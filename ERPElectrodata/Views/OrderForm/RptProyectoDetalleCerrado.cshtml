@@ -1,0 +1,101 @@
+﻿@{
+    Layout = null;
+}
+
+<div style="width: 100%; float:right; ">
+    <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.Workload</div></div>
+    <div class="bodyForm">
+        <div id="FilterWorkload" class="inBodyForm" style="height: 100%;">
+            <div id="infProyPm" style="width:100%;height: 300px; clear:both"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    UpdateWorkload();
+
+    function UpdateWorkload() {
+
+        var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+        var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+        $.ajax({
+            url: '/OrderForm/GrafCantidadProyectosPM?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var PM = new Array();
+                var VENTAS = new Array();
+                var SERVICIOS = new Array();
+                var RENOVACIONES = new Array();
+
+                $.each(jsonx['CantidadProy'], function (index, value) {
+                    PM[index] = value['PM'];
+                    VENTAS[index] = value['VENTAS'];//((value['InSLA']-value['OutSLA'])*100.00)/value['InSLA'];//(value['InSLA']-value['OutSLA'])/(value['InSLA'])*100;
+                    SERVICIOS[index] = value['SERVICIOS'];
+                    RENOVACIONES[index] = value['RENOVACIONES'];
+                });
+
+                // inicio chart
+                chart = new Highcharts.Chart({
+
+                    chart: {
+                        renderTo: 'Workload',
+                        type: 'column',
+                        zoomType: 'xy',
+                        margin: [20, 20, 80, 60]
+                    },
+                    title: {
+                        text: ''
+                    },
+                    subtitle: {
+                        text: ''
+                    },
+                    xAxis: {
+                        categories: PM,
+                        crosshair: true
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: ''
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                        pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                            '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                        footerFormat: '</table>',
+                        shared: true,
+                        useHTML: true
+                    },
+                    plotOptions: {
+                        column: {
+                            pointPadding: 0.2,
+                            borderWidth: 0
+                        }
+                    },
+                    series: [{
+                        name: 'Ventas',
+                        data: VENTAS
+
+                    }, {
+                        name: 'Inc. Servicios',
+                        data: SERVICIOS
+
+                    }, {
+                        name: 'Renovación',
+                        data: RENOVACIONES
+
+                    }]
+                });
+            }
+
+        });
+    }
+
+</script>
+

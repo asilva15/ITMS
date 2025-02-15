@@ -1,0 +1,1503 @@
+﻿@model ERPElectrodata.Models.SoporteED
+
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+
+<style>
+    table.k-editor {
+        height: auto !important;
+    }
+
+    .table-indicator {
+        /*position: relative;*/
+        width: 6px; /* Ajustado para adaptarse al contexto de tabla */
+        height: 40px; /* Ajustado para que no sea demasiado alto en una tabla */
+        border-radius: .3rem;
+        left: .625rem;
+        top: 30%; /* Alineado verticalmente dentro de la celda de la tabla */
+        opacity: .6;
+        transition: opacity .2s;
+    }
+
+        .table-indicator:hover {
+            opacity: .9;
+        }
+
+    .miTabla {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .miTabla thead {
+            background: #254988;
+            color: white;
+            text-align: center;
+        }
+
+        .miTabla th, .miTabla td {
+            border: 2px solid #e9ecef;
+        }
+</style>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+@using (Html.BeginForm("GuardarSoporteElectrodata", "SoporteED", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmRegistrar", name = "FrmRegistrar", target = "FrmRegistrar" }))
+{
+    <input type="hidden" id="IdDocuSale" name="IdDocuSale" value="@ViewBag.ID_DOCU_SALE" />
+    <input type="hidden" id="NroCombo" name="NroCombo" value="1" />
+    <input type="hidden" id="idCboSLA" name="idCboSLA" value="" />
+    <input type="hidden" id="cbFecha0" name="cbFecha0" />
+
+    <div class="main-card mb-3 card">
+        <div class="card-header">
+            <ul class="nav nav-tabs nav-justified">
+                <li class="nav-item active"><a data-toggle="tab" href="#" onclick="javascript:MostrarSoporteED();return false;" class="active nav-link" aria-expanded="true">Soporte Electrodata</a></li>
+                <li class="nav-item"><a data-toggle="tab" href="#" onclick="javascript:MostrarSLA();return false;" class="nav-link">SLA</a></li>
+            </ul>
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div id="tabSoporte" class="tab-pane active" role="tabpanel">
+                    <div class="row">
+                        <div class="mb-3 card col-md-12">
+                            <div class="">
+                                <div class="card-body">
+                                    <div class="card-title">Registro Soporte Electrodata</div>
+                                    <div id="mensajeED"></div>
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <div class="form-row">
+                                                <div class="col-md-10 editor-label">
+                                                    Mantenimientos Periódicos
+                                                    @*@Html.CheckBox("chkMantPreiodico", false)*@
+                                                    <input type="checkbox" id="chkMantPreiodico" name="chkMantPreiodico" style="width:80%" checked>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-12">
+                                                    <!--<div>Fabricante <b>(*)</b></div>--> <!--IdAccoPara-->
+                                                    <!--<input id="cbFabricanteED" name="cbFabricanteED" class="form-control select2" type="text" style="width:100%">-->
+                                                    <span>Producto/Fabricante <b>(*)</b></span>
+                                                    <input id="cbFabricanteED" name="cbFabricanteED" type="text" style="width: 100%" data-text-field="text" data-value-field="value">
+                                                </div>
+                                                <!--<div class="col-md-6">
+                                                    <div>SLA <b>(*)</b></div>-->
+                                                <!--IdAccoPara-->
+                                                <!--<select id="cbSLA" name="cbSLA" class="form-control select2" type="text" style="width:100%" disabled></select>
+                                                </div>-->
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    Bolsa de Horas Totales <b>(*)</b>
+                                                    <input id="txtBolsaHoras" name="txtBolsaHoras" class="form-control" type="number" min="0" />
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="position-relative form-group">
+                                                        Inicio de soporte <b>(*)</b>
+                                                        <input id="dtIniSoporte" name="dtIniSoporte" class="form-control pull-right" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div id="mantenimientoPeriodico1">
+                                                <div class="row">
+                                                    <div class="col-md-6">
+                                                        <span>Meses o días<b>(*)</b></span>
+                                                        <select class="form-control input-sm select2" type="text" style="width:100%" id="cbFrecuenciaSoporte" name="cbFrecuenciaSoporte">
+                                                            <option value="M">Meses</option>
+                                                            <option value="D">Dias</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <span>Tiempo de Soporte<b>(*)</b></span>
+                                                        <input id="txtTiempoSoporte" name="txtTiempoSoporte" class="form-control" type="number" style="width:100%;" min="0" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="position-relative form-group">
+                                                        Fin de soporte <b>(*)</b>
+                                                        <input id="dtFinSoporte" name="dtFinSoporte" class="form-control pull-right" />
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6" id="mantenimientosPreventivos">
+                                                    Mant. Preventivos Totales <b>(*)</b>
+                                                    <input id="txtMantPreventivo" name="txtMantPreventivo" class="form-control" type="number" style="width:100%;" min="0" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group" id="mantenimientoPeriodico2">
+                                            <div class="row">
+                                                <div class="col-md-4">
+                                                    &nbsp;
+                                                    <input id="btnGenerarFechasSoporte" name="btnGenerarFechasSoporte" class="btn btn-block btn-primary btn-sm" type="button" value="Generar Fechas" onclick="GenerarFechasSoporte();" />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="mb-3 card col-md-3 p-3" id="divPrioridad">
+                            </div>*@
+                    </div>
+                    <div class="form-group">
+                        <div class="form-row">
+                            <div class="col-lg-4" id="mantenimientoPeriodico3">
+                                <div class="main-card card">
+                                    <div class="card-header">Listado de Mantenimientos</div>
+                                    <div class="card-body" style="overflow-y: scroll;max-height:210px">
+                                        <div id="divListadoSoporte">
+                                            En esta sección se mostrará el listado de soportes.
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-8" id="divObservacionesSoporte">
+                                <textarea id="txtObservaciones" name="txtObservaciones" class="textarea" placeholder="Observaciones..."></textarea>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <div id="tabSLA" class="tab-pane" role="tabpanel">
+                    <div class="mb-3 card" hidden>
+                        <div class="card-body">
+                            <div class="card-title">Acuerdos de Nivel de Servicio</div>
+                            <div class="row">
+                                <div class="col-lg-7">
+                                    <div class="form-group row">
+                                        <div class="col-md-7">
+                                            SLA del Proyecto
+                                            <div id="divCboSLAPry">
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-5">
+                                            <br />
+                                            <button class="btn btn-primary" id="btnActualizarSLA" name="btnActualizarSLA">Actualizar SLA</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-5" id="divPrioridadSLA">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-2  mb-2 mt-1">
+                            <button class="btn btn-warning" id="btnNuevoSLA" name="btnNuevoSLA">Nuevo SLA</button>
+                        </div>
+                        <div class="col-md-10" hidden>
+                            <div>SLA <b>(*)</b></div>
+                            <select id="cbSLA" name="cbSLA" class="form-control select2" type="text" style="width:100%" disabled></select>
+                        </div>
+                    </div>
+                    <div class="mb-3 card d-none" id="divCreaSLA">
+                        <form id="frmSLA">
+                            <div class="card-body">
+
+
+
+                                <div class="row">
+                                    <div class="col-lg-4">
+                                        <div class="card-title">REGISTRO DE SLA</div>
+                                        Cuenta
+                                        <input id="cbCuentaSLA" name="cbCuentaSLA" style="font-size:12px;" class="dropdownKendo" disabled />
+                                        Tipo de Evento
+                                        <input id="cbTipoEvento" name="cbTipoEvento" style="font-size:12px;" class="dropdownKendo" />
+                                        Nombre
+                                        <input id="txtNombreSLA" name="txtNombreSLA" style="font-size:12px;height:30px" class="form-control" readonly />
+                                        Estado
+                                        <input id="cbEstadoSLA" name="cbEstadoSLA" style="font-size:12px;" class="dropdownKendo" />
+                                        <br /><br /><br />
+                                        <input id="btnGuardarSLA" name="btnGuardarSLA" class="btn btn-block btn-primary btn-sm" value="Guardar" />
+                                    </div>
+                                    <div class="col-lg-8">
+                                        <div class="scroll-area-md" style="height:auto;">
+                                            <div class="scrollbar-container">
+
+                                                <div class="p-0">
+                                                    <label style="font-size:9px;color:red;"><b>* SLA EN MINUTOS (60 MIN = 1HORA)</b></label>
+                                                    <table class="miTabla table">
+                                                        <thead style="font-size:12px;">
+                                                            <tr>
+                                                                <th>Prioridad</th>
+                                                                <th>Respuesta <input id="checkRespuesta" type="checkbox" class="mt-1" /></th>
+                                                                <th>Atención <input id="checkAtencion" type="checkbox" class="mt-1" /></th>
+                                                                <th>Resolución <input id="checkResolucion" type="checkbox" class="mt-1" /></th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody id="divNuevoSLA">
+                                                        </tbody>
+                                                    </table>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<div class="form-group">
+                                        <div class="row">
+                                            <div class="col-md-2">
+
+                                            </div>
+                                        </div>
+                                    </div>*@
+                            </div>
+                        </form>
+                    </div>
+                    <div class="mb-3 card">
+                        <div class="card-body">
+                            <div class="card-title">LISTA DE SLA</div>
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <table id="tbSLA" class="table table-bordered table-striped" style="width:100%;">
+                                        <thead>
+                                            <tr>
+                                                <th>Nombre</th>
+                                                <th>Tipo</th>
+                                                <th>Estado</th>
+                                                <th>Usuario Creador</th>
+                                                <th>Fecha creación</th>
+                                                <th>Opciones</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+
+                                    </table>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-9">
+            </div>
+            <div class="col-md-3">
+                <input id="btnGuardarSoporteED" name="btnGuardarSoporteED" class="btn btn-block btn-primary btn-sm" type="submit" value="Guardar" />
+            </div>
+        </div>
+    </div>
+}
+
+<iframe id="FrmRegistrar" name="FrmRegistrar" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+<iframe id="FrmCrearSLA" name="FrmCrearSLA" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+
+    var numeroCombo = 1;
+    var contPrioridad = 0;
+    var idEditSLA = 0;
+    var arrayPrioridad = [];
+    var nroForm = $("#nroForm").val;
+
+    $("#FrmRegistrar").submit(function (event) {
+
+        var selectedItems = $("#cbFabricanteED").data("kendoMultiSelect").value();
+        var input = $("<input>").attr("type", "hidden").attr("name", "SelectedFabricante").val(selectedItems);
+        $(this).append(input);
+    });
+
+    $(document).ready(function () {
+
+        $('#chkMantPreiodico').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+
+        $("#btnGuardarSoporteED").click(function () {
+            $("#FrmRegistrar").submit();
+        });
+
+
+        $("#dtIniSoporte").kendoDatePicker({format: "dd/MM/yyyy"});
+        $("#dtFinSoporte").kendoDatePicker({ format: "dd/MM/yyyy" });
+
+
+        $("#txtObservaciones").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        ocultarCombosPeriodos();
+
+        //Cargar fecha de Acta de conformidad
+        $.ajax({
+            url: "/OrderForm/ObtenerFechaDocumento/",
+            data: "id=" + @ViewBag.ID_DOCU_SALE + "",
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+
+                $("#dtIniSoporte").data("kendoDatePicker").value(resp.replace(/['"]+/g, ''));
+
+               /* $('#dtIniSoporte').val(resp.replace(/['"]+/g, ''));*/
+            }
+        });
+        //Check No Aplica
+        $('#chkAplicaSE').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoSoporteED(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoSoporteED(1);
+            }
+        });
+        $('#chkAplicaInforme').on('ifChanged', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoInformeED(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoInformeED(1);
+            }
+        });
+        $('#chkAplicaFabricante').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoSoporteFabricante(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoSoporteFabricante(1);
+            }
+        });
+
+        $('#chkMantPreiodico').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#mantenimientoPeriodico1").show();
+                $("#mantenimientoPeriodico2").show();
+                //Ocultando los combos periodicos
+                ocultarCombosPeriodos();
+                //Mostrando lista de observaciones
+                $("#mantenimientoPeriodico3").show();
+                $("#divObservacionesSoporte").removeClass();
+                $("#divObservacionesSoporte").addClass("col-lg-8");
+                $("#mantenimientosPreventivos").show();
+
+            } else {
+                $("#mantenimientoPeriodico1").show();
+                ////$("#hdnTkAutomatico").val(0);
+               /* $("#mantenimientoPeriodico1").hide();*/
+                $("#mantenimientoPeriodico2").hide();
+                $("#mantenimientoPeriodico3").hide();
+                numeroCombo = 0;
+                $("#cbFecha" + numeroCombo).parent().show("show");
+                $("#agregar" + numeroCombo).show("show");
+                $("#eliminar" + numeroCombo).show("show");
+
+                $("#NroCombo").val(numeroCombo);
+
+                //Ocultando lista de observaciones
+                $("#divObservacionesSoporte").removeClass();
+                $("#divObservacionesSoporte").addClass("col-lg-12");
+                $("#mantenimientosPreventivos").hide();
+
+            }
+        });
+
+        $("#agregar1").click(function () {
+            if (numeroCombo != 6) {
+                numeroCombo = numeroCombo + 1;
+                $("#cbFecha" + numeroCombo).parent().show("show");
+                $("#agregar" + numeroCombo).show("show");
+                $("#eliminar1").show("show");
+
+                $("#NroCombo").val(numeroCombo);
+            }
+        });
+        $("#eliminar1").click(function () {
+            if (numeroCombo > 1) {
+                $("#cbFecha" + numeroCombo).parent().hide("show");
+                $("#agregar" + numeroCombo).hide("show");
+                numeroCombo = numeroCombo - 1;
+
+                $("#NroCombo").val(numeroCombo);
+            }
+        });
+
+        $("#dtIniSoporte").change(function () {
+            if ($("#txtTiempoSoporte").val() != "" && kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd") != "") {
+                $.ajax({
+                    url: "/SoporteED/CalculoFinSoporte/",
+                    data: "&TiempoSoporte=" + $("#txtTiempoSoporte").val() + "&Frecuencia=" + $("#cbFrecuenciaSoporte").val() +
+                        "&TiempoInicial=" + kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd"),
+                    cache: false,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        /*$("#dtIniSoporte").data("kendoDatePicker").value(resp.replace(/['"]+/g, ''));*/
+                        $("#dtFinSoporte").data("kendoDatePicker").value(data.replace(/['"]+/g, ''));
+                    },
+                    error: function (data) {
+                        toastr.error("Por favor, ingrese una tiempo válido.")
+                    }
+
+                });
+            }
+        });
+
+
+        $("#cbFrecuenciaSoporte").change(function () {
+            if ($("#txtTiempoSoporte").val() != "" && kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd") != "") {
+                $.ajax({
+                    url: "/SoporteED/CalculoFinSoporte/",
+                    data: "&TiempoSoporte=" + $("#txtTiempoSoporte").val() + "&Frecuencia=" + $("#cbFrecuenciaSoporte").val() +
+                        "&TiempoInicial=" + kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd"),
+                    cache: false,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#dtFinSoporte").data("kendoDatePicker").value(data.replace(/['"]+/g, ''));
+                    }
+                });
+            }
+        });
+
+        //$("#txtTiempoSoporte").change(function(){
+        //    if ($("#txtTiempoSoporte").val() != "" && kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd") != "") {
+        //        $.ajax({
+        //            url: "/SoporteED/CalculoFinSoporte/",
+        //            data: "&TiempoSoporte=" + $("#txtTiempoSoporte").val() + "&Frecuencia=" + $("#cbFrecuenciaSoporte").val() +
+        //                "&TiempoInicial=" + kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd"),
+        //            cache: false,
+        //            type: "GET",
+        //            dataType: "json",
+        //            success: function (data) {
+        //                $("#dtFinSoporte").data("kendoDatePicker").value(data.replace(/['"]+/g, ''));
+        //            }
+        //        });
+        //    }
+        //});
+        $("#txtTiempoSoporte").change(function () {
+            var tiempoSoporte = $("#txtTiempoSoporte").val();
+
+            // Set the value of the hidden input
+            $("#cbFecha0").val(tiempoSoporte);
+
+            if (tiempoSoporte != "" && kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd") != "") {
+                $.ajax({
+                    url: "/SoporteED/CalculoFinSoporte/",
+                    data: "&TiempoSoporte=" + tiempoSoporte + "&Frecuencia=" + $("#cbFrecuenciaSoporte").val() +
+                        "&TiempoInicial=" + kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd"),
+                    cache: false,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#dtFinSoporte").data("kendoDatePicker").value(data.replace(/['"]+/g, ''));
+                    }
+                });
+            }
+        });
+
+        //$("#cbFabricanteED").kendoComboBox({
+        //    dataTextField: "text",
+        //    dataValueField: "id",
+        //    index: 1,
+        //    filter: "contains",
+        //    autoBind: true,
+        //    suggest: true,
+        //    dataSource: {
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/SoporteFabricante/ListarFabricante?var=" + Math.random()
+        //        }
+        //    }
+        //});
+        $("#cbFabricanteED").kendoMultiSelect({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/SoporteFabricante/ListarFabricantes",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: function (response) {
+                        return response; // Ajusta esto según la estructura de tus datos
+                    }
+                }
+            },
+            dataBound: function () {
+                var multiSelect = $("#cbFabricanteED").data("kendoMultiSelect");
+
+                // Realiza una llamada AJAX para obtener los fabricantes a autoseleccionar
+                $.ajax({
+                    url: "/SoporteFabricante/ListarFabricanteOP",
+                    type: "GET",
+                    data: { NumDocuSale: @ViewBag.ID_DOCU_SALE },
+                    dataType: "json",
+                    success: function (response) {
+                        // Extrae los IDs de los fabricantes y autoselecciónalos
+                        var selectedIds = response.map(function (item) {
+                            return item.id;
+                        });
+
+                        // Establece los valores seleccionados en el MultiSelect
+                        multiSelect.value(selectedIds);
+                    },
+                    error: function () {
+                        console.error("Error al obtener los fabricantes para autoseleccionar.");
+                    }
+                });
+            }
+        });
+
+
+
+        $("#cbSLA").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/SoporteED/ListarSLA",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page,
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+
+        $("#cbSLA").change(function () {
+            $("#divPrioridad").empty();
+            $.ajax({
+                url: "/SLA/ObtenerPrioridadPorSLA/",
+                data: "&IdSLA=" + $("#cbSLA").val(),
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    var strPrioridad = '';
+                    $.each(data['Data'], function (index) {
+                        strPrioridad = strPrioridad +
+                            '<div class="animated fadeInDown widget-chart widget-chart2 text-left mb-2 card-btm-border card-shadow-dark border-danger card pt-2 pb-2" style="border-color:' + (data['Data'][index]['Color']) + '!important;">' +
+                            '<div class="widget-chat-wrapper-outer">' +
+                            '<div class="widget-chart-content">' +
+                            '<div class="widget-title opacity-5 text-uppercase" style="font-size:.9em;font-weight:bold">' + (data['Data'][index]['Prioridad']) + '</div>' +
+                            '<div class="widget-numbers mt-2 fsize-4 mb-0 w-100">' +
+                            '<div class="widget-chart-flex">' +
+                            '<small class="opacity-5 pl-1" style="font-size:.5em;">' +
+                            '<span class="opacity-10 text-danger pr-2">' +
+                            '<i class="fa fa-history" style="color:' + (data['Data'][index]['Color']) + '"></i>' +
+                            '</span>' + (data['Data'][index]['Tiempo']) + 'h' +
+                            '</small>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>';
+                    });
+                    $("#divPrioridad").append(strPrioridad);
+                }
+            });
+        });
+
+    });
+
+    function GenerarFechasSoporte() {
+        var mensaje = "";
+        if (kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd") == "") {
+            mensaje = "- Seleccione una fecha de inicio.";
+        }
+        if ($("#txtMantPreventivo").val() == "") {
+            mensaje = mensaje + "<br>- Ingrese el número de mantenimientos.";
+        }
+        if ($("#txtTiempoSoporte").val() == "") {
+            mensaje = mensaje + "<br>- Ingrese el tiempo.";
+        }
+        if (kendo.toString($("#dtFinSoporte").data("kendoDatePicker").value(), "yyyy MM dd") == "") {
+            mensaje = mensaje + "<br>- Seleccione la fecha final.";
+        }
+
+        if (mensaje != "") {
+            toastr.warning(mensaje, "Mensaje");
+        }
+        else {
+
+            var fechaInicio = kendo.toString($("#dtIniSoporte").data("kendoDatePicker").value(), "yyyy MM dd");
+            var fechaFin = kendo.toString($("#dtFinSoporte").data("kendoDatePicker").value(), "yyyy MM dd");
+
+            $.ajax({
+                url: "/SoporteED/GenerarFechasMantenimiento/",
+                data: "&FechaInicial=" + fechaInicio + "&FechaFinal=" + fechaFin
+                    + "&NroInformes=" + $("#txtMantPreventivo").val(),
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+
+                    var cont = 1;
+                    $("#divListadoSoporte").empty();
+                    $.each(source['data'], function (index, value) {
+                        $("#divListadoSoporte").append(
+                            '<div class="form-row">' +
+                            'Soporte ' + cont +
+                            '<input type="text" class="form-control pull-right" id="dtSoporte' + cont + '" name="dtSoporte' + cont + '" value="' + (source['data'][index]['Fecha']) + '"/>' +
+                            '</div>');
+
+                        /*$("#dtSoporte" + cont).kendoDatePicker().data("kendoDateTimePicker");*/
+                        $("#dtSoporte" + cont).kendoDatePicker({ format: "dd/MM/yyyy" });
+                        cont = cont + 1;
+                    });
+                },
+                error: function (source) {
+
+                }
+            });
+        }
+    }
+
+    function ocultarCombosPeriodos() {
+        // Oculta los combos de Mantenimientos periodicos
+        $("#agregar1").hide();
+        $("#eliminar1").hide();
+        $("#cbFecha1").parent().hide();
+        $("#cbFecha2").parent().hide();
+        $("#cbFecha3").parent().hide();
+        $("#cbFecha4").parent().hide();
+        $("#cbFecha5").parent().hide();
+        $("#cbFecha6").parent().hide();
+    }
+
+
+    function MostrarSoporteED() {
+        $("#tabSoporte").addClass("active");
+        $("#tabSLA").removeClass("active");
+        $("#btnGuardarSoporteED").show();
+       /* ObtenerSLAPorProyecto();*/
+    }
+
+    function MostrarInforme() {
+        $("#tabSoporte").removeClass("active");
+        $("#tabSLA").removeClass("active");
+        $("#btnGuardarSoporteED").show();
+    }
+
+    function MensajeSoporteED(msj) {
+        toastr.warning(msj, "Mensaje");
+    }
+    function MensajeConfirmacion(resp, descripcion) {
+        if (resp == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("", "El registro ha sido guardado.");
+            var tbProyectos = $('#tablaSoporteEdata').DataTable();
+            tbProyectos.ajax.reload();
+        }
+        else if (resp == "SoporteED") {
+            toastr.warning(descripcion, "Soporte");
+
+        } else if (resp == "Informe") {
+            toastr.warning(descripcion, "Informe");
+        } else if (resp == "ERROR") { //Error Try catch
+            toastr.error("Por favor contacte al administrador.", "Mensaje");
+        }
+    }
+    /* --- SLA ---*/
+    /* --- SLA ---*/
+    @*ListarCboSLA(@ViewBag.IdSLA);*@
+    $("#cbCuentaSLA").kendoComboBox({
+        autoBind: true,
+        dataTextField: "text",
+        placeholder: "Seleccione una cuenta",
+        dataValueField: "id",
+        filter: "contains",
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        value: 4,
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/Administrator/ListarCuentas_Kendo"
+            }
+
+        }
+    });
+
+    $("#cbTipoEvento").kendoComboBox({
+        autoBind: true,
+        dataTextField: "text",
+        placeholder: "Seleccione un Tipo",
+        dataValueField: "id",
+        filter: "contains",
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            transport: {
+                read: "/SoporteED/TipoEventoElectrodata"
+            },
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        },
+        change: function (e) {
+            var comboBox = this;
+            var selectedValue = comboBox.value();
+            var IdDocuSale = @ViewBag.ID_DOCU_SALE;
+
+            $.ajax({
+                url: '/SoporteED/ObtenerNombreSLA',
+                type: 'GET',
+                data: { tipoEventoId: selectedValue, iddocusale: IdDocuSale },
+                success: function (response) {
+                    ObtenerPrioridadEstandar(selectedValue);
+                    $("#txtNombreSLA").val(response);
+                },
+                error: function () {
+                    console.log("Error al obtener el nombre del SLA");
+                }
+            });
+        }
+    });
+
+
+    $("#cbEstadoSLA").kendoComboBox({
+        dataTextField: "text",
+        dataValueField: "value",
+        dataSource: [
+            { text: "Activo", value: "1" },
+            { text: "Inactivo", value: "0" },
+        ],
+        filter: "contains",
+        suggest: true,
+        value:1,
+    });
+
+    $("#btnNuevoSLA").click(function () {
+        event.preventDefault();
+        ObtenerPrioridadNuevo();
+    });
+
+    //ListarPrioridadPorSLA($("#cbSLAPry").val());
+    //ObtenerSLAPorProyecto();
+    $("#btnActualizarSLA").click(function () {
+        event.preventDefault();
+        if ($("#cbSLAPry").val() == "" || $("#cbSLAPry").val() == null)
+            toastr.warning("Seleccione un SLA para el proyecto.");
+        else {
+            $.ajax({
+                url: "/SLA/ActualizarSLA?IdProyecto=@ViewBag.ID_DOCU_SALE&IdSLA=" + $("#cbSLAPry").val(),
+                type: "GET",
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == 'Actualizado') {
+                        //ListarCboSLA('');
+                        toastr.success("Se ha actualizado el SLA del proyecto.");
+                    } else {
+                        toastr.error("Ha ocurrido un error, contacte al administrador.");
+                    }
+                },
+                error: function (dato) {
+                    toastr.error("Ha ocurrido un error, contacte al administrador.");
+                }
+            });
+        }
+    });
+
+    $("#btnGuardarSLA").click(function () {
+        arrayPrioridad = [];
+        debugger;
+        // Iterar sobre cada fila en el contenedor #divNuevoSLA
+        $("#divNuevoSLA tr").each(function (index, element) {
+            debugger
+            var checked = false;
+            var checkedRespuesta = false;
+            var checkedAtencion = false;
+            var checkedResolucion = false;
+
+            // Obtener el ID dinámico basado en la fila actual
+            if ($('#chkPrio' + index).is(':checked')) {
+                checked = true;
+            }
+
+            if ($('#checkRespuesta').is(':checked')) {
+                checkedRespuesta = true;
+            }
+            if ($('#checkAtencion').is(':checked')) {
+                checkedAtencion = true;
+            }
+            if ($('#checkResolucion').is(':checked')) {
+                checkedResolucion = true;
+            }
+
+            // Construir el array con los valores de los inputs y checkboxes
+            arrayPrioridad.push(
+                checked + '|' +
+                $("#idPrio" + index).val() + '|' +
+                $("#valorRespuesta" + index).val() + '|' +
+                $("#valorAtencion" + index).val() + '|' +
+                $("#valorPrio" + index).val() + '|' +
+                checkedRespuesta + '|' +
+                checkedAtencion + '|' +
+                checkedResolucion
+            );
+        });
+        console.log(arrayPrioridad);
+        console.log(idEditSLA);
+        if (idEditSLA == 0) {
+            $.ajax({
+                url: "/SoporteED/CrearSlaProyecto?cbEstadoSLA=" + $("#cbEstadoSLA").val() +
+                    "&txtNombreSLA=" + $("#txtNombreSLA").val() +
+                    "&cbCuentaSLA=" + $("#cbCuentaSLA").val() +
+                    "&idDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                    "&idTipoTicket=" + $("#cbTipoEvento").val()+
+                    "&arrayPrioridad=" + arrayPrioridad,
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == 'OK') {
+                       /* ListarCboSLA($("#cbSLAPry").val());*/
+                        toastr.success("Se creó el SLA con éxito.");
+                        ListarSLA();
+                        $("#divCreaSLA").addClass("d-none");
+                    }
+                    else if (resp == 'ERROR') {
+                        toastr.error("Ha ocurrido un error, contacte al administrador.");
+                    }
+                    else {
+                        toastr.warning(resp);
+                    }
+                }
+            });
+        }
+        else {
+            $.ajax({
+                url: "/SoporteED/ValidarEdicionSLA?IdSLA=" + idEditSLA + "&IdDocuSale=@ViewBag.ID_DOCU_SALE" ,
+                type: "GET",
+                dataType: "text",
+                success: function (resp) {
+                    if (resp != '') {
+                        toastr.warning(resp);
+                    } else if (resp == 'Error') {
+                        toastr.error("Ha ocurrido un error, por favor contacte al administrador.");
+                    } else {
+                        $.ajax({
+                            url: "/SoporteED/EditarSLAPry?cbEstadoSLA=" + $("#cbEstadoSLA").val() +
+                                "&txtNombreSLA=" + $("#txtNombreSLA").val() +
+                                "&cbCuentaSLA=" + $("#cbCuentaSLA").val() +
+                                 "&idDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                                "&idTipoTicket=" + $("#cbTipoEvento").val() +
+                                "&IdSLA=" + idEditSLA +
+                                "&arrayPrioridad=" + arrayPrioridad,
+                            type: "GET",
+                            cache: false,
+                            dataType: "text",
+                            success: function (resp) {
+                                if (resp == 'OK') {
+                                    /*ListarCboSLA($("#cbSLAPry").val());*/
+                                    toastr.success("Se actualizó el SLA con éxito.");
+                                    ListarSLA();
+                                    idEditSLA = 0;
+                                    $("#divCreaSLA").addClass("d-none");
+                                }
+                                else if (resp == 'ERROR') {
+                                    toastr.error("Ha ocurrido un error, contacte al administrador.");
+                                }
+                                else {
+                                    toastr.warning(resp);
+                                }
+                            }
+                        });
+                    }
+                },
+                error: function (dato) {
+                    toastr.error("Ha ocurrido un error, contacte al administrador.");
+                }
+        });
+        }
+
+
+    });
+    //$("#cbSLAPry").change(function () {
+    //    ListarPrioridadPorSLA($("#cbSLAPry").val());
+    //});
+
+    function ObtenerPrioridadNuevo() {
+
+        idEditSLA = 0;
+        // Limpiar campos de texto y combos
+        $("#txtNombreSLA").val("");
+        $("#cbEstadoSLA").data("kendoComboBox").value("1");
+        var comboBox = $("#cbTipoEvento").data("kendoComboBox");
+        comboBox.value(""); // Asigna el valor
+        comboBox.enable(true);
+
+        $.ajax({
+            url: '/SoporteED/ObtenerPrioridadNuevo',
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+
+                limpiarSLA();
+
+                $.each(source['data'], function (index, value) {
+                    var contadorChk = $("#prioridad" + data['data'][index]['IdPrioridad']).val();
+
+                    if (contadorChk !== undefined) {
+                        $("#chkPrio" + contadorChk).prop('checked', true);
+                        $("#valorRespuesta" + contadorChk).val(data['data'][index]['TiempoRespuestaMinutos']).prop('disabled', false);
+                        $("#valorAtencion" + contadorChk).val(data['data'][index]['TiempoAtencionMinutos']).prop('disabled', false);
+                        $("#valorPrio" + contadorChk).val(data['data'][index]['TiempoResolucionMinutos']).prop('disabled', false);
+
+                        $('#valorRespuestaHoras' + contadorChk).html((data['data'][index]['TiempoRespuestaMinutos'] / 60).toFixed(2) + ' Hora(s)');
+                        $('#valorAtencionHoras' + contadorChk).html((data['data'][index]['TiempoAtencionMinutos'] / 60).toFixed(2) + ' Hora(s)');
+                        $('#valorPrioHoras' + contadorChk).html((data['data'][index]['TiempoResolucionMinutos'] / 60).toFixed(2) + ' Hora(s)');
+
+                    }
+                });
+
+
+                var isCheckRespuesta = data['data'][0]['checkRespuesta'];
+                $("#checkRespuesta").prop('checked', isCheckRespuesta);
+
+                if (!isCheckRespuesta) {
+                    $("input[id^='valorRespuesta']").val('').prop('disabled', true);
+                    $("label[id^='valorRespuestaHoras']").html('').prop('disabled', true);
+                }
+
+                var isCheckAtencion = data['data'][0]['checkAtencion'];
+                $("#checkAtencion").prop('checked', isCheckAtencion);
+
+                if (!isCheckAtencion) {
+                    $("input[id^='valorAtencion']").val('').prop('disabled', true);
+                    $("label[id^='valorAtencionHoras']").html('').prop('disabled', true);
+                }
+
+                var isCheckResolucion = data['data'][0]['checkResolucion'];
+                $("#checkResolucion").prop('checked', isCheckResolucion);
+
+                if (!isCheckResolucion) {
+                    $("input[id^='valorPrio']").val('').prop('disabled', true);
+                    $("label[id^='valorPrioHoras']").html('').prop('disabled', true);
+                }
+
+
+            },
+            error: function (source) {
+                // Manejo de errores si es necesario
+            }
+        });
+
+
+    }
+    function ObtenerPrioridadEstandar(id) {
+        $.ajax({
+            url: '/SoporteED/ObtenerPrioridadEstandar',
+            type: "GET",
+            data: { tipoEventoId: id },
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+
+                limpiarSLA();
+
+                $.each(source['data'], function (index, value) {
+                    var contadorChk = $("#prioridad" + data['data'][index]['IdPrioridad']).val();
+
+                    if (contadorChk !== undefined) {
+                        $("#chkPrio" + contadorChk).prop('checked', true);
+                        $("#valorRespuesta" + contadorChk).val(data['data'][index]['TiempoRespuestaMinutos']).prop('disabled', false);
+                        $("#valorAtencion" + contadorChk).val(data['data'][index]['TiempoAtencionMinutos']).prop('disabled', false);
+                        $("#valorPrio" + contadorChk).val(data['data'][index]['TiempoResolucionMinutos']).prop('disabled', false);
+
+                        $('#valorRespuestaHoras' + contadorChk).html((data['data'][index]['TiempoRespuestaMinutos'] / 60).toFixed(2) + ' Hora(s)');
+                        $('#valorAtencionHoras' + contadorChk).html((data['data'][index]['TiempoAtencionMinutos'] / 60).toFixed(2) + ' Hora(s)');
+                        $('#valorPrioHoras' + contadorChk).html((data['data'][index]['TiempoResolucionMinutos'] / 60).toFixed(2) + ' Hora(s)');
+
+                    }
+                });
+
+                $("#checkRespuesta").prop('checked', data['data'][0]['checkRespuesta']);
+                $("#checkAtencion").prop('checked', data['data'][0]['checkAtencion']);
+                $("#checkResolucion").prop('checked', data['data'][0]['checkResolucion']);
+
+            },
+            error: function (source) {
+                // Manejo de errores si es necesario
+            }
+        });
+    }
+    function ObtenerPrioridadEditar(id) {
+        idEditSLA = id;
+
+        $("#txtNombreSLA").val("");
+        $("#cbEstadoSLA").data("kendoComboBox").value("");
+        $("#cbTipoEvento").data("kendoComboBox").value("");
+
+        $.ajax({
+            url: '/SoporteED/ObtenerPrioridadEditar',
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            data: { IdSla: id },
+            success: function (source) {
+                data = source;
+
+                $("#txtNombreSLA").val(data['data'][0]['NombreSLA']);
+                $("#cbEstadoSLA").data("kendoComboBox").value(data['data'][0]['Estado']);
+
+                var comboBox = $("#cbTipoEvento").data("kendoComboBox");
+
+                // Verifica si el valor es 0
+                //if (data['data'][0]['IdTipoEvento'] === 0) {
+                //    comboBox.value(0); // Asigna "NO APLICA" si el valor es 0
+                //} else {
+                    comboBox.value(data['data'][0]['IdTipoEvento']); // Asigna el valor normalmente
+                /*}*/
+
+                comboBox.enable(false);
+
+                limpiarSLA();
+
+                $.each(source['data'], function (index, value) {
+                    var contadorChk = $("#prioridad" + data['data'][index]['IdPrioridad']).val();
+
+                    if (contadorChk !== undefined) {
+                        $("#chkPrio" + contadorChk).prop('checked', true);
+                        $("#valorRespuesta" + contadorChk).val(data['data'][index]['TiempoRespuestaMinutos']).prop('disabled', false);
+                        $("#valorAtencion" + contadorChk).val(data['data'][index]['TiempoAtencionMinutos']).prop('disabled', false);
+                        $("#valorPrio" + contadorChk).val(data['data'][index]['TiempoResolucionMinutos']).prop('disabled', false);
+
+                        $('#valorRespuestaHoras' + contadorChk).html((data['data'][index]['TiempoRespuestaMinutos'] / 60).toFixed(2) + ' Hora(s)');
+                        $('#valorAtencionHoras' + contadorChk).html((data['data'][index]['TiempoAtencionMinutos'] / 60).toFixed(2) + ' Hora(s)');
+                        $('#valorPrioHoras' + contadorChk).html((data['data'][index]['TiempoResolucionMinutos'] / 60).toFixed(2) + ' Hora(s)');
+
+                    }
+                });
+
+
+                var isCheckRespuesta = data['data'][0]['checkRespuesta'];
+                $("#checkRespuesta").prop('checked', isCheckRespuesta);
+
+                if (!isCheckRespuesta) {
+                    $("input[id^='valorRespuesta']").val('').prop('disabled', true);
+                    $("label[id^='valorRespuestaHoras']").html('').prop('disabled', true);
+                }
+
+                var isCheckAtencion = data['data'][0]['checkAtencion'];
+                $("#checkAtencion").prop('checked', isCheckAtencion);
+
+                if (!isCheckAtencion) {
+                    $("input[id^='valorAtencion']").val('').prop('disabled', true);
+                    $("label[id^='valorAtencionHoras']").html('').prop('disabled', true);
+                }
+
+                var isCheckResolucion = data['data'][0]['checkResolucion'];
+                $("#checkResolucion").prop('checked', isCheckResolucion);
+
+                if (!isCheckResolucion) {
+                    $("input[id^='valorPrio']").val('').prop('disabled', true);
+                    $("label[id^='valorPrioHoras']").html('').prop('disabled', true);
+                }
+
+
+            },
+            error: function (source) {
+                // Manejo de errores si es necesario
+            }
+        });
+    }
+
+
+    function MostrarSLA() {
+        $("#divCreaSLA").addClass("d-none");
+        $("#tabSLA").addClass("active");
+        $("#tabSoporte").removeClass("active");
+        ListarPrioridad();
+        ListarSLA();
+        $("#btnGuardarSoporteED").hide();
+    }
+
+    //function ListarPrioridadPorSLA(id) {
+    //    $("#divPrioridadSLA").empty();
+    //    $.ajax({
+    //        url: "/SLA/ObtenerPrioridadPorSLA/",
+    //        data: "&IdSLA=" + id,
+    //        cache: false,
+    //        type: "GET",
+    //        dataType: "json",
+    //        success: function (data) {
+    //            var strPrioridadSLA = '';
+    //            $.each(data['Data'], function (index) {
+    //                strPrioridadSLA = strPrioridadSLA +
+    //                    '<div class="badge mr-1 animated fadeInDown" style="background-color:' + (data['Data'][index]['Color']) + ';color:white;">' + (data['Data'][index]['Prioridad']) + ' ' + (data['Data'][index]['Tiempo']) + 'h</div>';
+    //            });
+    //            $("#divPrioridadSLA").append(strPrioridadSLA);
+    //        }
+    //    });
+    //}
+
+    function ListarPrioridad() {
+        contPrioridad = 0;
+
+        $("#divNuevoSLA").empty();
+        $.ajax({
+            url: "/SLA/ListarCrearPrioridadSLAEdata/",
+            data: "&IdSLA=" + $("#cbSLA").val(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                var divPrio = '';
+
+                $.each(data['data'], function (index) {
+                    divPrio += '<tr>' +
+                        '<td class="pb-2 pt-2">' +
+                        '<div class="row">' +
+                        '<div class="col-md-1">' +
+                        '<div class="table-indicator" style="background-color:' + (data['data'][index]['Color']) + ' !important;"></div>' +
+                        '</div>' +
+                        '<div class="col-md-1">' +
+                        '<input hidden type="text" class="form-control" id="idPrio' + contPrioridad + '" value="' + data['data'][index]['ID_PRIO'] + '"/>' +
+                        '<input hidden id="prioridad' + data['data'][index]['ID_PRIO'] + '" value="' + contPrioridad + '"/>' +
+                        '<input type="checkbox" class="mt-1 chkPrioridad" style="width:18px;height:18px;margin-left:-15px;" id="chkPrio' + contPrioridad + '"/>' +
+                        '</div>' +
+                        '<div class="col-md-5">' +
+                        '<label style="font-size:10px;margin-right:50px;margin-left:-15px;font-weight:bold;">' + (data['data'][index]['NAM_PRIO']) + '</label>' +
+                        '</div>' +
+                        '</div>' +
+                        '</td>' +
+                        '<td>' +
+                        '<div class="row">' +
+                        '<div class="col-md-12 d-flex align-items-center"><input type="text" class="form-control valorTiempo" data-label="valorRespuestaHoras' + contPrioridad + '" style="height:20px;text-align:right;" id="valorRespuesta' + contPrioridad + '"/><label style="font-size:10px;  margin-left: 3px; margin-top: 8px;font-weight:bold;">Min</label></div>' +
+                        '</div>' +
+                        '<div style="font-size:9px;text-align:right;font-weight:bold;"><label id="valorRespuestaHoras' + contPrioridad + '"></label></div>' +
+                        '</td>' +
+                        '<td>' +
+                        '<div class="row">' +
+                        '<div class="col-md-12 d-flex align-items-center"><input type="text" class="form-control valorTiempo" data-label="valorAtencionHoras' + contPrioridad + '" style="height:20px;text-align:right;" id="valorAtencion' + contPrioridad + '"/><label style="font-size:10px;  margin-left: 3px; margin-top: 8px;font-weight:bold;">Min</label></div>' +
+                        '</div>' +
+                        '<div style="font-size:9px;text-align:right;font-weight:bold;"><label id="valorAtencionHoras' + contPrioridad + '"></label></div>' +
+                        '</td>' +
+                        '<td>' +
+                        '<div class="row">' +
+                        '<div class="col-md-12 d-flex align-items-center"><input type="text" class="form-control valorTiempo" data-label="valorPrioHoras' + contPrioridad + '" style="height:20px;text-align:right;" id="valorPrio' + contPrioridad + '"/><label style="font-size:10px; margin-left: 3px; margin-top: 8px;font-weight:bold;">Min</label></div>' +
+                        '</div>' +
+                        '<div style="font-size:9px;text-align:right;font-weight:bold;"><label id="valorPrioHoras' + contPrioridad + '"></label></div>' +
+                        '</td>' +
+                        '</tr>';
+
+                    contPrioridad++;
+                });
+
+                $("#divNuevoSLA").append(divPrio);
+
+                // Evento para el checkbox de cada fila
+                $(".chkPrioridad").change(function () {
+                    var isChecked = $(this).is(':checked');
+                    var row = $(this).closest('tr'); // Obtener la fila más cercana al checkbox
+
+                    if (isChecked) {
+                        if ($("#checkRespuesta").is(':checked')) {
+                            row.find("input[id^='valorRespuesta']").prop('disabled', false);
+                            row.find("label[id^='valorRespuestaHoras']").prop('disabled', false);
+                        }
+                        if ($("#checkAtencion").is(':checked')) {
+                            row.find("input[id^='valorAtencion']").prop('disabled', false);
+                            row.find("label[id^='valorAtencionHoras']").prop('disabled', false);
+                        }
+                        if ($("#checkResolucion").is(':checked')) {
+                            row.find("input[id^='valorPrio']").prop('disabled', false);
+                            row.find("label[id^='valorPrioHoras']").prop('disabled', false);
+                        }
+                    } else {
+                        row.find("input[id^='valorRespuesta']").val('').prop('disabled', true);
+                        row.find("input[id^='valorAtencion']").val('').prop('disabled', true);
+                        row.find("input[id^='valorPrio']").val('').prop('disabled', true);
+
+                        row.find("label[id^='valorRespuestaHoras']").html('').prop('disabled', true);
+                        row.find("label[id^='valorAtencionHoras']").html('').prop('disabled', true);
+                        row.find("label[id^='valorPrioHoras']").html('').prop('disabled', true);
+                    }
+                });
+
+                // Eventos para los checkboxes de las columnas
+                $("#checkRespuesta").change(function () {
+                    var isChecked = $(this).is(':checked');
+                    $(".chkPrioridad:checked").each(function () {
+                        var row = $(this).closest('tr');
+                        row.find("label[id^='valorRespuestaHoras']").html('').prop('disabled', isChecked);
+                        row.find("input[id^='valorRespuesta']").val('').prop('disabled', isChecked);
+                        row.find("input[id^='valorRespuesta']").prop('disabled', !isChecked);
+                        row.find("label[id^='valorRespuestaHoras']").prop('disabled', !isChecked);
+                    });
+                });
+
+                $("#checkAtencion").change(function () {
+                    var isChecked = $(this).is(':checked');
+                    $(".chkPrioridad:checked").each(function () {
+                        var row = $(this).closest('tr');
+                        row.find("label[id^='valorAtencionHoras']").html('').prop('disabled', isChecked);
+                        row.find("input[id^='valorAtencion']").val('').prop('disabled', isChecked);
+                        row.find("input[id^='valorAtencion']").prop('disabled', !isChecked);
+                        row.find("label[id^='valorAtencionHoras']").prop('disabled', !isChecked);
+                    });
+                });
+
+                $("#checkResolucion").change(function () {
+                    var isChecked = $(this).is(':checked');
+                    $(".chkPrioridad:checked").each(function () {
+                        var row = $(this).closest('tr');
+                        row.find("label[id^='valorPrioHoras']").html('').prop('disabled', isChecked);
+                        row.find("input[id^='valorPrio']").val('').prop('disabled', isChecked);
+                        row.find("input[id^='valorPrio']").prop('disabled', !isChecked);
+                        row.find("label[id^='valorPrioHoras']").prop('disabled', !isChecked);
+                    });
+                });
+
+                // Evento para actualizar las horas en los labels
+                $(".valorTiempo").on('input', function () {
+                    var minutos = $(this).val();
+                    var horas = (minutos / 60).toFixed(2);
+                    var labelId = $(this).data("label");
+                    $('#' + labelId).html(horas + ' Hora(s)');
+                });
+            }
+        });
+    }
+
+
+
+    function ListarSLA() {
+        $('#tbSLA').dataTable().fnDestroy();
+        $('#tbSLA').DataTable({
+            "order": [[0, "asc"]],
+            dom: 'Bfrtip',
+            ajax: {
+                "url": "/SoporteED/ListarSLAxProyecto",
+                "data": function (d) {
+                        d.IdDocuSale = @ViewBag.ID_DOCU_SALE
+                }
+            },
+            columns: [
+                { data: "Nombre" },
+                { data: "Tipo" },
+                { data: "Estado" },
+                { data: "UsuarioCrea" },
+                { data: "FechaCrea" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style="text-align:center;">' +
+                            '<button type="button" id="BtnEditar" class="btn btn-outline-dark" title="Editar"  onclick="ObtenerPrioridadEditar(' + data.Id + ')">' +
+                            '<i class="fas fa-pencil-alt"></i>' +
+                            '</button>' +
+                            '</div>';
+                    }
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ],
+            pageLength: 5,
+        });
+    }
+
+    function limpiarSLA() {
+
+        /*idEditSLA = 1;*/
+        $("#divCreaSLA").removeClass("d-none");
+
+        // Selecciona todos los checkboxes con la clase 'chkPrioridad'
+        let checkboxes = document.querySelectorAll('.chkPrioridad');
+
+        // Recorre todos los checkboxes y desmárcalos
+        checkboxes.forEach(function (checkbox) {
+            checkbox.checked = false;
+        });
+       /* $("input[type='checkbox']").prop('checked', false);*/
+        $("input[id^='valorRespuesta']").val('').prop('disabled', true);
+        $("label[id^='valorRespuestaHoras']").html('');
+        $("input[id^='valorAtencion']").val('').prop('disabled', true);
+        $("label[id^='valorAtencionHoras']").html('');
+        $("input[id^='valorPrio']").val('').prop('disabled', true);
+        $("label[id^='valorPrioHoras']").html('');
+        //$(".chkPrioridad").attr("checked", false)
+    }
+
+    //function EditarSLA(id) {
+    //    contPrioridad = 0;
+    //    $("#divCreaSLA").removeClass("d-none");
+    //    arrayPrioridad = [];
+    //    idEditSLA = id;
+    //    ListarPrioridad();
+    //    $(".valorPrioridad").val("");
+    //    $("#txtNombreSLA").val("");
+    //    $("#cbEstadoSLA").data("kendoComboBox").value("1");
+    //    //Valores del SLA (CUENTA, NOMBRE, ESTADO)
+    //    $.ajax({
+    //        url: "/SLA/ObtenerSLA/" + id,
+    //        type: "GET",
+    //        cache: false,
+    //        dataType: "json",
+    //        success: function (source) {
+    //            debugger
+    //            data = source;
+    //            $.each(data['data'], function (index, value) {
+    //                $("#txtNombreSLA").val(data['data'][index]['Nombre']);
+    //                if (data['data'][index]['Estado'] == true)
+    //                    $("#cbEstadoSLA").data("kendoComboBox").value(1);
+    //                else
+    //                    $("#cbEstadoSLA").data("kendoComboBox").value(0);
+    //                $("#cbCuentaSLA").data("kendoComboBox").value(data['data'][index]['IdCuenta']);
+    //            });
+    //        },
+    //        error: function (source) {
+    //        }
+    //    });
+    //    ObtenerPrioridad(id);
+    //}
+    //function ObtenerPrioridad(id) {
+    //    $.ajax({
+    //        url: "/SLA/ListarEditarPrioridadSLA/"+ id + "/2",
+    //        type: "GET",
+    //        cache: false,
+    //        dataType: "json",
+    //        success: function (source) {
+    //            data = source;
+    //            $.each(source['data'], function (index, value) {
+    //                var contadorChk = $("#prioridad" + data['data'][index]['IdPrioridad']).val();
+    //                $("#chkPrio" + contadorChk).attr('checked', true);
+    //                $("#valorPrio" + contadorChk).val(data['data'][index]['Tiempo']);
+    //            });
+    //        },
+    //        error: function (source) {
+    //        }
+    //    });
+    //}
+
+
+    @*function ObtenerSLAPorProyecto() {
+        $.ajax({
+            url: "/SLA/ObtenerSLAPorProyecto/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(source['data'], function (index, value) {
+                    var $newOption = $("<option selected='selected'></option>").val((data['data'][index]['idSLA'])).text((data['data'][index]['nombreSLA']))
+                    $("#cbSLA").append($newOption).trigger('change');
+                    $("#idCboSLA").val((data['data'][index]['idSLA']));
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }*@
+    function valideKey(evt) {
+
+        // code is the decimal ASCII representation of the pressed key.
+        var code = (evt.which) ? evt.which : evt.keyCode;
+
+        if (code == 8) { // backspace.
+            return true;
+        } else if ((code >= 48 && code <= 57)) { // is a number.
+            return true;
+        } else { // other keys.
+            return false;
+        }
+    }
+
+    //function ListarCboSLA(id) {
+    //    $("#divCboSLAPry").empty();
+    //    $("#divCboSLAPry").append('<input id="cbSLAPry" name="cbSLAPry" class="form-control" />');
+    //    $("#cbSLAPry").kendoComboBox({
+    //    autoBind: true,
+    //    dataTextField: "Nombre",
+    //    placeholder: "Seleccione un SLA",
+    //    dataValueField: "Id",
+    //    filter: "contains",
+    //    delay: 500,
+    //    minLength: 0,
+    //    suggest: true,
+    //    value: id,
+    //    dataSource: {
+    //        schema: {
+    //            data: "Data",
+    //            total: "Count"
+    //        },
+    //        transport: {
+    //            read: "/SLA/ListarSLAPorCuenta"
+    //        }
+
+    //    }
+    //    });
+    //    $("#cbSLAPry").change(function () {
+    //        ListarPrioridadPorSLA($("#cbSLAPry").val());
+    //    });
+    //}
+
+</script>

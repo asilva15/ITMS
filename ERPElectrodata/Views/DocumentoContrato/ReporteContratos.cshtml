@@ -1,0 +1,186 @@
+﻿@{
+    ViewBag.Title = "Documentos Internos";
+    //Layout = null;
+}
+
+<div class="card mb-3">
+    <div class="card-header-tab card-header">Registro de Contratos</div>
+    <form id="ParametroOP" class="card-body">
+        
+        <div class="form-row mb-2">
+            <div class="col-md-1">
+                &nbsp;Concepto Contrato
+            </div>
+            <div class="col-md-2">
+                <input id="ConceptoContrato" name="ConceptoContrato">
+            </div>
+            <div class="col-md-1">
+                &nbsp;Numero de OP
+            </div>
+            <div class="col-md-2">
+                <input id="NumeroOP" name="NumeroOP">
+            </div>
+            <div class="col-md-1">
+                &nbsp;Estado de Firma
+            </div>
+            <div class="col-md-2">
+                <input id="EstadoFirmaContrato" name="EstadoFirmaContrato">
+            </div>
+        </div>
+        <div class="form-row mb-2">
+            <div class="col-md-1">
+                Cliente
+            </div>
+            <div class="col-md-2">
+                <input id="IdCliente" name="IdCliente" />
+            </div>
+            <div class="col-md-1">
+                Cliente Final
+            </div>
+            <div class="col-md-2">
+                <input id="IdClienteFinal">
+            </div>
+            <div class="col-md-1" style="font-size:13px">
+                Fecha Inicio Contrato
+            </div>
+            <div class="col-md-2">
+                <input id="FechaIniContrato">
+            </div>
+            <div class="col-md-1" style="font-size:13px">
+                Fecha  Fin Contrato
+            </div>
+            <div class="col-md-2">
+                <input id="FechaFinContrato">
+            </div>
+        </div>
+        <div class="form-row mb-2">
+            <div class="col-md-10">
+                <br />
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary btn-block" id="Buscar">Buscar</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="bodyForm" style="margin-top:10px;">
+    <div class="inBodyForm">
+        <iframe id="RSDocumentoContrato" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport() {
+        window.frames["RSDocumentoContrato"].src = "/Reporting/ControlDocumentario/DocumentoContrato/ListarContratos.aspx?var=" + Math.random() + "&" + $("#ParametroOP").serialize();
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#ConceptoContrato").kendoComboBox({
+            autoBind: false,
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarConceptoContrato?var=" + Math.random()
+                }
+            }
+        });
+        var ConceptoContrato = $("#ConceptoContrato").data("kendoComboBox");
+
+        var NumeroOP = $("#NumeroOP").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NUM_DOCU_SALE",
+            dataValueField: "ID_DOCU_SALE",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DocumentoContrato/ListarNumeroOP?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        NumeroOP.list.width(350);
+
+        var EstadoFirmaContrato = $("#EstadoFirmaContrato").kendoComboBox({
+            autoBind: false,
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarEstadoFirmaContrato?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        EstadoFirmaContrato.list.width(350);
+
+        var IdCliente = $("#IdCliente").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        IdCliente.list.width(350);
+
+        var IdClienteFinal = $("#IdClienteFinal").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        IdClienteFinal.list.width(350);
+
+
+        var FechaIniContrato = $("#FechaIniContrato").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaFinContrato = $("#FechaFinContrato").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#Buscar").click(function () {
+            GenerateReport();
+        });
+
+    });
+
+
+</script>

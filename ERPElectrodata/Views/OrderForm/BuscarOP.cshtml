@@ -1,0 +1,663 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_SALE
+
+@{
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+@*<link href="~/Content/ITMS/styles.css" rel="stylesheet" />*@
+@*<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />*@
+
+<style>
+    .incidentHomeListBlock1 {
+        background-color: #F5F5F5;
+    }
+
+    .incidentHomeListHeader {
+        color: #666;
+        width: 100%;
+        display: inline-block;
+        /*font-size:.9em;*/
+    }
+
+        .incidentHomeListHeader a {
+            color: #444;
+            font-weight: bold;
+        }
+
+    .OPDetails {
+        /*font-size: .95em;*/
+        font-family: "Segoe UI", Verdana, Helvetica, Sans-Serif;
+        background-repeat: no-repeat;
+        color: black;
+        background-color: White;
+        width: 100%;
+        height: 40px;
+        overflow: auto;
+    }
+    .k-list-item-text {
+        display: flex;
+    }
+</style>
+<div class="main-card card">
+    <div class="card-header">Búsqueda Avanzada</div>
+    <div class="card-body">
+        @using (Html.BeginForm("FindSale", "Sales", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmSaleFind", name = "FrmSaleFind", target = "upload_target" }))
+        {
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Tipo OP
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_TYPE_DOCU_SALE)
+                        @Html.ValidationMessageFor(model => model.ID_TYPE_DOCU_SALE)
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Código OP
+                    </div>
+                    <div class="k-textbox form-control">
+                        @Html.EditorFor(model => model.NUM_DOCU_SALE)
+                        @Html.ValidationMessageFor(model => model.NUM_DOCU_SALE)
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        OS
+                    </div>
+                    <div class="k-textbox form-control">
+                        @Html.EditorFor(model => model.OS)
+                        @Html.ValidationMessageFor(model => model.OS)
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Estado
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_STAT_DOCU_SALE)
+                        @Html.ValidationMessageFor(model => model.ID_STAT_DOCU_SALE)
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Palabra Clave
+                    </div>
+                    <div class="k-textbox form-control">
+                        <input type="text" name="KEYWORD" id="KEYWORD" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Cliente
+                    </div>
+                    <div class="editor-field">
+                        <input type="text" name="ID_ENTI" id="ID_ENTI" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Contacto
+                    </div>
+                    <div class="editor-field">
+                        <input type="text" name="ID_PERS_ENTI" id="ID_PERS_ENTI" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Cliente Final
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_COMP_END)
+                        @Html.ValidationMessageFor(model => model.ID_COMP_END)
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Area Responsable
+                    </div>
+                    <div class="editor-field">
+                        <input type="text" name="ID_QUEU_FIND" id="ID_QUEU_FIND" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Especialista
+                    </div>
+                    <div class="editor-field">
+                        <input type="text" name="ID_PERS_ENTI_ASSI_FIND" id="ID_PERS_ENTI_ASSI_FIND" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Gerente de Proyecto
+                    </div>
+                    <div class="editor-field">
+                        @Html.Editor("PM")
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Categoria
+                    </div>
+                    <div class="editor-field">
+                        <input type="text" name="ID_CATE_FIND" id="ID_CATE_FIND" />
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Vendedor
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_PERS_ENTI_VEND)
+                        @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_VEND)
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <span><br /></span>
+                    <div>
+                        <button id="btnFindSale" class="btn btn-light btn-block btn-lg" onclick="FindSales(); return false;"><i class="fa fa-search"></i> Buscar</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div style="clear:both;"></div>
+<div id="resultFindSale" class="contentView">
+</div>
+<div id="pagerFindSale" style="margin:10px 0 0 0">
+</div>
+
+<script type="text/x-kendo-tmpl" id="Details-tpt">
+    <a href="/OrderForm/DetalleProyecto/${ID_DOCU_SALE}" target="_blank" class="text-decoration-none" style="width:100%">
+        <div class="card-body py-3 btn-shadow btn-outline-focus" style="font-size:13px">
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-12">
+                    <div class="row no-gutters align-items-center" style="width:100%;font-weight:bold">
+                        <div class="col-md-2">
+                            <span>${COD_TYPE_DOCU_SALE} ${NUM_DOCU_SALE}</span>
+                        </div>
+                        <div class="col-md-2">
+                            <span>${COM_NAME}</span>
+                        </div>
+                        <div class="col-md-2">
+                            <span>OS: </span> ${OS}
+                        </div>
+                        <div class="col-md-2">
+                            <span>Creado:</span> ${DAT_DOCU_SALE}
+                        </div>
+                        <div class="col-md-2">
+                            <span>Fecha Expiración: </span> ${EXP_DATE}
+                        </div>
+                        <div class="col-md-2">
+                            <span>Vendedor:</span> ${VENDOR}
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-10">
+                    <div class="row no-gutters align-items-center" style="width:100%;">
+                        <div class="col-md-1"><b>Cliente:</b></div>
+                        <div class="col-md-5">
+                            <div>${CIA}</div>
+                            <div>${CIA_ADDR}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <b>Contacto:</b> ${NAM_CLIE_CONT}
+                            <div>${CLI_JOB_TITL}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <b>Project Manager:</b> ${PM}
+                        </div>
+                    </div>
+                    <div class="OPContentDetails" id="effectFind${ID_DOCU_SALE}"></div>
+                    <div class="OPContentDetails" id="effectTicketFind${ID_DOCU_SALE}"></div>
+                </div>
+                <div class="col-md-2">
+                    <div style="font-size:14px;text-align:center">${TITULO}</div>
+                    <div style="padding:3px 10px 3px 10px; text-align:center; color:white; background-color:${COLOR};">
+                        ${NAM_STAT_DOCU_SALE}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+    <a class="btn-shadow btn-outline-focus pl-2 pb-2 pr-2" onclick="verReporteConsolidado(${ID_DOCU_SALE});" id="linkReporteConsolidado" href="/Reporting/OrderForm/ReporteConsolidadoSoporte.aspx?idOP=${ID_DOCU_SALE}" target="_blank" style="text-decoration:none;"><i class="fa fa-clipboard pt-1 pr-2 pl-1" style="font-size:16px;"></i>Ver reporte</a>
+    <br />
+    <br />
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var ID_STAT_DOCU_SALE = $("#ID_STAT_DOCU_SALE").kendoComboBox({
+            dataTextField: "NAM_STAT_DOCU_SALE",
+            dataValueField: "ID_STAT_DOCU_SALE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Sales/ListStatusDocuSale?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_TYPE_DOCU_SALE = $("#ID_TYPE_DOCU_SALE").kendoComboBox({
+            dataTextField: "COD_TYPE_DOCU_SALE",
+            dataValueField: "ID_TYPE_DOCU_SALE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeDocumentSale/ListAll?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+
+        var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Sales/ListClients?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        //ID_ENTI.list.width(300);
+
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_ENTI",
+            dataTextField: "NAM_CONTACT",
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Sales/ListContactByID_ENTI1?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_COMP_END = $("#ID_COMP_END").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Sales/ListClients?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        //ID_COMP_END.list.width(300);
+
+        //var ID_PERS_ENTI_VEND = $("#ID_PERS_ENTI_VEND").kendoComboBox({
+        //    dataTextField: "NAM_VENDOR",
+        //    dataValueField: "ID_PERS_ENTI",
+        //    filter: "contains",
+        //    autoBind: true,
+        //    delay: 500,
+        //    minLength: 0,
+        //    suggest: true,
+        //    dataSource: {
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/Sales/ListVendorAll?var=" + Math.random()
+        //        }
+        //    }
+        //}).data("kendoComboBox");
+        var ID_PERS_ENTI_VEND = $("#ID_PERS_ENTI_VEND").kendoComboBox({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/EspecialistaPorAreaResponsable/28",
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_QUEU_FIND = $("#ID_QUEU_FIND").kendoComboBox({
+            dataTextField: "QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            template: '<div style="display:"flex";flex-direction: column">' +
+                        '<span style="text-transform:capitalize"><strong>${data.QUEU}</strong></span><br />' +
+                        '<span style="font-size:.9em;">${data.DES_QUEU}</span></div>',
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_PERS_ENTI_ASSI_FIND = $("#ID_PERS_ENTI_ASSI_FIND").kendoComboBox({
+            autoBind: true,
+            index: 1,
+            cascadeFrom: "ID_QUEU_FIND",
+            dataTextField: "ASSI",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                                      '<div style="float:left;letter-spacing:-1px;">${data.ASSI}</div>' +
+                                      '<div style="float:right; ">(WL ${data.WorkLoad})</div>' +
+                                  '</div>',
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_CATE_FIND").kendoComboBox({
+            autoBind: true,
+            filter: "contains",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;position:relative; ">' +
+                '<span><strong>${data.NAM_CATE_1}</strong></span><br />' +
+                '<span style="font-size:.9em; ">${data.NAM_CATE_2}</span><br />' +
+                '<span style="font-size:.9em; ">${data.NAM_CATE_3}</span><br />' +
+                '<span style="font-size:.9em;;">${data.NAM_CATE_4}</span></div>',
+            //template: '${data.NAM_CATE_1}' +
+            //            ' - ${data.NAM_CATE_2}' +
+            //            ' - ${data.NAM_CATE_3}' +
+            //            ' - ${data.NAM_CATE_4}',
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/List"
+                }
+            }
+        }).data("kendoComboBox");
+        var ID_CATE_FIND = $("#ID_CATE_FIND").data("kendoComboBox");
+        ID_CATE_FIND.list.width(300);
+
+        var PM = $("#PM").kendoComboBox({
+            autoBind: true,
+            dataTextField: "ASSI",
+            dataValueField: "ID_PERS_ENTI",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AssigneByQueue?filter[filters][0][field]=ID_QUEU&filter[filters][0][value]=22&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        FindSales();
+    });
+
+    function FindSales() {
+        var dataSource = null;
+        var pager = null;
+
+        $("#pagerFindSale").empty();
+        $("#resultFindSale").empty();
+
+        if ($("#resultFindSale").data("kendoListView")) {
+            $("#pagerFindSale").data("kendoPager").destroy();
+            $("#resultFindSale").data("kendoListView").destroy();
+        }
+
+        dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    type: "GET",
+                    dataType: "json",
+                    url: "/OrderForm/FindSaleResult?var=" + Math.random() + "&" + $('#FrmSaleFind').serialize(),
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#resultFindSale").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#Details-tpt").html())
+        });
+
+        pager = $("#pagerFindSale").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 60],
+            refresh: true
+        });
+
+        //AJAX PARA GRÁFICAS
+        @*$.ajax({
+            url: "/Sales/FindSaleResult?var=" + Math.random() + "&" + $('#FrmSaleFind').serialize() + "&skip=0&take=0",
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                $('#pie').highcharts({
+                    chart: {
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false
+                    },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: '@ResourceLanguaje.Resource.From '
+                            + json['From'] + ' @ResourceLanguaje.Resource.To '
+                            + json['To'] + '<br>@ResourceLanguaje.Resource.TotalClosed: ' + json['TTClosed']
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    tooltip: {
+                        pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                        percentageDecimals: 2
+                    },
+                    plotOptions: {
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            size: '55%',
+                            showInLegend: true,
+                            dataLabels: {
+                                enabled: true,
+                                color: '#000000',
+                                connectorColor: '#000000',
+                                format: '<b>{point.name}</b>: {point.percentage:.2f} %',
+                                distance: -10
+                            }
+                        }
+                    },
+                    series: [{
+                        type: 'pie',
+                        name: 'Browser share',
+                        data: json['Pie']
+                    }]
+                });
+            }
+        });*@
+
+        return false;
+    }
+
+    var indFind = 0;
+    function EffectExpandirTicketFind(id) {
+        $("#effectTicketFind" + id).show('blind', function () {
+            var txt = $("#effectTicketFind" + id).html();
+            if (txt.length == 18 || txt.length == 0 && indFind == 1) {
+                $("#effectTicketFind" + id).empty();
+                $("#effectTicketFind" + id).load("/Sales/ViewListTicket?id=" + id + "&var=" + Math.random(), function () {
+                    $("#divLoadingFind" + id).css("display", "none");
+                });
+            }
+            else { $("#divLoadingFind" + id).css("display", "none"); }
+        });
+    }
+
+    function EffectExpandirFind(id) {
+        $("#effectFind" + id).show('blind', function () {
+            var txt = $("#effectFind" + id).html();
+            if (txt.length == 18 || txt.length == 0 && indFind == 0) {
+                $("#effectFind" + id).empty();
+                $("#effectFind" + id).load("/Sales/ViewDetailArticleService?id=" + id + "&var=" + Math.random(), function () {
+                    $("#divLoadingFind" + id).css("display", "none");
+                });
+            }
+            else { $("#divLoadingFind" + id).css("display", "none"); }
+        });
+    }
+
+    function EffectContraerTicketFind(id, sw) {
+        $("#effectTicketFind" + id).hide('blind', function () {
+            //expandiendo los ticket despues de cerrar el detalle de la OP
+            if (sw == 1) {
+                $("#effectFind" + id).empty();
+                EffectExpandirFind(id);
+            }
+            else { $("#divLoadingFind" + id).css("display", "none"); }
+        });
+    }
+
+    function EffectContraerFind(id, sw) {
+        $("#effectFind" + id).hide('blind', function () {
+            //expandiendo los ticket despues de cerrar el detalle de la OP
+            if (sw == 1) {
+                $("#effectFind" + id).empty();
+                EffectExpandirTicketFind(id);
+            }
+            else { $("#divLoadingFind" + id).css("display", "none"); }
+        });
+    }
+
+    function ExecuteEffectFind(id) {
+
+        if (indFind != 0) { $("#effectTicketFind" + id).empty(); }
+        indFind = 0;
+        $("#divLoadingFind" + id).css("display", "block");
+
+        var className = $('#btnExpandirFind' + id).attr('class');
+        if (className == 'btnExpand') { //Solicita Expandir Detalle de OP
+            var classNameT = $('#btnExpandTicketFind' + id).attr('class');
+            if (classNameT == 'btnContractTicket') { //Tickets expandidos
+                EffectContraerTicketFind(id, 1);
+                $("#btnExpandTicketFind" + id).removeClass("btnContractTicket").addClass("btnExpandTicket");
+            }
+            else {
+                EffectExpandirFind(id);
+            }
+            $("#btnExpandirFind" + id).removeClass("btnExpand").addClass("btnContract");
+        }
+        else { //Solicita Contraer Detalle de OP
+            EffectContraerFind(id, 0);
+            $("#btnExpandirFind" + id).removeClass("btnContract").addClass("btnExpand");
+        }
+        return false;
+    }
+
+    function ExecuteEffectTicketFind(id) {
+        if (indFind != 1) { $("#effectTicketFind" + id).empty(); }
+        indFind = 1;
+        $("#divLoadingFind" + id).css("display", "block");
+
+        var classNameT = $('#btnExpandTicketFind' + id).attr('class');
+        if (classNameT == 'btnExpandTicket') { //Solicita expandir los tickets
+            var className = $('#btnExpandirFind' + id).attr('class');
+            if (className != 'btnExpand') { //Detalle de OP expandido
+                EffectContraerFind(id, 1);
+                $("#btnExpandirFind" + id).removeClass("btnContract").addClass("btnExpand");
+            }
+            else {
+                EffectExpandirTicketFind(id);
+            }
+            $("#btnExpandTicketFind" + id).removeClass("btnExpandTicket").addClass("btnContractTicket");
+        }
+        else {//Solicita contraer los tickets
+            EffectContraerTicketFind(id, 0);
+            $("#btnExpandTicketFind" + id).removeClass("btnContractTicket").addClass("btnExpandTicket");
+        }
+    }
+
+    function verReporteConsolidado(idOP) {
+        document.getElementById('linkReporteConsolidado').href = "/Reporting/OrderForm/ReporteConsolidadoSoporte.aspx?idOP=" + idOP;
+    }
+</script>

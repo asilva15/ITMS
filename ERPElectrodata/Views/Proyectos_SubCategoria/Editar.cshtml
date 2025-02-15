@@ -1,0 +1,162 @@
+﻿@{
+    ViewBag.Title = "Editar Tipo Servicio";
+    Layout = null;
+}
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="main-card mb-2 card">
+    <div class="card-body">
+
+        <div class="form-row">
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label id="lblEtapaE" for="etapa">Etapa</label>
+                    <input id="cboEtapaE" type="text" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label id="lblActividadE" for="actividad">Actividad</label>
+                    <input id="cboActividadE" type="text" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label id="lblSubcategoriaE" for="subcategoria">Subcategoría</label>
+                    <input id="txtSubcategoriaE" type="text" />
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-2">
+                <div class="position-relative form-group">
+                    <label for="chkEstadoE">Estado</label><br>
+                    <input id="chkEstadoE" type="checkbox" />
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 ml-auto">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" data-dismiss="modal" class="btn btn-secondary btn-block">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-primary btn-block" onclick="ActualizarSubcategoria()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        // ESTILO DE COMBOS
+        var cboEtapaE = $("#cboEtapaE").kendoComboBox({
+            placeholder: "",
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proyectos_Etapa/CboListarEtapa"
+                }
+            }
+        });
+        var cboActividadE = $("#cboActividadE").kendoComboBox({
+            placeholder: "",
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proyectos_Actividad/CboListarActividad"
+                }
+            }
+        });
+        //Dando estilo al input
+        $("#txtSubcategoriaE").kendoMaskedTextBox({
+            mask: ""
+        });
+        //Asignando valores de registro
+        $("#cboEtapaE").data("kendoComboBox").value(@ViewBag.IdEtapa);
+        $("#cboActividadE").data("kendoComboBox").value(@ViewBag.IdActividad);
+        $("#txtSubcategoriaE").val("@ViewBag.Subcategoria");
+        $('#chkEstadoE').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+        if ("@ViewBag.ChkEstado" == "True") {
+            $('#chkEstadoE').iCheck('check');
+        } else {
+            $('#chkEstadoE').iCheck('uncheck');
+        }
+    });
+
+    function ActualizarSubcategoria() {
+        var mensajeAdvertenciaE = '';
+        if ($("#cboEtapaE").val() == "") {
+            mensajeAdvertenciaE = mensajeAdvertenciaE + "- Etapa. <br/>";
+        }
+        if ($("#cboActividadE").val() == "") {
+            mensajeAdvertenciaE = mensajeAdvertenciaE + "- Actividad. <br/>";
+        }
+        if ($("#cboSubcategoriaE").val() == "") {
+            mensajeAdvertenciaE = mensajeAdvertenciaE + "- Subcategoría. <br/>";
+        }
+        if (mensajeAdvertenciaE == '') {
+            $.ajax({
+                type: "POST",
+                url: "/Proyectos_Subcategoria/EditarSubcategoria?id=" + "@ViewBag.Id" +
+                    "&idEtapa=" + $("#cboEtapaE").val() +
+                    "&idActividad=" + $("#cboActividadE").val() +
+                    "&subcategoria=" + $("#txtSubcategoriaE").val() +
+                    "&estado=" + $("#chkEstadoE").iCheck('update')[0].checked,
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("La subcategoría ingresada ya se encuentra registrada.", "Advertencia");
+                    } else {
+                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                        toastr.success("Registro Actualizado", "Exito!");
+                        $('#tbSubcategoria').DataTable().ajax.reload();
+                    }
+                }
+            });
+        } else {
+            toastr.warning(mensajeAdvertenciaE, 'Complete los siguientes campos:');
+        }
+    }
+</script>

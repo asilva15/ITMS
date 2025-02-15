@@ -1,0 +1,377 @@
+﻿@*@model ERPElectrodata.Models.EvaPlanMejora*@
+@{
+    Layout = null;
+}
+
+<style>
+
+    .container {
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+</style>
+
+@*<div class="titleForm">
+    <div class="title" id="divTitle">
+        Plan de Mejora
+    </div>
+</div>*@
+<div class="container">
+    <div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h4 style="font-weight:bold;padding-top: 10px;">FeedBack</h4>
+            <div class="button-group">
+                <button id="btnEditarFeedBack" class="btn btn-primary" onclick="EditarFeedBack(event);" hidden>Editar Feedback</button>
+                <button id="btnGuardarFeedBack" class="btn btn-primary" onclick="EditarFeedBack(event);">Guardar Feedback</button>
+            </div>
+        </div>
+
+
+        @*<h4 style="text-align:center; font-weight:bold ">ÁREAS DE MEJORA (DEBILIDADES):</h4>*@
+        <div style="font-size:16px;">
+            @*<div class="col-md-12" style="font-size:16px;">
+                *@
+
+                Esta sección tiene como finalidad identificar aquellas acciones que han aportado positivamente a tu desempeño y aquellas en donde aún se puede mejorar, logrando así llevar tu desempeño a niveles sobresalientes.
+
+                @*
+            </div>*@
+            @*Coloca 2 o 3 áreas de mejora que creas conveniente para  optimizar tu desempeño laboral.<br /><br />
+            EJEMPLO*@
+        </div>
+        <br /><br />
+        @*<div style="float:left; width:50%;">
+            <p>
+                <div style="text-decoration:underline; font-weight:bold">ÁREAS DE MEJORA:</div>
+                *Pueden ser frases largas:<br />
+                - El ser tan desordenado hace que mis entregables no sean 100% satisfactorios.<br />
+                - Me frustro rápido con los problemas del día a día y esto me impide buscar soluciones rápidas.<br />
+                - Mi  poca destreza en el inglés me genera problemas al momento de hablar con los proveedores.<br /><br />
+                *Pueden ser frases cortas:<br />
+                - Mejorar mi orden<br />
+                - Manejo de estrés<br />
+                -Inglés muy básico<br />
+            </p>
+        </div>
+        <div style="float:left; width:50%;"></div>
+        <p>
+            <div style="text-decoration:underline; font-weight:bold">ACCIONES A TOMAR:</div>
+            No te olvides de colocar las pequeñas tareas y/o acciones a realizar para mejorar los puntos mencionados anteriormente:<br /><br />
+            Ejemplo:<br />
+            •	Hacer un calendario mensual con mis tareas y actividades a realizar para no olvidarme de ellas.<br />
+            •	Guardar mis documentos en files ordenados por nombres.<br />
+            •	Descargarme aplicaciones prácticas para practicar mi inglés.<br />
+            •	Coordinar con algún compañero para que me ayude a mejorar mi conversación en inglés
+        </p>*@
+    </div>
+    <div class="divFondoDos">
+        <div class="divFondoDos" style="width:49%; float:left">
+            <div class="divSpace2"></div>
+            <div class="form-grup row">
+                <div class="editor-label">
+                    <h4><b>Comentarios del colaborador:</b></h4>
+                </div>
+                <div class="editor-field">
+                    <div style="font-size:16px!important">
+                        Menciona 2 o 3 acciones positivas que te han permitido alcanzar tus objetivos.
+                    </div>
+                    <br />
+                    @*@Html.TextAreaFor(model => model.ComentarioColaborador1)*@
+                    <textarea rows="8" style="width:100%" id="ComentarioColaborador1"></textarea>
+                    @*<textarea id="txtAreaMejora" name="txtAreaMejora" rows="8" style="width:100%">@ViewBag.AreaMejora</textarea>*@
+                </div>
+                <div class="editor-field">
+                    <div style="font-size:16px!important">
+                        Menciona 2 o 3 áreas de mejora para optimizar tu desempeño laboral.
+                    </div>
+                    <br />
+                    <textarea rows="8" style="width:100%" id="ComentarioColaborador2"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="divFondoDos" style="width:2%; float:left">
+        </div>
+        <div class="divFondoDos" style="width:49%; float:left">
+            <div class="divSpace2"></div>
+            <div class="form-grup row">
+                <div class="editor-label">
+                    <h4><b>Comentarios del jefe directo:</b></h4>
+                </div>
+                <div class="editor-field">
+                    <div style="font-size:16px!important">
+                        Menciona 2 o 3 acciones positivas que han resaltado en el desempeño del personal evaluado:
+                    </div>
+                    <br />
+                    <textarea rows="8" style="width:100%" id="ComentarioJefeDirecto1"></textarea>
+                    @*@Html.TextAreaFor(model => model.Comentario)*@
+                    @*<textarea id="txtComentario" name="txtComentario" rows="8" style="width:100%">@ViewBag.Comentario</textarea>*@
+                </div>
+                <div class="editor-field">
+                    <div style="font-size:16px!important">
+                        Menciona 2 o 3 áreas de mejora para optimizar el desempeño del personal evaluado:
+                    </div>
+                    <br />
+                    <textarea rows="8" style="width:100%" id="ComentarioJefeDirecto2"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<iframe id="upload_target2" name="upload_target2" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if (@ViewBag.IdEstadoFeedBack == 1) {
+            var IdEvaluacionFeedBack = @ViewBag.IdEvaluacionFeedBack;
+
+            // Realiza la llamada AJAX
+            $.ajax({
+                url: '/EvaluacionPersonal/ObtenerDatosFeedBacks',
+                type: 'GET',
+                data: { id: IdEvaluacionFeedBack },
+                success: function (data) {
+                    // Verifica si la respuesta tiene datos
+                    if (data && data.length > 0) {
+                        // Itera sobre cada item en los datos recibidos
+                        data.forEach(function (item, index) {
+
+                            var editor1 = $("#ComentarioColaborador1").data("kendoEditor");
+                            var editor2 = $("#ComentarioColaborador2").data("kendoEditor");
+
+                            editor1.value(item.FeedBackColaborador1);
+                            editor2.value(item.FeedBackColaborador2);
+
+                            document.getElementById('btnEditarFeedBack').setAttribute('hidden', 'hidden');
+                            document.getElementById('btnGuardarFeedBack').removeAttribute('hidden');
+
+                        });
+                    } else {
+                        toastr.warning('No se encontraron datos para los objetivos.', 'Advertencia');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Ocurrió un error al obtener los datos de los objetivos.', 'Error');
+                }
+            });
+        }
+        else if (@ViewBag.IdEstadoFeedBack == 2) {
+            var IdEvaluacionFeedBack = @ViewBag.IdEvaluacionFeedBack;
+
+            // Realiza la llamada AJAX
+            $.ajax({
+                url: '/EvaluacionPersonal/ObtenerDatosFeedBacks',
+                type: 'GET',
+                data: { id: IdEvaluacionFeedBack },
+                success: function (data) {
+                    // Verifica si la respuesta tiene datos
+                    if (data && data.length > 0) {
+                        // Itera sobre cada item en los datos recibidos
+                        data.forEach(function (item, index) {
+
+                            var editor1 = $("#ComentarioColaborador1").data("kendoEditor");
+                            var editor2 = $("#ComentarioColaborador2").data("kendoEditor");
+                            var editor3 = $("#ComentarioJefeDirecto1").data("kendoEditor");
+                            var editor4 = $("#ComentarioJefeDirecto2").data("kendoEditor");
+
+                            editor1.value(item.FeedBackColaborador1);
+                            editor2.value(item.FeedBackColaborador2);
+                            editor3.value(item.FeedBackJefeDirecto1);
+                            editor4.value(item.FeedBackJefeDirecto2);
+
+                            document.getElementById('btnGuardarFeedBack').setAttribute('hidden', 'hidden');
+                            document.getElementById('btnEditarFeedBack').removeAttribute('hidden');
+
+                        });
+                    } else {
+                        toastr.warning('No se encontraron datos para los objetivos.', 'Advertencia');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Ocurrió un error al obtener los datos de los objetivos.', 'Error');
+                }
+            });
+        }else if (@ViewBag.IdEstadoFeedBack == 3) {
+            var IdEvaluacionFeedBack = @ViewBag.IdEvaluacionFeedBack;
+
+            // Realiza la llamada AJAX
+            $.ajax({
+                url: '/EvaluacionPersonal/ObtenerDatosFeedBacks',
+                type: 'GET',
+                data: { id: IdEvaluacionFeedBack },
+                success: function (data) {
+                    // Verifica si la respuesta tiene datos
+                    if (data && data.length > 0) {
+                        // Itera sobre cada item en los datos recibidos
+                        data.forEach(function (item, index) {
+
+                            var editor1 = $("#ComentarioColaborador1").data("kendoEditor");
+                            var editor2 = $("#ComentarioColaborador2").data("kendoEditor");
+                            var editor3 = $("#ComentarioJefeDirecto1").data("kendoEditor");
+                            var editor4 = $("#ComentarioJefeDirecto2").data("kendoEditor");
+
+                            editor1.value(item.FeedBackColaborador1);
+                            editor2.value(item.FeedBackColaborador2);
+                            editor3.value(item.FeedBackJefeDirecto1);
+                            editor4.value(item.FeedBackJefeDirecto2);
+
+                            document.getElementById('btnEditarFeedBack').setAttribute('hidden', 'hidden');
+                            document.getElementById('btnGuardarFeedBack').setAttribute('hidden', 'hidden');
+
+
+                        });
+                    } else {
+                        toastr.warning('No se encontraron datos para los objetivos.', 'Advertencia');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Ocurrió un error al obtener los datos de los objetivos.', 'Error');
+                }
+            });
+        }
+
+    $("#ComentarioColaborador1").kendoEditor({
+        tools: [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "foreColor",
+            "backColor",
+            "justifyLeft",
+            "justifyCenter",
+            "justifyRight",
+            "justifyFull",
+            "insertUnorderedList",
+            "insertOrderedList",
+            "indent",
+            "outdent",
+            "createLink",
+            "unlink",
+            "subscript",
+            "superscript"
+        ], encoded: false
+    });
+
+    $("#ComentarioColaborador2").kendoEditor({
+        tools: [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "foreColor",
+            "backColor",
+            "justifyLeft",
+            "justifyCenter",
+            "justifyRight",
+            "justifyFull",
+            "insertUnorderedList",
+            "insertOrderedList",
+            "indent",
+            "outdent",
+            "createLink",
+            "unlink",
+            "subscript",
+            "superscript"
+        ], encoded: false
+    });
+
+
+    $("#ComentarioJefeDirecto1").kendoEditor({
+        tools: [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "foreColor",
+            "backColor",
+            "justifyLeft",
+            "justifyCenter",
+            "justifyRight",
+            "justifyFull",
+            "insertUnorderedList",
+            "insertOrderedList",
+            "indent",
+            "outdent",
+            "createLink",
+            "unlink",
+            "subscript",
+            "superscript"
+        ], encoded: false
+    });
+
+
+
+
+    $("#ComentarioJefeDirecto2").kendoEditor({
+        tools: [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "foreColor",
+            "backColor",
+            "justifyLeft",
+            "justifyCenter",
+            "justifyRight",
+            "justifyFull",
+            "insertUnorderedList",
+            "insertOrderedList",
+            "indent",
+            "outdent",
+            "createLink",
+            "unlink",
+            "subscript",
+            "superscript"
+        ], encoded: false
+    });
+
+        $($('#ComentarioColaborador1').data().kendoEditor.body).attr('contenteditable', false);
+        $($('#ComentarioColaborador2').data().kendoEditor.body).attr('contenteditable', false);
+
+    });
+
+    function EditarFeedBack(event) {
+        event.preventDefault();
+
+        var comentario1 = $("#ComentarioJefeDirecto1").data("kendoEditor").value();
+        var comentario2 = $("#ComentarioJefeDirecto2").data("kendoEditor").value();
+        @*var IdEvaluacion = @ViewBag.IdEvaluacionFeedBack;*@
+        var idPersEnti = @ViewBag.IdPersEnti;
+        var idPeriodo = @ViewBag.IdPeriodo;
+
+        if (comentario1.trim() == '' && comentario2.trim() == '') {
+            toastr.warning("Ingrese el feedback.", "Mensaje"); 
+
+        } else {
+            var data = {
+                FeedBackJefeDirecto1: comentario1,
+                FeedBackJefeDirecto2: comentario2,
+                id_pers_enti: idPersEnti,
+                IdPeriodo: idPeriodo
+                /*IdEvaluacionFeed: IdEvaluacion*/
+            };
+
+            $.ajax({
+                url: '/EvaluacionPersonal/EditarFeedBackJefeDirecto',
+                type: 'POST',
+                data: JSON.stringify(data),
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    document.getElementById('btnGuardarFeedBack').setAttribute('hidden', 'hidden');
+                    document.getElementById('btnEditarFeedBack').removeAttribute('hidden');
+                    toastr.success('Se registraron de forma exitosa los feedbacks.', 'Exito');
+                },
+                error: function (error) {
+                    console.error('Error al enviar los datos:', error);
+                }
+            });
+        }
+        
+    }
+
+</script>

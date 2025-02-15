@@ -1,0 +1,166 @@
+﻿@{
+    ViewBag.Title = "InformesRelacionados";
+    Layout = null;
+}
+
+<style>
+
+    .container::-webkit-scrollbar {
+        width: 12px; /* width of the entire scrollbar */
+    }
+
+    .container::-webkit-scrollbar-thumb {
+        background-color: #9B9B9B; /* color of the scroll thumb */
+        border-radius: 20px; /* roundness of the scroll thumb */
+        border: 3px solid white; /* creates padding around scroll thumb */
+    }
+</style>
+<div class="container" style="height: 580px;  overflow-y: scroll; overflow-x: hidden; ">
+    <div class="form-group row">
+
+        <table id="tbListadoInformesxOP" class="table table-bordered table-striped" style="width:100%">
+            <thead style="font-size: 12px;">
+                <tr>
+                    <th>Cliente</th>
+                    <th>Cliente Final</th>
+                    <th>Fabricante</th>
+                    <th>Fecha Fin Soporte</th>
+                    <th>Ticket</th>
+                    <th>Estado</th>
+                    <th>Días para vencer informe</th>
+                    @*<th>Aprobar Informe</th>*@
+                    @*<th>Editar Informe</th>*@
+                </tr>
+            </thead>
+            <tbody style="font-size: 12px;"></tbody>
+        </table>
+
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        ListadoInformesxOP();
+    });
+
+        function ListadoInformesxOP() {
+
+        let OP = @ViewBag.OP;
+
+            $('#tbListadoInformesxOP').dataTable().fnDestroy();
+
+            var table = $('#tbListadoInformesxOP').DataTable({
+                searching: true,
+                responsive: true,
+                language: {
+                    "url": "https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json"
+                },
+            dom: 'Bfrtip',
+            "order": [[6, "asc"]],
+            ajax: {
+                "url": "/InformeED/ListarInformesporOP/",
+                "data": function (d) {
+
+                    d.bOP = OP;
+                }
+            },
+
+            columns: [
+                { data: "Cliente" },
+                { data: "ClienteFinal" },
+                { data: "Marca" },
+                { data: "FechaFinSoporte" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.IdTicket != 0) {
+                            return '<a href=\"/DetailsTicket/Index/' + data.IdTicket + '" target="_blank">' + data.CodigoTicket + '</a>';
+                        }
+                        else {
+                            return '<div style="text-align: center;">-</div>';
+                        }
+                    }
+                },
+
+                { data: "EstadoInforme" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.Diasparavencimiento == 0) {
+                            return '<div class="contenedor" style = "position: relative;"><div class="badge badge-success" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">OK</div></div>';
+                        }
+
+                        else if (data.Diasparavencimiento < 11) {
+                            return '<div class="contenedor" style = "position: relative;"><div class="badge badge-danger" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">' + data.Diasparavencimiento + '</div></div>';
+                        } else {
+
+                            return '<div class="contenedor" style = "position: relative;"><div class="badge badge-secondary" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">' + data.Diasparavencimiento + '</div></div>';
+                        }
+
+                    }
+                },
+
+
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        return '<div class="contenedor" style = "position: relative;"><div style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">' +
+                //            '<i class="fa fa-eye-slash fa-xs"></i>' +
+                //            '</div></div>';
+                //        //if (data.IdTicket != 0) {
+                //        //    var XOP = "'" + data.OP + "'";
+                //        //    return '<div class="col-md-12">' +
+                //        //        '<button id="btnAprobarInforme" class="btn btn-light btn-hover-shine"  data-toggle="modal" data-target="#modalAprobarInforme" onclick="AprobarInforme2(' + data.IdDocuSale + ',' + XOP + ');"><i class="fa fa-eye fa-xs"></i></button>' +
+                //        //        '</div>';
+                //        //}
+                //        //else {
+                //        //    return '<div class="contenedor" style = "position: relative;"><div style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">' +
+                //        //        '<i class="fa fa-eye-slash fa-xs"></i>' +
+                //        //        '</div></div>';
+                //        //}
+                //    }
+                //},
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        var XOP = "'" + data.OP + "'";
+                //        var titulo = "'" + data.Titulo + "'";
+                //        return '<div class="col-md-12">' +
+                //            '<button id="btnMaquinaEstados" class="btn btn-light btn-hover-shine"  data-toggle="modal" data-target="#modalMaquinaEstados" onclick="MaquinaEstados2(' + data.IdDocuSale + ',' + XOP + ',' + titulo + ',' + data.IdInformeFecha + ',' + data.IdEstadoInforme + ');"><i class="fa fa-pen fa-xs"></i></button>' +
+                //            '</div>';
+                //    }
+                //}
+            ],
+                buttons: [
+                ]
+        });
+
+    }
+
+    function MaquinaEstados2(id, OP, titulo, iddetainforme, idEstadoInforme) {
+
+        $("#lblTituloMaquinaEstados").text("Detalle de Informe - " + OP + " | " + titulo);
+
+        //$(".modal-dialog").removeClass("modal-sm");
+        //$(".modal-dialog").removeClass("modal-xl");
+        //$(".modal-dialog").addClass("modal-xl");
+        $('#modal-contentMaquinaEstados').empty();
+        $('#modal-contentMaquinaEstados').load('/InformeED/EditarInforme?OP=' + id + '&IDI=' + iddetainforme + '&Estado=' + idEstadoInforme);
+
+    }
+
+
+    function AprobarInforme2(id) {
+
+        $("#lblTituloAprobarInforme").text("Módulo de Aprobación de Informe");
+
+        //$(".modal-dialog").removeClass("modal-xl");
+        //$(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").addClass("modal-lg");
+        $('#modal-contentAprobarInforme').empty();
+        $('#modal-contentAprobarInforme').load('/InformeED/AprobarInforme?OP=' + id);
+
+    }
+
+</script>

@@ -1,0 +1,270 @@
+﻿@model ERPElectrodata.Models.PLANTILLA
+
+@{
+    Layout = null;
+}
+
+<style>
+    b {
+        color: #F83C50;
+    }
+</style>
+
+<div style="width:100%; display:inline-block;">
+    @using (Html.BeginForm("EdicionPlantilla", "Plantilla", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormNewRequest", name = "FormNewRequest", target = "ut_NewRequest" }))
+    {
+        <div id="mensaje"></div>
+        @Html.HiddenFor(model => model.USUARIOCREACION)
+        @Html.HiddenFor(model => model.FECHACREACION)
+        @Html.ValidationSummary(true)
+        //@Html.Raw(TempData["msgtp"])
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6">
+                    <div>Cuenta <b>*</b> </div>
+                    <select id="cbCuentaE" name="cbCuentaE" class="form-control select2" type="text" style="width:100%" disabled="disabled" ></select>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-6">
+                    <div>Grupo <b>*</b></div>
+
+                    <select id="GrupoE" name="GrupoE" class="form-control select2" type="text" style="width:100%" value="@ViewBag.IdGrupo" ></select>
+                </div>
+
+                <div class="col-md-6">
+                    <div>Tipo Plantilla <b>*</b></div>
+                    <select id="cbTipoPlantillaE" name="cbTipoPlantillaE" class="form-control select2" type="text" style="width:100%" value="@ViewBag.Idtipoplan" ></select>
+                    <label id="msgtp" for="yyyyy" disabled =""></label>
+                </div>
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-12">
+                    <div>Plantilla <b>*</b></div>
+                    <input id="PlantillaE" name="PlantillaE" class="form-control" type="text" value="@ViewBag.Plantilla" />
+                </div>
+
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-12">
+                    <div>Descripción <b>*</b></div>
+
+                    @Html.TextAreaFor(model => model.DESCRIPCION, new { @class = "form-control" })
+                    @Html.ValidationMessageFor(model => model.DESCRIPCION)
+
+                    @*<textarea class="form-control" id="TextareaPlanEdita" name="TextareaPlanEdita" rows="8"> @ViewBag.Descripcion</textarea> *@
+                </div>
+
+            </div>
+            <br />
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="editor-label">
+                        Estado
+                    </div>
+                    <div class="editor-field">
+                        <input type="checkbox" id="EstadoE" name="EstadoE" style="width:80%">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-md-12">
+            <br />
+        </div>
+
+
+
+        <input type="hidden" id="IDPlantilla" name="IDPlantilla" value="@ViewBag.IdPlantilla" />
+        @*---------------------------Footer--------------------------------------------------------*@
+
+        <div class="card-footer">
+            <div class="col-md-12">
+
+                <div class="row">
+                    <div class="col-md-3">
+                        <br />
+
+                    </div>
+                    <div class="col-md-3">
+                        <br />
+
+                    </div>
+                    <div class="col-md-3">
+                        <button id="submitRequest" class="btn btn-primary btn-block">Guardar</button>
+
+                    </div>
+                    <div class="col-md-3">
+                        <button id="btnCancelar" class="ladda-button mb-2 btn btn-gradient-light btn-block widthMax" data-style="expand-right" data-dismiss="modal">
+                            <span class="ladda-label">Cancelar</span><span class="ladda-spinner"></span>
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+
+    }
+    <iframe id="ut_NewRequest" name="ut_NewRequest" src="" class="d-none" @*style="width:0px;height:0px;border-width:0px;display:none;"*@></iframe>
+</div>
+    
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        if("@ViewBag.Estado"=="1"){
+            $("#EstadoE").attr('checked',true)
+        }else{
+            $("#EstadoE").attr('checked',false)
+        }
+        $("#cbCuentaE").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            //placeholder: "Seleccione una cuenta",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListarCuentas_Kendo"
+                }
+
+            }
+        });
+
+        //Asignación inicial
+        $("#cbCuentaE").data("kendoComboBox").value(@ViewBag.IdCuenta);
+
+
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+
+
+        var ID_GRUPO = $("#GrupoE").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "cbCuentaE",
+            dataTextField: "NOMBRE",
+            dataValueField: "ID_GRUPO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data1: { ID_GRUPO: $("#GrupoE").val() == 0 ? '' : $("#GrupoE").val() },
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Plantilla/ListarGruposCuenta?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_GRUPO.value(@ViewBag.IdGrupo);
+
+        var ID = $("#cbTipoPlantillaE").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NOMBRE",
+            dataValueField: "ID",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data1: { ID: $("#cbTipoPlantillaE").val() == 0 ? '' : $("#cbTipoPlantillaE").val() },
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Plantilla/ListarTipoPlantillaCombo?" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID.value(@ViewBag.Idtipoplan);
+
+ 
+        $("#DESCRIPCION").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: function (e) {
+                if (/<img\s+[^>]*>/i.test(e.html)) {
+                    toastr.warning("No se permiten imágenes en este campo.");
+                    e.html = "";
+                } else if ((/^<img src="data:image/).test(e.html)) {
+                    toastr.warning("No se permiten imágenes en este campo.");
+                    e.html = "";
+                }
+            }
+        });
+
+
+
+        
+    });
+    
+
+    function activMsj()
+    {
+        var elemento = document.getElementById("msgtp").disabled = true
+        elemento.innerText = "ffffff";
+    }
+
+
+    function uploadDoneNR(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success(msnErr);
+            $("#btnBuscar").click();
+            $("#btnCancelar").click();
+        }
+        else {
+            toastr.error(msnErr);
+        }
+    }
+
+
+</script>
+
+
+
+
+
+
+

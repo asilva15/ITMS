@@ -1,0 +1,1099 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    ViewBag.Title = "Create";
+    //Layout = null;
+}
+
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Nueva Recepción de Activo</div>
+            <div class="card-body">
+                <div class="inBodyForm" id="Encabezado">
+                    @using (Html.BeginForm("CreateRecepcion", "DeliveryReception", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormReceptionAsset", target = "upload_target" }))
+                    {
+                        @Html.ValidationSummary(true)
+                        <fieldset>
+                            @Html.HiddenFor(model => model.ID_TYPE_TICK)
+                            @Html.HiddenFor(model => model.ID_CATE)
+                            @Html.HiddenFor(model => model.ID_PERS_ENTI_END)
+                            @Html.HiddenFor(model => model.ID_PERS_ENTI_ASSI)
+                            @Html.HiddenFor(model => model.ID_QUEU)
+                            @Html.HiddenFor(model => model.ID_PRIO)
+                            @Html.HiddenFor(model => model.ID_STAT)
+                            @Html.HiddenFor(model => model.ID_AREA, new { @value = "0" })
+                            @Html.HiddenFor(model => model.ID_SOUR)
+                            <input type="hidden" id="Fecha" name="Fecha" value="@ViewBag.FEC_TICK" />
+
+                            @Html.Hidden("nombresLicencias", null, new { id = "nombresLicencias" })
+                            @Html.Hidden("idLicencias", null, new { id = "idLicencias" })
+
+                            <div class="form-group row">
+                                @if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                                {
+                                    <div class="col-md-4">
+                                        <div class="editor-label">
+                                            Grupo <b style="color:red">(*)</b>
+                                        </div>
+                                        <div class="editor-field">
+                                            @Html.TextBoxFor(model => model.IdGrupoActivo)
+                                            @Html.ValidationMessageFor(model => model.IdGrupoActivo)
+                                        </div>
+                                    </div>
+                                    @*<div class="col-md-4">
+                                        <div class="editor-label">
+                                            Unidad Minera <b style="color:red">(*)</b>
+                                        </div>
+                                        <div class="editor-field">
+                                            @Html.TextBoxFor(model => model.ID_COMP)
+                                            @Html.ValidationMessageFor(model => model.ID_COMP)
+                                        </div>
+                                    </div>*@
+                                }
+                                else if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 55)
+                                {
+                                    <input type="hidden" name="IdGrupoActivo" id="IdGrupoActivo" value="@ViewBag.IdGrupoIT" />
+                                }
+                                <div class="col-md-4">
+                                    <div class="editor-label">
+                                        Usuario <b style="color:red">(*)</b>
+                                    </div>
+                                    <div class="editor-field">
+                                        @Html.TextBoxFor(model => model.ID_PERS_ENTI)
+                                        @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="editor-label">
+                                        Fecha de Entrega (mm/dd/yyyy) <b style="color:red">(*)</b>
+                                    </div>
+                                    <div class="editor-field">
+                                        @Html.EditorFor(model => model.FEC_TICK)
+                                        @Html.ValidationMessageFor(model => model.FEC_TICK)
+                                    </div>
+                                </div>
+                                @{
+                                    if (Convert.ToInt32(Session["ID_ACCO"].ToString()) != 56 && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 57
+                                        && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 58 && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 60)
+                                    {
+                                        <div class="col-md-4">
+                                            <div class="editor-label">
+                                                Locación <b style="color:red">(*)</b>
+                                            </div>
+                                            <div class="editor-field">
+                                                @Html.TextBoxFor(model => model.ID_LOCA)
+                                                @Html.ValidationMessageFor(model => model.ID_LOCA)
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                                @if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                                {
+                                    <div class="col-md-4 divMicro">
+                                        <div class="editor-label">
+                                            Locación
+                                        </div>
+                                        <div class="editor-field">
+                                            <input id="Locacion" name="Locacion" />
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <div class="editor-label">
+                                        Comentario <b style="color:red">(*)</b>
+                                    </div>
+                                    <div class="editor-field">
+                                        @Html.TextAreaFor(model => model.SUM_TICK)
+                                        @Html.ValidationMessageFor(model => model.SUM_TICK)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <input name="files" id="files" type="file" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-12">
+                                    <div id="divAssetsAdd" style="width: 100%;"></div>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-md-6">
+                                </div>
+                                <div class="col-md-3">
+                                    <button id="reset" type="button" class="btn btn-light btn-block" onclick="cancel(); return false;">Limpiar</button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button type="submit" class="ladda-button mb-2 mr-2 btn btn-primary btn-block" data-style="expand-right" id="submit" onclick="enviarForm(this)">
+                                        <span class="ladda-label">
+                                            <i class="fa fa-save"></i> Guardar
+                                        </span>
+                                        <span class="ladda-spinner"></span>
+                                        <div class="ladda-progress" style="width: 0px;"></div>
+                                    </button>
+
+                                    <style>
+                                        .ladda-button.disabled {
+                                            pointer-events: none;
+                                        }
+                                    </style>
+                                </div>
+                            </div>
+                            <iframe id="upload_target" name="upload_target" src="" style="display:none;"></iframe>
+
+                            <input id="idsActivo" type="hidden" name="idsActivo" value="" />
+                            <input id="idsCondicion" type="hidden" name="idsCondicion" value="" />
+                            <input id="idsNombreActivo" type="hidden" name="idsNombreActivo" value="" />
+                            <input id="idsLicencias" type="hidden" name="idsLicencias" value="" />
+                        </fieldset>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Agregar Activo</div>
+            <div class="card-body">
+                <fieldset>
+                    <div class="form-group row" id="divUsuariosCesados" style="display: none;">
+                        <div class="col-md-12">
+                            <div class="editor-label">
+                                Usuarios Cesados
+                            </div>
+                            <div class="k-check">
+                                <input id='chkUCesados' type='checkbox' name='chkUCesados'>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div id="divUsuario" style="width:100%">
+                            </div>
+                            <br />
+
+                            <div id="divUsuario2" style="width:100%">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="editor-label">
+                                Buscar Activo
+                            </div>
+                            <div class="k-textbox" style="width:100%">
+                                <input id='txtActivo' type='text' name='ID_ASSE'>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        @if (Convert.ToInt32(Session["ID_ACCO"].ToString()) != 60)
+                        {
+                            <div class="col-md-7">
+                                <div class="editor-label">
+                                    Tipo Activo
+                                </div>
+                                <div class="editor-field">
+                                    <input id='cmbTipoActivo' type='text' name='cmbTipoActivo'>
+                                </div>
+                            </div>
+                        }
+                        <div class="col-md-5">
+                            <br />
+                            <button id='AgregarTodo' class='btn btn-primary btn-block'><i class="fa fa-upload"></i> Agregar todo</button>
+                        </div>
+                    </div>
+                    <div style="overflow-y:auto; height:360px; width:100%;">
+                        <div id="gridActivos">
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+        <div id="div${ IdActivo }" class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div id="TA${IdActivo}" name="LicenciaIds" style="font-weight:bold;" class="col-md-7">${ TipoActivo }</div>
+                <div class="col-md-5">
+                    <button id="${IdActivo}" class='btn btn-light' style='font-size:11px;' onclick="AgregarActivo(this);">Agregar Activo</button>
+            </div>
+    </div>
+            <div class="row no-gutters align-items-center">
+                <div style="font-size:13px;" class="col-md-12">
+                    # if (TipoActivo && TipoActivo === "Licencia") { #
+                         <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Tipo Activo :&nbsp;</span><span id="CO${IdActivo}">${ TipoActivo }</span></div></div>
+            <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Estado Licencia :&nbsp;</span><span id="CD${IdActivo}">${ EstadoLicencia }</span></div></div>
+            <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Solped :&nbsp;</span><span id="SE${IdActivo}">${ Solped }</span></div></div>
+            <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Programa :&nbsp;</span><span id="MA${IdActivo}">${ Programa }</span></div></div>
+            <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Periodo :&nbsp;</span><span id="MS${IdActivo}">${ NombrePeriodo }</span></div></div>
+                    # } else { #
+            <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Estado - Condicion :&nbsp;</span><span id="CO${IdActivo}">${ Estado } - ${ Condicion }</span></div></div>
+            <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Codigo Activo :&nbsp;</span><span id="CD${IdActivo}">${ Codigo }</span></div></div>
+            <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Serie :&nbsp;</span><span id="SE${IdActivo}">${ Serie }</span></div></div>
+            <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Marca :&nbsp;</span><span id="MA${IdActivo}">${ Marca }</span></div></div>
+                # if (parseInt(@Session["ID_ACCO"]) == 60) { #
+                    <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Unidad :&nbsp;</span><span>${ UnidadMinera }</span></div></div>
+                # } #
+                    <div class="row no-gutters align-items-center"><div style="font-size:13px;" class="col-md-12"><span style="font-weight:bold">Locación :&nbsp;</span><span id="MA${IdActivo}">${ Locacion }</span></div></div>
+            # } #
+    </div>
+            </div>
+        </div>
+</script>
+
+@*@section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }*@
+
+<script type="text/javascript">
+    var ID_QUEU = parseInt(@Html.Raw(Json.Encode(Session["ID_QUEU"].ToString())));
+    var idACC = parseInt(@Html.Raw(Json.Encode(Session["ID_ACCO"])));
+
+    function almacenarNombresActivos() {
+        var nombresActivos = $('input[id^="NAM_EQUI"]').map(function () {
+            return $(this).val();
+        }).get();
+        $("#idsNombreActivo").val(nombresActivos.reverse().join(','));
+    }
+
+    var ids = '';
+    $("#ID_SOUR").val(3);
+
+    $(document).ready(function () {
+        if (@ViewBag.IdAcco == 60) {
+            $("#FEC_TICK").prop('disabled', true);
+            $("#txtActivo").attr('title', 'Número de Serie');
+            $("#divUsuariosCesados").show();
+            if ("@ViewBag.Grupo" == "MICROINFORMATICO") {
+                $(".divMicro").css("display", "block");
+            } else if ("@ViewBag.Grupo" == "INFRAESTRUCTURA") {
+                $(".divMicro").css("display", "none");
+            } else if ("@ViewBag.Grupo" == "MOVIL") {
+                $(".divMicro").css("display", "none");
+            }
+
+            var idFiltro = 1;
+
+            var IdGrupoActivo = $("#IdGrupoActivo").kendoComboBox({
+                dataTextField: "Nombre",
+                dataValueField: "Id",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Asset/ListarGruposBNV?var=" + Math.random()
+                    }
+                },
+                change: function (e) {
+                    if (IdGrupoActivo.text() == "MICROINFORMATICO") {
+                        $(".divMicro").css("display", "block");
+                    } else if (IdGrupoActivo.text() == "INFRAESTRUCTURA") {
+                        $(".divMicro").css("display", "none");
+                    } else if (IdGrupoActivo.text() == "MOVIL") {
+                        $(".divMicro").css("display", "none");
+                    }
+                    Locacion.value("");
+                    ID_PERS_ENTI.value("");
+                    ID_PERS_ENTI.dataSource.read();
+                    CargarActivos();
+                }
+            }).data("kendoComboBox");
+
+            //var ID_COMP = $("#ID_COMP").kendoComboBox({
+            //    dataTextField: "COM_NAME",
+            //    dataValueField: "ID_ENTI",
+            //    cascadeFrom: "IdGrupoActivo",
+            //    autoBind: false,
+            //    filter: "contains",
+            //    delay: 500,
+            //    minLength: 0,
+            //    suggest: true,
+            //    dataSource: {
+            //        serverFiltering: true,
+            //        schema: {
+            //            data: "Data",
+            //            total: "Count"
+            //        },
+            //        transport: {
+            //            read: "/Asset/ListarUMineraBNV?var=" + Math.random()
+            //        }
+            //    },
+            //    dataBound: function (e) {
+            //        if (ID_COMP.dataSource.view().length == 1) {
+            //            ID_COMP.select(0);
+            //        }
+            //    },
+            //    change: function (e) {
+            //        ID_PERS_ENTI.value("");
+            //        ID_PERS_ENTI.dataSource.read();
+            //    }
+            //}).data("kendoComboBox");
+
+            var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+                dataTextField: "CLIE",
+                dataValueField: "ID_PERS_ENTI",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: {
+                            url: "/Asset/ListarAfectadosxGrupoBNV",
+                            data: function () {
+                                return {
+                                    id: idFiltro,
+                                    idGrupo: IdGrupoActivo.value(),
+                                    var: Math.random()
+                                };
+                            }
+                        }
+                    }
+                }
+            }).data("kendoComboBox");
+
+            var Locacion = $("#Locacion").kendoComboBox({
+                dataTextField: "NAM_LOCA",
+                dataValueField: "ID_LOCA",
+                cascadeFrom: 'ID_COMP',
+                template: '<div><div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                    '<div>${ data.NAM_LOCA }</div></div>',
+                filter: "contains",
+                autoBind: false,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: {
+                            url: "/Asset/ListarLocacionBNV",
+                            data: function() {
+                                return {
+                                    idGrupo: IdGrupoActivo.value(),
+                                    var: Math.random()
+                                };
+                            }
+                        }
+                    }
+                }
+            }).data("kendoComboBox");
+
+            //$("#chkExcepcion").change(function () {
+            //    if (this.checked) {
+            //        id = 3;
+            //        ID_PERS_ENTI.value("");
+            //        ID_PERS_ENTI.dataSource.read();
+            //    } else {
+            //        id = 2;
+            //        ID_PERS_ENTI.value("");
+            //        ID_PERS_ENTI.dataSource.read();
+            //    }
+            //});
+
+            $("#chkUCesados").change(function () {
+                if (this.checked) {
+                    idFiltro = 4;
+                    ID_PERS_ENTI.value("");
+                    ID_PERS_ENTI.dataSource.read();
+                } else {
+                    idFiltro = 1;
+                    ID_PERS_ENTI.value("");
+                    ID_PERS_ENTI.dataSource.read();
+                }
+            });
+
+
+        } else {
+            var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+                dataTextField: "CLIE",
+                dataValueField: "ID_PERS_ENTI",
+                filter: "contains",
+                autoBind: false,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/DeliveryReception/PersonaPorCompania?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            ID_PERS_ENTI.bind("change", function (e) {
+                ObtenerCargoxUsuario(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+            });
+        }
+
+        $("#ID_LOCA").kendoComboBox({
+            dataTextField: "NAM_LOCA",
+            dataValueField: "ID_LOCA",
+            template: '<div><div style="font-weight:bold">${ data.NAM_SITE }</div>' +
+                '<div>${ data.NAM_LOCA }</div></div>',
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Location/List?var=" + Math.random()
+                }
+            },
+
+            select: function(e) {
+               var userId = parseInt(@Html.Raw(Json.Encode(Session["UserId"])));
+                var selectedDataItem = this.dataItem(e.item.index());
+
+                if (selectedDataItem.ID_LOCA === 173015) {
+                    if (userId == 293 || userId == 187 || userId == 34) {
+
+                    } else {
+                        e.preventDefault();
+                        uploadDone("INFO", "Esta locación está restringida para este usuario.", null);
+                    }
+                }
+            }
+        });
+
+        var ID_LOCA = $("#ID_LOCA").data("kendoComboBox");
+
+
+        var FEC_TICK = $("#FEC_TICK").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        if (@ViewBag.IdAcco == 55) {
+        }
+        else {
+            FEC_TICK.min("@ViewBag.FEC_TICK");
+        }
+
+        FEC_TICK.value("@ViewBag.FEC_TICK");
+
+        $("#SUM_TICK").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            }
+        });
+
+        ID_PERS_ENTI.bind("change", function (e) {
+            ids = '';
+            $("#divAssetsAdd").empty();
+            $("#txtActivo").val("");
+            CargarActivos();
+        });
+
+        $("#txtActivo").keyup(function () {
+            CargarActivos();
+        });
+
+        if (@ViewBag.IdAcco != 60) {
+            $("#cmbTipoActivo").kendoComboBox({
+                index: 0,
+                dataTextField: "NAM_TYPE_ASSE",
+                dataValueField: "ID_TYPE_ASSE",
+                filter: "contains",
+                autoBind: false,
+                suggest: true,
+                dataSource: {
+                    serverFiltering: false,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/TypeAsset/List?var=" + Math.random()
+                    }
+                }
+            });
+            var cmbTipoActivo = $("#cmbTipoActivo").data("kendoComboBox");
+
+            cmbTipoActivo.bind("change", function (e) {
+                CargarActivos();
+            });
+        }
+
+        function CargarActivos() {
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/DeliveryReception/FiltrarActivoRecepcion?var=" + Math.random(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            txt: $("#txtActivo").val(),
+                            IdPersEnti: ID_PERS_ENTI.value(),
+                            ta: $("#cmbTipoActivo").val() == '' ? 0 : $("#cmbTipoActivo").val(),
+                            IdGrupo: $("#IdGrupoActivo").length ? ($("#IdGrupoActivo").val() == '' ? 0 : $("#IdGrupoActivo").val()) : 0
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 15,
+                schema: {
+                    data: "Data",
+                }
+            });
+
+            dataSource.fetch(function () {
+                var data = dataSource.data();
+                console.log(data);
+            });
+
+            $("#gridActivos").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#template").html())
+            });
+        }
+
+        $("#submit").click(function () {
+            if (@ViewBag.IdAcco == 60) {
+                $("#FEC_TICK").prop('disabled', false);
+            }
+            toastr.info("Guardando...", "Espere por favor");
+        });
+
+        $("#AgregarTodo").click(function () {
+            $("#txtActivo").val("");
+
+            $.ajax({
+                url: "/DeliveryReception/FiltrarActivoRecepcion?var=" + Math.random(),
+                data: {
+                    txt: $("#txtActivo").val(),
+                    IdPersEnti: ID_PERS_ENTI.value(),
+                    IdGrupo: $("#IdGrupoActivo").length ? ($("#IdGrupoActivo").val() == '' ? 0 : $("#IdGrupoActivo").val()) : 0
+                },
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    ids = '';
+                    $("#idsActivo").val('');
+                    $("#divAssetsAdd").empty();
+
+                    $.each(data['Data'], function (index, value) {
+                        var strHtml = '';
+
+                        var tipoActivo = String(data['Data'][index]['TipoActivo']).toUpperCase().substring(0, 12);
+
+                        if ((idACC === 56 && ID_QUEU === 1) || (idACC === 57 && ID_QUEU === 1) || (idACC === 58 && ID_QUEU === 1)) {
+                            var strHtml =
+                                '<div id="divDetail_' + String(data['Data'][index]['IdActivo']) + '">' +
+                                '<div id="divDetailAsset_' + String(data['Data'][index]['IdActivo']) + '" class="form-row">' +
+                                '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Tipo</div><div style="font-size:12px;">' + String(data['Data'][index]['TipoActivo']).toUpperCase().substring(0, 12) + '</div></div>' +
+                                '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Código</div><div style="font-size:12px;">' + String(data['Data'][index]['Codigo']) + '</div></div>' +
+                                '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Número de Serie</div><div style="font-size:12px;">' + String(data['Data'][index]['Serie']) + '</div></div>' +
+                                '<div class="col-md-1"><div style="font-weight:bold; font-size:12px;">Marca</div><div style="font-size:12px;">' + String(data['Data'][index]['Marca']) + '</div></div>' +
+                                '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Nombre Equipo</div><input id="NAM_EQUI" type="text" class="form-control" style="width:100%;" onchange="condicionActivo(this.value, ' + String(data['Data'][index]['IdActivo']) + ');"></div>' +
+                                '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Estado</div><div class="editor-field"><input id="ID_COND" type="text" name="ID_COND" style="width:100%;" onchange="condicionActivo(this.value, ' + String(data['Data'][index]['IdActivo']) + ');"></div></div>' +
+                                '<div class="col-md-1"><br><button onclick="removeAsset(this);" id="removeAsset_' + String(data['Data'][index]['IdActivo']) + '" style="font-weight:bold; text-align:center; font-size:10px;" class="btn btn-danger btn-block" title="Eliminar">X</button></div>' +
+                                '</div><hr class="m-0" /></div>';
+                        } else {
+                            if (tipoActivo === "LICENCIA") {
+                                strHtml =
+                                    '<div id="divDetail_' + String(data['Data'][index]['IdActivo']) + '">' +
+                                        '<div id="divDetailAsset_' + String(data['Data'][index]['IdActivo']) + '" class ="form-row">' +
+                                            '<div class="col-sm-6 col-lg-2">' +
+                                                '<div style="font-weight: bold;">Tipo de Activo</div>' +
+                                                '<div>' + String(data['Data'][index]['TipoActivo']).toUpperCase().substring(0, 12) + '</div>' +
+                                            '</div>' +
+                                            '<div class="col-sm-6 col-lg-2">' +
+                                                '<div style="font-weight: bold;">Periodo</div>' +
+                                            '<div>' + String(data['Data'][index]['NombrePeriodo']) + '</div>' +
+                                        '</div>' +
+                                        '<div class="col-sm-6 col-lg-2">' +
+                                            '<div style="font-weight: bold;">Solped</div>' +
+                                            '<div>' + String(data['Data'][index]['Solped']) + '</div>' +
+                                        '</div>' +
+                                        '<div class="col-sm-6 col-lg-2">' +
+                                            '<div style="font-weight: bold;">Programa</div>' +
+                                            '<div>' + String(data['Data'][index]['Programa']) + '</div>' +
+                                        '</div>' +
+                                        '<div class="col-sm-6 col-lg-3">' +
+                                            '<div style="font-weight: bold;">Estado</div>' +
+                                            '<div class="editor-field"><input id="ID_COND" type="text" name="ID_COND" onchange="condicionActivo(this.value, ' + String(data['Data'][index]['IdActivo']) + ')" value="BAJA - DEVOLUCIÓN DE ALQUILER" disabled></div>' +
+                                        '</div>' +
+                                        '<div class="col-sm-6 col-lg-1">' +
+                                            '</br>' +
+                                            '<button onclick="removeAsset(this);" id="removeAsset_' + String(data['Data'][index]['IdActivo']) + '" style="font-weight: bold; text-align: center" class="btn btn-danger btn-block" title="Eliminar">X</button>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="m-0" />';
+                                    almacenarLicencias(String(data['Data'][index]['TipoActivo']), String(data['Data'][index]['IdActivo']));
+                            } else {
+                                strHtml =
+                                    '<div id="divDetail_' + String(data['Data'][index]['IdActivo']) + '">' +
+                                        '<div id="divDetailAsset_' + String(data['Data'][index]['IdActivo']) + '" class ="form-row">' +
+                                            '<div class = "col-sm-6 col-lg-2">' +
+                                                '<div style="font-weight: bold;">Tipo de Activo</div>' +
+                                                '<div>' + String(data['Data'][index]['TipoActivo']).toUpperCase().substring(0, 12) + '</div>' +
+                                            '</div>' +
+                                            '<div class = "col-sm-6 col-lg-2">' +
+                                                '<div style="font-weight: bold;"">Código de Activo</div>' +
+                                                '<div>' + String(data['Data'][index]['Codigo']) + '</div>' +
+                                            '</div>' +
+                                            '<div class = "col-sm-6 col-lg-2">' +
+                                                '<div style="font-weight: bold;">Número de Serie</div>' +
+                                                '<div>' + String(data['Data'][index]['Serie']) + '</div>' +
+                                            '</div>' +
+                                            '<div class = "col-sm-6 col-lg-2">' +
+                                                '<div style="font-weight: bold;">Marca</div>' +
+                                                '<div>' + String(data['Data'][index]['Marca']) + '</div>' +
+                                            '</div>' +
+                                            '<div class = "col-sm-6 col-lg-3">' +
+                                                '<div style="font-weight: bold;">Estado</div>' +
+                                                '<div class = "editor-field"><input id="ID_COND" type="text" name="ID_COND" onchange="condicionActivo(this.value, ' + String(data['Data'][index]['IdActivo']) + ');"></div>' +
+                                            '</div>' +
+                                            '<div class = "col-sm-6 col-lg-1">' +
+                                                '</br>' +
+                                                '<button onclick="removeAsset(this);" id="removeAsset_' + String(data['Data'][index]['IdActivo']) + '" style="font-weight: bold; text-align: center" class="btn btn-danger btn-block" title="Eliminar">X</button>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '<hr class="m-0" />';
+                                almacenarLicencias(String(data['Data'][index]['TipoActivo']), String(data['Data'][index]['IdActivo']));
+                            }
+                        }
+
+                        $("#divAssetsAdd").prepend(strHtml);
+                        CargarCondicion(data['Data'][index]['IdActivo']);
+                        ids = ids + String(data['Data'][index]['IdActivo']) + ',';
+                        $("#idsActivo").val(ids);
+                    });
+                },
+                error: function (source) {
+                    toastr.error('Error al cargar los datos.','');
+                }
+            });
+        });
+
+        function CargarCondicion(idAsse) {
+            var ID_COND = $("#ID_COND").kendoComboBox({
+                autoBind: true,
+                dataTextField: "TEXT",
+                dataValueField: "ID_COND",
+                template: '<div><div style="font-weight:bold;">${ data.NAM_STAT_ASSE }</div>' +
+                            '<div>${ data.NAM_COND }</div></div>',
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/OptionCondition/ListarCondicionRecepcion/2",
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+    });
+
+    function ObtenerCargoxUsuario(id) {
+        if (@ViewBag.IdAcco == 55) {
+            $.ajax({
+                url: "/AccountEntity/ObtenerCargoxUsuario/" + id,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    $.each(data['Data'], function (index) {
+                        $("#divUsuario").empty();
+                        $("#divUsuario").append(
+                            '<div class = "row">' +
+                            '<div class="col-md-3"  style="font-weight:bolder">Cargo:</div>' +
+                            '<div class="col-md-6">' + (data['Data'][index]['Cargo']) + '</div>' +
+                            '</div>' + '</br>' +
+                            '<div class = "row">' +
+                            '<div class="col-md-3" style="font-weight:bolder">Area:</div>' +
+                            '<div class="col-md-6">' + (data['Data'][index]['Area']) + '</div>' +
+                            '</div>'
+                        );
+                    });
+                },
+                error: function (source) {
+                    toastr.error("Error Carga Json Comercial", "Mensaje");
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/AccountEntity/ObtenerCargoxUsuario/" + id,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    $.each(data['Data'], function (index) {
+                        $("#divUsuario").empty();
+                        $("#divUsuario").append(
+                            '<div class = "row">' +
+                            '<div class="col-md-3"  style="font-weight:bolder">Cargo:</div>' +
+                            '<div class="col-md-6">' + (data['Data'][index]['Cargo']) + '</div>' +
+                            '</div>');
+                    });
+                },
+                error: function (source) {
+                    toastr.error("Error Carga Json Comercial", "Mensaje");
+                }
+            });
+        }
+    }
+
+    function ObtenerLocacionxUsuario(id) {
+        $.ajax({
+            url: "/AccountEntity/ObtenerLocacionxUsuario/" + id,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(data['Data'], function (index) {
+                    $("#divUsuario2").empty();
+                    $("#divUsuario2").append(
+                        '<div class = "row">' +
+                            '<div class="col-md-3"><b>Locación: </b></div>' +
+                            '<div class="col-md-9">' + (data['Data'][index]['Locacion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class="col-md-3"><b>DNI: </b></div>' +
+                            '<div class="col-md-9">' + (data['Data'][index]['NUM_TYPE_DI']) + '</div>' +
+                        '</div>'
+                    );
+
+                });
+            },
+            error: function (source) {
+                toastr.error("Error Carga Json Comercial", "Mensaje");
+            }
+        });
+    }
+
+    var nombresLicencias = [];
+    var idLicencias = [];
+
+    $("#nombresLicencias").val(JSON.stringify(nombresLicencias));
+    $("#idLicencias").val(JSON.stringify(idLicencias));
+
+
+    function almacenarLicencias(licencia,id) {
+        nombresLicencias.push(licencia);
+        idLicencias.push(id);
+    }
+
+    function AgregarActivo(btn) {
+		debugger;
+        var sw = 0;
+        var elem = ids.split(',');
+        for (f = 0; f < elem.length - 1; f++) {
+            if (elem[f] == btn.id) {
+                toastr.warning('','El activo ya se ha agregado.');
+                f = elem.length;
+                sw = 1;
+            }
+        }
+
+        if (sw == 0) {
+            if (sw == 0) {
+                var TipoActivo = String($("#TA" + btn.id).html()).toUpperCase().substring(0, 12);
+                var strHtml = '';
+                if ((idACC === 56 && ID_QUEU === 1) || (idACC === 57 && ID_QUEU === 1) || (idACC === 58 && ID_QUEU === 1)) {
+                //if (idACC === 56 || idACC === 57 || idACC === 58) {
+                       strHtml =
+                        '<div id="divDetail_' + String(btn.id) + '">' +
+                        '<div id="divDetailAsset_' + String(btn.id) + '" class="form-row">' +
+                        '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Tipo</div><div style="font-size:12px;">' + String($("#TA" + btn.id).html()).toUpperCase().substring(0, 12) + '</div></div>' +
+                        '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Código</div><div style="font-size:12px;">' + String($("#CD" + btn.id).html()) + '</div></div>' +
+                        '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Serie</div><div style="font-size:12px;">' + String($("#SE" + btn.id).html()) + '</div></div>' +
+                        '<div class="col-md-1"><div style="font-weight:bold; font-size:12px;">Marca</div><div style="font-size:12px;">' + String($("#MA" + btn.id).html()) + '</div></div>' +
+                        '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Nombre Equipo</div><input id="NAM_EQUI" type="text" class="form-control" style="width:100%;" onchange="condicionActivo(this.value, ' + btn.id + ');"></div>' +
+                        '<div class="col-md-2"><div style="font-weight:bold; font-size:12px;">Estado</div><div class="editor-field"><input id="ID_COND" type="text" name="ID_COND" style="width:100%;" onchange="condicionActivo(this.value, ' + btn.id + ');"></div></div>' +
+                        '<div class="col-md-1"></br><button onclick="removeAsset(this);" id="removeAsset_' + String(btn.id) + '" style="font-weight:bold; text-align:center; font-size:10px;" class="btn btn-danger btn-block" title="Eliminar">X</button></div>' +
+                        '</div><hr class="m-0" /></div>';
+                } else {
+                    if (TipoActivo === "LICENCIA") {
+                        strHtml =
+                        '<div id="divDetail_' + String(btn.id) + '">' +
+                            '<div id="divDetailAsset_' + String(btn.id) + '" class ="form-row">' +
+                                '<div class="col-sm-6 col-lg-2">' +
+                                    '<div style="font-weight: bold;">Tipo de Activo</div>' +
+                                    '<div>' + String($("#TA" + btn.id).html()).toUpperCase().substring(0, 12) + '</div>' +
+                                '</div>' +
+                                '<div class="col-sm-6 col-lg-2">' +
+                                    '<div style="font-weight: bold;">Periodo</div>' +
+                                    '<div>' + String($("#MS" + btn.id).html()) + '</div>' +
+                                '</div>' +
+                                '<div class="col-sm-6 col-lg-2">' +
+                                    '<div style="font-weight: bold;">Solped</div>' +
+                                    '<div>' + String($("#SE" + btn.id).html()) + '</div>' +
+                                '</div>' +
+                                '<div class="col-sm-6 col-lg-2">' +
+                                    '<div style="font-weight: bold;">Programa</div>' +
+                                    '<div>' + String($("#MA" + btn.id).html()) + '</div>' +
+                                '</div>' +
+                                '<div class="col-sm-6 col-lg-3">' +
+                                    '<div style="font-weight: bold;">Estado</div>' +
+                                    '<div class="editor-field"><input id="ID_COND" type="text" name="ID_COND" onchange="condicionActivo(this.value, ' + btn.id + ')" value="BAJA - DEVOLUCIÓN DE ALQUILER" disabled></div>' +
+                                '</div>' +
+                                '<div class="col-sm-6 col-lg-1">' +
+                                    '</br>' +
+                                    '<button onclick="removeAsset(this);" id="removeAsset_' + String(btn.id) + '" style="font-weight: bold; text-align: center" class="btn btn-danger btn-block" title="Eliminar">X</button>' +
+                                '</div>' +
+                            '</div>' +
+                            '<hr class="m-0" />' ;
+
+
+                        almacenarLicencias(String($("#TA" + btn.id).html()), String(btn.id) );
+                    }
+                    else {
+                        strHtml =
+                            '<div id="divDetail_' + String(btn.id) + '">' +
+                                '<div id="divDetailAsset_' + String(btn.id) + '" class ="form-row">' +
+                                    '<div class = "col-sm-6 col-lg-2">' +
+                                        '<div style="font-weight: bold;">Tipo de Activo</div>' +
+                                        '<div>' + String($("#TA" + btn.id).html()).toUpperCase().substring(0, 12) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "col-sm-6 col-lg-2">' +
+                                        '<div style="font-weight: bold;"">Código de Activo</div>' +
+                                        '<div>' + String($("#CD" + btn.id).html()) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "col-sm-6 col-lg-2">' +
+                                        '<div style="font-weight: bold;">Número de Serie</div>' +
+                                        '<div>' + String($("#SE" + btn.id).html()) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "col-sm-6 col-lg-2">' +
+                                        '<div style="font-weight: bold;">Marca</div>' +
+                                        '<div>' + String($("#MA" + btn.id).html()) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "col-sm-6 col-lg-3">' +
+                                        '<div style="font-weight: bold;">Estado</div>' +
+                                        '<div class = "editor-field"><input id="ID_COND" type="text" name="ID_COND" onchange="condicionActivo(this.value, ' + btn.id + ');"></div>' +
+                                    '</div>' +
+                                    '<div class = "col-sm-6 col-lg-1">' +
+                                        '</br>' +
+                                        '<button onclick="removeAsset(this);" id="removeAsset_' + String(btn.id) + '" style="font-weight: bold; text-align: center" class="btn btn-danger btn-block" title="Eliminar">X</button>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<hr class="m-0" />' +
+                            '</div>';
+                        almacenarLicencias(String($("#TA" + btn.id).html()), String(btn.id));
+                    }
+                }
+            }
+
+            $("#divAssetsAdd").prepend(strHtml);
+            CargarCondicion(btn.id);
+            ids = ids + String(btn.id) + ',';
+            $("#idsActivo").val(ids);
+        }
+    }
+
+    function CargarCondicion(idAsse) {
+        if (@ViewBag.IdAcco == 60) {
+            var IdGrupo = $("#IdGrupoActivo").data("kendoComboBox");
+
+            var ID_COND = $("#ID_COND").kendoComboBox({
+                autoBind: true,
+                dataTextField: "TEXT",
+                dataValueField: "ID_COND",
+                template: '<div><div style="font-weight:bold;">${ data.NAM_STAT_ASSE }</div>' +
+                    '<div>${ data.NAM_COND }</div></div>',
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Condition/ListarCondicionEntregaBNV/2?idGrupo=" + IdGrupo.dataItem().Id,
+                    }
+                }
+            }).data("kendoComboBox");
+
+        } else {
+            var ID_COND = $("#ID_COND").kendoComboBox({
+                autoBind: true,
+                dataTextField: "TEXT",
+                dataValueField: "ID_COND",
+                template: '<div><div style="font-weight:bold;">${ data.NAM_STAT_ASSE }</div>' +
+                    '<div>${ data.NAM_COND }</div></div>',
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/OptionCondition/ListarCondicionRecepcion/2",
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+    }
+
+    function removeAsset(c) {
+        var elem = c.id.split('_');
+        ids = ids.replace(elem[1] + ',', '');
+        $("#idsActivo").val(ids);
+        $('#divDetail_' + String(elem[1])).remove();
+
+        if ((idACC === 56 && ID_QUEU === 1) || (idACC === 57 && ID_QUEU === 1) || (idACC === 58 && ID_QUEU === 1)) {
+        //if (idACC === 56 || idACC === 57 || idACC === 58) {
+            almacenarNombresActivos();
+        }
+
+        if (idACC == 4) {
+            debugger;
+            var valorIdBoton = c.id;
+
+            var posicion = valorIdBoton.indexOf('_');
+
+            if (posicion !== -1) {
+                var idTextoDespues_ = valorIdBoton.substring(posicion + 1);
+                var posicionArray = idLicencias.indexOf(idTextoDespues_);
+                idLicencias.splice(posicionArray, 1);
+                nombresLicencias.splice(posicionArray, 1);
+            }
+        }
+
+
+    }
+
+    function condicionActivo(idCondicion, idActivo) {
+        var str = $("#idsCondicion").val();
+        var elem1, elem2, flag = 0;
+        //reemplazo si existe
+        if (str.indexOf(idActivo) != -1) {
+            elem1 = str.split(',');
+            for (i = 0; i < elem1.length; i++) {
+                elem2 = elem1[i].split('_');
+                if (elem2[0] == idActivo) {
+                    str = str.replace(elem1[i], idActivo + '_' + idCondicion);
+                    flag = 1;
+                }
+            }
+        }
+        if (flag == 0) {
+            str = str + idActivo + '_' + idCondicion + ',';
+        }
+        $("#idsCondicion").val(str);
+    }
+</script>
+
+<script type="text/javascript">
+
+    function enviarForm(button) {
+        debugger;
+        if ((idACC === 56 && ID_QUEU === 1) || (idACC === 57 && ID_QUEU === 1) || (idACC === 58 && ID_QUEU === 1)) {
+        //if (idACC === 56 || idACC === 57 || idACC === 58) {
+            almacenarNombresActivos();
+        }
+        $("#nombresLicencias").val(JSON.stringify(nombresLicencias));
+        $("#idLicencias").val(JSON.stringify(idLicencias));
+        button.classList.add("disabled");
+        button.querySelector(".ladda-spinner").style.display = "inline-block";
+        document.getElementById("FormReceptionAsset").submit();
+    }
+
+    function cancel() {
+       location.reload(true);
+    }
+
+    function uploadDone(msg, code, id) {
+        if (msg == "OK") {
+            toastr.success("Se registró correctamente la recepción.", "Información Guardada");
+
+            setTimeout(function () {
+                var newurl = location.host + "/DeliveryReception/Details/" + id;
+                location = "https://" + location.host + "/DeliveryReception/Details/" + id;
+            }, 1000);
+        } else if (msg == "OKLicencia") {
+            toastr.success("Se registró correctamente la recepción.", "Información Guardada");
+            setTimeout(function () {
+                cancel();
+            }, 2000);
+        } else if (msg == "INFO") {
+            toastr.warning(code, "Mensaje");
+        }
+        else {
+            var messageAsset = '';
+            if (code == '0') {
+                messageAsset = 'Por favor, completar la información.';
+            }
+            else if (code == '1') {
+                messageAsset = 'Falla al insertar en base de datos.';
+            }
+            else {
+                titleAsset = '@ResourceLanguaje.Resource.Warning';
+                messageAsset = '@ResourceLanguaje.Resource.ReceptionMessage2';
+
+                var elem = msg.split(',');
+                for (f = 0; f < elem.length - 1; f++) {
+                    $("#divDetailAsset_" + elem[f]).addClass('borderDetailsRojo');
+                }
+            }
+
+            toastr.warning(messageAsset, "Mensaje");
+
+        }
+
+        $("#submit").removeClass("disabled");
+    }
+</script>

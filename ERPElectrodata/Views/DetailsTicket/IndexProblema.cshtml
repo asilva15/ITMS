@@ -1,0 +1,2153 @@
+﻿@model ERPElectrodata.Models.DETAILS_TICKET
+
+@{
+    ViewBag.Title = "Index";
+    //Layout = null;
+}
+<style>
+    .navVertical {
+        margin: 0px;
+        padding: 0px;
+        list-style: none;
+    }
+
+        .navVertical ul {
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            list-style: none;
+        }
+
+            .navVertical ul li {
+                float: left;
+                color: #022A41;
+                font-size: 13px;
+                margin: 0px;
+                padding: 0px;
+                border-bottom: 1px solid #e2e2e2;
+                width: 100%;
+            }
+
+                .navVertical ul li a {
+                    text-decoration: none;
+                    color: #022A41;
+                }
+
+                    .navVertical ul li a div {
+                        padding: 6px 10px 6px 10px;
+                    }
+
+                    .navVertical ul li a:hover div {
+                        background-color: #022A41;
+                        color: #e2e2e2;
+                    }
+
+    #navDT {
+        width: 100%;
+        list-style: none;
+        margin: 0px;
+        padding: 0px;
+    }
+
+        #navDT ul {
+            margin: 0px;
+            margin-top: 2px;
+            /*border:solid 1px #e2e2e2;*/
+            /*background-color:#e2e2e2;*/
+            display: inline-block;
+            list-style: none;
+            padding: 0px;
+            width: 100%;
+            border-top: solid 1px #e2e2e2;
+            /*border-bottom:solid 1px #e2e2e2;*/
+        }
+
+            #navDT ul li {
+                float: left;
+                color: #022A41;
+                font-size: 13px;
+                margin: 0px;
+                padding: 0px;
+            }
+
+                #navDT ul li a {
+                    text-decoration: none;
+                    color: #022A41;
+                }
+
+                    #navDT ul li a div {
+                        padding: 6px 10px 6px 10px;
+                    }
+
+                    #navDT ul li a:hover div {
+                        background-color: #022A41;
+                        color: #e2e2e2;
+                    }
+
+    .activeNavDT {
+        background-color: #022A41;
+        color: #e2e2e2;
+    }
+
+    .titulo a:hover {
+        color: #2E64FE;
+        cursor: pointer;
+    }
+
+    #tamGestionCambio {
+        width: 78% !important;
+    }
+
+    .modal:nth-of-type(even) {
+        z-index: 1042 !important;
+    }
+
+    .modal-backdrop.in:nth-of-type(even) {
+        z-index: 1041 !important;
+    }
+
+    .smallTitulo {
+        opacity: .8;
+        font-weight: bold;
+    }
+
+    .smallCampo {
+        color: #444444;
+        text-transform: capitalize;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                @ViewBag.NAM_TYPE_TICK # @ViewBag.COD_TICK
+                <div style="padding-top:3px; padding-right:1%; float:right; width:73%; text-transform:capitalize; text-align:right;" id="divCIA"></div>
+            </div>
+            <input type="hidden" id="idUsuario" name="idUsuario" readonly="readonly" />
+            <div class="card-body">
+                <div id="divDetaTicket">
+                </div>
+
+                <div class="card-body">
+                    <ul class="tabs-animated-shadow nav-justified tabs-animated nav">
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link active" id="tabComentario" data-toggle="tab" aria-selected="true">
+                                <span class="nav-text"><i class="fa fa-comment"></i> Comentario</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link" id="tabCambiarEstado" data-toggle="tab" aria-selected="false">
+                                <span class="nav-text"><i class="fa fa-arrow-circle-up"></i> Cambiar Estado</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a role="tab" class="nav-link" id="tabTransferir" data-toggle="tab">
+                                <span class="nav-text"><i class="fa fa-fighter-jet"></i> Transferir</span>
+                            </a>
+                        </li>
+                        @{if (ViewBag.time == true)
+                            {
+                                <li class="nav-item">
+                                    <a role="tab" class="nav-link" id="tabTime" data-toggle="tab">
+                                        <span class="nav-text"><i class="fa fa-clock"></i> Time</span>
+                                    </a>
+                                </li>
+                            }
+                        }
+
+                    </ul>
+                    @using (Html.BeginForm("Create", "DetailsTicket", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmDetailIncident", target = "upload_target" }))
+                    {
+                        @Html.ValidationSummary(true)
+                        <input type="hidden" value="@ViewBag.UploadFile" name="KEY_ATTA" id="KEY_ATTA" readonly="readonly" />
+                        @Html.HiddenFor(model => model.ID_TICK)
+
+                        @Html.HiddenFor(model => model.ID_TYPE_DETA_TICK)
+                        <input type="hidden" id="ControlRemoto" name="ControlRemoto" value="false" />
+
+                        <input type="hidden" id="TicketProblemaME" name="TicketProblemaME" value="1" />
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="tab-animated1-0" role="tabpanel">
+                                <div class="form-row">
+                                    <div class="col-md-4" id="DivDesde" hidden>
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Desde </label>
+                                            @Html.EditorFor(model => model.FROM_TIME)
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4" id="DivHasta" hidden>
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Hasta </label>
+                                            @Html.EditorFor(model => model.TO_TIME)
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-4" id="DivEstado" hidden>
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Estado </label>
+                                            @Html.EditorFor(model => model.ID_STAT)
+                                            @Html.ValidationMessageFor(model => model.ID_STAT)
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4" id="DivFechaProgramada" hidden>
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Fecha Programada </label>
+                                            @Html.EditorFor(model => model.FEC_SCHE)
+                                            @Html.ValidationMessageFor(model => model.FEC_SCHE)
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4" id="DivEsperaCliente" hidden>
+                                        <div class="form-group">
+                                            <label id="" for="" class="" style="padding-left:20px">¿Es Espera Por Cliente? </label>
+                                            <div class="position-relative form-group">
+                                                <div>
+                                                    <div class="custom-checkbox custom-control">
+                                                        @Html.CheckBox("EsperaPorCliente", false)
+                                                        @Html.ValidationMessageFor(model => model.EsperaPorCliente)
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-4" id="DivArea" hidden>
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Area Responsable </label>
+                                            @Html.EditorFor(model => model.ID_QUEU)
+                                            @Html.ValidationMessageFor(model => model.ID_QUEU)
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4" id="DivAsignado" hidden>
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Asignado a </label>
+                                            @Html.EditorFor(model => model.ID_PERS_ENTI)
+                                            @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                                        </div>
+                                    </div>
+                                    @{
+                                        if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 3)
+                                        {
+                                            <div class="col-md-4" id="DivFechaFinReal" hidden>
+                                                <div class="form-group">
+                                                    <label id="" for="" class="">Fecha Fin Real </label>
+                                                    @Html.EditorFor(model => model.FEC_END_REAL)
+                                                    @Html.ValidationMessageFor(model => model.FEC_END_REAL)
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+
+                                </div>
+                                <div class="row" id="DivLecionesAprendidas">
+                                    <div class="col-md-12">
+                                        <div class="main-card mb-3 card element-block-example">
+                                            <div class="card-body">
+                                                <div class="card-body" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+                                                    <div class="card-title" style="background-color:#E2DDDD;">Datos Principales</div>
+                                                    <div class="form-row">
+                                                        <div class="col-md-12">
+                                                            <div class="position-relative form-group">
+                                                                <label id="" for="" class="">Titulo </label>
+                                                                @(Html.TextBoxFor(model => model.Titulo, new { @class = "form-control" }))
+                                                                @(Html.ValidationMessageFor(model => model.Titulo))
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+
+                                                </div>
+                                                <br>
+                                                <div class="card-body" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+                                                    <div class="card-title" style="background-color:#E2DDDD;">Análisis Causa del Problema</div>
+                                                    <div class="form-row">
+                                                        <div class="col-md-12">
+                                                            <div class="position-relative">
+                                                                <label id="" for="" class="">¿Por qué? <i class="fa fa-comment icon-gradient bg-plum-plate"></i></label>
+                                                                @Html.TextAreaFor(model => model.DescripcionProblema, new { @class = "form-control", style = "max-width:505px;height:100px" })
+                                                                @Html.ValidationMessageFor(model => model.DescripcionProblema)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="col-md-1">
+
+                                                        </div>
+                                                        <div class="col-md-11">
+                                                            <div class="position-relative">
+                                                                <label id="" for="" class="">¿Por qué? <i class="fa fa-comment icon-gradient bg-plum-plate"></i></label>
+                                                                @Html.TextAreaFor(model => model.Porque2, new { @class = "form-control", style = "max-width:505px;height:100px" })
+                                                                @Html.ValidationMessageFor(model => model.Porque2)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="col-md-2">
+
+                                                        </div>
+                                                        <div class="col-md-10">
+                                                            <div class="position-relative">
+                                                                <label id="" for="" class="">¿Por qué? <i class="fa fa-comment icon-gradient bg-plum-plate"></i></label>
+                                                                @Html.TextAreaFor(model => model.Porque3, new { @class = "form-control", style = "max-width:505px;height:100px" })
+                                                                @Html.ValidationMessageFor(model => model.Porque3)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="col-md-3">
+
+                                                        </div>
+                                                        <div class="col-md-9">
+                                                            <div class="position-relative">
+                                                                <label id="" for="" class="">¿Por qué? <i class="fa fa-comment icon-gradient bg-plum-plate"></i></label>
+                                                                @Html.TextAreaFor(model => model.Porque4, new { @class = "form-control", style = "max-width:505px;height:100px" })
+                                                                @Html.ValidationMessageFor(model => model.Porque4)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-row">
+                                                        <div class="col-md-4">
+
+                                                        </div>
+                                                        <div class="col-md-8">
+                                                            <div class="position-relative">
+                                                                <label id="" for="Porque5" class="">¿Por qué? <i class="fa fa-comment icon-gradient bg-plum-plate"></i></label>
+                                                                @Html.TextAreaFor(model => model.Porque5, new { @class = "form-control", style = "max-width:505px;height:100px" })
+                                                                @Html.ValidationMessageFor(model => model.Porque5)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="card-body">
+                                                    <div class="form-row">
+                                                        <div class="card-body col-md-5" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+                                                            <div class="col-md-10">
+                                                                <div class="card-title" style="background-color:#E2DDDD;">Impacto en el negocio</div>
+                                                                <div class="position-relative">
+                                                                    <label id="" for="" class="">Descripción </label>
+                                                                    @Html.TextAreaFor(model => model.Impactonegocio, new { @class = "form-control", @rows = "5", style = "max-width:391px" })
+                                                                    @Html.ValidationMessageFor(model => model.Impactonegocio)
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-2">
+
+                                                        </div>
+                                                        <div class="card-body col-md-5" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+                                                            <div class="col-md-12">
+                                                                <div class="card-title" style="background-color:#E2DDDD;">Solución Temporal</div>
+                                                                <div class="position-relative">
+                                                                    <label id="" for="" class="">Descripción </label>
+                                                                    @Html.TextAreaFor(model => model.SolucionTemporal, new { @class = "form-control", @rows = "5", style = "max-width:391px" })
+                                                                    @Html.ValidationMessageFor(model => model.SolucionTemporal)
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <br>
+                                                <div class="card-body" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+                                                    <div class="card-title" style="background-color:#E2DDDD;">Solución definitiva</div>
+                                                    <div class="form-row">
+                                                        <div class="col-md-12">
+                                                            <div class="position-relative">
+                                                                <label id="" for="" class="">Descripción</label>
+                                                                @Html.TextAreaFor(model => model.SolucionDefinitiva, new { @class = "form-control", style = "height:100px" })
+                                                                @Html.ValidationMessageFor(model => model.SolucionDefinitiva)
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-12" id="DivComentario" hidden>
+                                        <div class="form-group">
+                                            <label id="" for="" class="" style="padding-left:20px">Comentario </label>
+                                            @Html.TextAreaFor(model => model.COM_DETA_TICK, new { rows = "20" })
+                                            @Html.ValidationMessageFor(model => model.COM_DETA_TICK)
+
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">&nbsp; </label>
+                                            <button type="button" data-toggle="modal" data-target="#miModal" onclick="AdjuntarComentario();" id="Adjuntar" class="mb-2 mr-2 btn-pill btn btn-success btn-block"><span>Adjuntar</span></button>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">&nbsp; </label>
+
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">&nbsp; </label>
+
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">&nbsp; </label>
+                                            <button id="submit" class="mb-2 mr-2 btn-pill btn btn-primary btn-block"><span>Crear</span></button>
+
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="tab-animated1-1" role="tabpanel">
+                                <p class="mb-0">
+                                    Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an
+                                    unknown
+                                    printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged.
+                                </p>
+                            </div>
+                            <div class="tab-pane" id="tab-animated1-2" role="tabpanel">
+                                <p class="mb-0">
+                                    It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus
+                                    PageMaker including versions of Lorem Ipsum.
+                                </p>
+                            </div>
+                        </div>
+                        <iframe id="upload_target" name="upload_target" src="" hidden></iframe>
+                    }
+                </div>
+                <div id="divDetails"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="form-row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-header">
+                        Gestión De Cambios
+                    </div>
+                    <div class="card-body" style="text-align:center">
+                        <span id="MensajeCambio"></span>
+                        <button id="btnGestionDeCambio" type="button" class="mb-2 mr-2 btn btn-gradient-info" onclick="GenerarCambio()" data-toggle="modal" data-target="#miModal">Generar Cambio</button>
+                        <button id="btnIrCambio" type="button" class="mb-2 mr-2 btn btn-gradient-info" onclick="IrCambio(@ViewBag.IdCambio)">Ir al Cambio</button>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-header">
+                        Lecciones Aprendidas
+                    </div>
+                    <div class="card-body">
+                        <div style="right:auto" class="col-md-12">
+                            <div class="x_panel">
+                                <div class="x_content lecciones">
+                                    <ul class='list-unstyled msg_list' style='overflow-x: hidden; overflow-y: scroll;'></ul>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-header">
+                        Tickets Vinculados
+                    </div>
+                    <div class="card-body">
+                        <div>
+                            <div class="x_panel">
+                                <div class="x_content tickets">
+                                    <ul class="list-unstyled msg_list" style="overflow-x: hidden; overflow-y: scroll;"></ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-header">
+                        Adjuntar
+                    </div>
+                    <div class="card-body">
+                        <div id="divAttachFiles" style="padding:5px;height:185px;border:none;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-header">
+                        Actividades
+                    </div>
+                    <div class="card-body">
+                        <div id="divActivities">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+
+<script type="text/x-kendo-tmpl" id="templdu">
+    <div class="du12">
+        <div class="duCont">
+            <div class="duContdet" style="text-transform:capitalize;margin:0px 5px 3px 5px;color:black;">
+                Fotocheck: ${FOT_CLIE}<br>
+                Usuario: ${NAM_CLIE}<br>
+                <div style="float:left;padding:0px 5px 0px 0px">Tipo Usuario: </div><div style="color:${COLOR};"> ${USE_TYPE}</div>
+                Cargo: ${JOB_TITL}<br>
+                Area: ${ARE_CLIE}<br>
+                Gestión: ${MANA}<br>
+                Compañía: ${CIA}<br>
+                Anexo: ${EXT}<br>
+                Celular: ${CEL_CLIE}<br>
+                RPM: ${RPM_CLIE}
+            </div>
+            <div class="duContFot">
+            </div>
+        </div>
+    </div>
+</script>
+
+
+<script id="templateDownload" type="text/x-kendo-template">
+    <tr data-uid="#= uid #">
+        <td colspan="2">
+            <a href="../../Adjuntos/#: NAM_ATTA #" target="_BLANK">#: NAM_ATTA #</a>
+        </td>
+        <td colspan="2">
+            <strong>#: NAM_TYPE_DOCU_ATTA #</strong>
+        </td>
+    </tr>
+</script>
+
+<script type="text/javascript">
+    /*################################################################## GCR161203 #######################################################################################*/
+    //function detalleUsuario() {
+
+    //    var idUsuario = $("#idUsuario").val();
+    //    var htmlForm = '<div id="FormDetalleUsuario"></div>';
+    //    winFormPopUpModal("Detalle de Usuario", htmlForm, 850, 600);
+    //    $("#FormDetalleUsuario").load("/Ticket/viewDetalleUsuario?id=" + idUsuario + "&var=" + Math.random());
+    //}
+    /*################################################################## GCR161203 #######################################################################################*/
+    @*function fnloadProduct() {
+
+        var htmlForm = '<div id="FormListProduct"></div>';
+        winFormPopUpModal("Lista de Soporte de Productos", htmlForm, 850, 600);
+        $("#FormListProduct").load("/Ticket/viewListProduct?id=" + "@ViewBag.ID_COMP" + "&var=" + Math.random());
+    }*@
+    var i_conf = 0;
+
+    $(document).ready(function () {
+
+
+
+        //$("#tabComentario").addClass("active");
+        //$("#tabActividadProgramar").removeClass("active");
+        //$("#tabCambiarEstado").removeClass("active");
+        //$("#tabTime").removeClass("active");
+
+
+        //$("#DivDesde").attr("hidden", true);
+        //$("#DivHasta").attr("hidden", true);
+        //$("#DivFechaProgramada").attr("hidden", true);
+        //$("#DivEsperaCliente").attr("hidden", true);
+        //$("#DivEstado").attr("hidden", true);
+        //$("#DivArea").attr("hidden", true);
+        //$("#DivAsignado").attr("hidden", true);
+        //$("#DivFechaFinReal").attr("hidden", true);
+
+        Inicio();
+        $("#tabComentario").click(function () {
+            $("#ID_QUEU").data("kendoComboBox").value("");
+
+            $("#tabComentario").addClass("active");
+            $("#tabActividadProgramar").removeClass("active");
+            $("#tabCambiarEstado").removeClass("active");
+            $("#tabTime").removeClass("active");
+
+
+            //$("#DivCausa").attr("hidden", true);
+            //$("#DivCausa").removeAttr("hidden");
+            $("#DivDesde").attr("hidden", true);
+            $("#DivHasta").attr("hidden", true);
+            $("#DivFechaProgramada").attr("hidden", true);
+            $("#DivEsperaCliente").attr("hidden", true);
+            $("#DivEstado").attr("hidden", true);
+            $("#DivArea").attr("hidden", true);
+            $("#DivAsignado").attr("hidden", true);
+            $("#DivFechaFinReal").attr("hidden", true);
+            $("#DivComentario").removeAttr("hidden");
+            $("#DivLecionesAprendidas").attr("hidden", true);
+            //$("#DivControlRemoto").attr("hidden", true);
+
+            $("#ID_TYPE_DETA_TICK").val(1);
+
+            $("#FEC_END_REAL").val('');
+
+        });
+
+
+
+        $("#tabCambiarEstado").click(function () {
+            $("#ID_QUEU").data("kendoComboBox").value("");
+
+            $("#tabComentario").removeClass("active");
+            $("#tabTransferir").removeClass("active");
+            $("#tabCambiarEstado").addClass("active");
+            $("#tabTime").removeClass("active");
+
+            //$("#DivCausa").attr("hidden", true);
+
+
+            $("#DivDesde").attr("hidden", true);
+            $("#DivHasta").attr("hidden", true);
+            $("#DivFechaProgramada").attr("hidden", true);
+            $("#DivEsperaCliente").attr("hidden", true);
+            $("#DivEstado").removeAttr("hidden");
+            $("#DivArea").attr("hidden", true);
+            $("#DivAsignado").attr("hidden", true);
+            $("#DivFechaFinReal").attr("hidden", true);
+            $("#DivComentario").removeAttr("hidden");
+            $("#DivLecionesAprendidas").attr("hidden", true);
+
+            $("#ID_TYPE_DETA_TICK").val(3);
+            $("#ID_STAT").data("kendoComboBox").value("");
+
+            $("#ID_STAT").on('change', function (e) {
+                var cbEstado = $("#ID_STAT").val();
+
+                if (cbEstado == 5) {
+                    $("#ID_STAT").data("kendoComboBox").value(5);
+                    $("#DivFechaProgramada").removeAttr("hidden");
+                    $("#DivComentario").removeAttr("hidden");
+                    $(".LeccionAprendida").hide();
+                } else if (cbEstado == 4) {
+                    $("#DivFechaProgramada").attr("hidden", true);
+                    $("#DivFechaFinReal").removeAttr("hidden");
+                    //$(".LeccionAprendida").show();
+                    $("#DivLecionesAprendidas").removeAttr("hidden");
+                    $("#DivComentario").attr("hidden", true);
+                    UpdateDetalleLeccionAprendida();
+                    if ($("#SolucionDefinitiva").val() == "") {
+                        ObtenerSolucionDefinitiva();
+                    }
+                } else if (cbEstado == 8) {
+                    $("#DivFechaProgramada").attr("hidden", true);
+                    $("#DivFechaFinReal").removeAttr("hidden");
+                    $("#DivLecionesAprendidas").removeAttr("hidden");
+                    //$(".LeccionAprendida").show();
+                    $("#DivComentario").attr("hidden", true);
+                } else {
+                    $("#DivFechaProgramada").attr("hidden", true);
+                    $("#DivFechaFinReal").attr("hidden", true);
+                    //$(".LeccionAprendida").hide();
+                    $("#DivComentario").removeAttr("hidden");
+                    $("#DivLecionesAprendidas").attr("hidden", true);
+
+                }
+
+
+            });
+
+
+        });
+
+        $("#tabTransferir").click(function () {
+            $("#ID_QUEU").data("kendoComboBox").value('');
+
+            $("#tabComentario").removeClass("active");
+            $("#tabTime").removeClass("active");
+            $("#tabCambiarEstado").removeClass("active");
+            $("#tabTransferir").addClass("active");
+
+            $("#DivDesde").attr("hidden", true);
+            $("#DivHasta").attr("hidden", true);
+            $("#DivFechaProgramada").attr("hidden", true);
+            $("#DivEsperaCliente").attr("hidden", true);
+            $("#DivEstado").attr("hidden", true);
+            $("#DivArea").removeAttr("hidden");
+            $("#DivAsignado").removeAttr("hidden");
+            $("#DivFechaFinReal").attr("hidden", true);
+            $("#DivComentario").removeAttr("hidden");
+
+            $("#ID_TYPE_DETA_TICK").val(2);
+
+        });
+
+        $("#tabTime").click(function () {
+            $("#ID_QUEU").data("kendoComboBox").value("");
+
+            $("#tabComentario").removeClass("active");
+            $("#tabTime").addClass("active");
+            $("#tabCambiarEstado").removeClass("active");
+            $("#tabTransferir").removeClass("active");
+
+            $("#DivDesde").removeAttr("hidden");
+            $("#DivHasta").removeAttr("hidden");
+            $("#DivFechaProgramada").attr("hidden", true);
+            $("#DivEsperaCliente").attr("hidden", true);
+            $("#DivEstado").attr("hidden", true);
+            $("#DivArea").attr("hidden", true);
+            $("#DivAsignado").attr("hidden", true);
+            $("#DivFechaFinReal").attr("hidden", true);
+            $("#DivComentario").removeAttr("hidden");
+
+            $("#ID_TYPE_DETA_TICK").val(9);
+
+        });
+
+        var flag=0;
+        if( @ViewBag.Estado==4 ||  @ViewBag.Estado==6 ||  @ViewBag.IdCambio!=0) {
+            $("#btnGestionDeCambio").hide();
+            flag=1;
+        }
+
+        if(@ViewBag.IdCambio==0){
+            $("#btnIrCambio").hide();
+            flag=flag+1;
+        }
+
+        if(flag==2){
+            $("#MensajeCambio").text("No se encontró una solicitud de cambios.")
+        }
+        $(".LeccionAprendida").hide();
+
+        $("#ID_TYPE_DETA_TICK").val(1);
+
+        $("#AMM_SALE_OPP").kendoNumericTextBox({
+            min: 0,
+            step: 1
+        });
+
+        $("#PRO_SALE_OPP").kendoNumericTextBox({
+            min: 0,
+            step: 1,
+            max: 100
+        });
+
+        //$("#submit").click(function () {
+        //    winPopUpModalLoad('Guardando Ticket', 'Espere por favor', 300, 130);
+        //});
+
+        $.ajax({
+            url: "/DetailsTicket/ListByIdTick/" + "@ViewBag.ID_TICK",
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+
+                data1 = source;
+                showDetailsIncident();
+            },
+            error: function (source) {
+            }
+        });
+
+
+    });
+
+    function Inicio() {
+        $("#DivComentario").removeAttr("hidden");
+
+
+
+        $("#DivLecionesAprendidas").attr("hidden", true);
+        $("#ID_TYPE_DETA_TICK").val(1);
+
+        $("#FEC_END_REAL").val('');
+        $("#ID_QUEU").val('');
+    }
+
+    var key_atta = $("#KEY_ATTA").val()
+
+    function AdjuntarComentario() {
+        $("#lblTitulo").text("Adjuntar Documentos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/DetailsTicket/AdjuntarArchivosComentario/?KEY_ATTA=' + key_atta);
+    }
+    /*
+        $(".lecciones").click(function () {
+
+            alert("Hola");
+        });*/
+
+    /*################################################################## GCR161203 #######################################################################################*/
+
+    var url = "/KnowledgeManagement/ListLeccionesAprendidasTickets";
+    var idTicket = "@ViewBag.ID_TICK";
+    /*Carga de las leccioens aprendidas y Tickets*/
+    $.ajax({
+        contentType: 'application/json; charset=utf-8',
+        url: url,
+        type: "Get",
+        data: { idTicket: idTicket },
+        datatype: "json",
+        cache: false,
+        /*  beforeSend: function () {
+              swal({ title: "Procesando información, por favor espere.", text: "Detalle de Tickets", showConfirmButton: false, imageUrl: "/images/search_abs.gif" })
+          },*/
+        success: function (data) {
+
+            if (data) {
+                tejerLeccionesAprendidas(data["lecciones"]);
+                tejerTicket(data["tickets"]);
+                swal.close();
+            }
+        },
+        error: function () {
+            //Crear_Failed()
+        }
+    });
+
+    /*################################################################## GCR161203 #######################################################################################*/
+    $("#files").kendoUpload({
+        localization: {
+            select: "Adjuntar"
+        },
+        upload: function (e) {
+            e.data = {
+                ID_TYPE_DOCU_ATTA: ArrayFile.dataItem().ID_TYPE_DOCU_ATTA,
+                KEY_ATTA: '@ViewBag.UploadFile'
+            };
+        },
+        remove: function (e) {
+            e.data = {
+                KEY_ATTA: '@ViewBag.UploadFile'
+            };
+        },
+        async: {
+            saveUrl: "/Attach/SaveDetailTicket",
+            removeUrl: "/Attach/RemoveDetailTicket"
+        }
+    });
+
+    var ArrayFile = $("#ArrayFile").kendoComboBox({
+        dataTextField: "NAM_TYPE_DOCU_ATTA",
+        dataValueField: "ID_TYPE_DOCU_ATTA",
+        filter: "contains",
+        index: 1,
+        autoBind: true,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Total"
+            },
+            transport: {
+                read: "/TypeDocumentModule/ListByModule/1?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    var FEC_SCHE = $("#FEC_SCHE").kendoDateTimePicker({ change: startChange }).data("kendoDateTimePicker");
+
+    var FEC_END_REAL = $("#FEC_END_REAL").kendoDateTimePicker({ value: today, change: startChange }).data("kendoDateTimePicker");
+
+    //var FEC_SCHE = $("#FEC_SCHE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+
+    var today = kendo.date.today();
+
+    var time_from = $("#FROM_TIME").kendoDateTimePicker({ value: today, change: startChange }).data("kendoDateTimePicker");
+    var time_to = $("#TO_TIME").kendoDateTimePicker({ value: today, change: endChange }).data("kendoDateTimePicker");
+
+    /*################################################################## GCR161203 #######################################################################################*/
+    function tejerLeccionesAprendidas(lecciones) {
+
+
+        if (parseInt(lecciones.length) > 0) {
+            $.each(lecciones, function (index, value) {
+                $(".lecciones ul").append('<li><div class="row"><div class="col-md-6 titulo"><a target="_blank"  href="/KnowledgeManagement/EditLessonLearned/' + lecciones[index].idLeccionAprendida + '"' + ' style="text-decoration:none;"><span class="glyphicon glyphicon-play" aria-hidden="true"></span>' +
+                   '<span>' + lecciones[index].Titulo + '</span></a></div>' +
+                   '<div class="col-md-6"><div class="stars stars-existing" style="float:right;" title="' + lecciones[index].Puntuacion + ' estrellas' + '"></div></div></div>' +
+                   '<div class="row"> <div class="col-md-12">' +
+                  ' <span style="display: inline-block; font-size: 11px;margin-left:14px; ">' + lecciones[index].Solucion + '</span></div></div><div class="rayaItms"></div></li>');
+                var puntuacion = lecciones[index].Puntuacion;
+                $('.stars-existing').starrr({
+                    rating: puntuacion
+                });
+            });
+        } else {
+            $(".lecciones ul").append('<div class="smallField">No se encontraron Lecciones aprendidas vinculadas');
+        }
+
+    }
+    /*################################################################## GCR161203 #######################################################################################*/
+    function tejerTicket(tickets) {
+
+
+        if (parseInt(tickets.length) > 0) {
+            $.each(tickets, function (index, value) {
+
+                $(".tickets ul").append('<li><div class="row"><div class="col-md-6 titulo"><a target="_blank" href="/DetailsTicket/Index/' + tickets[index].idTicket + '"' + ' style="text-decoration:none;"><span class="glyphicon glyphicon-play" aria-hidden="true"></span>' +
+                   '<span>' + tickets[index].nombreCategoria + '</span></a></div>' +
+                   '</div>' +
+                   '<div class="row"> <div class="col-md-12">' +
+                  ' <span style="display: inline-block; font-size: 11px;margin-left:14px; ">' + tickets[index].ComentarioTicket + '</span></div></div><div class="rayaItms"></div></li>');
+            });
+        } else {
+            $(".lecciones ul").append('<div class="smallField">No se encontraron Lecciones aprendidas vinculadas');
+        }
+    }
+    /*################################################################## GCR161203 #######################################################################################*/
+    function Crear_Failed() {
+        swal("¡Error al intentar obtener información!", "Cierre de Tickets", "error");
+    }
+    /*################################################################## GCR161203 #######################################################################################*/
+    function startChange() {
+        var startDate = time_from.value(),
+        endDate = time_to.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            time_to.min(startDate);
+        } else if (endDate) {
+            time_from.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            time_from.max(endDate);
+            time_to.min(endDate);
+        }
+    }
+
+
+
+    function endChange() {
+        var endDate = time_to.value(),
+        startDate = time_from.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            time_from.max(endDate);
+        } else if (startDate) {
+            time_to.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            time_from.max(endDate);
+            time_to.min(endDate);
+        }
+    }
+
+    time_from.max(time_to.value());
+    time_to.min(time_from.value());
+
+    $("#COM_DETA_TICK").kendoEditor({
+        encoded: false
+    });
+
+    @*var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").kendoComboBox({
+        autoBind: true,
+        index: 0,
+        dataTextField: "NAM_TYPE_DETA_TICK",
+        dataValueField: "ID_TYPE_DETA_TICK",
+        dataSource: {
+            serverFiltering: true,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/TypeDetailsTicket/List/"+"@ViewBag.ID_QUEU"
+            }
+        }
+    }).data("kendoComboBox");
+
+    ID_TYPE_DETA_TICK.bind("change", function (e) {
+
+        for (var i = 2; i <= 4; i++) {
+            $("#divTypeTicket" + i).addClass('divHide');
+        }
+
+        if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 8) {
+            $("#divTypeTicket4").removeClass('divHide');
+        }
+        if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 3) {
+            $("#divTypeTicket3").removeClass('divHide');
+            $("#ID_QUEU").data("kendoComboBox").value("");
+
+            if(	$("#ID_CLIE").data("kendoComboBox"))
+            {
+                $("#ID_CLIE").data("kendoComboBox").value("");
+                $("#ID_CLIE").data("kendoComboBox").enable(false);
+            }
+
+        }
+        if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 2) {
+            $("#divTypeTicket2").removeClass('divHide');
+            $("#ID_STAT").data("kendoComboBox").value("");
+        }
+        if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 1) {
+
+            $("#ID_QUEU").data("kendoComboBox").value("");
+            if(	$("#ID_CLIE").data("kendoComboBox"))
+            {
+                $("#ID_CLIE").data("kendoComboBox").value("");
+                $("#ID_CLIE").data("kendoComboBox").enable(false);
+            }
+            $("#ID_STAT").data("kendoComboBox").value("");
+
+        }
+    });*@
+
+    var ID_STAT = $("#ID_STAT").kendoComboBox({
+        //autoBind: true,
+        dataTextField: "NAM_STAT",
+        dataValueField: "ID_STAT",
+        dataSource: {
+            //type: "odata",
+            serverFiltering: false,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/StatusTicket/StatusConditionProblems/@ViewBag.ID_TICK"
+            }
+        }
+    }).data("kendoComboBox");
+
+    //ID_STAT.bind("change", function (e) {
+
+    //    if (ID_STAT.dataItem().ID_STAT == 5) {
+    //        $("#fechaScheduled").removeClass('divHide');
+    //        $("#fechaRealTermino").addClass('divHide');
+    //        $(".LeccionAprendida").hide();
+    //        $(".DetalleTicket").show();
+    //    }
+    //    else {
+    //        if (ID_STAT.dataItem().ID_STAT == 4) {
+    //            $("#fechaScheduled").addClass('divHide');
+    //            $("#fechaRealTermino").removeClass('divHide');
+    //            $(".LeccionAprendida").show();
+    //            $(".DetalleTicket").hide();
+    //            //IniciarLeccionAprendida();
+    //            //$("#submit").trigger('click');
+    //            UpdateDetalleLeccionAprendida();
+    //            if($("#SolucionDefinitiva").val()==""){
+    //                ObtenerSolucionDefinitiva();
+    //            }
+    //        }
+    //        else if (ID_STAT.dataItem().ID_STAT == 8) {
+    //            $("#fechaScheduled").addClass('divHide');
+    //            $("#fechaRealTermino").removeClass('divHide');
+    //            $(".LeccionAprendida").show();
+    //            $(".DetalleTicket").hide();
+
+    //        }
+    //        else {
+    //            $("#fechaScheduled").addClass('divHide');
+    //            $("#fechaRealTermino").addClass('divHide');
+    //            $(".LeccionAprendida").hide();
+    //            $(".DetalleTicket").show();
+    //        }
+    //    }
+    //});
+
+    //status sale
+    $("#ID_STAT_SALE_OPP").kendoComboBox({
+        dataTextField: "NAM_STAT_SALE_OPPO",
+        dataValueField: "ID_STAT_SALE_OPPO",
+        filter: "contains",
+        autoBind: false,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/StatusSalesOpportunities/ListAll?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    $("#ID_QUEU").kendoComboBox({
+        dataTextField: "QUEU",
+        dataValueField: "ID_QUEU",
+        filter: "contains",
+        autoBind: false,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+                    '<span><strong>${data.QUEU}</strong></span><br />' +
+                    '<span style="font-size:.9em; position:absolute; top:15px;">${data.DES_QUEU}</span></div>',
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountQueue/ListByAcco?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+
+
+
+    $("#ID_PERS_ENTI").kendoComboBox({
+        autoBind: false,
+        index: 1,
+        cascadeFrom: "ID_QUEU",
+        dataTextField: "ASSI",
+        template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                                  '<div style="float:left;">${data.ASSI}</div>' +
+                                  '<div style="float:right; ">(WL ${data.WorkLoad})</div>' +
+                              '</div>',
+        dataValueField: "ID_PERS_ENTI",
+        dataSource: {
+            //type: "odata",
+            serverFiltering: true,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+
+    @*function uploadDone(conf, msg, nivel1, nivel2, nivel3, nivel4, idTema, idtick, nameNivel1, nameNivel2, nameNivel3, nameNivel4, nameTema, idEstado) {
+
+        closeWinModalPopUpLoad();
+        if (conf == 'OK') {
+            var title = 'Información Guardada';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                   + "<div style='padding:10px 0px 10px 0px;'>La información detallada del ticket se guardó con éxito</div>"
+                   + "<div style='padding:10px 0px 10px 0px;'>Código: " + msg + "</div>" +
+                   "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                   "<button id='btnContinues' class='k-button'>Continue</button>" +
+                   "</div></div>";
+
+            winPopUpModal(title, body, 400, 185);
+
+            $("#closebtnmodal").click(function () {
+                location.reload(true);
+            });
+
+            $("#btnContinues").click(function () {
+                location.reload(true);
+            });
+        }
+        else {
+            var title = '@ResourceLanguaje.Resource.InformationMissing';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                        "</div></div>";
+
+            winPopUpModal(title, body, 400, 150);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }*@
+
+    function UpdateDetalleLeccionAprendida() {
+
+        var url = "DetailsTicket/UpdateDetailsTicket";
+        var idTicket = "@ViewBag.ID_TICK";
+        /*Carga de las leccioens aprendidas y Tickets*/
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: url,
+            type: "Get",
+            data: { idTicket: idTicket },
+            datatype: "json",
+            cache: false,
+            /*  beforeSend: function () {
+                  swal({ title: "Procesando información, por favor espere.", text: "Detalle de Tickets", showConfirmButton: false, imageUrl: "/images/search_abs.gif" })
+              },*/
+            success: function (data) {
+                if (data) {
+                    $("#Titulo").attr('value',data.Titulo);
+
+                    $("#DescripcionProblema").data("kendoEditor").value(data.DescripcionProblema);
+
+                    //$("#SolucionAplicada").data("kendoEditor").value(data.SolucionAplicada);
+                    $("#Impactonegocio").data("kendoEditor").value(data.Impactonegocio);
+                    $("#SolucionTemporal").data("kendoEditor").value(data.SolucionTemporal);
+                    $("#Porque2").data("kendoEditor").value(data.Porque2);
+                    $("#Porque3").data("kendoEditor").value(data.Porque3);
+                    $("#Porque4").data("kendoEditor").value(data.Porque4);
+                    $("#Porque5").data("kendoEditor").value(data.Porque5);
+                    $("#SolucionDefinitiva").data("kendoEditor").value(data.SolucionDefinitiva);
+                }
+            },
+            error: function () {
+                //Crear_Failed()
+            }
+        });
+    }
+    function ObtenerSolucionDefinitiva(){
+
+        $.ajax({
+            url: "/ChangeRequest/SolucionDefinitivaActividades/"+@ViewBag.ID_TICK,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+
+                $.each(source['data'], function (index, value) {
+                    $("#SolucionDefinitiva").html(data['data'][index]['SolucionDefinitiva'])
+                });
+
+            },
+            error: function (source) {
+
+            }
+        });
+    }
+
+    /*Modificado para la gestión de conocimiento y problemas*/
+    function uploadDone(conf, msg, nivel1, nivel2, nivel3, nivel4, idTema, idtick, nameNivel1, nameNivel2, nameNivel3, nameNivel4, nameTema, idEstado, Flagproblema) {
+
+        //closeWinModalPopUpLoad();
+        if (conf == 'OK') {
+            /*################################################################## GCR161203 #######################################################################################*/
+            if (idEstado == 4) {
+
+                if (Flagproblema == "True") {
+
+                    var title = 'Información Guardada';
+                    var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                           + "<div style='padding:10px 0px 10px 0px;'>La información detallada del ticket se guardó con éxito</div>"
+                           + "<div style='padding:10px 0px 10px 0px;'>Código: " + msg + "</div>" +
+                           "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                           "<button id='btnContinues' class='k-button'>Continue</button>" +
+                           "</div></div>";
+
+                    swal({
+                        title: title,
+                        type: 'success',
+                        text: 'Code: ' + msg,
+                        focusConfirm: false,
+                        confirmButtonText:
+                            'Continue',
+                        confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                    }, function () {
+                        location.reload();
+                    })
+                    //winPopUpModal(title, body, 400, 185);
+
+                    $("#closebtnmodal").click(function () {
+
+                        //location.reload(true);
+                        location.reload(true);
+                        // var url = "http://" + location.host + "/#/NewLessonLearned?nivel1=" + nivel1 + "&nivel2=" + nivel2 + "&nivel3=" + nivel3 + "&nivel4=" + nivel4 + "&idTema=" + idTema + "&idtick=" + idtick + "&nameNivel1=" + nameNivel1 + "&nameNivel2=" + nameNivel2 + "&nameNivel3=" + nameNivel3 + "&nameNivel4=" + nameNivel4 + "&nameTema=" + nameTema;
+                        //window.open(url, '_blank');
+                    });
+                    $("#btnContinues").click(function () {
+                        location.reload(true);
+                        //var url = "http://" + location.host + "/#/NewLessonLearned?nivel1=" + nivel1 + "&nivel2=" + nivel2 + "&nivel3=" + nivel3 + "&nivel4=" + nivel4 + "&idTema=" + idTema + "&idtick=" + idtick + "&nameNivel1=" + nameNivel1 + "&nameNivel2=" + nameNivel2 + "&nameNivel3=" + nameNivel3 + "&nameNivel4=" + nameNivel4 + "&nameTema=" + nameTema;
+                        //window.open(url, '_blank');
+                    });
+                } else {
+                    var title = 'Información Guardada';
+                    swal({
+                        title: title,
+                        text: 'Code: ' + msg,
+                        type: "success",
+                        //showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Continue",
+                        //cancelButtonText: "No, cancel plx!",
+                        closeOnConfirm: false,
+                        //closeOnCancel: false
+                    },
+                        function (isConfirm) {
+                            if (isConfirm) {
+                                swal({
+                                    title: "¿Desea agregar una lección aprendida a esta operación realizada?",
+                                    type: "info",
+                                    showCancelButton: true,
+                                    confirmButtonColor: "#DD6B55",
+                                    cancelButtonText: "No",
+                                    confirmButtonText: "Sí",
+                                    closeOnConfirm: false
+                                }, function (dismiss) {
+                                    if (dismiss) {
+                                        var url = "http://" + location.host + "/KnowledgeManagement/NewLessonLearned?nivel1=" + nivel1 + "&nivel2=" + nivel2 + "&nivel3=" + nivel3 + "&nivel4=" + nivel4 + "&idTema=" + idTema + "&idtick=" + idtick + "&nameNivel1=" + nameNivel1 + "&nameNivel2=" + nameNivel2 + "&nameNivel3=" + nameNivel3 + "&nameNivel4=" + nameNivel4 + "&nameTema=" + nameTema;
+                                        window.open(url, '_blank');
+                                        location.reload(true);
+
+                                    } else
+                                        location.reload(true);
+                                })
+                            }
+                        }
+                    );
+                }
+            } else {
+                var title = 'Información Guardada';
+                swal({
+                    title: title,
+                    type: 'success',
+                    text: 'Code: ' + msg,
+                    focusConfirm: false,
+                    confirmButtonText:
+                        'Continue',
+                    confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                }, function () {
+                    location.reload();
+                })
+            }
+
+        }
+        else {
+            swal({
+                type: 'info',
+                title: '@ResourceLanguaje.Resource.InformationMissing',
+                text: msg,
+                confirmButtonText:
+                    'Continue',
+            })
+
+            /*################################################################## GCR161203 #######################################################################################*/
+        }
+    }
+
+    function detailUser(id) {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/AccountEntity/DetailPerson/" + id,
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#divDetu").empty();
+
+        $("#divDetu").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#templdu").html())
+        });
+    }
+
+    function ListAllAttach() {
+
+        $("#divAttachFiles").kendoGrid({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/DetailsTicket/AttaAllTick/" + "@ViewBag.ID_TICK",
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            ran: Math.random()
+                        }
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    model: {
+                        fields: {
+                            NAM_ATTA: { type: "string" },
+                            ID_ATTA: { type: "number" },
+                            EXT_ATTA: { type: "string" },
+                            NAM_TYPE_DOCU_ATTA: { type: "string" }
+                        }
+                    }
+                },
+                group: {
+                    field: "NAM_TYPE_DOCU_ATTA", aggregates: [
+                       { field: "NAM_ATTA", aggregate: "count" }
+                       , { field: "NAM_TYPE_DOCU_ATTA", aggregate: "count" }
+                    ]
+                }
+            },
+            sortable: true,
+            filterable: true,
+            pageable: false,
+            height: 185,
+            columns: [
+                { field: "NAM_ATTA", title: "File Name", template: "<a href='../../Adjuntos/#: NAM_ATTA #_#: ID_ATTA ##: EXT_ATTA #' target='_blank'>#: NAM_ATTA # </a>" }
+                , { field: "NAM_TYPE_DOCU_ATTA", title: "Type Attach", groupHeaderTemplate: "#= value # (#= count#)" }
+            ]
+        });
+    }
+
+    function showDetailsIncident() {
+
+        $.each(data1['datadeta'], function (index, value) {
+
+            $("#divDetaTicket").append(
+                '<div class="form-row">' +
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Estado </label>' +
+                            '<p id="" for="" class="smallCampo"> ' + (data1['datadeta'][index]['NAM_STAT']) + ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Usuario Afectado </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['AEU']) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Nivel de Servicio </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['SLA']) +  ' Horas </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Tiempo de Expiración </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['EXP_TIME']) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    ("@ViewBag.ACCESO_EDIT" == 1 && parseInt(@Session["ID_ACCO"]) == 17 ?
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Tiempo transcurrido </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['TIME_USED']) + '</p>' +
+                        '</div>' +
+                    '</div>' : '') +
+                    ((data1['datadeta'][index]['ID_DOCU_SALE']) != 0 ?
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">OP </label>' +
+                            '<p id="" for="" class="smallCampo"><a href="/OrderForm/Details/' + (data1['datadeta'][index]['ID_DOCU_SALE']) + '" target="_blank" style="text-decoration:none;" title="View OP">' + (data1['datadeta'][index]['COD_TYPE_DOCU_SALE']) + ' ' + (data1['datadeta'][index]['NUM_OP']) + '</a></p>' +
+                        '</div>' +
+                    '</div>' : '') +
+                    ((data1['datadeta'][index]['ID_QUEU']) == 26 ?
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Monto </label>' +
+                            '<p id="" for="" class="smallCampo">$ ' + (data1['datadeta'][index]['AMM']) + '</p>' +
+                        '</div>' +
+                    '</div>' : '') +
+                    ((data1['datadeta'][index]['ID_QUEU']) == 26 ?
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Ganancia </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['PROF']) + ' % </p>' +
+                        '</div>' +
+                    '</div>' : '') +
+                '</div>' +
+                '<div class="form-row">' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Prioridad </label>' +
+                            '<p id="" for="" class="smallCampo"> ' + (data1['datadeta'][index]['NAM_PRIO']) + ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Unidad de Negocio </label>' +
+                            '<p id="" for="" class="smallCampo"> ' + (data1['datadeta'][index]['CATE_1']) + ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Macroservicio </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['CATE_2']) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Servicio </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['CATE_3']) +  ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Incidente/Requerimiento </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['CATE_4']) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Tema </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['NAME_TEMA']) + '</p>' +
+                        '</div>' +
+                    '</div>'+
+                '</div>' +
+                '<div class="form-row">' +
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Fuente </label>' +
+                            '<p id="" for="" class="smallCampo"> ' + (data1['datadeta'][index]['NAM_SOUR']) + ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Fecha Creación </label>' +
+                            '<p id="" for="" class="smallCampo"> ' + (data1['datadeta'][index]['CREATE_TICK']) + ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Fecha Modificación</label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['MODIFIED_TICK']) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    ((data1['datadeta'][index]['ID_STAT']) == 5 ?
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Fecha Programación</label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['DATE_SCHE']) + '</p>' +
+                        '</div>' +
+                    '</div>' : '') +
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Adjuntos </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['ATTA_TOT']) +  ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Control Remoto </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['REM_CONT']) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-1">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Servicio </label>' +
+                            '<p id="" for="" class="smallCampo">' + (data1['datadeta'][index]['SERVICE']) + '</p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                (parseInt(@Session["ID_ACCO"]) == 3 ?
+                '<div class="form-row">' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Fecha de Inicio Real </label>' +
+                            '<p id="" for="" class="smallCampo"> ' + (data1['datadeta'][index]['FEC_INI_REAL']) + ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<label id="" for="" class="smallTitulo">Fecha Fin Real </label>' +
+                            '<p id="" for="" class="smallCampo"> ' + (data1['datadeta'][index]['FEC_END_REAL']) + ' </p>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' : '') +
+                '<div class="form-row">' +
+                    '<div class="col-xs-2">' +
+                        '<div class="form-group">' +
+                            '<a><img width="125" class="rounded-circle" src="/Content/Fotos/' + (data1['datadeta'][index]['PHOTO']) + '.jpg"/></a>' +
+                        '</div>' +
+                '</div>' +
+                    '<div class="col-md-10">' +
+                        '<div class="main-card mb-3 card">' +
+                                        '<div class="card-header">' +
+                                            '<i class="header-icon lnr-laptop-phone icon-gradient bg-plum-plate"> </i>Creado por ' + (data1['datadeta'][index]['CREA_BY']) +
+                                            '<div style="padding-top:3px; padding-right:1%; float:right; width:64%; text-transform:capitalize; text-align:right;">' +
+                                                'Asignado A ' +
+                                                    (data1['datadeta'][index]['ASSI_TO']) +
+                                                ("@ViewBag.ACCESO_EDIT" == 1 ?
+                                                     '|<a style="cursor:pointer; color:#369;" href="javascript:void(0)" data-toggle="modal" data-target="#miModal" onclick="EditComment(@ViewBag.ID_TICK)"> Editar </a>'
+                                                 : '') +
+                                                 ("@ViewBag.ACCESO_SEND_SURVEY" == 1 && (data1['datadeta'][index]['ID_STAT']) == 6 ?
+                                                    '|<a style="cursor:pointer; color:#369;" href="javascript:void(0)" onclick="FcnSendSurvey(@ViewBag.ID_TICK)"> Enviar Encuesta </a>'
+                                                  : '') +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class="card-body">' +
+                                            '<p>' + (data1['datadeta'][index]['SUM_TICK']) + '</p>' +
+                                            '<p>' + (data1['datadeta'][index]['Adicional1']) + '</p>' +
+                                            '<p>' + (data1['datadeta'][index]['Adicional2']) + '</p>' +
+                                        '</div>' +
+                                        '<div class="card-footer">' +
+                                             (data1['datadeta'][index]['ATTA']) +
+                                        '</div>' +
+                                    '</div>' +
+                        '</div>' +
+                '</div>'
+
+                );
+
+
+            if ((data1['datadeta'][index]['ID_ACCO']) == 4) {
+                $("#divCIA").html(data1['datadeta'][index]['CIA'] + ' - ' + data1['datadeta'][index]['COMPEND']);
+                $("#divCIA").attr("title", data1['datadeta'][index]['COMP'] + ' - ' + data1['datadeta'][index]['COMPEND']);
+            }
+
+            /*Gestión del Conocimiento*/
+            //detailUser(data1['datadeta'][index]['ID_PERS_ENTI_END']);
+            /*Fin*/
+
+            $("#idUsuario").val(data1['datadeta'][index]['ID_PERS_ENTI_END']);
+            ListAllAttach();
+        });
+
+        $.each(data1['data'], function (index, value) {
+
+            $("#divActivities").append(
+                '<a onclick="mover(' + (data1['data'][index]['ID_DETA_TICK']) + ')" style="color:#3f6ad8;"><div class="listActCont">' +
+                    '<div class="form-row">' +
+                        '<div class="col-md-4">' +
+                            '<div class="form-group">' +
+                                '<label id="" for="" class="" style="text-transform:capitalize">' + (data1['data'][index]['NAM_TYPE_DETA_TICK']) + '-' + (data1['data'][index]['MinutosTranscurridos']) + ' m' + '</label>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="col-md-4">' +
+                            '<div class="form-group">' +
+                                '<label id="" for="" class="" style="text-transform:capitalize">' + (data1['data'][index]['CREATE_DETA_INCI']) + '</label>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="col-md-4">' +
+                            '<div class="form-group">' +
+                                '<label id="" for="" class="" style="text-transform:capitalize">' + (data1['data'][index]['PERS']) + '</label>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '</a>'
+                );
+
+            $("#divDetails").append(
+                '<div class="chat-wrapper" id="' + (data1['data'][index]['ID_DETA_TICK']) + '">' +
+
+                    '<div class="chat-box-wrapper" >' +
+
+                        '<div>' +
+                            '<div class="avatar-icon-wrapper mr-1">' +
+                                '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                    '<img src="/Content/Fotos/' + (data1['data'][index]['PHOTO']) + '.jpg" />' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div>' +
+                        ("@ViewBag.ACCESO_EDIT" == 1 ?
+                                            '<div class="float-right text-muted small">' +
+                                                  '<a style="color:#369; cursor:pointer;" data-toggle="modal" data-target="#miModal" onclick="EditDetailComment(' + data1['data'][index]['INEX'] + ')"> Edit</a>' +
+                                            '</div>' : '') +
+                '<label href="javascript:void(0)" style="color:#336699;text-transform:capitalize">' + (data1['data'][index]['PERS']).toLowerCase() + ' </label> <label> ' + (data1['data'][index]['CREATE_DETA_INCI']) + ' ' + (data1['data'][index]['Causa']) +'</label>' +
+                '<div class="text-muted small">Inicio Actividad: ' + (data1['data'][index]['DATE_INIC']) + ' &nbsp; &nbsp; &nbsp; &nbsp; Fin Actividad: ' + (data1['data'][index]['DATE_END']) + '</div>' +
+                '<div class="text-muted small" style="text-transform:capitalize">' + (data1['data'][index]['NAM_TYPE_DETA_TICK']).toLowerCase() + ' ' +
+                ((data1['data'][index]['ID_TYPE_DETA_TICK']) == 3 ? (": " + (data1['data'][index]['NAM_STAT']).toLowerCase() + " " + (data1['data'][index]['FEC_SCHE'])) : '') +
+                ((data1['data'][index]['ID_TYPE_DETA_TICK']) == 2 ? (": " + data1['data'][index]['ASSI']).toLowerCase() : '') +
+                ((data1['data'][index]['ID_TYPE_DETA_TICK']) == 8 ? (": " + data1['data'][index]['NAM_STAT_SALE_OPPO']).toLowerCase() + " | Ammount: $ " + (data1['data'][index]['AMM_SALE_OPP']) + " | Profit:" + (data1['data'][index]['PRO_SALE_OPP']) + " %" : '') +
+                ((data1['data'][index]['ID_TYPE_DETA_TICK']) == 9 ? (": " + data1['data'][index]['FROM_TIME'] + " - " + data1['data'][index]['TO_TIME']) : '') +
+                '</div>' +
+                            '<div class="chat-box">' +
+                                '<div class="form" id="clipboard' + (data1['data'][index]['ID_DETA_TICK']) +'">' +
+                                    (data1['data'][index]['COM_DETA_INCI']) +
+                                '</div>' +
+
+
+                            '</div>' +
+                            '<div class="small mt-2">' +
+                                    (data1['data'][index]['ADJ']) +
+                            '</div>' +
+
+                         '</div>' +
+                    '</div>' +
+                 '</div>' );
+
+        });
+
+
+        if (data1['listaLeccionAprendida'] != null) {
+
+            $.each(data1['listaLeccionAprendida'], function (index, value) {
+
+                /*Gestión de problemas*/
+                $("#divLeccionAprendida").append('<div class="detailsSummary">' +
+                          '<div id="detSummary">' +
+                              '<div class="containerdt">' +
+                                  '<div class="userData">' +
+                                      '<div class="asignedImage"><div ><img src="/Content/Fotos/1007.jpg"/></div></div>' +
+                                  '</div>' +
+
+                                  '<div class="messageData">' +
+                                      '<div class="messageArrow"></div>' +
+                                          '<div class ="messageBoxDet">' +
+                                                '<label>Lección aprendida Ticket problema</label> <a target="_blank" href="/KnowledgeManagement/EditLessonLearned/' + data1['listaLeccionAprendida'][index]['idLeccionAprendida'] + '"' + ' style="text-decoration:none;"><span class="glyphicon glyphicon-play" aria-hidden="true"></span><span>' + data1['listaLeccionAprendida'][index]['idLeccionAprendida'] + '</span></a>' +
+                                            '</div>' +
+                                      '<div class="msgBoxBody">' +
+                                           '<spam><label>Título</label><p>' +
+                                          (data1['listaLeccionAprendida'][index]['Titulo']) +
+                                          '</p><label>Categoría</label><p>' +
+                                            (data1['listaLeccionAprendida'][index]['Categoria']) +
+                                            '</p></spam>' +
+                                              '</p><label>Análisis Causa del Problema</label><p>' +
+                                            (data1['listaLeccionAprendida'][index]['Descripcion']) +
+                                            '</p></spam>' +
+                                            //   '</p><label>Solución Aplicada</label><p>' +
+                                            //(data1['listaLeccionAprendida'][index]['SolucionAplicada']) +
+                                            //'</p></spam>' +
+                                                   '</p><label>Impacto en el negocio</label><p>' +
+                                            (data1['listaLeccionAprendida'][index]['Impacto']) +
+                                            '</p></spam>' +
+                                              '</p><label>Solución Temporal</label><p>' +
+                                            (data1['listaLeccionAprendida'][index]['SolucionTemporal']) +
+                                            '</p></spam>' +
+                                                   '</p><label>Solución Definitiva</label><p>' +
+                                            (data1['listaLeccionAprendida'][index]['SolucionDefinitiva']) +
+                                            '</p></spam>' +
+                                      '</div>' +
+                                  '</div>' +//message Data
+                              '</div>' +
+                          '</div>' +
+                      '</div>');
+                /*Fin*/
+            });
+        }
+    }
+
+    function EditComment(id) {
+        $("#lblTitulo").text("Editar Descripción");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Ticket/UpdateDateTicket/" + id + "?_=" + Math.random());
+        //$("#divFrmLoadSummary").empty();
+
+        //if (parseInt(@Session["ID_ACCO"]) == 17) {
+        //$("#divFrmLoadSummary").load("/Ticket/UpdateDateTicket/" + id + "?_=" + Math.random());
+        //}
+        //else {
+        //    $("#divFrmLoadSummary").load("/Ticket/EditSummary/" + id + "?_=" + Math.random());
+        //}
+
+    }
+
+    function EditDetailComment(id) {
+
+        $("#lblTitulo").text("Editar Comentario");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/DetailsTicket/UpdateDatesDetailsTicket/" + id + "?_=" + Math.random());
+        //$("#divFrmLoadSummary").empty();
+        @*if(parseInt(@Session["ID_ACCO"]) == 17 )
+        *@//{
+        //$("#divFrmLoadSummary").load("/DetailsTicket/UpdateDatesDetailsTicket/" + id + "?_=" + Math.random());
+        //}
+        //else {
+        //$("#divFrmLoadSummary").load("/DetailsTicket/EditSummary/" + id + "?_=" + Math.random());
+        //}
+    }
+
+    function fxNewComment(obj) {
+        ChangeX();
+
+        $("#linkNC").addClass("activeNavDT");
+
+        $("#ID_TYPE_DETA_TICK").val(1);
+
+        $("#FEC_END_REAL").val('');
+        //$("#linkSCH").removeClass("activeNavDT");
+    }
+    //function fxSchedule(obj, eve) {
+    //    ChangeX();
+    //    $("#linkSCH").addClass("activeNavDT");
+    //    $("#ID_TYPE_DETA_TICK").val(3);
+    //    $("#ID_STAT").val(5);
+
+    //    $("#fechaScheduled").removeClass("divHide");
+    //    $("#EsperaPorCliente").removeClass("divHide");
+    //    $("#divTypeTicket3").removeClass("divHide");
+    //    $("#fechaRealTermino").addClass("divHide");
+    //    $(".ComentsTickets").removeClass("divHide");
+
+    //}
+
+    function fxUpdateStatus() {
+        ChangeX();
+        $("#linkUS").addClass("activeNavDT");
+
+        $("#ID_TYPE_DETA_TICK").val(3);
+
+        if ($("#ID_STAT").val() == 5) {
+            $("#ID_STAT").data("kendoComboBox").value(5);
+            $("#fechaScheduled").removeClass("divHide");
+            //$("#EsperaPorCliente").removeClass("divHide");
+        }
+        //console.log($("#ID_STAT").val());
+        $("#divStatus").removeClass("divHide");
+        $("#divTypeTicket3").removeClass("divHide");
+    }
+
+    function fxTransferTo() {
+        ChangeX();
+        $("#linkTT").addClass("activeNavDT");
+
+        $("#divTypeTicket2").removeClass("divHide");
+        $("#ID_TYPE_DETA_TICK").val(2);
+    }
+
+    function fxTimer() {
+        ChangeX();
+        $("#linkTimer").addClass("activeNavDT");
+
+        $("#ID_TYPE_DETA_TICK").val(9);
+
+        $("#divTypeTicket5").removeClass("divHide");
+
+    }
+
+    function fxOptions() {
+        ChangeX();
+        $("#linkOptions").addClass("activeNavDT");
+
+        if (i_conf == 0) {
+            $("#divDTOptions").css("height", 135);
+            $("#divDTOptions").css("border", "1px solid #e2e2e2");
+            i_conf = 1;
+        }
+        else {
+            $("#divDTOptions").css("height", 0);
+            $("#divDTOptions").css("border", "0px solid #e2e2e2");
+            i_conf = 0;
+        }
+    }
+
+    function ChangeX() {
+        //$("#linkSCH").removeClass("activeNavDT");
+        $("#linkNC").removeClass("activeNavDT");
+        $("#linkUS").removeClass("activeNavDT");
+        $("#linkTT").removeClass("activeNavDT");
+        $("#linkTimer").removeClass("activeNavDT");
+        $("#linkOptions").removeClass("activeNavDT");
+        $("#divTypeTicket2").addClass("divHide");
+        $("#divTypeTicket3").addClass("divHide");
+        $("#fechaScheduled").addClass("divHide");
+        $("#EsperaPorCliente").addClass("divHide");
+        $("#divStatus").addClass("divHide");
+        $("#divTypeTicket5").addClass("divHide");
+
+        $("#ID_QUEU").data("kendoComboBox").value("");
+    }
+
+    function FcnSendSurvey(id) {
+        swal({
+            title: 'Warning',
+            text: 'Are you sure to send survey',
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            cancelButtonText: "No",
+            confirmButtonText: "Sí",
+            closeOnConfirm: false
+        }, function (dismiss) {
+            if (dismiss) {
+                $.ajax({
+                    url: "/Ticket/SendSurveyTicket/",
+                    data: "ID_TICK=" + id + "&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == "OK") {
+
+
+                            swal({
+                                title: 'Warning',
+                                type: 'success',
+                                text: 'Sent successfully',
+                                focusConfirm: false,
+                                confirmButtonText:
+                                    'Continue',
+                                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                            })
+                        }
+                        else if (resp == "EXISTE") {
+
+                            //alert("The survey was sent");
+                            swal({
+                                title: 'Warning',
+                                type: 'info',
+                                text: 'The survey was sent',
+                                focusConfirm: false,
+                                confirmButtonText:
+                                    'Continue',
+                                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                            })
+
+                        }
+                        else {
+                            alert(Error);
+                        }
+                    }
+                });
+
+            }
+
+        })
+    }
+
+
+</script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        fxNewComment();
+        /*##########################################################################################################################################################################################*/
+        //$("#DescripcionProblema").kendoEditor({
+        //    messages: {
+        //        width: "5"
+        //    },
+        //    encoded: false
+        //});
+
+        //$("#SolucionAplicada").kendoEditor({
+        //    encoded: false
+        //});
+
+        //$("#Impactonegocio").kendoEditor({
+        //    encoded: false
+        //});
+
+        //$("#SolucionTemporal").kendoEditor({
+        //    encoded: false
+        //});
+
+        //$("#SolucionDefinitiva").kendoEditor({
+        //    encoded: false
+        //});
+
+        /*##########################################################################################################################################################################################*/
+        function Crear_Success() {
+
+            swal("¡Lección aprendida creada correctamente!", "Mantenimiento de Lecciones Aprendidas", "success");
+            return
+            // var newurl = location.host + "/#/TrayLessonsLearned";
+            //location = "http://" + location.host + "/#/TrayLessonsLearned";
+        }
+
+        function Crear_Failed() {
+            swal("¡Error al intentar crear la lección aprendida!", "Mantenimiento de lecciones aprendidas", "error");
+        }
+        /*##########################################################################################################################################################################################*/
+        function limpiarCategorias() {
+            $("#Nvel2").data("kendoComboBox").value("");
+            $("#Nivel3").data("kendoComboBox").value("");
+            $("#Nivel4").data("kendoComboBox").value("");
+            $("#IdTema").data("kendoComboBox").value("");
+        }
+        /*##########################################################################################################################################################################################*/
+        $("#idGuardarLeccionAprendida").click(function () {
+
+
+            var objLeccionAprendida = {
+                Titulo: $("#Titulo").val(),
+                Nivel1: $("#Nivel1").val(),
+                Nvel2: $("#Nvel2").val(),
+                Nivel3: $("#Nivel3").val(),
+                Nivel4: $("#Nivel4").val(),
+                IdTema: $("#IdTema").val(),
+                EstadoAprobacion: $("#EstadoAprobacion").val(),
+                NroRevisiones: $("#NroRevisiones").val(),
+                Puntuacion: $("#idCalificacion").val() == "" ? 0 : $("#idCalificacion").val(),
+                DescripcionProblema: $("#DescripcionProblema").val(),
+                //SolucionAplicada: $("#SolucionAplicada").val(),
+                Impactonegocio: $("#Impactonegocio").val(),
+                SolucionTemporal: $("#SolucionTemporal").val(),
+                SolucionDefinitiva: $("#SolucionDefinitiva").val(),
+                ID_TICKET: $("#idTicket").val(),
+                IdLeccioNAprendida: $("#idLeccionAprendidaAprobador").val(),
+            }
+
+            /*Validaciones*/
+            if (objLeccionAprendida.Titulo == "" || objLeccionAprendida.Titulo == null) {
+                swal("¡Por favor Ingrese el Título de la Lección aprendida!", "Nueva Lección Aprendida", "info");
+                return false;
+            }
+
+            if (objLeccionAprendida.Nivel1 == "" || objLeccionAprendida.Nivel1 == null) {
+                swal("¡Por favor seleccione una Unidad de Negocio!", "Nueva Lección Aprendida", "info");
+                return false;
+            }
+
+            if (objLeccionAprendida.Nvel2 == "" || objLeccionAprendida.Nvel2 == null) {
+                swal("¡Por favor seleccione un Macroservicio!", "Nueva Lección Aprendida", "info");
+                return false;
+            }
+
+            /*
+            if (objLeccionAprendida.IdTema == "" || objLeccionAprendida.IdTema == null) {
+                swal("¡Por favor Ingrese el Tema!", "Nueva Lección Aprendida", "info");
+                return false;
+            }*/
+
+            if (parseInt($("#idPerfilAprobador").val()) == 1) {
+                if (objLeccionAprendida.EstadoAprobacion == "" || objLeccionAprendida.EstadoAprobacion == null) {
+                    swal("¡Por favor seleccione un estado de  aprobación!", "Nueva Lección Aprendida", "info");
+                    return false;
+                }
+
+                if (objLeccionAprendida.Puntuacion == "0" || objLeccionAprendida.Puntuacion == null) {
+                    swal("¡Por favor elija una calificación correcta!", "Nueva Lección Aprendida", "info");
+                    return false;
+                }
+            }
+
+            if (objLeccionAprendida.DescripcionProblema == "" || objLeccionAprendida.DescripcionProblema == null) {
+                swal("¡Por favor ingrese la descripción del problema!", "Nueva Lección Aprendida", "info");
+                return false;
+            }
+
+            //if (objLeccionAprendida.SolucionAplicada == "" || objLeccionAprendida.SolucionAplicada == null) {
+            //    swal("¡Por favor ingrese la solución del problema!", "Nueva Lección Aprendida", "info");
+            //    return false;
+            //}
+
+            if (objLeccionAprendida.Impactonegocio == "" || objLeccionAprendida.Impactonegocio == null) {
+                swal("¡Por favor ingrese el impacto generado!", "Nueva Lección Aprendida", "info");
+                return false;
+            }
+
+            if (objLeccionAprendida.SolucionTemporal == "" || objLeccionAprendida.SolucionTemporal == null) {
+                swal("¡Por favor elija la solución temporal usada!", "Nueva Lección Aprendida", "info");
+                return false;
+            }
+            /*
+            if (objLeccionAprendida.SolucionDefinitiva == "" || objLeccionAprendida.SolucionDefinitiva == null) {
+                swal("¡Por favor elija una solución definitiva aplicada!", "Nueva Lección Aprendida", "info");
+                return false;
+            }*/
+            /*Fin*/
+
+            swal({
+                title: "¿Está seguro de registrar la Lección Aprendida?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                cancelButtonText: "Cancelar",
+                confirmButtonText: "Aceptar",
+                closeOnConfirm: false
+            }, function () {
+
+                var param = {
+                    objLeccionAprendida: objLeccionAprendida,
+                    TypeOperation: $("#idTypeOperacion").val(),
+                    KEY_ATTA: $("#KEY_ATTA").val()
+                };
+                var url = $("#form_create").attr('action');
+                var type = $("#form_create").attr('method');
+                $.ajax({
+                    contentType: 'application/json; charset=utf-8',
+                    url: url,
+                    type: type,
+                    data: JSON.stringify(param),
+                    datatype: "json",
+                    cache: false,
+                    beforeSend: function () {
+                        swal({ title: "Procesando información, por favor espere.", text: "Mantenimiento del Lecciones aprendidas", showConfirmButton: false, imageUrl: "../../images/search_abs.gif" })
+                    },
+                    success: function (listaTemas) {
+
+                        if (listaTemas != 0) {
+                            Crear_Success();
+                            ClosewinFormPopup();
+                        } else
+                            Crear_Failed()
+                    },
+                    error: function () {
+                        Crear_Failed()
+                    }
+                });
+
+
+            }
+
+            );
+
+
+        });
+        /*##########################################################################################################################################################################################*/
+
+    });
+    function GenerarCambio(id) {
+        $("#lblTitulo").text("Gestión de Cambios");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/ChangeRequest/RegistrarGestionCambio/" + @ViewBag.ID_TICK);
+
+        //$("#divGenerarCambio").empty();
+        //$("#divGenerarCambio").load("/ChangeRequest/RegistrarGestionCambio/" + @ViewBag.ID_TICK);
+    }
+
+    function IrCambio(id){
+        window.open("http://" + location.host + "/ChangeRequest/ResumenGestionCambio/"+id)
+    }
+
+
+</script>

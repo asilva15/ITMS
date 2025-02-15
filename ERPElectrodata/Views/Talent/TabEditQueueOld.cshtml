@@ -1,0 +1,419 @@
+﻿    @{ 
+        Layout = null;
+    }
+
+    <div style="width:100%; height:542px; display:inline-block; margin-top:10px;">
+        <div style="float:left; width:48%;">
+            <div style="width:100%;">
+                <div class="titleForm">
+                    <div class="title">Edit Queue</div>
+                </div>
+                <div class="inBodyForm" style="height:100px;" id="">
+
+                    @using (Html.BeginForm("UpdateQueue", "Talent", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormUpdateQueue", name = "FormUpdateQueue", target = "upload_targetUpdateQueue" }))
+                    {
+                        <input type="hidden" name="ID_PERS_ENTI" value="@ViewBag.ID_PERS_ENTI_QUEU" />
+                        <div class="divFondoUno">
+                            <div class="divSpace2"></div>
+                            <div class="divCont2">
+                                <div class="editor-label">
+                                    Cuenta
+                                </div>
+                                <div class="editor-field">
+                                    <input id="ID_ACCO" name="ID_ACCO" />
+                                </div>
+                            </div>
+                            <div class="divSpace2"></div>
+                            <div class="divCont2" style="margin-left:-2px;">
+                                <div class="editor-label">
+                                    Cola de Cuenta
+                                </div>
+                                <div class="editor-field">
+                                    <input id="ID_QUEU" name="ID_QUEU" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoUno" style="margin-bottom:5px;">
+                            <div class="divSpace2" style="float:right;"></div>
+                            <div style="display:inline-block; float:right; margin-top:5px;">
+                                <button id="submit" class="k-button">@ResourceLanguaje.Resource.BtnSaveTalent</button>
+                            </div>
+                        </div>
+                    }
+                    <iframe id="upload_targetUpdateQueue" name="upload_targetUpdateQueue" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+                </div>
+            </div>
+        </div>
+        <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+        <div style="width:50%;min-width:5px;float:left;">
+            <div class="titleForm">
+                <div class="title">Account Entity</div>
+            </div>
+            <div class="inBodyForm" style="height:400px; padding:10px 20px 10px 20px;" id="">
+                <div style="width:100%;">
+                 <div class="clearfix" style="padding-bottom:15px;"><button type="button" class="btn btn-primary btn-sm" style="float:right;" onclick="FnAddNewAccountEntity()">Add New</button></div>
+                    <div style="">
+
+                        <table id="TBAddNewAccoEnti" class="table divHide">
+                            <thead>
+                                <tr>
+                                    <th>Cuenta</th>
+                                    <th>Requiere</th>
+                                    <th>Asignación</th>
+                                    <th>Talento Visible</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="editor-field">
+                                            <input id="IDACCO" name="IDACCO" />
+                                        </div>
+                                    </td>
+                                    <td style=" text-align: center;"><input id="Req" type="checkbox" style="width:15px;"></td>
+                                    <td style=" text-align: center;"><input id="Ass" type="checkbox" style="width:15px;"></td>
+                                    <td style=" text-align: center;"><input id="Vis" type="checkbox" style="width:15px;"></td>
+                                    <td style=" text-align: center;">
+                                        <span title="Save" class="glyphicon glyphicon-floppy-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px; " onclick="SaveNewAccountEntity()"></span>
+                                        <span>&nbsp;&nbsp;</span>
+                                        <span title="Hide" class="glyphicon glyphicon-chevron-up" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px; " onclick="HideNewAccountEntity()"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                                                             
+                    </div>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Nombre de Cuenta</th>                                
+                                <th>Requiere</th>
+                                <th>Asignación</th>
+                                <th>Habilitar Talento</th>
+                                <th style="border-left: 1px solid #e2e2e2; ">Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TableAccountEntity">
+                           
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var ID_ACCO = $("#ID_ACCO").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Talent/ListAccounts?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_ACCO.bind("dataBound", function (e) {
+            ID_ACCO.value(@ViewBag.ID_ACCO_PERT);
+        });
+
+        var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_ACCO",
+            filter: "contains",
+            dataTextField: "DES_QUEU",
+            dataValueField: "ID_QUEU",
+            template: '<span">#= DES_QUEU # (#= NAM_QUEU #)</span>',
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Talent/ListQueues?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_QUEU.bind("dataBound", function (e) {
+            ID_QUEU.value(@ViewBag.ID_QUEU);
+        });
+        LoadTableAccountEntity();  
+    });
+
+    function PopUpQueue(msg) {
+        if (msg == 'OK') {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Saved Information");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>La información se ha actualizado Correctamente.</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.ContinueTalent</button>" +
+                                       "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        }
+        else {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Saved Information");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>No se puede Actualizar la información.</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.ContinueTalent</button>" +
+                                       "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        }
+    }
+
+        var x = 0;
+        // Cargamos los datos del Account Entity.
+    function LoadTableAccountEntity()
+    {
+        $.ajax({
+            url: "/Talent/ListAccountEntity/@ViewBag.ID_PERS_ENTI_QUEU",
+                data: "var=" + Math.random(),
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+
+                    $("#TableAccountEntity").empty();
+
+                    $.each(data['Data'], function (index, value) {
+
+                    $("#TableAccountEntity").append(
+                                                    '<tr id="FilaAccoEnti' + (data['Data'][index]['ID_ACCO_ENTI']) + '"' + ((data['Data'][index]['DEF_ACCO']) == true ? 'class="danger"' : '') + '>' +
+                                                        '<td>' + (data['Data'][index]['NAM_ACCO']) + '</td>' +                                                       
+                                                        '<td style=" text-align: center;">'+
+                                                            '<span id="VisRequ' + (data['Data'][index]['ID_ACCO_ENTI']) + '"  class="glyphicon glyphicon-' + ((data['Data'][index]['VIS_REQU']) == true ? 'ok' : 'remove') + '" aria-hidden="true" style="color: #3E4752; font-size: 9px;"></span>' +
+                                                             '<input id="CBVisRequ' + (data['Data'][index]['ID_ACCO_ENTI']) + '" class="divHide" type="checkbox" style="width:15px;" ' + ((data['Data'][index]['VIS_REQU']) == true ? 'checked' : '') + ' />' +
+                                                        '</td>'+
+                                                        '<td style=" text-align: center;">'+
+                                                            '<span id="VisAssi' + (data['Data'][index]['ID_ACCO_ENTI']) + '" class="glyphicon glyphicon-' + ((data['Data'][index]['VIS_ASSI']) == true ? 'ok' : 'remove') + '" aria-hidden="true" style="color: #3E4752; font-size: 9px; "></span>' +
+                                                             '<input id="CBVisAssi' + (data['Data'][index]['ID_ACCO_ENTI']) + '" class="divHide" type="checkbox" style="width:15px;" ' + ((data['Data'][index]['VIS_ASSI']) == true ? 'checked' : '') + ' />' +
+                                                        '</td>'+
+                                                        '<td style=" text-align: center;">'+
+                                                            '<span id="VisTale' + (data['Data'][index]['ID_ACCO_ENTI']) + '" class="glyphicon glyphicon-' + ((data['Data'][index]['VIS_TALE']) == true ? 'ok' : 'remove') + '" aria-hidden="true" style="color: #3E4752; font-size: 9px; "></span>' +
+                                                            '<input id="CBVisTale' + (data['Data'][index]['ID_ACCO_ENTI']) + '" class="divHide" type="checkbox" style="width:15px;" ' + ((data['Data'][index]['VIS_TALE']) == true ? 'checked' : '') + ' />' +
+                                                        '</td>'+
+                                                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">'+
+                                                            '<span  id="Edit' + (data['Data'][index]['ID_ACCO_ENTI']) + '" title="Edit" class="glyphicon glyphicon-pencil" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="EdtitAccountEntity(' + (data['Data'][index]['ID_ACCO_ENTI']) + ')"></span>' +
+                                                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                                            '<span id="Remove' + (data['Data'][index]['ID_ACCO_ENTI']) + '" title="Remove" class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="RemoveAccountEntity(' + (data['Data'][index]['ID_ACCO_ENTI']) + ',' + (data['Data'][index]['DEF_ACCO']) + ')"></span>' +
+                                                            '<span id="Save' + (data['Data'][index]['ID_ACCO_ENTI']) + '" title="Save" class="glyphicon glyphicon-floppy-save divHide" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px; " onclick="SaveAccountEntity(' + (data['Data'][index]['ID_ACCO_ENTI']) + ')"></span>' +
+                                                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                                            '<span id="Default' + (data['Data'][index]['ID_ACCO_ENTI']) + '" title="Default" class="glyphicon glyphicon-ok divHide" aria-hidden="true" style="color: #679700; cursor: pointer; font-size: 13px; " onclick="DefaultAccountEntity(' + (data['Data'][index]['ID_ACCO_ENTI']) + ')"></span>' +
+                                                        '</td>' +
+                                                    '</tr>'
+
+                        );
+                    });
+                },
+                error: function (source) {
+                    alert("Error Carga Json");
+                }
+            });
+    }
+
+        function EdtitAccountEntity(id)
+        {    
+            $("#VisRequ" + id).addClass("divHide");
+            $("#VisAssi" + id).addClass("divHide");
+            $("#VisTale" + id).addClass("divHide");
+            $("#Edit" + id).addClass("divHide");
+            $("#Remove" + id).addClass("divHide");
+
+            $("#CBVisRequ" + id).removeClass("divHide");
+            $("#CBVisAssi" + id).removeClass("divHide");
+            $("#CBVisTale" + id).removeClass("divHide");
+            $("#Save" + id).removeClass("divHide");
+            $("#Default" + id).removeClass("divHide");
+
+            if (x != 0)
+            {
+                $("#VisRequ" + x).removeClass("divHide");
+                $("#VisAssi" + x).removeClass("divHide");
+                $("#VisTale" + x).removeClass("divHide");
+                $("#Edit" + x).removeClass("divHide");
+                $("#Remove" + x).removeClass("divHide");
+
+                $("#CBVisRequ" + x).addClass("divHide");
+                $("#CBVisAssi" + x).addClass("divHide");
+                $("#CBVisTale" + x).addClass("divHide");
+                $("#Save" + x).addClass("divHide");
+                $("#Default" + x).addClass("divHide");
+            } 
+            x = id;
+        }
+
+        function SaveAccountEntity(id)
+        {
+            var vr= $("#CBVisRequ" + id).prop('checked');
+            var va = $("#CBVisAssi" + id).prop('checked');
+            var vt = $("#CBVisTale" + id).prop('checked');
+
+            $.ajax({
+                url: "/Talent/SaveAccountEntity/",
+                data: "vr=" + vr + "&va=" + va + "&vt=" + vt + "&idaccoenti="+id+ "&var=" + Math.random(),
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+
+                    if (resp == "OK")
+                    {
+                        LoadTableAccountEntity();
+                        x = 0;
+                    }
+                }
+            });
+        }
+
+        function DefaultAccountEntity(id)
+        {
+            $.ajax({
+                url: "/Talent/DefaultAccountEntity/",
+                data: "&idaccoenti="+id+"&idpersenti=" + @ViewBag.ID_PERS_ENTI_QUEU +  "&var=" + Math.random(),
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+
+                    if (resp == "OK")
+                    {
+                        LoadTableAccountEntity();
+                        x = 0;
+                    }
+                }
+            });
+        }
+
+        function RemoveAccountEntity(id, defacco)
+        {
+            if (defacco == false)
+            {    
+                $.ajax({
+                    url: "/Talent/RemoveAccountEntity/",
+                    data: "idaccoenti=" + id + "&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == "OK") {
+                          //  $("#FilaAccoEnti" + id).remove();
+                            LoadTableAccountEntity();
+                            x = 0;
+                        }
+                    }
+                });
+            }
+            else {
+
+                $('#SmallModalContent').modal('show');
+                $("#SmallModalTitle").empty();
+                $("#SmallModalTitle").text("Warning");
+                $("#SmallModalBody").empty();
+                $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Error al eliminar Cuenta </div>");
+                $("#SmallModalFooter").empty();
+                $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                  "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.ContinueTalent</button>" +
+                                           "</div>");
+                var undo = $("#continues")
+                .bind("click", function () {
+                    $('#SmallModalContent').modal('hide');
+                });
+            }            
+        }
+
+        function FnAddNewAccountEntity()
+        {
+          
+            $("#TBAddNewAccoEnti").removeClass("divHide");
+
+            $("#Req").removeAttr('checked');
+            $("#Ass").removeAttr('checked');
+            $("#Vis").removeAttr('checked');
+            $("#IDACCO").val('');
+
+            var IDACCO = $("#IDACCO").kendoComboBox({
+                autoBind: true,
+                dataTextField: "NAM_ACCO",
+                dataValueField: "ID_ACCO",
+                filter: "contains",
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Talent/ListAccounts?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+
+        function HideNewAccountEntity()
+        {
+
+            $("#Req").removeAttr('checked');
+            $("#Ass").removeAttr('checked');
+            $("#Vis").removeAttr('checked');
+            $("#IDACCO").val('');
+
+            $("#TBAddNewAccoEnti").addClass("divHide");
+        }
+
+        function SaveNewAccountEntity()
+        {
+            var vr = $("#Req").prop('checked');
+            var va = $("#Ass").prop('checked');
+            var vt = $("#Vis").prop('checked');
+            var idacco = $("#IDACCO").val();
+          
+            $.ajax({
+                url: "/Talent/SaveNewAccountEntity/",
+                data: "vr=" + vr + "&va=" + va + "&vt=" + vt + "&idpersenti=" + @ViewBag.ID_PERS_ENTI_QUEU + "&idacco=" + idacco + "&var=" + Math.random(),
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+
+                    if (resp == "OK") {
+                        $("#TBAddNewAccoEnti").addClass("divHide");
+                        LoadTableAccountEntity();
+                        x = 0;
+                    }
+                }
+            });
+        }
+
+    </script>

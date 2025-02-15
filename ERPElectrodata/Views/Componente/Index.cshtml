@@ -1,0 +1,209 @@
+﻿@{
+    ViewBag.Title = "Componente";
+    Layout = null;
+}
+@*<link href="~/Content/ITMS/styles.css" rel="stylesheet" />*@
+<style type="text/css">
+    a.tooltip span {
+        cursor: default;
+        display: none;
+        padding: 5px;
+        margin: -25px 0px 0px 120px;
+        width: 230px;
+        position: relative;
+        z-index: 9;
+    }
+
+    a.tooltip:hover span {
+        display: block;
+        position: absolute;
+        background: #000;
+        border: 1px solid #cccccc;
+        color: #ddd;
+        font-size: 14px;
+        font-weight: normal;
+        opacity: 0.9;
+    }
+
+    .bg-primary {
+        background-color: rgb(81, 104, 130);
+        font-size:13px;
+    }
+    
+    .detalle {
+        font-size:13px;
+        color:#7F7F7F;
+    }
+    .contenido {
+        background:#DCDCDE;
+    }
+    .btn-warning{
+        width:10%;
+        float:right;
+        margin-bottom:10px;
+    }
+    #btnLicencias {
+        margin-left:5px;
+        background:#F24541;
+        border-color:#F24541;
+    }
+    #caja {
+        /*border:1px solid black;*/
+        height:30px;
+        padding-top:-5px;
+    }
+    #pagerdivPrograma {
+        margin-top:0;
+        padding-top:0;
+    }
+    #exportar {
+        /*clear:both;*/
+        float:right;
+        height:28px;
+        width:70px;
+    }
+    #Buscar {
+        margin-right: 20px;
+    }
+</style>
+<div id="divContent">
+    <h1 class="titleModule">Componentes</h1>
+    <div class="divFondoDos" style="padding:1px,1px;height:40px;">
+        <div style="float:left; width:100%">
+            <div class="editor-label" style="float:left; padding: 5px;">
+                Tipo de Activo
+            </div>
+            <div class="editor-field" style="float:left;">
+                <input id="IdTipoActivo">
+            </div>
+            @using (Html.BeginForm("ExportarListaComponentes", "Componente", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+            {
+                <button type="button" class="btn btn-primary btn-warning" onclick="ExportarComponentes();" id="exportar">Exportar</button>
+            }
+            <button type="button" class="btn btn-primary btn-sm" style="float:right;" id="Buscar">Buscar</button>
+        </div>
+    </div>
+</div>
+
+<div style="width: 100%; margin:15px auto;" id="cabecera">
+    <div class="bodyForm">
+        <div class="inBodyForm" style="height:100%; background-color:white">
+            <div class="bg-primary" style="width:100%;">
+                <div class="bg-primary" style="float:left; width:100%;">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:51%"><strong>Tipo de Activo</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:15%"><strong>Cantidad Total</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:15%"><strong>En Uso</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:14%"><strong>Disponible</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+            </div>
+            <div style="float:left; width:100%;height:10px;"></div>
+            <div id="divComponente" class="contentView"></div>
+            <div id="pagerdivComponente" class="contentViewPager" style="width:99%"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaComponente">
+    <a href="\\ComponenteDetalle/${ID_TYPE_ASSE}" target="_blank">
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:51%;height:10px;" class="detalle">${Tipo}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:15%" class="detalle">${Cantidad}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:15%" class="detalle">${EnUso}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:14%" class="detalle">${Disponible}</div>
+        <div style="float:left; width:100%" id="caja"><hr /></div>
+    </a>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#IdTipoActivo").kendoComboBox({
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/ListarTipoActivo?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#Estado").kendoComboBox({
+            dataTextField: "texto",
+            dataValueField: "valor",
+            dataSource: [
+                { texto: "Disponible", valor: 2 },
+                { texto: "En Uso", valor: 1 }
+            ]
+        });
+        
+        $("#Buscar").click(function () {
+
+            $("#pagerdivComponente").empty();
+            $("#divComponente").empty();
+
+            if ($("#divComponente").data("kendoListView")) {
+                $("#pagerdivComponente").data("kendoPager").destroy();
+                $("#divComponente").data("kendoListView").destroy();
+            }
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/Componente/BuscarListarComponentes/0?var",
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random(),
+                            IdTipoActivo: $("#IdTipoActivo").val() == '' ? 0 : $("#IdTipoActivo").val()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 15,
+                    schema: {
+                        data: "Data",
+                        total: "Cantidad"
+                    }
+            });
+
+            $("#pagerdivComponente").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [5, 10, 15],
+                refresh: true
+            });
+
+            $("#divComponente").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#plantillaComponente").html())
+            });
+
+        });
+
+        $("#Buscar").click();
+
+    });
+
+    function ExportarComponentes() {
+        $("#formExportar").submit();
+    }
+
+</script>

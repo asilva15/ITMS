@@ -1,0 +1,168 @@
+﻿@model ERPElectrodata.Models.Cronograma
+@{
+    Layout = null;
+}
+<style>
+    b {
+        color: #F83C50;
+    }
+</style>
+
+@using (Html.BeginForm("AgregarActividad", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmGenerarCronograma", target = "upload_target" }))
+{
+    @Html.Hidden("IdDocuSale")
+    <input type="hidden" value="@ViewBag.ReprogramarCronograma" name="chkReprogramar" id="chkReprogramar" />
+    <div class="mb-3 card">
+        <div class="card-body">
+            <div class="card-title">Registro de actividades</div>
+            <div id="mensaje"></div>
+            <div class="col-md-12" id="divMostrarFechaInicio">
+                <div class="row">
+                    <div class="col-md-4">
+                        <label>Fecha de Inicio<b>(*)</b></label>
+                        <input type="text" class="form-control pull-right" id="dtFechaInicio" name="dtFechaInicio" />
+                    </div>
+
+                    <div class="col-md-8">
+                        <br />
+                        <button id="btnAgregarFechaInicio" class="btn btn-primary">Agregar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12">
+                <div id="divRegistrarCronograma">
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <label>Nombre Actividad <b>(*)</b></label>
+                            <input id="NombreActividad" name="NombreActividad" class="form-control input-sm" type="text" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Fecha <b>(*)</b></label>
+                            <input type="text" class="form-control" id="FechaFin" name="FechaFin" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>Peso(Acumulable) <b>(*)</b></label>
+                            <input id="txtPeso" name="txtPeso" class="form-control" type="number" style="width:100%;" min="0" max="100" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <label>Tipo de Actividad <b>(*)</b></label>
+                            @Html.DropDownListFor(model => model.IdAccoPara, new SelectList(Model.ListarTipoActividad, "id", "text"), new { htmlAttributes = new { @class = "form-control select2" } })
+                            @Html.ValidationMessageFor(model => model.IdAccoPara, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="col-md-4">
+                            <br />
+                            <button id="btnAgregarActividad" class="btn btn-primary btn-block">Agregar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="mb-3 card">
+        <div class="card-body">
+            <div style="width:100%" id="divTablaCronograma">
+                <table id="tbCronograma" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Actividad</th>
+                            <th>Tipo actividad</th>
+                            <th>Fecha</th>
+                            <th>Peso</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Actividad</th>
+                            <th>Tipo actividad</th>
+                            <th>Fecha</th>
+                            <th>Peso</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+
+}
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página. -->
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#divMostrarFechaInicio").hide();
+        $("#divRegistrarCronograma").hide();
+
+        $("#dtFechaInicio").kendoDatePicker();
+        $("#FechaFin").kendoDatePicker();
+
+        $('.modal-body #IdDocuSale').val(@ViewBag.ID_DOCU_SALE);
+        $(".modal-body #IdAccoPara").select2({ width: '100%' });
+
+        MostrarFechaInicio();
+
+        listarActividades();
+
+    });
+    function MostrarFechaInicio() {
+        if(@ViewBag.MostrarFechaInicio==1){
+            $("#divMostrarFechaInicio").show();
+            $("#divRegistrarCronograma").hide();
+        }else{
+            $("#divMostrarFechaInicio").hide();
+            $("#divRegistrarCronograma").show();
+        }
+    }
+    function listarActividades() {
+        $('#tbCronograma').dataTable().fnDestroy();
+        $('#tbCronograma').DataTable({
+            //"order": [[4, "asc"]],
+            responsive: true,
+            //dom: 'Bfrtip',
+            searching: false,
+            bPaginate: false,
+            ajax: "/OrderForm/ListarActividadesAgregadas/@ViewBag.ID_DOCU_SALE",
+            columns: [
+                { data: "Actividad" },
+                { data: "TipoActividad" },
+                { data: "Fecha" },
+                { data: "Peso" }
+                //{ data: null,
+                //    render: function (data, type, row) {
+                //        return '<span  id="' + data.IdContacto + '" title="Eliminar Contacto" class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px; " onclick="eliminarContacto(' + (data.IdContacto) + ')"></span>';
+                //    }
+                //}
+            ]//,
+        });
+    }
+
+
+    function mostrarMensaje(msg, code) {
+        if (msg == "ERROR") {
+            toastr.error(code, "Mensaje");
+        }
+        else
+        if (msg == "OK")
+        {
+            if (code == 1) {
+                toastr.success("<strong>¡Bien!</strong> El Registro ha sido guardado. ", "Mensaje");
+                setTimeout(function () { limpiar() }, 800);
+                listarActividades();
+                MostrarMensajeCronograma(@ViewBag.ID_DOCU_SALE);
+            }
+            else if (code == 2) {
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+                toastr.success("<strong>¡Bien!</strong> El Registro ha sido guardado. ", "Mensaje");
+            }
+        }
+
+    }
+
+    function limpiar() {
+        $('.modal-body #NombreActividad').val('');
+        $('.modal-body #FechaFin').val('');
+        $('.modal-body #txtPeso').val('');
+
+    }
+</script>

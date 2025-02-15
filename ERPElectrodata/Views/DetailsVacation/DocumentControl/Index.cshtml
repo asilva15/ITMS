@@ -1,0 +1,607 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+
+<style>
+    #bandeja ul {
+        margin: 0;
+        padding: 0;
+        list-style-type: none;
+    }
+
+        #bandeja ul i {
+            float: right;
+            margin: 0px;
+            display: none;
+            cursor: pointer;
+        }
+
+        #bandeja ul li {
+            margin: 0px;
+            padding: 0px;
+        }
+
+            #bandeja ul li:hover {
+                background-color: #F0F0F0;
+            }
+
+                #bandeja ul li:hover i {
+                    display: inline-block;
+                }
+
+    .ulDC {
+        list-style: none;
+    }
+
+        .ulDC li {
+            margin: 2px 0px 2px 0px;
+            padding: 2px 0px;
+        }
+
+            .ulDC li a:hover {
+                cursor: pointer;
+                text-decoration: none;
+            }
+
+            .ulDC li a img {
+                float: left;
+            }
+
+    .divContDC {
+        border: 1px solid #e2e2e2;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .btnDownload {
+        background: url('../../Content/Images/menu/download.png');
+        height: 16px;
+        width: 16px;
+        margin-left: 5px;
+    }
+
+    .btnFavourite {
+        background: url('../../Content/Images/menu/favourite.png');
+        height: 16px;
+        width: 16px;
+    }
+</style>
+
+    <div>
+        <h1>Document Control</h1>
+
+        <div ng-controller="ModalDemoCtrl">
+            <script type="text/ng-template" id="myModalContent.html">
+                <div class="modal-header" ng-repeat="item in titles">
+                    <h3 class="modal-title">
+                        {{ item }}
+                    </h3>
+                </div>
+                    <div class="modal-body">
+                        <div>
+                            <ui-select ng-model="address.selected"
+                                       theme="bootstrap"
+                                       ng-disabled="disabled"
+                                       @*reset-search-input="false"*@
+                                       style="width: 300px;"
+                                       title="Choose an address"
+                                       on-select="someFunction($item, $model)">
+                                <ui-select-match placeholder="Enter a name">{{$select.selected.FIR_NAME}}</ui-select-match>
+                                <ui-select-choices repeat="address in addresses | filter: $select.search"
+                                                   @*ng-bind="refreshAddresses($select.search)"*@
+                                                   @*refresh="refreshAddresses($select.search)"
+                                                   refresh-delay="500"*@>
+                                    <div ng-bind-html="address.FIR_NAME | highlight: $select.search"></div>
+                                </ui-select-choices>
+                            </ui-select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-primary" ng-repeat="button in Buttons" ng-click="ok()">{{ button }}</button>
+                        <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+                    </div>
+            </script>
+            <script type="text/ng-template" id="myModalAlertDC.html">
+                <div class="modal-header" ng-repeat="item in titles">
+                    <h3 class="modal-title">
+                        {{ item }}
+                    </h3>
+                </div>
+                <div class="modal-body">
+                    <div ng-repeat="texto in textos">
+                        <div class="alert alert-warning" role="alert">{{ texto }}</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary" ng-repeat="button in Buttons" ng-click="ok()">{{ button }}</button>
+                    <button class="btn btn-default" ng-click="cancel()">Cancel</button>
+                </div>
+            </script>
+        </div>
+
+        <div class="afterMain" ng-controller="PaginationDemoCtrl">
+            <div style="float:left;width:15%;height:490px;border:1px solid #e2e2e2">
+                <ul class="ulDC">
+                    <li><a @*onclick="gridInbox(this)"*@ ng-click="menu('Inbox')" href=""><img src="~/Content/Images/menu/documentDownload.png" style="margin-right:5px;" /><div>Inbox</div></a></li>
+                    <li><a @*onclick="listUpload(this)"*@ ng-click="menu('Upload')" href=""><img src="~/Content/Images/menu/documentUpload.png" style="margin-right:5px;" /><div>Upload</div></a></li>
+                    @*<li><a onclick="listStorage(this) " href="#"><img src="~/Content/Images/menu/folder.png" style="margin-right:5px;" /><div>Storage</div></a></li>
+                    <li><a><img src="~/Content/Images/menu/recent.png" style="margin-right:5px;" /><div>Recent</div></a></li>
+                    <li><a><img src="~/Content/Images/menu/favourite.png" style="margin-right:5px;" /><div>Favourite</div></a></li>*@
+                </ul>
+            </div>
+
+            <div style="width:1%;float:left;">&nbsp;</div>
+
+            <div style="float:left;width:50%;height:490px;border:0px solid white;">
+
+                <div>
+                    <div id="bandeja" style="padding:00px 0px 0px 0px;" ng-init="init(1)">
+                        <ul style="border-top:1px solid #e3e3e3;border-bottom:none;border-right:none;border-left:none;height:440px;overflow:auto;" id="divListDC">
+                            <li ng-repeat="data in datos" ng-click="work(data.ID_DOCU_CONT)" style="border-bottom:1px solid #e3e3e3;border-right:1px solid #e3e3e3;border-left:1px solid #e3e3e3; padding:5px;">
+
+                                <div style="padding:4px 4px 4px 4px; border-left:5px solid {{data.COLOR}}; background-color:{{data.COLOR}};">
+                                    <img width="30px" style="float:left" src="/Content/Fotos/{{data.ID_FOTO}}" />
+                                    <div style="color:white;float:left;font-size:13px;margin-left:5px;">{{data.REMI}} ({{data.NAM_DOCU_CONT_ACTI}})<br />{{data.COM_NAME}}</div>
+                                    <div style="color:white;float:right;">{{data.CREATED_DATE}}</div>
+                                    <div style="clear:both;"></div>
+                                    <div style="float:left; color:white">{{data.NAM_TYPE_DOCU_CONT}} - {{data.NUM_DOCU}}</div>
+                                    <div style="float:right; display:inline-block;heigdownloadFileht:20px;">
+                                        <i onclick="addFavourite(data.ID_DOCU_CONT)" class="glyphicon glyphicon-star" style="margin-right:10px;"></i>
+                                        <i ng-click="confirmReception(data.ID_DOCU_CONT)" class="glyphicon glyphicon-ok-sign" style="margin-right:10px;"></i>
+                                        <i ng-click="downloadFile(data.ID_DOCU_CONT)" class="glyphicon glyphicon-cloud-download" style="margin-right:10px;"></i>
+                                        <span class="dropdown" dropdown on-toggle="toggled(open)" ng-controller="DropdownCtrl" style="margin-right:170px;">
+                                            <a href class="dropdown-toggle" dropdown-toggle>
+                                                <i class="glyphicon glyphicon-option-vertical" style="margin-right:10px;"></i>
+                                            </a>
+
+                                            <ul class="dropdown-menu" role="menu" ng-controller="ModalDemoCtrl">
+                                                <li><a href ng-click="open(data.ID_DOCU_CONT,1)"><span style="float:left;margin-right:5px;margin-top:2px;" class="glyphicon glyphicon-share"></span><div style="margin-left:5px;">Shared</div></a></li>
+                                                <li><a href="" ng-click="open(data.ID_DOCU_CONT,2)"><span style="float:left;margin-right:5px;margin-top:2px;" class="glyphicon glyphicon-edit"></span><div style="margin-left:5px;">Send Validate</div></a></li>
+                                                <li><a href="" ng-click="openDC(0,0)"><span style="float:left;margin-right:5px;margin-top:2px;" class="glyphicon glyphicon-check"></span><div style="margin-left:5px;">Validate</div></a></li>
+                                                <li class="divider"></li>
+                                                <li><a href="" ng-click="openDC(0,-1)"><span style="float:left;margin-right:5px;margin-top:2px;" class="glyphicon glyphicon-remove"></span><div style="margin-left:5px;">Delete</div></a></li>
+                                            </ul>
+
+                                        </span>
+                                    </div>
+                                    <div style="clear:both;"></div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <pagination total-items="bigTotalItems" ng-model="currentPage" items-per-page="itemsPerPage" max-size="maxSize" class="pagination-sm" boundary-links="true" rotate="false" num-pages="numPages" ng-change="pageChanged()"></pagination>
+                    @*<div ng-repeat="detalle in detalles">{{detalle.FROM_PERSON}}</div>*@
+                </div>
+            </div>
+
+            <div style="width:1%;float:left;">&nbsp;</div>
+
+            <div style="width:33%;float:left;display:block;height:490px;" ng-controller="DropdownCtrl">
+                
+                <div ng-controller="AccordionDemoCtrl">
+                    @*<p>
+                        <button class="btn btn-default btn-sm" ng-click="status.open = !status.open">Toggle last panel</button>
+                        <button class="btn btn-default btn-sm" ng-click="status.isFirstDisabled = ! status.isFirstDisabled">Enable / Disable first panel</button>
+                    </p>
+                    <label class="checkbox">
+                        <input type="checkbox" ng-model="oneAtATime">
+                        Open only one at a time
+                    </label>*@
+                    <accordion close-others="oneAtATime">
+                        @*<accordion-group heading="Static Header, initially expanded" is-open="status.isFirstOpen" is-disabled="status.isFirstDisabled">
+                            This content is straight in the template.
+                        </accordion-group>
+                        <accordion-group heading="{{group.title}}" ng-repeat="group in groups">
+                            {{group.content}}
+                        </accordion-group>
+                        <accordion-group heading="Dynamic Body Content">
+                            <p>The body of the accordion group grows to fit the contents</p>
+                            <button class="btn btn-default btn-sm" ng-click="addItem()">Add Item</button>
+                            <div ng-repeat="item in items">{{item}}</div>
+                        </accordion-group>*@
+                        <accordion-group is-open="status.open">
+                            <accordion-heading>
+                                Activities <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-right': !status.open}"></i>
+                            </accordion-heading>
+                            <div ng-repeat="detalle in detalles" >
+                                <div style="width:100%;clear:both;">
+                                    <div style="float:left;margin-right:15px;">
+                                        <img width="30px" style="float:left;border-radius:50%;" src="/Content/Fotos/{{detalle.FROM_FOTO}}.jpg" />
+                                    </div>
+                                    <div style="float:left; width:70%;">
+                                        <div>From: {{detalle.FROM_PERSON}}</div>
+                                        <div>To:   {{detalle.TO_PERSON}}</div>
+                                        <div><div style="float:left;"><strong>{{detalle.ACTION}}</strong> </div><div style="float:right;"><strong>{{detalle.CREATED}}</strong></div></div>
+                                    </div>
+                                </div>
+                                <div style="clear:both;height:5px;"></div>
+                                <hr style="clear:both;"/>
+                             </div>
+                        </accordion-group>
+                        <accordion-group>
+                            <accordion-heading>
+                                Detail Document <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-up': !status.open}"></i>
+                            </accordion-heading>
+                            <div ng-repeat="file in files">
+                                <div style="width:100%;clear:both;">
+                                    @*<div style="float:left;margin-right:15px;">
+                    <img width="30px" style="float:left;border-radius:50%;" src="/Content/Fotos/{{compartido.FROM_FOTO}}.jpg" />
+                </div>*@
+                                    <div style="width:100%;">
+                                        @*<div>From: {{compartido.FROM_PERSON}}</div>
+                    <div>To:   {{compartido.TO_PERSON}}</div>*@
+                                        @*<div><div style="float:left;"><strong>{{compartido.PERSON}}</strong>{{compartido.Area}} </div><div style="float:right;"><strong>{{compartido.CREATED}}</strong></div></div>*@
+                                        <div><strong>{{file.CODART}}</strong></div>
+                                        <div>{{file.DESART}}</div>
+                                        <div><strong>Cost     : </strong>{{file.PRECOS}}</div>
+                                        <div><strong>Quantity : </strong>{{file.CANTOT}}</div>
+                                    </div>
+                                </div>
+                                <div style="clear:both;height:5px;"></div>
+                                <hr style="clear:both;" />
+                            </div>
+                        </accordion-group>
+                        <accordion-group>
+                            <accordion-heading>
+                                Shared Acces <i class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': status.open, 'glyphicon-chevron-up': !status.open}"></i>
+                            </accordion-heading>
+                            <div ng-repeat="compartido in compartidos">
+                                <div style="width:100%;clear:both;">
+                                    <div style="float:left;margin-right:15px;">
+                                        <img width="30px" style="float:left;border-radius:50%;" src="/Content/Fotos/{{compartido.FROM_FOTO}}.jpg" />
+                                    </div>
+                                    <div style="float:left; width:100%;">
+                                        @*<div>From: {{compartido.FROM_PERSON}}</div>
+                                        <div>To:   {{compartido.TO_PERSON}}</div>*@
+                                        <div><div style="float:left;"><strong>{{compartido.PERSON}}</strong>{{compartido.Area}} </div><div style="float:right;"><strong>{{compartido.CREATED}}</strong></div></div>
+                                    </div>
+                                </div>
+                                <div style="clear:both;height:5px;"></div>
+                                <hr style="clear:both;" />
+                            </div>
+                        </accordion-group>
+                    </accordion>
+                </div>
+
+                @*<div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingOne">
+                            <p class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                                    Activities
+                                </a>
+                            </p>
+                        </div>
+                        <div id="collapseOne" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingOne">
+                            <div class="panel-body">
+                                Uno
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingTwo">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                    Detail Document
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseTwo" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingTwo">
+                            <div class="panel-body">
+                                <div id="divDCD"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingThree">
+                            <h4 class="panel-title">
+                                <a class="collapsed" data-toggle="collapse" data-parent="#accordion" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                    Opcion 3
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                            <div class="panel-body">
+                                tres
+                            </div>
+                        </div>
+                    </div>
+                </div>*@
+
+                @*<div style="margin:0 auto;width:100%;height:200px;border:1px solid #e2e2e2;">
+                    <div style="margin:0 auto;width:250px;height:200px;">
+                        <img width="280px" style="text-align:center;margin-top:5px;" src="~/Content/Images/BannerDocumentControl.png" />
+                    </div>
+                </div>
+                <div style="height:10px;">&nbsp;</div>
+                <div style="margin:0 auto;width:99%;height:280px;border:1px solid #e2e2e2;">
+                    <div id="pieDC" style="width:99%; height:259px;"></div>
+                </div>*@
+
+            </div>
+        </div>
+
+    </div>
+
+
+    <iframe id="tempDownload" class="elementHide"></iframe>
+
+
+
+    @*<script type="text/x-kendo-tmpl" id="template">
+        <li onclick="clickDC('${ID_DOCU_CONT}')" style="border-bottom:1px solid \\#e3e3e3;border-right:1px solid \\#e3e3e3;border-left:1px solid \\#e3e3e3;">
+            <div style="padding:4px 4px 4px 4px;">
+
+                <img width="30px" style="float:left" src="/Content/Fotos/${ID_FOTO}" />
+
+                <div style="color:\\#022A41;float:left;font-size:13px;margin-left:5px;">${REMI} (${NAM_DOCU_CONT_ACTI})<br />${COM_NAME}</div>
+                <div style="color:\\#428bca;float:right;">${CREATED_DATE}</div>
+
+                <div style="clear:both;"></div>
+
+                <div style="float:left;">${NAM_TYPE_DOCU_CONT} - ${NUM_DOCU}</div>
+
+                <div style="float:right;">
+
+                    <i onclick="addFavourite(this)" class="glyphicon glyphicon-star" style="margin-right:10px;"></i>&nbsp;
+                    <i onclick="confirmReception('${ID_DOCU_CONT}')" class="glyphicon glyphicon-ok-sign" style="margin-right:10px;"></i>&nbsp;
+                    <i onclick="downloadFile('${ID_DOCU_CONT}')" class="glyphicon glyphicon-cloud-download" style="margin-right:10px;"></i>&nbsp;
+                </div>
+                <div style="clear:both;"></div>
+
+            </div>
+        </li>
+    </script>*@
+
+    @*<script type="text/x-kendo-tmpl" id="templatedcd">
+        <div>${CODART} - ${DESART}</div>
+    </script>*@
+
+    <script type="text/javascript">
+
+        function pieDC() {
+            $('#pieDC').highcharts({
+                title: {
+                    text: null
+                },
+                colors: ["#022A41", "#CB3F37", "#679700", "#EC863A", "#F2BA0C", "#2D5C88"],
+                tooltip: {
+                    pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                },
+                credits: { enabled: false },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                            style: {
+                                color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Type Documents',
+                    innerSize: '50%',
+                    data: [
+                        ['Contracts', 25.0],
+                        ['Comprobantes', 26.8],
+                        {
+                            name: 'Notification',
+                            y: 12.8,
+                            sliced: true,
+                            selected: true
+                        },
+                        ['Letter', 8.5],
+                        ['Boleta', 6.2],
+                        ['Factura', 20.7]
+                    ]
+                }]
+            });
+        }
+
+        function downloadFile(id) {
+            console.log(id);
+            window.open("/DocumentControl/Download/" + id);
+            //gridInbox()
+        }
+
+        //function gridInbox() {
+
+        //    $("#divListDC").empty();
+
+        //    if ($("#divListDC").data("kendoListView")) {
+        //        $("#divListDC").data("kendoListView").destroy();
+        //    }
+
+        //    var dataSource = new kendo.data.DataSource({
+        //        transport: {
+        //            read: {
+        //                url: "/DocumentControl/Inbox?var" + Math.random(),
+        //                type: "GET",
+        //                dataType: "json",
+        //                data: {
+        //                    ran: Math.random()
+        //                }
+        //            }
+        //        },
+        //        autoSync: true,
+        //        serverFiltering: true,
+        //        filter: { field: "Status", operator: "eq", value: 0 },
+        //        serverPaging: true,
+        //        pageSize: 7,
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        }
+        //    });
+
+        //    $("#pagerDocument").kendoPager({
+        //        dataSource: dataSource,
+        //        pageSizes: [7, 15, 30],
+        //        refresh: true
+        //    });
+
+        //    $("#divListDC").kendoListView({
+        //        dataSource: dataSource,
+        //        template: kendo.template($("#template").html()),
+        //    });
+        //}
+
+        function listUpload() {
+
+            $("#divListDC").empty();
+
+            if ($("#divListDC").data("kendoListView")) {
+                $("#divListDC").data("kendoListView").destroy();
+            }
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/DocumentControl/Upload?var" + Math.random(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            ran: Math.random()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                filter: { field: "Status", operator: "eq", value: 0 },
+                serverPaging: true,
+                pageSize: 7,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                }
+            });
+
+            $("#pagerDocument").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [7, 15, 30],
+                refresh: true
+            });
+
+            $("#divListDC").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#template").html()),
+            });
+        }
+
+        function listStorage() {
+            $("#divListDC").empty();
+
+            if ($("#divListDC").data("kendoListView")) {
+                $("#divListDC").data("kendoListView").destroy();
+            }
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/DocumentControl/Storage?var" + Math.random(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            ran: Math.random()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                filter: { field: "Status", operator: "eq", value: 0 },
+                serverPaging: true,
+                pageSize: 15,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                }
+            });
+
+            $("#pagerDocument").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [7, 15, 30],
+                refresh: true
+            });
+
+            $("#divListDC").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#template").html()),
+            });
+        }
+
+        //function confirmReception(id) {
+
+        //    var r = confirm("Confirma que ha recibido el documento fisico");
+        //    if (r == true) {
+        //        $.ajax({
+        //            url: "/DocumentControl/Confirm/" + id,
+        //            cache: false,
+        //        }).done(function (msg) {
+        //            if (msg == "OK") {
+        //                alert("Se Confirmo la Recepcion en Fisico");
+        //                gridInbox();
+        //            }
+        //            else {
+        //                alert("Contacte su Administrador");
+        //            }
+        //        })
+        //        .fail(function () {
+        //            alert("Error");
+        //            gridInbox();
+        //        });
+        //    }
+        //}
+
+        function clickDC(id) {
+            //divDCD
+            $("#divDCD").empty();
+
+            if ($("#divDCD").data("kendoListView")) {
+                $("#divDCD").data("kendoListView").destroy();
+            }
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/DocumentControlDetail/ByDC/" + id + "?var" + Math.random(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            ran: Math.random()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                //filter: { field: "Status", operator: "eq", value: 0 },
+                //serverPaging: true,
+                //pageSize: 15,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                }
+            });
+
+            //$("#pagerDocument").kendoPager({
+            //    dataSource: dataSource,
+            //    pageSizes: [7, 15, 30],
+            //    refresh: true
+            //});
+
+            $("#divDCD").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#templatedcd").html()),
+            });
+        }
+
+        $(document).ready(function () {
+            //gridInbox();
+            pieDC();
+        });
+    </script>

@@ -1,0 +1,707 @@
+﻿@{
+    Layout = null;
+}
+
+<style>
+
+
+    .container {
+        width: 100%;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+
+    th, td {
+        padding: 5px;
+        text-align: center;
+    }
+
+    thead {
+        background-color: #f2f2f2;
+    }
+
+    button {
+        cursor: pointer;
+    }
+
+    #message {
+        color: red;
+        font-weight: bold;
+    }
+
+    .summary-box {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+        .summary-box .info {
+            display: flex;
+            align-items: center;
+        }
+
+            .summary-box .info i {
+                font-size: 24px;
+                margin-right: 10px;
+            }
+
+        .summary-box .buttons {
+            display: flex;
+        }
+
+            .summary-box .buttons button {
+                margin-left: 10px;
+            }
+
+        .summary-box .percentage-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f5f5f5;
+            border-radius: 10px;
+            padding: 10px;
+        }
+
+            .summary-box .percentage-box .text-container {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                margin-left: 5px;
+            }
+            /*
+            .summary-box .percentage-box span {
+                font-size: 24px;
+                font-weight: bold;
+            }*/
+
+            .summary-box .percentage-box p {
+                margin: 0;
+                font-size: 10px;
+            }
+    
+</style>
+<!DOCTYPE html>
+
+<html>
+
+<body>
+    <div>
+        <div class="container">
+
+            <div class="summary-box">
+                <div class="info">
+                    <h4 style="font-weight:bold;padding-right:60px;">Objetivos</h4>
+                    <div id="info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>La suma del campo ponderado debe ser 100</span>
+                    </div>
+                </div>
+                <div class="percentage-box" id="estado1">
+                    <i class="fas fa-chart-bar" style="font-size: 30px;"></i>
+                    <div class="text-container">
+
+                        <span id="ponderado" style="font-size: 24px; font-weight: bold;"> 0%</span>
+
+                        <p style="font-size: 10px; margin: 1px;">Ponderado</p>
+                    </div>
+
+                </div>
+                <div class="percentage-box" id="estado2" hidden>
+                    <div class="form-group row">
+                        <div class="col-md-12" style="text-align: center; margin-bottom: -15px;">
+                            <i class="fas fa-chart-bar" style="font-size:30px;padding-right:10px"></i><label id="nivcumponderado" style="font-size: 24px; font-weight: bold;"> 0%</label>
+                            <p><b style="font-size: 10px; margin: 0; ">Nivel de Cumplimiento <br /> Ponderado (TOTAL)</b></p>
+                        </div>
+                    </div>
+                </div>
+                <div class="percentage-box" id="calificacion" hidden>
+                    <div class="col-md-12">
+                        <p><b id="Calificacion">Sin Calificación</b></p>
+                    </div>
+                </div>
+
+                <div class="buttons">
+                    <button id="ModalAgregarObjetivo" class="btn-shadow btn btn-hover-shine btn-warning" onclick="VerAgregarObjetivo(event);">Agregar Objetivo</button>
+                    <button id="btnEditarObjetivosGuardados" class="btn btn-primary" onclick="EditarObjetivosGuardados(event);" hidden>Editar Indicadores</button>
+                    <button id="btnCorregirIndicadores" class="btn btn-primary" onclick="CorregirIndicadores(event);" hidden>Corregir Indicadores</button>
+                    <button id="btnGuardarObjetivos" class="btn btn-primary" onclick="GuardarObjetivos(event);">Guardar Indicadores</button>
+                </div>
+            </div>
+            <br />
+            <table id="datatable">
+                <thead>
+                    <tr>
+                        <th># de Indicador</th>
+                        <th>Objetivos</th>
+                        <th>Descripción</th>
+                        <th>Fórmula Invertida</th>
+                        <th>Ponderado (%)</th>
+                        <th>Unidad de medida</th>
+                        <th>Meta</th>
+                        <th id="VR" hidden>Valor Real</th>
+                        <th id="NC" hidden>Nivel Cumplimiento</th>
+                        <th id="NCP" hidden>Nivel Cumplimiento Ponderado (%)</th>
+                        <th id="acciones">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $('.buttonFinish').hide();
+
+        if (@ViewBag.IdEstadoEvaluacion == 1) {
+            var IdEvaluacion = @ViewBag.IdEvaluacion;
+
+            // Realiza la llamada AJAX
+            $.ajax({
+                url: '/EvaluacionPersonal/ObtenerDatosEvaluacionDetalle',
+                type: 'GET',
+                data: { id: IdEvaluacion },
+                success: function (data) {
+                    // Verifica si la respuesta tiene datos
+                    if (data && data.length > 0) {
+                        // Itera sobre cada item en los datos recibidos
+                        data.forEach(function (item, index) {
+                            var rowCount = $('#datatable tbody tr').length + 1;
+
+                            var newRow = '<tr>' +
+                                '<td>' + rowCount + '</td>' +
+                                '<td>' + item.Objetivo + '</td>' +
+                                '<td>' + item.Descripcion + '</td>' +
+                                '<td><input type="checkbox"' + (item.FormulaInvertida ? 'checked' : '') + ' disabled> FI</td>' +
+                                '<td>' + item.Ponderado + '</td>' +
+                                '<td>' + item.Unidad + '</td>' +
+                                '<td>' + item.Meta + '</td>' +
+                                '<td>' +
+                                '<button class="btn btn-secundary" data-toggle="modal" data-target="#miModal" onclick="EditarFilaObjetivo(this,event)">✏️</button>' +
+                                '<button class="btn btn-secundary" onclick="EliminarFilaObjetivo(this,event)">🗑️</button>' +
+                                '</td>' +
+                                '</tr>';
+
+                            // Añade la nueva fila a la tabla
+                            $("#datatable tbody").append(newRow);
+
+                            document.getElementById('btnGuardarObjetivos').setAttribute('hidden', 'hidden');
+                            document.getElementById('btnEditarObjetivosGuardados').removeAttribute('hidden');
+
+                            $("#ponderado").text('100%');
+
+                        });
+                    } else {
+                        toastr.warning('No se encontraron datos para los objetivos.', 'Advertencia');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Ocurrió un error al obtener los datos de los objetivos.', 'Error');
+                }
+            });
+        }
+        else if (@ViewBag.IdEstadoEvaluacion == 2) {
+
+            var IdEvaluacion = @ViewBag.IdEvaluacion;
+
+            $.ajax({
+                url: '/EvaluacionPersonal/ObtenerDatosEvaluacionDetalle',
+                type: 'GET',
+                data: { id: IdEvaluacion },
+                success: function (data) {
+
+                    if (data && data.length > 0) {
+
+                        data.forEach(function (item, index) {
+                            var rowCount = $('#datatable tbody tr').length + 1;
+
+                            var newRow = '<tr>' +
+                                '<td>' + rowCount + '</td>' +
+                                '<td>' + item.Objetivo + '</td>' +
+                                '<td>' + item.Descripcion + '</td>' +
+                                '<td><input type="checkbox"' + (item.FormulaInvertida ? 'checked' : '') + ' disabled> FI</td>' +
+                                '<td>' + item.Ponderado + '</td>' +
+                                '<td>' + item.Unidad + '</td>' +
+                                '<td>' + item.Meta + '</td>' +
+                                '<td id="ValorReal' + rowCount + '"><label>-</label></td>' +
+                                '<td id="NC' + rowCount + '"><label>-</label></td>' +
+                                '<td id="NCP' + rowCount + '"><label>-</label></td>' +
+                                '</tr>';
+
+                            $("#datatable tbody").append(newRow);
+                            $("#ponderado").text('0%');
+                            document.getElementById('VR').removeAttribute('hidden');
+                            document.getElementById('NC').removeAttribute('hidden');
+                            document.getElementById('NCP').removeAttribute('hidden');
+                            document.getElementById('acciones').setAttribute('hidden', 'hidden');
+                            document.getElementById('estado1').setAttribute('hidden', 'hidden');
+                            document.getElementById('info').setAttribute('hidden', 'hidden');
+                            document.getElementById('estado2').removeAttribute('hidden');
+                            /*document.getElementById('calificacion').removeAttribute('hidden');*/
+                            document.getElementById('ModalAgregarObjetivo').setAttribute('hidden', 'hidden');
+                            document.getElementById('btnEditarObjetivosGuardados').setAttribute('hidden', 'hidden');
+                            document.getElementById('btnGuardarObjetivos').setAttribute('hidden', 'hidden');
+
+
+                        });
+                    } else {
+                        toastr.warning('No se encontraron datos para los objetivos.', 'Advertencia');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Ocurrió un error al obtener los datos de los objetivos.', 'Error');
+                }
+            });
+
+        }
+        else if (@ViewBag.IdEstadoEvaluacion == 3) {
+
+            var IdEvaluacion = @ViewBag.IdEvaluacion;
+
+            $.ajax({
+                url: '/EvaluacionPersonal/ObtenerDatosEvaluacionDetalle',
+                type: 'GET',
+                data: { id: IdEvaluacion },
+                success: function (data) {
+
+                    if (data && data.length > 0) {
+                        var PonderadoInicial = 0;
+
+                        data.forEach(function (item, index) {
+                            var rowCount = $('#datatable tbody tr').length + 1;
+
+                            var newRow = '<tr>' +
+                                '<td>' + rowCount + '</td>' +
+                                '<td>' + item.Objetivo + '</td>' +
+                                '<td>' + item.Descripcion + '</td>' +
+                                '<td><input type="checkbox"' + (item.FormulaInvertida ? 'checked' : '') + ' disabled> FI</td>' +
+                                '<td>' + item.Ponderado + '</td>' +
+                                '<td>' + item.Unidad + '</td>' +
+                                '<td>' + item.Meta + '</td>' +
+                                '<td>' + (item.Estado == 'APROBADO' ? '<p style="color: green;"><b style="font-size:12px;font-family:calibri;">APROBADO</b></p>' :
+                                    (item.Estado == 'RECHAZADO' ? '<button class="btn btn-secundary" data-toggle="modal" data-target="#miModal" onclick="EditarFilaObjetivo(this,event)"><p style="color: red;"><b style="font-size:12px;font-family:calibri;">DESAPROBADO ✏️</b></p> </button>' :
+                                        (item.Estado == 'CORREGIDO' ? '<button class="btn btn-secundary" data-toggle="modal" data-target="#miModal" onclick="EditarFilaObjetivo(this,event)"><p style="color: blue;"><b style="font-size:12px;font-family:calibri;">CORREGIDO ✏️</b></p> </button>' : ''))) +
+                                '</td>' +
+                                '</tr>';
+
+                            $("#datatable tbody").append(newRow);
+
+                            if (item.Estado !== 'RECHAZADO') {
+                                PonderadoInicial += item.Ponderado;
+                            }
+
+                            document.getElementById('btnCorregirIndicadores').removeAttribute('hidden');
+                            document.getElementById('ModalAgregarObjetivo').setAttribute('hidden', 'hidden');
+                            document.getElementById('btnGuardarObjetivos').setAttribute('hidden', 'hidden');
+
+                        });
+
+                        $("#ponderado").text(PonderadoInicial.toFixed(0) + '%');
+
+                    } else {
+                        toastr.warning('No se encontraron datos para los objetivos.', 'Advertencia');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Ocurrió un error al obtener los datos de los objetivos.', 'Error');
+                }
+            });
+
+        }
+        else if (@ViewBag.IdEstadoEvaluacion == 4 || @ViewBag.IdEstadoEvaluacion == 5) {
+            var IdEvaluacion = @ViewBag.IdEvaluacion;
+
+            $.ajax({
+                url: '/EvaluacionPersonal/ObtenerDatosEvaluacionDetalle',
+                type: 'GET',
+                data: { id: IdEvaluacion },
+                success: function (data) {
+
+                    if (data && data.length > 0) {
+
+                        var totalNivCumpliPonde = data[0].TotalNivCumpliPonde;
+                        var calificacion = data[0].Calificacion;
+
+                        $('#nivcumponderado').text(totalNivCumpliPonde + '%');
+                        $('#Calificacion').text(calificacion);
+
+                        data.forEach(function (item, index) {
+                            var rowCount = $('#datatable tbody tr').length + 1;
+
+                            var newRow = '<tr>' +
+                                '<td>' + rowCount + '</td>' +
+                                '<td>' + item.Objetivo + '</td>' +
+                                '<td>' + item.Descripcion + '</td>' +
+                                '<td><input type="checkbox"' + (item.FormulaInvertida ? 'checked' : '') + ' disabled> FI</td>' +
+                                '<td>' + item.Ponderado + '</td>' +
+                                '<td>' + item.Unidad + '</td>' +
+                                '<td>' + item.Meta + '</td>' +
+                                '<td id="ValorReal' + rowCount + '"><label>' + item.ValorReal+'</label></td>' +
+                                '<td id="NC' + rowCount + '"><label>' + item.NivelCumplimiento +'</label></td>' +
+                                '<td id="NCP' + rowCount + '"><label>' + item.NivelCumplimientoPonderado + '</label></td>' +
+                                '</tr>';
+
+                            $("#datatable tbody").append(newRow);
+
+                            document.getElementById('VR').removeAttribute('hidden');
+                            document.getElementById('NC').removeAttribute('hidden');
+                            document.getElementById('NCP').removeAttribute('hidden');
+                            document.getElementById('acciones').setAttribute('hidden', 'hidden');
+                            document.getElementById('estado1').setAttribute('hidden', 'hidden');
+                            document.getElementById('info').setAttribute('hidden', 'hidden');
+                            document.getElementById('estado2').removeAttribute('hidden');
+                            document.getElementById('calificacion').removeAttribute('hidden');
+                            document.getElementById('ModalAgregarObjetivo').setAttribute('hidden', 'hidden');
+                            document.getElementById('btnGuardarObjetivos').setAttribute('hidden', 'hidden');
+
+
+                        });
+
+
+                    } else {
+                        toastr.warning('No se encontraron datos para los objetivos.', 'Advertencia');
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Ocurrió un error al obtener los datos de los objetivos.', 'Error');
+                }
+            });
+
+        }
+
+
+    });
+
+    function CorregirIndicadores(event) {
+        event.preventDefault();
+
+        var rowCount = $('#datatable tbody tr').length;
+        var ponderadoActual = parseFloat($("#ponderado").text()) || 0;
+
+        var sumaPonderado = 0;
+        var hasDesaprobado = false;
+        var table = document.getElementById('datatable');
+
+        for (var i = 1, row; row = table.rows[i]; i++) {
+            var revision = row.cells[7].textContent;
+            var peso = parseFloat(row.cells[4].textContent) || 0;
+            console.log(revision);
+            if (revision === 'DESAPROBADO ✏️ ') {
+                hasDesaprobado = true;
+            } else {
+                sumaPonderado += peso;
+            }
+        }
+
+        if (!hasDesaprobado) {
+            sumaPonderado = 0;
+        }
+
+        if (rowCount < 3) {
+            toastr.warning('Debe agregar por lo menos 3 objetivos.', 'Advertencia');
+            return;
+        } else if (rowCount > 6) {
+            toastr.warning('Como máximo son 5 objetivos.', 'Advertencia');
+            return;
+        } else if (ponderadoActual != (sumaPonderado == 0 ? 100 : sumaPonderado)) {
+            toastr.warning('La suma del campo ponderado debe ser ' + (sumaPonderado == 0 ? 100 : sumaPonderado) + '.', 'Advertencia');
+            return;
+        }
+
+        var filas = [];
+
+        for (var i = 1, row; row = table.rows[i]; i++) {
+            var numero = row.cells[0].textContent;
+            var objetivo = row.cells[1].textContent;
+            var descripcion = row.cells[2].textContent;
+            var formulaInverted = row.cells[3].querySelector('input').checked;
+            var peso = row.cells[4].textContent;
+            var unidad = row.cells[5].textContent;
+            var meta = row.cells[6].textContent;
+            var revision = row.cells[7].textContent;
+
+            filas.push({
+                Numero: numero,
+                Objetivo: objetivo,
+                Descripcion: descripcion,
+                FormulaInverted: formulaInverted,
+                Peso: peso,
+                Unidad: unidad,
+                Meta: meta,
+                Revision: revision
+            });
+        }
+
+        var IdEvaluacion = @ViewBag.IdEvaluacion;
+
+        $.ajax({
+            url: '/EvaluacionPersonal/GuardarRevisionObjetivos',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ indicadores: filas, IdEvaluacion: IdEvaluacion }),
+            success: function (response) {
+                console.log(response);
+                toastr.success('Los objetivos se actualizaron de forma exitosa.', 'Éxito');
+            },
+            error: function (error) {
+                console.error('Error al enviar los datos:', error);
+            }
+        });
+    }
+
+    function VerAgregarObjetivo(event) {
+
+        event.preventDefault();
+        var rowCount = $('#datatable tbody tr').length;
+
+        if (rowCount > 4) {
+            var btn = document.getElementById('ModalAgregarObjetivo');
+            btn.removeAttribute('data-toggle');
+            btn.removeAttribute('data-target');
+            MensajeEvaluacion('Mensaje', 'Alcanzo el límite de indicadores. Máximo son 5 indicadores.');
+        } else {
+            // Agrega los atributos al botón
+            var btn = document.getElementById('ModalAgregarObjetivo');
+            btn.setAttribute('data-toggle', 'modal');
+            btn.setAttribute('data-target', '#miModal');
+
+            // Configura el contenido del modal
+            $("#lblTitulo").text("Agregar Objetivo");
+
+            $(".modal-dialog").removeClass("modal-xl");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/EvaluacionPersonal/AgregarObjetivo/');
+
+        }
+
+    }
+
+    function EliminarFilaObjetivo(button,event) {
+        event.preventDefault();
+        var row = $(button).closest('tr');
+        row.remove();
+
+        var rowSeleccionada = button.parentNode.parentNode;
+        var pesoEliminado = rowSeleccionada.cells[4].textContent;
+
+        var ponderadoActualEliminar = parseFloat($("#ponderado").text()) || 0;
+        var nuevoPonderadoEliminar = ponderadoActualEliminar - parseFloat(pesoEliminado);
+        console.log(nuevoPonderadoEliminar);
+        $("#ponderado").text(nuevoPonderadoEliminar.toFixed(0) + '%');
+
+        ActualizarNumeroFilas();
+    }
+
+    function EditarFilaObjetivo(button, event) {
+        event.preventDefault();
+
+        var row = button.parentNode.parentNode;
+
+        // Obtener los datos de la fila
+        var numero = row.cells[0].textContent;
+        var objetivo = row.cells[1].textContent;
+        var descripcion = row.cells[2].textContent;
+        var formulaInverted = row.cells[3].querySelector('input').checked;
+        var peso = row.cells[4].textContent;
+        var unidad = row.cells[5].textContent;
+        var meta = row.cells[6].textContent;
+        var revision = row.cells[7].textContent.replace(" ✏️ ", "");
+
+        $("#lblTitulo").text("Editar Objetivo");
+
+        $(".modal-dialog").removeClass("modal-xl modal-sm modal-lg");
+
+        $.ajax({
+            type: "POST",
+            url: '/EvaluacionPersonal/EditarFilaObjetivo',
+            data: {
+                num: numero,
+                obj: objetivo,
+                des: descripcion,
+                fi: formulaInverted,
+                pes: peso,
+                uni: unidad,
+                met: meta,
+                revision: revision
+            },
+            success: function (response) {
+                $('#modal-content').html(response);
+            },
+            error: function (xhr, status, error) {
+                console.error("Error al cargar los datos: " + error);
+            }
+        });
+    }
+
+
+    //function EditarFilaObjetivo(button, event) {
+    //    event.preventDefault();
+
+    //    var row = button.parentNode.parentNode;
+
+    //    // Obtener los datos de la fila
+    //    var numero = row.cells[0].textContent;
+    //    var objetivo = encodeURIComponent(row.cells[1].textContent);
+    //    var descripcion = encodeURIComponent(row.cells[2].textContent);
+    //    var formulaInverted = row.cells[3].querySelector('input').checked;
+    //    var peso = row.cells[4].textContent;
+    //    var unidad = encodeURIComponent(row.cells[5].textContent);
+    //    var meta = row.cells[6].textContent;
+    //    var revision = encodeURIComponent(row.cells[7].textContent);
+
+
+    //    $("#lblTitulo").text("Editar Objetivo");
+
+    //    $(".modal-dialog").removeClass("modal-xl");
+    //    $(".modal-dialog").removeClass("modal-sm");
+    //    $(".modal-dialog").removeClass("modal-lg");
+
+    //    $('#modal-content').empty();
+    //    $('#modal-content').load('/EvaluacionPersonal/EditarFilaObjetivo?num=' + numero + '&obj=' + objetivo + '&des=' + descripcion + '&fi=' + formulaInverted + '&pes=' + peso + '&uni=' + unidad + '&met=' + meta + '&revision=' + revision);
+
+
+    //}
+
+    function GuardarObjetivos(event) {
+        event.preventDefault();
+        var rowCount = $('#datatable tbody tr').length;
+        var ponderadoActual = parseFloat($("#ponderado").text()) || 0;
+        console.log();
+
+        if (rowCount < 3) {
+            toastr.warning('Debe agregar por lo menos 3 objetivos.', 'Advertencia');
+            return;
+        } else if (rowCount > 6) {
+            toastr.warning('Como máximo son 5 objetivos.', 'Advertencia');
+            return;
+        } else if (ponderadoActual != 100) {
+            toastr.warning('La suma del campo ponderado debe ser 100.', 'Advertencia');
+            return;
+        }
+
+        var filas = [];
+        var table = document.getElementById('datatable'); // Reemplaza 'miTabla' con el id de tu tabla
+
+        for (var i = 1, row; row = table.rows[i]; i++) { // Comienza desde 1 si la primera fila es el encabezado
+            var numero = row.cells[0].textContent;
+            var objetivo = row.cells[1].textContent;
+            var descripcion = row.cells[2].textContent;
+            var formulaInverted = row.cells[3].querySelector('input').checked;
+            var peso = row.cells[4].textContent;
+            var unidad = row.cells[5].textContent;
+            var meta = row.cells[6].textContent;
+
+            filas.push({
+                Numero: numero,
+                Objetivo: objetivo,
+                Descripcion: descripcion,
+                FormulaInverted: formulaInverted,
+                Peso: peso,
+                Unidad: unidad,
+                Meta: meta
+            });
+        }
+        var IdPeriodo = @ViewBag.IdPeriodo;
+
+        $.ajax({
+            url: '/EvaluacionPersonal/GuardarIndicadoresObjetivos',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ indicadores: filas, IdPeriodo: IdPeriodo }),
+           /* data: JSON.stringify(filas),*/
+            success: function (response) {
+                document.getElementById('btnGuardarObjetivos').setAttribute('hidden', 'hidden');
+                document.getElementById('btnEditarObjetivosGuardados').removeAttribute('hidden');
+                toastr.success('Los objetivos se registraron de forma exitosa.', 'Exito');
+            },
+            error: function (error) {
+                console.error('Error al enviar los datos:', error);
+            }
+        });
+
+
+    }
+
+    function EditarObjetivosGuardados(event) {
+        event.preventDefault();
+        var rowCount = $('#datatable tbody tr').length;
+        var ponderadoActual = parseFloat($("#ponderado").text()) || 0;
+        console.log();
+
+        if (rowCount < 3) {
+            toastr.warning('Debe agregar por lo menos 3 objetivos.', 'Advertencia');
+            return;
+        } else if (rowCount > 6) {
+            toastr.warning('Como máximo son 5 objetivos.', 'Advertencia');
+            return;
+        } else if (ponderadoActual != 100) {
+            toastr.warning('La suma del campo ponderado debe ser 100.', 'Advertencia');
+            return;
+        }
+
+        var filas = [];
+        var table = document.getElementById('datatable');
+
+        for (var i = 1, row; row = table.rows[i]; i++) {
+            var numero = row.cells[0].textContent;
+            var objetivo = row.cells[1].textContent;
+            var descripcion = row.cells[2].textContent;
+            var formulaInverted = row.cells[3].querySelector('input').checked;
+            var peso = row.cells[4].textContent;
+            var unidad = row.cells[5].textContent;
+            var meta = row.cells[6].textContent;
+
+            filas.push({
+                Numero: numero,
+                Objetivo: objetivo,
+                Descripcion: descripcion,
+                FormulaInverted: formulaInverted,
+                Peso: peso,
+                Unidad: unidad,
+                Meta: meta
+            });
+        }
+
+        var IdEvaluacion = @ViewBag.IdEvaluacion;
+
+        $.ajax({
+            url: '/EvaluacionPersonal/EditarIndicadoresObjetivos',
+            type: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ indicadores: filas, IdEvaluacion: IdEvaluacion }),
+            success: function (response) {
+                toastr.success('Los objetivos se actualizaron de forma exitosa.', 'Éxito');
+            },
+            error: function (error) {
+                console.error('Error al enviar los datos:', error);
+            }
+        });
+
+
+    }
+
+
+
+</script>

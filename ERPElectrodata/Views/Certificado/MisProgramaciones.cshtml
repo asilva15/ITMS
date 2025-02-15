@@ -1,0 +1,201 @@
+﻿@{
+    ViewBag.Title = "MisProgramaciones";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Mis certificaciones programadas
+                <div class="page-title-subheading">
+                    Listado de todas mis certificaciones programadas.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title">Programación</div>
+                    <form class="">
+                        <div class="form-row">
+                            <div class="col-md-2">
+                                <button id="btnCalendario" type="button" class="mt-1 btn btn-primary btn-block" onclick="MostrarCalendario();"><i class="fa fa-calendar"></i>&nbsp;Calendario</button>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <br />
+                        </div>
+                        <div class="form-row">
+                            <table style="width: 100%;" id="tbCertificado" name="tbCertificado" class="table table-hover table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Gerencia</th>
+                                        <th>Área</th>
+                                        <th>Persona</th>
+                                        <th>Marca</th>
+                                        <th>Certificado</th>
+                                        <th>Examen</th>
+                                        <th>Motivo</th>
+                                        <th>Fecha Programada</th>
+                                        <th>Estado</th>
+                                        <th style="text-align:center">Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Gerencia</th>
+                                        <th>Área</th>
+                                        <th>Persona</th>
+                                        <th>Marca</th>
+                                        <th>Certificado</th>
+                                        <th>Examen</th>
+                                        <th>Motivo</th>
+                                        <th>Fecha Programada</th>
+                                        <th>Estado</th>
+                                        <th style="text-align:center">Opciones</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {    
+        ListarCertificados();
+    });
+
+
+    function ListarCertificados() {
+
+        $('#tbCertificado').dataTable().fnDestroy();
+
+        var table = $('#tbCertificado').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            "order": [[0, "asc"]],
+            //'select': 'multi',
+            ajax: {
+                "url": "/Certificado/ListarMisProgramaciones/0",
+
+            },
+            columns: [
+                { data: "Orden" },
+                { data: "Gerencia" },
+                { data: "Area" },
+                { data: "Persona" },
+                { data: "Marca" },
+                { data: "Certificado" },
+                { data: "Examen" },
+                { data: "MotivoCertificado" },
+                { data: "FechaProgramada" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<button type="button" class="btn btn-sm btn-block btn-' + data.Alerta + '">' + data.Estado + '</button>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var contenido
+                        if (data.IdEstado == 1 || data.IdEstado == 2 ) {
+                            contenido = '<div class="form-row">' +
+                                '<div class="col-md-3" style="text-align:center"><button type="button" style="font-size:15px;cursor:pointer"id="btnEditar' + data.Id + '" title="Editar" class="border-0 btn-transition btn btn-outline-secondary" onclick="Editar(' + data.Id + ')"><i class="fa fa-pencil-alt"></i></button></div>' +
+                                '<div class="col-md-2" style="text-align:center"><button type="button" style="font-size:15px;cursor:pointer" id="btnDetalle' + data.Id + '" title="Ver Detalle" class="border-0 btn-transition btn btn-outline-secondary" onclick="location.href=\'/Certificado/DetalleCertificado/' + data.Id + '\'"><i class="fa fa-eye"></i></button></div>' +
+                                '</div>';
+                        } else {
+                            contenido = '<div class="col-md-2" style="text-align:center"><button type="button" style="font-size:15px;cursor:pointer" id="btnDetalle' + data.Id + '" title="Ver Detalle" class="border-0 btn-transition btn btn-outline-secondary" onclick="location.href=\'/Certificado/DetalleCertificado/' + data.Id + '\'"><i class="fa fa-eye"></i></button></div>' +
+                                '</div>';
+                        }
+                        return contenido;
+                    }
+                },
+            ],
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                },
+            ],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+        
+    }
+
+    function MostrarCalendario() {
+        $("#lblTitulo").text("Calendario Certificaciones");
+
+        $("#btnCalendario").attr("data-style", "expand-right");
+        $("#btnCalendario").attr("data-toggle", "modal");
+        $("#btnCalendario").attr("data-target", "#miModal");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/Certificado/CalendarioMisCertificaciones/');
+    }
+    
+
+    function Editar(id) {
+        $("#lblTitulo").text("Editar certificado");
+
+        $("#btnEditar" + id).attr("data-style", "expand-right");
+        $("#btnEditar" + id).attr("data-toggle", "modal");
+        $("#btnEditar" + id).attr("data-target", "#miModal");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/Certificado/Editar/' + id);
+    }
+
+
+</script>

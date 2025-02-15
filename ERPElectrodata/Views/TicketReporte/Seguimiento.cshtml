@@ -1,0 +1,238 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card p-3 card">
+            <form id="Parametro">
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            Cuenta
+                            <div class="editor-field">
+                                <input type="text" id="IdCuenta" name="IdCuenta" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            Compañía
+                            <div class="editor-field">
+                                <input type="text" id="IdCompania" name="IdCompania" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            Usuario
+                            <div class="editor-field">
+                                <input type="text" id="IdUsuario" name="IdUsuario" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <div class="editor-label">
+                                Fecha inicio
+                            </div>
+                            <div class="editor-field">
+                                <input id="FechaIniCreacion" name="FechaIniCreacion">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <div class="editor-label">
+                                Fecha fin
+                            </div>
+                            <div class="editor-field">
+                                <input id="FechaFinCreacion" name="FechaFinCreacion">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <div class="editor-label">
+                                Estado
+                            </div>
+                            <div class="editor-field">
+                                <input type="text" id="IdEstado" name="IdEstado" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4" id="divSubCuenta" style="display:none">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Sub Cuenta</label>
+                                <div class="position-relative form-check">
+                                    <label class="form-check-label">
+                                        <input type="radio" id="rbTodos" name="rbSubCuenta" class="form-check-input" value="0" checked> TODOS
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label><br /></label>
+                                <div class="position-relative form-check">
+                                    <label class="form-check-label">
+                                        <input type="radio" id="rbInterno" name="rbSubCuenta" class="form-check-input" value="1"> INTERNO
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label><br /></label>
+                                <div class="position-relative form-check">
+                                    <label class="form-check-label">
+                                        <input type="radio" id="rbExterno" name="rbSubCuenta" class="form-check-input" value="2"> EXTERNO
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            &nbsp;<br />
+                            <button id="btnBuscar" class="btn btn-block btn-secondary">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="main-card p-3 card">
+            <iframe id="RSSeguimiento" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport() {
+        window.frames["RSSeguimiento"].src = "/Reporting/Ticket/Seguimiento.aspx?var=" + Math.random() + "&" + $("#Parametro").serialize();
+    }
+</script>
+
+<script id="tmp-CIA" type="text/x-kendo-template">
+    <div style="width: 100%; font-size: 1em;">
+        <span style="width:100%; font-size:1em;">#= COM_NAME #</span>
+        <div style="width:100%; font-size:0.9em; margin-top:-5px;">RUC: #= NUM_TYPE_DI #</div>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    //alert("fuera");
+    $(document).ready(function () {
+
+        var IdCuenta = $("#IdCuenta").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Account/AccountsByUser?var=" + Math.random()
+                },
+            },
+            filter: "contains",
+            suggest: true,
+            change: function (e) {
+                $("#rbTodos").prop("checked", true);
+
+                var cuenta = $("#IdCuenta").val();
+                $("#divSubCuenta").removeAttr("style");
+                if (cuenta == 4) {
+                    $("#divSubCuenta").css("display", "true");
+                } else {
+                    $("#divSubCuenta").css("display", "none");
+                }
+            },
+        });
+        var IdUsuario = $("#IdUsuario").kendoComboBox({
+            autoBind: false,
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                },
+            },
+            filter: "contains",
+            suggest: true,
+        });
+        var IdUsuario = $("#IdUsuario").data("kendoComboBox");
+        var ID_COMP = $("#IdCompania").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                },
+            },
+            filter: "contains",
+            suggest: true,
+            template: kendo.template($("#tmp-CIA").html()),
+        });
+        //ID_COMP.list.width(350);
+        var IdEstado = $("#IdEstado").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_STAT",
+            dataValueField: "ID_STAT",
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TicketReporte/ListaEstadoTicketActivo?var=" + Math.random()
+                },
+            },
+            filter: "contains",
+            suggest: true,
+        });
+        var FechaIniCreacion = $("#FechaIniCreacion").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaFinCreacion = $("#FechaFinCreacion").kendoDateTimePicker().data("kendoDateTimePicker");
+        $("#btnBuscar").click(function (event) {
+            GenerateReport();
+            event.preventDefault();
+        });
+
+        //var IdEstado = $("#IdEstado").kendoComboBox({
+        //    autoBind: false,
+        //    dataTextField: "NAM_STAT",
+        //    dataValueField: "ID_STAT",
+        //    filter: "contains",
+        //    delay: 500,
+        //    minLength: 0,
+        //    suggest: true,
+        //    dataSource: {
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/TicketReporte/ListaEstadoTicketActivo?var=" + Math.random()
+        //        }
+        //    }
+        //}).data("kendoComboBox");
+
+
+    });
+
+</script>

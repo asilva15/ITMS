@@ -1,0 +1,221 @@
+﻿@model ERPElectrodata.Models.EncuestaConfiguracion
+
+@{
+    ViewBag.Title = "Editar";
+    Layout = null;
+}
+
+<style>
+    a {
+        text-decoration: none;
+    }
+
+    form {
+        font-size: .9em;
+    }
+
+    .titleForm {
+        height: auto;
+        background-color: #516882;
+        width: 100%;
+        border-color: #516882;
+        color: white;
+        font-size: 1.1em;
+        border-radius: 4px 4px 0px 0px;
+    }
+
+    .titleForm .title {
+       padding: 2px 0px 5px 10px;
+    }
+
+    .bodyForm {
+        width: 100%;
+    }
+
+    .inBodyForm {
+        border: 1px solid #e2e2e2;
+        border-radius: 0px 0px 4px 4px;
+    }
+
+    b{
+        color:#F83C50;
+    }
+</style>
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+</script>
+<div style="padding-left: 20px; padding-right: 20px">
+    @using (Html.BeginForm("Editar", "EncuestaConfiguracion", FormMethod.Post, new { enctype = "multipart/form-data", target = "upload_target"}))
+    { // 
+        @Html.ValidationSummary(true)
+        <fieldset>
+            <legend>Encuesta Configuración</legend>
+            @Html.HiddenFor(model => model.FechaUltimaEnvio)
+            @Html.HiddenFor(model => model.FechaCreacion)
+            @Html.HiddenFor(model => model.UsuarioCreacion)
+            @Html.HiddenFor(model => model.Estado)
+            @Html.HiddenFor(model => model.IdAcco)
+            @Html.HiddenFor(model => model.IdEncuestaConfiguracion)
+            <div class="divFondoDos">
+                <div class="divCont3" id="divEnvioAutomaticoEdit">
+                    <div class="editor-label">
+                        Envio Automático?
+                    </div>
+                    <div class="editor-field">
+                        @Html.CheckBox("EnvioAutomatico", Model.EnvioAutomatico)
+                        @Html.ValidationMessageFor(model => model.EnvioAutomatico)
+                    </div>
+                </div>
+                <div class="divSpace3"></div>
+                <div class="divCont3" id="divEnvioDiarioEdit">
+                    <div class="editor-label">
+                        Envio Diario?
+                    </div>
+                    <div class="editor-field">
+                        @Html.CheckBox("EnvioDiario", Model.EnvioDiario)
+                        @Html.ValidationMessageFor(model => model.EnvioDiario)
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoUno">
+                <div class="divCont3" id="divNumeroEncuestasEdit">
+                    <div class="editor-label">
+                        Número de Encuestas <b>(*)</b>
+                    </div>
+                    <div class="k-textbox">
+                        @Html.EditorFor(model => model.NroEncuestas)
+                        @Html.ValidationMessageFor(model => model.NroEncuestas)
+                    </div>
+                </div>
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        Cuenta <b>(*)</b>
+                    </div>
+                    <div class="k-textbox">
+                        <input name="Cuenta" id="Cuenta" value="@ViewBag.Cuenta" disabled="disabled" />
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoUno">
+                <div style="display:inline-block; float:right; padding:10px 15px 15px 5px; font-size:1.1em;">
+                    <div style=" float:left; padding:0px 15px 0px 0px; ">
+                        <button id="submit" class="k-button">Guardar</button>
+                    </div>
+                    <button id="reset" class="k-button" onclick="cancel(); return false;">Cancelar</button>
+                    <iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+                </div>
+            </div>
+        </fieldset>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#divEnvioAutomaticoEdit #EnvioAutomatico').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#divEnvioDiarioEdit").show();
+            } else {
+                $("#divEnvioDiarioEdit").hide();
+            }
+        });
+
+        $('#divEnvioDiarioEdit #EnvioDiario').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#divNumeroEncuestasEdit").hide();
+            } else {
+                $("#divNumeroEncuestasEdit").show();
+            }
+        });
+        $("#NroEncuestas").kendoNumericTextBox({
+            min: 0,
+            decimals: 0,
+            format: '#'
+        });
+        //var FechaAdquisicion = $("#FechaAdquisicion").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            closeWinFormModalPopUp();
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    function cancel() {
+        closeWinModalPopUpLoad();
+        winPopUpModal("Operación Cancelada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;'>La operacion fue cancelada</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='continuer' class='k-button'>Continuar</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#continuer")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                closeWinFormModalPopUp();
+                //location.replace(location.href.replace("Edit", "Details"));
+            });
+
+        $("#closebtnmodal").click(function () {
+            closeWinModalPopUp();
+            closeWinFormModalPopUp();
+            //location.replace(location.href.replace("Edit", "Details"));
+        });
+
+        return false;
+    }
+
+    function uploadDone(msg, code) {
+        if (msg == "OK") {
+            winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0px 10px 0px;'>La información ha sido actualizada.</div>"
+           + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>Continuar</button>" +
+           "</div></div>", 400, 160);
+
+            var undo = $("#continues")
+           .bind("click", function () {
+               closeWinModalPopUp();
+               closeWinFormModalPopUp();
+               $("#IdAcco").val('');
+               $("#NroEncuestas").val('');
+               CargarGrilla();
+               //location.replace(location.href.replace("Edit", "Details"))
+           });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+                closeWinFormModalPopUp();
+                $("#IdAcco").val('');
+                $("#NroEncuestas").val('');
+                CargarGrilla();
+                //location.replace(location.href.replace("Edit", "Details"))
+            });
+        }
+        else {
+            winPopUpModal("Error al registrar", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>Completar la información solicitada</div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continuee' class='k-button'>Continuar</button>" +
+               "</div></div>"
+               , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+</script>

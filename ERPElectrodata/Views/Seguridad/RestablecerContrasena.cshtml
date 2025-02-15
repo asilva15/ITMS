@@ -1,0 +1,125 @@
+﻿@{
+    ViewBag.Title = "RestablecerContrasena";
+    Layout = null;
+}
+<div class="titleForm">
+    <div class="title">
+        Restablecer contraseña
+    </div>
+</div>
+<div style="width:100%; height:542px; display:inline-block;">
+    <div style="float:left; width:100%;">
+        <div style="width:100%;">
+            <div style="width:30%; padding-top:10px; padding-left:10px; float:left;">
+@*@using (Html.BeginForm("RestableceContrasena", "Seguridad", FormMethod.Post, new { id = "FrmRestablecer", name = "FrmRestablecer" }))
+{*@
+                <div>
+                    Usuario<br />
+                    <input type="text" id="ID_ENTI" name="ID_ENTI" />
+                    <button type="button" class="k-button" style="float:right;" onclick="Restablecer()">Restablecer</button>
+                </div>
+@*  }*@
+                </div>
+
+                <div style="clear:both;"></div>
+            </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.get("/Assistance/Equipo", function (json) {
+
+            var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+                index: 1,
+                dataTextField: "FIR_NAME",
+                dataValueField: "ID_ENTI",
+                template: '<div style="clear:both;"><div style="float:left"><img height="40" width="40" src=\"/Content/Fotos/${data.ID_FOTO}.jpg\" alt=\"#:data.ID_ENTI#\" /></div>' +
+                          '<div style="height:40px;"><div style="padding-top:10px;"><div>&nbsp;${data.FIR_NAME}</div><br /></div></div></div>',
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['Data']
+            }).data("kendoComboBox");
+
+        });
+    });
+   
+    function Restablecer() {
+        $.ajax({
+            url: "/Seguridad/RestableceContrasena/" ,
+            data: "Id=" + $("#ID_ENTI").val(),
+            cache: false,
+            type: "GET",
+            dataType: "text",
+            success: function (rpta) {
+                uploadDone(rpta,0);
+            }
+        });
+    } 
+
+</script>
+
+<script type="text/javascript">
+    function uploadDone(msg, code) {
+        
+        if (msg == "OK") {
+            winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0px 10px 0px;'>Se restauro la contraseña con exito, se envio un mensaje a su correo.</div>"
+           + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>Continuar</button>" +
+           "</div></div>", 400, 160);
+            $("#continues").focus();
+            $("#continues").click(function () {
+                closeWinModalPopUp();
+                closeWinFormModalPopUp();
+            });
+        }
+
+        else if (msg == "ERROR_1") {
+            winPopUpModal("Error al restaurar la contraseña", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>No se encuentra registro del usuario.</div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continuee' class='k-button'>Continuar</button>" +
+               "</div></div>"
+               , 400, 160);
+            $("#continuee").focus();
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                closeWinFormModalPopUp();
+            });
+        } else if (msg == "ERROR_2") {
+            winPopUpModal("Error al restaurar la contraseña", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>No se completo la restauracion.</div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continuee' class='k-button'>Continuar</button>" +
+               "</div></div>"
+               , 400, 160);
+            $("#continuee").focus();
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                closeWinFormModalPopUp();
+            });
+        } else if (msg == "EXISTE") {
+            winPopUpModal("Aviso", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>Se restauro la contraseña con exito, el usuario no cuenta con un correo registrado.</div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continuee' class='k-button'>Continuar</button>" +
+               "</div></div>"
+               , 400, 160);
+            $("#continuee").focus();
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                closeWinFormModalPopUp();
+            });
+        }
+
+    }
+</script>

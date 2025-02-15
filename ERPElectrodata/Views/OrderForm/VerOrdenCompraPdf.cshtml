@@ -1,0 +1,78 @@
+﻿@{
+    ViewBag.Title = "VerOrdenCompraPdf";
+    Layout = null;
+}
+
+<div class="container col-md-12">
+    <div>
+        <div id="cargando" class="text-center" style="display: none;">
+            <img src="../../Images/spinner.gif" alt="Cargando...">
+        </div>
+        <iframe id="idiframeaprobacion" width="1090" height="600" style="overflow-y: scroll; overflow-x: hidden;"></iframe>
+
+    </div>
+</div>
+<script>
+
+    $(document).ready(function () {
+
+        var ajaxRequest; // Define ajaxRequest variable here
+
+        var Tipo = "@ViewBag.Tipo";
+        var OP = "@ViewBag.OP";
+        var NumDoc = "@ViewBag.NumDoc";
+
+        VerPdf(Tipo, OP, NumDoc);
+    });
+
+    function VerPdf(tipo, op, numdoc) {
+
+        console.log(tipo, op, numdoc);
+
+        var ajaxRequest; // Define ajaxRequest variable here
+
+        if (ajaxRequest && ajaxRequest.readyState !== 4) {
+            ajaxRequest.abort();
+            ajaxRequest = null;
+        }
+
+        // Mostrar la animación de carga
+        $('#cargando').show();
+
+        // Ocultar el iframe
+        var iframe = document.getElementById('idiframeaprobacion');
+        iframe.style.display = 'none';
+
+        // Realizar una solicitud AJAX para llamar al controlador
+        ajaxRequest = $.ajax({
+            url: '/OrderForm/VerPdf',
+            type: 'POST',
+            data: {
+                tip: tipo,
+                proyecto: op,
+                numdocu: numdoc
+            }, // Enviar el valor de IdInforme como parámetro
+            success: function (data) {
+                // Comprobar si la respuesta contiene datos PDF válidos
+                if (data !== null && data !== "") {
+                    // Ocultar la animación de carga
+                    $('#cargando').hide();
+
+                    // Mostrar el PDF en el iframe
+                    iframe.src = 'data:application/pdf;base64,' + data;
+                    iframe.style.display = 'block';
+                } else {
+                    // Ocultar la animación de carga y mostrar un mensaje de error
+                    $('#cargando').hide();
+                    alert('Error al generar el informe.');
+                }
+            },
+            error: function () {
+                // Ocultar la animación de carga y mostrar un mensaje de error
+                $('#cargando').hide();
+                alert('Error en la solicitud al servidor.');
+            }
+        });
+    }
+
+</script>

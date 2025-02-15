@@ -1,0 +1,329 @@
+﻿@{
+    ViewBag.Title = @ResourceLanguaje.Resource.IncidentRequest;
+    @Layout = null;
+}
+
+<style type="text/css">
+    a.tooltip span {
+        cursor: default;
+        display: none;
+        padding: 5px;
+        margin: -25px 0px 0px 120px;
+        width: 230px;
+        position: relative;
+        z-index: 9;
+    }
+
+    a.tooltip:hover span {
+        display: block;
+        position: absolute;
+        background: #000;
+        border: 1px solid #cccccc;
+        color: #ddd;
+        font-size: 14px;
+        font-weight: normal;
+        opacity: 0.9;
+    }
+</style>
+
+<div id="divContent">
+    <h1 class="titleModule">Tickets de Activos</h1>
+    <div id="ticketsByStatus">
+        <div class="ticketByStatusP4_1">
+            <div id="homInc1" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus1" style="position:relative;">
+                    <div id="boxPENTREGA_INT" class="boxQty">@ViewBag.PActive</div>
+                    <div id="letrashomInc1" class="letras letrasActive">
+                        <div>Entrega - Pendientes<br /><div id="boxTPDELIVERY">Total @ViewBag.TAActive</div></div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc1" class="tab-active-marks2"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ticketByStatusP4_1">
+            <div id="homInc2" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus3" style="position:relative;">
+                    <div id="boxCENTREGA_INT" class="boxQty">@ViewBag.PScheduled</div>
+                    <div id="letrashomInc2" class="letras">
+                        <div>Entrega - Cerrados<br /><div id="boxTCDELIVERY">Total @ViewBag.TAScheduled</div></div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc2"></div>
+                    <div class="divAjax-Loading" id="loadinghomInc2" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ticketByStatusP4_1">
+            <div id="homInc3" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus1" style="position:relative;">
+                    <div id="boxPRECEPCION_INT" class="boxQty">@ViewBag.PResolved</div>
+                    <div id="letrashomInc3" class="letras">
+                        <div>Recepción - Pendientes<br /><div id="boxTPRECEPTION">Total @ViewBag.TAResolved</div></div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc3"></div>
+                    <div class="divAjax-Loading" id="loadinghomInc3" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ticketByStatusP4_1">
+            <div id="homInc4" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus3" style="position:relative;">
+                    <div id="boxCRECEPCION_INT" class="boxQty">@ViewBag.PClosed</div>
+                    <div id="letrashomInc4" class="letras">
+                        <div>Recepción - Cerrados<br /><div id="boxTCRECEPTION">Total @ViewBag.TAClosed</div></div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc4"></div>
+                    <div class="divAjax-Loading" id="loadinghomInc4" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="TimeServer" name="TimeServer" value="@ViewBag.TimeServer" />
+
+    <div id="gridTickets" class="contentView">
+
+    </div>
+
+    <div id="pagerTickets" class="contentViewPager">
+
+    </div>
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="incidentHomeList">
+        <div class="incidentHomeListBlock1 hasLayout">
+            <div class="incidentHomeListHeader" style="position:relative;">
+                <div class="FondoNegro">
+                    <div id="${ID_INCI}" onclick="child(this)" class="${PARENT}">
+                    </div>
+                    <div class="status">
+                        Asginado a: ${ASSI}
+                    </div>
+                    # if (VIS_COMP) { #
+                    <div class="incidentHomeRequesterIcon" title="${CIA_TOOL}">
+                        ${REQU} (${CIA})
+                    </div>
+                    # } else { #
+                    <div class="incidentHomeRequesterIcon">
+                        ${REQU}
+                    </div>
+                    # } #
+                    <div class="incidentHomeCreate" title="Creation date @ResourceLanguaje.Resource.DateFormat">
+                        Creado: ${CREATE_INCI}
+                    </div>
+                    <div class="incidentHomeModified" title="Modification date @ResourceLanguaje.Resource.DateFormat">
+                        Actualizado: ${MODIFIED_INCI}
+                    </div>
+                    # if (COUNTSON > 0) { #
+                    <div id="btnExpandir${ID_INCI}" class="btnExpand" onclick="jsViewSon(${ID_INCI})" title="View tickets son"></div>
+                    <div class="divAjax-Loading" style="display:none; float:right;" id="divLoading${ID_INCI}"></div>
+                    # } #
+                </div>
+                <div class="${ICO_PRIO}">
+                    ${NAM_STAT} <div style="float:right"> ${NAM_PRIO} ${HOU_PRIO}</div>
+                </div>
+                # if(EXP_TIME.indexOf("Stopped") > -1 ) {#
+                # if(ID_STAT_END != 4 && ID_STAT_END != 6) { #
+                <div style="position: absolute; display: inline-block; top: 25px; right: 0px; width: 100px; height: 60px;padding: 3px 10px 3px 10px; " title="Date Scheduled">
+                    <div style="float: left; font-family: Sans-Serif; font-size: 1.3em; width: 100%; padding-top: 2px; text-align: center; color: \\#FFBB00; min-height: 40px; -webkit-border-top-left-radius: 4px; -webkit-border-top-right-radius: 4px; -moz-border-radius-topleft: 4px; -moz-border-radius-topright: 4px; border-top-left-radius: 4px; border-top-right-radius: 4px; ">
+                        <div style="font-size:.85em;">${DATE_SCHE} | ${HOUR_SCHE}</div>
+                    </div>
+                </div>
+                # } #
+                # } else { #
+                <div id="divContentTimeRemaining${ID_INCI}" style="position: absolute; display: block; top: 25px; right: 0px; width: 100px; height: 60px; padding: 3px 10px 3px 10px;" title="Expiration Time">
+                    <div id="divTimeRemaining${ID_INCI}" style="float: left; font-size: 1.3em; width: 100%; padding-top: 1px; text-align: center; min-height: 40px;font-weight:500">${EXP_TIME}</div>
+                </div>
+                # } #
+            </div>
+        </div>
+        <div class="incidentHomeSumary">
+            <a href="\\#${URL}${ID_INCI}" target='_BLANK' id="Resumen" title="${SUM_INCI_PLAIN}">#= SUM_INCI #</a>
+        </div>
+        <div class="contraya">
+            <div class="raya"></div>
+        </div>
+        <div class="incidentHomeRes">
+            <div class="ticket">
+                <div style="float:left;">
+                    ${NAM_TYPE_TICK} \\#
+                </div>
+                <div style="float:left;">
+                    #= COD_INCI.substr(0, (COD_INCI.length-6)) #
+                </div>
+                <div style="color:\\#022A41;float:left;font-weight:600;">
+                    #= COD_INCI.substr((COD_INCI.length-6), 6) #
+                </div>
+            </div>
+            <div class="cateTicket">
+                ${NAM_CATE} > ${NAM_SUBC} > ${NAM_CLAS} > ${NAM_SUBCLAS}
+                # if(NUM_OP != '') { #
+                <a href="\\#/DocumentSaleActivity/Index/${ID_DOCU_SALE}" target="_blank" title="View OP">
+                    ${COD_TYPE_DOCU_SALE} ${NUM_OP}
+                </a>
+                # } else { #
+                > Via ${NAM_SOUR}
+                # } #
+            </div>
+            <div class="createBy">Creado por: ${CREATEBY}</div>
+            <div class="assignedTo"></div>
+        </div>
+    </div>
+    <div style="width:100%; height:100%; position:relative; float:left;" id="divSON${ID_INCI}">
+
+    </div>
+
+    <div id="btn${ID_INCI}">
+    </div>
+    <div style="clear:both">
+    </div>
+
+</script>
+
+<script type="text/javascript">
+    var con = 0;
+    var timer;
+    function jsViewSon(id){
+
+        $("#divLoading"+ id).css("display","block");
+        var className = $('#btnExpandir' + id).attr('class');
+        if(className=='btnExpand'){
+            $("#divSON" + id).show('blind', function(){
+                var txt = $("#divSON" + id).html();
+                if(txt.length == 6 || txt.length == 0){
+                    $("#divSON" + id).empty();
+                    $("#divSON" + id).load("/Ticket/viewListTicketSon?id=" + id +"&var=" + Math.random(),function(){
+
+                    });
+                }
+                else{ $("#divLoading"+ id).css("display","none"); }
+
+                $("#btnExpandir" + id).removeClass("btnExpand").addClass("btnContract");
+            });
+        }
+        else{
+            $("#divSON" + id).hide('blind', function(){
+                //expandiendo los ticket despues de cerrar el detalle de la OP
+                $("#divLoading"+ id).css("display","none");
+                $("#btnExpandir" + id).removeClass("btnContract").addClass("btnExpand");
+            });
+        }
+    }
+
+    $(document).ready(function () {
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Inventario/ListByStatusTicket/1?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerTickets").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridTickets").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html()),
+        });
+
+        //$("#Resumen").tooltip();
+        $("#Resumen").tooltip({
+
+            title: "<h4><img src='images/smiley.png' alt='Smiley'> Hello, <b>I'm</b> <i>Smiley!</i></h4>",
+            html: true
+
+        });
+
+        UpdateBarStatus();
+    });
+
+    function Click(parm) {
+        //$("#loading" + parm.id).css("display", "block");
+
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 0;
+        if (parm.id == "homInc2") {
+            bandera = 1;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 2;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 3;
+        }
+        var listView = $("#gridTickets").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+        //$("#cueroHomInc").load("Incident/PendienteByIdUserView/0");
+    }
+
+    function UpdateBarStatus() {
+
+        if (typeof $("#gridTickets").data("kendoListView") === "undefined") {
+            //    //alert("something is undefined");
+            //console.log("OK");
+            clearTimeout(myVar);
+            //    break;
+            return false;
+        }
+        else{
+            //console.log("NOOO");
+        }
+
+        $.ajax({
+            url: '/Inventario/UpdateBarStatus/1?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var active = 0, activeT = 0;
+                $.each(jsonx['Data'], function (index, value) {
+                    $("#boxP" + value['NAM_TYPE_FORM']).html(value['TicketsP']);
+                    $("#boxTP" + value['NAM_TYPE_FORM']).html("Total " + value['TotalP']);
+                    $("#boxC" + value['NAM_TYPE_FORM']).html(value['TicketsC']);
+                    $("#boxTC" + value['NAM_TYPE_FORM']).html("Total " + value['TotalC']);
+                });
+
+                var listViewd = $("#gridTickets").data("kendoListView");
+                listViewd.dataSource.page(listViewd.dataSource.page());
+            }
+
+        });
+
+        myVar = setTimeout("UpdateBarStatus();", 60000);
+    }
+
+
+</script>

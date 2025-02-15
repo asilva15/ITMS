@@ -1,0 +1,117 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Plugins/css/star-rating.min.css" rel="stylesheet" />
+<script src="~/Plugins/js/star-rating.min.js"></script>
+
+<div  style="width:100%;">
+    <h1>Encuesta Kick Off 2015</h1>
+    <hr />
+    <div id="divSurveyx" style="float:left;width:100%;"></div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $.ajax({
+            url: "/QuestionPersonEntity/QuestionBySurvey/" + "1",
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                createSurvey();
+                //console.log(data1);
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+    });
+
+    function sendForm() {
+        $.ajax({
+            url: "/QuestionPersonEntity/Create?" + $('#divSurvey').serialize(),
+            //dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (msg) {
+                if (msg == "OK") {
+                    $("#divContent").empty();
+                    $("#divContent").load("/Event/Index?var=" + Math.random());
+                }
+                else {
+                    alert(msg);
+                }
+                //console.log('OK');
+            }
+        });
+    }
+
+    function createSurvey() {
+        $("#divSurveyx").append('<form id="divSurvey" style="width:100%;">')
+
+        $("#divSurvey").append('<div id="divSurveyLeft" style="width:47.5%;float:left;border-right:1px solid #e3e3e3; padding-right:5%;"></div>');
+        $("#divSurvey").append('<div id="divSurveyRight" style="width:47.5%;float:right;"></div>');
+
+        $("#divSurveyLeft").append('<div style="width:100%; font-size:14px;font-weight:600;">Por favor, valora las siguientes afirmaciones según tu opinión sobre el evento.</div><br />');
+        $("#divSurveyRight").append('<div style="width:100%; font-size:14px;font-weight:600;">Por favor responda las siguientes preguntas de acuerdo a su criterio.</div><br />');
+
+        $.each(data['Data'], function (index, value) {
+            $("#divSurvey").append('<div style="width:100%;">');
+
+            //$('"#' + data['Data'][index]['ID_QUES'] + '"').rating();
+            
+            switch(data['Data'][index]['ID_QUES_TYPE']) {
+                case 1:
+                    $("#divSurveyLeft").append('<div style="float:left;width:70%;height:30px;">' + data['Data'][index]['NAM_QUES'] + '</div>');
+                    $("#divSurveyLeft").append('<div style="font-size:10px;float:right;width:30%;height:30px;">' + '<input type="number" data-container-class="text-right"  id="inpNum' + data['Data'][index]['ID_QUES'] + '" name="' + data['Data'][index]['ID_QUES_PERS_ENTI'] + '"/>' + '</div>');
+                        $("#inpNum" + data['Data'][index]['ID_QUES']).rating({
+                            showClear: false,
+                            showCaption: false,
+                            glyphicon: false,
+                            size: "xs",
+                            min:0,
+                            step:1,
+                            max:5
+                        });
+                        $("#divSurveyLeft").append('</div>');
+                        $("#divSurveyLeft").append('<div style="clear:both;"></div>');
+                        $("#divSurveyLeft").append('<hr />');
+                    break;
+                case 2:
+                    //code block
+                    $("#divSurveyLeft").append('<div style="width:70%;float:left;height:35px;">' + data['Data'][index]['NAM_QUES'] + '</div>');
+
+                    //
+                    $("#divSurveyLeft").append('<div style="width:20%;float:right;"><div style="width:100%;height:35px;">' +
+                        '<div style="width:50%;float:right;"><input style="width:25%;float:left;" type="radio" name="' + data['Data'][index]['ID_QUES_PERS_ENTI'] + '" value="1"> Si</div>' +
+                        '<div style="width:50%;float:right;"><input style="width:25%;float:left;" type="radio" name="' + data['Data'][index]['ID_QUES_PERS_ENTI'] + '" value="0" checked> No</div>' +
+
+                        '</div></div>');
+                    //$("#divSurveyLeft").append('<div style="width:30%;float:right;border:1px solid red;"><div style="float:left;width:20px;">Si</div><input style="float:left;" type="radio" name="' + data['Data'][index]['ID_QUES'] + '" value="1"/></div>');
+                    
+                    //$("#divSurveyLeft").append('<div style="width:5%;float:right;">No</div>');
+                    //$("#divSurveyLeft").append('<div style="width:30%;float:right;border:1px solid red;">No<input style="float:left;" type="radio" name="' + data['Data'][index]['ID_QUES'] + '" value="0" checked/></div>');
+                    
+//                    <input type="radio" name="group1" value="Milk"> Milk<br>
+//<input type="radio" name="group1" value="Butter" checked> 
+                    break;
+                case 3:
+                    $("#divSurveyRight").append('<div style="width:100%;">' + data['Data'][index]['NAM_QUES'] + '</div><br/>');
+                    $("#divSurveyRight").append('<div style="font-size:13px;width:100%;height:70px;">' + '<textarea style="width:100%;resize: none;" id="inpNum' + data['Data'][index]['ID_QUES'] + '" name="' + data['Data'][index]['ID_QUES_PERS_ENTI'] + '"></textarea>' + '</div>');
+                    //$("#inpNum" + data['Data'][index]['ID_QUES']).kendoEditor();
+                    $("#divSurveyRight").append('</div>');
+                default:
+                    break;
+            }
+        });
+        $("#divSurveyRight").append('<button id="SaveSurvey" class="k-button">Guardar</button>');
+        $("#divSurvey").append('</form>');
+
+        $("#SaveSurvey").click(function (event) {
+            event.preventDefault();
+            sendForm()
+        });
+    }
+</script>

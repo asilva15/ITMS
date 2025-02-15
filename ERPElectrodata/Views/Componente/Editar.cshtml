@@ -1,0 +1,202 @@
+﻿@model ERPElectrodata.Models.Componente
+
+@{
+    ViewBag.Title = "Editar";
+    Layout = null;
+}
+
+<style>
+    a {
+        text-decoration: none;
+    }
+
+    form {
+        font-size: .9em;
+    }
+
+    .titleForm {
+        height: auto;
+        background-color: #516882;
+        width: 100%;
+        border-color: #516882;
+        color: white;
+        font-size: 1.1em;
+        border-radius: 4px 4px 0px 0px;
+    }
+
+    .titleForm .title {
+       padding: 2px 0px 5px 10px;
+    }
+
+    .bodyForm {
+        width: 100%;
+    }
+
+    .inBodyForm {
+        border: 1px solid #e2e2e2;
+        border-radius: 0px 0px 4px 4px;
+    }
+
+    b{
+        color:#F83C50;
+    }
+</style>
+
+<div style="padding-left: 20px; padding-right: 20px">
+    @using (Html.BeginForm("Guardar", "Componente", FormMethod.Post, new { enctype = "multipart/form-data", target = "upload_target"}))
+    {
+        @Html.ValidationSummary(true)
+        <fieldset>
+            <legend>Licencia</legend>
+
+            <div class="divFondoUno">
+                <div class="divCont3">
+                    <div class="editor-label">
+                        Tipo de Activo <b>(*)</b>
+                    </div>
+                    <div class="editor-field" disabled="disabled">
+                        @Html.EditorFor(model => model.IdTipoActivo)
+                        @Html.ValidationMessageFor(model => model.IdTipoActivo)
+                    </div>
+                </div>
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        Stock <b>(*)</b>
+                    </div>
+                    <div class="k-textbox">
+                        <input name="stock" id="stock" value="@ViewBag.Cantidad" />
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoDos">
+                <div style="display:inline-block; float:right; padding:10px 15px 15px 5px; font-size:1.1em;">
+                    <div style=" float:left; padding:0px 15px 0px 0px; ">
+                        <button id="submit" class="k-button">Guardar</button>
+                    </div>
+                    <button id="reset" class="k-button" onclick="cancel(); return false;">Cancelar</button>
+                    <iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+                </div>
+            </div>
+        </fieldset>
+    }
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#IdTipoActivo").kendoComboBox({
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            enabled:false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/ListarTipoActivo?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#Descripcion").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            closeWinFormModalPopUp();
+        });
+
+    });
+</script>
+
+<script type="text/javascript">
+    function cancel() {
+        closeWinModalPopUpLoad();
+        winPopUpModal("Operación Cancelada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;'>La operacion fue cancelada</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='continuer' class='k-button'>Continuar</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#continuer")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                //location.replace(location.href.replace("Edit", "Details"));
+            });
+
+        $("#closebtnmodal").click(function () {
+            closeWinModalPopUp();
+            //location.replace(location.href.replace("Edit", "Details"));
+        });
+
+        return false;
+    }
+
+    function uploadDone(msg, code) {
+        if (msg == "OK") {
+            winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0px 10px 0px;'>La información ha sido actualizada.</div>"
+           + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>Continuar</button>" +
+           "</div></div>", 400, 160);
+
+            var undo = $("#continues")
+           .bind("click", function () {
+               closeWinModalPopUp();
+               location.reload(true);
+               //location.replace(location.href.replace("Edit", "Details"))
+           });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+                location.reload(true);
+                //location.replace(location.href.replace("Edit", "Details"))
+            });
+        }
+        else {
+            winPopUpModal("Error al registrar", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>Completar la información solicitada</div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continuee' class='k-button'>Continuar</button>" +
+               "</div></div>"
+               , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+</script>

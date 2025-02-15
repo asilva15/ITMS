@@ -1,0 +1,312 @@
+﻿@{
+    ViewBag.Title = "MantPlanBNV";
+    Layout = null;
+}
+
+<div class="form-row">
+    <div class="col-md-3">
+        <div class="editor-label">
+            Grupo
+        </div>
+        <div class="editor-field">
+            <input id="cbGrupo" name="cbGrupo" value="@ViewBag.IdGrupo" />
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="editor-label">
+            Operador
+        </div>
+        <div class="editor-field">
+            <input id="cbOperador" name="cbOperador" />
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="editor-label">
+            Plan
+        </div>
+        <div class="editor-field">
+            <input id="cbPlan" name="cbPlan" />
+        </div>
+    </div>
+    <div class="col-md-2">
+        <br />
+        <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="btnBuscar" onclick="ListarPlanBNV()"><i class="fa fa-search"></i> Buscar</button>
+    </div>
+    <div class="col-md-2">
+        <br />
+        <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="btnNuevoPlan" onclick="NuevoPlanBNV()"><i class="fa fa-plus"></i> Nuevo</button>
+    </div>
+</div>
+
+<div class="table-responsive mt-3">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%;" id="tbListado">
+                <thead>
+                    <tr>
+                        <th class="text-center">Operador</th>
+                        <th class="text-center">Plan</th>
+                        <th class="text-center">Descripción</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var cbGrupo = $("#cbGrupo").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarGruposBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cbOperador = $("#cbOperador").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            cascadeFrom: 'cbGrupo',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarOperadorBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cbPlan = $("#cbPlan").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            cascadeFrom: 'cbOperador',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: {
+                        url: "/Asset/ListarPlanBNV",
+                        data: function () {
+                            return {
+                                idGrupo: cbGrupo.value(),
+                                var: Math.random()
+                            };
+                        }
+                    }
+                }
+            }
+        }).data("kendoComboBox");
+
+        ListarTabla();
+
+    });
+
+    function ListarPlanBNV() {
+        var cbGrupo = $("#cbGrupo").data("kendoComboBox");
+
+        if (cbGrupo.dataItem() === undefined) {
+            toastr.warning("Seleccione un grupo.", "Mensaje");
+        } else {
+            ListarTabla();
+        }
+    }
+
+    function ListarTabla() {
+        const parametros = {
+            IdGrupo: $("#cbGrupo").val(),
+            IdOperador: $("#cbOperador").val(),
+            IdPlan: $("#cbPlan").val()
+        };
+        var table = $('#tbListado').DataTable();
+        table.clear().destroy();
+        $('#tbListado').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: `/Maintenance/ListadoPlanesBNV`,
+                data: parametros,
+                type: "GET"
+            },
+            columns: [
+                {
+                    data: "NombreOperador",
+                    width: "20%"
+                },
+                {
+                    data: "NombrePlan",
+                    width: "20%"
+                },
+                {
+                    data: "Descripcion",
+                    width: "30%"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let color, text = '';
+                        if (data.Estado == 1) { color = 'success'; text = 'Activo' } else { color = 'danger'; text = 'Inactivo' };
+                        let label = `<div class="badge badge-${color}">${text}</div>`
+                        return label;
+                    },
+                    width: "15%",
+                    className: 'text-center'
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let boton;
+                        if (data.Estado == 1) {
+                            boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                        <button type="button" id="btnEliminarPlan" onclick="EliminarPlanBNV(${data.Id})" class="btn-shadow btn-hover-shine btn btn-danger btn-sm btn-pill pl-3"><i class="fa fa-edit" aria-hidden="true"></i> Desactivar</button>
+                                    </div>`
+                        } else {
+                            boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                        <button type="button" id="btnActivarPlan" onclick="ActivarPlanBNV(${data.Id})" class="btn-shadow btn-hover-shine btn btn-success btn-sm btn-pill pl-3"><i class="fa fa-edit" aria-hidden="true"></i> Activar</button>
+                                    </div>`
+                        }
+                        return boton;
+                    },
+                    width: "15%",
+                    className: 'text-center'
+                },
+            ],
+            order: [[3, 'asc'], [0, 'asc'], [1, 'asc']],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+    }
+
+    function NuevoPlanBNV() {
+        $("#btnNuevoPlan").removeAttr("data-toggle");
+        $("#btnNuevoPlan").removeAttr("data-target");
+
+        var cbGrupo = $("#cbGrupo").data("kendoComboBox");
+        var cbOperador = $("#cbOperador").data("kendoComboBox");
+
+        if (cbGrupo.dataItem() === undefined) {
+            toastr.warning("Seleccione un grupo.", "Mensaje");
+        } else if (cbOperador.dataItem() === undefined) {
+            toastr.warning("Seleccione un operador.", "Mensaje");
+        } else {
+            $("#lblTitulo").text("Nuevo Plan");
+
+            $("#btnNuevoPlan").attr("data-toggle", "modal");
+            $("#btnNuevoPlan").attr("data-target", "#miModal");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load("/Maintenance/CreatePlan/" + cbOperador.dataItem().Id + "?idGrupo=" + cbGrupo.dataItem().Id + "&mant=1");
+        }
+    }
+
+    function EliminarPlanBNV(id) {
+            swal({
+                    title: `¿Desea desactivar este plan?`,
+                    text: `Se desactivará el plan seleccionado`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: "/Maintenance/ModificarEstadoPlanBNV/" + id + "?idEstado=0&var=" + Math.random(),
+                            type: "POST",
+                            cache: false,
+                            dataType: "text",
+                            success: function (resp) {
+                                if (resp == 'ERROR') {
+                                    toastr.error("Error al desactivar el plan.", "Mensaje");
+                                } else {
+                                    toastr.success("Se desactivó el plan.", "Información Guardada");
+                                    ListarTabla();
+                                    $("#cbPlan").data("kendoComboBox").dataSource.read();
+                                    swal.close();
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Cancelado", "Ha cancelado la operación", "error");
+                    }
+                });
+    }
+
+    function ActivarPlanBNV(id) {
+        swal({
+            title: `¿Desea activar este plan?`,
+            text: `Se activará el plan seleccionado`,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Guardar",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        }, function (dismiss) {
+            if (dismiss) {
+                $.ajax({
+                    url: "/Maintenance/ModificarEstadoPlanBNV/" + id + "?idEstado=1&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == 'ERROR') {
+                            toastr.error("Error al activar el plan.", "Mensaje");
+                        } else {
+                            toastr.success("Se activó el plan.", "Información Guardada");
+                            ListarTabla();
+                            $("#cbPlan").data("kendoComboBox").dataSource.read();
+                            swal.close();
+                        }
+                    }
+                });
+            }
+            else {
+                swal("Cancelado", "Ha cancelado la operación", "error");
+            }
+        });
+    }
+
+    function uploadDone(msg, code, idActivo) { }
+
+</script>

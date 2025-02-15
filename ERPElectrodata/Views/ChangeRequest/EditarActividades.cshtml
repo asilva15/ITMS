@@ -1,0 +1,452 @@
+﻿@{
+    ViewBag.Title = "EditarActividades";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<div id="mensajeEliminarActividad"></div>
+<input type="hidden" id="Contador" name="Contador" value="0" />
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="form-group">
+            <button type="button" class="btn btn-primary btn-block" id="add_row">
+                <i class="fa fa-plus"></i> Agregar
+            </button>
+        </div>
+    </div>
+    <div class="col-md-9">
+        &nbsp;
+    </div>
+</div>
+<div class="row">
+    <table id="tablaDetalleCambio" class="table table-bordered table-striped table-responsive" style="width:100%">
+        <thead>
+            <tr>
+                <th>Tipo de Tarea</th>
+                <th>Responsable</th>
+                <th>Fecha Inicio Real</th>
+                <th>Fecha Fin Real</th>
+                <th>Descripción</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        CargarDetalleCambio();
+        var i=1;
+        $("#add_row").click(function(){
+            var newRow = $("<tr>");
+            var cols =
+                "<td>"+
+                "<select id='cbActividadN" + i + "' name='cbActividadN" + i +"' class='form-control input-sm select2' type='text' style='width:100%' ></select>"+
+                "</td>"+
+                "<td>"+
+                "<select id='cbResponsableN" + i + "' name='cbResponsableN" + i +"' class='form-control input-sm select2' type='text' style='width:100%' ></select>"+
+                "</td>"+
+                "<td>"+
+                   "<div class='input-group'>"+
+                        "<div class='input-group-prepend datepicker-trigger'>"+
+                            "<div class='input-group-text'>"+
+                                "<i class='fa fa-calendar'></i>" +
+                            "</div>" +
+                        "</div>"+
+                        "<input type='text' class='form-control pull-right' id='dtFechaInicioN"+i+"' name='dtFechaInicioN"+i+"' />"+
+                    "</div>"+
+                "</td>"+
+                "<td>"+
+                    "<div class='input-group'>"+
+                        "<div class='input-group-prepend datepicker-trigger'>"+
+                            "<div class='input-group-text'>"+
+                                "<i class='fa fa-calendar'></i>" +
+                            "</div>" +
+                        "</div>"+
+                        "<input type='text' class='form-control pull-right' id='dtFechaFinN"+i+"' name='dtFechaFinN"+i+"'  />"+
+                    "</div>"+
+                "</td>"+
+                "<td><input  id='DescripcionN"+i+"' name='DescripcionN"+i+"' type='text' placeholder='Descripción'  class='form-control input-md'></td>"+
+                "<td style='text-align:center'>"+
+                '<span id="GuardarActividad" title="Guardar" class="fa fa-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px;" onclick="GuardarActividad('+i+')"></span>&nbsp;&nbsp;&nbsp;' +
+                "<span id='EliminarFila' title='Eliminar' class='fa fa-times' aria-hidden='true' style='color: #ff0000; cursor: pointer; font-size: 13px;' ></span>"+
+                "</td>";
+
+            newRow.append(cols);
+            $("#tablaDetalleCambio").append(newRow);
+
+            ObtenerDatosDetalleCambio(i);
+            $("#Contador").val(i);
+
+            i++;
+        });
+
+        $("#tablaDetalleCambio").on("click", "#EliminarFila", function (event) {
+            $(this).closest("tr").remove();
+            //i--;
+        });
+    });
+
+    function CargarDetalleCambio() {
+
+        $('#tablaDetalleCambio').dataTable().fnDestroy();
+        $('#tablaDetalleCambio').DataTable({
+            "order": [[3, "asc"]],
+            ajax: "/ChangeRequest/ListarActividadesCambio/"+@ViewBag.IdCambio,
+            columns: [
+                {
+                    data:null,
+                    render: function (data, type, row) {
+                        CargarActividades(data.IdDetalleCambio);
+                        //Asignación inicial
+                        var $newOption = $("<option></option>").val(data.IdTarea).text(data.Tarea);
+                        $("#cbActividad"+data.IdDetalleCambio).append($newOption).trigger('change');
+                        return "<select id='cbActividad" + data.IdDetalleCambio + "' name='cbActividad" + data.IdDetalleCambio +"' class='form-control input-sm select2' type='text' style='width:100%' ></select>";
+
+                    }
+                },
+                {
+                    data:null,
+                    render: function (data, type, row) {
+                        CargarResponsable(data.IdDetalleCambio);
+                        //Asignación inicial
+                        var $newOption = $("<option></option>").val(data.IdResponsable).text(data.Responsable);
+                        $("#cbResponsable"+data.IdDetalleCambio).append($newOption).trigger('change');
+
+                        return "<select id='cbResponsable" + data.IdDetalleCambio + "' name='cbResponsable" + data.IdDetalleCambio +"' class='form-control input-sm select2' type='text' style='width:100%' ></select>";
+
+                    }
+                },
+                {
+                    data:null,
+                    render: function (data, type, row) {
+
+                        $('#dtFechaInicio'+data.IdDetalleCambio).datepicker({ autoclose: true });
+                        return "<div class='input-group'>"+
+                                    "<div class='input-group-prepend datepicker-trigger'>"+
+                                        "<div class='input-group-text'>"+
+                                            "<i class='fa fa-calendar'></i>" +
+                                        "</div>" +
+                                    "</div>"+
+                                    "<input type='text' class='form-control pull-right' id='dtFechaInicio"+data.IdDetalleCambio+"' name='dtFechaInicio"+data.IdDetalleCambio+"' value='"+data.FechaInicioProgramada+"'/>"+
+                                "</div>";
+                    }
+                },
+                {
+                    data: null ,
+                    render: function (data, type, row) {
+
+                        $('#dtFechaFin'+data.IdDetalleCambio).datepicker({ autoclose: true });
+                        return "<div class='input-group'>"+
+                                        "<div class='input-group-prepend datepicker-trigger'>"+
+                                            "<div class='input-group-text'>"+
+                                                "<i class='fa fa-calendar'></i>" +
+                                            "</div>" +
+                                        "</div>"+
+                                    "<input type='text' class='form-control pull-right' id='dtFechaFin"+data.IdDetalleCambio+"' name='dtFechaFin"+data.IdDetalleCambio+"' value='"+data.FechaFinProgramada+"'/>"+
+                                "</div>";
+                    }
+                },
+                {
+                    data:null,
+                    render: function (data, type, row) {
+                        return "<input  id='Descripcion"+data.IdDetalleCambio+"' name='Descripcion"+data.IdDetalleCambio+"' type='text' placeholder='Descripción'  class='form-control input-md' value='"+data.Detalle+"'>";
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        $("#divEdicionActividad"+data.IdDetalleCambio).hide();
+                        $("#divActividadValidada"+data.IdDetalleCambio).hide();
+                        if(data.ActividadValidada==1){
+                            $("#divActividadValidada"+data.IdDetalleCambio).show();
+                        }
+
+                        if((@ViewBag.IdPersEnti==data.IdResponsable || @ViewBag.Acceso=="1") && data.ActividadValidada==0){
+                            $("#divEdicionActividad"+data.IdDetalleCambio).show();
+                        }
+
+                        return  '<div id="divEdicionActividad'+data.IdDetalleCambio+'" style="text-align:center">' +
+                                    '<span id="GuardarActividad" title="Validar" class="fa fa-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px;" onclick="ValidarActividad(' + data.IdDetalleCambio + ')"></span>&nbsp;&nbsp;&nbsp;' +
+                                    '<span id="EliminarActividad" title="Eliminar" class="fa fa-times" aria-hidden="true" style="color: #ff0000; cursor: pointer; font-size: 13px;" onclick="EliminarActividad(' + data.IdDetalleCambio + ')"></span>' +
+                                '</div>'+
+                                '<div id="divActividadValidada'+data.IdDetalleCambio+'" style="text-align:center">' +
+                                    '<span id="ValidarActividad" title="Guardar" class="fa fa-check" aria-hidden="true" style="color: #679700; cursor: pointer; font-size: 13px;" ></span>' +
+                                '</div>';
+                    }
+                },
+
+            ],
+            "bPaginate": false,
+            "searching": false,
+            "info":false,
+
+        });
+    }
+
+    function CargarActividades(i){
+
+        $("#cbActividad"+i).select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioTareas/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+    }
+
+    function CargarResponsable(i){
+        if(@ViewBag.Acceso == "1") {
+            $("#cbResponsable"+i).select2({
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/ChangeRequest/ListarCambioResponsable/" + @ViewBag.IdCuenta,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+        }else{
+            $("#cbResponsable"+i).select2();
+        }
+    }
+
+    function ObtenerDatosDetalleCambio(i){
+
+
+        $("#cbActividadN"+i).select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioTareas/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        if(@ViewBag.Acceso == "1") {
+            $("#cbResponsableN"+i).select2({
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/ChangeRequest/ListarCambioResponsable/" + @ViewBag.IdCuenta,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+        }else{
+            $("#cbResponsableN"+i).select2();
+
+            //Asignación inicial
+            var $newOption = $("<option></option>").val("@ViewBag.IdPersEnti").text("@ViewBag.Usuario");
+            $("#cbResponsableN"+i).append($newOption).trigger('change');
+        }
+
+        $('#dtFechaInicioN'+i).datepicker({ autoclose: true });
+        $('#dtFechaFinN'+i).datepicker({ autoclose: true });
+    }
+
+    function GuardarActividad(id){
+        $.ajax({
+            url: "/ChangeRequest/AgregarActividadCambio/",
+            data: "IdCambio=" + @ViewBag.IdCambio+
+                  "&cbActividad=" +$("#cbActividadN"+id).val() +
+                  "&cbResponsable=" +$("#cbResponsableN"+id).val() +
+                  "&dtFechaInicio=" +$("#dtFechaInicioN"+id).val() +
+                  "&dtFechaFin=" +$("#dtFechaFinN"+id).val() +
+                  "&Descripcion=" +$("#DescripcionN"+id).val() +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    Mensaje("Se validó la actividad.",2);
+                    CargarDetalleCambio();
+                }else{
+                    Mensaje(resp,3);
+                }
+            }
+        });
+
+    }
+
+    function ValidarActividad(id){
+        swal({ title: "Procesando información, por favor espere.", text: "Gestión de Cambios", showConfirmButton: false, imageUrl: "/images/spinner.gif" })
+
+        $.ajax({
+            url: "/ChangeRequest/ValidarActividadCambio/",
+            data: "IdDetalleCambio=" +id +
+                  "&IdCambio=" + @ViewBag.IdCambio+
+                  "&cbActividad=" +$("#cbActividad"+id).val() +
+                  "&cbResponsable=" +$("#cbResponsable"+id).val() +
+                  "&dtFechaInicio=" +$("#dtFechaInicio"+id).val() +
+                  "&dtFechaFin=" +$("#dtFechaFin"+id).val() +
+                  "&Descripcion=" +$("#Descripcion"+id).val() +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                swal.close();
+                if (resp == "OK") {
+                    Mensaje("Se validó la actividad.",2);
+                    CargarDetalleCambio();
+                }else{
+                    Mensaje(resp,3);
+                }
+            }
+        });
+
+    }
+
+    function EliminarActividad(id){
+        $.ajax({
+            url: "/ChangeRequest/ValidarActividadEliminada/",
+            data: "IdCambio=" + @ViewBag.IdCambio+
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+
+                if (resp == "OK") {
+                    $('#mensajeEliminarActividad').empty();
+                    $('#mensajeEliminarActividad').show("show");
+                    $("#mensajeEliminarActividad").append("<div class='alert alert-danger col-md-12'><div class='row'>"+
+                        "<div class='col-md-4'><strong>¿Porqué desea eliminar la actividad?</strong></div>"+
+                        "<div class='col-md-6'><input id='txtMotivo' name='txtMotivo' class='form-control' type='text' style='width:100%' /> </div>"+
+                        "<div class='col-md-2'><button type='button' class='btn btn-light' onclick='EliminarActividadCambio("+id+")'>Eliminar</button></div>"+
+                        "<div class='col-md-5'><span id='divMotivo'></span></div>"+
+                        "</div></div>");
+                }
+                else if (resp == "ERROR") {
+                    Mensaje("No se puede eliminar la actividad. La solicitud del cambio necesita tener por lo menos una tarea.",3);
+
+                }
+            }
+        });
+
+
+    }
+
+    function EliminarActividadCambio(id){
+
+        if($("#txtMotivo").val()==""){
+            $("#divMotivo").text("*Ingrese una breve descripción.")
+
+        }else{
+            swal({ title: "Procesando información, por favor espere.", text: "Gestión de Cambios", showConfirmButton: false, imageUrl: "/images/spinner.gif" })
+
+            $.ajax({
+            url: "/ChangeRequest/EliminarActividadCambio/",
+            data: "IdDetalleCambio=" +id +
+                  "&IdCambio=" + @ViewBag.IdCambio+
+                      "&txtMotivo=" + $("#txtMotivo").val()+
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+
+                if (resp == "OK") {
+                    $('#mensajeEliminarActividad').hide();
+                    swal.close();
+                    Mensaje("Se eliminó la actividad.",2);
+                    CargarDetalleCambio();
+                }
+            }
+        });
+        }
+    }
+
+    function Mensaje(msj,flag){
+        if (@ViewBag.IdCuenta== 60) {
+            if (flag == 1) {
+                toastr.success("El cambio se ha validado.", "Sistema Integrado de Gestión");
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+            } else
+                if (flag == 2) {
+                    toastr.warning(msj, "Gestión de Cambios");
+                }
+                else {
+                    toastr.success("El cambio se ha validado.", "Gestión de Cambios");
+                    $("[data-dismiss=modal]").trigger({ type: "click" });
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1500);
+                }
+        } else {
+            if (flag == 1) {
+                toastr.success("El cambio se ha validado.", "Sistema Integrado de Gestión");
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+            } else
+                if (flag == 2) {
+                    toastr.warning(msj, "Sistema Integrado de Gestión");
+                }
+                else {
+                    toastr.warning(msj, "¡Alerta!");
+                }
+        }
+       
+    }
+
+</script>

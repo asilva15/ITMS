@@ -1,0 +1,137 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+<div style="padding:10px 20px 10px 20px;">
+    <form id="Parametro">
+
+        <div style="float:left;padding-top:1.5%">
+            Periodo:  <input id="cbPeriodo" name="cbPeriodo" style="font-size:12px;" class="dropdownKendo" />
+        </div><label>&nbsp;&nbsp;</label>
+       
+        <input id="cbEvaluado" name="cbEvaluado" value="@ViewBag.IdUsuario" hidden />
+    </form>
+</div>
+
+<div class="bodyForm">
+    <div class="my-2 d-flex justify-content-end">
+        <button id="btnConfirmacion" onclick="darConformidad()" class="mb-2 mr-2 btn btn-gradient-success" hidden>Estoy conforme</button>
+    </div>
+    <div class="inBodyForm">
+        <iframe id="RSFormatoConformidad" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#cbPeriodo").kendoDropDownList({
+            dataTextField: "Periodo",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/ListaPeriodosAsignados?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                var comboBox = $("#cbPeriodo").data("kendoDropDownList");
+                // Select the first item
+                comboBox.select(0);
+                // Trigger the change event to load the associated content
+                comboBox.trigger("change");
+            },
+            change: function (e) {
+                var comboBox = $("#cbPeriodo").val();
+
+                console.log(comboBox);
+                
+                $.ajax({
+                    url: "/EvaluacionPersonal/ExisteConformidad?idperiodo=" + comboBox,
+                    type: "POST",
+                    success: function (resp) {
+                        if (!resp.error) {
+                            var conforme = resp.Conforme;
+                            var idEvaluacion = resp.IdEvaluacion;
+
+                            console.log("Conforme:", conforme);
+                            console.log("IdEvaluacion:", idEvaluacion);
+
+                            var btnConformidad = document.getElementById("btnConfirmacion");
+                            if (conforme) {
+                                btnConformidad.setAttribute("hidden", "hidden");
+                            } else {
+                                btnConformidad.setAttribute("onclick", "darConformidad(" + idEvaluacion + ")");
+                                btnConformidad.removeAttribute("hidden");
+                                
+                            }
+                        } else {
+                            toastr.error("Ocurrió un error: " + resp.error, "Contactar con el administrador");
+                        }
+                    }
+                });
+
+                GenerateReportConformidad();
+
+            }
+        });
+
+
+
+    });
+    function GenerateReportConformidad() {
+        window.frames["RSFormatoConformidad"].src = "/Reporting/EvaluacionPersonal/FormatoSeguimiento.aspx?var=" + Math.random() + "&" + $("#Parametro").serialize();
+    }
+    function aprobarConformidadTrabajador(id) {
+        $.ajax({
+            url: "/EvaluacionPersonal/GuardarConformidad?id=" + id + "&tipo=usuario",
+            type: "POST",
+            success: function (resp) {
+                console.log(resp)
+                if (resp == "OK") {
+                    toastr.success("La información ha sido actualizada", "Se dio conformidad a la evaluación ");
+                    var btnConformidad = document.getElementById("btnConfirmacion")
+                    btnConformidad.setAttribute("hidden", true);
+
+                } else {
+                    toastr.error("Ocurrio un error", "contactar con el administrador")
+                }
+            }
+        });
+    }
+    function darConformidad(id) {
+        swal({
+            title: '¿Estás seguro que deseas dar conformidad a la evaluación?',
+            text: 'Estoy conforme con mi evaluación de desempeño',
+            type: 'info',
+            showCancelButton: true,//There won't be any cancle button
+            showConfirmButton: true, //There won't be any confirm button
+
+        }, function () {
+            aprobarConformidadTrabajador(id)
+
+            //location.reload();
+        })
+    }
+
+</script>

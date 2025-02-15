@@ -1,0 +1,122 @@
+﻿@{
+    ViewBag.Title = "Programas";
+    Layout = null;
+}
+
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte de Mantenimiento de Activos
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-3">
+                <div class="editor-label">
+                    Desde
+                </div>
+                <div class="editor-field">
+                    <input id="FechaInicio" name="FechaInicio" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="editor-label">
+                    Hasta
+                </div>
+                <div class="editor-field">
+                    <input id="FechaFin" name="FechaFin" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="editor-label">
+                    Tipo de Activo
+                </div>
+                <div class="editor-field">
+                    <input id="IdTipoActivo" name="IdTipoActivo" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="editor-label">
+                    Activo
+                </div>
+                <div class="editor-field">
+                    <input id="IdActivo" name="IdActivo" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <br />
+                <button type="button" class="btn btn-primary btn-block" id="btnBuscar"><i class="fa fa-search"></i> Buscar</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="bodyForm">
+    <div class="inBodyForm">
+        <iframe id="rptActivoMantenimiento" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var FechaInicio = $("#FechaInicio").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaFin = $("#FechaFin").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#btnBuscar").click(function () {
+            if ($("#FechaInicio").val() != "" && $("#FechaFin").val() != "") {
+                window.frames["rptActivoMantenimiento"].src = "/Reporting/Activo/ReporteTotalActivoMantenimiento.aspx?var=" + Math.random()
+                    + "&IdTipoActivo=" + $("#IdTipoActivo").val() + "&IdActivo=" + $("#IdActivo").val() +
+                    "&FechaInicio=" + $("#FechaInicio").val() + "&FechaFin=" + $("#FechaFin").val();
+            }
+            else {
+                toastr.warning("Seleccione un rango de fechas.", "Mensaje");
+            }
+        });
+
+        var IdTipoActivo = $("#IdTipoActivo").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/ListarTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdActivo = $("#IdActivo").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IdTipoActivo",
+            filter: "contains",
+            dataTextField: "SER_NUMB",
+            dataValueField: "ID_ASSE",
+            template: '<div style="font-weight:bold;">${ data.COD_ASSE }</div>' +
+                '<div>${ data.SER_NUMB }</div>',
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarActivossss?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+    });
+
+</script>

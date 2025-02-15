@@ -1,0 +1,637 @@
+﻿@{
+    Layout = null;
+}
+
+
+    @if (ViewBag.RETURN == 1)
+    {
+        <div style="float:left;margin-top:8px;" onclick="EvaluationStaff()">
+                <img style="margin-top:-1px;" src="~/Content/Images/arrow_return_big.png" />
+        </div>
+    }
+    <h1>&nbsp;@ViewBag.NAME_EVAL</h1>
+
+<div>
+    <div style="float:left; width:50%">
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:450px;border:none;">
+                <div id="mainPrincipalGP">
+                    <div id="pnlEvaluation">
+                    </div>
+                    <button class="btn primary" style="width:30%;float:left;" onclick="GPEvaluation(this)">
+                        Evaluation
+                    </button>
+
+                    <div style="float:left;width:5%">&nbsp;</div>
+                    
+                    <button class="btn primary" style="width:30%;float:left;" onclick="GPObjetives(this)">
+                        Objetives
+                    </button>
+
+                    <div style="float:left;width:5%">&nbsp;</div>
+                    <button class="btn primary" style="width:30%;float:right;" onclick="GPComents(this)">
+                        Coments
+                    </button>
+                </div>
+                <div id="pnlEvaluationWork"></div>
+            </div>
+            <div style="height:10px;"></div>
+        </div>
+    </div>
+    <div style="float:right; width:49%">
+        <!--Panel Calificación Total-->
+        <div class="titleForm" style="background-color:white;color:black;"><div class="title" style="background-color:none">Calification Total</div></div>
+        <div class="bodyForm" style="border:none;">
+            <div class="inBodyForm" style="height:90px;border:none;border-top:1px solid #878ea2">
+                <div id="divScale" style="float:left;height:100px;width:59.5%;border:2px solid white;">
+                </div>
+                <div id="divArea" style="float:right;height:100px;width:29.5%;border:0px solid white;">
+                    <div style="display:block;text-align:center;border:0px solid white;">
+                        <div style="font-weight:300;font-size:50px;border:0px solid white;color:#E35A33;">50%</div>
+                        <div style="color:white;font-size:.8em;margin-top:-1px;border:1px solid #E35A33;background-color:#E35A33">Adverage Total Advance</div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+        <div style="clear:both;"></div>
+        <!--Panel Avance Por Objetivos-->
+        @*<div class="titleForm" style="background-color:white;color:black;"><div class="title" style="background-color:none">Comparative Calification</div></div>*@
+        <div class="bodyForm" style="border:none;">
+            <div class="inBodyForm" style="height:137px;border:none;border-top:0px solid #878ea2">
+                <div id="divComDos" style="float:left;height:135px;width:49%;border:0px solid white;">
+                </div>
+                <div id="divComUno" style="float:right;height:135px;width:49%;border:0px solid white;">
+                </div>
+                <div style="clear:both"></div>
+                <div id="divComTres" style="float:left;height:260px;width:50%;border:0px solid white;">
+                </div>
+
+                @*<div style="clear:both"></div>*@
+                <div id="divComCuatro" style="float:left;height:260px;width:50%;border:0px solid white;">
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+<div style="height:10px;">&nbsp;</div>
+
+@*<div class="modal" tabindex="-1" role="dialog" aria-labelledby="" aria-hidden="true" id="myModalGP">
+    <div class="progress">
+        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="100" aria-valuemin="0" aria-valuemax="40" style="width: 40%">
+            
+        </div>
+    </div>
+</div>*@
+
+
+<style>
+    #pnlEvaluation{
+        border:none;
+    }
+    .evaluation{
+
+    }
+    .evaluation .divLine{
+        display:inline-block;
+        clear:both;
+        width:100%;
+        margin-bottom:5px;
+    }
+    .evaluation .divLine .divCont{
+        float:left;
+        width:25%;
+        color:#878ea2;
+        display:block;
+        text-align:center;
+    }
+    .evaluation .divLine .divCont .marcador{
+        /*width:100%;*/
+        margin-right:2px;
+        /*margin-right:2px;*/
+        
+    }
+    .evaluation .divLine .divCont .marcador .number{
+        font-weight:600;
+        padding-top:10px;
+        font-size:22px;
+    }
+    .evaluation .divLine .divCont .marcador span{
+        color:#a0a7b8;
+        padding-bottom:10px;
+    }
+    .evaluation .divLine .divCont .marcador .rayaGP{
+        border-bottom:5px solid #BA141A;
+    }
+
+    .evaluation .divLine .divCont2{
+        float:left;
+        width:37.5%;
+        color:#878ea2;
+        display:block;
+        text-align:left;
+        font-weight:500;
+    }
+
+    .evaluation .divLine .divCont img{
+        height:64px;
+        border-radius:50%;
+        margin-top:10px;
+    }
+
+    .evaluation .divLine .divCont_3{
+        float:left;
+        width:20%;
+        color:#878ea2;
+        display:block;
+        text-align:center;
+        font-weight:500;
+    }
+    .evaluation .divLine .divCont_3 .marcador2{
+        width:100%;
+    }
+    .evaluation .divLine .divCont_3 .marcador2 img{
+        height:64px;
+        border-radius:50%;
+    }
+</style>
+
+<script type="text/x-kendo-template" id="template">
+    <div class="evaluation">
+        <div class="divLine">
+            <div class="divCont">
+                <div class="marcador">
+                    <div class="number">#:EVA_TIME#</div>
+                    <span>Time Evaluation</span>
+                    <div class="rayaGP"></div>
+                </div>
+            </div>
+            <div class="divCont">
+                <div class="marcador">
+                    <div class="number">#:NUM_EMPL_EVAL#</div>
+                    <span>Employees Evaluated</span>
+                    <div class="rayaGP"></div>
+                </div>
+            </div>
+            <div class="divCont">
+                <div class="marcador">
+                    <div class="number">#:NUM_EMPL_UEN#</div>
+                    <span>Empleyees by UEN</span>
+                    <div class="rayaGP"></div>
+                </div>
+            </div>
+            <div class="divCont">
+                <div class="marcador">
+                    <div class="number">#:NUM_EMPL_AREA#</div>
+                    <span>Empleyees by Area</span>
+                    <div class="rayaGP"></div>
+                </div>
+            </div>
+        </div>
+        <div style="clear:both; height:5px;">&nbsp;</div>
+        
+        <div class="divLine">
+            <div class="divCont">
+                <img src="/Content/Fotos/#:ID_FOTO#.jpg" />
+            </div>
+            <div class="divCont2">
+                <div>#:NAM_EMPL# </div>
+                <div>Electrodata User #:USER_ELEC# </div>
+                <div>Code Employee #:COD_EMPL# </div>
+                <div>Location #:NAM_LOCA# </div>
+                
+            </div>
+            <div class="divCont2">
+                <div>Area #:NAM_AREA# </div>
+                <div>Status Employee #:NAM_STAT# </div>
+                <div>Job Title #:JOB_TITL# </div>
+                <div>UEN #:NAM_UEN# </div>
+            </div>
+        </div>
+        
+        <div style="clear:both; height:5px;">&nbsp;</div>
+        
+        <div id="Objetives" style="height:180px; width:100%;border:0px red solid;"></div>
+
+        <div class="divLine">
+            <div class="divCont_3">
+                <div class="marcador2">
+                    <div>Evaluator</div>
+                    <img src="/Content/Fotos/#:FOT_SUPE#.jpg" />
+                    <div>#:NAM_SUPER# </div>
+                </div>
+            </div>
+            <div class="divCont_3">
+                <div class="marcador2">
+                    <div>Matrix Manager 1</div>
+                    <img src="/Content/Fotos/#:FOT_UEN#.jpg" />
+                    <div>#:NAM_GER_UEN# </div>
+                </div>
+            </div>
+            <div class="divCont_3">
+                <div class="marcador2">
+                    <div>Matrix Manager 2</div>
+                    <img src="/Content/Fotos/#:FOT_GERE_GENE#.jpg" />
+                    <div>#:NAM_GERE_GENE# </div>
+                </div>
+            </div>
+            <div class="divCont_3">
+                <div class="marcador2">
+                    <div>Matrix Manager 3</div>
+                    <img src="/Content/Fotos/1144.jpg" />
+                    <div>Recursos Humanos</div>
+                </div>
+            </div>
+            <div class="divCont_3">
+                <div class="marcador2">
+                    <div>Matrix Manager 4</div>
+                    <img src="/Content/Fotos/1064.jpg" />
+                    <div>Client </div>
+                </div>
+                
+            </div>
+        </div> 
+    </div>
+</script>
+
+<script type="text/x-kendo-template" id="templateScale">
+    <div style="width:100%;">
+        <div style="float:left;width:20%">
+            <div style="display:block;text-align:center;">
+                <div style="color:#:COL_SCAL_EVAL#;border:0px solid red;font-size:50px;font-weight:300;">#:ACR#</div>
+                <div style="font-size:.8em;margin:1px;border:1px solid #:COL_SCAL_EVAL#">#:VAL#</div>
+            </div>
+        </div>
+        
+    </div>
+</script>
+
+<script type="text/javascript">
+    function GrafObjetives() {
+
+        //Pie
+        $('#divComDos').highcharts({
+            colors: ["#2D5C88", "#679700"],
+            title: {
+                text: null
+            },
+            credits:{
+                enabled:false
+            },
+            tooltip: {
+                pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        format: '<b>{point.name}</b>: {point.percentage:.1f} %',
+                        distance: 0,
+                        style: {
+                            color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                        }
+                    }
+                }
+            },
+            series: [{
+                type: 'pie',
+                innerSize: '80%',
+                name: 'Browser share',
+                data: [
+                    ['General', 45],
+                    ['Specific', 55]
+                ]
+            }]
+        });
+        //
+
+        //3
+        $('#divComCuatro').highcharts({
+            chart: {
+                type: 'bar'
+            },
+            colors: ["#2D5C88"],
+            title: {
+                text: null
+            },
+            subtitle: {
+                text: null
+            },
+            credits: {
+                enabled: false
+            },
+            xAxis: {
+                gridLineWidth:1,
+                categories: ['Obj 1', 'Obj 2', 'Obj 3', 'Obj 4', 'Obj 5', 'Obj 6', 'Obj 7', 'Obj 8', 'Obj 9', 'Obj 10']
+            },
+            yAxis: {
+                gridLineWidth: 1,
+                min: 0,
+                max: 100,
+                title: {
+                    text: '% Avance'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Total Month',
+                data: [50, 72, 100, 70, 100, 100, 70, 90, 90, 75]
+
+            }]
+        });
+        //
+
+        //3
+        $('#divComTres').highcharts({
+            chart: {
+                type: 'bar'
+            },
+            colors: ["#679700"],
+            title: {
+                text: null
+            },
+            subtitle: {
+                text: null
+            },
+            credits: {
+                enabled: false
+            },
+            xAxis: {
+                gridLineWidth: 1,
+                categories: ['Obj 1','Obj 2','Obj 3','Obj 4','Obj 5','Obj 6','Obj 7','Obj 8','Obj 9','Obj 10']
+            },
+            yAxis: {
+                gridLineWidth: 1,
+                min: 0,
+                max: 100,
+                title: {
+                    text: '% Avance'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Total Month',
+                data: [50, 72, 100, 70, 100, 100, 70, 90, 90, 75]
+
+            }]
+        });
+        //
+
+        //1
+        $('#divComUno').highcharts({
+            chart: {
+                type: 'column'
+            },
+            colors: ["#2D5C88"],
+            title: {
+                text: null
+            },
+            subtitle: {
+                text: null
+            },
+            credits: {
+                enabled: false
+            },
+            xAxis: {
+                gridLineWidth: 1,
+                categories: [
+                    'Yo',
+                    'Area',
+                    'UEN',
+                    'CIA'
+                ]
+            },
+            yAxis: {
+                gridLineWidth: 1,
+                min: 0,
+                max: 100,
+                title: {
+                    text: '% Avance'
+                }
+            },
+            legend: {
+                enabled: false
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Total',
+                data: [50, 72, 100, 70]
+
+            }]
+        });
+        //2
+        $('#Objetives').highcharts({
+            chart: {
+                type: 'column'
+            },
+            colors: ["#2D5C88", "#679700"],
+            title: {
+                text: null
+            },
+            subtitle: {
+                text: null
+            },
+            credits:{
+                enabled:false
+            },
+            xAxis: {
+                gridLineWidth: 1,
+                categories: [
+                    'Jan',
+                    'Feb',
+                    'Mar',
+                    'Apr',
+                    'May',
+                    'Jun',
+                    'Jul',
+                    'Aug',
+                    'Sep',
+                    'Oct',
+                    'Nov',
+                    'Dec'
+                ]
+            },
+            yAxis: {
+                gridLineWidth: 1,
+                min: 0,
+                max:100,
+                title: {
+                    text: '% Avance'
+                }
+            },
+            legend:{
+                enabled:false
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Objetives Specific',
+                data: [50, 72, 100, 70, 100, 100, 70, 90, 90, 75, 40, 55]
+            }, {
+                name: 'Objetives Generales',
+                data: [71, 50, 90, 20, 50, 60, 70, 80, 100, 95, 80, 95]
+            }]
+        });
+        $('#myModalLoading').modal('hide');
+    }
+
+    $(document).ready(function () {
+        
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/EvaluationStaff/GPARS/"+"@ViewBag.ID_EVAL_STAF",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pnlEvaluation").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html())
+            ,dataBound: function(){
+                $("#Objetives" + 153).html("<div>hello</div>");
+                GrafObjetives();
+            }
+        });
+
+        //Opciones Para la Escala
+        var dataSourceScale = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/ScaleEvaluation/ListAllActive",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#divScale").kendoListView({
+            dataSource: dataSourceScale,
+            template: kendo.template($("#templateScale").html())
+            ,dataBound: function () {
+                //$("#Objetives" + 153).html("<div>hello</div>");
+                //GrafObjetives();
+            }
+        });
+
+    });
+
+    function lala(x) {
+        for (i = 1; i <= 1; i++) {
+            $("#Objetives" + x).html("<div>hello</div>");
+        }
+    };
+    
+    function GPComents() {
+        $("#mainPrincipalGP").addClass("elementHide");
+        $("#pnlEvaluationWork").empty();
+        $("#pnlEvaluationWork").load("/DetailEvaluationStaff/Index/" + "@ViewBag.ID_EVAL_STAF" + "?_" + Math.random());
+    };
+
+    function GPEvaluation() {
+        $("#mainPrincipalGP").addClass("elementHide");
+        $("#pnlEvaluationWork").empty();
+        $("#pnlEvaluationWork").load("/EvaluationStaff/ListStaffBySupervisor/" + "@ViewBag.ID_EVAL_STAF" + "?_" + Math.random());
+    };
+    
+    function ReturnEvaluation() {
+        $("#mainPrincipalGP").removeClass("elementHide");
+        $("#pnlEvaluationWork").empty();
+    }
+
+    function GPObjetives() {
+        $("#mainPrincipalGP").addClass("elementHide");        
+        $("#pnlEvaluationWork").empty();
+        $("#pnlEvaluationWork").load("/EvaluationStaff/ListObjectivesByStaff/" + "@ViewBag.ID_EVAL_STAF" + "?_" + Math.random());
+    }
+
+    //function ReturnGPRS()
+</script>

@@ -1,0 +1,493 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_SALE
+
+@{
+    Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<body>
+    <div>
+        @using (Html.BeginForm("OPFromSIDIGE", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmOPFromSIDIGE", target = "upload_target" }))
+        {
+            @Html.ValidationSummary(true)
+            @Html.HiddenFor(model => model.ID_COMP)
+            @Html.HiddenFor(model => model.ID_TYPE_DOCU_SALE)
+            @Html.HiddenFor(model => model.NUM_DOCU_SALE)
+            @Html.HiddenFor(model => model.OS)
+            @Html.HiddenFor(model => model.Titulo)
+            @Html.HiddenFor(model => model.FechaLimitePM)
+            @Html.HiddenFor(model => model.ID_PERS_ENTI_PREV)
+            @Html.HiddenFor(model => model.FormaPago)
+            @Html.HiddenFor(model => model.ID_COMP_END)
+            @Html.HiddenFor(model => model.SUM_DOCU_SALE)
+
+            @Html.Hidden("ObjetoServicio")
+            @Html.Hidden("TipoCambio")
+            @Html.Hidden("MontoFacturaDolar")
+            @Html.Hidden("MontoFacturaSol")
+            @Html.Hidden("FechaInicioContrato")
+            @Html.Hidden("FechaFinContrato")
+            @Html.Hidden("FechaInicioSoporte")
+            @Html.Hidden("FechaFinSoporte")
+            @Html.Hidden("ComentarioGobierno")
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="">
+                        <div class="card-header-tab card-header">
+                            Módulo Proyectos
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    Título de la OP
+                                    <input id="txtTitulo" name="txtTitulo" class="form-control" type="text" />
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        Fecha Límite
+                                        <input type="text" class="form-control pull-right" id="dtFechaLimite">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    Preventa
+                                    <select id="cbPreventa" class="form-control select2" style="width:100%"></select>
+                                </div>
+                                <div class="col-md-6">
+                                    <div>Forma de Pago</div>
+                                    <select id="cbFormaPago" class="form-control select2" type="text" style="width:100%"></select>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    Cliente
+                                    <input id="cbCompania" class="form-control" style="width:100%" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+
+                                <div class="col-md-12">
+                                    Cliente Final
+                                    <input id="cbCompaniaFinal" class="form-control" style="width:100%" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="">
+                        <div class="card-header-tab card-header">
+                            Módulo Gobierno
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    Objeto del Servicio
+                                    <input id="txtObjetoServicio" class="form-control" type="text" />
+                                </div>
+                                <div class="col-md-6">
+                                    Tipo de Cambio
+                                    <input id="txtTipoCambio" class="form-control" type="text" onkeypress="return soloDecimal(event, this)" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    $ Monto Facturado
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="txtMontoFacturaDolar">$</span>
+                                        </div>
+                                        <input id="txtMontoFacturaDolar" class="form-control" type="text" onkeypress="return soloDecimal(event, this)" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    S/. Monto Facturado
+                                    <div class="input-group mb-3">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text" id="txtMontoFacturaSol">S/</span>
+                                        </div>
+                                        <input id="txtMontoFacturaSol" class="form-control" type="text" onkeypress="return soloDecimal(event, this)" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        Fecha Inicio Contrato
+                                        <input id="dtFechaInicioContrato" class="form-control pull-right" type="text" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        Fecha Fin Contrato
+                                        <input id="dtFechaFinContrato" class="form-control pull-right" type="text" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        Fecha Inicio Soporte
+                                        <input id="dtFechaInicioSoporte" class="form-control pull-right" type="text" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        Fecha Fin Soporte
+                                        <input id="dtFechaFinSoporte" class="form-control pull-right" type="text" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="col-lg-12">
+                            Comentario
+                            <textarea id="ComentarioProyecto" style="width:100%; height:150px"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <div class="col-lg-12">
+                            Descripción
+                            <textarea id="ComentarioGob" style="width:100%; height:150px"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-12 row mb-3">
+                <div class="col-md-4">
+                    <div class="custom-radio custom-control">
+                        <input type="radio" name="chkProyecto" id="chkProyectoOperaciones" class="chkProyecto1 custom-control-input" value="1" checked>
+                        <label class="custom-control-label" for="chkProyectoOperaciones">
+                            Proyecto Operaciones
+                        </label>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="custom-radio custom-control">
+                        <input type="radio" name="chkProyecto" id="chkProyectoOutsourcing" class="chkProyecto2 custom-control-input" value="2">
+                        <label class="custom-control-label" for="chkProyectoOutsourcing">
+                            Proyecto Outsourcing
+                        </label>
+                    </div>
+                </div>
+            </div>
+            @*<label class="radio-inline" style="padding-top:10px">
+                    <div style="padding-left: 7px;">
+                        <input type="radio" name="chkProyecto" id="chkProyecto" class="chkProyecto1" value="1" checked>
+                    </div>Proyectos Operaciones
+                </label>
+                <label class="radio-inline" style="padding-top:10px">
+                    <div style="padding-left:7px;">
+                        <input type="radio" name="chkProyecto" id="chkProyecto" class="chkProyecto2" value="2">
+                    </div>Proyectos Outsourcing
+                </label>*@
+            <div class="row">
+                <div class="col-md-6">
+                </div>
+                <div class="col-md-3">
+                    <button id="btnCancelar" class="btn btn-light btn-block">Cancelar</button>
+                </div>
+                <div class="col-md-3">
+                    <button id="btnGenerar" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Generar</button>
+                </div>
+            </div>
+        }
+
+        <iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+
+    </div>
+</body>
+
+
+
+<script>
+    $(document).ready(function () {
+        var idComp = @ViewBag.IdCompania;
+        $("#cbCompania").kendoComboBox({
+            placeholder: "Seleccione un cliente",
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            minLength: 1,
+            autoBind: false,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/AccountEntity/CompaniaListarPorCuenta",
+                        dataType: "json",
+                        data: function () {
+                            return {
+                                q: $("#cbCompania").data("kendoComboBox").input.val()
+                            };
+                        }
+                    }
+                }
+            },
+            height: 400,
+            suggest: true,
+            change: function (e) {
+                var selectedValue = this.value();
+                console.log("Valor seleccionado: " + selectedValue);
+            }
+        }).data("kendoComboBox").value(idComp);
+
+
+
+        var idComp2 = @ViewBag.IdCompaniaFinal;
+        $("#cbCompaniaFinal").kendoComboBox({
+            placeholder: "Seleccione un cliente",
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            minLength: 1,
+            autoBind: false,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/AccountEntity/CompaniaListarPorCuenta",
+                        dataType: "json",
+                        data: function () {
+                            return {
+                                q: $("#cbCompania").data("kendoComboBox").input.val()
+                            };
+                        }
+                    }
+                }
+            },
+            height: 400,
+            suggest: true,
+            change: function (e) {
+                var selectedValue = this.value();
+                console.log("Valor seleccionado: " + selectedValue);
+            }
+        }).data("kendoComboBox").value(idComp2);
+    });
+
+
+</script>
+
+
+<script type="text/javascript">
+
+    function uploadDone(msg, code, idDocuSale) {
+
+        if (msg == "OK") {
+            $("#hdnTipoDocumento").val(idDocuSale);
+            var title = 'Información Guardada / Notificación Enviada';
+            var body = "La información fue guardada.</br>"
+                    + "Código: " + code + "</br>"
+                   "<span style='font-weight: bold;'>A continuación cargar los documentos asociados a la OP creada.</span>";
+
+            toastr.success(body, title);
+
+            $("#btnArchivosInicio").click();
+
+        }
+        else {
+            toastr.warning(code, "Problema al grabar.");
+        }
+    }
+
+
+    $(document).ready(function () {
+        cargarComboPreventa();
+        $(".chkProyecto1").click(function () {
+            cargarComboPreventa();
+        });
+        $(".chkProyecto2").click(function () {
+            cargarComboPreventaOutsourcing();
+        });
+
+        $('#dtFechaLimite').kendoDatePicker();
+        $('#dtFechaInicioContrato').kendoDatePicker();
+        $('#dtFechaFinContrato').kendoDatePicker();
+        $('#dtFechaInicioSoporte').kendoDatePicker();
+        $('#dtFechaFinSoporte').kendoDatePicker();
+
+        $("#cbFormaPago").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Parameter/ListarPorParametro?idparametro=41",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+      
+        $("#btnCancelar").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#btnGenerar").click(function (event) {
+            $("#Titulo").val($("#txtTitulo").val());
+            $("#FechaLimitePM").val($("#dtFechaLimite").val());
+            $("#ID_PERS_ENTI_PREV").val($("#cbPreventa").val());
+            $("#FormaPago").val($("#cbFormaPago").val());
+            $("#ID_COMP_END").val($("#cbCompaniaFinal").val());
+            $("#SUM_DOCU_SALE").val($("#ComentarioProyecto").val());
+
+            $("#ObjetoServicio").val($("#txtObjetoServicio").val());
+            $("#TipoCambio").val($("#txtTipoCambio").val());
+            $("#MontoFacturaDolar").val($("#txtMontoFacturaDolar").val());
+            $("#MontoFacturaSol").val($("#txtMontoFacturaSol").val());
+            $("#FechaInicioContrato").val($("#dtFechaInicioContrato").val());
+            $("#FechaFinContrato").val($("#dtFechaFinContrato").val());
+            $("#FechaInicioSoporte").val($("#dtFechaInicioSoporte").val());
+            $("#FechaFinSoporte").val($("#dtFechaFinSoporte").val());
+            $("#ComentarioGobierno").val($("#ComentarioGob").val());
+
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            }
+        });
+
+        //Asignación inicial
+        var $newOption = $("<option></option>").val("@ViewBag.IdCompania").text("@ViewBag.Compania");
+        $("#cbCompania").append($newOption).trigger('change');
+        var $newOptionF = $("<option></option>").val("@ViewBag.IdCompaniaFinal").text("@ViewBag.CompaniaFinal");
+        $("#cbCompaniaFinal").append($newOptionF).trigger('change');
+
+        $("#ComentarioProyecto").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "foreColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink"
+            ], encoded: false
+        });
+
+        $("#ComentarioGob").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "foreColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink"
+            ], encoded: false
+        });
+    });
+
+    function format(res) {
+        return res.text + '<br/>' + res.text;
+    }
+
+    function formato(res) {
+        return res.VAL_ACCO_PARA + '<br/>' + res.ID_ACCO_PARA;
+    }
+
+    function formatoSeleccion(res) {
+        return res.VAL_ACCO_PARA;
+    }
+
+    function cargarComboPreventa() {
+        $("#cbPreventa").empty();
+        $("#cbPreventa").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/PersonaPorAreaResponsable?IdArea=26",
+                dataType: 'json',
+                //type: "POST",
+                //params: {
+                //    contentType: 'application/json; charset=utf-8'
+                //},
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+            formatResult: format,
+            formatSelection: format,
+            escapeMarkup: function (m) { return m; }
+        });
+    }
+    function cargarComboPreventaOutsourcing() {
+        $("#cbPreventa").empty();
+        $("#cbPreventa").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/CargarPreventaOutsourcing?IdArea="+'26,9,22,18',
+                dataType: 'json',
+                //type: "POST",
+                //params: {
+                //    contentType: 'application/json; charset=utf-8'
+                //},
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+            formatResult: format,
+            formatSelection: format,
+            escapeMarkup: function (m) { return m; }
+        });
+    }
+</script>

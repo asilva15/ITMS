@@ -1,0 +1,463 @@
+﻿@model ERPElectrodata.Models.DETAILS_TICKET
+
+@{
+    ViewBag.Title = "Index";
+}
+
+@*DETALLE DE CHANGE*@
+
+<div style="float:left; width:60%;">
+    <div class="titleForm">
+        <div class="title">@ViewBag.NAM_TYPE_TICK # @ViewBag.COD_TICK</div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            <div id="divDetaTicket">
+            </div>
+            <div style="clear:both;">
+                @using (Html.BeginForm("Create", "DetailsChange", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmDetailChange", target = "upload_target" }))
+                {
+                    @Html.ValidationSummary(true)
+                    @Html.HiddenFor(model=>model.ID_TICK)
+                    <div class="divFondoDos">
+                        <div class="divSpace2_a"></div>
+                        <div class="divCont2">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Type
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_TYPE_DETA_TICK)
+                                @Html.ValidationMessageFor(model => model.ID_TYPE_DETA_TICK)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divFondoUno">
+                        <div class="divSpace2_a"></div>
+                        <div style="width:96%;float:left">
+                            <div class="editor-field" id="DivDownloadFile">
+                                <a href="~/Adjuntos/Change/Template/AUT_@ViewBag.ACR_ACCO" target="_blank" title="@ResourceLanguaje.Resource.DownloadFormat" style="color:blue">@ResourceLanguaje.Resource.DownloadFormat</a>
+                            </div>
+                        </div>
+                    </div>                                        
+                    <div id="divTypeTicket2" class="divFondoUno" style="display:none">
+                        <div class="divSpace2_a"></div>
+                        <div class="divCont2">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Queue
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_QUEU)
+                                @Html.ValidationMessageFor(model => model.ID_QUEU)
+                            </div>
+                        </div>
+                        <div class="divSpace2_a"></div>
+                        <div class="divCont2">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Assignee
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_PERS_ENTI)
+                                @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divFondoUno">
+                        <div class="divSpace2_a"></div>
+                        <div style="width:96%;float:left">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Comment
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextAreaFor(model => model.COM_DETA_TICK, new { rows = "20" })
+                                @Html.ValidationMessageFor(model => model.COM_DETA_TICK)
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width: 96%; float:left; padding: 0px 0px 0 15px; ">
+                        <input name="files" id="files" type="file" />
+                    </div>                
+                    <div style="margin:0px 15px 0px 0px; height:25px; border:0px solid black;">
+                    <div style="margin:0px 15px 0px 0px; height:30px; border:0px solid black;">
+                        <div style="display:inline-block; float:right; padding:10px 18px 0px 0px;">
+                            <div style=" float:left; padding:0px 15px 0px 0px; display:none" id="divBtnSend">
+                                <button id="BtnSend" class="k-button" >@ResourceLanguaje.Resource.RequestApproval</button>
+                            </div>
+                            <button id="submit" class="k-button" >Create</button>
+                        </div>
+                    </div>
+                    </div>
+                    <iframe id="upload_target" name="upload_target" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+                    <div style="clear:both; padding-top:10px;"></div>
+                }
+            </div>
+            <div class="divFondoUno">
+                <div id="divDetails"></div>
+            </div>
+            <div style="clear:both; padding-bottom:5px;"></div>        
+        </div>
+    </div>
+</div>
+
+<div style="float:right; width:39%;">
+    <div class="titleForm">
+        <div class="title">@ResourceLanguaje.Resource.Activities</div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            <div id="divActivities" style="padding:5px;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    
+    $(document).ready(function () {
+        
+        $("#submit").click(function () {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingChange', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });
+
+        $("#BtnSend").click(function (event) {
+            event.preventDefault();
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingChange', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+
+            $.ajax({
+                url: "/DetailsChange/RequestApproval?" + $('#FrmDetailChange').serialize(),
+                data: "var=" + Math.random(),
+                type: "GET",
+                dataType: "text",
+                success: function (txt) {
+                    if(txt == 'ERROR 1'){
+                        uploadDone('ERROR','@ResourceLanguaje.Resource.Message1');
+                    }
+                    else if(txt == 'ERROR 2'){
+                        uploadDone('ERROR','@ResourceLanguaje.Resource.BasedDrawback');
+                    }
+                    else{
+                        uploadDone('OK','');
+                    }
+                },
+                error: function (txt) {
+                    alert('Error');
+                }
+            });
+        });
+        
+
+        $.ajax({
+            url: "/DetailsChange/ListByIdTick/" + @ViewBag.ID_TICK,
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                showDetailsIncident();
+            },
+            error: function (source) {
+
+            }
+        });
+    });
+
+    var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").kendoComboBox({
+        autoBind: true,
+        index: 0,
+        dataTextField: "NAM_TYPE_DETA_TICK",
+        dataValueField: "ID_TYPE_DETA_TICK",
+        dataSource: {
+            serverFiltering: true,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/TypeDetailsTicket/ListTypeDetailsTicketByID_MODU/3/" + "@ViewBag.ID_STAT_END"
+            }
+        }
+    }).data("kendoComboBox");
+
+    ID_TYPE_DETA_TICK.bind("dataBound", function(e) { //Quitando link de descarga si la opcion es EXECUTE
+        if(ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 11){ 
+            $("#DivDownloadFile").empty();
+        }
+    });
+
+    ID_TYPE_DETA_TICK.bind("change", function (e) {
+        $("#DivDownloadFile").empty();
+        $("#divTypeTicket2").css("display", "none");
+        if(ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 2){            
+            $("#divTypeTicket2").css("display", "block");
+            $("#ID_QUEU").data("kendoComboBox").value("");
+            $("#ID_CLIE").data("kendoComboBox").value("");
+            $("#ID_CLIE").data("kendoComboBox").enable(false);
+        }        
+        else if(ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 4){            
+            $("#DivDownloadFile").append('<a href="/Adjuntos/Change/Template/AUT_@ViewBag.ACR_ACCO" target="_blank" title="@ResourceLanguaje.Resource.DownloadFormat" style="color:blue">@ResourceLanguaje.Resource.DownloadFormat</a>');
+        }
+        else if(ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 5){            
+            $("#DivDownloadFile").append('<a href="/Adjuntos/Change/Template/RollBackPlan_@ViewBag.ACR_ACCO" target="_blank" title="@ResourceLanguaje.Resource.DownloadFormat" style="color:blue">@ResourceLanguaje.Resource.DownloadFormat</a>');
+        }
+        else if(ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 6){            
+            $("#DivDownloadFile").append('<a href="/Adjuntos/Change/Template/Comunication_@ViewBag.ACR_ACCO" target="_blank" title="@ResourceLanguaje.Resource.DownloadFormat" style="color:blue">@ResourceLanguaje.Resource.DownloadFormat</a>');
+        }
+
+    });
+
+    $("#COM_DETA_TICK").kendoEditor({
+        tools: [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "foreColor",
+            "backColor",
+            "justifyLeft",
+            "justifyCenter",
+            "justifyRight",
+            "justifyFull",
+            "insertUnorderedList",
+            "insertOrderedList",
+            "indent",
+            "outdent",
+            "createLink",
+            "unlink",
+            "subscript",
+            "superscript"
+        ], encoded: false
+    });
+
+    $("#files").kendoUpload({
+        localization: {
+            select: "@ResourceLanguaje.Resource.Attach"
+        }
+    });
+
+    $("#ID_QUEU").kendoComboBox({
+        dataTextField: "QUEU",
+        dataValueField: "ID_QUEU",
+        filter: "contains",
+        autoBind: false,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountQueue/ListByAcco?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    $("#ID_PERS_ENTI").kendoComboBox({
+        autoBind: false,
+        index: 1,
+        cascadeFrom: "ID_QUEU",
+        dataTextField: "ASSI",
+        template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                                  '<div style="float:left;">${data.ASSI}</div>' +
+                                  '<div style="float:right; ">(WL ${data.WorkLoad})</div>' +
+                              '</div>',
+        dataValueField: "ID_PERS_ENTI",
+        dataSource: {
+            //type: "odata",
+            serverFiltering: true,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    function showDetailsIncident() {
+        $.each(data1['datadeta'],function (index,value){
+            $("#divDetaTicket").append('<div class="divFondoDos">'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.Requester</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['AEU'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.Status</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['NAM_STAT'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.Priority</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['NAM_PRIO'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.DateScheduled</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['DATE_SCHE'])+'</div>'+
+            '</div>'+
+        '</div>'+
+        '<div class="divFondoUno">'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.Source</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['NAM_SOUR'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.Category</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['CATE'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.SubCategory</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['SUBCATE'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.Class</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['CLASS'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.SubClass</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['SUBCLASS'])+'</div>'+
+            '</div>'+
+        '</div>'+
+        '<div class="divFondoDos">'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.CreatedDate</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['CREATE_TICK'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.ModifiedDate</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['MODIFIED_TICK'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">@ResourceLanguaje.Resource.Attach</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['ATTA_TOT'])+'</div>'+
+            '</div>'+
+            '<div class="casilla">'+
+                '<div class="smallTitle">Approved</div>'+
+                '<div class="smallField">'+(data1['datadeta'][index]['APPROVED'])+'</div>'+
+            '</div>'+
+        '</div>'+
+        '<div class="divFondoUno">'+
+            '<div class="detailsSummary">'+
+                '<div id="detSummary">'+
+                    '<div class="container">'+
+                        '<div class ="userData">'+
+                            '<div class="asignedImage"><a><img src="/Content/Images/userAssig.png"/></a></div>'+
+                        '</div>'+
+                        '<div class="messageData">'+
+                            '<div class="messageArrow"></div>'+
+                            '<div class="messageBoxDet">'+
+                                '<div class="msgBoxDetUser">'+'@ResourceLanguaje.Resource.CreatedBy ' +(data1['datadeta'][index]['CREA_BY'])+
+                                '</div>'+
+                                '<div class="msgBoxDetUserAssi">'+'@ResourceLanguaje.Resource.AssignedTo '+(data1['datadeta'][index]['ASSI_TO'])+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="msgBoxBody">'+(data1['datadeta'][index]['SUM_TICK'])+
+                            '</div>'+
+                            '<div class="dadjuntos">'+(data1['datadeta'][index]['ATTA'])+
+                            '</div>'+
+                        '</div>'+
+                        
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+        '</div>');
+
+            if(data1['datadeta'][index]['TTDetails456'] == 3){ $("#divBtnSend").css("display", "block"); }
+            else { $("#divBtnSend").css("display", "none"); }
+        });
+
+        $.each(data1['data'],function (index,value){
+            
+            $("#divActivities").append(
+                '<div class="listActCont">'+
+                    '<div class="listActContGris">'+
+                        (data1['data'][index]['NAM_TYPE_DETA_TICK'])+
+                    '</div>'+
+                    '<div class="listActContGrisR">'+
+                        (data1['data'][index]['PERS'])+
+                    '</div>'+
+                    '<div class="listActContGrisR">'+
+                        (data1['data'][index]['CREATE_DETA_INCI'])+
+                    '</div>'+
+                '</div>'
+                );
+
+            $("#divDetails").append('<div class="detailsSummary">'+
+                '<div id="detSummary">'+
+                    '<div class="container">'+
+                        '<div class="userData">'+
+                            '<div class="asignedImage"><a href="#"><img src="/Content/Images/userAssig.png"/></a></div>'+
+                        '</div>'+
+                        '<div class="messageData">'+
+                            '<div class="messageArrow"></div>'+
+                                '<div class ="messageBoxDet">'+
+                                    '<div class ="msgBoxDetUser">'+
+                                        (data1['data'][index]['PERS']).toLowerCase()+
+                                    '</div>'+
+                                    '<div class ="msgBoxDetCreate">'+
+                                        (data1['data'][index]['CREATE_DETA_INCI']).toLowerCase()+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class ="messageBoxDet2">'+
+                                    '<div class ="msgBoxDetTDI'+(data1['data'][index]['ID_TYPE_DETA_TICK'])+'">'+
+                                    (data1['data'][index]['NAM_TYPE_DETA_TICK']).toLowerCase()+
+                                    '</div>'+
+                                    '<div class="msgBoxDetAs">'+
+                                        ((data1['data'][index]['ID_TYPE_DETA_TICK']) == 3 ? ((data1['data'][index]['NAM_STAT']).toLowerCase() +" "+ (data1['data'][index]['FEC_SCHE']).toLowerCase()) :'')+
+                                        ((data1['data'][index]['ID_TYPE_DETA_TICK']) == 2 ? (data1['data'][index]['ASSI']).toLowerCase():'')+
+                                        //((data1['data'][index]['ID_TYPE_DETA_TICK']) == 4 ? (data1['data'][index]['COD_PARENT']):'')+
+                                    '</div>'+
+                                '</div>'+
+                            '<div class="msgBoxBody">'+
+                                (data1['data'][index]['COM_DETA_INCI'])+
+                            '</div>'+
+                            '<div class ="dadjuntos">'+
+                                (data1['data'][index]['ADJ'])+
+                        '</div>'+
+                        '</div>'+//message Data
+                    '</div>'+
+                '</div>'+
+            '</div>');
+        });
+    }
+
+    function uploadDone(conf,msg){
+        closeWinModalPopUpLoad();
+        if(conf=='OK'){
+            var title = '@ResourceLanguaje.Resource.InformationSaved ';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                   "<div style='padding:10px 0px 10px 0px;'>Detail Change information was succesfully saved</div>" +
+                   "<div style='padding:10px 0px 10px 0px;'></div>"+ 
+                   "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                   "<button id='btnContinues' class='k-button'>Continue</button>" +
+                   "</div></div>";
+
+            winPopUpModal(title, body, 400, 158);
+
+            $("#closebtnmodal").click(function () {
+                location.reload(true);
+            });
+
+            $("#btnContinues").click(function () {
+                location.reload(true);
+            });
+        }
+        else{
+            var title = '';
+            title = '@ResourceLanguaje.Resource.InformationMissing';
+            if(conf=='ERROR1'){title = '@ResourceLanguaje.Resource.ChangeStatus';}
+            
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                "<div style='padding:10px 0px 10px 0px;'>"+msg+"</div>" +
+                "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                        "</div></div>";
+
+            winPopUpModal(title, body, 400, 138);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+</script>

@@ -1,0 +1,307 @@
+﻿@{
+    ViewBag.Title = "Cronograma";
+    Layout = null;
+}
+
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">
+
+<script src="~/Content/themes/plugin/fullcalendar/moment.min.js"></script>
+<script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+
+<div class="main-card card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-8">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        Cliente
+                        <select id="cbCliente" name="cbCliente" type="text" style="width:100%"></select>
+                    </div>
+                    <div class="col-md-6">
+                        Cliente Final
+                        <select id="cbClienteFinal" name="cbClienteFinal" type="text" style="width:100%"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-6">
+                        Marca
+                        <select id="cbMarca" name="cbMarca" type="text" style="width:100%"></select>
+                    </div>
+                    <div class="col-md-6">
+                        Estado
+                        <input id="cbEstadoInforme" name="cbEstadoInforme" type="text" style="width:100%">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-6">
+                        Responsable
+                        <select id="cbResponsable" name="cbResponsable" type="text" style="width:100%"></select>
+                    </div>
+                    <div class="col-md-6">
+                        Tipo Informe
+                        <select id="cbTipoInforme" name="cbTipoInforme" type="text" style="width:100%"></select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-6">
+                        OP
+                        <input id="txtOP" name="txtOP" class="form-control" type="text" />
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <br />
+                            <button type="button" class="btn btn-warning btn-block" onclick="VerCalendarioInforme()"><i class="fa fa-search"></i> Buscar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="col-md-12"><br /></div>
+                <div id="divEstados" class="col-md-12"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <div class="form-row">
+        <div class="col-md-12">
+            <div id="calendarioInforme">
+            </div>
+        </div>
+    </div>
+</div>
+<strong style="padding-left:15px">*Calendario de Informes PMO</strong>
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+
+        var cbCliente = $("#cbCliente").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Sales/ListClients?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        cbCliente.list.width(300);
+
+
+        var cbClienteFinal = $("#cbClienteFinal").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Sales/ListClients?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#cbMarca").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            }
+        });
+        var cbMarca = $("#cbMarca").data("kendoComboBox");
+
+        $("#cbEstadoInforme").kendoComboBox({
+            dataTextField: "Estado",
+            dataValueField: "IdEstado",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ListarInformeEstado?var=" + Math.random()
+                }
+            }
+        });
+        var cbEstadoInforme = $("#cbEstadoInforme").data("kendoComboBox");
+
+        $("#cbResponsable").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ListarInformeResponsable?var=" + Math.random()
+                }
+            }
+        });
+        var cbResponsable = $("#cbResponsable").data("kendoComboBox");
+        
+        var cbTipoInforme = $("#cbTipoInforme").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "cbResponsable",
+            filter: "contains",
+            dataTextField: "TipoInforme",
+            dataValueField: "IdTipoInforme",
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ListarTipoInformexRresponsable?_=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        
+        $.ajax({
+            url: "/InformeED/ListarInformeEstado/",
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                $("#divEstados").empty();
+                var contenido = "";
+                $.each(source['Data'], function (index, value) {
+                    var letraColor = "black";
+                    //if ((source['Data'][index]['IdEstado']) == 1 || (source['Data'][index]['IdEstado']) == 7) {
+                        letraColor = "white";
+                    //}
+                    contenido = contenido +
+                        '<div class="form-row">' +
+                            '<div class="col-md-2"><span class="badge" style="background-color:' + (source['Data'][index]['Color']) + '; color:' + letraColor + '">' +
+                            (source['Data'][index]['IdEstado']) + '</span></div>' +
+                            '<div class="col-md-10"><span style="font-size:12.5px">' + (source['Data'][index]['Estado']) + '</span></div>' +
+                        '</div>';
+                });
+                $("#divEstados").append(contenido);
+            },
+            error: function (source) {
+                toastr.error("Error al obtener la información del informe.");
+            }
+        });
+
+
+        setTimeout(function () {
+            VerCalendarioInforme();
+        }, 500);
+    });
+
+    function VerCalendarioInforme() {
+        $('#calendarioInforme').fullCalendar('destroy');
+
+        $('#calendarioInforme').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            eventLimit: true,
+            views: {
+                month: {
+                    eventLimit: 20
+                }
+            },
+            buttonText: {
+                today: 'hoy',
+                month: 'mes',
+                week: 'semana',
+                day: 'día'
+            },
+            //Random default events
+            events: function (start, end, timezone, callback) {
+                $.ajax({
+                    url: '/InformeED/CronogramaInforme/',
+                    type: "POST",
+                    datatype: 'json',
+                    data: {
+                        IdCliente: $("#cbCliente").val() == "" ? "0" : $("#cbCliente").val(),
+                        IdClienteFinal: $("#cbClienteFinal").val() == "" ? "0" : $("#cbClienteFinal").val(),
+                        IdMarca: $("#cbMarca").val() == "" ? "0" : $("#cbMarca").val(),
+                        IdEstado: $("#cbEstadoInforme").val() == "" ? "0" : $("#cbEstadoInforme").val(),
+                        IdResponsable: $("#cbResponsable").val() == "" ? "0" : $("#cbResponsable").val(),
+                        IdTipoInforme: $("#cbTipoInforme").val() == "" ? "0" : $("#cbTipoInforme").val(),
+                        OP: $("#txtOP").val(),
+                        //start: start.format(),
+                        //end: end.format()
+                    },
+                    success: function (data) {
+                        var events = [];
+
+                        $.each(data['data'], function (index, value) {
+
+                            events.push({
+                                id: (data['data'][index]['IdInforme']),
+                                title: (data['data'][index]['OP']),
+                                description: (data['data'][index]['TipoInforme']) + ' | ' + (data['data'][index]['Marca']),
+                                start: (data['data'][index]['FechaInforme']),
+                                backgroundColor: (data['data'][index]['EstadoColor']),
+                                borderColor: (data['data'][index]['EstadoColor']),
+                                url: "javascript:VerInforme(" + (data['data'][index]['IdInforme']) + ")",
+                            });
+
+                        });
+
+                        callback(events);
+                    },
+                    error: function (err) {
+
+                    }
+                });
+            },
+            eventRender: function (event, element) {
+                $('.fc-row.fc-week.fc-widget-content.fc-rigid').attr("style", "min-height:95px");
+                element.find('.fc-title').append("<br/>" + event.description);
+            },
+            //eventAfterAllRender: function () {
+            //    $('.fc-row.fc-week.fc-widget-content.fc-rigid').attr("style", "min-height:170px");
+            //},
+            editable: false,
+            droppable: true, // this allows things to be dropped onto the calendar !!!
+            eventLimit: true,
+        });
+    }
+
+    function VerInforme(id) {
+        if (id != 0) {
+            window.open("http://" + location.host + "/InformeED/Detalle/" + id)
+        }
+    }
+
+</script>

@@ -1,0 +1,591 @@
+﻿@{
+    ViewBag.Title = "CargaActivosBNV";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.8/lottie.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.0/js/dataTables.bootstrap4.min.js"></script>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-dolly-flatbed icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Importar Activos
+                <div class="page-title-subheading">
+                    En este módulo se importan activos de un grupo y unidad minera (MAXIMO 1000 REGISTROS).
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header-tab card-header">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+            <i class="header-icon lnr-upload mr-3 text-muted opacity-6"> </i>
+            Importar Activos
+        </div>
+    </div>
+    <br />
+    <div class="mb-3 ml-auto ml-lg-5">
+        <div class="row mt-3">
+            <div class="col-lg-4">
+                <div class="editor-label">
+                    Grupo <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    <input id="IdGrupo" name="IdGrupo" value="@ViewBag.IdGrupo" />
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="editor-label">
+                    Unidad Minera <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    <input id="UMinera" name="UMinera" />
+                </div>
+            </div>
+            <div class="col-lg-4"></div>
+        </div>
+        <div class="row">
+            <div class="col-lg-2">
+                <input type="file" id="fileInput" name="file" style="display:none;" />
+                <br />
+                <button type="button" id="btnImportar" class="btn btn-light Active btn-lg custom-btn" style="width: 100%;">Importar</button>
+            </div>
+            <div class="col-lg-2">
+                <br />
+                <button type="button" id="btnGuardar" class="btn btn-success btn-lg custom-btn" style="width: 100%;" disabled>Guardar</button>
+            </div>
+            <div class="col-lg-2">
+                <br />
+                <button type="button" id="btnLimpiar" class="btn btn-secondary btn-lg custom-btn" style="width: 100%;">Limpiar</button>
+            </div>
+            <div class="col-lg-2">
+                <br />
+                <a id="btnPlantilla" class="btn btn-info btn-lg custom-btn" style="color: #fff; width: 100%;">Descargar Plantilla</a>
+            </div>
+            <div class="col-lg-4"></div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3" id="PreVisualizacion" style="display: none;">
+    <div class="card-header-tab card-header">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+            <i class="header-icon lnr-laptop-phone mr-3 text-muted opacity-6"> </i>Pre-Visualización de Datos
+        </div>
+
+    </div>
+    <br />
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="dataTablePreVisualizacion" class="table table-striped table-bordered">
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var IdGrupo = $("#IdGrupo").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarGruposBNV/1?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                if (IdGrupo.dataSource.view().length == 1) {
+                    IdGrupo.select(0);
+                }
+            }
+        }).data("kendoComboBox");
+
+        var UMinera = $("#UMinera").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            cascadeFrom: 'IdGrupo',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarUMineraBNV?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                if (UMinera.dataSource.view().length == 1) {
+                    UMinera.select(0);
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#btnPlantilla").click(function () {
+            $(this).attr('href', "#")
+
+            if (IdGrupo.value() == null || IdGrupo.value() == '') {
+                toastr.warning("Seleccione un grupo", "Mensaje");
+            } else {
+                var url = '/Asset/DescargarPlantillaBNV?idGrupo=' + IdGrupo.value();
+                $(this).attr('href', url);
+                $(this).get(0).click();
+            }
+        });
+
+        $("#btnLimpiar").click(function () {
+            $("#fileInput").val('');
+            if ($.fn.DataTable.isDataTable('#dataTablePreVisualizacion')) {
+                $('#dataTablePreVisualizacion').DataTable().destroy();
+            }
+            $('#btnGuardar').prop("disabled", true);
+            $('#PreVisualizacion').hide();
+            IdGrupo.enable(true);
+            UMinera.enable(true);
+        });
+
+        $("#btnGuardar").click(function () {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+
+            if (file) {
+                var formData = new FormData();
+                formData.append('idGrupo', IdGrupo.value());
+                formData.append('idUMinera', UMinera.value());
+                formData.append('file', file);
+
+                InsertarActivos(formData);
+            }
+        });
+
+        $("#btnImportar").click(function () {
+            $("#fileInput").val('');
+
+            if (IdGrupo.value() == null || IdGrupo.value() == '') {
+                toastr.warning("Seleccione un grupo", "Mensaje");
+            } else if (UMinera.value() == null || UMinera.value() == '') {
+                toastr.warning("Seleccione una unidad minera", "Mensaje");
+            } else {
+                if ($.fn.DataTable.isDataTable('#dataTablePreVisualizacion')) {
+                    $('#dataTablePreVisualizacion').DataTable().destroy();
+                }
+                $('#btnGuardar').prop("disabled", true);
+                $('#PreVisualizacion').hide();
+                $("#fileInput").click();
+            }
+        });
+
+        $("#fileInput").change(function () {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+
+            if (file) {
+                var fileName = file.name;
+                var fileExtension = fileName.split('.').pop().toLowerCase();
+
+                if (fileExtension == 'xlsx') {
+                    var formData = new FormData();
+                    formData.append('idGrupo', IdGrupo.value());
+                    formData.append('idUMinera', UMinera.value());
+                    formData.append('file', file);
+
+                    if (IdGrupo.text() == "MICROINFORMATICO") {
+                        CargarDatosMicro(formData);
+                    } else if (IdGrupo.text() == "INFRAESTRUCTURA") {
+                        CargarDatosInfra(formData);
+                    } else if (IdGrupo.text() == "MOVIL") {
+                        CargarDatosMovil(formData);
+                    }
+
+                    IdGrupo.enable(false);
+                    UMinera.enable(false);
+
+                } else {
+                    toastr.warning("Por favor, cargue un archivo con extensión .xlsx", "Extensión de archivo incorrecta");
+                }
+            }
+        });
+
+        function CargarDatosMicro(data) {
+            Swal.fire({
+                title: "Cargando la información",
+                html: "Por favor, espere...<br><span id='progressText'>0%</span>",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    const progressBar = document.createElement('progress');
+                    progressBar.setAttribute('max', '100');
+                    Swal.getContent().appendChild(progressBar);
+
+                    const progressText = document.getElementById('progressText');
+
+                    const interval = setInterval(() => {
+                        progressBar.value += 10;
+                        const currentPercentage = progressBar.value + '%';
+                        progressText.textContent = currentPercentage;
+
+                        if (progressBar.value >= 100) {
+                            progressBar.value = 0;
+                            //Swal.close();
+                        }
+                    }, 2000);
+
+                    $.ajax({
+                        url: '/Asset/ValidarCargaMasivaBNV',
+                        type: 'POST',
+                        data: data,
+                        contentType: false,
+                        processData: false,
+                        success: function (result) {
+                            progressText.textContent = '100%';
+                            progressBar.value = 100;
+                            clearInterval(interval);
+                            Swal.close();
+
+                            $('#PreVisualizacion').show();
+
+                            if (result.message == "OK") {
+                                $('#btnGuardar').prop("disabled", false);
+                            } else {
+                                $('#btnGuardar').prop("disabled", true);
+                                toastr.error("Por favor validar la información.", "Registros no Válidos");
+                            }
+
+                            var dataTable = $('#dataTablePreVisualizacion').DataTable({
+                                dom: 'Bfrtip',
+                                scrollX: true,
+                                columns: [
+                                    {
+                                        title: 'Validación',
+                                        data: null,
+                                        render: function (data, type, row) {
+                                            let color, text = '';
+                                            if (data.EstadoValidacion == 1) { color = 'success'; text = 'Valido' } else { color = 'danger'; text = 'No valido' };
+                                            let label = `<div class="badge badge-${color}">${text}</div>`
+                                            return label;
+                                        },
+                                        className: 'text-center'
+                                    },
+                                    { data: 'Errores', title: 'MensajeDeError' },
+                                    { data: 'Serie', title: 'Serie*' },
+                                    { data: 'NombreActivo', title: 'NombreEquipo' },
+                                    { data: 'TipoActivo', title: 'TipoActivo*' },
+                                    { data: 'Marca', title: 'Marca*' },
+                                    { data: 'Modelo', title: 'ModeloComercial*' },
+                                    { data: 'Estado', title: 'Estado*' },
+                                    { data: 'Condicion', title: 'Condicion*' },
+                                    { data: 'UsuarioAsignado', title: 'UsuarioAsignado*' },
+                                    { data: 'Sitio', title: 'Sitio' },
+                                    { data: 'Locacion', title: 'Locación' },
+                                    { data: 'Ubicacion', title: 'Ubicación' },
+                                    { data: 'Contrato', title: 'Proyecto*' },
+                                    { data: 'FechaInicio', title: 'FechaInicio' },
+                                    { data: 'FechaFin', title: 'FechaFin' },
+                                    { data: 'Tarifa', title: 'Tarifa' },
+                                    { data: 'Comentario', title: 'Comentario' }
+                                ],
+                                buttons: []
+                            });
+
+                            dataTable.clear().rows.add(result.previsualizacionDatos).draw();
+                            //dataTable.columns.adjust().draw();
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+
+                        }
+                    });
+                }
+            });
+
+        }
+
+        function CargarDatosInfra(data) {
+            Swal.fire({
+                title: "Cargando la información",
+                html: "Por favor, espere...<br><span id='progressText'>0%</span>",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    const progressBar = document.createElement('progress');
+                    progressBar.setAttribute('max', '100');
+                    Swal.getContent().appendChild(progressBar);
+
+                    const progressText = document.getElementById('progressText');
+
+                    const interval = setInterval(() => {
+                        progressBar.value += 10;
+                        const currentPercentage = progressBar.value + '%';
+                        progressText.textContent = currentPercentage;
+
+                        if (progressBar.value >= 100) {
+                            progressBar.value = 0;
+                            //Swal.close();
+                        }
+                    }, 2000);
+
+                    $.ajax({
+                        url: '/Asset/ValidarCargaMasivaBNV',
+                        type: 'POST',
+                        data: data,
+                        contentType: false,
+                        processData: false,
+                        success: function (result) {
+                            progressText.textContent = '100%';
+                            progressBar.value = 100;
+                            clearInterval(interval);
+                            Swal.close();
+
+                            $('#PreVisualizacion').show();
+
+                            if (result.message == "OK") {
+                                $('#btnGuardar').prop("disabled", false);
+                            } else {
+                                $('#btnGuardar').prop("disabled", true);
+                                toastr.error("Por favor validar la información.", "Registros no Válidos");
+                            }
+
+                            var dataTable = $('#dataTablePreVisualizacion').DataTable({
+                                dom: 'Bfrtip',
+                                scrollX: true,
+                                columns: [
+                                    {
+                                        title: 'Validación',
+                                        data: null,
+                                        render: function (data, type, row) {
+                                            let color, text = '';
+                                            if (data.EstadoValidacion == 1) { color = 'success'; text = 'Valido' } else { color = 'danger'; text = 'No valido' };
+                                            let label = `<div class="badge badge-${color}">${text}</div>`
+                                            return label;
+                                        },
+                                        className: 'text-center'
+                                    },
+                                    { data: 'Errores', title: 'MensajeDeError' },
+                                    { data: 'Serie', title: 'Serie*' },
+                                    { data: 'NombreActivo', title: 'NombreEquipo' },
+                                    { data: 'TipoActivo', title: 'TipoActivo*' },
+                                    { data: 'Marca', title: 'Marca*' },
+                                    { data: 'Modelo', title: 'ModeloComercial*' },
+                                    { data: 'Estado', title: 'Estado*' },
+                                    { data: 'Condicion', title: 'Condicion*' },
+                                    { data: 'UsuarioAsignado', title: 'UsuarioAsignado*' },
+                                    { data: 'Sitio', title: 'Sitio' },
+                                    { data: 'Locacion', title: 'Locación' },
+                                    { data: 'ModoCompra', title: 'ModoCompra' },
+                                    { data: 'Contrato', title: 'Contrato*' },
+                                    { data: 'Comentario', title: 'Comentario' },
+                                    { data: 'IpLocal', title: 'IpLocal' },
+                                    { data: 'MacFisica', title: 'MacFisica' },
+                                    { data: 'Procesador1', title: 'Procesador1' },
+                                    { data: 'Procesador2', title: 'Procesador2' },
+                                    { data: 'CantidadHD', title: 'CantidadHD' },
+                                    { data: 'CapacidadHD', title: 'CapacidadHD' }
+                                ],
+                                buttons: []
+                            });
+
+                            dataTable.clear().rows.add(result.previsualizacionDatos).draw();
+                            //dataTable.columns.adjust().draw();
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+
+                        }
+                    });
+                }
+            });
+
+        }
+
+        function CargarDatosMovil(data) {
+            Swal.fire({
+                title: "Cargando la información",
+                html: "Por favor, espere...<br><span id='progressText'>0%</span>",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    const progressBar = document.createElement('progress');
+                    progressBar.setAttribute('max', '100');
+                    Swal.getContent().appendChild(progressBar);
+
+                    const progressText = document.getElementById('progressText');
+
+                    const interval = setInterval(() => {
+                        progressBar.value += 10;
+                        const currentPercentage = progressBar.value + '%';
+                        progressText.textContent = currentPercentage;
+
+                        if (progressBar.value >= 100) {
+                            progressBar.value = 0;
+                            //Swal.close();
+                        }
+                    }, 2000);
+
+                    $.ajax({
+                        url: '/Asset/ValidarCargaMasivaBNV',
+                        type: 'POST',
+                        data: data,
+                        contentType: false,
+                        processData: false,
+                        success: function (result) {
+                            progressText.textContent = '100%';
+                            progressBar.value = 100;
+                            clearInterval(interval);
+                            Swal.close();
+
+                            $('#PreVisualizacion').show();
+
+                            if (result.message == "OK") {
+                                $('#btnGuardar').prop("disabled", false);
+                            } else {
+                                $('#btnGuardar').prop("disabled", true);
+                                toastr.error("Por favor validar la información.", "Registros no Válidos");
+                            }
+
+                            var dataTable = $('#dataTablePreVisualizacion').DataTable({
+                                dom: 'Bfrtip',
+                                scrollX: true,
+                                columns: [
+                                    {
+                                        title: 'Validación',
+                                        data: null,
+                                        render: function (data, type, row) {
+                                            let color, text = '';
+                                            if (data.EstadoValidacion == 1) { color = 'success'; text = 'Valido' } else { color = 'danger'; text = 'No valido' };
+                                            let label = `<div class="badge badge-${color}">${text}</div>`
+                                            return label;
+                                        },
+                                        className: 'text-center'
+                                    },
+                                    { data: 'Errores', title: 'MensajeDeError' },
+                                    { data: 'Serie', title: 'Serie*' },
+                                    { data: 'NombreActivo', title: 'IMEI' },
+                                    { data: 'TipoActivo', title: 'TipoActivo*' },
+                                    { data: 'Marca', title: 'Marca*' },
+                                    { data: 'Modelo', title: 'ModeloComercial*' },
+                                    { data: 'Estado', title: 'Estado*' },
+                                    { data: 'Condicion', title: 'Condicion*' },
+                                    { data: 'UsuarioAsignado', title: 'UsuarioAsignado*' },
+                                    { data: 'Sitio', title: 'Sitio' },
+                                    { data: 'Locacion', title: 'Locación' },
+                                    { data: 'Contrato', title: 'Contrato*' },
+                                    { data: 'FechaInicio', title: 'FechaInicio' },
+                                    { data: 'FechaFin', title: 'FechaRenovacion' },
+                                    { data: 'Modalidad', title: 'Modalidad' },
+                                    { data: 'Operador', title: 'Operador' },
+                                    { data: 'Plan', title: 'Plan' },
+                                    { data: 'Tarifa', title: 'MontoMensual' },
+                                    { data: 'MontoTotal', title: 'MontoTotal' },
+                                    { data: 'IpLocal', title: 'Anexo' },
+                                    { data: 'Comentario', title: 'Comentario' },
+                                    { data: 'Antivirus', title: 'Antivirus' },
+                                    { data: 'Aplicaciones', title: 'Aplicaciones' }
+                                ],
+                                buttons: []
+                            });
+
+                            dataTable.clear().rows.add(result.previsualizacionDatos).draw();
+                            //dataTable.columns.adjust().draw();
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+
+                        }
+                    });
+                }
+            });
+
+        }
+
+        function InsertarActivos(data) {
+            Swal.fire({
+                title: "Guardando la información",
+                html: "Por favor, espere...<br><span id='progressText'>0%</span>",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    const progressBar = document.createElement('progress');
+                    progressBar.setAttribute('max', '100');
+                    Swal.getContent().appendChild(progressBar);
+
+                    const progressText = document.getElementById('progressText');
+
+                    const interval = setInterval(() => {
+                        progressBar.value += 10;
+                        const currentPercentage = progressBar.value + '%';
+                        progressText.textContent = currentPercentage;
+
+                        if (progressBar.value >= 100) {
+                            progressBar.value = 0;
+                            //Swal.close();
+                        }
+                    }, 2000);
+
+                    $.ajax({
+                        url: '/Asset/InsertarCargaMasivaBNV',
+                        type: 'POST',
+                        data: data,
+                        contentType: false,
+                        processData: false,
+                        success: function (result) {
+                            progressText.textContent = '100%';
+                            progressBar.value = 100;
+                            clearInterval(interval);
+                            Swal.close();
+
+                            $('#PreVisualizacion').hide();
+                            $('#btnGuardar').prop("disabled", true);
+                            IdGrupo.enable(true);
+                            UMinera.enable(true);
+
+                            if (result.message == "OK") {
+                                toastr.success("Se guardó la información.", "Completado");
+                                setTimeout(function () {
+                                    window.location.href = "http://" + location.host + "/Asset/index";
+                                }, 2000);
+                            } else {
+                                toastr.error("Error al cargar la información.", "Error");
+                            }
+
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+
+                        }
+                    });
+                }
+            });
+
+        }
+
+    });
+
+</script>

@@ -1,0 +1,127 @@
+﻿@{
+    Layout = null;
+}
+
+<input type="hidden" name="IdObjetivo" id="IdObjetivo" value="@ViewBag.Id" />
+<div class="divFondoDos">
+    <div class="divSpace3"></div>
+    <div class="divCont3">
+        <div class="editor-label">
+            Objetivo
+        </div>
+        <div class="" style="height:75px; width:300px">
+            <textarea id="EditNombre" name="EditNombre" style="height:75px; width:460px">@ViewBag.Objetivo</textarea>
+        </div>
+    </div>
+    <div class="divSpace3"></div>
+    <div class="divCont3">
+        <div class="editor-label">
+            &nbsp;
+        </div>
+        <div class="editor-label">
+            &nbsp;
+        </div>
+    </div>
+    <div class="divSpace3"></div>
+    <div class="divCont3">
+        <div class="editor-label">
+            Indicador
+        </div>
+        <div class="k-textbox">
+            <input id="EditIndicador" type="text" name="EditIndicador" value="@ViewBag.Indicador">
+        </div>
+        <div class="editor-label">
+            Peso
+        </div>
+        <div class="editor-field">
+            <input id="EditPeso" type="text" name="EditPeso" value="@ViewBag.Peso">
+        </div>
+        <div class="editor-label">
+            Cargo
+        </div>
+        <div class="editor-field">
+            <input id="EditIdCargo" type="text" name="EditIdCargo">
+        </div>
+    </div>
+</div>
+<div class="divFondoDos">
+    <div class="divSpace3"></div>
+    <div class="divCont3">
+        <div class="editor-label">
+            Descripción
+        </div>
+        <div class="" style="height:75px; width:300px">
+            <textarea id="EditDescripcion" name="EditDescripcion" style="height:75px; width:460px">@ViewBag.Descripcion</textarea>
+        </div>
+    </div>
+</div>
+<div style="display:inline-block; float:right; padding: 20px 20px 15px 5px;">
+    <div style=" float: left; padding: 0 15px 0 0;">
+        <button id="btnGuardarEditar" class="k-button">Grabar</button>
+    </div>
+    <button id="btnCancelarEditar" class="k-button">Cancelar</button>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#EditIdCargo").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/ListarCargo?var=" + Math.random()
+                }
+            }
+        });
+        var EditIdCargo = $("#EditIdCargo").data("kendoComboBox");
+        EditIdCargo.value(@ViewBag.Cargo);
+
+        $("#btnGuardarEditar").click(function () {
+
+            var params = {
+                IdObjetivo: $("#IdObjetivo").val(),
+                EditNombre: $("#EditNombre").val(),
+                EditDescripcion: $("#EditDescripcion").val(),
+                EditIndicador: $("#EditIndicador").val(),
+                EditPeso: $("#EditPeso").val(),
+                EditIdCargo: $("#EditIdCargo").val()
+            };
+
+            $.ajax({
+                url: "/EvaluacionPersonal/GrabarEditar",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == '"OK"') {
+                        closeWinFormModalPopUp();
+                        $("#btnBuscarObjetivo").click();
+                    }
+                }
+            });
+        });
+
+        $("#btnCancelarEditar").click(function (event) {
+            event.preventDefault();
+            closeWinFormModalPopUp();
+        });
+
+        $("#EditPeso").kendoNumericTextBox({
+            min: 0
+        });
+
+    });
+
+</script>

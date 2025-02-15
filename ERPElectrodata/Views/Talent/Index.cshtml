@@ -1,0 +1,584 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+@{
+    ViewBag.Title = "ListaProyectos";
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    .ClassFoto {
+        width: 110px;
+        height: 110px;
+    }
+    .BordeInternoFoto {
+        width: 110px;
+        height: 110px;
+        margin: 0 auto;
+        text-align: center;
+    }
+
+    .textoM:first-letter {
+        text-transform: uppercase;
+    }
+</style>
+<div id="divContent">
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="font-icon-wrapper font-icon-lg">
+                    <i class="fa fa-users icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <div class="titleModule"><b>TALENTO HUMANO</b></div>
+                    <div class="page-title-subheading">
+                        Lista de Colaboradores por Estados.
+                    </div>
+                </div>
+                <div class="derecha">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" id="ticketsByStatus">
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-danger btn" id="homInc1" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">@ResourceLanguaje.Resource.CeasedStaffTalent</div>
+                        <div class="widget-subheading"></div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span>@ViewBag.TCesado</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-warning btn" id="homInc2" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">@ResourceLanguaje.Resource.AvailableStaffTalent</div>
+                        <div class="widget-subheading"></div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span>@ViewBag.TDisponible</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-success btn" id="homInc3" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">@ResourceLanguaje.Resource.TemporalStaffTalent</div>
+                        <div class="widget-subheading"></div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span>@ViewBag.TPracticante</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-info btn" id="homInc4" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">@ResourceLanguaje.Resource.EmployeesTalent</div>
+                        <div class="widget-subheading"></div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span>@ViewBag.TPlanilla</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <input type="hidden" id="TimeServer" name="TimeServer" value="@ViewBag.TimeServer" />
+    <div id="gridUsers" class="contentView"> </div>
+
+    <div id="pagerUsers" class="contentViewPager"></div>
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="incidentHomeList" @*onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"*@>
+        <div class="incidentHomeListHeader">
+            <a href="\/Talent/Profile/${ID_PERS_ENTI}" target='_blank' style="width:100%; height:100%; font-weight: 400;text-decoration:none;">
+                <div class="card-body py-3 btn-shadow btn-outline-focus">
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-1">
+                            <div class="BordeInternoFoto">
+                                <img src="/Content/Fotos/${FOTO}.jpg" class="ClassFoto" style="width:90%;" />
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-lg-3">
+                            <div class="small">
+                                <b>${usuario}</b>
+                            </div>
+                            <div class="small">
+                                ${CAR_PERS}
+                            </div>
+                            <div class="small">
+                                <b>@ResourceLanguaje.Resource.EmailTalent:</b>
+                            </div>
+                            <div class="small">
+                                ${EMA_ELEC}
+                            </div>
+                            <div class="small">
+                                <b>@ResourceLanguaje.Resource.CellPhoneTalent:</b>
+                            </div>
+                            <div class="small">
+                                ${CEL_PERS}
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-lg-3">
+                            <div class="small">
+                                <b>${USB}</b>
+                            </div>
+                            <div class="small">
+                                ${NOM_AREA}
+                            </div>
+                            <div class="small">
+                                <b>@ResourceLanguaje.Resource.LocationTalent:</b>
+                            </div>
+                            <div class="small">
+                                ${SITIO}
+                            </div>
+                            <div class="small">
+                                <b>@ResourceLanguaje.Resource.PhoneExtensionTalent:</b>
+                            </div>
+                            <div class="small">
+                                ${TEL_PERS}
+                            </div>
+                        </div>
+                        <div class="col-sm-12 col-lg-2">
+                            <div class="small">
+                                <b>@ResourceLanguaje.Resource.ConditionContractTalent:</b>
+                            </div>
+                            <div class="small">
+                                ${CONDITION}
+                            </div>
+                            <div class="small">
+                                <b>@ResourceLanguaje.Resource.StartDateContractTalent:</b>
+                                ${STAR_CONT}
+                            </div>
+                            <div class="small">
+                                <b>@ResourceLanguaje.Resource.EndDateContractTalent:</b>
+                                ${END_CONT}
+                            </div>
+                            <div class="small">
+                                <b>@ResourceLanguaje.Resource.TerminationDateTalent:</b>
+                                ${CESS_DATE}
+                            </div>
+                        </div>
+                        <div class"col-sm-12 col-lg-2"> </div>
+                        
+                        # if (@ViewBag.Editar == 1) { #
+                                <div class="media align-items-center ml-4">
+                                    <div role="group" class="mb-3 btn-group-lg btn-group">
+                                        # if (@ViewBag.Supervisor == 1) { #
+                                        <button id="BtnEdit" class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3" title="Editar" onclick="Edit(${ID_PERS_ENTI}); return false;"> <i class="fa fa-edit" aria-hidden="true"></i></button>
+                                        <button id="BtnChange" class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3 btnAbrirModal" title="Cambiar estado" onclick="ChangeStatus(${ID_PERS_ENTI},${ID_PERS_STAT},${ID_CIA}); return false;"> <i class="fas fa-retweet" aria-hidden="true"></i></button>
+                                        # if(ID_PERS_STAT == 1 || ID_PERS_STAT == 2) { #
+                                        <button id="BtnContract" class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pr-3" title="Contrato" onclick="Contract(${ID_PERS_ENTI}); return false;"><i class="fas fa-file-contract" aria-hidden="true"></i></button>
+                                        # } #
+                                        # } #
+                                    </div>
+                                </div>
+                        # } #
+                    </div>
+                </div>
+            </a>
+        </div>
+    </div>
+</script>
+
+<!-- MODAL ESTADO -->
+<div class="modal fade" id="modalEstado" role="dialog" aria-labelledby="modalEstadoLabel" aria-hidden="true">
+    <div class="modal-dialog" id="tamEstado">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Estado</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divEstado"></div>
+                <!-- CONTENIDO -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL CARGO -->
+<div class="modal fade" id="modalCargo" role="dialog" aria-labelledby="modalCargoLabel" aria-hidden="true">
+    <div class="modal-dialog" id="tamCargo">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Cargo</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divCargo"></div>
+                <!-- CONTENIDO -->
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    //function onmouseoutMenu(){
+    //    $("#divMenuFloat1").css("display","none");
+    //}
+    //function onmouseoverMenu(){
+    //    $("#divMenuFloat1").css("display","block");
+    //}
+
+    $(document).ready(function () {
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Talent/ListByStatus/@ViewBag.Supervisor?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 1 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerUsers").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridUsers").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html())
+        });
+    });
+
+    function Click(parm) {
+
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 3;
+        if (parm.id == "homInc2") {
+            bandera = 4;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 2;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 1;
+        }
+        var listView = $("#gridUsers").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+    }
+
+    //function mouseOver(e) {
+    //    e.style.background = "#fcfcfc";
+    //}
+
+    //function mouseOut(e) {
+    //    e.style.background = "#ffffff";
+    //}
+
+    function Edit(id) {
+        window.open("/Talent/Edit/" + id + "/@ViewBag.Supervisor");
+        return false;
+    }
+
+    function Contract(id) {
+        window.open("/Talent/Contract/" + id);
+        return false;
+    }
+
+    function ChangeStatus(idpers, idstat, identi) {
+        $(".btnAbrirModal").attr("data-style", "expand-right");
+        $(".btnAbrirModal").attr("data-toggle", "modal");
+        $(".btnAbrirModal").attr("data-target", "#miModal");
+        $("#lblTitulo").text("Cambiar estado");
+
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Talent/ChangeStatus?id=" + idpers + "&id1=" + idstat + "&id2=" + identi);
+
+        
+        //$('#modal-content').load('/TalentChart/ViewChartWithoutStaff?id=' + identi);
+    }
+</script>
+
+<script type="text/javascript">
+    var fl1 = 0;
+    var fl2 = 0;
+    var fl3 = 0;
+    function MyProfile(parm) {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/MyProfile?var=" + Math.random());
+    }
+
+    function NewProfile(parm) {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/Create?var=" + Math.random());
+    }
+
+    function FindProfile(parm) {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/Find?id=@ViewBag.Supervisor&var=" + Math.random());
+    }
+
+    function FindAchievements() {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/ViewFindAchievements?var=" + Math.random());
+    }
+
+    @*function Training() {
+        UnselectMenu();
+        SelectMenu('Training','Achie');
+
+        $("#divContent").empty();
+        $("#divContent").load("/Training/Index?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+    }*@
+
+    function Chart(){
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/ViewChart?var=" + Math.random());
+    }
+
+    function Assistance(e) {
+        UnselectMenu();
+        SelectMenu('Assistance','Achie');
+
+        document.getElementById("divContent").innerHTML = "";
+        $("#divContent").load("/Assistance/Index");
+    }
+
+    function ReportTalent(parm) {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/Reports?var=" + Math.random());
+    }
+
+    function Scheduler(parm){
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Room/Index?var=" + Math.random());
+    }
+
+    function Evaluation(parm){
+        UnselectMenu();
+        SelectMenu('Evaluation','Sche');
+
+        $("#divContent").empty();
+        $("#divContent").load("/Evaluation/Index?var=" + Math.random());
+    }
+
+    function Vacation(parm){
+        UnselectMenu();
+        SelectMenu('Vacation','Report');
+        $("#divContent").empty();
+        $("#divContent").load("/Vacation/Index?var=" + Math.random());
+    }
+
+    function PaymentBallots(){
+        UnselectMenu();
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/LoadPaymentBallots?var=" + Math.random());
+    }
+
+    function SelectMenu(id,liant) {
+        $("#a" + id).css("color", "Black");
+        $("#a" + id).css("font-weight", "bold");
+        $("#li" + id).css("background-color", "#eaeaea");
+        $("#li" + liant).css("margin-right", "-4px");
+        fl3=1;
+    }
+
+    function UnselectMenu(){
+
+        $("#aEvaluation").css("color", "White");
+        $("#aEvaluation").css("font-weight", "initial");
+        $("#liEvaluation").css("background-color", "#333333");
+        $("#liSche").css("margin-right", "-2px");
+
+        $("#aAssistance").css("color", "White");
+        $("#aAssistance").css("font-weight", "initial");
+        $("#liAssistance").css("background-color", "#333333");
+        $("#liAchie").css("margin-right", "-2px");
+
+        if ('@ViewBag.AccessVacation' == '1')
+        {
+            $("#aVacation").css("color", "White");
+            $("#aVacation").css("font-weight", "initial");
+            $("#liVacation").css("background-color", "#333333");
+            $("#liReport").css("margin-right", "-2px");
+        }
+    }
+
+</script>
+
+<script type="text/javascript">
+
+    function cancel() {
+        closeWinFormModalPopUp();
+        return false;
+    }
+
+    function uploadDone(msg, code, cdg) {
+        $("#modalEstado").modal("toggle");
+        if (msg == "OK") {
+            if (code == "Training") {
+                closeWinModalPopUpLoad();
+                winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+               + "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.TrainingMsn04</div>"
+               + "<div>Code: " + cdg + "</div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continues' class='k-button'>Continue</button>" +
+               "</div></div>"
+                 , 400, 160);
+
+                Training();
+                var undo = $("#continues")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+
+                $("#closebtnmodal").click(function () {
+                    closeWinModalPopUp();
+                });
+            }
+            else if (code == "OpenPDF") {
+                //closeWinFormModalPopUp();
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+                window.open("/Talent/ViewDownload/" + cdg, "_blank");
+            }
+            else {
+                closeWinModalPopUpLoad();
+                winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+               + "<div style='padding:10px 0px 10px 0px;'>La información se ha guardado correctamente</div>"
+               + "<div style='padding:10px 0px 10px 0px;'></div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continues' class='k-button'>Continue</button>" +
+               "</div></div>"
+                 , 400, 160);
+
+                var undo = $("#continues")
+               .bind("click", function () {
+                   closeWinModalPopUp();
+                   location.reload(true);
+               });
+
+                $("#closebtnmodal").click(function () {
+                    closeWinModalPopUp();
+                    location.reload(true);
+                });
+            }
+        }
+        else {
+            closeWinModalPopUpLoad();
+
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+            }
+            else if (code == '1') {
+                titleAsset = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+            }
+            else if (code == '2') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongDates';
+                messageAsset = '@ResourceLanguaje.Resource.WrongDatesMsn';
+            }
+            else if (code == '3') {
+                titleAsset = '@ResourceLanguaje.Resource.Attach';
+                messageAsset = '@ResourceLanguaje.Resource.AttachMsn';
+            }
+            else if (code == '4') {
+
+                titleAsset = '@ResourceLanguaje.Resource.TituloActivosAsignados';
+                messageAsset = '@ResourceLanguaje.Resource.MsjActivosAsignados';
+            }
+            else if (code == '5') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongCredentials';
+                messageAsset = '@ResourceLanguaje.Resource.WrongCredentialsMsn1';
+            }
+            else if (code == '6') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongCredentials';
+                messageAsset = '@ResourceLanguaje.Resource.WrongCredentialsMsn2';
+            }
+
+            else if (code == '7') {
+                titleAsset = 'Licencias';
+                messageAsset = 'El usuario tiene licencias asignadas';
+            }
+
+            winPopUpModal(titleAsset, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + messageAsset + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+</script>
+

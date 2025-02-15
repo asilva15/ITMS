@@ -1,0 +1,249 @@
+﻿@{
+    ViewBag.Title = "EnviadoConformeModal";
+    Layout = null;
+}
+
+<style>
+    #listEstados::-webkit-scrollbar {
+        width: 12px; /* width of the entire scrollbar */
+    }
+
+    #listEstados::-webkit-scrollbar-thumb {
+        background-color: #9B9B9B; /* color of the scroll thumb */
+        border-radius: 20px; /* roundness of the scroll thumb */
+        border: 3px solid white; /* creates padding around scroll thumb */
+    }
+</style>
+
+@using (Html.BeginForm("GuardarFormatoInforme", "InformeED", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmECModal", name = "FrmECModal", target = "upload_targetECM" }))
+{
+    <input id="IdInformeECM" name="IdInforme" value="@ViewBag.IdDetaInforme" type="hidden" />
+    <input id="IdEstadoECM" name="IdEstado" value="@ViewBag.IdEstado" type="hidden" />
+    <input id="NumDocuSaleECM" name="NumDocuSale" value="@ViewBag.NumDocuSale" type="hidden" />
+    <input id="IdPlantillaECM" name="IdPlantilla" type="hidden" />
+    <div class="container row">
+        <div class="col-md-3" style="border-right: solid; border-right-width: 0.5px; border-right-color: #A2A2A2;">
+            <p>Línea de Tiempo de Estado</p>
+
+            <div class="x_content estadosECM" id="estadosECM">
+                <ul id="listEstados" class="todo-list-wrapper list-group list-group-flush" style="list-style: none; overflow-x:hidden; overflow-y: scroll; max-height:400px;"></ul>
+
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Estado</label>
+                    <input id="txtEstadoInformeECM" name="txtEstadoInforme" class="form-control" type="text" style="width:100%" value="Pendiente de Elaboración" disabled>
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Responsable</label>
+                    <input id="txtResponsableECM" name="txtResponsable" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Tipo Informe</label>
+                    <input id="txtTipoInformeECM" name="txtTipoInforme" class="form-control" type="text" style="width:100%" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Marca</label>
+                    <input id="txtMarcaECM" name="txtMarca" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label"><b>Ticket</b></label>
+                    <div>
+                        <span id="lblCodigoTicketECM"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Fecha Máxima de Envío</label>
+                    <input id="dtFechaMaximaEnvioECM" name="dtFechaMaximaEnvio" class="form-control" type="text" style="width:100%" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Correos</label>
+                    <input id="txtCorreoECM" name="txtCorreo" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Dirección</label>
+                    <input id="txtDireccionECM" name="txtDireccion" class="form-control" type="text" style="width:100%" disabled/>
+
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Enlace Mesa de Partes Digital</label>
+                    <input id="txtEnlaceECM" name="txtEnlace" class="form-control" type="text" style="width:100%" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Tipo Entrega (OP)</label>
+                    <input id="IdTipoEntregaECM" name="IdTipoEntrega" multiple="multiple" class="form-control" type="text" style="width:100%" disabled/>
+                </div>
+                <div class="col-md-6">
+                    <br />
+                    <label class="label" style=" display: flex; justify-content: space-between; align-items: center;">
+                        <label class="label">CORREO ELECTRÓNICO</label>
+                        <a id="btnMaquinaEstadosECM" class="btn btn-light btn-hover-shine" data-toggle="modal" data-target="#modalLogo" onclick="verEvidenciaECM(3);"><i class="fa fa-eye"></i></a>
+                    </label>
+                    <label class="label" style=" display: flex; justify-content: space-between; align-items: center;">
+                        <label class="label">MESA DE PARTES FÍSICA</label>
+                        <a id="btnMaquinaEstadosECM" class="btn btn-light btn-hover-shine" data-toggle="modal" data-target="#modalLogo" onclick="verEvidenciaECM(1);"><i class="fa fa-eye"></i></a>
+                    </label>
+                    <label class="label" style=" display: flex; justify-content: space-between; align-items: center;">
+                        MESA DE PARTES DIGITAL
+                        <input id="txtCargoECM" name="txtCargo" type="text" class="form-control" style="margin-left: 10px;" disabled/>    
+                    </label>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-12">
+                    <button data-dismiss="modal" id="btnCerrarModalECM" class="btn btn-hover-shine btn-primary" style="float: right; ">Cerrar</button>
+                </div>
+            </div>
+        </div>
+        <button data-dismiss="modal" id="btnCerrarModalECM" hidden>Cerrar</button>
+    </div>
+    <iframe id="upload_targetECM" name="upload_targetECM" src="" class="d-none"></iframe>
+}
+
+<script>
+
+    $(document).ready(function () {
+
+        var IDINECM = @ViewBag.IdDetaInforme;
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "MaquinaEstados",
+            type: "Get",
+            data: { IDI: IDINECM },
+            datatype: "json",
+            cache: false,
+
+            success: function (data) {
+                if (data) {
+                    tejerMaquinaEstadoECM(data["Maquina"]);
+                }
+            },
+            error: function () {
+            }
+        });
+
+         $.ajax({
+             url: "/InformeED/ObtenerDatosPendienteEnvio/" + @ViewBag.IdDetaInforme,
+        type: "GET",
+            dataType: "json",
+                success: function (source) {
+                    $.each(source['Data'], function (index, value) {
+
+                        $("#txtEstadoInformeECM").val(source['Data'][index]['EstadoInforme']);
+                        $("#txtResponsableECM").val(source['Data'][index]['ResponsableInforme']);
+                        $("#txtTipoInformeECM").val(source['Data'][index]['TipoInforme']);
+                        $("#dtFechaMaximaEnvioECM").val(kendo.toString(new Date(source['Data'][index]['FechaMaximaEnvio']), "dd/MM/yyyy"));
+                        $("#txtMarcaECM").val(source['Data'][index]['Marca']);
+                        $("#IdTicketECM").val(source['Data'][index]['IdTicket']);
+                        $("#txtCorreoECM").val(source['Data'][index]['Correos']);
+                        $("#txtDireccionECM").val(source['Data'][index]['Direccion']);
+                        $("#txtEnlaceECM").val(source['Data'][index]['Enlace']);
+                        $("#EstadoECM").text(source['Data'][index]['EstadoInforme']);
+                        $("#txtCargoECM").val(source['Data'][index]['Cargo']);
+                        if ((source['Data'][index]['IdTicket']) != 0) {
+                            $("#lblCodigoTicketECM").append('<a href=\"/DetailsTicket/Index/' + source['Data'][index]['IdTicket'] + '" target="_blank">' + source['Data'][index]['CodigoTicket'] + '</a>');
+                        } else {
+                            $("#lblCodigoTicketECM").append("-");
+                        }
+
+                    });
+
+                }
+         });
+
+          $("#IdTipoEntregaECM").kendoMultiSelect({
+            dataTextField: "text",
+            dataValueField: "value",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: [
+                { text: "Mesa de Partes física", value: "1" },
+                { text: "Mesa de Partes digital", value: "2" },
+                { text: "Por correo electrónico", value: "3" }
+            ],
+        });
+
+          actualizarTipoEnvioECM();
+
+      });
+
+    function actualizarTipoEnvioECM() {
+/*        var IDIECM = $("#IdInformeECM").val();*/
+        var listaTipoEntrega = $("#IdTipoEntregaECM").data("kendoMultiSelect")
+        var lista = []
+        $.ajax({
+            url: "/InformeED/ObtenerTipoEntrega?iddocusale=" + @ViewBag.NumDocuSale,
+            type: 'GET',
+            success: function (data) {
+                for (var i = 0; i < data.Data.length; i++) {
+                    lista.push(data.Data[i].Id.toString());
+                }
+
+                console.log(lista);
+                listaTipoEntrega.value(lista);
+            }
+        });
+    }
+
+
+    function tejerMaquinaEstadoECM(Maquina) {
+
+        console.log(Maquina);
+
+        if (parseInt(Maquina.length) > 0) {
+
+            $.each(Maquina, function (index, value) {
+
+                console.log(Maquina[index].Fecha);
+
+                    $(".estadosECM ul").append('<li><div class= "vertical-timeline vertical-timeline--animate vertical-timeline--one-column" >'
+                        + '<div class= "vertical-timeline-item vertical-timeline-element" > '
+                        + '<div>'
+                        + '      <span class="vertical-timeline-element-icon bounce-in">'
+                        + '          <i class="badge badge-dot badge-dot-xl badge-success"> </i>'
+                        + '      </span>'
+                        + '      <div class="vertical-timeline-element-content bounce-in">'
+                        + '          <h4 class="timeline-title" style="font-size:12px;">' + Maquina[index].NombreEstado + '</h4>'
+                        + '          <p style="font-size:10px;">Hecho por: ' + Maquina[index].HechoPor + '</p>'
+                        + '          <span class="vertical-timeline-element-date" style="font-size:10px;">' + Maquina[index].Fecha + '<br />' + Maquina[index].Hora
+                        + '</span>'
+                        + '      </div>'
+                        + '  </div>'
+                        + '</div>'
+                        + '</div >'
+                        + '</li >'
+                    );
+
+
+            });
+
+        } else {
+            $(".estadosECM ul").append('<div class="smallField"> No se encontraron registros');
+        }
+
+
+    }
+
+    function verEvidenciaECM(idTipoEntrega) {
+
+        $("#lblTituloLogo").text("Ver evidencia de Envío");
+        $('#modal-contentLogo').empty();
+        $('#modal-contentLogo').load('/InformeED/VerEvidencia/?IDI=' + @ViewBag.IdDetaInforme + '&IDTIPOENTREGA=' + idTipoEntrega);
+    }
+
+</script>

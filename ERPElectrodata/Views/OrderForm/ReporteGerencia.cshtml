@@ -1,0 +1,1769 @@
+﻿@{
+    ViewBag.Title = "ReporteGerencia";
+    //Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<div class="row">
+    <div class="col-sm-12 col-md-4">
+        <div class="card main-card mb-3">
+            <div class="card-header-tab card-header">PROYECTOS ABIERTOS Y CERRADOS</div>
+            <div class="card-body">
+                <div style="padding-top:20px;text-align:center">
+                    <strong>PROYECTOS ABIERTOS Y CERRADOS (CANTIDADES)</strong>
+                </div>
+                <div id="divGrafProyectoxEstado" style="height:325px;"></div>
+
+                <div style="padding-top:55px;text-align:center">
+                    <strong>PROYECTOS ABIERTOS Y CERRADOS (MONTOS)</strong>
+                </div>
+                <div id="divGrafMontoProyectos" style="height:325px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-8">
+        <div class="card main-card mb-3">
+            <div class="card-header-tab card-header">CONSOLIDADO PROYECTOS</div>
+            <div class="card-body" style="overflow-y: scroll;">
+                <div class="form-row">
+                    <div class="col-md-2"><a style="cursor:pointer" onclick="ConsolidadoProyectos(1);">Nueva OP</a></div>
+                    <div class="col-md-3"><a style="cursor:pointer" onclick="ConsolidadoProyectos(2);">Entrega de equipos</a></div>
+                    <div class="col-md-2"><a style="cursor:pointer" onclick="ConsolidadoProyectos(3);">Implementación</a></div>
+                    <div class="col-md-3" style="text-align:right"><a style="cursor: pointer; padding-right: 30px" onclick="ConsolidadoProyectos(4);">Facturación</a></div>
+                    <div class="col-md-2" style="text-align:right"><a style="cursor:pointer" onclick="ConsolidadoProyectos(5);">Pago</a></div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <div class="progress">
+                            <div id="divPorcentaje" class="progress-bar progress-bar-primary progress-bar-striped" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                <span id="PorcentajeAvance">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="height:295px;">
+                    <table id="tbConsolidado" class="table table-bordered table-striped" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>Orden</th>
+                                <th>Op</th>
+                                <th>Titulo</th>
+                                <th>Cliente</th>
+                                <th>Cliente Final</th>
+                                <th>Project Manager</th>
+                                <th>Fecha de Compromiso</th>
+                                <th>Fecha Límite</th>
+                                <th>Monto Total(sin IGV)</th>
+                                <th>Equipos Entregados (%)</th>
+                                <th>Especialista</th>
+                                <th>% Facturación</th>
+                                <th>Pagado</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header-tab card-header">
+                PROYECTOS TOP POR MONTO (ABIERTOS)
+            </div>
+            <div class="card-body" style="overflow-y: scroll;">
+                <div class="row" style="height:295px;">
+                    <table id="tbTop10" class="table table-bordered table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Orden</th>
+                                <th>Op</th>
+                                <th>Titulo</th>
+                                <th>Cliente</th>
+                                <th>Cliente Final</th>
+                                <th>Project Manager</th>
+                                <th>Fecha de Compromiso</th>
+                                <th>Monto Total(sin IGV)</th>
+                                <th>% Facturación</th>
+                                <th>Fecha Límite</th>
+                                <th>Equipos Entregados (%)</th>
+                                <th>Especialista</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-12 col-md-8">
+        <div class="card main-card mb-3">
+            <div class="card-header-tab card-header">CRONOGRAMA DE HITOS</div>
+            <div class="card-body" style="overflow-y: scroll;">
+                <div id="divRptCronogramaHitos" class="row" style="height:300px;">
+                    <table id="tbHitos" class="table table-bordered table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Op</th>
+                                <th>Titulo</th>
+                                <th>Cliente</th>
+                                <th>Project Manager</th>
+                                <th>Actividad</th>
+                                <th>Avance (%)</th>
+                                <th>Fecha Fin</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-sm-12 col-md-4">
+        <div class="card main-card mb-3">
+            <div class="card-header-tab card-header">ÚLTIMO COMENTARIO</div>
+            <div class="card-body" style="overflow-y: scroll;">
+                <div id="divUltimoComentario" style="height:300px;">
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="col-sm-12 col-md-6">
+        <div class="card main-card mb-3">
+            <div class="card-header-tab card-header">PROYECTOS POR PROJECT MANAGER</div>
+            <div class="card-body" style="overflow-y: scroll; height: 600px;">
+                <div class="form-row">
+                    <div class="col-sm-5">
+                        <div class="position-relative form-group">
+                            Fecha Inicio (Creación OP)
+                            <input type="text" class="form-control pull-right" id="dtFechaInicioPM" name="dtFechaInicioPM" value="@ViewBag.FechaInicio" />
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="position-relative form-group">
+                            Fecha Fin (Creación OP)
+                            <input type="text" class="form-control pull-right" id="dtFechaFinPM" name="dtFechaFinPM" value="@ViewBag.FechaActual" />
+                        </div>
+                    </div>
+                    <div class="col-sm-2">
+                        <br /> <button type="button" class="btn btn-primary" style="float:right;" id="btnBuscarPM" onclick="GrafMontosPM();">Buscar</button>
+                    </div>
+                </div>
+                @*Grafico en barras*@
+                <div style="text-align: center;padding-top:60px">
+                    <strong><span>Proyectos por Project Manager</span></strong>
+                </div>
+                <div id="divGrafPM" style="height: 370px;"></div>
+                <div style="height: 20px;"></div>
+                @*Montos x PM*@
+                <div style="text-align: center;">
+                    <strong><span id="NombrePM"></span></strong>
+                </div>
+                <div id="divGrafxPM" style="height: 250px;"></div>
+                @*Listado de Proyectos x PM*@
+                <div style="height: 20px;"></div>
+                <div id="divRptProyectoPM" style="height:400px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-sm-12 col-md-6">
+        <div class="card main-card mb-3">
+            <div class="card-header-tab card-header">PROYECTOS POR ESPECIALISTA</div>
+            <div class="card-body" style="overflow-y: scroll; height: 600px;">
+                <div class="form-row">
+                    <div class="col-sm-5">
+                        <div class="position-relative form-group">
+                            Fecha Inicio (Creación OP)
+                            <input type="text" class="form-control pull-right" id="dtFechaInicioEsp" name="dtFechaInicioEsp" value="@ViewBag.FechaInicio" />
+                        </div>
+                    </div>
+                    <div class="col-sm-5">
+                        <div class="position-relative form-group">
+                            Fecha Fin (Creación OP)
+                            <input type="text" class="form-control pull-right" id="dtFechaFinEsp" name="dtFechaFinEsp" value="@ViewBag.FechaActual" />
+                        </div>
+                    </div>
+                    <div class="col-sm-2" style="float:left">
+                        <br /><button type="button" class="btn btn-primary" style="float:right;" id="btnBuscarEsp" onclick="GrafMontosEspecialista();">Buscar</button>
+                    </div>
+                </div>
+                @*Grafico en barras*@
+                <div style="text-align: center;padding-top:60px">
+                    <strong><span>Proyectos por Especialista</span></strong>
+                </div>
+                <div id="divGrafEspecialista" style="height: 370px; "></div>
+                <div style="height: 20px;"></div>
+                @*Montos x Especialista*@
+                <div style="text-align: center;">
+                    <strong><span id="NombreEspecialista"></span></strong>
+                </div>
+                <div id="divGrafxEspecialista" style="height: 250px;"></div>
+                <div style="height: 20px;"></div>
+                <div id="divRptProyectosEspecialista" style="height:400px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+    var IdPersEntiPM, IdPersEntiEsp;
+
+    $(document).ready(function () {
+
+        $('#dtFechaInicioPM').kendoDatePicker();
+        $('#dtFechaFinPM').kendoDatePicker();
+        $('#dtFechaInicioEsp').kendoDatePicker();
+        $('#dtFechaFinEsp').kendoDatePicker();
+
+        GenerarReporte();
+
+    });
+
+
+    function GenerarReporte() {
+        $("#divGrafProyectoxEstado").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 20%; width: 20%; text-align: center;'></div>");
+
+        $("#divGrafMontoProyectos").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 20%; width: 20%; text-align: center;'></div>");
+
+        $("#divGrafPM").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><img src='../../Images/spinner.gif' style='height: 20%; width: 20%; text-align: center;'></div>");
+
+        $("#divGrafEspecialista").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><img src='../../Images/spinner.gif' style='height: 20%; width: 20%; text-align: center;'></div>");
+
+        $("#divGrafxPM").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><img src='../../Images/spinner.gif' style='height: 18%; width: 18%; text-align: center;'></div>");
+
+        $("#divGrafxEspecialista").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><img src='../../Images/spinner.gif' style='height: 18%; width: 18%; text-align: center;'></div>");
+
+        ConsolidadoProyectos(1);
+        GrafProyectosAbiertosCerrados();
+        GrafProyectosMontos();
+        ReporteTop10();
+        ReporteActividadesPendientes(0, 1);
+
+        GrafMontosPM();
+        //ListaPM();
+
+        GrafMontosEspecialista();
+        //ListaEspecialista();
+
+    }
+
+
+    function GrafProyectosAbiertosCerrados() {
+
+        $.ajax({
+            url: '/OrderForm/GrafProyectosEstado/1',
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Serie = new Array();
+                var Abiertos = new Array();
+                var Cerrados = new Array();
+                var Color = new Array();
+
+                $.each(jsonx['ProyectosxEstado'], function (index, value) {
+                    Serie[index] = value['Serie'];
+                    Abiertos[index] = value['Abiertos'];
+                    Cerrados[index] = value['Cerrados'];
+                });
+
+                Color[0] = "#B21E1E";
+                Color[1] = "#516882";
+                Color[2] = "#516882";
+
+                // inicio chart
+                chart = new Highcharts.Chart({
+
+                    chart: {
+                        renderTo: 'divGrafProyectoxEstado',
+                        type: 'column',
+                        zoomType: 'xy',
+                        //margin: [20, 20, 80, 60]
+                    },
+                    //colors: (Highcharts.theme && Highcharts.theme.textColor) || 'gray',
+                    colors: Color,
+                    title: {
+                        text: null
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    xAxis: {
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Meses',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+
+                    yAxis: {
+                        lineWidth: 1,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'N° de Proyectos',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Proyectos',
+                        valueDecimals: 0
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            shadow: false,
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        },
+                        series: {
+                            cursor: 'pointer',
+                            events: {
+                                click: function (event) {
+
+                                }
+                            }
+                        }
+                    },
+
+                    series: [{
+                        name: 'Abiertos',
+                        data: Abiertos
+                    }, {
+                        name: 'Cerrados',
+                        data: Cerrados
+
+                    }]
+                });
+            }
+
+        });
+
+    }
+    function GrafProyectosMontos() {
+
+        $.ajax({
+            url: '/OrderForm/GrafMontoProyectos/1',
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Serie = new Array();
+                var Abiertos = new Array();
+                var AbiertoFacturado = new Array();
+                var Cerrados = new Array();
+                var Color = new Array();
+
+                $.each(jsonx['ProyectosxMonto'], function (index, value) {
+                    Serie[index] = value['Serie'];
+                    Abiertos[index] = value['Abiertos'];
+                    AbiertoFacturado[index] = value['AbiertosFacturado'];
+                    Cerrados[index] = value['Cerrados'];
+                });
+
+                Color[0] = "#B21E1E";
+                Color[1] = "#4A0C00";
+                Color[2] = "#516882";
+
+                // inicio chart
+                chart = new Highcharts.Chart({
+
+                    chart: {
+                        renderTo: 'divGrafMontoProyectos',
+                        type: 'column',
+                        zoomType: 'xy',
+                        //margin: [20, 20, 80, 60]
+                    },
+                    //colors: (Highcharts.theme && Highcharts.theme.textColor) || 'gray',
+                    colors: Color,
+                    title: {
+                        text: null
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    xAxis: {
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Meses',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+
+                    yAxis: {
+                        lineWidth: 1,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Monto (Sin IGV)',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: '',
+                        valueDecimals: 0
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            shadow: false,
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        },
+                        series: {
+                            cursor: 'pointer',
+                            events: {
+                                click: function (event) {
+
+                                }
+                            }
+                        }
+                    },
+
+                    series: [{
+                        name: 'Abiertos',
+                        data: Abiertos
+                    },
+                    {
+                        name: 'AbiertoFacturado',
+                        data: AbiertoFacturado
+                    },
+                    {
+                        name: 'Cerrados',
+                        data: Cerrados
+
+                    }]
+                });
+            }
+
+        });
+
+    }
+
+    function ConsolidadoProyectos(flag) {
+
+        if (flag == 1) {
+            $("#divPorcentaje").css("width", "0%");
+            $("#PorcentajeAvance").text("0%");
+        } else if (flag == 2) {
+            $("#divPorcentaje").css("width", "25%");
+            $("#PorcentajeAvance").text("25%");
+        } else if (flag == 3) {
+            $("#divPorcentaje").css("width", "50%");
+            $("#PorcentajeAvance").text("50%");
+        } else if (flag == 4) {
+            $("#divPorcentaje").css("width", "75%");
+            $("#PorcentajeAvance").text("75%");
+        } else if (flag == 5) {
+            $("#divPorcentaje").css("width", "100%");
+            $("#PorcentajeAvance").text("100%");
+        }
+
+        $('#tbConsolidado').dataTable().fnDestroy();
+
+        $('#tbConsolidado').DataTable({
+            "order": [[0, "asc"]],
+            //dom: 'Bfrtip',
+            responsive: true,
+            ajax: "/OrderForm/ConsolidadoProyectosxEstado/" + flag + "/1",
+            columns: [
+                { data: "Orden" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"/OrderForm/DetalleProyecto/' + data.IdProyecto + '\" target="_blank" style="font-size:10.5px">' + data.TipoProyecto + ' ' + data.Op + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer">' + data.Titulo + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.Cliente + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer">' + data.ClienteFinal + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.ProjectManager + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.FechaCompromiso + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.FechaLimitePM + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.TotalSinIGV + '</p>';
+                    }
+                },
+
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.EqEntregados + ' (' + data.PorcentajeEqEntregados + ' %)' + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.Especialista + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.Facturacion + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" >' + data.Pago + '</p>';
+                    }
+                },
+            ],
+            //"bPaginate": false,
+            //"searching": false,
+            //"info": false,
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+
+        });
+    }
+
+    function ReporteTop10() {
+        $('#tbTop10').dataTable().fnDestroy();
+
+        $('#tbTop10').DataTable({
+            "order": [[0, "asc"]],
+            //dom: 'Bfrtip',
+            responsive: true,
+            ajax: "/OrderForm/ListarConsolidadoProyectos/1",
+            columns: [
+                { data: "Orden" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"/OrderForm/DetalleProyecto/' + data.IdProyecto + '\" target="_blank" style="font-size:10.5px">' + data.TipoProyecto + ' ' + data.Op + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.Titulo + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.Cliente + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.ClienteFinal + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.ProjectManager + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.FechaCompromiso + '</p>';
+                    }
+                },
+
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.TotalSinIGV + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.PorcentajeFacturacion + ' %</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.FechaLimitePM + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.EqEntregados + ' (' + data.PorcentajeEqEntregados + ' %)' + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ReporteActividadesPendientes(' + data.IdProyecto + ',2)">' + data.Especialista + '</p>';
+                    }
+                },
+            ],
+            //"bPaginate": false,
+            //"searching": false,
+            //"info": false,
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+
+        });
+    }
+
+    function ReporteActividadesPendientes(id, id1) {
+
+
+        $('#tbHitos').dataTable().fnDestroy();
+
+        $('#tbHitos').DataTable({
+            "order": [[5, "asc"]],
+            //dom: 'Bfrtip',
+            responsive: true,
+            ajax: "/OrderForm/ListarActividadesPendientes/" + id + "/" + id1 + "/1",
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"/OrderForm/DetalleProyecto/' + data.IdProyecto + '\" target="_blank" style="font-size:10.5px">' + data.TipoProyecto + ' ' + data.Op + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ObtenerUltimoComentario(' + data.IdProyecto + ')">' + data.Titulo + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ObtenerUltimoComentario(' + data.IdProyecto + ')">' + data.Cliente + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ObtenerUltimoComentario(' + data.IdProyecto + ')">' + data.ProjectManager + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ObtenerUltimoComentario(' + data.IdProyecto + ')">' + data.NombreActividad + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ObtenerUltimoComentario(' + data.IdProyecto + ')">' + data.PorcentajeAvance + ' %' + '</p>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<p style="font-size:10.5px;cursor:pointer" onclick="ObtenerUltimoComentario(' + data.IdProyecto + ')">' + data.FechaFin + '</p>';
+                    }
+                },
+
+            ],
+            "bPaginate": false,
+            //"searching": false,
+            "info": false,
+
+
+        });
+
+    }
+    function ObtenerUltimoComentario(IdProyecto) {
+
+        $.ajax({
+            url: "/OrderForm/ObtenerUltimoComentario/" + IdProyecto,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $("#divUltimoComentario").empty();
+                $.each(data['Data'], function (index, value) {
+                    $("#divUltimoComentario").append(
+                        '<div class="asignedImage" style="float:left"><img src="/Content/Fotos/' + (data['Data'][index]['Foto']) + '" style="border-radius:50%;height:70px"/></div>' +
+                        '<div style="padding-left:83px;height:90px;padding-top:30px"><strong>' + (data['Data'][index]['Usuario']) + ' </strong></div>' +
+                        '<div style="text-align:justify"><strong> ' + (data['Data'][index]['TipoProyecto']) + ' ' + (data['Data'][index]['Op']) + '</strong> </div>' +
+                        '<div style="text-align:justify"> ' + (data['Data'][index]['Titulo']) + ' </div>' +
+                        '<div style="text-align:justify"> ' + (data['Data'][index]['Comentario']) + ' </div>'
+                    );
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    function GrafMontosPM() {
+
+        ReporteProyectosPM(0, 0);
+
+        $.ajax({
+            url: '/OrderForm/GrafProyectosPM/1',
+            dataType: 'json',
+            data: {
+                FechaInicio: $("#dtFechaInicioPM").val() == '' ? 0 : $("#dtFechaInicioPM").val(),
+                FechaFin: $("#dtFechaFinPM").val() == '' ? 0 : $("#dtFechaFinPM").val()
+            },
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var IdPersEnti = new Array();
+                var Serie = new Array();
+                var Abiertos = new Array();
+                var AbiertosFacturado = new Array();
+                var Cerrados = new Array();
+                var Color = new Array();
+
+                $.each(jsonx['ProyectosPM'], function (index, value) {
+                    IdPersEnti[index] = value['IdPersEnti'];
+                    Serie[index] = value['ProjectManager'];
+                    Abiertos[index] = value['Abierto'];
+                    AbiertosFacturado[index] = value['AbiertoFacturado'];
+                    Cerrados[index] = value['Cerrado'];
+                });
+
+                Color[0] = "#B21E1E";
+                Color[1] = "#4A0C00";
+                Color[2] = "#516882";
+
+                // inicio chart
+                chart = new Highcharts.Chart({
+
+                    chart: {
+                        renderTo: 'divGrafPM',
+                        type: 'bar',
+                        //zoomType: 'xy',
+                        //margin: [20, 20, 80, 60]
+                    },
+                    colors: Color,
+                    title: {
+                        text: null
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    xAxis: {
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Project Manager',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+
+                    yAxis: {
+                        lineWidth: 1,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Monto (sin IGV)',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: '',
+                        valueDecimals: 0,
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+
+                        series: {
+                            cursor: 'pointer',
+                            stacking: 'normal',
+                            point: {
+                                events: {
+                                    click: function () {
+                                        ObtenerIdPM(this.category);
+                                    }
+                                }
+                            }
+
+                        }
+                    },
+
+                    series: [{
+                        name: 'Abiertos',
+                        data: Abiertos,
+                    },
+                    {
+                        name: 'AbiertosFacturado',
+                        data: AbiertosFacturado,
+                    },
+                    {
+                        name: 'Cerrados',
+                        data: Cerrados,
+
+                    }]
+                });
+            }
+
+        });
+
+
+    }
+    function ObtenerIdPM(nombre) {
+
+        //Listado de PM
+        $.ajax({
+            url: "/OrderForm/ObtenerIdPersonal/" + nombre,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                IdPersEntiPM = data;
+                ReporteProyectosPM(data, 0);
+            },
+            error: function (source) {
+            }
+        });
+    }
+    function ReporteProyectosPM(id, flag) {
+
+        $.ajax({
+            url: "/OrderForm/ReporteProyectosPM/" + id + '/' + flag + '/1',
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            data: {
+                FechaInicio: $("#dtFechaInicioPM").val() == '' ? 0 : $("#dtFechaInicioPM").val(),
+                FechaFin: $("#dtFechaFinPM").val() == '' ? 0 : $("#dtFechaFinPM").val()
+            },
+            success: function (data) {
+                $("#divRptProyectoPM").empty();
+                var cont = 1;
+                $.each(data['Data'], function (index, value) {
+                    if (cont == 1) {
+                        $("#divRptProyectoPM").append(
+                            '<div class="mb-2 card">' +
+                            '<div class="card-header collapsed card-link" data-toggle="collapse" data-target="#collapse' + cont + '" style="height:55px">' +
+                            '<div class="asignedImage" style="float:left;height:43px"><img src="/Content/Fotos/' + (data['Data'][index]['Foto']) + '" style="border-radius:50%;height:43px"/></div>' +
+                            '<button class="btn btn-link" style="padding-top:10px">' +
+                            (data['Data'][index]['ProjectManager']) +
+                            '</button>' +
+                            '<span style="float:right;padding-top:10px;font-size:12px">Monto Total: ' + (data['Data'][index]['Total']) + '&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; N° de Proyectos: ' + (data['Data'][index]['CantidadOP']) + ' </span>' +
+                            ' </div>' +
+                            '<div id="collapse' + cont + '" class="collapse show" data-parent="#divRptProyectoPM">' +
+                            '<div class="box" style="overflow-y: scroll; height: 350px;">' +
+                            '<div class="tab-content">' +
+                            '<div class="tab-pane active" id="tab">' +
+                            '<div class="box">' +
+                            '<div class="box-body">' +
+                            '<table id="tbPM' + cont + '" class="table table-bordered table-striped" style="width:100%">' +
+                            '<thead>' +
+                            ' <tr>' +
+                            '<th>Orden</th>' +
+                            '<th>OP</th>' +
+                            '<th>Título</th>' +
+                            '<th>Cliente</th>' +
+                            '<th>Cliente Final</th>' +
+                            '<th>Fecha Límite</th>' +
+                            '<th>Monto(sin IGV)</th>' +
+                            ' </tr>' +
+                            '</thead>' +
+                            '<tbody></tbody>' +
+                            ' </table>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>'
+                        );
+                        IdPersEntiPM = (data['Data'][index]['IdPersEnti']);
+                        $("#NombrePM").text((data['Data'][index]['ProjectManager']));
+                        if (flag == 0) {
+                            GrafMontosxPM((data['Data'][index]['IdPersEnti']));
+                        }
+                    } else {
+                        $("#divRptProyectoPM").append(
+                            '<div class= "mb-2 card">' +
+                            '<div class="card-header collapsed card-link" data-toggle="collapse" data-target="#collapse' + cont + '" style="height:55px">' +
+                                '<div class="asignedImage" style="float:left;height:43px"><img src="/Content/Fotos/' + (data['Data'][index]['Foto']) + '" style="border-radius:50%;height:43px"/></div>' +
+                                '<button class="btn btn-link" style="padding-top:10px" >' +
+                                    (data['Data'][index]['ProjectManager']) +
+                                '</button>' +
+                                '<span style="float:right;padding-top:10px;font-size:12px">Monto Total: ' + (data['Data'][index]['Total']) + '&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; N° de Proyectos: ' + (data['Data'][index]['CantidadOP']) + ' </span>' +
+                            ' </div>' +
+                            '<div id="collapse' + cont + '" class="collapse" data-parent="#divRptProyectoPM" >' +
+                            '<div class="box" style="overflow-y: scroll; height: 350px;">' +
+                            '<div class="tab-content">' +
+                            '<div class="tab-pane active" id="tab">' +
+                            '<div class="box">' +
+                            '<div class="box-body">' +
+                            '<table id="tbPM' + cont + '" class="table table-bordered table-striped" style="width:100%">' +
+                            '<thead>' +
+                            ' <tr>' +
+                            '<th>Orden</th>' +
+                            '<th>OP</th>' +
+                            '<th>Título</th>' +
+                            '<th>Cliente</th>' +
+                            '<th>Cliente Final</th>' +
+                            '<th>Fecha Límite</th>' +
+                            '<th>Monto(sin IGV)</th>' +
+                            ' </tr>' +
+                            '</thead>' +
+                            '<tbody></tbody>' +
+                            ' </table>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>'
+                        );
+                    }
+                    ListarProyectosxPM(data['Data'][index]['IdPersEnti'], cont, flag)
+
+
+                    cont = cont + 1;
+                    //ListarHorasUsuario('ActividadesHoras' + data['Data'][index]['id'], data['Data'][index]['id'], 1);
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    function GrafMontosxPM(id) {
+
+        $("#divGrafxPM").empty();
+        $("#divGrafxPM").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><img src='../../Images/spinner.gif' style='height: 20%; width: 20%; text-align: center;'></div>");
+
+
+        $.ajax({
+            url: '/OrderForm/GrafMontosxPM/' + id + '/1',
+            dataType: 'json',
+            cache: false,
+            data: {
+                FechaInicio: $("#dtFechaInicioPM").val() == '' ? 0 : $("#dtFechaInicioPM").val(),
+                FechaFin: $("#dtFechaFinPM").val() == '' ? 0 : $("#dtFechaFinPM").val()
+            },
+            async: true,
+            success: function (jsonx) {
+
+                var Item = new Array();
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+                var valor1, valor2;
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['Estado'];
+                    vValue[index] = value['Monto'];
+
+                    acumulado = acumulado + value['Monto'];
+                });
+
+
+                Color[0] = "#FFBB00";
+                Color[1] = "#B21E1E";
+                Color[2] = "#7CBB00";
+                Color[3] = "#516882";
+
+                var colors = Highcharts.getOptions().colors,
+                    colorPie = "##7CBB00",
+                    categories = ["All"],
+                    name = 'Status',
+                    data = [{
+                        y: acumulado,
+                        color: colorPie,
+                        drilldown: {
+                            name: 'Status',
+                            categories: Cat,
+                            data: vValue,
+                            color: colors[0]
+                        }
+                    }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]//Highcharts.Color(data[i].color).brighten(brightness).get()
+                            //color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'divGrafxPM',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total percent market share'
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true,
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: 'Porcentaje: <b>{point.percentage:.2f}%</b><br>Cantidad: <b>{point.y}</b>',
+                                percentageDecimals: 2
+                            }
+                        },
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function (event) {
+                                        var nombre = this.name;
+                                        if (nombre == "Abiertos(En SLA)") {
+                                            ReporteProyectosPM(IdPersEntiPM, 1);
+                                        } else if (nombre == "Abiertos(Fuera SLA)") {
+                                            ReporteProyectosPM(IdPersEntiPM, 2);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    series: [{
+                        //name: 'Versions',
+                        data: versionsData,
+                        //innerSize: '50%',
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Monto</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+                //fin chart
+            }
+
+        });
+    }
+    function ListarProyectosxPM(IdPersEnti, id, flag) {
+
+        $('#tbPM' + id).dataTable().fnDestroy();
+
+        $('#tbPM' + id).DataTable({
+            "order": [[0, "asc"]],
+            //dom: 'Bfrtip',
+            responsive: true,
+            ajax: {
+                "url": "ListarProyectosxPM/" + IdPersEnti + '/' + flag + '/1',
+                "data": function (d) {
+                    d.FechaInicio = $("#dtFechaInicioPM").val() == '' ? 0 : $("#dtFechaInicioPM").val(),
+                        d.FechaFin = $("#dtFechaFinPM").val() == '' ? 0 : $("#dtFechaFinPM").val()
+                }
+            },
+            columns: [
+                { data: "Orden" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"/OrderForm/DetalleProyecto/' + data.IdProyecto + '\" target="_blank" style="font-size:10.5px">' + data.TipoProyecto + ' ' + data.Op + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.Titulo + '</p>'
+                            + '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Especialista:</strong> </br>' + data.Especialista + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.Cliente + '</p>'
+                            + '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Especialista:</strong> </br>' + data.Especialista + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.ClienteFinal + '</p>' +
+                            '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Especialista:</strong> </br>' + data.Especialista + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.FechaLimitePM + '</p>'
+                            + '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Especialista:</strong> </br>' + data.Especialista + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.TotalSinIGV + '</p>'
+                            + '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Especialista:</strong> </br>' + data.Especialista + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+            ],
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                }
+            ],
+            "bPaginate": false,
+            "searching": false,
+            "info": false,
+
+
+        });
+
+
+    }
+
+    function GrafMontosEspecialista() {
+
+        ReporteProyectosEspecialista(0, 0);
+        $.ajax({
+            url: '/OrderForm/GrafProyectosEspecialista/1',
+            dataType: 'json',
+            data: {
+                FechaInicio: $("#dtFechaInicioEsp").val() == '' ? 0 : $("#dtFechaInicioEsp").val(),
+                FechaFin: $("#dtFechaFinEsp").val() == '' ? 0 : $("#dtFechaFinEsp").val()
+            },
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var IdPersEnti = new Array();
+                var Serie = new Array();
+                var Abiertos = new Array();
+                var AbiertosFacturado = new Array();
+                var Cerrados = new Array();
+                var Color = new Array();
+
+                $.each(jsonx['ProyectosEspecialista'], function (index, value) {
+                    IdPersEnti[index] = value['IdPersEnti'];
+                    Serie[index] = value['Especialista'];
+                    Abiertos[index] = value['Abierto'];
+                    AbiertosFacturado[index] = value['AbiertoFacturado'];
+                    Cerrados[index] = value['Cerrado'];
+                });
+
+                Color[0] = "#B21E1E";
+                Color[1] = "#4A0C00";
+                Color[2] = "#516882";
+
+                // inicio chart
+                $('#divGrafEspecialista').highcharts({
+
+                    chart: {
+                        //renderTo: 'divGrafEspecialista',
+                        type: 'bar',
+                        zoomType: 'xy',
+                        //margin: [20, 20, 80, 60]
+                    },
+                    //colors: (Highcharts.theme && Highcharts.theme.textColor) || 'gray',
+                    colors: Color,
+                    title: {
+                        text: null
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    xAxis: {
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Especialista',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Monto (sin IGV)',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: '',
+                        valueDecimals: 0,
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        //column: {
+                        //    stacking: 'normal',
+                        //    shadow: false,
+                        //    tooltip: {
+                        //        headerFormat: headerFormat,
+                        //        pointFormat: pointFormat
+                        //    }
+                        //},
+                        series: {
+                            cursor: 'pointer',
+                            stacking: 'normal',
+                            point: {
+                                events: {
+                                    click: function (event) {
+                                        ObtenerIdEspecialista(this.category);
+                                    }
+                                }
+                            }
+                        }
+                    },
+
+                    series: [{
+                        name: 'Abiertos',
+                        data: Abiertos,
+
+                    },
+                    {
+                        name: 'AbiertosFacturado',
+                        data: AbiertosFacturado,
+
+                    }, {
+                        name: 'Cerrados',
+                        data: Cerrados,
+
+                    }]
+                });
+            }
+
+        });
+
+
+    }
+    function ObtenerIdEspecialista(nombre) {
+
+        $.ajax({
+            url: "/OrderForm/ObtenerIdPersonal/" + nombre,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                IdPersEntiEsp = data;
+                ReporteProyectosEspecialista(data, 0);
+            },
+            error: function (source) {
+            }
+        });
+    }
+    function ReporteProyectosEspecialista(id, flag) {
+
+        $.ajax({
+            url: "/OrderForm/ReporteProyectosEspecialista/" + id + "/" + flag + '/1',
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            data: {
+                FechaInicio: $("#dtFechaInicioEsp").val() == '' ? 0 : $("#dtFechaInicioEsp").val(),
+                FechaFin: $("#dtFechaFinEsp").val() == '' ? 0 : $("#dtFechaFinEsp").val()
+            },
+            success: function (data) {
+                $("#divRptProyectosEspecialista").empty();
+                var cont = 1;
+                $.each(data['Data'], function (index, value) {
+                    if (cont == 1) {
+                        $("#divRptProyectosEspecialista").append(
+                            '<div class="mb-2 card">' +
+                            '<div class="card-header collapsed card-link" data-toggle="collapse" data-target="#collapse0' + cont + '" style="height:55px">' +
+                            '<div class="asignedImage" style="float:left;height:43px"><img src="/Content/Fotos/' + (data['Data'][index]['Foto']) + '" style="border-radius:50%;height:43px"/></div>' +
+                            '<button class="btn btn-link" style="padding-top:10px" >' +
+                            (data['Data'][index]['Especialista']) +
+                            '</button>' +
+                            '<span style="float:right;padding-top:10px;font-size:12px">Monto Total: ' + (data['Data'][index]['Total']) + '&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; N° de Proyectos: ' + (data['Data'][index]['CantidadOP']) + ' </span>' +
+                            ' </div>' +
+                            '<div id="collapse0' + cont + '" class="collapse show" data-parent="#divRptProyectosEspecialista">' +
+                            '<div class="box" style="overflow-y: scroll; height: 350px;">' +
+                            '<div class="tab-content">' +
+                            '<div class="tab-pane active" id="tab">' +
+                            '<div class="box">' +
+                            '<div class="box-body">' +
+                            '<table id="tbEspecialista' + cont + '" class="table table-bordered table-striped" style="width:100%">' +
+                            '<thead>' +
+                            ' <tr>' +
+                            '<th>Orden</th>' +
+                            '<th>OP</th>' +
+                            '<th>Título</th>' +
+                            '<th>Cliente</th>' +
+                            '<th>Cliente Final</th>' +
+                            '<th>Fecha Límite</th>' +
+                            '<th>Monto(sin IGV)</th>' +
+                            ' </tr>' +
+                            '</thead>' +
+                            '<tbody></tbody>' +
+                            ' </table>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>'
+                        );
+                        IdPersEntiEsp = (data['Data'][index]['IdPersEnti']);
+                        $("#NombreEspecialista").text((data['Data'][index]['Especialista']));
+                        if (flag == 0) {
+                            GrafMontosxEspecialista((data['Data'][index]['IdPersEnti']));
+                        }
+                    } else {
+                        $("#divRptProyectosEspecialista").append(
+                            '<div class="mb-2 card">' +
+                            '<div class="card-header collapsed card-link"  data-toggle="collapse" data-target="#collapse0' + cont + '" style="height:55px">' +
+                            '<div class="asignedImage" style="float:left;height:43px"><img src="/Content/Fotos/' + (data['Data'][index]['Foto']) + '" style="border-radius:50%;height:43px"/></div>' +
+                            '<button class="btn btn-link" style="padding-top:10px">' +
+                            (data['Data'][index]['Especialista']) +
+                            '</button>' +
+                            '<span style="float:right;padding-top:10px;font-size:12px">Monto Total: ' + (data['Data'][index]['Total']) + '&nbsp;&nbsp;&nbsp; &nbsp; &nbsp; N° de Proyectos: ' + (data['Data'][index]['CantidadOP']) + ' </span>' +
+                            ' </div>' +
+                            '<div id="collapse0' + cont + '" class="collapse" data-parent="#divRptProyectosEspecialista">' +
+                            '<div class="box" style="overflow-y: scroll; height: 350px;">' +
+                            '<div class="tab-content">' +
+                            '<div class="tab-pane active" id="tab">' +
+                            '<div class="box">' +
+                            '<div class="box-body">' +
+                            '<table id="tbEspecialista' + cont + '" class="table table-bordered table-striped" style="width:100%">' +
+                            '<thead>' +
+                            ' <tr>' +
+                            '<th>Orden</th>' +
+                            '<th>OP</th>' +
+                            '<th>Título</th>' +
+                            '<th>Cliente</th>' +
+                            '<th>Cliente Final</th>' +
+                            '<th>Fecha Límite</th>' +
+                            '<th>Monto(sin IGV)</th>' +
+                            ' </tr>' +
+                            '</thead>' +
+                            '<tbody></tbody>' +
+                            ' </table>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div>'
+                        );
+                    }
+                    ListarProyectosxEspecialista(data['Data'][index]['IdPersEnti'], cont, flag)
+
+                    cont = cont + 1;
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    function GrafMontosxEspecialista(id) {
+        //$.ajax({
+        //    url: "/OrderForm/ObtenerDatosPersonal/" + id,
+        //    cache: false,
+        //    type: "GET",
+        //    dataType: "json",
+        //    success: function (data) {
+        //        if (data != "") {
+        //            $("#NombreEspecialista").text(data);
+        //        } else {
+        //            $("#NombreEspecialista").text("");
+        //        }
+        //    },
+        //    error: function (source) {
+        //    }
+        //});
+        $.ajax({
+            url: '/OrderForm/GrafMontosxEspecialista/' + id + '/1',
+            dataType: 'json',
+            cache: false,
+            data: {
+                FechaInicio: $("#dtFechaInicioEsp").val() == '' ? 0 : $("#dtFechaInicioEsp").val(),
+                FechaFin: $("#dtFechaFinEsp").val() == '' ? 0 : $("#dtFechaFinEsp").val()
+            },
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+                var valor1, valor2;
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['Estado'];
+                    vValue[index] = value['Monto'];
+                    acumulado = acumulado + value['Monto'];
+                });
+
+                Color[0] = "#FFBB00";
+                Color[1] = "#B21E1E";
+                Color[2] = "#7CBB00";
+                Color[3] = "#516882";
+
+                var colors = Highcharts.getOptions().colors,
+                    colorPie = "##7CBB00",
+                    categories = ["All"],
+                    name = 'Status',
+                    data = [{
+                        y: acumulado,
+                        color: colorPie,
+                        drilldown: {
+                            name: 'Status',
+                            categories: Cat,
+                            data: vValue,
+                            color: colors[0]
+                        }
+                    }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]//Highcharts.Color(data[i].color).brighten(brightness).get()
+                            //color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'divGrafxEspecialista',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total percent market share'
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true,
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: 'Porcentaje: <b>{point.percentage:.2f}%</b><br>Cantidad: <b>{point.y}</b>',
+                                percentageDecimals: 2
+                            }
+                        },
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function (event) {
+                                        var nombre = this.name;
+                                        if (nombre == "Abiertos(En SLA)") {
+                                            ReporteProyectosEspecialista(IdPersEntiEsp, 1);
+                                        } else if (nombre == "Abiertos(Fuera SLA)") {
+                                            ReporteProyectosEspecialista(IdPersEntiEsp, 2);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    series: [{
+                        //name: 'Versions',
+                        data: versionsData,
+                        //innerSize: '50%',
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Monto</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+                //fin chart
+            }
+
+        });
+    }
+
+    function ListarProyectosxEspecialista(IdPersEnti, id, flag) {
+
+        $('#tbEspecialista' + id).dataTable().fnDestroy();
+
+        $('#tbEspecialista' + id).DataTable({
+            "order": [[0, "asc"]],
+            //dom: 'Bfrtip',
+            responsive: true,
+            ajax: {
+                "url": "/OrderForm/ListarProyectosxEspecialista/" + IdPersEnti + '/' + flag + '/1',
+                "data": function (d) {
+                    d.FechaInicio = $("#dtFechaInicioEsp").val() == '' ? 0 : $("#dtFechaInicioEsp").val(),
+                        d.FechaFin = $("#dtFechaFinEsp").val() == '' ? 0 : $("#dtFechaFinEsp").val()
+                }
+            },
+            columns: [
+                { data: "Orden" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"/OrderForm/DetalleProyecto/' + data.IdProyecto + '\" target="_blank" style="font-size:10.5px">' + data.TipoProyecto + ' ' + data.Op + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.Titulo + '</p>' +
+                            '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Project Manager:</strong> </br>' + data.ProjectManager + '</a></li>' +
+                            '</ul></div>';
+
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.Cliente + '</p>' +
+                            '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Project Manager:</strong> </br>' + data.ProjectManager + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.ClienteFinal + '</p>' +
+                            '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Project Manager:</strong> </br>' + data.ProjectManager + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.FechaLimitePM + '</p>' +
+                            '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Project Manager:</strong> </br>' + data.ProjectManager + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="dropup"><p class="dropdown-toggle" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="font-size:10.5px;cursor:pointer">' + data.TotalSinIGV + '</p>' +
+                            '<ul class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+                            '<li><a><strong>Project Manager:</strong> </br>' + data.ProjectManager + '</a></li>' +
+                            '</ul></div>';
+                    }
+                },
+            ],
+            "bPaginate": false,
+            "searching": false,
+            "info": false,
+            "columnDefs": [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                }
+            ],
+        });
+
+    }
+
+
+</script>

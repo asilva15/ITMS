@@ -1,0 +1,149 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("CreateSupply", "ClassEntity", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmTicket", target = "upload_target", @class = "form-horizontal" }))
+{
+    @*@Html.HiddenFor(x => x.ID_PROV_VACA)
+    @Html.HiddenFor(x => x.ID_PERS_ENTI)*@
+    <div class="modal-body">
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Sidige</label>
+            <div class="col-sm-10">
+                <input type="text" name="ID_SIDIGE" id="ID_SIDIGE" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">RUC</label>
+            <div class="col-sm-10">
+                <input type="text" name="NUM_TYPE_DI" id="NUM_TYPE_DI" class="k-textbox" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword3" class="col-sm-2 control-label">Razon Social</label>
+            <div class="col-sm-10">
+                <input type="text" name="COM_NAME" id="COM_NAME" class="k-textbox" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword3" class="col-sm-2 control-label">Address</label>
+            <div class="col-sm-10">
+                <input type="text" name="ADDRESS" id="ADDRESS" class="k-textbox" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputPassword3" class="col-sm-2 control-label">Phone</label>
+            <div class="col-sm-10">
+                <input type="text" name="TEL_ENTI" id="TEL_ENTI" class="k-textbox" />
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-footer">
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-default">Create</button>
+            </div>
+        </div>
+    </div>
+
+
+}
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden"></iframe>
+<script type="text/javascript">
+
+    //var ID_SIDIGE;
+
+    function doneCreateSupply(msg, code, name) {
+        if (msg == "OK") {
+
+            var ID_CIA = $("#ID_CIA").data("kendoComboBox");
+
+            ID_CIA.dataSource.read();
+            ID_CIA.refresh();
+            ID_CIA.value(code);
+            //ID_SIDIGE.text(name);
+
+            $('#myModalLoading').modal('hide');
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Supply Created");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Supply Created Successfully</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                       "</div>");
+
+            var undo = $("#continues").bind("click", function () {
+                   $('#SmallModalContent').modal('hide');//$('#ModalContent').modal('hide');
+            });
+
+        }
+        else {
+
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.InformationMissing");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>"+code+"</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                       "</div>");
+
+            var undo = $("#continues").bind("click", function () {
+                $('#SmallModalContent').modal('hide');//$('#ModalContent').modal('hide');
+            });
+
+        }
+    }
+
+    $(document).ready(function () {
+            ID_SIDIGE = $("#ID_SIDIGE").kendoComboBox({
+            dataTextField: "NOMANE",
+            dataValueField: "CODANE",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 4,
+            //suggest: true,
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                        '<span><strong>${data.NOMANE}</strong></span><br />' +
+                        '<span>${data.IDEANE1}</span></div>',
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                serverFiltering: true,
+                transport: {
+                    read: "/Sidige/ListSupplier?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_SIDIGE.bind("change", function (e) {
+            //console.log(ID_SIDIGE.dataItem().IDEANE1)
+            $("#NUM_TYPE_DI").val(ID_SIDIGE.dataItem().IDEANE1)
+            $("#COM_NAME").val(ID_SIDIGE.dataItem().NOMANE)
+            $("#ADDRESS").val(ID_SIDIGE.dataItem().DIRANE)
+            $("#TEL_ENTI").val(ID_SIDIGE.dataItem().TELANE)
+            //Store para vista Detail User
+            //detailUser(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+            //AssetByUser(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+            @*if (ID_SIDIGE.dataItem() === undefined) {
+                //$("#divEditCombo").css("display", "none");
+            }
+            else {
+                //if ('@ViewBag.ACCESO_NEWREQ' == '1') {
+                    //$("#divEditCombo").css("display", "block");
+                //}
+                $("#NUM_TYPE_DI").val = ID_SIDIGE.dataItem().IDEANE1
+            }*@
+        });
+    });
+</script>
+

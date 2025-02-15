@@ -1,0 +1,340 @@
+﻿@{
+    ViewBag.Title = "SubCategoria";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+@*--------------------------------Plugin iCheck--------------------------------*@
+<link href="~/Content/themes/plugin//iCheck/flat/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+@*-----------------------Plugin DataTable + Bootstrap---------------------------------------------------------*@
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<div class="app-page-title" style="margin-bottom: 2%; padding: 1% 2.5%;">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Mantenimiento Tipo de Servicio / Actividades
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-2 card">
+                <div class="card-body" style="padding-bottom: 1%;">
+                    <div class="card-title">Tipo de Servicio</div>
+                    <hr style="margin-top: 0%; margin-bottom: 1%;" />
+                    <form class="">
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblEtapa" for="cboEtapa" style="color:#648AE3;cursor:pointer;" data-toggle="modal" data-target="#miModal" onclick="AbrirModalEtapa()"><b>Etapa</b></label>
+                                    <input id="cboEtapa" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblActividad" for="cboActividad" style="color:#648AE3;cursor:pointer" data-toggle="modal" data-target="#miModal" onclick="AbrirModalActividad();"><b>Actividad</b></label>
+                                    <input id="cboActividad" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblSubcategoria" for="txtSubcategoria">Subcategoría</label>
+                                    <input id="txtSubcategoria" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="position-relative form-group">
+                                    <label for="chkEstado">Estado</label><br>
+                                    <input id="chkEstado" type="checkbox" />
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="position-relative form-group">
+                                    <br>
+                                    <button id="btnCrear" type="button" class="btn btn-primary btn-block">Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active">
+                            <table id="tbSubcategoria" class="table table-hover table-striped table-bordered" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Etapa</th>
+                                        <th>Actividad</th>
+                                        <th>Subcategoría</th>
+                                        <th>Estado</th>
+                                        <th width="10">Opciones</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="body-block-example-1 d-none">
+    <div class="loader bg-transparent no-shadow p-0">
+        <div class="ball-grid-pulse">
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+        </div>
+    </div>
+</div>
+
+@*<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>*@
+<script>
+
+    $(document).ready(function () {
+        $("#btnCrear").click(function(){
+            NuevaSubcategoria();
+        });
+        // ESTILO DE COMBOS
+        cargarCboEtapa();
+        cargarCboActividad();
+        //Dando estilo a los input
+        $("#txtSubcategoria").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        //Dando estilo iCheck a los checkbox
+        $('#chkEstado').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+        $('#chkEstado').iCheck('check');
+
+        //Variable de lenguaje para tablas
+        var leng_esp = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+
+        //Limpieza de Tablas
+        $("#tbSubcategoria").dataTable().fnDestroy();
+        //Carga de Tablas
+        $('#tbSubcategoria').DataTable({
+            order: [[1, "asc"]],
+            responsive: true,
+            dom: 'frtip',
+            select: true,
+            ajax: {
+                url: "/Proyectos_Subcategoria/ListarSubcategoria",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "IdSubcategoria"
+                },
+                {
+                    data: "Etapa"
+                },
+                {
+                    data: "Actividad"
+                },
+                {
+                    data: "Subcategoria"
+                },
+                {
+                    data: "Estado"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div role="group" class="btn-group-lg btn-group">' +
+                            '<button class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3" title="Editar Subcategoria" data-toggle="modal" data-target="#miModal" onclick="EditarSubcategoria(' + data.IdSubcategoria + ');"> <i class="fa fa-edit" aria-hidden="true"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            columnDefs: [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                }
+            ],
+            language: leng_esp
+        });
+    });
+
+    function NuevaSubcategoria() {
+        var mensajeAdvertencia = '';
+        if ($("#cboEtapa").val() == "") {
+            mensajeAdvertencia = mensajeAdvertencia + "- Etapa. <br/>";
+        }
+        if ($("#cboActividad").val() == "") {
+            mensajeAdvertencia = mensajeAdvertencia + "- Actividad. <br/>";
+        }
+        if ($("#txtSubcategoria").val() == "") {
+            mensajeAdvertencia = mensajeAdvertencia + "- Subcategoria. <br/>";
+        }
+        if (mensajeAdvertencia == '') {
+            $.ajax({
+                type: "POST",
+                url: "/Proyectos_Subcategoria/NuevaSubcategoria?idEtapa=" + $("#cboEtapa").val() +
+                    "&idActividad=" + $("#cboActividad").val() +
+                    "&subcategoria=" + $("#txtSubcategoria").val() +
+                    "&estado=" + $("#chkEstado").iCheck('update')[0].checked,
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("La subcategoría ingresada ya se encuentra registrada.", "Advertencia");
+                    } else {
+                        toastr.success("Registro Creado", "Exito!");
+                        $("#cboEtapa").data("kendoComboBox").value("");
+                        $("#cboActividad").data("kendoComboBox").value("");
+                        $("#txtSubcategoria").val("");
+                        $('#chkEstado').iCheck('check');
+                        $('#tbSubcategoria').DataTable().ajax.reload();
+                    }
+                }
+            });
+        } else {
+            toastr.warning(mensajeAdvertencia,'Complete los siguientes campos:');
+        }
+    }
+
+    function EditarSubcategoria(Id) {
+        $("#lblTitulo").text("Editar Subcategoria");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/Proyectos_SubCategoria/Editar?id=' + Id);
+    }
+
+    function AbrirModalEtapa() {
+        $("#lblTitulo").text("Nueva Etapa");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-md");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/Proyectos_Etapa/Index');
+    }
+
+    function AbrirModalActividad() {
+        $("#lblTitulo").text("Nueva Actividad");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-md");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/Proyectos_Actividad/Index');
+    }
+
+    function cargarCboEtapa() {
+        var cboEtapa = $("#cboEtapa").kendoComboBox({
+            placeholder: "",
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proyectos_Etapa/CboListarEtapa"
+                }
+            }
+        });
+        //var combobox = $("#combobox").data("kendoComboBox");
+
+        var combobox = $("#cboEtapa").data("kendoComboBox");
+
+        combobox.refresh();
+    }
+
+    function cargarCboActividad() {
+        var cboActividad = $("#cboActividad").kendoComboBox({
+            placeholder: "",
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proyectos_Actividad/CboListarActividad"
+                }
+            }
+        });
+    }
+</script>

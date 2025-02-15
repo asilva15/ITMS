@@ -1,0 +1,266 @@
+﻿@{
+    ViewBag.Title = "Tipo Actividad";
+    Layout = null;
+}
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.min.js"></script>
+
+<div class="main-card mb-2 card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-5">
+                <div class="position-relative form-group">
+                    <label for="txtTipoActividadLog">Tipo de actividad</label>
+                    <input id="txtTipoActividadLog" type="text" />
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="position-relative form-group">
+                    <label for="cboSubType">Subtipo</label>
+                    <input id="cboSubType" type="text" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="position-relative form-group">
+                    <label for="">Estado</label><br>
+                    <input id="chkEstadoActividad" type="checkbox" />
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 ml-auto">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-secondary btn-block" onclick="CancelarTipoActividad();">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-primary btn-block" onclick="GuardarTipoActividad()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    <div class="card-body">
+        <div class="tab-content">
+            <div class="tab-pane active table-responsive">
+                <table id="tbTipoActividad" class="table table-hover table-striped table-bordered display responsive no-wrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Tipo actividad</th>
+                            <th>Subtipo</th>
+                            <th>Cuenta</th>
+                            <th>Estado</th>
+                            <th width="10">Opciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var tipo = "I";
+    var idTipoActividad = 0;
+    $(document).ready(function () {
+
+        var table = $('#tbTipoActividad').DataTable();
+
+        table.clear().draw();
+        //Lista de tipo de actividades
+        ListarTipoActividad();
+        //Dando estilo al input
+        $("#txtTipoActividadLog").kendoMaskedTextBox({
+            mask: ""
+        });
+        //Dando estilo iCheck a checkbox
+        $('#chkEstadoActividad').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+        $('#chkEstadoActividad').iCheck('check');
+        $("#cboSubType").kendoComboBox({
+            dataSource: [
+                { Name: "OP", Id: 1 },
+                { Name: "TICKETS", Id: 2 },
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+            //dataBound: function (e) {
+            //    var items = e.sender.items();
+            //    var dataItems = e.sender.dataItems();
+            //    for (var i = 0; i < dataItems.length; i++) {
+            //        $(items[i]).attr("name", dataItems[i].Id.toString())
+            //    }
+            //}
+        });
+    });
+
+    function GuardarTipoActividad() {
+        var msjTipoActividad = '';
+        if ($("#txtTipoActividadLog").val() == '') {
+            msjTipoActividad = msjTipoActividad + 'Tipo actividad.'
+        }
+        if ($("#cboSubType").val() == '') {
+            msjTipoActividad = msjTipoActividad + 'Subtipo.'
+        }
+        if (msjTipoActividad == '') {
+            var url = "/Type_Act_Log/Nuevo?tipoActividad=" + $("#txtTipoActividadLog").val() +
+                "&subtipo=" + $("#cboSubType").val() +
+                "&estado=" + $("#chkEstadoActividad").iCheck('update')[0].checked;
+            if (tipo == "U")
+                url = "/Type_Act_Log/Editar?id=" + idTipoActividad + "&tipoActividad=" + $("#txtTipoActividadLog").val() +
+                    "&subtipo=" + $("#cboSubType").val() +
+                    "&estado=" + $("#chkEstadoActividad").iCheck('update')[0].checked;
+            $.ajax({
+                type: "POST",
+                url: url,
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("El tipo de actividad ingresado ya se encuentra registrado.", "Advertencia");
+                    } else {
+                        toastr.success("Registro Actualizado", "Exito!");
+                        setTimeout(function () { location.reload(); }, 500);
+                    }
+                }
+            });
+        } else {
+            toastr.warning(msjTipoActividad, 'Complete los siguientes campos:');
+        }
+    }
+
+    function ListarTipoActividad() {
+        //Variable de lenguaje para tablas
+        var leng_espTAct = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+        //Limpieza de Tablas
+        $("#tbTipoActividad").dataTable().fnDestroy();
+        //Carga de Tablas
+        $('#tbTipoActividad').DataTable({
+            order: [[1, "asc"]],
+            responsive: true,
+            dom: 'frtip',
+            select: true,
+            ajax: {
+                url: "/Type_Act_Log/Listar",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "ID_TYPE_ACT"
+                },
+                {
+                    data: "DES_ACT"
+                },
+                {
+                    data: "DES_SUB_TYPE"
+                },
+                {
+                    data: "Estado"
+                },
+                {
+                    data: "NAM_ACCO"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div role="group" class="btn-group-lg btn-group">' +
+                            '<button class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3" title="Editar Tipo Actividad" onclick="DetalleTipoActividad(' + data.ID_TYPE_ACT + ');"> <i class="fa fa-edit" aria-hidden="true"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            columnDefs: [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                }
+            ],
+            language: leng_espTAct
+        });
+    }
+
+    function DetalleTipoActividad(id) {
+        $("#lblTitulo").empty();
+        $("#lblTitulo").text("Editar Tipo Actividad");
+        idTipoActividad = id;
+        $.ajax({
+            type: "GET",
+            url: "/Type_Act_Log/Detalle?id=" + id,
+            cache: false,
+            success: function (data) {
+                tipo = "U";
+                $.each(data, function (index, value) {
+                    if (value.DES_SUB_TYPE == 'OP') {
+                        $("#cboSubType").data("kendoComboBox").value(1);
+                    } else {
+                        $("#cboSubType").data("kendoComboBox").value(2);
+                    }
+                    if (value.VIG_ACT == true) {
+                        $('#chkEstadoActividad').iCheck('check');
+                    } else {
+                        $('#chkEstadoActividad').iCheck('uncheck');
+                    }
+                    $("#txtTipoActividadLog").val(value.DES_ACT);
+                });
+
+            },
+            error: function (data) {
+                toastr.danger("", "Error")
+            }
+        });
+    }
+
+    function CancelarTipoActividad() {
+        $("#txtTipoActividadLog").val("");
+        $("#cboSubType").data("kendoComboBox").value("");
+        $('#chkEstadoActividad').iCheck('check');
+        tipo = "I";
+        $("#lblTitulo").empty();
+        $("#lblTitulo").text("Nuevo Tipo de Actividad");
+    }
+</script>

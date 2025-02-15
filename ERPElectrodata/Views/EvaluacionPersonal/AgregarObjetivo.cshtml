@@ -1,0 +1,198 @@
+﻿@{
+    Layout = null;
+}
+
+<style>
+
+    .form-container {
+        padding: 10px;
+    }
+
+        .form-container input, .form-container textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container label {
+            font-weight: bold;
+        }
+
+        .form-container .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+
+</style>
+
+<div class="form-container">
+
+    <label for="objetivo">Objetivo  <b>(*)</b></label>
+    <input type="text" id="objetivo" placeholder="Escribir aquí">
+    <br /><br />
+    <label for="descripcion">Descripción <b>(*)</b></label>
+    <textarea id="descripcion" placeholder="Escribir una descripción aquí"></textarea>
+    <br /><br />
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label for="formula">Fórmula</label>
+                    <br /><br />
+                    <label style="font-weight:100;padding-left:30px;">Fórmula Invertida</label>
+                </div>
+                <div class="col-md-3">
+                    <input type="checkbox" id="formulaInverted" style="margin-top:45px">
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label for="peso">Ponderado/Peso  <b>(*)</b></label>
+            <input type="number" id="peso" placeholder="Escribir aquí" step="1" onkeydown="validaNumericos(event)" >
+            <small>* Recuerde la suma debe ser 100</small>
+        </div>
+    </div>
+    <br />
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label for="unidad">Unidad de Medida  <b>(*)</b></label>
+            <br />
+            <input style="font-size:13px;padding-top:7px" type="text" id="unidad" placeholder="Escribir aquí">
+        </div>
+        <div class="col-md-6">
+            <label for="meta">Meta  <b>(*)</b></label>
+            <input type="number" id="meta" placeholder="Escribir aquí" step="1"  onkeydown="validaNumericos(event)" >
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-12" style="text-align:center;">
+            <small>* Una vez validado por el jefe los campos son no editables</small>
+        </div>
+    </div>
+    <br />
+    <div class="buttons">
+          <button id="agregar">Agregar</button>
+          <button data-dismiss="modal" id="cerrar">Cerrar</button>
+          <button id="closeModalAgregarObjetivo" data-dismiss="modal" hidden></button>
+    </div>
+</div>
+
+
+
+    <script>
+        $(document).ready(function () {
+
+            $("#agregar").kendoButton();
+            $("#cerrar").kendoButton();
+
+            $("#agregar").click(function () {
+                var rowCount = $('#datatable tbody tr').length;
+
+                var objetivo = $("#objetivo").val();
+                var descripcion = $("#descripcion").val();
+                var valorunidad = $("#unidad").data("kendoComboBox").text();
+                /*console.log(valorunidad);*/
+                var formulaInverted = $("#formulaInverted").prop("checked");
+                var peso = $("#peso").val();
+                var unidad = $("#unidad").val();
+                var meta = $("#meta").val();
+
+                if (!objetivo) {
+                    toastr.warning('El campo "Objetivo" es obligatorio. Por favor, completarlo.', 'Advertencia');
+                    return; 
+                } else if (!descripcion) {
+                    toastr.warning('El campo "Descripcion" es obligatorio. Por favor, completarlo.', 'Advertencia');
+                    return;
+                } else if (!peso) {
+                    toastr.warning('El campo "Ponderado" es obligatorio. Por favor, completarlo.', 'Advertencia');
+                    return;
+                } else if (!unidad) {
+                    toastr.warning('El desplegable "Unidad de Medida" es obligatorio. Por favor, seleccione una opción.', 'Advertencia');
+                    return;
+                } else if (!meta) {
+                    toastr.warning('El campo "Meta" es obligatorio. Por favor, completarlo.', 'Advertencia');
+                    return;
+                }
+
+                rowCount++;
+
+                var newRow = '<tr>' +
+                    '<td>' + rowCount + '</td>' +
+                    '<td>' + objetivo + '</td>' +
+                    '<td>' + descripcion + '</td>' +
+                    '<td><input type="checkbox"' + (formulaInverted ? 'checked' : '') + ' disabled> FI</td>' +
+                    '<td>' + peso + '</td>' +
+                    '<td>' + valorunidad + '</td>' +
+                    '<td>' + meta + '</td>' +
+                    '<td>' +
+                    '<button class="btn btn-secundary" data-toggle="modal" data-target="#miModal" onclick="EditarFilaObjetivo(this,event)">✏️</button>' +
+                    '<button class="btn btn-secundary" onclick="EliminarFilaObjetivo(this,event)">🗑️</button>' +
+                    '</td>' +
+                    '</tr>';
+
+                $("#datatable tbody").append(newRow);
+
+                var ponderadoActual = parseFloat($("#ponderado").text()) || 0;
+                var nuevoPonderado = ponderadoActual + parseFloat(peso);
+                $("#ponderado").text(nuevoPonderado.toFixed(0) + '%');
+
+                var btn = document.getElementById('closeModalAgregarObjetivo');
+                btn.click();
+
+                $("#objetivo").val('');
+                $("#descripcion").val('');
+                $("#formulaInverted").prop('checked', false);
+                $("#peso").val('');
+                $("#unidad").val('');
+                $("#meta").val('');
+                
+            });
+
+            $("#cerrar").click(function () {
+                var btn = document.getElementById('closeModalAgregarObjetivo');
+                btn.click();
+            });
+
+
+            var unidad = $("#unidad").kendoComboBox({
+                autoBind: true,
+                dataTextField: "Nombre",
+                dataValueField: "IdUnidadMedida",
+                filter: "contains",
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    transport: {
+                        read: {
+                            url: "/EvaluacionPersonal/ComboUnidadMedida",
+                            dataType: "json"
+                        }
+                    },
+                    schema: {
+                        data: function (response) {
+                            return response; 
+                        }
+                    }
+                }
+            }).data("kendoComboBox");
+
+        });
+
+        function ActualizarNumeroFilas() {
+            $('#datatable tbody tr').each(function (index) {
+                $(this).find('td:first').text(index + 1);
+            });
+        }
+
+        function validaNumericos(event) {
+            if (!/[0-9]/.test(event.key) && event.key !== "Backspace" && event.key !== "Tab") {
+                event.preventDefault(); // Prevenir la entrada si no es un número ni Tab ni Backspace
+            }
+        }
+
+    </script>

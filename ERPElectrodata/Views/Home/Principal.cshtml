@@ -1,0 +1,101 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+<style>
+    #contenedorBotonRefrescar {
+        text-align: right;
+        margin-top: 10px; /* Ajusta el margen superior según sea necesario */
+    }
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" integrity="sha384-xrRt7XyJHxIUnT2JmUq8N9rVdLo5zH4Fc2DdDpxc9d+eWnEmA3t4M7gAp7E8LoT" crossorigin="anonymous">
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<script type="text/javascript" src="~/Scripts/jq-paginator.js"></script>
+<div class="app-page-title cabeceraBg">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="font-icon-wrapper font-icon-lg bg-white">
+                <i class="fa fa-file icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                <div class="titleModule"><b><span class="INCIDENTESYREQUERIMIENTOS">Incidentes y Requerimientos</span></b></div>
+                <div class="page-title-subheading">
+                    <span class="ListadeTicketsporcuentadesoporteporestado">Lista de Tickets por cuenta.</span>
+                </div>
+            </div>
+        </div>
+        <div class="ml-auto @(ViewBag.Usuario == 4 ? "mr-3" : "")">
+            @if (ViewBag.Usuario == 60)
+            {
+                <button id="btnRefrescar" class="btn btn-primary">
+                    <i class="fas fa-sync"></i> Actualizar
+                </button>
+            }
+            else if (ViewBag.Usuario == 4)
+            {
+                <button id="btnTickManten" class="btn btn-primary">
+                    <i class="fa fa-wrench"></i> Tickets Mantenimiento
+                </button>
+                <button id="btnTickCompleto" class="btn btn-primary" style="display: none;">
+                    <i class="fa fa-book-open"></i> Tickets Completos
+                </button>
+            }
+        </div>
+    </div>
+    <div id="mensajeCarga" style="display: none;">Cargando...</div>
+
+</div>
+<div id="Principal">
+    @{
+        if (ViewBag.Usuario == 4)
+        {
+            @Html.Action("_ElectrodataPeru", "Home");
+        }
+        else
+        if (ViewBag.Usuario == 60)
+        {
+            @Html.Action("_Buenaventura", "Home");
+        }
+        else
+        if (ViewBag.Usuario == 56 || ViewBag.Usuario == 57 || ViewBag.Usuario == 58)
+        {
+            @Html.Action("_Minsur", "Home");
+        }
+        else
+        {
+            @Html.Action("_General", "Home");
+        }
+    }
+</div>
+
+<script>
+     $(document).ready(function () {
+        $("#btnRefrescar").click(function () {
+            toastr.warning("Actualizando tabla de Tickets.");
+            // Recargar la página
+            location.reload(true);
+        });
+
+         $("#btnTickManten").click(function () {
+             $("#btnTickManten").hide();
+             $("#btnTickCompleto").show();
+             $("#Principal").html("");
+
+             $.ajax({
+                url: '@Url.Action("TicketMantenimiento", "Home")',
+                type: 'GET',
+                success: function(result) {
+                    $('#Principal').html(result);
+                },
+                error: function(xhr, status, error) {
+                    console.log(error);
+                }
+            });
+         });
+
+         $("#btnTickCompleto").click(function () {
+             location.reload(true);
+         });
+    });
+</script>

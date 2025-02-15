@@ -1,0 +1,245 @@
+﻿@{
+    ViewBag.Title = "Reporte por Cuentas";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+    /*.modal-backdrop {
+        display: none;
+    }*/
+</style>
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+
+<script src="~/Scripts/highcharts/highcharts.js"></script>
+<script src="~/Scripts/highcharts/highcharts-more.js"></script>
+<script src="~/Scripts/highcharts/modules/solid-gauge.src.js"></script>
+<script src="~/Scripts/jquery.tinycarousel.min.js"></script>
+<script src="~/Scripts/highcharts/modules/exporting.js"></script>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Reporte de Actividades
+                <div class="page-title-subheading">
+                    Horas trabajas por cuenta
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form id="Parametro">
+                        <div class="form-row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="SIN_DATE">Fecha Inicio</label>
+                                    <input id="SIN_DATE" name="SIN_DATE" />
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="TO_DATE">Fecha Fin</label>
+                                    <input id="TO_DATE" name="TO_DATE" />
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <label for="">&nbsp;</label>
+                                <input id="btnBuscar" name="btnBuscar" class="btn btn-block btn-primary btn-sm" type="button" value="Generar" onclick="ValidarParametro();" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-12">
+                    <div id="ListCuentas" style="width: 70%; float: left; margin-left: 150px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#SIN_DATE").kendoDatePicker({
+            format: "MM/dd/yyyy"
+        });
+        $("#TO_DATE").kendoDatePicker({
+            format: "MM/dd/yyyy"
+        });
+    });
+    function ValidarParametro() {
+        if ($("#SIN_DATE").val() == "" || $("#TO_DATE").val() == "") {
+            toastr.warning("Ingrese la fecha de inicio y fin.", "Mensaje");
+        }
+        else {
+            GenerarGrafica();
+        }
+    }
+
+    function GenerarGrafica() {
+        $("#ListCuentas").empty();
+
+        $("#ListCuentas").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><br /><br /><br /><h3>Cargando...</h3><br /><img src='../../Images/spinner.gif' style='height: 17%; width: 17%; text-align: center;'></div>");
+
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val()
+        };
+
+        $.ajax({
+            url: "/Activity/ListCuentas",
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                //TODOS
+                var accountAll = new Array();
+                var ImplemAll = new Array();
+                var SopExtAll = new Array();
+                var SopIntAll = new Array();
+                var ComerAll = new Array();
+                var CapacAll = new Array();
+                var SoporteAll = new Array();
+                var InformeAll = new Array();
+                var OtrosAll = new Array();
+                $.each(json['ListCuentas'], function (index, value) {
+                    accountAll[index] = value['NAM_ACCO'];
+                    ImplemAll[index] = value['IMPLEMENTACION'] / 3600;
+                    SopExtAll[index] = value['SOPORTEEXT'] / 3600;
+                    SopIntAll[index] = value['SOPORTEINT'] / 3600;
+                    ComerAll[index] = value['COMERCIAL'] / 3600;
+                    CapacAll[index] = value['CAPACITACION'] / 3600;
+                    SoporteAll[index] = value['SOPORTE'] / 3600;
+                    InformeAll[index] = value['INFORME'] / 3600;
+                    OtrosAll[index] = value['OTROS'] / 3600;
+                });
+                $('#ListCuentas').highcharts({
+                    chart: {
+                        type: 'bar',
+                        marginTop: 20
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: accountAll,
+                        title: {
+                            text: 'Cuentas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    legend: {
+                        backgroundColor: '#FFFFFF',
+                        reversed: false,
+                        align: 'right',
+                        verticalAlign: 'top',
+                        layout: 'vertical',
+                        x: 0,
+                        y: 100
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Hrs',
+                        valueDecimals: 1,
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal',
+                        }
+                    },
+                    series: [{
+                        name: 'Implementación',
+                        color: '#376092',
+                        data: ImplemAll,
+                    }, {
+                        name: 'Soporte Externo',
+                        color: '#95B3D7',
+                        data: SopExtAll,
+                    }, {
+                        name: 'Soporte Interno',
+                        color: '#E46C0A',
+                        data: SopIntAll,
+                        cursor: 'pointer',
+                    }, {
+                        name: 'Comercial',
+                        color: '#77933C',
+                        data: ComerAll,
+                    }, {
+                        name: 'Capacitación',
+                        color: '#FFFF00',
+                        data: CapacAll,
+                    }, {
+                        name: 'Soporte',
+                        color: '#CBABA6',
+                        data: SoporteAll,
+                    }, {
+                        name: 'Informe',
+                        color: '#4BD439',
+                        data: InformeAll,
+                    }, {
+                        name: 'Otros',
+                        color: '#CCCCCC',
+                        data: OtrosAll,
+                    }]
+                });
+            }
+        });
+    }
+</script>

@@ -1,0 +1,145 @@
+﻿@{
+    Layout = null;
+}
+<link href="~/Content/ArchitectureUI/main.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.common.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.rtl.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.default.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.default.mobile.min.css" rel="stylesheet" />
+<link href="~/Content19/all.css" rel="stylesheet" />
+
+<script src="~/Scripts19/kendo/2019.3.1023/jquery.min.js"></script>
+<script src="~/Scripts19/kendo/2019.3.1023/jszip.min.js"></script>
+<script src="~/Scripts19/kendo/2019.3.1023/kendo.all.min.js"></script>
+
+
+
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form id="Parametro">
+                        <div class="form-row">
+                            <div class="col-sm-5">
+                                <div class="form-group">
+                                    <label for="cbUsuario">Usuario</label>
+                                    <select multiple="multiple" class="multiselect-dropdown form-control" id="cbUsuario" style="width:100%;"></select>
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label for="cbAño">Año</label>
+                                    <input id="cbAño" type="text">
+                                </div>
+                            </div>
+                            <div class="col-sm-2">
+                                <div class="form-group">
+                                    <label for="cbMes">Mes</label><br />
+                                    <input id="cbMes" type="text">
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <label for="">&nbsp;</label><br />
+                                <input id="btnBuscar" name="btnBuscar" class="btn btn-warning btn-sm" type="button" value="Buscar" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-12">
+                    <iframe id="RSReporteUsuario" style="height:480px; width:100%;border: 0px #eee solid;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="~/Content/ArchitectureUI/assets/scripts/main.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+    function GenerarReporte() {
+        if ($("#cbUsuario").val() == null || $("#cbAño").val() == null || $("#cbMes").val() == null || $("#cbAño").val() == "" || $("#cbMes").val() == "") {
+            uploadDone("ERROR");
+        } else {
+            window.frames["RSReporteUsuario"].src = "/Reporting/Actividad/ActividadSemanalHorasUsuario.aspx?var=" + Math.random() + "&ID_PERS_ENTI=" + $("#cbUsuario").val() + "&ANIO=" + $("#cbAño").val() + "&MES=" + $("#cbMes").val();
+        }
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#btnBuscar").click(function (event) {
+            GenerarReporte();
+            event.preventDefault();
+        });
+
+        $.ajax({
+            url: "/Activity/ListPersonalActividadMultiSelect",
+            type: 'post',
+            success: function (response) {
+                $.each(response, function (ind, elem) {
+                    console.log(elem.opcion);
+                    $("#cbUsuario").append(elem.opcion);
+                });
+                $("#cbUsuario").multiselect("rebuild");
+                $("#cbUsuario").attr("disabled", false);
+            }
+        });
+
+        $("#cbAño").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un año",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/ListarAñosCbx"
+                }
+
+            }
+        });
+
+        $("#cbMes").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un mes",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/ListarMesesCbx"
+                }
+
+            }
+        });
+    });
+
+</script>
+<script type="text/javascript">
+
+    function uploadDone(msg) {
+        toastr.warning("Completar la información solicitada.", "Mensaje");
+    }
+</script>

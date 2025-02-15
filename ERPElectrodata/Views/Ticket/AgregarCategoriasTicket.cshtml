@@ -1,0 +1,250 @@
+﻿@{
+    Layout = null;
+}
+<style>
+    .k-in{
+        padding:2px !important;
+        font-size:14px !important;
+    }
+    .k-i-expand {
+        width: 30px !important;
+        
+    }
+    .k-i-collapse {
+        width: 30px !important;
+        
+    }
+</style>
+<div id="treeviewProcedure" style="padding: 3px 0 0 7px;"></div>
+<script type="text/javascript">
+    var valor = 0
+    var nombre = ""
+    var cateId3 = 0
+    var cateNombre3 = ''
+    var cateId4 = 0
+    var cateNombre4 = ''
+    var cateId5 = 0
+    var cateNombre5 = ''
+    var cateId6 = 0
+    var cateNombre6 = ''
+    $(document).ready(function () {
+        $("#treeviewProcedure").empty();
+        homogeneous = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: ("/Ticket/ListarCategorias/?idCateN2=@ViewBag.ID_CATEN2&idAcco=@ViewBag.ID_ACCO"),
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE",
+                }
+            }
+        });
+
+        // Categoria ALTA/INTERMEDIACION solo para GAC y PSD
+        if (@Session["ID_ACCO"] == 56 || @Session["ID_ACCO"] == 57 || @Session["ID_ACCO"] == 58) {
+            if (@Session["ADMINISTRADOR"] != 1 && @Session["SUPERVISOR_SERVICEDESK"] != 1 && @Session["ID_QUEU"] != 78 @*&& @Session["ID_QUEU"] != 5*@) {
+                homogeneous.filter({
+                    logic: "and",
+                    filters: [
+                        { field: "ID_PARA", operator: "neq", value: 27008 },
+                        { field: "ID_PARA", operator: "neq", value: 28397 },
+                        { field: "ID_PARA", operator: "neq", value: 29750 }
+                    ]
+                });
+            }
+        }
+
+        $("#treeviewProcedure").kendoTreeView({
+            dataSource: homogeneous,
+            dataTextField: "NAME_PARA",
+            select: function (e) {
+                var data = $('#treeviewProcedure').data('kendoTreeView').dataItem(e.node);
+
+                if (data.HAS_VALUE) {
+                    e.preventDefault();
+                } else {
+                    var treeview = $("#treeviewProcedure").data("kendoTreeView");
+                    valor = data.ID_PARA
+                    nombre = data.NAME_PARA
+
+                    var getitem = treeview.dataSource.get(data.ID_PARA);
+                    treeview.findByUid(getitem.uid);
+                    var selectitem = treeview.findByUid(getitem.uid);
+                    treeview.select(selectitem);
+
+                    //Tiene 6 niveles
+                    if (data.NIV_CATE == 6) {
+                        //nodo 6
+                        cateId6 = data.ID_PARA
+                        cateNombre6 = data.NAME_PARA
+                        //nodo 5
+                        cateId5 = data.ID_CATE_PARE
+                        cateNombre5 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId5).uid))
+                        //nodo 4
+                        cateId4 = treeview.dataSource.get(cateId5).ID_CATE_PARE
+                        cateNombre4 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId4).uid))
+                        //nodo 3
+                        cateId3 = treeview.dataSource.get(cateId4).ID_CATE_PARE
+                        cateNombre3 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId3).uid))
+                    }
+                    else
+                        if (data.NIV_CATE == 5) {
+                            //nodo 6
+                            cateId6 = 0
+                            cateNombre6 = ''
+                            //nodo 5
+                            cateId5 = data.ID_PARA
+                            cateNombre5 = data.NAME_PARA
+                            //nodo 4
+                            cateId4 = data.ID_CATE_PARE
+                            cateNombre4 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId4).uid))
+                            //nodo 3
+                            cateId3 = treeview.dataSource.get(cateId4).ID_CATE_PARE
+                            cateNombre3 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId3).uid))
+                        }
+                        else
+                            if (data.NIV_CATE == 4) {
+                                //nodo 6
+                                cateId6 = 0
+                                cateNombre6 = ''
+                                //nodo 5
+                                cateId5 = 0
+                                cateNombre5 = ''
+                                //nodo 4
+                                cateId4 = data.ID_PARA
+                                cateNombre4 = data.NAME_PARA
+                                //nodo 3
+                                cateId3 = data.ID_CATE_PARE
+                                cateNombre3 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId3).uid))
+                            }
+                            else
+                                if (data.NIV_CATE == 3) {
+                                    //nodo 6
+                                    cateId6 = 0
+                                    cateNombre6 = ''
+                                    //nodo 5
+                                    cateId5 = 0
+                                    cateNombre5 = ''
+                                    //nodo 4
+                                    cateId4 = 0
+                                    cateNombre4 = ''
+                                    //nodo 3
+                                    cateId3 = data.ID_PARA
+                                    cateNombre3 = data.NAME_PARA
+                                }
+                }
+            },
+        })
+        $("#guardarCategoriaModal").click(function () {
+            if (valor !== 0) {
+                $("#ID_CATE").val(valor)
+                console.log('Inicio')
+                console.log(cateNombre3)
+                console.log(cateNombre4)
+                console.log(cateNombre5)
+                console.log(cateNombre6)
+                $("#nuevaCategoria").val(`${cateNombre3} ${cateId4 != 0 ? "-" : ""} ${cateNombre4} ${cateId5 != 0 ? "-" : ""} ${cateNombre5} ${cateId6 != 0 ? "-" : ""} ${cateNombre6}`)
+            }
+            if ($("#ID_TYPE_TICK").length) {
+                console.log(valor)
+                if ($("#usuarioVipMarcado").val() == 'false') {
+                    var ID_TYPE_TICK = $("#ID_TYPE_TICK").data("kendoComboBox");
+
+                    $.ajax({
+                        url: "/Ticket/ObtenerTipoIncidenteCategoria/?id=" + valor,
+                        type: 'GET',
+                        success: function (data) {
+                            if (data != 0) {
+                                ID_TYPE_TICK.value(data)
+                            }
+                        },
+                        error: function (data) {
+                        },
+                    });
+                }
+            }
+            if ($("#ID_PRIO").length) {
+                var ID_PRIO = $("#ID_PRIO").data("kendoComboBox");
+
+                $.ajax({
+                    url: "/Ticket/ObtenerSLACategoria?id=" + valor,
+                    type: "GET",
+                    success: function (response) {
+                        if (response.Data != null) {
+                            var data = response.Data;
+                            ID_PRIO.value(data.IdPrioridad);
+
+                            if ($("#sla").length) {
+                                $("#sla").html("Nivel de Servicio: " + data.TiempoAtencion + " Hours");
+                                if (ID_PRIO.value() == 1) {
+                                    $('#sla').css('background', 'red');
+                                } else if (ID_PRIO.value() == 2) {
+                                    $('#sla').css('background', 'orange');
+                                } else if (ID_PRIO.value() == 3) {
+                                    $('#sla').css('background', 'yellow');
+                                } else if (ID_PRIO.value() == 4) {
+                                    $('#sla').css('background', 'aqua');
+                                } else {
+                                    $('#sla').css('background', 'gray');
+                                }
+                            }
+
+                            if ($("#sla_nombre").length) {
+                                $("#sla_nombre").html(data.Nombre);
+                            }
+
+                            if ($("#IdSLA").length) {
+                                $("#IdSLA").val(data.Id);
+                            }
+                            ID_PRIO.enable(false);
+                        } else {
+                            ID_PRIO.value(null);
+                            ID_PRIO.enable(true);
+                            if ($("#sla_nombre").length) {
+                                $("#sla_nombre").html('SLA ESTANDAR');
+                            }
+                            $.ajax({
+                                url: "/Ticket/ObtenerSLAId",
+                                type: "GET",
+                                success: function (data) {
+                                    if ($("#IdSLA").length) {
+                                        $("#IdSLA").val(data);
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+            var categoriasFecha = [27009, 27011, parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeMinsur"]), parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeMarcobre"]), parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeRaura"])];
+            var idCate = parseInt($("#ID_CATE").val());
+            if (idCate == 27158 || idCate == 28529 || idCate == 29900) {
+                $("#divMovil").removeAttr('hidden');
+            } else {
+                $("#divMovil").attr('hidden', true);
+            }
+            if (categoriasFecha.indexOf(idCate) != -1) {
+                $("#divFechaIngreso").removeAttr('hidden');
+                $("#FechaIngreso").kendoDateTimePicker({ value: new Date() }).data("kendoDateTimePicker");
+            } else {
+                $("#divFechaIngreso").attr('hidden',true);
+                $("#FechaIngreso").kendoDateTimePicker({ value: '' }).data("kendoDateTimePicker");
+            }
+        })
+        $("#treeviewProcedure").on("dblclick", function (e) {
+            var tree = $("#treeviewProcedure").data("kendoTreeView");
+            var item = tree.dataItem($(e.target).closest("li"));
+            var cerrarBtn = document.getElementById("guardarCategoriaModal")
+            cerrarBtn.click()
+        })
+    });
+</script>
+
+
+
+
+

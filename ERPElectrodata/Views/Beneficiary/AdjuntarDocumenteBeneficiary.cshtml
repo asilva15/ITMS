@@ -1,0 +1,84 @@
+﻿@{
+    ViewBag.Title = "AdjuntarDocumenteBeneficiary";
+    Layout = null;
+}
+
+<div class="form-row">
+    <div class="col-md-12">
+        <div class="form-group">
+            <label id="lblTipoDocumento" for="lblTipoDocumento">
+                Type Document
+            </label>
+            @Html.TextBox("ArrayFile")<span style="font-style: oblique;"> *Only Extension .pdf</span>
+        </div>
+    </div>
+
+</div>
+
+<div class="form-row">
+    <div class="col-md-12">
+        <div class="position-relative form-group">
+            <input name="files" id="files" type="file" />
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").val();
+        
+        $("#files").kendoUpload({
+        localization: {
+            select: "Adjuntar"
+        },
+        upload: function (e) {
+
+            var ID_BEN = $("#ID_BENI_EDIT").val();
+            
+            e.data = {
+                ID_TYPE_ATTA_BENE: $("#ArrayFile").val(),
+                KEY_ATTA_BENE: $("#KEY_ATTA").val(),
+                EDI: 'E',
+                ID_BENE: ID_BEN,
+
+            };
+        },
+        remove: function (e) {
+            e.data = {
+                ID_TYPE_ATTA_BENE: $("#ArrayFile").val(),
+                KEY_ATTA_BENE: $("#KEY_ATTA").val(),
+            };
+        },
+
+        async: {
+            saveUrl: "/AttachBeneficiary/SaveAttachBeneficiary/?ID_PERS_ENTI=" + ID_PERS_ENTI +"",
+            removeUrl: "/AttachBeneficiary/RemoveAttachBeneficiary/?ID_PERS_ENTI=" + ID_PERS_ENTI +"",
+            },
+            autoUpload: false
+        });
+
+
+        var ArrayFile = $("#ArrayFile").kendoComboBox({
+            dataTextField: "NAM_ATTA_BENE",
+            dataValueField: "ID_TYPE_ATTA_BENE",
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Beneficiary/ListTypeAttaBene/?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        
+    });
+</script>

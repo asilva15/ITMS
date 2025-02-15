@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "Principal";
+}
+
+<!DOCTYPE html>
+
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<body>
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-file"></i>
+                </div>
+                <div>
+                    Configuracion de Encuesta
+                    <div class="page-title-subheading">Agrega, editar o eliminar pregunta de la encuesta.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+
+        <div class="container">
+
+            <div class="card">
+
+                <div class="card-body">
+                    <button id="btnModalAgregar" class="btn btn-primary mb-3" data-toggle="modal" data-target="#miModal" onclick="agregarPreguntaModal()">Agregar pregunta</button>
+                    <table id="tbPreguntas" class="table table-bordered table-striped table-responsive-lg">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Pregunta</th>
+                                <th>Acciones</th>
+                                <th>Año</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <iframe id="upload_target" name="upload_target" src="" style="display:none;"></iframe>
+    </footer>
+</body>
+
+
+
+
+<script>
+    $('#tbPreguntas').DataTable().destroy();
+
+    listarPreguntas();
+
+    function agregarPreguntaModal() {
+        debugger;
+        $("#lblTitulo").text("Agregar Pregunta");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/EncuestaBuenaventura/Create");
+        /*listarPreguntas();*/
+    }
+
+    function listarPreguntas() {
+        debugger;
+        $('#tbPreguntas').DataTable().destroy();
+
+        var table = $('#tbPreguntas').DataTable({
+            order: [[0, "asc"]],
+            ajax: {
+                "url": "/EncuestaBuenaventura/ListarPreguntas"
+            },
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, full, meta) {
+                        return meta.row + 1;
+                    }
+                },
+                { data: "PREGUNTA" },
+                {
+                    data: null,
+                    defaultContent: '<button class="btn btn-primary btn-sm btnEditar">Editar</a></button> <button class = "btn btn-danger btn-sm btnElliminar">Eliminar</button>'
+                },
+                { data: "AnioPregunta" }
+            ],
+            lengthChange: false,
+            columnDefs: [
+                {
+                    targets: -2,
+                    render: function (data, type, full, meta) {
+                        return '<button class="btn btn-primary btn-sm btnEditar" data-toggle="modal" data-target="#miModal" data-id="' + data.IdPreunnta + '" onclick="editarPregunta(' + data.IdPreunnta + ');">Editar</button> <button class="btn btn-danger btn-sm btnElliminar" data-id="' + data.IdPreunnta + '" onclick="eliminarPregunta(' + data.IdPreunnta + ');">Eliminar</button>'
+                    }
+                },
+                { targets: [0, 2], className: 'text-center' },
+                { targets: 0, orderable: false } 
+            ]
+        });
+    }
+
+    function editarPregunta(idPregunta) {
+        console.log(idPregunta);
+
+        $("#lblTitulo").text("Editar Pregunta");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/EncuestaBuenaventura/Editar?idPregunta=" + idPregunta);
+
+
+    }
+
+    function eliminarPregunta(idPregunta) {
+        debugger;
+        swal({
+            title: '¿Estás seguro que deseas eliminar esta pregunta?',
+            type: 'info',
+            focusConfirm: false,
+            confirmButtonText: 'Continuar',
+            confirmButtonAriaLabel: 'Thumbs up, great!',
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            cancelButtonColor: '#d33',
+            preConfirm: function () {
+                console.log('Second button clicked');
+            }
+        }, function () {
+            $.ajax({
+                url: "/EncuestaBuenaventura/EliminarPregunta",
+                data: { IdPregunta: idPregunta },
+                type: 'POST',
+                success: function (response) {
+                    swal({
+                        title: 'Pregunta Eliminada',
+                        type: 'success',
+                        confirmButtonText: 'Continuar',
+                    });
+                    listarPreguntas();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        })
+    }
+
+</script>

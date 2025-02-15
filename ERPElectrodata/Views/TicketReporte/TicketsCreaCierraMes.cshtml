@@ -1,0 +1,163 @@
+﻿@{
+    Layout = null;
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card p-3 card">
+            <form id="Parametro">
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            Cuenta
+                            <div class="editor-field">
+                                <input type="text" id="IdCuenta" name="IdCuenta" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            Año
+                            <div class="editor-field">
+                                <input type="text" id="Anio" name="Anio" value="@ViewBag.AnioActual" style="width:100%;" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            Mes
+                            <div class="editor-field">
+                                <input type="text" id="Mes" name="Mes" value="@ViewBag.MesActual" style="width:100%;" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4" id="divSubCuenta" style="display:none">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Sub Cuenta</label>
+                                <div class="position-relative form-check">
+                                    <label class="form-check-label">
+                                        <input type="radio" id="rbTodos" name="rbSubCuenta" class="form-check-input" value="0" checked> TODOS
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label><br /></label>
+                                <div class="position-relative form-check">
+                                    <label class="form-check-label">
+                                        <input type="radio" id="rbInterno" name="rbSubCuenta" class="form-check-input" value="1"> INTERNO
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label><br /></label>
+                                <div class="position-relative form-check">
+                                    <label class="form-check-label">
+                                        <input type="radio" id="rbExterno" name="rbSubCuenta" class="form-check-input" value="2"> EXTERNO
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <div class="form-group">
+                            &nbsp;<br />
+                            <button id="btnBuscar" class="btn btn-block btn-secondary">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="main-card p-3 card">
+            <iframe id="RSCreaCierra" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport() {
+        window.frames["RSCreaCierra"].src = "/Reporting/Ticket/TicketCreaCierra.aspx?var=" + Math.random() + "&" + $("#Parametro").serialize();
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var IdCuenta = $("#IdCuenta").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Account/AccountsByUser?var=" + Math.random()
+                },
+            },
+            filter: "contains",
+            suggest: true,
+            change: function (e) {
+                $("#rbTodos").prop("checked", true);
+
+                var cuenta = $("#IdCuenta").val();
+                $("#divSubCuenta").removeAttr("style");
+                if (cuenta == 4) {
+                    $("#divSubCuenta").css("display", "true");
+                } else {
+                    $("#divSubCuenta").css("display", "none");
+                }
+            },
+        });
+
+        var ID_ACCO_YEAR = $("#Anio").kendoDropDownList({
+            dataTextField: "ID_ACCO_YEAR",
+            dataValueField: "ID_ACCO_YEAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountingYear/List?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#Mes").kendoDropDownList({
+            dataTextField: "NAM_ACCO_MONT",
+            dataValueField: "ID_ACCO_MONTH",
+            cascadeFrom: 'Anio',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountingMonth/List?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#btnBuscar").click(function (event) {
+            GenerateReport();
+            event.preventDefault();
+        });
+
+    });
+
+</script>

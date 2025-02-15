@@ -1,0 +1,96 @@
+﻿@{
+    Layout = null;
+}
+<style>
+    b {
+        color:#F83C50;
+    }
+</style>
+<div class="box">
+    <form id="Parametro">
+
+        <div class="box-body">
+            <div id="msjAlerta"></div>
+            <div class="row">
+            </div>
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="position-relative form-group">
+                        <label for="dtAnio">Año</label>
+                        <input type="text" class="form-control pull-right" id="dtAnio">
+                    </div>
+                </div>
+                <div class="col-sm-3">
+                    <div class="position-relative form-group">
+                        <label for="cbClienteFinal">Cliente Final</label>
+                        <select id="cbClienteFinal" name="cbClienteFinal" class="form-control select2" style="width:100%" ></select>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="position-relative form-group">
+                        <label><br /></label>
+                        <button id="btnBuscar" type="button" class="ladda-button mb-2 mr-2 btn btn-warning btn-block" data-style="expand-right" onclick="GenerateReport();">
+                            <span class="ladda-label">
+                                <i class="fa fa-search"></i> Buscar
+                            </span>
+                            <span class="ladda-spinner">
+                            </span><div class="ladda-progress" style="width: 0px;"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="box" style="margin-top:10px;">
+    <div class="box-body">
+        <iframe id="RptMantProgramados" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport() {
+        window.frames["RptMantProgramados"].src = "/Reporting/OrderForm/MantenimientosProgramados.aspx?var=" + Math.random()
+            + "&cbClienteFinal=" + $("#cbClienteFinal").val() + "&dtAnio=" + $("#dtAnio").val();
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#msjAlerta").hide();
+
+        $('#dtAnio').datepicker({
+            format: " yyyy",
+            viewMode: "years",
+            minViewMode: "years"
+        });
+
+        $("#cbClienteFinal").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ClassEntity/ListarCompania",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+
+    });
+
+</script>
+

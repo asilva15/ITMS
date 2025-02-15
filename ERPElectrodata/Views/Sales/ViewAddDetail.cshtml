@@ -1,0 +1,411 @@
+﻿@model ERPElectrodata.Models.DETAIL_DOCUMENT_SALE
+
+@{
+    Layout = null;
+}
+
+<div style="float:left;width:100%;">
+    <fieldset>
+        <legend>SALES</legend>
+        <div id="divAddDetails" style="width:100%; display:inline-block;">
+            <div class="divFondoUno">
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.ArticleCode
+                    </div>
+                    <div class="k-textbox">
+                        @Html.EditorFor(model => model.CODE_ARTI)
+                        @Html.ValidationMessageFor(model => model.CODE_ARTI)
+                    </div>
+                </div>
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.ProductCode
+                    </div>
+                    <div class="k-textbox">
+                        @Html.EditorFor(model => model.CODE)
+                        @Html.ValidationMessageFor(model => model.CODE)
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoDos">
+                <div style="width: 95.5%; float:left; padding: 0 0 0 15px;">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Description
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextAreaFor(model => model.DESC_DETA)
+                        @Html.ValidationMessageFor(model => model.DESC_DETA)
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoUno">
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        @*<a href="#" onclick="NewManufacturer()" title="Click here to register a new Manufacturer">@ResourceLanguaje.Resource.Manufacturer</a>*@
+                        @ResourceLanguaje.Resource.Manufacturer
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(model => model.ID_MANU)
+                        @Html.ValidationMessageFor(model => model.ID_MANU)
+                    </div>
+                </div>
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        @*<a href="#" onclick="NewCommercialModel()" title="Click here to register a new Commercial Model">@ResourceLanguaje.Resource.CommercialModel</a>*@
+                        @ResourceLanguaje.Resource.CommercialModel
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(model => model.ID_COMM_MODE)
+                        @Html.ValidationMessageFor(model => model.ID_COMM_MODE)
+                    </div>
+                </div>
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        @*<a href="#" onclick="NewManufacturerModel()" title="Click here to register a new Manufacturer Model">@ResourceLanguaje.Resource.ManufacturerModel</a>*@
+                        @ResourceLanguaje.Resource.ManufacturerModel
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(model => model.ID_MANU_MODE)
+                        @Html.ValidationMessageFor(model => model.ID_MANU_MODE)
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoDos">
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Quantity 
+                    </div>
+                    <div style="margin-top:0px;">
+                        @Html.EditorFor(model => model.QUANTITY)
+                        @Html.ValidationMessageFor(model => model.QUANTITY)
+                    </div>
+                </div>
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.UnitPrice
+                    </div>
+                    <div style="margin-top:0px;">
+                        @Html.EditorFor(model => model.VTA_ME)
+                        @Html.ValidationMessageFor(model => model.VTA_ME)
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoUno">
+                <div style="display:inline-block; float:right; padding:7px 12px 5px 0px;">
+                    <div style=" float:left; padding:0px 10px 0px 0px; ">
+                        <button id="btnAddArticle" class="k-button">@ResourceLanguaje.Resource.Add</button>
+                    </div>
+                    <button id="cancelAdd" class="k-button">Cancel</button>
+                </div>
+            </div>
+            </div>
+    </fieldset>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#cancelAdd").click(function () {
+            closeWinFormModalPopUp();
+        });
+
+        $("#QUANTITY").kendoNumericTextBox({
+            min: 0,
+            value: 1
+        });
+        $("#VTA_ME").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#DESC_DETA").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#btnAddArticle").click(function (event) {
+            event.preventDefault();
+
+            codeArt = $("#CODE_ARTI").val();
+            if (codeArt.length == 0) {
+                Messagebox();
+            }
+            else {
+                dd = $("#DESC_DETA").val();
+                if (dd.length == 0) {
+                    Messagebox();
+                }
+                else {                    
+                    if ($.isNumeric($("#QUANTITY").val()) == false) {
+                        Messagebox();
+                    }
+                    else {
+                        if ($.isNumeric($("#VTA_ME").val()) == false) {
+                            Messagebox();
+                        }
+                        else {
+                            qty = $("#QUANTITY").val();
+                            upr = $("#VTA_ME").val();
+
+                            code = $("#CODE").val();
+                            idmanu = a_entero($("#ID_MANU").val());
+                            idcm = a_entero($("#ID_COMM_MODE").val());
+                            idmm = a_entero($("#ID_MANU_MODE").val());
+                            agregandoDetalle(codeArt, code, dd, qty, upr, idmanu, idmm, idcm);
+                        }
+                    }
+                }
+            }
+        });
+
+        $("#ID_MANU").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_MANU = $("#ID_MANU").data("kendoComboBox");
+
+        $("#ID_COMM_MODE").kendoComboBox({
+
+            dataTextField: "NAM_COMM_MODE",
+            dataValueField: "ID_COMM_MODE",
+            cascadeFrom: 'ID_MANU',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CommercialModel/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_COME_MODE = $("#ID_COMM_MODE").data("kendoComboBox");
+
+        $("#ID_MANU_MODE").kendoComboBox({
+
+            dataTextField: "NAM_MANU_MODE",
+            dataValueField: "ID_MANU_MODE",
+            cascadeFrom: 'ID_MANU',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ManufacturerModel/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_MANU_MODE = $("#ID_MANU_MODE").data("kendoComboBox");
+
+    });
+
+    function calcularTotales() {
+        st = 0;
+        ctd = 0;
+        for (i = 1; i <= idx; i++) {
+            if ($("#divTot_" + i).length) {
+                ctd = ctd + 1;
+                st = st + parseFloat($("#divTot_" + i).html().replace(",",""));
+
+                var alt = $("#divDesc_" + String(i)).height();
+                $("#divNro_" + i).height(alt);
+                $("#divCode_" + i).height(alt);
+                $("#divQty_" + i).height(alt);
+                $("#divUPr_" + i).height(alt);
+                $("#divTot_" + i).height(alt);
+
+                col = "#ffffff";
+                if (ctd % 2 == 0) { col = "#f8f8f8"; }
+                $("#divNro_" + i).css("background-color", col);
+                $("#divNro_" + i).html(ctd);
+                $("#divCode_" + i).css("background-color", col);
+                $("#divDesc_" + i).css("background-color", col);
+                $("#divQty_" + i).css("background-color", col);
+                $("#divUPr_" + i).css("background-color", col);
+                $("#divTot_" + i).css("background-color", col);                
+            }            
+        }
+        $("#ctdHD").val(ctd);
+
+        st = parseFloat(st).toFixed(2);
+        tt = parseFloat(st * 1.18).toFixed(2);
+        igv = parseFloat(tt - st).toFixed(2);
+        $("#divValVVta").html(conComas(st));
+        $("#divValIGV").html(conComas(igv));
+        $("#divValTotal").html(conComas(tt));
+    }
+
+    function conComas(valor) {
+
+        dec = valor.toString().substr(valor.length - 3, 3);
+        valor = valor.toString().substr(0, valor.length - 3);
+
+        var nums = new Array();
+        var simb = ","; //Éste es el separador
+        valor = valor.toString();
+        valor = valor.replace(/\D/g, "");   //Ésta expresión regular solo permitira ingresar números
+        nums = valor.split(""); //Se vacia el valor en un arreglo
+        var long = nums.length - 1; // Se saca la longitud del arreglo
+        var patron = 3; //Indica cada cuanto se ponen las comas
+        var prox = 2; // Indica en que lugar se debe insertar la siguiente coma
+        var res = "";
+
+        while (long > prox) {
+            nums.splice((long - prox), 0, simb); //Se agrega la coma
+            prox += patron; //Se incrementa la posición próxima para colocar la coma
+        }
+
+        for (var i = 0; i <= nums.length - 1; i++) {
+            res += nums[i]; //Se crea la nueva cadena para devolver el valor formateado
+        }
+
+        return res + dec;
+    }
+
+    function agregandoDetalle(cod,codpr, des, qty, upr, idmanu, idmanumode,idcommmode) {
+        idx = parseInt($("#idsHD").val());
+        ctd = parseInt($("#ctdHD").val());
+        idx = idx + 1;
+        ctd = ctd + 1;
+        $("#idsHD").val(idx);
+        listIds = $("#ListIdsHD").val();
+        $("#ListIdsHD").val(listIds + idx + ",");
+        
+        col = "#ffffff";
+        if (idx % 2 == 0) { col = "#f8f8f8"; }
+
+        $("#divContentDetailOP").append(
+            '<div id="divNro_' + idx + '" class="RowContentDetailOP" style="width: 5%; background-color:' + col + ';" onmouseout="manttoOut(' + idx + ')" onmouseover="manttoOver(' + idx + ')">' + String(ctd) + '</div>' +
+            '<div id="divCode_' + idx + '" class="RowContentDetailOP" style="width: 16%; background-color:' + col + ';" onmouseout="manttoOut(' + idx + ')" onmouseover="manttoOver(' + idx + ')">' + cod + '</div>' +
+            '<div id="divDesc_' + idx + '" class="RowContentDetailOP" style="width: 44%; text-align:left; padding-left:1%; background-color:' + col + ';" onmouseout="manttoOut(' + idx + ')" onmouseover="manttoOver(' + idx + ')">' + des + '</div>' +
+            '<div id="divQty_' + idx + '" class="RowContentDetailOP" style="width: 8%; text-align:right; padding-right:1%; background-color:' + col + ';" onmouseout="manttoOut(' + idx + ')" onmouseover="manttoOver(' + idx + ')">' + conComas(parseFloat(qty).toFixed(2)) + '</div>' +
+            '<div id="divUPr_' + idx + '" class="RowContentDetailOP" style="width: 11%; text-align:right; padding-right:1%; background-color:' + col + ';" onmouseout="manttoOut(' + idx + ')" onmouseover="manttoOver(' + idx + ')">' + conComas(parseFloat(upr).toFixed(2)) + '</div>' +
+            '<div id="divTot_' + idx + '" class="RowEndContentDetailOP" style="width: 10.2%; text-align:right; padding-right:1%; background-color:' + col + '; position:relative;" onmouseout="manttoOut(' + idx + ')" onmouseover="manttoOver(' + idx + ')">' + conComas(parseFloat(upr * qty).toFixed(2)) +
+            '<div id="mantto' + idx + '" style="position:absolute;top:0px;right:-20px; padding-top:3px; width:22px;height:100%;display:none;"><a id="del|' + idx + '" class="delete-link" href="\#" title="Remove"></a></div></div>' +
+            '<input type="hidden" name="codeArtHD' + idx + '" id="codeArtHD' + idx + '" value="' + cod + '" />' +
+            '<input type="hidden" name="codeProHD' + idx + '" id="codeProHD' + idx + '" value="' + codpr + '" />' +
+            '<input type="hidden" name="descHD' + idx + '" id="descHD' + idx + '" value="' + des + '" />' +
+            '<input type="hidden" name="qtyHD' + idx + '" id="qtyHD' + idx + '" value="' + qty + '" />' + 
+            '<input type="hidden" name="uprHD' + idx + '" id="uprHD' + idx + '" value="' + upr + '" />' + 
+            '<input type="hidden" name="idManuHD' + idx + '" id="idManuHD' + idx + '" value="' + idmanu + '" />' +
+            '<input type="hidden" name="id_Comm_ModeHD' + idx + '" id="id_Comm_ModeHD' + idx + '" value="' + idmanumode + '" />' +
+            '<input type="hidden" name="id_Manu_ModeHD' + idx + '" id="id_Manu_ModeHD' + idx + '" value="' + idcommmode + '" />');
+
+        calcularTotales();
+
+        $("#CODE_ARTI").val('');
+        $("#CODE").val('');
+        var DESC_DETA = $("#DESC_DETA").data("kendoEditor");
+        DESC_DETA.value("");
+        var QUANTITY = $("#QUANTITY").data("kendoNumericTextBox");
+        QUANTITY.value(1);
+        var VTA_ME = $("#VTA_ME").data("kendoNumericTextBox");
+        VTA_ME.value('');
+        var ID_MANU = $("#ID_MANU").data("kendoComboBox");
+        ID_MANU.value('');
+        var ID_MANU_MODE = $("#ID_MANU_MODE").data("kendoComboBox");
+        ID_MANU_MODE.value('');
+        var ID_COMM_MODE = $("#ID_COMM_MODE").data("kendoComboBox");
+        ID_COMM_MODE.value('');
+
+        recentrarForm();
+        $("#CODE_ARTI").focus();
+    }
+
+    function manttoOver(id) {
+        $("#mantto" + id).css("display", "inline-block");
+    }
+
+    function manttoOut(id) {
+        $("#mantto" + id).css("display", "none");
+    }
+
+    $(document).on("click", ".delete-link", function (e) {
+        e.preventDefault();
+        var ctrl = $(this);
+        var id = $(this).attr("id");
+        var elem = id.split('|');        
+
+        $("#divNro_" + elem[1]).remove();
+        $("#divCode_" + elem[1]).remove();
+        $("#divDesc_" + elem[1]).remove();
+        $("#divQty_" + elem[1]).remove();
+        $("#divUPr_" + elem[1]).remove();
+        $("#divTot_" + elem[1]).remove();
+
+        //quitando ID de la lista
+        ListIdsHD = $("#ListIdsHD").val();
+        ListIdsHD = ListIdsHD.replace(elem[1] + ",", "");
+        $("#ListIdsHD").val(ListIdsHD);
+
+        calcularTotales();
+    });
+
+    function Messagebox(msg) {
+        var title = '@ResourceLanguaje.Resource.InformationMissing';
+        var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            "<div style='padding:10px 0px 10px 0px;'>@ResourceLanguaje.Resource.InformationMissingMsn</div>" +
+            "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+            "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                    "</div></div>";
+
+        winPopUpModal(title, body, 400, 150);
+
+        $("#btnContinuee").click(function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+    }
+
+</script>

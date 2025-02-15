@@ -1,0 +1,216 @@
+﻿@{
+    Layout = null;
+}
+
+<div id="scheduler"></div>
+
+<script id="event-tpt-Allday" type="text/x-kendo-template">
+    <div style="background-color: \\#516882; padding:4px 0 4px 5px;" title="All day: #: description #">#: title #</div>
+</script>
+
+<script id="template" type="text/x-kendo-template">
+    #var uid = target.attr("data-uid");#
+    #var scheduler = target.closest("[data-role=scheduler]").data("kendoScheduler");#
+    #var model = scheduler.dataSource.getByUid(uid);#
+
+    <div style="background-color:white; width:104%; height:100%; margin:2px 0px 0px 1px;">
+        #if(model) {#
+        <div style="width:100%; display:inline-block;">
+            <div style="width: 98%; float: left; background: \\#516882; color:white; text-align:left; padding:2px 0 2px 2%;">Title</div>
+            <div style="width: 96%; float: left; background: white; color: black; text-align: left; padding: 2px 2% 2px 2%;">#=model.title#</div>
+        </div>
+        <div style="width:100%; display:inline-block;">
+            <div style="width: 12%; float: left; background: \\#516882; color:white; text-align:left; padding:2px 0 2px 2%;">Start :</div>
+            <div style="width: 34%; float: left; background: white; color: black; text-align: left; padding: 2px 0 2px 2%;">#=kendo.format('{0:d}',model.start)# #=kendo.format('{0:t}',model.start)#</div>
+            <div style="width: 12%; float: left; background: \\#516882; color:white; text-align:left; padding:2px 0 2px 2%;">End :</div>
+            <div style="width: 34%; float: left; background: white; color: black; text-align: left; padding: 2px 0 2px 2%;">#=kendo.format('{0:d}',model.end)# #=kendo.format('{0:t}',model.end)#</div>
+        </div>
+        <div style="width:100%; display:inline-block;">
+            <div style="width: 98%; float: left; background: \\#516882; color:white; text-align:left; padding:2px 0 2px 2%;">Description</div>
+            <div style="width: 96%; float: left; background: white; color: black; text-align: left; padding: 2px 2% 2px 2%; text-align: justify; max-height: 350px; overflow: auto; ">#=model.description#</div>
+        </div>
+        #} else {#
+        <strong>No event data is available</strong>
+        #}#
+    </div>
+</script>
+
+<script id="event-template" type="text/x-kendo-template">
+    <div style="width:90%; height:100%;">
+        <div style="width:95%; height:100%; text-align:justify; margin:0px 4px 0px 2px;">
+            #: title # (#: kendo.toString(start, "hh:mm tt") # - #: kendo.toString(end, "hh:mm tt") #)
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#scheduler").kendoScheduler({
+            date: new Date("@ViewBag.Date"),
+            timezone: "America/Lima",
+            startTime: new Date("@ViewBag.TimeStar"),
+            mobile: true,
+            selectable: true,
+            eventTemplate: $("#event-template").html(),
+            editable: {
+                resize: false,
+                move: false,
+                //confirmation: false,
+                confirmation: "Are you sure you want to delete this event ?"
+            },
+            messages: {
+                recurrenceMessages: {
+                    editRecurring: "Do you want to edit the whole series ?",
+                    deleteRecurring: "Are you sure you want to delete this series of event ?",
+                }
+            },
+            views: [
+                {
+                    type: "day",
+                    editable: {
+                        create: "@ViewBag.acceso" == "1" ? true : false,
+                        update: "@ViewBag.acceso" == "1" ? true : false,
+                        destroy: "@ViewBag.acceso" == "1" ? true : false,
+                        //destroy: true,
+                    },
+                    allDayEventTemplate: $("#event-tpt-Allday").html(),
+                },
+                {
+                    type: "workWeek",
+                    selected: true,
+                    editable: {
+                        create: "@ViewBag.acceso" == "1" ? true : false,
+                        update: "@ViewBag.acceso" == "1" ? true : false,
+                        destroy: "@ViewBag.acceso" == "1" ? true : false,
+                    }
+                },
+                {
+                    type: "week",
+                    editable: {
+                        create: "@ViewBag.acceso" == "1" ? true : false,
+                        update: "@ViewBag.acceso" == "1" ? true : false,
+                        destroy: "@ViewBag.acceso" == "1" ? true : false,
+                    }
+                },
+                {
+                    type: "month",
+                    editable: {
+                        create: "@ViewBag.acceso" == "1" ? true : false,
+                        update: "@ViewBag.acceso" == "1" ? true : false,
+                        destroy: "@ViewBag.acceso" == "1" ? true : false,
+                    }
+                },
+                {
+                    type: "agenda",
+                    editable: {
+                        create: "@ViewBag.acceso" == "1" ? true : false,
+                        update: "@ViewBag.acceso" == "1" ? true : false,
+                        destroy: "@ViewBag.acceso" == "1" ? true : false,
+                    }
+                },
+            ],
+            dataSource: {
+                batch: true,
+                transport: {
+                    read: {
+                        url: "/ResponsibleChartScheduled/ListByID_PERS_ENTI?id1=@ViewBag.ID_PERS_ENTI&id2=@ViewBag.ID_AREA_SALE",
+                        type: "GET",
+                        dataType: "json"
+                    }
+                },
+                serverFiltering: true
+            },
+            resources: [
+                {
+                    field: "roomId",
+                    dataColorField: "key",
+                    dataSource: [
+                      { text: "Eventos del Area", value: 1, key: "#dc7324" },
+                      { text: "Eventos del Personal", value: 2, key: "#7ea700" }
+                    ]
+                }
+            ],
+            add: function (e) {
+                e.preventDefault();
+                try {
+                    var b = e.event.isRecurring();
+                    if (b) {
+                        DisplayEvent(e, "edit", "ES"); // ECO: Edit current ocurrence
+                    }
+                } catch (error) {
+                    DisplayEvent(e, "add", "");
+                }
+            },
+            edit: function (e) {
+                e.preventDefault();
+                if (e.event.isRecurring()) {
+                    DisplayEvent(e, "edit", "ES"); // ES: Edit the series
+                }
+                else {
+                    DisplayEvent(e, "edit", "NR"); // NR: no recurring
+                }
+            },
+            remove: function (e) {
+                e.preventDefault();
+                if (e.event.isRecurring()) {
+                    DisplayEvent(e, "delete", "DS"); // ES: Edit the series
+                }
+                else {
+                    DisplayEvent(e, "delete", "NR"); // NR: no recurring
+                }
+            }
+        });
+
+        $("#scheduler").kendoTooltip({
+            filter: ".k-event",
+            width: 450,
+            showOn: "click",
+            content: kendo.template($('#template').html()),
+            autoHide: false,
+        });
+    });
+
+    function DisplayEvent(e, acc, proc) {
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").data("kendoComboBox");
+        var iddel = ID_PERS_ENTI.value();
+
+        if ("@ViewBag.acceso" == "1") {
+            var idper = escape(String($("@ViewBag.ID_PERS_ENTI")));
+            var start = escape(String(e.event.start));
+            var end = escape(String(e.event.end));
+
+            $("#divContent").empty();
+
+            if (acc == "add") {
+                $("#divContent").load('/Scheduler/viewCreateEvent?_=' + Math.random() + '&acc=new&start=' + start + '&end=' + end + '&idper=@ViewBag.ID_PERS_ENTI');
+            }
+            else if (acc == "edit") {
+                var title = escape(String(e.event.title));
+                var desc = escape(String(e.event.description));
+                var id = escape(String(e.event.id));
+                $("#divContent").load('/Scheduler/viewCreateEvent?_=' + Math.random() + '&acc=edit&id=' + id + '&start=' + start + '&end=' + end +
+                    '&title=' + title + "&desc=" + desc + "&proc=" + proc + "&idper=" + idper);
+            }
+            else {
+                var id = escape(String(e.event.id));
+                $.ajax({
+                    url: "/ResponsibleChartScheduled/AccDelete/" + id,
+                    data: "_var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        $("#divContent").empty();
+                        $("#divContent").load("/Sales/viewChartScheduled?var=" + Math.random(), function () {
+                            //var ID_PERS_ENTI = $("#ID_PERS_ENTI").data("kendoComboBox");
+                            //ID_PERS_ENTI.value(iddel);
+                        });
+                    },
+                    error: function (dato) {
+                        alert("ERROR");
+                    }
+                });
+            }
+        }
+    }
+</script>

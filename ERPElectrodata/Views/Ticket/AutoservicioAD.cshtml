@@ -1,0 +1,224 @@
+﻿@{
+//Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="app-page-title">
+    <div class="row">
+        <div class="col-md-8 mt-2">
+            <div class="page-title-wrapper">
+                <div class="page-title-heading">
+                    <div class="page-title-icon">
+                        <i class="fa fa-file icon-gradient bg-sunny-morning"> </i>
+                    </div>
+                    <div>
+                        Reporte de códigos generados
+                        <div class="page-title-subheading">
+                            Autoservicio Active Directory
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card-shadow-primary mb-0 widget-chart widget-chart2 text-left card">
+                <div class="widget-chat-wrapper-outer">
+                    <div class="widget-chart-content">
+                        <h6 class="widget-subheading">Reseteo</h6>
+                        <div class="widget-chart-flex">
+                            <div class="widget-numbers mb-0 w-100">
+                                <div class="widget-chart-flex">
+                                    <div class="fsize-3" style="color:darkblue" id="divReset">
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card-shadow-primary mb-0 widget-chart widget-chart2 text-left card">
+                <div class="widget-chat-wrapper-outer">
+                    <div class="widget-chart-content">
+                        <h6 class="widget-subheading">Desbloqueo</h6>
+                        <div class="widget-chart-flex">
+                            <div class="widget-numbers mb-0 w-100">
+                                <div class="widget-chart-flex">
+                                    <div class="fsize-3" style="color:darkblue" id="divDesbl">
+
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+    <div class="main-card mb-3 card">
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label id="" for="" class="">Desde </label>
+                        <input id="dtFechaInicio" name="dtFechaInicio" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label id="" for="" class="">Hasta </label>
+                        <input id="dtFechaFin" name="dtFechaFin" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label id="" for="" class="">&nbsp; </label>
+                        <button type="button" id="btnBuscar" class="mb-2 mr-2 btn-pill btn btn-primary btn-block" onclick="ListarAutoservicio();"><span>Buscar</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+    <div class="main-card mb-3 card">
+        <div class="card-body">
+            <table id="tbAutoservicio" class="table table-bordered table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Tipo de Solicitud</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Celular</th>
+                        <th>Código SMS</th>
+                        <th>Estado</th>
+                        <th>Vigencia</th>
+                        <th>Fecha Solicitada</th>
+                        <th>Ticket Generado</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr>
+                        <th>Tipo de Solicitud</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Celular</th>
+                        <th>Código SMS</th>
+                        <th>Estado</th>
+                        <th>Vigencia</th>
+                        <th>Fecha Solicitada</th>
+                        <th>Ticket Generado</th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        var today = new Date();
+        //var newDate = addMins(new Date(), 1);
+        $("#dtFechaInicio").kendoDatePicker({ value: today , format: "dd/MM/yyyy" }).data("kendoDatePicker");
+        $("#dtFechaFin").kendoDatePicker({ value: today,format: "dd/MM/yyyy" }).data("kendoDatePicker");
+        ListarAutoservicio();
+    });
+    function ListarAutoservicio() {
+        debugger
+        if ($("#dtFechaInicio").val() == "" || $("#dtFechaFin").val() == "") {
+            toastr.warning("Seleccione un rango de fechas.");
+        } else {
+            $('#tbAutoservicio').dataTable().fnDestroy();
+            $('#tbAutoservicio').DataTable({
+                //"order": [[4, "asc"]],
+                responsive: true,
+                dom: 'Bfrtip',
+                ajax: "/Ticket/ListarAutoservicioAD?fI=" + $("#dtFechaInicio").val() + "&fF=" + $("#dtFechaFin").val(),
+                columns: [
+                    { data: "TipoSolicitud" },
+                    { data: "UsuarioSolicita" },
+                    { data: "Nombre" },
+
+                    { data: "Celular" },
+                    { data: "Codigo" },
+                    { data: "Estado" },
+                    {
+                        data: null,
+                        render: function (data, type, row) {
+                            return '<div style="width:100%">' +
+                                '<label/>' + data.InicioVigencia + ' - ' + data.FinVigencia + '</label></div>';
+                        }
+                    },
+                    { data: "FechaSolicita" },
+                    { data: "TicketGenerado" }
+                ],
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export',
+                        buttons: [
+                            'excel',
+                            'csv',
+                            'pdf'
+                        ]
+                    }
+                ]
+            });
+            ConteoAutoservicio();
+        }
+    }
+
+    function ConteoAutoservicio() {
+        $.ajax({
+            url: '/Ticket/ConteoAutoservicioAD/',
+            data: {
+                fI: $("#dtFechaInicio").val(),
+                fF: $("#dtFechaFin").val(),
+                tipo: "Desbloqueo"
+            },
+            type: 'GET',
+            dataType: 'text',
+            success: function (data) {
+                $("#divDesbl").empty();
+                $("#divDesbl").append(data);
+            },
+            error: function (data) {
+            },
+        });
+        $.ajax({
+            url: '/Ticket/ConteoAutoservicioAD/',
+            data: {
+                fI: $("#dtFechaInicio").val(),
+                fF: $("#dtFechaFin").val(),
+                tipo: "Reseteo"
+            },
+            type: 'GET',
+            dataType: 'text',
+            success: function (data) {
+                $("#divReset").empty();
+                $("#divReset").append(data);
+            },
+            error: function (data) {
+            },
+        });
+    }
+</script>

@@ -1,0 +1,159 @@
+﻿@{
+    Layout = null;
+}
+
+<style>
+    .wizard_horizontal ul.wizard_steps li a:before {
+        width: 100%;
+    }
+</style>
+<div class="container-fluid">
+
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="form-group row">
+
+        <div style="float:left;padding-top:1.5%">
+            Periodo: <input id="IdPeriodo" style="font-size:12px;" class="dropdownKendo" />
+        </div>
+
+    </div>
+    <div class="x_panel">
+        <div class="x_title">
+
+            <div style="float:left;width:75%;padding-left:20%">
+
+            </div>
+            <div class="divSpace3"></div>
+            <br />
+            <div style="float:right;padding-top:1.5%" hidden>
+                Evaluar: @Html.Editor("IdEvaluado")
+            </div>
+
+        </div>
+
+        <div class="x_content">
+            <!-- Smart Wizard -->
+            <div id="wizard" class="form_wizard wizard_horizontal">
+                <ul class="wizard_steps">
+                    <li>
+                        <a href="#step-1">
+                            <span class="step_no"><i class="glyphicon glyphicon-user"></i></span>
+                            <span class="step_descr" title="SGD - Objetivos">
+                                1. Objetivos<br />
+                                <small> </small>
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#step-2">
+                            <span class="step_no"><i class="glyphicon glyphicon-list"></i></span>
+                            <span class="step_descr" title="SGD - Competencias">
+                                2. Principios<br />
+                                <small> </small>
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#step-3">
+                            <span class="step_no"><i class="glyphicon glyphicon-file"></i></span>
+                            <span class="step_descr" title="SGD - Plan de Mejora">
+                                3. Feedback<br />
+                                <small> </small>
+                            </span>
+                        </a>
+                    </li>
+
+                </ul>
+                <div id="step-1">
+                    <div class="form-horizontal form-label-left">
+                        <div class="divSpace2"></div>
+                        <div id="divEvObjetivos" style="width:100%;">
+                            <div id="divObjetivos"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="step-2">
+                    <div class="form-horizontal form-label-left">
+                        <div class="divSpace2"></div>
+                        <div id="divEvaCompetencias" style="width:100%;">
+                            <div id="divCompetencias"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="step-3">
+                    <div class="form-horizontal form-label-left">
+                        <div class="divSpace2"></div>
+                        <div id="divEvaPlanMejora" style="width:100%;">
+                            <div id="divPlanMejora"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+
+
+<script>
+    $(document).ready(function () {
+        
+        $("#IdPeriodo").kendoDropDownList({
+            dataTextField: "Periodo",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/ListaPeriodosAsignados?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                var comboBox = $("#IdPeriodo").data("kendoDropDownList");
+                comboBox.select(0);
+                comboBox.trigger("change");
+            },
+            change: function (e) {
+                var comboBox = $("#IdPeriodo").data("kendoDropDownList");
+                var selectedValue = comboBox.value();
+
+                $('.buttonFinish').hide();
+
+                $("#divObjetivos").empty();
+                $("#divObjetivos").load("/EvaluacionPersonal/EvaluacionObjetivos/" + selectedValue + "?var=" + Math.random());
+
+                $("#divCompetencias").empty();
+                $("#divCompetencias").load("/EvaluacionPersonal/EvaluacionCompetencias/?var=" + Math.random());
+
+                $("#divPlanMejora").empty();
+                $("#divPlanMejora").load("/EvaluacionPersonal/EvaluacionFeedBack/" + selectedValue + "?var=" + Math.random());
+
+                $('#wizard').smartWizard();
+                $('.buttonNext').addClass('btn btn-success');
+                $('.buttonPrevious').addClass('btn btn-success');
+            }
+        });
+
+       
+
+
+        $('#wizard').smartWizard();
+        $('.buttonNext').addClass('btn btn-success');
+        $('.buttonPrevious').addClass('btn btn-success');
+        
+
+    });
+
+</script>
+

@@ -1,0 +1,51 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<div id="treeviewAchi" style="padding: 3px 0 0 7px;height:170px;"></div>
+
+@* TreeView Achievements *@
+
+<script id="treeviewAchi-template" type="text/kendo-ui-template">
+    # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 24) { #
+        <a href="#: item.NAM_FILE #" title="Descripcion #: item.Descripcion #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+    # }   else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+    # } #
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        homogeneousAchi = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE"
+                }
+            }
+        });
+
+        $("#treeviewAchi").kendoTreeView({
+            template: kendo.template($("#treeviewAchi-template").html()),
+            dataSource: homogeneousAchi,
+            dataTextField: "NAME_PARA"
+        });
+
+    });
+</script>

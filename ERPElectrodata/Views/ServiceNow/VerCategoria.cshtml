@@ -1,0 +1,120 @@
+﻿@{
+    ViewBag.Title = "VerCategoria";
+    Layout = null;
+}
+<style>
+    .titulo {
+        height: 45px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
+<div class="card-header d-flex">
+    <div>
+        Categorias
+    </div>
+    <div style="flex-grow:1" class="justify-content-end d-flex">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#miModal" onclick="agregarFilaCategoria()">Nuevo</button>
+    </div>
+</div>
+<div class="card-body">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card card">
+                <div class="card-body">
+                    <table id="tbCategoria" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Categoria</th>
+                                <th>Supervision estimado</th>
+                                <th>Supervision real</th>
+                                <th>Infraestructura estimado</th>
+                                <th>Infraestructura real</th>
+                                <th>HelpDesk estimado</th>
+                                <th>HelpDesk real</th>
+                                <th>Soporte Usuario estimado</th>
+                                <th>Soporte Usuario real</th>
+                                <th>Arquitectura estimado</th>
+                                <th>Arquitectura real</th>
+                                <th>ServicioDBA estimado</th>
+                                <th>ServicioDBA real</th>
+                                <th>Total de Horas estimado</th>
+                                <th>Total de Horas real</th>
+                                <th>Tipo de Atención</th>
+                                <th>Fecha creación</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const table = $("#tbCategoria").DataTable({
+            scrollX: true,
+            ajax: "/ServiceNow/ObtenerListaCategorias",
+            columns: [
+                { data: "id_Categoria" },
+                { data: "Categoria1" },
+                { data: "Supervision_estimado" },
+                { data: "Supervision_real" },
+                { data: "Infraestructura_estimado" },
+                { data: "Infraestructura_real" },
+                { data: "HelpDesk_estimado" },
+                { data: "HelpDesk_real" },
+                { data: "SoporteUser_estimado" },
+                { data: "SoporteUser_real" },
+                { data: "Arquitectura_estimado" },
+                { data: "Arquitectura_real" },
+                { data: "ServicioDBA_estimado" },
+                { data: "ServicioDBA_real" },
+                { data: "TotalHoras_estimado" },
+                { data: "TotalHoras_real" },
+                { data: "TipoAtencion1"},
+                {
+                    data: "created_at",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                {
+                    data: "id_Categoria",
+                    render: function (data, type, row) {
+                        return '<button class="btn btn-primary" data-toggle="modal" data-target="#miModal" onclick="editarFilaCategoria(' + data + ')">Editar</button>';
+                    }
+                },
+            ]
+        })
+    })
+    function editarFilaCategoria(id) {
+        $("#lblTitulo").text("Editar Categoria");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-xl");
+        $(".modal-dialog").addClass("modal-xl");
+        $('#modal-content').load("/ServiceNow/EditarCategoria/" + id);
+    }
+    function agregarFilaCategoria() {
+        $("#lblTitulo").text("Agregar Categoria");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-xl");
+        $(".modal-dialog").addClass("modal-xl");
+        $('#modal-content').load("/ServiceNow/AgregarCategoria/");
+    }
+</script>

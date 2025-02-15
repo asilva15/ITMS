@@ -1,0 +1,129 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="mb-2 card">
+    <div class="card-header-tab card-header">Nuevo Comentario</div>
+    <div class="card-body">
+        <div class="form-group row">
+            <div class="col-md-12">
+                @Html.TextArea("txtComentario", new { style = "width: 100%", rows = "2", @class = "form-control" })
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-8">
+            </div>
+            <div class="col-md-4">
+                <button id="btnGuardarCmt" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-2 card">
+    <div class="card-header-tab card-header">Comentarios</div>
+    <div class="card-body">
+        <div id="SinComent" style="text-align:center;">Sin Comentarios</div>
+        <div id="divComentarios"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        CargarBloc();
+
+        $("#txtComentario").kendoEditor({
+            encoded: false
+        });
+
+        function CargarBloc() {
+            $("#SinComent").hide();
+
+            $.ajax({
+                url: "/Asset/CargarBlocNotas/@ViewBag.ID_ASSE",
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    $("#divComentarios").empty();
+                    var comentarios = "";
+
+                    $.each(data['Data'], function (index) {
+
+                        comentarios = comentarios +
+                            '<div class="chat-wrapper">' +
+                                '<div class="chat-box-wrapper" >' +
+                                    '<div>' +
+                                        '<div class="avatar-icon-wrapper mr-1">' +
+                                            '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                                '<img src="/Content/Fotos/' + (data['Data'][index]['Foto']) + '" />' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div style="width: 100%;">' +
+                                        '<div class="chat-box" style="font-size:12.5px">' +
+                                            '<div class="form">' +
+                                                (data['Data'][index]['Comentario']) +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<small class="opacity-7">' +
+                                            (data['Data'][index]['CreadoPor']) +
+                                            ' <i class="fa fa-calendar-alt mr-1"></i>' +
+                                            (data['Data'][index]['FechaCreacion']) +
+                                        '</small>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+
+                    });
+                    $("#divComentarios").append(comentarios);
+
+                    if (data['Data'].length == 0) {
+                        $("#SinComent").show();
+                    }
+                },
+                error: function (source) {
+                    toastr.error("Error Carga", "Mensaje");
+                }
+            });
+        }
+
+        $('#btnGuardarCmt').click(function(){
+            var comt = $("#txtComentario").data("kendoEditor");
+
+            if (comt.value().replace(/<p>|<\/p>|&nbsp;/g, '').trim() == ""){
+                toastr.warning("Ingrese un comentario.","Mensaje");
+            }
+            else {
+                $('#btnGuardarCmt').prop('disabled', true);
+
+                $.ajax({
+                    url: "/Asset/GuardarBlocNotas/",
+                    data: {
+                        idAsse: "@ViewBag.ID_ASSE",
+                        idClieAsse: "@ViewBag.ID_CLIE_ASSE",
+                        txt: comt.value()
+                    },
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == "Ok") {
+                            toastr.success("Se guardó el comentario", "Información Guardada");
+                            $('#btnGuardarCmt').prop('disabled', false);
+                            comt.value("");
+                            CargarBloc();
+                        }
+                        else {
+                            toastr.error('No se pudo guardar el comentario', "Mensaje");
+                        }
+
+                    }
+                });
+            }
+        })
+    });
+</script>

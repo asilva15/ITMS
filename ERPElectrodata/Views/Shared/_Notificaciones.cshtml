@@ -1,0 +1,140 @@
+﻿<style>
+    .etiquetaUL {
+        overflow:hidden;
+        list-style:none;
+        border-bottom:1px solid rgba(209,219,189, .6);
+        margin:0;
+        padding:0;
+    }
+        .lista {
+            width:100%; /*114%;*/
+            float:right;
+            /*display:block;*/
+            padding:0;
+            margin:0;
+
+        }
+            .etiquetaA {
+                padding:4px;
+                display:block;
+                text-decoration:none;
+                color:#818775;
+            }
+
+                .etiquetaA:hover {
+                    background:#D1D0CA;
+                    color:#3c8dbc;
+                }
+    #verTodos {
+       display:block;
+       text-decoration:none;
+       color:#818775;
+       text-align:center;
+       padding-top:5px;
+    }
+    #verTodos:hover {
+        background:#D1D0CA;
+        color:#3c8dbc;
+    }
+</style>
+
+<div style="width:100%;overflow-y: scroll;height: 275px;" id="cuadroNotificaciones" >
+    <!-- NOTIFICACIONES -->
+</div>
+<a id="verTodos" onclick="VerNotificaciones();">Ver todos</a>
+
+
+<script>
+    $(document).ready(function () {
+        ObtenerNotificaciones();
+    });
+    function ObtenerNotificaciones() {
+        $.ajax({
+            url: "/ChangeRequest/ObtenerNotificaciones/",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                $("#cuadroNotificaciones").empty();
+                $.each(source['Data'], function (index, value) {
+                    var imagen = "";
+                    if (((source['Data'][index]['IdTipo']) == 1 && (source['Data'][index]['IdTipoMensaje']) == 2)) {
+                        imagen =
+                            '<a class="etiquetaA" style="text-decoration:none;" onclick="IrResumenCambio(' + (source['Data'][index]['IdChangeRequest']) + ',0);">' +
+                            '<i class="glyphicon glyphicon-ok" style="color:#5DCB4E;font-size:15px;"></i>';
+                    } else
+                        if ((source['Data'][index]['IdTipo']) == 2 && (source['Data'][index]['IdTipoMensaje']) == 1) {
+                            imagen =
+                            '<a class="etiquetaA" style="text-decoration:none;" onclick="IrResumenCambio(' + (source['Data'][index]['IdChangeRequest']) + ',1);">' +
+                            '<i class="glyphicon glyphicon-ok" style="color:#5DCB4E;font-size:15px;"></i>';
+                        }else
+                        if (((source['Data'][index]['IdTipo']) == 1 && (source['Data'][index]['IdTipoMensaje']) == 8)) {
+                            imagen =
+                               '<a class="etiquetaA" style="text-decoration:none;" onclick="IrResumenCambio(' + (source['Data'][index]['IdChangeRequest']) + ',1);">' +
+                                '<i class="glyphicon glyphicon-warning-sign" style="color:#FF9800;font-size:15px;"></i>';
+                        } else
+                            if (((source['Data'][index]['IdTipo']) == 2 && (source['Data'][index]['IdTipoMensaje']) == 2) || (source['Data'][index]['IdTipoMensaje']) == 0) {
+                                imagen =
+                                    '<a class="etiquetaA" style="text-decoration:none;" onclick="validarActividades(' + (source['Data'][index]['IdChangeRequest']) + ',1)">' +
+                                    '<i class="glyphicon glyphicon-warning-sign" style="color:#FF9800;font-size:15px;"></i>';
+                            } else
+                            if(((source['Data'][index]['IdTipo']) == 1 && (source['Data'][index]['IdTipoMensaje']) == 3)) {
+                                imagen = 
+                                    '<a class="etiquetaA" style="text-decoration:none;" onclick="IrResumenCambio(' + (source['Data'][index]['IdChangeRequest']) + ',0);">' +
+                                    '<i class="glyphicon glyphicon-remove" style="color:#E53D47;font-size:15px;"></i>';
+                            }
+                    $("#cuadroNotificaciones").append(
+                        '<ul class="etiquetaUL">' + 
+                            '<li class="lista" style="width:100%;">' +
+                                    imagen +
+                                        '&nbsp;&nbsp;' + (source['Data'][index]['Notificacion']) +
+                                '</a>' +
+                            '</li>' +
+                        '</ul>'
+                    );
+                });
+            },
+            error: function (source) {
+                alert("Error Carga Json Asignación de Activos");
+            }
+        });
+    }
+
+    function validarActividades(id) {
+        $("#ModalValidarActividad").modal("show");
+        $("#divValidarActividad").empty();
+        $("#divValidarActividad").load("/ChangeRequest/EditarActividades?id=" + id);
+    }
+
+    function IrResumenCambio(id, activo) {
+        location = "http://" + location.host + "/ChangeRequest/ResumenGestionCambio/" + id;
+        $("#divNotificaciones").removeClass("notificacion");
+        $("#divNotificaciones").removeClass("animOne");
+        index2 = 0;
+        if (activo == 0) {
+            $.ajax({
+                url: "/ChangeRequest/ActualizarVistaNotificaciones?Id=" + id,
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        CantidadNotificaciones();
+                        ObtenerNotificaciones();
+                    }
+
+                },
+                error: function (source) {
+
+                }
+            });
+        }
+    }
+
+    function VerNotificaciones() {
+        location = "http://" + location.host + "/Notificaciones/";
+        $("#divNotificaciones").removeClass("notificacion");
+        $("#divNotificaciones").removeClass("animOne");
+        index2 = 0;
+    }
+</script>

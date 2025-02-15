@@ -1,0 +1,832 @@
+﻿@{
+//Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div style="width: 100%;font-size:0.9em" id="divContent">
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="font-icon-wrapper font-icon-lg">
+                    <i class="fa fa-cogs icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <div class="titleModule"><b>CAMBIOS</b></div>
+                    <div class="page-title-subheading">
+                        Lista de Aprobaciones.
+                    </div>
+                </div>
+                <div class="derecha">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @* -----------------------------------FILTROS------------------------------ *@
+    <div id="filtros" class="row">
+        <div class="col-md-2">
+            Clasificación del Cambio<br />
+            <select id="idChangeType" name="idChangeType" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+        </div>
+        <div class="col-md-2">
+            Tipo de Cambio<br />
+            <select id="idTipoCambio" name="idTipoCambio" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+        </div>
+        <div class="col-md-2">
+            Solicitante<br />
+            <select id="idRequested" name="idRequested" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+        </div>
+
+        <div class="col-md-2">
+            Estado<br />
+            <select id="idApproved" name="idApproved" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+        </div>
+        @if (@ViewBag.IdCuenta == 60 || @ViewBag.IdCuenta == 56)
+        {<div class="col-md-2">
+                Código<br />
+                <input id="keyword" name="keyword" class="form-control" placeholder="Código" />
+            </div>}
+        else
+        {
+            <div class="col-md-2">
+                Palabra Clave<br />
+                <input id="keyword" name="keyword" class="form-control" placeholder="Descripción..." />
+            </div>
+        }
+
+        <div class="col-md-2">
+            <br />
+            <button class="btn btn-primary btn-block" onclick="CargarGrilla(this)"><i class="fa fa-search"></i> Buscar</button>
+        </div>
+    </div>
+    @* ------------------------------------------------------------------------------------- *@
+
+    <div id="divPrincipal">
+        <div style="width:100%; display:inline-block;">
+            <div style="float:right; width:15%; text-align:right; margin-right:5px; display:none;" id="divButtons">
+                <button id="btnApprovals" class="k-button">@ResourceLanguaje.Resource.Approvals</button>
+            </div>
+        </div>
+
+        @*Grilla*@
+        <div style="width: 100%; height:100%;" id="divBandeja">
+            <div id="gridRequest" class="contentView"></div>
+            <div id="pagerRequest" class="contentViewPager"></div>
+        </div>
+
+    </div>
+</div>
+<script type="text/x-kendo-tmpl" id="template">
+
+
+   @if(@ViewBag.IdCuenta == 60) {
+         <a href="\\ChangeRequest/ResumenGestionCambioBNV/${idChangeRequest}" id="id${idChangeRequest}" target="_blank" class="text-decoration-none" style="width:100%">
+        <div class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-12">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-md-1">
+                            <div style="width:90%; margin:0 auto; height:100%;">
+                                <div style="width: 50px; color: black; font-size: 2.2em;text-align: center;">
+                                    ${idChangeRequest}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <div style="width:90%; margin:0 auto; height:100%;">
+                                <div style="width: 50px; color: white; font-size: 2.2em;text-align: center; background-color: ${colorApproved}">
+                                    ${LetraApproved}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="text-align: left;">
+                            <div style="width:100%; height:100%; ">
+                                <div style="width:100%; font-size: 11px; " id="idType${idChangeRequest}">Cambio: ${ChangeType}</div>
+                                <div style="width: 100%; font-size: 12px; " id="idStat${idChangeRequest}">Estado: ${TypeApproved}</div>
+                                <div style="width: 100%; font-size: 12px; " id="Avance${idChangeRequest}">Avance: ${porcentajeAvance} %</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="text-align: left;">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idUR${idChangeRequest}">${User}</div>
+                                <div style="width: 100%; font-size: .85em; ">Solicitante</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div style="width: 95%; text-align: justify;">
+                                <div style="width: 100%; font-size: 0.85em;" id="idJusti${idChangeRequest}">${detailChange}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="text-align: left;">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idMY${idChangeRequest}">${MONTH_YEAR}</div>
+                                <div style="width: 100%; font-size: .85em;text-transform: capitalize; ">${DAY_NAME}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="text-align: left; ">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idAmount${idChangeRequest}">Prioridad</div>
+                                <div style="width: 100%; font-size: .85em; text-transform: capitalize;">${priority}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1" style="text-align:center">
+                    @*SwApproval =Tipo Usuario { true: Admin,Jefes y SIG, false: Usuarios}*@
+                    @*idApproved = Estado de la Solicitud {1:Nuevo, 2: Aprobado, 3:Rechazado, 4: Pendiente, 5:Ejecutado, 6:No ejecutado}*@
+                    @*activeJustified =Agregar Resumen del cambio { true: Cargado por el usuario, false :pendiente de carga, no podra validar ejecucion del plan sino carga documento }*@
+                    @* Aprobacion de Solicitud  *@
+
+
+                </div>
+            </div>
+        </div>
+    </a>
+    }
+   else if(@ViewBag.IdCuenta == 56) {
+         <a href="\\ChangeRequest/ResumenGestionCambioMinsur/${idChangeRequest}" id="id${idChangeRequest}" target="_blank" class="text-decoration-none" style="width:100%">
+        <div class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-11">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-md-1">
+                            <div style="width:90%; margin:0 auto; height:100%;">
+                                <div style="width: 50px; color: black; font-size: 2.2em;text-align: center;">
+                                    ${idChangeRequest}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <div style="width:90%; margin:0 auto; height:100%;">
+                                <div style="width: 50px; color: white; font-size: 2.2em;text-align: center; background-color: ${colorApproved}">
+                                    ${LetraApproved}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="text-align: left;">
+                            <div style="width:100%; height:100%; ">
+                                <div style="width:100%; font-size: 11px; " id="idType${idChangeRequest}">Cambio: ${ChangeType}</div>
+                                <div style="width: 100%; font-size: 12px; " id="idStat${idChangeRequest}">Estado: ${TypeApproved}</div>
+                                <div style="width: 100%; font-size: 12px; " id="Avance${idChangeRequest}">Avance: ${porcentajeAvance} %</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="text-align: left;">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idUR${idChangeRequest}">${User}</div>
+                                <div style="width: 100%; font-size: .85em; ">Solicitante</div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div style="width: 95%; text-align: justify;">
+                                <div style="width: 100%; font-size: 0.85em;" id="idJusti${idChangeRequest}">${detailChange}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="text-align: left;">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idMY${idChangeRequest}">${MONTH_YEAR}</div>
+                                <div style="width: 100%; font-size: .85em;text-transform: capitalize; ">${DAY_NAME}</div>
+                            </div>
+                        </div>
+                       <div class="col-md-1" style="text-align: left; ">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idAmount${idChangeRequest}">Prioridad</div>
+                                <div style="width: 100%; font-size: .85em; text-transform: capitalize;">${priority}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1" style="text-align:center">
+                     @*SwApproval =Tipo Usuario { true: Admin,Jefes y SIG, false: Usuarios}*@
+                    @*idApproved = Estado de la Solicitud {1:Nuevo, 2: Aprobado, 3:Rechazado, 4: Pendiente, 5:Ejecutado, 6:No ejecutado}*@
+                    @*activeJustified =Agregar Resumen del cambio { true: Cargado por el usuario, false :pendiente de carga, no podra validar ejecucion del plan sino carga documento }*@
+                    @* Aprobacion de Solicitud  *@
+                    # if( idApproved==0) { #
+                    <div id="btnValidarActividad${idChangeRequest}" class="btn-hover-shine btn btn-light btn-md btn-pill" style="font-size:14px" title="Validar Actividades" onclick="ValidarActividades(${idChangeRequest}); return false;">
+                        <i class="fa fa-exclamation-triangle"></i>
+                    </div>
+                    @* Validar Ejecución del plan de Solicitud de Cambio *@
+                    #} else if(approved==idSession && idApproved==8 ) { #
+                    <div class="media align-items-center">
+                        <div role="group" class="mb-3 btn-group-lg btn-group">
+                            <div id="BtnAprobar${idChangeRequest}" class="btn-hover-shine btn btn-light btn-sm btn-pill pl-3" style="font-size:14px" title="Aprobar" onclick="ApprovedRequest(${idchangeApproved}); return false;"><i class="fa fa-check"></i></div>
+                            <div id="BtnRechazar${idChangeRequest}" class="btn-hover-shine btn btn-light btn-sm btn-pill pr-3" style="font-size:14px" title="Rechazar" onclick="RejectRequest(${idchangeApproved}); return false;"><i class="fas fa-trash" aria-hidden="true"></i></div>
+                        </div>
+                    </div>
+                    #} else if(idApproved==3) { #
+
+                    @*  Solicitud Finalizada *@
+                    # } else {#
+                    # } #
+
+                </div>
+            </div>
+        </div>
+    </a>
+    }
+     else
+            {
+         <a href="\\ChangeRequest/ResumenGestionCambio/${idChangeRequest}" id="id${idChangeRequest}" target="_blank" class="text-decoration-none" style="width:100%">
+        <div class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-11">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-md-1">
+                            <div style="width:90%; margin:0 auto; height:100%;">
+                                <div style="width: 50px; color: white; font-size: 2.2em;text-align: center; background-color: ${colorApproved}">
+                                    ${LetraApproved}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="text-align: left;">
+                            <div style="width:100%; height:100%; ">
+                                <div style="width:100%; font-size: 11px; " id="idType${idChangeRequest}">Cambio: ${ChangeType}</div>
+                                <div style="width: 100%; font-size: 12px; " id="idStat${idChangeRequest}">Estado: ${TypeApproved}</div>
+                                <div style="width: 100%; font-size: 12px; " id="Avance${idChangeRequest}">Avance: ${porcentajeAvance} %</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="text-align: left;">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idUR${idChangeRequest}">${User}</div>
+                                <div style="width: 100%; font-size: .85em; ">Solicitante</div>
+                            </div>
+                        </div>
+                        <div class="col-md-2" style="text-align: left;">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idUA${idChangeRequest}">${Jefe}</div>
+                                <div style="width: 100%; font-size: .85em;">Aprueba</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div style="width: 95%; text-align: justify;">
+                                <div style="width: 100%; font-size: 0.85em;" id="idJusti${idChangeRequest}">${detailChange}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="text-align: left;">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idMY${idChangeRequest}">${MONTH_YEAR}</div>
+                                <div style="width: 100%; font-size: .85em;text-transform: capitalize; ">${DAY_NAME}</div>
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="text-align: left; ">
+                            <div style="width:100%; height:100%;">
+                                <div style="width:100%; font-size: 1em; text-transform:capitalize;" id="idAmount${idChangeRequest}">Prioridad</div>
+                                <div style="width: 100%; font-size: .85em; text-transform: capitalize;">${priority}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1" style="text-align:center">
+                    @*SwApproval =Tipo Usuario { true: Admin,Jefes y SIG, false: Usuarios}*@
+                    @*idApproved = Estado de la Solicitud {1:Nuevo, 2: Aprobado, 3:Rechazado, 4: Pendiente, 5:Ejecutado, 6:No ejecutado}*@
+                    @*activeJustified =Agregar Resumen del cambio { true: Cargado por el usuario, false :pendiente de carga, no podra validar ejecucion del plan sino carga documento }*@
+                    @* Aprobacion de Solicitud  *@
+                    # if( idApproved==1 ||  idApproved==4 ) { #
+                    <div id="btnValidarActividad${idChangeRequest}" class="btn-hover-shine btn btn-light btn-md btn-pill" style="font-size:14px" title="Validar Actividades" onclick="ValidarActividades(${idChangeRequest}); return false;">
+                        <i class="fa fa-exclamation-triangle"></i>
+                    </div>
+                    @* Validar Ejecución del plan de Solicitud de Cambio *@
+                    #} else if(SwApproval && idApproved==8 || approved==idSession && idApproved==8 ) { #
+                    <div class="media align-items-center">
+                        <div role="group" class="mb-3 btn-group-lg btn-group">
+                            <div id="BtnAprobar${idChangeRequest}" class="btn-hover-shine btn btn-light btn-sm btn-pill pl-3" style="font-size:14px" title="Aprobar" onclick="ApprovedRequest(${idchangeApproved}); return false;"><i class="fa fa-check"></i></div>
+                            <div id="BtnRechazar${idChangeRequest}" class="btn-hover-shine btn btn-light btn-sm btn-pill pr-3" style="font-size:14px" title="Rechazar" onclick="RejectRequest(${idchangeApproved}); return false;"><i class="fas fa-trash" aria-hidden="true"></i></div>
+                        </div>
+                    </div>
+                    @*<div class="AccApproval" title="Aprobar" onclick="ApprovedRequest(${idchangeApproved})"></div>
+                        <div class="AccReject" title="Rechazar" onclick="RejectRequest(${idchangeApproved})"></div>*@
+                    @* Validar Ejecución del plan de Solicitud de Cambio
+                        #} else if(SwApproval && idApproved==2 || approved==idSession && idApproved==2 ) { #*@
+                    @*<div class="AccApproval" title="Ejecutado" onclick="EjecutarPlan(${idchangeApproved},5)"></div>
+                        <div class="AccReject" title="No Ejecutado" onclick="EjecutarPlan(${idchangeApproved},6)"></div>*@
+
+                    @* Actualizar Detalle de Actividades luego del Rechazo de Solicitud *@
+                    #} else if(idApproved==3) { #
+                    <div id="btnActualizarEstado${idChangeRequest}" class="btn-hover-shine btn btn-light btn-md btn-pill" title="Editar Actividades" style="font-size:14px" onclick="UpdDetailChange(${idChangeRequest}); return false;">
+                        <i class="fa fa-retweet" aria-hidden="true"></i>
+                    </div>
+                    @*  Solicitud Finalizada *@
+                    # } else {#
+                    # } #
+                </div>
+            </div>
+        </div>
+    </a>
+            }
+</script>
+<script type="text/javascript">
+    var widthMain = 0;
+    $(document).ready(function () {
+        $("#idChangeType").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Administrator/ListarPrioridadCambio/"+@ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#idChangeType").on('change', function (e) {
+            $("#idTipoCambio").empty();
+
+            var cbClasificacionCambio = $("#idChangeType").find(':selected').val();
+
+            $("#idTipoCambio").select2({
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/ChangeRequest/ListarCambioClasificacionTipo/" + cbClasificacionCambio,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+        });
+
+        if (@ViewBag.IdCuenta== 56) {
+            $("#idRequested").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioResponsable/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        }
+        else {
+            $("#idRequested").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioResponsable/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        }
+
+
+
+
+        $("#idApproved").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioEstados/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        CargarGrilla();
+        //widthMain = $("#divBandeja").width() + 5;
+        //$("#divDetails").css("left",widthMain + "px");
+    });
+
+    function prueba() {
+        alert("dfsf");
+    }
+
+    function CargarGrilla(){
+
+        $("#divBandeja").css("top","20px");
+        $("#divButtons").css("display","none");
+        $("#pagerRequest").empty();
+        $("#gridRequest").empty();
+        if ($("#gridRequest").data("kendoListView")) {
+            $("#pagerRequest").data("kendoPager").destroy();
+            $("#gridRequest").data("kendoListView").destroy();
+        }
+        //------------------------------FILTROS-----------------------------
+        var idChangeType = $("#idChangeType").val();
+        var idTipoCambio = $("#idTipoCambio").val();
+        //var idRequested = $("#idApproved").val();
+
+        var idRequested = $("#idRequested").val();
+        var idApproved= $("#idApproved").val();
+        var keyword = $("#keyword").val();
+
+        if (!idChangeType){ idChangeType=0; }
+        if (!idTipoCambio){ idTipoCambio=0; }
+        if (!idRequested){  idRequested=0;  }
+        if (!idApproved){   idApproved=0;   }
+        //------------------------------MODIFICACIÓN DE LA URL PARA LOS FILTROS-----------------------------
+        //Lista las Solicitudes de Cambio
+
+        if (@ViewBag.IdCuenta==60) {
+            var dataSource = new kendo.data.DataSource({
+
+                transport: {
+                    read: {
+
+                        url: "/ChangeRequest/ListBNV/?var" + Math.random() + "&idChangeType=" + idChangeType + "&idTipoCambio=" + idTipoCambio + "&idRequested=" + idRequested + "&idApproved=" + idApproved + "&keyword=" + keyword,
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 10,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                }
+            });
+        };
+
+        if(@ViewBag.IdCuenta== 4){
+            var dataSource = new kendo.data.DataSource({
+
+                transport: {
+                    read: {
+
+                        url: "/ChangeRequest/List/?var" + Math.random() + "&idChangeType=" + idChangeType + "&idTipoCambio=" + idTipoCambio + "&idRequested=" + idRequested + "&idApproved=" + idApproved + "&keyword=" + keyword,
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 10,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                }
+            });
+                    };
+
+          if(@ViewBag.IdCuenta== 56){
+            var dataSource = new kendo.data.DataSource({
+
+                transport: {
+                    read: {
+
+                        url: "/ChangeRequest/ListMINSUR/?var" + Math.random() + "&idChangeType=" + idChangeType + "&idTipoCambio=" + idTipoCambio + "&idRequested=" + idRequested + "&idApproved=" + idApproved + "&keyword=" + keyword,
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 10,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                }
+            });
+                    };
+        $("#pagerRequest").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [10],
+            refresh: true,
+            change: function () {
+                $("#divBandeja").css("top","20px");
+                $("#divButtons").css("display","none");
+            }
+        });
+        $("#gridRequest").kendoListView({ //Llena por primera vez la grilla
+            dataSource: dataSource,
+            template: kendo.template($("#template").html()),
+        });
+    }
+    function mouseOverBandeja(id) {
+        $("#id" + id).css("background-color", "#ffffff");
+        $("#idType" + id).css("color", "#000000");
+        $("#idStat" + id).css("color", "#000000");
+        $("#idUR" + id).css("color", "#000000");
+        $("#idUA" + id).css("color", "#000000");
+        $("#idJusti" + id).css("color", "#000000");
+        $("#idMY" + id).css("color", "#000000");
+        $("#idAmount" + id).css("color", "#000000");
+    }
+    function mouseOutBandeja(id) {
+        $("#id" + id).css("background-color", "#f5f5f5");
+        $("#idType" + id).css("color", "#808080");
+        $("#idStat" + id).css("color", "#808080");
+        $("#idUR" + id).css("color", "#808080");
+        $("#idUA" + id).css("color", "#808080");
+        $("#idJusti" + id).css("color", "#808080");
+        $("#idMY" + id).css("color", "#808080");
+        $("#idAmount" + id).css("color", "#808080");
+    }
+
+    var altMain = 0
+    var sttBtn = '';
+
+    function cargarCombo(){
+        $("#statusPlanAccion").kendoComboBox({
+            dataTextField: "detail",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                },
+                transport: {
+                    read: "/ChangeRequest/ListToPlan?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+    }
+    function EjecutarPlan(idchangeApproved, idtypeRequest){
+        $('#myModalLoading').modal('show')
+        $.ajax({
+            url: "/ChangeRequest/toPlanRequest/",
+            data: "id=" + idchangeApproved + "&statusPlanAccion=" + idtypeRequest + "&var=" + Math.random(),
+            type: "POST",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                $('#myModalLoading').modal('hide');
+                if(resp=='OK'){
+                    $('#SmallModalContent').modal('show');
+                    $("#SmallModalTitle").empty();
+                    $("#SmallModalTitle").text("Mensaje");
+                    $("#SmallModalBody").empty();
+                    if(idtypeRequest=="5"){
+                        $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Se ha Ejecutado el Plan de acción</div>");
+                    }
+                    else
+                    {
+                        $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Se ha cancelado el Plan de acción</div>");
+                    }
+                    $("#SmallModalFooter").empty();
+                    $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                      "<button id='continues' class='k-button'>Continuar</button>" +
+                                               "</div>");
+                    var undo = $("#continues")
+                    .bind("click", function () {
+                        $('#SmallModalContent').modal('hide');
+                        $('#ModalContent').modal('hide');
+                        CargarGrilla();
+                    });
+                }
+                else {
+                    $('#SmallModalContent').modal('show');
+                    $("#SmallModalTitle").empty();
+                    $("#SmallModalTitle").text("Mensaje");
+                    $("#SmallModalBody").empty();
+                    $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Error al guardar Cambios</div>");
+                    $("#SmallModalFooter").empty();
+                    $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                      "<button id='continues' class='k-button'>Continuar</button>" +
+                                               "</div>");
+                    var undo = $("#continues")
+                    .bind("click", function () {
+                        $('#SmallModalContent').modal('hide');
+                    });
+                }
+            }
+        });
+     }
+
+    function ApprovedRequest(id) {
+        swal({
+            title: 'Solicitud de Cambio',
+            text: '¿Desea Aprobar la Solicitud de Cambio?',
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            cancelButtonText: "No",
+            confirmButtonText: "Sí",
+            closeOnConfirm: false
+        }, function (dismiss) {
+            if (dismiss) {
+                swal({ title: "Procesando información, por favor espere.", text: "Gestión de Cambios", showConfirmButton: false, imageUrl: "/images/spinner.gif" })
+
+                $.ajax({
+                    url: "/ChangeRequest/Approved/" + id,
+                    data: "var=" + Math.random(),
+                    cache: false,
+                    type: "GET",
+                    dataType: "text",
+                    success: function (resp) {
+                        swal.close();
+                        if (resp == 'OK') {
+                            toastr.success("Se ha Aprobado la solicitud de cambio.", "Sistema Integrado de Gestión");
+                        }
+                        else if (resp == 'Advertencia') {
+                            toastr.warning("Sólo se puede Aprobar las Solicitudes Validadas.", "Sistema Integrado de Gestión");
+                        }
+                        else {
+                            toastr.warning("Se ha aprobado la solicitud pero hubo error al enviar correos, por favor informar al Administrador.", "Sistema Integrado de Gestión");
+                        }
+                        CargarGrilla();
+                    },
+                    error: function (source) {
+                        toastr.error("Contacte al administrador.","")
+                    }
+                });
+
+            }
+            });
+    }
+
+    function RejectRequest(id) {
+
+        swal({
+            title: 'Solicitud de Cambio',
+            text: '¿Desea Rechazar la Solicitud de Cambio?',
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            cancelButtonText: "No",
+            confirmButtonText: "Sí",
+            closeOnConfirm: false
+        }, function (dismiss) {
+            if (dismiss) {
+                swal({ title: "Procesando información, por favor espere.", text: "Gestión de Cambios", showConfirmButton: false, imageUrl: "/images/spinner.gif" })
+
+                $.ajax({
+                    url: "/ChangeRequest/RejectApproved/" + id,
+                    data: $("#FormRejectRequest").serialize() + "&var=" + Math.random(),
+                    type: "POST",
+                    success: function (resp) {
+                        swal.close();
+                        if (resp == 'OK') {
+                            toastr.success("Se ha rechazado la Solicitud de Cambio.", "Sistema Integrado de Gestión");
+                        }
+                        else if (resp == 'Advertencia') {
+                            toastr.warning("Sólo se puede Aprobar las Solicitudes Validadas.", "Sistema Integrado de Gestión");
+                        }
+                        else {
+                            toastr.warning("Se rechazo la solicitud pero hubo error al enviar correos, por favor contactar con el Administrador.",
+                                "Sistema Integrado de Gestión");
+                        }
+                        CargarGrilla();
+                    }
+                });
+            }
+        });
+    }
+
+    function ValidarActividades(id) {
+        $("#lblTitulo").text("Actividades");
+        $("#btnValidarActividad"+id).attr("data-style", "expand-right");
+        $("#btnValidarActividad" + id).attr("data-toggle", "modal");
+        $("#btnValidarActividad" + id).attr("data-target", "#miModal");
+        $(".modal-dialog").attr("style", "max-width: 980px;min-width: 100px;");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/ChangeRequest/EditarActividades?id=" + id + "&var=" + Math.random());
+    }
+
+    function UpdDetailChange(id) {
+
+        $("#lblTitulo").text("Detalle del Cambio");
+        $("#btnActualizarEstado" + id).attr("data-style", "expand-right");
+        $("#btnActualizarEstado" + id).attr("data-toggle", "modal");
+        $("#btnActualizarEstado" + id).attr("data-target", "#miModal");
+
+        $(".modal-dialog").removeAttr("style");
+        $(".modal-dialog").attr("style", "max-width: 980px;min-width: 100px;");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/ChangeRequest/viewDetailActivity?id=" + id + "&var=" + Math.random());
+
+        //$("#ModalContentAll").empty();
+
+        //$("#ModalContentAll").append('<div class="modal-body">' +
+        //    '<div id="divFormDetailChange"></div>' +
+        //    '</div>');
+
+        //$("#divFormDetailChange").load("/ChangeRequest/viewDetailActivity?id=" + id + "&var=" + Math.random());
+    }
+
+</script>
+<script type="text/javascript">
+    function uploadDoneMsn(msg, msnErr) {
+        $('#myModalLoading').modal('hide');
+        closeWinModalPopUpLoad();
+        if (msg == 'OK toPlan') {
+
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Se ha registrado el Resumen del Cambio</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                       "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+                $('#ModalContent').modal('hide');
+                $('#ModalContent').modal('hide');
+            });
+
+            $("#closebtnmodal").click(function () {
+                $('#SmallModalContent').modal('hide');
+                $('#ModalContent').modal('hide');
+            });
+            CargarGrilla();
+        }
+        else {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.InformationMissing");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + msnErr + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>Continuar</button>" +
+                                       "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+                $('#ModalContent').modal('hide');
+            });
+        }
+    }
+
+
+</script>

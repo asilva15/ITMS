@@ -1,0 +1,250 @@
+﻿@{
+    ViewBag.Title = "OrdenCompra";
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<style>
+
+    .#tbListadoOC {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    #tbListadoOC th, #tbListadoOC td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+
+    #tbListadoOC th {
+        background-color: #2c395b;
+        color: white;
+        text-align: left;
+    }
+
+    #tbListadoOC tbody tr:hover {
+        background-color: #ddd;
+    }
+
+
+    .table-wrapper {
+        max-height: 400px;
+        overflow: auto;
+    }
+</style>
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="main-card mb-4 card">
+            <div class="card-header"><span id="spanTitulo">ORDEN DE COMPRA</span> </div>
+            <div class="card-body">
+
+                <div class="row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>TIPO OC</label>
+                            <input id="TipoOC" name="Tipo" type="text" style="width:100%">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="label">Periodo Desde</label>
+                            <input id="dtFechaInicioOC" name="dtFechaInicio" class="form-control" type="text" style="width:100%">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label>Hasta</label>
+                            <input id="dtFechaFinOC" name="dtFechaFin" class="form-control" type="text" style="width:100%">
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <br />
+
+                        <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="Buscar"><i class="fa fa-search"></i> Buscar</button>
+
+                    </div>
+                </div>
+                <div class="card">
+                    <div id="buttons-container" class="mb-3"></div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="tab_1">
+                                <div class="table-wrapper">
+                                    <div class="table-responsive">
+                                        <table id="tbListadoOC" class="display" style="width:100%">
+                                            <thead style="font-size: 12px;">
+                                                <tr>
+                                                    <th>N° Doc.</th>
+                                                    <th>Cen. Benef:</th>
+                                                    <th>Fecha Doc:</th>
+                                                    <th>Nom. Ane</th>
+                                                    <th>Moneda</th>
+                                                    <th>Tot.Doc:</th>
+                                                    <th>Saldo</th>
+                                                    <th>Proveedor</th>
+                                                    <th>Solicitante</th>
+                                                    <th>Tip.Eve.</th>
+                                                    <th>Opciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody style="font-size: 12px;"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-12" id="registroInfo"></div>
+                    <br />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+   /* var dataTable;*/
+
+    $(document).ready(function () {
+
+        $("#dtFechaInicioOC").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDatePicker");
+        $("#dtFechaFinOC").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDatePicker");
+
+        $("#TipoOC").kendoComboBox({
+            dataTextField: "NAMTIPOOC",
+            dataValueField: "ID_TIPO",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                data: [
+                    { NAMTIPOOC: "OCN - Orden de Compra Nacional", ID_TIPO: "OCN" },
+                    { NAMTIPOOC: "OCS - Orden de Compra Servicio", ID_TIPO: "OCS" },
+                    { NAMTIPOOC: "OCE - Orden de Compra Exterior", ID_TIPO: "OCE" }
+                ]
+            }
+        });
+
+        $("#Buscar").click(function () {
+            var table = $('#tbListadoOC').DataTable();
+            table.clear().destroy(); // Limpiamos y destruimos la tabla antes de volver a cargar los datos
+            ListarOC();
+        });
+
+        ListarOC();
+    });
+
+    function ListarOC() {
+
+    var bOP = "@ViewBag.NumDocuSale";
+    var TipoOC = $("#TipoOC").data("kendoComboBox").value(); // Obtener el valor seleccionado correctamente
+    var fechaInicio = $("#dtFechaInicioOC").val();
+    var fechaFin = $("#dtFechaFinOC").val();
+
+    $.ajax({
+        url: '/OrderForm/ListarOC',
+        type: 'GET',
+        data: {
+            OP: bOP,
+            Tipo: TipoOC,
+            FIni: fechaInicio,
+            FFin: fechaFin
+        },
+        dataType: 'json',
+        success: function (response) {
+            if (response && response.Data) {
+                var data = response.Data;
+                var totalRegistros = data.length;
+
+                $('#registroInfo').html('<div>&nbsp&nbsp&nbspMostrando <b>' + totalRegistros + '</b> registros</div>');
+
+                var tbody = $('#tbListadoOC tbody');
+                tbody.empty();
+
+                $.each(data, function (index, item) {
+                    var fecha = new Date(parseInt(item.FECDOC.substr(6)));
+                    var dia = fecha.getDate();
+                    var mes = fecha.getMonth() + 1;
+                    var año = fecha.getFullYear();
+                    var fechaFormateada = dia.toString().padStart(2, '0') + '/' + mes.toString().padStart(2, '0') + '/' + año;
+
+                    var XTipo = "'" + item.Tipo + "'";
+                    var XOP = "'" + item.OP + "'";
+                    var XNUMDOC = "'" + item.NUMDOC + "'";
+
+                    var row = '<tr>' +
+                        '<td>' + item.NUMDOC + '</td>' +
+                        '<td>' + item.CENCOS2 + '</td>' +
+                        '<td>' + fechaFormateada + '</td>' +
+                        '<td>' + item.NOMANE + '</td>' +
+                        '<td>' + item.XTIPMON + '</td>' +
+                        '<td>' + item.TOTDOC + '</td>' +
+                        '<td>' + item.SALDOC + '</td>' +
+                        '<td>' + item.CODANE + '</td>' +
+                        '<td>' + item.CODVEN + '</td>' +
+                        '<td>' + item.XTIPEVE + '</td>' +
+                        '<td>' +
+                        '<button id="btnDetalleOC" class="btn btn-sm btn-primary"  data-toggle="modal" data-target="#modalInformesRelacionados" onclick="DetalleOC(' + XTipo + ',' + XNUMDOC + ')">' +
+                        '<i class="fas fa-eye fa-sm"></i>' +
+                        '</button>&nbsp;' +
+                        '<button  id="btnImprimirOC"  class="btn btn-sm btn-primary"  data-toggle="modal" data-target="#modalAprobarInforme" onclick="imprimirDocumento(' + XTipo + ',' + XOP + ',' + XNUMDOC + ');">' +
+                        '<i class="fas fa-print fa-sm"></i>' +
+                        '</button>' +
+                        '</td>' +
+                        '</tr>';
+                    tbody.append(row);
+                });
+
+                // Destruir la DataTable existente antes de volver a inicializarla
+                $('#tbListadoOC').DataTable().destroy();
+                // Inicializar DataTable nuevamente
+                $('#tbListadoOC').DataTable({
+                    dom: 'Bfrtip',
+                    buttons: [
+                        'excelHtml5',
+                        'csvHtml5',
+                        'pdfHtml5'
+                    ]
+                });
+            } else {
+                console.log('No se encontraron datos.');
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Error en la solicitud AJAX:', error);
+        }
+    });
+    }
+
+    function imprimirDocumento(tipo, OP, numdoc) {
+
+        $("#lblTituloAprobarInforme").text("OC Pdf");
+
+        $('#modal-contentAprobarInforme').empty();
+        $('#modal-contentAprobarInforme').load('/OrderForm/VerOrdenCompraPdf?OP=' + encodeURIComponent(OP) + '&Tipo=' + encodeURIComponent(tipo) + '&NumDoc=' + encodeURIComponent(numdoc));
+
+    }
+
+    function DetalleOC(tipo, numdoc) {
+
+        $("#lblTituloInformesRelacionados").empty();
+        $("#lblTituloInformesRelacionados").append("Detalle OC");
+
+        $('#modal-contentInformesRelacionados').empty();
+        $('#modal-contentInformesRelacionados').load('/OrderForm/DetalleOC?Tipo=' + encodeURIComponent(tipo) + '&NumDoc=' + encodeURIComponent(numdoc));
+    }
+
+</script>

@@ -1,0 +1,282 @@
+﻿@{
+//Layout = null;
+}
+
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<style>
+    .color {
+        width: 70%;
+        padding: 2px 15px;
+        color: white;
+        font-size: 11px;
+    }
+
+    .rojo {
+        background: #BA141A;
+    }
+
+    .amarillo {
+        background: #F2BA0C;
+    }
+
+    .verde {
+        background: #679700;
+    }
+
+    #leyenda {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+    #tamModalProductos {
+        width: 70% !important;
+    }
+
+    #tamModalRenovacion {
+        width: 26% !important;
+        margin: 10% auto;
+    }
+
+    #btnOP {
+        cursor: pointer;
+    }
+
+    #advertencia {
+        border: none;
+    }
+
+    b {
+        color: #F83C50;
+    }
+
+    #advertencia strong, span {
+        color: #383834;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">PRODUCTOS EN GARANTÍA (RENOVADOS)</div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div>Cliente <b>(*)</b></div> <!--IdAccoPara-->
+                        <select id="cbCliente" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                    </div>
+                    <div class="col-md-3">
+                        <div>Cliente Final <b>(*)</b></div> <!--IdAccoPara-->
+                        <select id="cbClienteFinal" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <div>Marca <b>(*)</b></div> <!--IdAccoPara-->
+                        <select id="cbMarca" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                    </div>
+                    <div class="col-md-2">
+                        <div>Tipo OP <b>(*)</b></div> <!--IdAccoPara-->
+                        <select id="cbTipoOP" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                    </div>
+                    <div class="col-md-1">
+                        OP <b>(*)</b>
+                        <input id="txtOP" name="txtOP" class="form-control input-sm" type="text" />
+                    </div>
+                    <div class="col-md-1">
+                        <span>&nbsp;</span>
+                        <input id="btnBuscar" name="btnBuscar" class="btn btn-block btn-primary" type="button" value="Buscar" onclick="BuscarPorFiltro();" />
+                    </div>
+                </div>
+                <div class="alert alert-warning" role="alert" id="advertencia">
+                    <strong>Advertencia!</strong><span> Se visualizan 1000 registros, para mayor detalle porfavor aplicar los filtros.</span>
+                </div>
+                <table id="tablaRenovaciones" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Número OP</th>
+                            <th>F. Creación</th>
+                            <th>Cliente</th>
+                            <th>Cliente Final</th>
+                            <th>Código Producto</th>
+                            <th>Descripción</th>
+                            <th>Marca</th>
+                            <th>Serie Interna</th>
+                            <th>Serie Externa</th>
+                            <th>Cantidad</th>
+                            <th>T. Moneda</th>
+                            <th>P. de Vta</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Número OP</th>
+                            <th>F. Creación</th>
+                            <th>Cliente</th>
+                            <th>Cliente Final</th>
+                            <th>Código Producto</th>
+                            <th>Descripción</th>
+                            <th>Marca</th>
+                            <th>Serie Interna</th>
+                            <th>Serie Externa</th>
+                            <th>Cantidad</th>
+                            <th>T. Moneda</th>
+                            <th>P. de Vta</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        cargarListaProyectos();
+        $("#cbCliente").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ClassEntity/ListarCompania",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbClienteFinal").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ClassEntity/ListarCompania",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbMarca").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/OrderForm/ListarMarcasSidige",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbTipoOP").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/OrderForm/ListarTipoOP",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+    });
+
+    function cargarListaProyectos() {
+        $('#tablaRenovaciones').dataTable().fnDestroy();
+        $('#tablaRenovaciones').DataTable({
+            //"order": [[1, "asc"]],
+            dom: 'Bfrtip',
+            responsive:true,
+            ajax: {
+                url: "/OrderForm/ListarProductosRenovados?idMarca=" + $("#cbMarca").val() +
+                    "&idCliente=" + $("#cbCliente").val() +
+                    "&idClienteFinal=" + $("#cbClienteFinal").val() +
+                    "&idTipoOP=" + $("#cbTipoOP").val() +
+                    "&OP=" + $("#txtOP").val(),
+                type: "GET",
+            },
+            columns: [
+                { data: "OP" },
+                { data: "FechaCreacion" },
+                { data: "Cliente" },
+                { data: "ClienteFinal" },
+                { data: "CodigoProducto" },
+                { data: "Descripcion" },
+                { data: "Marca" },
+                { data: "SerieInterna" },
+                { data: "SerieExterna" },
+                { data: "Cantidad" },
+                { data: "TipoMoneda" },
+                { data: "PrecioVenta" },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+
+    function BuscarPorFiltro() {
+        cargarListaProyectos();
+    }
+
+</script>

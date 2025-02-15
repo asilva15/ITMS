@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "ImportarExcel";
+    Layout = null;
+}
+
+
+@using (Html.BeginForm("ImportarExcel", "Certificado", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmCargarExcel", name = "FrmCargarExcel", target = "upload_targetExcel" }))
+{
+    @Html.ValidationSummary(true)
+    
+    <div class="tab-content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <div class="form-row element-block-example">
+                            <div class="col-md-12">
+                                &nbsp;&nbsp;&nbsp;Seleccione un archivo excel con las siguientes columnas:
+                            </div>
+                            <div class="col-md-12">
+                                &nbsp;&nbsp;&nbsp;<span style="font-size:13px">Gerencia, Área, Persona, Marca, Certificado y Fecha(MM/DD/YYYY).</span>
+                            </div>
+                            <div class="col-md-12">
+                                <input type="file" name="excelFile" id="excelFile" class="btn-shadow btn btn-default btn-block" style="cursor:pointer" required />
+                            </div>
+                            <div class="col-md-8">
+                                &nbsp;&nbsp;
+                                <button type="button" class="mt-1 btn btn-secondary">
+                                    <a href="/Certificado/VerDocumento/ProgramacionCertificado.xlsx" target="_blank" style="font-size:12px;color:white"><i class="fa fa-file-excel"></i> &nbsp;Descargar Plantilla</a>
+                                </button>
+                            </div>
+                            <div class="col-md-4">
+                                <button id="btnExcel" type="submit" class="mt-1 btn btn-success btn-block "><i class="fa fa-file-excel"></i> &nbsp;Importar Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+       
+}
+
+<script type="text/javascript">
+
+    $("#FrmCargarExcel").submit(function (e) {
+        toastr.info("Espere un momento por favor.", "Importando Excel...");
+    });
+
+    
+
+    function DescargarExcel() {
+        $.ajax({
+            url: "/Certificado/VerDocumento/ProgramacionCertificado.xlsx",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (data) {
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    function MostrarMensajeExcel(msg) {
+        if (msg == "OK") {
+            toastr.success("El excel fue cargado correctamente.", "");
+            var tabla = $('#tbCertificado').DataTable();
+            tabla.ajax.reload();
+
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        }
+        else if (msg == "FORMATO") {
+            toastr.warning("Por favor, seleccione un archivo en formato excel.", "");
+        }
+        else {
+            toastr.error("Verifique las columnas del archivo Excel(Formato Fecha: MM/DD/YYYY)", "Error");
+        }
+    }
+</script>

@@ -1,0 +1,185 @@
+﻿@{
+    ViewBag.Title = "VerContacto";
+    Layout = null;
+}
+<style>
+    .divHide {
+        display: none;
+    }
+</style>
+<input type="hidden" id="IdDocuSale" name="IdDocuSale" value="@ViewBag.ID_DOCU_SALE" />
+<div id="">
+    <div class="mb-3 card">
+        <div class="tab-content">
+            <!-- NUEVO CONTACTO -->
+            <div class="col-md-12">
+                <div class="main-card mb-1">
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="txtCompania">Compañía</label>
+                                    <input id="txtCompania" name="txtCompania" type="text" class="form-control" disabled>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="txtNombres">Nombres</label><br />
+                                    <input id="txtNombres" name="txtNombres" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="txtApellidos">Apellidos</label><br />
+                                    <input id="txtApellidos" name="txtApellidos" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="cboSexo">Sexo</label>
+                                    <input id="cboSexo" name="cboSexo" type="text" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="txtCelularUsuario">Celular</label>
+                                    <input id="txtCelularUsuario" name="txtCelularUsuario" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="txtRPM">RPM</label><br />
+                                    <input id="txtRPM" name="txtRPM" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="txtExtension">Extensión</label><br />
+                                    <input id="txtExtension" name="txtExtension" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="txtCorreoPersonal">Correo Personal</label>
+                                    <input id="txtCorreoPersonal" name="txtCorreoPersonal" type="email" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="txtCargo">Cargo</label>
+                                    <input id="txtCargo" name="txtCargo" type="text" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label for="txtObservaciones">Observaciones</label><br />
+                                    <input id="txtObservaciones" name="txtObservaciones" type="text" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <div class="ml-auto">
+                                <button id="btnLimpiar" name="btnLimpiar" class="btn btn-link btn-lg" onclick="LimpiarCamposNuevoContacto();">Limpiar</button>
+                                <button id="btnGuardar" name="btnGuardar" class="btn btn-primary btn-lg" onclick="GuardarNuevoContacto();"><i class="fa fa-save" style="color:white;"></i> Guardar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div id="listaContacto"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        CargarCompania();
+        var sexo = [{ text: "Masculino", value: "M" }, { text: "Femenino", value: "F" }];
+        var cboSexo = $("#cboSexo").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            dataValueField: "value",
+            suggest: true,
+            dataSource: sexo,
+            index: 0
+        }).data("kendoComboBox");
+    });
+    function CargarCompania() {
+        $.ajax({
+            url: "/Contacto/CargarCompania/",
+            data: "IdDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp != "ERROR") {
+                    $("#txtCompania").val(resp);
+                }
+            }
+        });
+    }
+    function MensajeDatosProductosServicios(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success(msnErr, "Información Actualizada.");
+        }
+
+        else if (msg == 'Mensaje') {
+            toastr.warning(msnErr, "Mensaje");
+        }
+    }
+    function GuardarNuevoContacto(id) {
+            $.ajax({
+                url: "/Contacto/AgregarNuevoContacto/",
+                data: "IdDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                      "&FirName=" + $("#txtNombres").val() +
+                      "&LasName=" + $("#txtApellidos").val() +
+                      "&SexEnti=" + $("#cboSexo").val() +
+                      "&CelPers=" + $("#txtCelularUsuario").val() +
+                      "&RpmPers=" + $("#txtRPM").val() +
+                      "&ExtPers=" + $("#txtExtension").val() +
+                      "&CarPers=" + $("#txtCargo").val() +
+                      "&EmaPers=" + $("#txtCorreoPersonal").val() +
+                      "&Observacion=" + $("#txtObservaciones").val() +
+                      "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        // Contacto creado
+                        toastr.success("El contacto se registró correctamente.", "¡Bien hecho!");
+                        LimpiarCamposNuevoContacto();
+                        ListaCboContacto();
+                    }
+                    else {
+                        if (resp == "1") { //Campos vacíos
+                            toastr.warning("Verifique los datos porfavor.", "¡Alerta!");
+                        } else
+                            if (resp == "2") { //Repetido
+                                toastr.warning("El contacto ya existe.", "¡Alerta!");
+                            }
+                    }
+                }
+            });
+    }
+
+    function LimpiarCamposNuevoContacto() {
+        $("#txtNombres").val("");
+        $("#txtApellidos").val("");
+        $("#txtCelularUsuario").val("");
+        $("#txtRPM").val("");
+        $("#txtExtension").val("");
+        $("#txtCorreoPersonal").val("");
+        $("#txtCargo").val("");
+        $("#txtObservaciones").val("");
+        var cboSexo = $("#cboSexo").data("kendoComboBox");
+        cboSexo.value("M");
+        cboSexo.trigger("change");
+    }
+</script>

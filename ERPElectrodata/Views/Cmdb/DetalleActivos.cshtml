@@ -1,0 +1,490 @@
+﻿@{
+    ViewBag.Title = "DetalleActivos";
+    Layout = null;
+}
+
+<div class="card-header card-header-tab-animation">
+    <ul class="nav nav-justified">
+        <li class="nav-item"><a data-toggle="tab" id="tabActivo" class="active nav-link" onclick="DetalleActivo()">Activo</a></li>
+        <li class="nav-item"><a data-toggle="tab" id="tabComponentes" class="nav-link" onclick="DetalleComponentes()">Componentes</a></li>
+        <li class="nav-item"><a data-toggle="tab" id="tabHistorial" class="nav-link" onclick="DetalleHistorial()">Historial</a></li>
+        <li class="nav-item"><a data-toggle="tab" id="tabFormato" class="nav-link" onclick="DetalleFormatos()">Formatos</a></li>
+    </ul>
+</div>
+@*<ul class="nav nav-tabs">
+    <li role="presentation" class="active col-md-3" id="lActivo"><a onclick="DetalleActivo()">Activo</a></li>
+    <li role="presentation" class="col-md-3" id="lComponentes"><a onclick="DetalleComponentes()">Componentes</a></li>
+    <li role="presentation" class="col-md-3" id="lHistorial"><a onclick="DetalleHistorial()">Historial</a></li>
+    <li role="presentation" class="col-md-3" id="lFormato"><a onclick="DetalleFormatos()">Formatos</a></li>
+</ul>*@
+<div id="divDetalleActivo">
+    <br />
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">
+            Datos del activo
+        </div>
+        <div class="card-body">
+            <div id="divDatosActivo"></div>
+
+        </div>
+    </div>
+</div>
+<div id="divDetalleComponentes">
+    <br />
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">
+            Lista de componentes
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane active">
+                    <table id="tbDetalleComponentes" class="table table-responsive table-bordered table-striped" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>Codigo Activo</th>
+                                <th>Nombre</th>
+                                <th>Serie</th>
+                                <th>Tipo activo</th>
+                                <th>Usuario Asignado</th>
+                                <th>Tipo componente</th>
+                                <th>Componente</th>
+                                <th>Sub tipo componente</th>
+                                <th>Comentario asignación</th>
+                                <th>Estado</th>
+                                <th>Condición</th>
+                                <th>Usuario creación</th>
+                                <th>Fecha asignación</th>
+                                <th>Locación</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divDetalleHistorial">
+    <br />
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">
+            Historial de activos
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane active">
+                    <table id="tablaHistorialActivos" class="table table-bordered table-striped table-responsive" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                                <th>Ticket</th>
+                                <th>Creado por</th>
+                                <th>Fecha creación</th>
+                                <th>Estado</th>
+                                <th>Prioridad</th>
+                                <th>Usuario Final</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="divDetalleFormatos">
+    <br />
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">
+            Formatos de Entrega y Recepción de Activos
+        </div>
+        <div class="card-body">
+            <div id="gridFormato" style="border:none;"></div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/x-kendo-tmpl" id="templateF">
+    <div class="row no-gutters align-items-center">
+        <div class="col-sm-6 col-lg-2">
+            ${NAM_TYPE_FORM}
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            <a href="\\DeliveryReception/Details/${ID_TICK}" target='_BLANK' id="${ID_TICK}">#= COD_TICK #</a>
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            ${FIR_NAME} ${LAS_NAME}
+        </div>
+        <div class="col-sm-6 col-lg-2">
+            ${CREATE_TICK}
+        </div>
+        <div class="col-sm-6 col-lg-3">
+            #= ADJUNTOS #
+        </div>
+    </div>
+</script>
+
+
+<script type="text/javascript">
+
+    var IdActivo = @ViewBag.IdActivo;
+    var IdCuenta = @ViewBag.IdCuenta;
+
+    DetalleActivo();
+    ActivoDetalleComponente(IdActivo, IdCuenta, 0);
+    ListarHistorialActivos();
+
+    function DetalleActivo() {
+        $("#divDetalleActivo").show()
+        $("#divDetalleComponentes").hide()
+        $("#divDetalleHistorial").hide()
+        $("#divDetalleFormatos").hide()
+
+        $("#lActivo").removeClass("active");
+        $("#lComponentes").removeClass("active");
+        $("#lHistorial").removeClass("active");
+        $("#lFormato").removeClass("active");
+        $("#lActivo").addClass("active");
+
+        ObtenerDatosActivo(@ViewBag.IdActivo,@ViewBag.IdCuenta);
+
+    }
+    function DetalleComponentes() {
+        $("#divDetalleActivo").hide()
+        $("#divDetalleComponentes").show()
+        $("#divDetalleHistorial").hide()
+        $("#divDetalleFormatos").hide()
+
+        $("#lActivo").removeClass("active");
+        $("#lComponentes").removeClass("active");
+        $("#lHistorial").removeClass("active");
+        $("#lFormato").removeClass("active");
+        $("#lComponentes").addClass("active");
+    }
+    function DetalleHistorial() {
+        $("#divDetalleActivo").hide()
+        $("#divDetalleComponentes").hide()
+        $("#divDetalleHistorial").show()
+        $("#divDetalleFormatos").hide()
+
+        $("#lActivo").removeClass("active");
+        $("#lComponentes").removeClass("active");
+        $("#lHistorial").removeClass("active");
+        $("#lFormato").removeClass("active");
+        $("#lHistorial").addClass("active");
+
+    }
+    function DetalleFormatos() {
+        $("#divDetalleActivo").hide()
+        $("#divDetalleComponentes").hide()
+        $("#divDetalleHistorial").hide()
+        $("#divDetalleFormatos").show()
+
+        $("#lActivo").removeClass("active");
+        $("#lComponentes").removeClass("active");
+        $("#lHistorial").removeClass("active");
+        $("#lFormato").removeClass("active");
+        $("#lFormato").addClass("active");
+
+    }
+
+    function ObtenerDatosActivo(id,id1) {
+
+        $.ajax({
+            url: "/Cmdb/ObtenerDatosActivo/" + id + "/" + id1,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                mostrarDatosActivo();
+            },
+            error: function (source) {
+                alert("Error Carga Json Comercial");
+            }
+        });
+    }
+
+    function mostrarDatosActivo() {
+
+        $.each(data['Data'], function (index) {
+            $("#divDatosActivo").empty();
+            $("#divDatosActivo").append(
+                '<div class="form-row">' +
+                    '<div class ="col-md-6">' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Código de Activo</b></div>' +
+                            '<div class = "col-md-7"><a href="/Asset/Detalle/' + @ViewBag.IdActivo + '\" target="_blank">' + (data['Data'][index]['CodigoActivo']) + '</a></div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Tipo de Activo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['TipoActivo']).toLowerCase() + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Marca</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Marca']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Modelo Comercial</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['NombreComercial']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Modelo de Fábrica</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['NombreFabrica']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Nombre de Equipo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['NombreActivo']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Número de Serie</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Serie']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>MAC Física</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Mac']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>MAC Inalámbrica</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Mac_Address']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>MAC Bluetooth</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['MacAddressBluetooth']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Fecha de Adquisición</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaAdquisicion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Asignado a</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Asignado']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Area</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Area']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Unidad de Negocio</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['AreaPadre']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Estado</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Estado']) + '</div>' +
+                        '</div>' +
+                    '</div>' + // FIN DE BLOQUE1
+                    '<div class="col-md-6">' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Modo de Compra</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['ModoCompra']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Código Solped</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Solped']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Centro de Costo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['CentroCosto']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Costo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Costo']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Lote</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Lote']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Condición</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Condicion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Lugar</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Sitio']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Locación</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Locacion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Fecha de Creación</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaCreacion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Última Actualización</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaActualizacion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Ip Local</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['IpLocal']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Ip Pública</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['IpPublica']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Contrato</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Contrato']) + '</div>' +
+                        '</div>' +
+                        (parseInt(@Session["ID_ACCO"]) == 4 ?
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Valor Activo</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['ValorActivo']) + '</div>' +
+                             '</div>' +
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Riesgo Intrínseco</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['RiesgoIntrinseco']) + '</div>' +
+                             '</div>' +
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>MAC Inalámbrica</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['Mac_Address']) + '</div>' +
+                             '</div>'
+                         : '') +
+                         (parseInt(@Session["ID_ACCO"]) == 19 ?
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Fecha Inicio de Préstamo</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['FecIniPrest']) + '</div>' +
+                             '</div>' +
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Fecha Fin de Préstamo</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['FecFinPrest']) + '</div>' +
+                             '</div>' +
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Garantía</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['fechaFinGarantia']) + '</div>' +
+                             '</div>'
+                         : '') +
+                    '</div>' +
+                '</div>'+
+                '<div class="chat-wrapper">' +
+                    '<div class="chat-box-wrapper" >' +
+                        '<div>' +
+                            '<div class="avatar-icon-wrapper mr-1">' +
+                                '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                    '<img src="/Content/Fotos/' + (data['Data'][index]['Foto'])  + '.jpg" />' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="chat-box">' +
+                                '<div class="form" id="clipboard">' +
+                                    (data['Data'][index]['Resumen']) +
+                                '</div>' +
+                            '</div>' +
+                            '<small class="opacity-7">' +
+                                (data['Data'][index]['Creador']) +
+                                ((data['Data'][index]['NombreArchivo']) != "-" ?
+                                    '<div class="msgBoxBody">' +
+                                    '<li><a href="/Adjuntos/Asset/' + (data['Data'][index]['NombreArchivo']) + '_'+ (data['Data'][index]['IdArchivo'])+(data['Data'][index]['ExtensionArchivo'])+ '" target="_blank">'+
+                                    (data['Data'][index]['NombreArchivo'])+(data['Data'][index]['ExtensionArchivo'])+ '</a ></li> '+
+                                    '</div>' : '') +
+                            '</small>' +
+                         '</div>' +
+                    '</div>' +
+                 '</div>'
+            );
+        });
+    }
+
+    function ActivoDetalleComponente(id, id1, id2) {
+        $('#tbDetalleComponentes').dataTable().fnDestroy();
+
+        $('#tbDetalleComponentes').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: "/Cmdb/ActivoDetalleComponente/" + id + "/"+ id1 + "/" + id2,
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<center><a href="/Asset/Detalle/' + IdActivo + '\" target="_blank">' + data.CodigoActivo + '</a></center>';
+                    }
+                },
+                { data: "NombreActivo" },
+                { data: "SerieActivo" },
+                { data: "TipoActivo" },
+                { data: "UsuarioAsignado" },
+                { data: "TipoComponente" },
+                { data: "Componente" },
+                { data: "SubTipoComponente" },
+                { data: "ComentarioAsignacion" },
+                { data: "Estado" },
+                { data: "Condicion" },
+                { data: "UsuarioCrea" },
+                { data: "FechaAsignacion" },
+                { data: "Locacion" },
+            ]
+        });
+    }
+
+    function ListarHistorialActivos() {
+        $('#tablaHistorialActivos').dataTable().fnDestroy();
+
+        $('#tablaHistorialActivos').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: "/Asset/ListarHistorialActivos/" + @ViewBag.IdActivo,
+            columns: [
+                { data: "IdTicket" },
+                { data: "Tipo" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href="\\DeliveryReception/Details/'+data.IdTicket+'" target="_BLANK"> '+data.CodigoTicket+'</a>';
+                    }
+                },
+                { data: "UsuarioCreacion" },
+                { data: "Fecha" },
+                { data: "Estado" },
+                { data: "Prioridad" },
+                { data: "UsuarioFinal" },
+
+            ],
+            "columnDefs": [
+            {
+                "targets": [0],
+                "visible": false,
+                "searchable": false
+            }
+            ]
+
+        });
+
+    }
+
+
+    var dataSourceF = new kendo.data.DataSource({
+        transport: {
+            read: {
+                url: "/Cmdb/AssetTicket",
+                type: "GET",
+                dataType: "json",
+                data: {
+                    id: IdActivo,
+                    id1: IdCuenta
+                }
+            }
+        },
+        autoSync: true,
+        serverFiltering: true,
+        serverPaging: true,
+        pageSize: 15,
+        schema: {
+            data: "Data",
+            total: "Count"
+        }
+    });
+
+    $("#pagerFormato").kendoPager({
+        dataSource: dataSourceF,
+        pageSizes: [15, 30, 65],
+        refresh: true
+    });
+
+    $("#gridFormato").kendoListView({
+        dataSource: dataSourceF,
+        template: kendo.template($("#templateF").html())
+    });
+</script>

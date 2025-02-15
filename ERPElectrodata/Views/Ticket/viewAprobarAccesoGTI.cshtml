@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+<style>
+    .k-button.k-upload-selected {
+        display: none !important
+    }
+
+    .k-button.k-clear-selected {
+        display: none !important
+    }
+</style>
+
+@*<input type="hidden" name="IdTicketAcceso" id="IdTicketAcceso" value="@ViewBag.IdTicketAcceso" />*@
+<input type="hidden" name="IdTick" id="IdTick" value="@ViewBag.ID_TICK" />
+
+<fieldset>
+
+    <h5 style="text-align: center; font-weight: bold;">¿Desea enviar un correo de solicitando la aprobación de GTI?</h5> <h6 style="text-align: center">*El correo se enviará con el último comentario e imagen adjunta que tenga el estado "Por aprobar GTI"</h6>
+
+    <div class="form-group row">
+        <div class="col-md-12">
+            <div class="editor-label">
+                Comentario u observación
+            </div>
+            <div>
+                <textarea id="Comentario" name="Comentario" class="form-control" rows="5" placeholder="Ingrese un comentario u observación adicional..">@ViewBag.Comentario</textarea>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <div class="form-row">
+        <div class="col-md-6"></div>
+        <div class="col-md-3">
+            <button id="cancelAcceso" class="btn btn-light btn-block">Atrás        </button>
+        </div>
+        <div class="col-md-3">
+            <button id="enviarCorreoAprobacionGTI" class="btn btn-primary btn-block btn-success">Enviar</button>
+        </div>
+    </div>
+
+</fieldset>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        @*console.log('@ViewBag.ID_TICK');*@
+
+        //$("#enviarCorreoAprobacionGTI").click(function () {
+
+        //    var params = {
+        //        IdTick: $("#IdTick").val(),
+        //        Comentario: $("#Comentario").val(),
+        //    };
+
+        //    $.ajax({
+        //        /*url: "/Ticket/GenerarTicketRemediacionHostBNV",*/
+        //        data: params,
+        //        type: "POST",
+        //        cache: false,
+        //        dataType: "JSON",
+        //        success: function (resp) {
+
+        //            if (resp.Respuesta == "OK") {
+        //                var id = resp.id;
+        //                uploadDone(resp.Respuesta, id);
+        //            }
+        //            else {
+        //                uploadDone(resp.Respuesta, id);
+        //            }
+        //        }
+        //    });
+        //});
+
+        $("#enviarCorreoAprobacionGTI").click(function () {
+            var params = {
+                IdTick: $("#IdTick").val(),
+                Comentario: $("#Comentario").val(),
+            };
+
+            $.ajax({
+                url: "/Ticket/EnviarCorreoAprobacionGTI",  
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "json",
+                success: function (resp) {
+                    if (resp.Respuesta == "OK") {
+                        uploadDone(resp.Respuesta);
+                    } else {
+                        uploadDone(resp.Respuesta);
+                    }
+                },
+                error: function () {
+                    toastr.error("Error en la solicitud", "Error");
+                }
+            });
+        });
+
+        $("#cancelAcceso").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+
+        function uploadDone(msg, id) {
+            if (msg === "OK") {
+                toastr.success("Correo de solcitud enviado a GTI", "Éxito");
+                setTimeout(function () {
+                    $("[data-dismiss=modal]").trigger("click");
+                    //window.open("/#/DetailsTicket/Index/" + id, "_blank");
+                }, 3000);
+            } else {
+                toastr.warning("El archivo adjunto para el correo debe ser una imagen", "Advertencia");
+            }
+        }
+
+        //function uploadDone(msg, msgerror) {
+
+        //    if (msg == "OK") {
+        //        toastr.success(msgerror, "Ticket de Remediación Generado");
+        //        setTimeout(function () {
+        //            $("[data-dismiss=modal]").trigger({ type: "click" });
+        //            //location.reload();
+        //            window.open("/DetailsTicket/Index/" + id, "_blank");
+        //        }, 3000);
+        //    }
+        //    else {
+
+        //        toastr.warning(msgerror, "Ingrese los campos requeridos");
+        //    }
+        //}
+
+    });
+
+</script>

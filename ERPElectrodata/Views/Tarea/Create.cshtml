@@ -1,0 +1,324 @@
+﻿@{
+    ViewBag.Title = "Crear Categoría con Tarea";
+    Layout = null;
+}
+
+<style>
+    #ID_CATE {
+        display: none;
+    }
+</style>
+
+<div>
+    @if (Convert.ToInt32(Session["ID_ACCO"]) == 60)
+    {
+        <div class="form-row">
+            <div class="col-md-12">
+                <div class="form-group">
+                    Tipo Ticket <span style="color:red">(*)</span>
+                    <input id="ID_TYPE_TICK" name="ID_TYPE_TICK" />
+                </div>
+            </div>
+        </div>
+    }
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <span id="txtCat1"></span> <span style="color:red">(*)</span>
+                <input id="ID_CATE_N1" name="ID_CATE_N1" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                <span id="txtCat2"></span> <span style="color:red">(*)</span>
+                <input id="ID_CATE_N2" name="ID_CATE_N2" />
+            </div>
+        </div>
+    </div>
+    @if (Convert.ToInt32(Session["ID_ACCO"]) == 56 || Convert.ToInt32(Session["ID_ACCO"]) == 57 || Convert.ToInt32(Session["ID_ACCO"]) == 58)
+    {
+        <div class="form-row">
+            <div class="col-md-12">
+                <div class="form-group d-flex flex-column">
+                    <span>Categoría <span style="color:red">(*)</span></span>
+                    <div class="d-flex">
+                        <textarea id="nuevaCategoria" class="form-control w-100 d-inline" disabled="disabled" style="height:38px; overflow:auto; min-height:38px"></textarea>
+                        <input id="ID_CATE" name="ID_CATE" />
+                        <button class="btn-shadow btn btn-primary mr-1" type="button" style="height:38px" data-toggle="modal" data-target="#modalCategorias" onclick="AgregarCategoriaTicket();" id="AgregarCategoria" disabled>
+                            +
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="form-row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    Categoría 2 <span style="color:red">(*)</span>
+                    <input id="ID_CATE_N3" name="ID_CATE_N3" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    Categoría 3 <span style="color:red">(*)</span>
+                    <input id="ID_CATE" name="ID_CATE" />
+                </div>
+            </div>
+        </div>
+    }
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="form-group">
+                Cambiar estado a 'Resuelto' al finalizar las tareas
+                <br />
+                <input type="checkbox" id="ResolverTicket" name="ResolverTicket" @(Convert.ToInt32(Session["ID_ACCO"]) == 60 ? "checked" : "") />
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <button type="button" class="btn btn-primary btn-block" onclick="GuardarCategoriaConTarea();"><i class="fa fa-save"></i> Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var idAcco = parseInt(@Session["ID_ACCO"]);
+
+        if (idAcco == 56 || idAcco == 57 || idAcco == 58) {
+            $("#txtCat1").text("Categoría 1");
+            $("#txtCat2").text("Categoría 2");
+
+            var ID_CATE_N1 = $("#ID_CATE_N1").kendoComboBox({
+                autoBind: false,
+                filter: "contains",
+                dataTextField: "NAM_CATE",
+                dataValueField: "ID_CATE",
+                dataSource: {
+                    serverFiltering: false,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            var ID_CATE_N2 = $("#ID_CATE_N2").kendoComboBox({
+                autoBind: false,
+                filter: "contains",
+                cascadeFrom: "ID_CATE_N1",
+                dataTextField: "NAM_CATE2",
+                dataValueField: "ID_CATE2",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            ID_CATE_N1.bind("change", function (e) {
+                $('#ID_CATE').val(null);
+                $('#nuevaCategoria').val('');
+                document.getElementById('AgregarCategoria').disabled = true;
+            });
+
+            ID_CATE_N2.bind("change", function (e) {
+                $('#ID_CATE').val(null);
+                $('#nuevaCategoria').val('');
+
+                if (ID_CATE_N2.value()) {
+                    document.getElementById('AgregarCategoria').disabled = false;
+                } else {
+                    document.getElementById('AgregarCategoria').disabled = true;
+                }
+            });
+
+        } else {
+            $("#txtCat1").text("Macroservicio");
+            $("#txtCat2").text("Categoría 1");
+
+            $("#ID_TYPE_TICK").kendoComboBox({
+                autoBind: true,
+                dataTextField: "NAM_TYPE_TICK",
+                dataValueField: "ID_TYPE_TICK",
+                suggest: true,
+                index: 1,
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/TypeTicket/ListarCboTypeTicketxEmpresa?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#ID_CATE_N1").kendoComboBox({
+                autoBind: false,
+                filter: "contains",
+                cascadeFrom: "ID_TYPE_TICK",
+                dataTextField: "NAM_CATE",
+                dataValueField: "ID_CATE",
+                dataSource: {
+                    serverFiltering: false,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#ID_CATE_N2").kendoComboBox({
+                autoBind: false,
+                filter: "contains",
+                cascadeFrom: "ID_CATE_N1",
+                dataTextField: "NAM_CATE2",
+                dataValueField: "ID_CATE2",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#ID_CATE_N3").kendoComboBox({
+                autoBind: false,
+                filter: "contains",
+                cascadeFrom: "ID_CATE_N2",
+                dataTextField: "NAM_CATE3",
+                dataValueField: "ID_CATE3",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory3?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#ID_CATE").kendoComboBox({
+                autoBind: true,
+                filter: "contains",
+                cascadeFrom: "ID_CATE_N3",
+                dataTextField: "NAM_CATE4",
+                dataValueField: "ID_CATE4",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory4?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+
+    });
+
+    function AgregarCategoriaTicket() {
+
+        var ID_CATE_N2 = $("#ID_CATE_N2").data("kendoComboBox");
+
+        $("#lblTituloCategoria").text("Seleccione una Categoria");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-contentCategoria').empty();
+        $('#modal-contentCategoria').load('/Tarea/CategoriaPorTarea/' + ID_CATE_N2.value());
+    }
+
+    function GuardarCategoriaConTarea() {
+        var resolverTicket = $("#ResolverTicket").prop("checked");
+        var idCate = $("#ID_CATE").val();
+
+        if (idCate != "") {
+            swal({
+                title: `¿Desea crear la categoría?`,
+                text: `Se podrán crear tareas para la categoría seleccionada`,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Guardar",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: false,
+                closeOnCancel: false
+            }, function (dismiss) {
+                if (dismiss) {
+                    $.ajax({
+                        url: '/Tarea/CrearCategoria',
+                        type: 'POST',
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            idCate,
+                            resolverTicket
+                        }),
+                        success: function (result) {
+                            if (result.message == 'OK') {
+                                toastr.success("Información guardada correctamente.");
+
+                                setTimeout(function () {
+                                    location = `https://${location.host}/Tarea/Detalle/${result.id}`;
+                                }, 1000);
+
+                            } else if (result.message == 'EXISTE') {
+                                toastr.warning("La categoría ya tiene tareas.");
+
+                                setTimeout(function () {
+                                    location = `https://${location.host}/Tarea/Detalle/${result.id}`;
+                                }, 1000);
+
+                            } else if (result.message == 'ERROR') {
+                                swal({
+                                    title: 'Warning',
+                                    type: 'info',
+                                    text: 'ERROR EN LA CREACIÓN',
+                                    confirmButtonColor: "#DD6B55",
+                                    focusConfirm: false,
+                                    confirmButtonText: 'Continue',
+                                    confirmButtonAriaLabel: 'Thumbs up, great!'
+                                })
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            console.error(xhr.responseText);
+                        }
+                    });
+                }
+            });
+        } else {
+
+            toastr.warning("Seleccione una categoría.");
+        }
+    }
+
+
+</script>

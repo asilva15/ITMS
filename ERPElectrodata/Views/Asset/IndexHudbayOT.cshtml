@@ -1,0 +1,349 @@
+﻿@{
+    ViewBag.Title = "Asset & Configuration";
+    if (Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_OT"]) == 1 && Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_IT"]) == 0)
+    {
+        Layout = "~/Views/Shared/_LayoutHBOT.cshtml";
+    }
+}
+
+<div id="divContent">
+    <div class="app-page-title mb-2">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="fa fa-archive icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <b>ACTIVOS Y CONFIGURACIONES</b>
+                    <div class="page-title-subheading">Lista de Activos por estados.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-2">
+            Tipo Activo
+            <input id="ID_TYPE_ASSE" name="ID_COMP" />
+        </div>
+        <div class="col-md-2">
+            Marca
+            <input id="ID_MANU">
+        </div>
+        <div class="col-md-3">
+            Usuario
+            <input id="ID_ENTI">
+        </div>
+        <div class="col-md-3">
+            Palabra Clave
+            <input id="PalabraClave" class="k-textbox" style="width:100%" data-toggle="tooltip" data-placement="top" title="Código de Activo, Equipo, Serie, MAC">
+        </div>
+        <div class="col-md-2">
+            <br />
+            <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="Buscar"><i class="fa fa-search"></i> Buscar</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-lg-6 col-xl-3">
+            <div id="homInc3" class="card mb-3 widget-content btn btn-danger" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="icon-wrapper rounded-circle">
+                            <div class="icon-wrapper-bg bg-white opacity-1"></div>
+                            <i class="fa fa-user"></i>
+                        </div>
+                    </div>
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading"> &nbsp; Equipos</div>
+                        <div class="widget-heading"> &nbsp; Asignados</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxActive"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-xl-3">
+            <div id="homInc4" class="card mb-3 widget-content btn btn-success" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="icon-wrapper rounded-circle">
+                            <div class="icon-wrapper-bg bg-white opacity-1"></div>
+                            <i class="fa fa-archive"></i>
+                        </div>
+                    </div>
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading"> &nbsp; Equipos</div>
+                        <div class="widget-heading"> &nbsp; No Asignados</div>
+                        <span id="spanMicroNA" class="widget-heading"></span>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxSCHEDULED"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div id="homInc2" class="card mb-3 widget-content btn btn-warning" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="icon-wrapper rounded-circle">
+                            <div class="icon-wrapper-bg bg-white opacity-1"></div>
+                            <i class="fa fa-cogs"></i>
+                        </div>
+                    </div>
+                    <div class="widget-content-left">
+                        <div class="widget-heading"> &nbsp; Equipos</div>
+                        <div class="widget-heading"> &nbsp; De Repuesto</div>
+                        <span id="spanMicroRG" class="widget-heading"></span>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxRESOLVED"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div id="homInc1" class="card mb-3 widget-content btn btn-info" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="icon-wrapper rounded-circle">
+                            <div class="icon-wrapper-bg bg-white opacity-1"></div>
+                            <i class="fa fa-ban"></i>
+                        </div>
+                    </div>
+                    <div class="widget-content-left">
+                        <div class="widget-heading"> &nbsp; Equipos</div>
+                        <div class="widget-heading"> &nbsp; Inoperativos</div>
+                        <span id="spanMicroB" class="widget-heading"></span>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxCLOSED"></span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="listView" class="contentView">
+    </div>
+
+    <div id="pager" class="contentViewPager">
+    </div>
+</div>
+<script type="text/x-kendo-tmpl" id="templateOT">
+    <div>
+        <a href="\\Asset/Detalle/${IdActivo}" target="_blank" class="text-decoration-none" style="width:100%">
+            <div class="card-body py-3 btn-shadow btn-outline-focus">
+                <div class="card-header-sm pr-0 pl-0" style="font-weight:bold">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col-md-6 col-lg-2">
+                            ${Condicion}
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div title="User">
+                                ${UsuarioAsignado}
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-3">
+                            <div title="Record date">
+                                Creado: ${FechaCreacion}
+                            </div>
+                        </div>
+                        <div class="col-md-6 col-lg-2">
+                            <div title="Modification date">
+                                Modificado: ${FechaModificacion}
+                            </div>
+                        </div>
+                        <div class="col-md-12 col-lg-2" style="text-align:center;background-color:${COLOR};color:white;padding:3px 0px 3px 0px;">
+                            ${TipoActivo}
+                        </div>
+                    </div>
+                </div>
+                <div class="row no-gutters align-items-center">
+                    @*<a href="\\#/Asset/Detalle/${IdActivo}" target="_blank" class="form-row">*@
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="titleSummary">Código de Activo : ${CodigoActivo}</div>
+                        <div class="titleSummary">Marca : ${Marca}</div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="titleSummary">Número de Serie : ${Serie}</div>
+                        <div class="titleSummary">Nombre de Equipo : ${NombreActivo}</div>
+                    </div>
+                    <div class="col-sm-6 col-lg-4">
+                        <div class="titleSummary">Contrato : ${Contrato}</div>
+                        <div class="titleSummary">Locación : ${Locacion}</div>
+                    </div>
+                    @*</a>*@
+                </div>
+                <hr class="m-0" />
+                <div class="form-row">
+                    <div class="col-md-12">
+                        ${TipoTicket} \\# ${CodigoTicket}
+                    </div>
+                </div>
+            </div>
+        </a>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var ID_TYPE_ASSE = $("#ID_TYPE_ASSE").kendoComboBox({
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/ListarTipoActivoPorGrupo?idGrupo=@ViewBag.IdGrupoOT&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_MANU = $("#ID_MANU").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/ListarMarcaPorGrupo?idGrupo=@ViewBag.IdGrupoOT&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#Buscar").click(function () {
+            $("#pager").empty();
+            $("#listView").empty();
+
+            if ($("#listView").data("kendoListView")) {
+                $("#pager").data("kendoPager").destroy();
+                $("#listView").data("kendoListView").destroy();
+            }
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/Asset/ListaActivosPorGrupo?var" + Math.random(),
+                        //contentType: "application/json; charset=utf-8",
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random(),
+                            IdGrupo: @ViewBag.IdGrupoOT,
+                            IdTipoActivo: $("#ID_TYPE_ASSE").val() == '' ? 0 : $("#ID_TYPE_ASSE").val(),
+                            IdMarca: $("#ID_MANU").val() == '' ? 0 : $("#ID_MANU").val(),
+                            IdUsuario: $("#ID_ENTI").val() == '' ? 0 : $("#ID_ENTI").val(),
+                            PalabraClave: $("#PalabraClave").val()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                filter: { field: "Status", operator: "eq", value: 1 },
+                serverPaging: true,
+                pageSize: 15,
+                schema: {
+                    data: "Grid",
+                    total: "Cantidad"
+                }
+            });
+
+            $("#pager").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [15, 30, 60],
+                refresh: true
+            });
+
+            $("#listView").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#templateOT").html())
+            });
+
+            $.ajax({
+                url: "/Asset/CantidadActivosPorGrupo?var" + Math.random(),
+                data: {
+                    IdGrupo: @ViewBag.IdGrupoOT,
+                    IdTipoActivo: $("#ID_TYPE_ASSE").val() == '' ? 0 : $("#ID_TYPE_ASSE").val(),
+                    IdMarca: $("#ID_MANU").val() == '' ? 0 : $("#ID_MANU").val(),
+                    IdUsuario: $("#ID_ENTI").val() == '' ? 0 : $("#ID_ENTI").val(),
+                    PalabraClave: $("#PalabraClave").val()
+                },
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    $("#boxActive").html(data['Asignado']);
+                    $("#boxSCHEDULED").html(data['NoAsignado']);
+                    $("#boxRESOLVED").html(data['Repuesto']);
+                    $("#boxCLOSED").html(data['Inoperativo']);
+                },
+                error: function (source) {
+                    //alert("Error Carga Json");
+                }
+            });
+        });
+
+        $("#Buscar").click();
+
+    });
+
+    function Click(parm) {
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 2;
+        if (parm.id == "homInc1") {
+            bandera = 3;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 1;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 4;
+        }
+        var listView = $("#listView").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+    }
+
+
+</script>

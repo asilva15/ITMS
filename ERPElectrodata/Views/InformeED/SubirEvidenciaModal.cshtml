@@ -1,0 +1,208 @@
+﻿@{
+    ViewBag.Title = "SubirEvidenciaModal";
+    Layout = null;
+}
+
+
+<style>
+    .drop-area {
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        margin-top: 20px;
+        cursor: pointer;
+    }
+
+        .drop-area.dragover {
+            background-color: #f5f5f5;
+        }
+
+        .drop-area.image-dropped {
+            border: none;
+            padding: 0;
+            background-color: transparent;
+        }
+
+            .drop-area.image-dropped img {
+                max-width: 100%;
+                max-height: 400px;
+            }
+
+    #error-messageSEM {
+        color: red;
+        margin-top: 10px;
+        display: none;
+    }
+
+    #buttons-containerSEM {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+        #buttons-containerSEM button {
+            margin: 10px;
+        }
+
+    #eliminar-btnSEM {
+        background-color: transparent;
+        border: none;
+        color: red;
+        cursor: pointer;
+        display: none;
+        font-size: 20px;
+        margin-top: 10px;
+    }
+</style>
+
+
+<input id="IdInformeEDDetalleSEModal" name="IdInformeEDDetalle" value="@ViewBag.IdInformeDetalle" type="hidden" />
+<input id="IdTipoEntregaOPSEModal" name="IdTipoEntregaOP" value="@ViewBag.IdTipoEntrega" type="hidden" />
+
+<div class="container">
+    <div class="drop-area" id="drop-areaSEM">
+        <h3>Arrastra y suelta aquí la imagen</h3>
+        <p>O selecciona una imagen haciendo clic aquí.</p>
+            <input name="files" id="filesSEM" type="file"  accept="image/*" >
+    </div>
+    <div id="preview-containerSEM"></div>
+    <div id="error-messageSEM"></div>
+    <div id="buttons-containerSEM">
+        <button class="btn btn-primary" id="guardar-btnSEM">Guardar</button>
+        <input type="button" data-dismiss="modal" class="btn btn-secondary" id="cerrar-btnSEM" value="Cerrar">
+        <input type="button" class="btn btn-danger" id="eliminar-btnSEM" value="&times;">
+    </div>
+</div>
+
+<script>
+
+    var droppedFile;
+
+    $(document).ready(function () {
+        var dropArea = document.getElementById("drop-areaSEM");
+
+        dropArea.addEventListener("dragenter", function () {
+            $("#drop-areaSEM").addClass("dragover");
+        });
+
+        dropArea.addEventListener("dragleave", function () {
+            $("#drop-areaSEM").removeClass("dragover");
+        });
+
+        dropArea.addEventListener("dragover", function (e) {
+            e.preventDefault();
+        });
+
+        dropArea.addEventListener("drop", function (e) {
+            e.preventDefault();
+            $("#drop-areaSEM").removeClass("dragover");
+            var files = e.dataTransfer.files;
+            if (files.length > 0) {
+                var file = files[0];
+                if (isValidImage(file)) {
+                    showPreviewImage(file);
+                    $("#error-messageSEM").hide();
+
+                } else {
+                    displayErrorMessage("La imagen seleccionada no es válida.");
+                }
+            }
+        });
+
+        $("#guardar-btnSEM").click(function () {
+            var file = droppedFile || $("#filesSEM")[0].files[0]; // Toma la imagen arrastrada o seleccionada
+
+            if (isValidImage(file)) {
+                var formData = new FormData();
+                formData.append("files", file);
+
+               /* var DocuSale = $("#DocuSale").val();*/
+                $.ajax({
+                    url: "/InformeED/GuardarEvidenciaEnvio?IDI=" + @ViewBag.IdInformeDetalle + '&IDTIPOENTREGA=' + @ViewBag.IdTipoEntrega,
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function () {
+                        alert("Imagen guardada correctamente.");
+                        const boton = document.getElementById('cerrar-btnSEM');
+                        boton.click();
+                    },
+                    error: function () {
+                        alert("Error al guardar la imagen.");
+                    }
+                });
+            } else {
+                displayErrorMessage("La imagen seleccionada no es válida.");
+            }
+        });
+
+        $("#eliminar-btnSEM").click(function () {
+            $("#drop-areaSEM").removeClass("image-dropped");
+            $("#drop-areaSEM").html('<h3>Arrastra y suelta aquí la imagen</h3><p>O selecciona una imagen haciendo clic aquí.</p>'
+                +'<input name = "files" id = "filesSEM" type = "file"  accept = "image/*" >');
+            $("#preview-containerSEM").hide();
+            $("#eliminar-btnSEM").hide();
+            $("#error-messageSEM").hide();
+        });
+
+        $("#cerrar-btnSEM").click(function () {
+
+        });
+
+        /*var DocuSale = $("#DocuSale").val();*/
+        $.ajax({
+            url: "/InformeED/MostrarImagenEvidencia?IDI=" + @ViewBag.IdInformeDetalle + '&IDTIPOENTREGA=' + @ViewBag.IdTipoEntrega,
+            type: "GET",
+            success: function (data) {
+                if (data.Success) {
+                    var imagePath = data.FilePath;
+                    showPreviewImageFromPath(imagePath);
+                }
+            },
+            error: function () {
+                // Manejar el error si ocurre
+            }
+        });
+
+
+
+
+    });
+    function isValidImage(file) {
+
+        return file.type.startsWith("image/");
+    }
+
+    function displayErrorMessage(message) {
+        $("#error-messageSEM").text(message);
+        $("#error-messageSEM").show();
+    }
+
+    function showPreviewImage(file) {
+
+        droppedFile = file; //
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $("#drop-areaSEM").html('<img src="' + e.target.result + '">');
+            $("#drop-areaSEM").addClass("image-dropped");
+            $("#eliminar-btnSEM").show();
+        };
+        reader.readAsDataURL(file);
+    }
+
+
+    function showPreviewImageFromPath(imagePath) {
+    var timestamp = new Date().getTime(); // Agregar un timestamp único
+    $("#drop-areaSEM").html('<img src="' + imagePath + '?t=' + timestamp + '">');
+    $("#drop-areaSEM").addClass("image-dropped");
+    $("#eliminar-btnSEM").show();
+
+}
+
+
+
+</script>

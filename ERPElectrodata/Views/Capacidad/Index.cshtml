@@ -1,0 +1,336 @@
+﻿@model ERPElectrodata.Models.Capacidad
+
+@{
+    Layout = null;
+}
+<meta http-equiv=”Content-Type” content=”text/html; charset=UTF-8″ />
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<style type="text/css">
+    b{
+        color:#F83C50;
+    }
+    .centro {
+        border-radius: 10px;
+        width: 90%;
+        margin: 0px auto;
+        float: none;
+    }
+    .checkBox {
+        width:50px;
+    }
+</style>
+
+<div class="panel panel-primary" style="width:100%;float:left;">
+    <div class="panel-heading">
+        <span>Gestión de la Capacidad</span>
+    </div>
+    <br />
+    <div class="centro">
+
+        <div id="divMensaje"></div>
+        <div class="col-md-3">
+            Cuenta
+            <select id='cbCuenta' name='cbCuenta' class='form-control input-sm select2' type='text' style="width:100%"  ></select>
+        </div>
+        <div class="col-md-12">
+            <br />
+            <div id="Parametro">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1">
+                        <div class="box">
+                            <!-- /.box-header -->
+                            <div class="box-body">
+                                <table id="tablaGestionCapacidad" class="table table-bordered table-striped" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>QUEUE</th>
+                                            <th>Tickets</th>
+                                            <th>Proyectos</th>
+                                            <th>Creado por</th>
+                                            <th>Fecha de creación</th>
+                                            <th>Habilitado</th>
+                                            <th>Opciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class='col-md-4'>
+                                                <select id='cbQueue' name='cbQueue' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+                                            </td>
+                                            <td class='col-md-3'>
+                                            </td>
+                                            <td class='col-md-3'>
+                                            </td>
+                                            <td class='col-md-3'>
+                                            </td>
+                                            <td class='col-md-3'>
+                                            </td>
+                                            <td class='col-md-1'>
+                                            </td>
+                                            <td class='col-md-2' align="center">
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        ListarGestionCapacidad();
+        /* Carga el combo de Cuentas */
+        $("#cbCuenta").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Administrator/ListarCuentas/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        cuentaPorDefecto(@ViewBag.IdAcco);
+        /* Carga la Grilla con el resultado de las Colas por Cuenta */
+        $("#cbCuenta").on('change', function (e) {
+            ListarGestionCapacidad();
+        });
+    });
+    /* Carga Grilla */
+    function ListarGestionCapacidad() {
+        $('#tablaGestionCapacidad').dataTable().fnDestroy();
+        var tablaCapacidad = $('#tablaGestionCapacidad').DataTable({
+            "order": [[0, "asc"]],
+            dom: 'Bfrtip',
+            ajax: "/Capacidad/ListarGestionCapacidad?id=" + $("#cbCuenta").val(),
+            columns: [
+                { data: "DESC_QUEUE" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var CantTicket = "";
+                        CantTicket = '<span class="view' + data.ID_ACCO_QUEUE + '" id="cantTicket' + data.ID_ACCO_QUEUE + '">' + data.CantTicket + '</span>' +
+                                     '<input type="number" class="form-control pull-right divHide" id="txtCantidadTicket' + data.ID_ACCO_QUEUE + '" name="txtCantidadTicket' + +data.ID_ACCO_QUEUE + '" value="' + data.CantTicket + '" min="1"/>';
+                        return CantTicket;
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var CantProyecto = "";
+                        CantProyecto = '<span class="view' + data.ID_ACCO_QUEUE + '" id="cantProyecto' + data.ID_ACCO_QUEUE + '">' + data.CantProyecto + '</span>' +
+                                       '<input type="number" class="form-control pull-right divHide" id="txtCantidadProyecto' + data.ID_ACCO_QUEUE + '" name="txtCantidadProyecto' + +data.ID_ACCO_QUEUE + '" value="' + data.CantProyecto + '" min="1"/>';
+                        return CantProyecto;
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var strEstado = "", estado = "", checked = "";
+                        if (data.Estado == true) {
+                            estado = "Activo";
+                            checked = "checked";
+                        } else {
+                            estado = "Inactivo";
+                            checked = "";
+                        }
+                        strEstado = '<center class="view' + data.ID_ACCO_QUEUE + '" id="estado' + data.ID_ACCO_QUEUE + '">' + estado + '</center>' +
+                                        '<center class="edit' + data.ID_ACCO_QUEUE + ' divHide"><input type="checkbox" name="chkEstado' + data.ID_ACCO_QUEUE + '" id="chkEstado' + data.ID_ACCO_QUEUE + '" ' + checked + ' class="checkBox"/>';
+                        return strEstado;
+                    }
+                },
+                { data: "UsuarioCrea" },
+                { data: "FechaCrea" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var opcion = "";
+                        opcion = '<center>' +
+                                    '<i class="glyphicon glyphicon-pencil view' + data.ID_ACCO_QUEUE + '" aria-hidden="true" style="color: #FFC107; cursor: pointer; font-size:20px;border:none" onclick="editarCapacidad(' + data.ID_ACCO_QUEUE + ')"></i>' +
+                                '</center>' +
+                                '<center>' +
+                                    '<i class="glyphicon glyphicon-floppy-disk edit' + data.ID_ACCO_QUEUE + ' divHide" aria-hidden="true" style="color: #2196F3; cursor: pointer; font-size:20px;border:none" onclick="guardarCapacidad(' + data.ID_ACCO_QUEUE + ')"></i>' +
+                                    '&nbsp;&nbsp;&nbsp;&nbsp' +
+                                    '<i class="glyphicon glyphicon-remove edit' + data.ID_ACCO_QUEUE + ' divHide" aria-hidden="true" style="color: #F44336; cursor: pointer; font-size:20px;border:none" onclick="limpiarDatos(' + data.ID_ACCO_QUEUE + ')"></i>' +
+                                '</center>';
+                        return opcion;
+                    }
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+        if ($("#cbCuenta").val() != 4) {
+            var columna = tablaCapacidad.column(2);
+            columna.visible(!columna.visible());
+        } else {
+            var columna = tablaCapacidad.column(2);
+            columna.visible(columna.visible());
+        }
+    }
+
+    function editarCapacidad(id) {
+        $("#txtCantidadTicket" + id).removeClass('divHide');
+        $("#txtCantidadProyecto" + id).removeClass('divHide');
+        $(".view" + id).addClass('divHide');
+        $(".edit" + id).removeClass('divHide');
+    }
+
+    function limpiarDatos(id) {
+        $("#txtCantidadTicket" + id).addClass('divHide');
+        $("#txtCantidadProyecto" + id).addClass('divHide');
+        $(".view" + id).removeClass('divHide');
+        $(".edit" + id).addClass('divHide');
+    }
+
+    function guardarCapacidad(id) {
+        var estado = "";
+        if ($("#cbCuenta").val() == 4) {
+            if ($("#txtCantidadTicket" + id).val() == 0 || $("#txtCantidadProyecto" + id).val() == 0) {
+                $('#divMensaje').empty();
+                $('#divMensaje').show("show");
+                $("#divMensaje").append("<div class='alert alert-danger'>Las cantidades deben ser mayor a 0 </div>");
+                setTimeout(function () {
+                    $("#divMensaje").fadeOut(3000);
+                }, 1000);
+            } else {
+                if ($("#chkEstado" + id).is(':checked')) {
+                    estado = true;
+                } else {
+                    estado = false;
+                }
+                $.ajax({
+                    url: "/Capacidad/GuardarCapacidad?" +
+                         "IdAccoQueue=" + id +
+                         "&CantTicket=" + $("#txtCantidadTicket" + id).val() +
+                         "&CantProyecto=" + $("#txtCantidadProyecto" + id).val() +
+                         "&IdAcco=" + $("#cbCuenta").val() +
+                         "&Estado=" + estado,
+                    type: "GET",
+                    cache: false,
+                    dataType: "json",
+                    success: function (source) {
+                        data = source
+                        $("#txtCantidadTicket" + id).addClass('divHide');
+                        $("#txtCantidadProyecto" + id).addClass('divHide');
+                        $(".view" + id).removeClass('divHide');
+                        $(".edit" + id).addClass('divHide');
+                        document.getElementById("cantTicket" + id).innerHTML = (data['Data'][0]['CantTicket']);
+                        document.getElementById("cantProyecto" + id).innerHTML = (data['Data'][0]['CantProyecto']);
+                        var estadoV = "";
+                        if ((data['Data'][0]['Estado']) == true) {
+                            estadoV = "Activo";
+                        } else {
+                            estadoV = "Inactivo";
+                        }
+                        document.getElementById("estado" + id).innerHTML = estadoV;
+                    },
+                    error: function (source) {
+                    }
+                });
+            }
+        }
+        else
+        {
+            if ($("#txtCantidadTicket" + id).val() == 0) {
+                $('#divMensaje').empty();
+                $('#divMensaje').show("show");
+                $("#divMensaje").append("<div class='alert alert-danger'>Las cantidades deben ser mayor a 0 </div>");
+                setTimeout(function () {
+                    $("#divMensaje").fadeOut(3000);
+                }, 1000);
+            } else {
+                if ($("#chkEstado" + id).is(':checked')) {
+                    estado = true;
+                } else {
+                    estado = false;
+                }
+                $.ajax({
+                    url: "/Capacidad/GuardarCapacidad?" +
+                         "IdAccoQueue=" + id +
+                         "&CantTicket=" + $("#txtCantidadTicket" + id).val() +
+                         //"&CantProyecto=" + $("#txtCantidadProyecto" + id).val() +
+                         "&IdAcco=" + $("#cbCuenta").val() +
+                         "&Estado=" + estado,
+                    type: "GET",
+                    cache: false,
+                    dataType: "json",
+                    success: function (source) {
+                        //alert(1);
+                        data = source
+                        $("#txtCantidadTicket" + id).addClass('divHide');
+                        $(".view" + id).removeClass('divHide');
+                        $(".edit" + id).addClass('divHide');
+                        document.getElementById("cantTicket" + id).innerHTML = (data['Data'][0]['CantTicket']);
+                        var estadoV = "";
+                        if ((data['Data'][0]['Estado']) == true) {
+                            estadoV = "Activo";
+                        } else {
+                            estadoV = "Inactivo";
+                        }
+                        document.getElementById("estado" + id).innerHTML = estadoV;
+                    },
+                    error: function (source) {
+                    }
+                });
+            }
+        }
+    }
+
+    function cuentaPorDefecto(id) {
+        $.ajax({
+            url: "/Capacidad/CuentaPorDefecto/",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source
+                //alert((data['Data']['NamAcco']));
+                var $newOption = $("<option></option>").val(id).text((data['Data'][0]['text']));
+                $("#cbCuenta").append($newOption).trigger('change');
+            },
+            error: function (source) {
+            }
+        });
+    }
+</script>

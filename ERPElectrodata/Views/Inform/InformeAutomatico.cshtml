@@ -1,0 +1,497 @@
+﻿@{
+    ViewBag.Title = "InformeAutomatico";
+    Layout = null;
+}
+<style>
+    .select2 {
+        width: 100% !important;
+    }
+</style>
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Informe Automático
+                <div class="page-title-subheading">
+                    Reportes Preestablecidos.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col-md-2" id="divSubCuenta">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <label>Sub Cuenta</label>
+                        <div class="position-relative form-check">
+                            <label class="form-check-label">
+                                <input type="radio" id="rbTodos" name="rbSubCuenta" class="form-check-input" value="0" checked> TODOS
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label><br /></label>
+                        <div class="position-relative form-check">
+                            <label class="form-check-label">
+                                <input type="radio" id="rbInterno" name="rbSubCuenta" class="form-check-input" value="1"> INTERNO
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-md-12">
+                        <label><br /></label>
+                        <div class="position-relative form-check">
+                            <label class="form-check-label">
+                                <input type="radio" id="rbExterno" name="rbSubCuenta" class="form-check-input" value="2"> EXTERNO
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10" id="divFiltros">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtClientes" for="txtClientes" class="right">Clientes </label>
+                            <select id="ID_CLIE_REP" name="ID_CLIE_REP" class="form-control select2"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtClienteFinal" for="txtClienteFinal" class="">Cliente Final </label>
+                            <select id="ID_CLIE_FIN" name="ID_CLIE_FIN" class="form-control select2"></select>
+                            @*<select id="ID_STAT_END" class="form-control select2" multiple="multiple" type="text" style="width:100%" />*@
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtFechaInicio" for="txtFechaInicio" class="right">Fecha Inicio </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend datepicker-trigger">
+                                    <div class="input-group-text">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control" id="dtFechaInicio" name="dtFechaInicio" value="@ViewBag.FechaInicio" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtFechaFin" for="txtFechaFin" class="right">Fecha Fin </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend datepicker-trigger">
+                                    <div class="input-group-text">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control" id="dtFechaFin" name="dtFechaFin" value="@ViewBag.FechaActual" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtTipoTicket" for="txtTipoTicket" class="right">Tipo Ticket </label>
+                            <select id="cbTipoTicket" name="cbTipoTicket" class="form-control select2"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="" for="" class="">&nbsp; </label>
+                            <button type="button" id="btnBuscar" onclick="BuscarTickets();" class="mb-2 mr-2 btn-pill btn btn-primary btn-block"><span>Buscar</span></button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtAreaResponsable" for="txtAreaResponsable" class="right">Área Responsable </label>
+                            <select id="IdAreaResponsable" name="IdAreaResponsable" class="form-control select2" ></select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtAsignadoa" for="txtAsignadoa" class="">Asignado a </label>
+                            <select id="IdAsignadoA" name="IdAsignadoA" class="form-control select2"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtUnidadNegocio" for="txtUnidadNegocio" class="right">Unidad de Negocio </label>
+                            <select id="cbCategoria" name="cbCategoria" class="form-control select2" ></select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtMacroservicio" for="txtMacroservicio" class="right">Macroservicio </label>
+                            <select id="cbSubCategoria" name="cbSubCategoria" class="form-control select2"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtServicio" for="txtServicio" class="right">Servicio </label>
+                            <select id="cbClase" name="cbClase" class="form-control select2"></select>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtInciReque" for="txtInciReque" class="right">Incidente/Requerimiento </label>
+                            <select id="cbSubClase" name="cbSubClase" class="form-control select2"></select>
+                        </div>
+                    </div>
+                </div>
+                <style>
+                    #mensajetexbox {
+                        display: inline-block;
+                        margin-left: 5px;
+                        color: blue;
+                    }
+                </style>
+
+                <div class="form-row">
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="idcheckfirma">
+                            </label>
+                            <p id="mensajetexbox">Firma</p>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <iframe id="RSInforme" style="height:550px; width:75%;border: 0px #eee solid;padding-left:25%;"></iframe>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+        function GenerarReporte() {
+
+            if ($("#dtFechaInicio").val() == "" || $("#dtFechaFin").val() == "") {
+              
+                swal({
+                    title: 'Mensaje',
+                    type: 'info',
+                    text: 'Ingrese un rango de fechas.',
+                    focusConfirm: false,
+                    confirmButtonText:
+                        'Continue',
+                    confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                })
+            } else {
+                window.frames["RSInforme"].src = "/Reporting/Inform/InformeAutomatico.aspx?FechaInicio=" + $("#dtFechaInicio").val() +
+                    "&FechaFin=" + $("#dtFechaFin").val() +
+                    "&Cliente=" + $("#ID_CLIE_REP").val() + "&ClienteFinal=" + $("#ID_CLIE_FIN").val() +
+                    "&IdAreaResponsable=" + $("#IdAreaResponsable").val() +
+                    "&IdAsignadoA=" + $("#IdAsignadoA").val() +
+                    "&IdCategoria=" + $("#cbCategoria").val() +
+                    "&IdSubCategoria=" + $("#cbSubCategoria").val() +
+                    "&IdClase=" + $("#cbClase").val() +
+                    "&IdSubClase=" + $("#cbSubClase").val() +
+                    "&IdTipoTicket=" + $("#cbTipoTicket").val() +
+                    "&SubCuenta=" + $("input[name='rbSubCuenta']:checked").val()+
+                    "&Id=" + @ViewBag.Id +"" +
+                    "&MostrarFirma=" + ($("#idcheckfirma").is(":checked") ? 1 : 0);
+            }
+
+        }
+</script>
+
+<script type="text/javascript">
+
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+    $(document).ready(function () {
+
+        if (@Session["ID_ACCO"] != 4) {
+            $("#divSubCuenta").css("display", "none");
+            $("#divFiltros").addClass("col-md-12");
+        }
+
+        $('#dtFechaInicio').datepicker({
+            autoclose: true
+        });
+        $('#dtFechaFin').datepicker({
+            autoclose: true
+        });
+
+        $("#cbSubCategoria").select2();
+        $("#cbClase").select2();
+        $("#cbSubClase").select2();
+        $("#IdAsignadoA").select2();
+
+        $("#ID_CLIE_REP").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarCompañiasxCuenta",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $("#ID_CLIE_FIN").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarCompañiasxCuenta",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+
+        $("#cbTipoTicket").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeTicket/ListarTipoTicket",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+        $("#cbCategoria").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Administrator/ListarCategorias/0",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $("#cbCategoria").on('change', function (e) {
+            $("#cbSubCategoria").empty();
+            var idCategoria = $("#cbCategoria").find(':selected').val()
+            $("#cbSubCategoria").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/Administrator/ListarCategorias/" + idCategoria,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+
+        });
+        $("#cbSubCategoria").on('change', function (e) {
+            $("#cbClase").empty();
+            var idSubCategoria = $("#cbSubCategoria").find(':selected').val()
+            $("#cbClase").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/Administrator/ListarCategorias/" + idSubCategoria,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+
+        });
+        $("#cbClase").on('change', function (e) {
+            $("#cbSubClase").empty();
+            var idClase = $("#cbClase").find(':selected').val()
+            $("#cbSubClase").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/Administrator/ListarCategorias/" + idClase,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+
+        });
+        $("#IdAreaResponsable").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountQueue/ListarAreaResponsable",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+        $("#IdAreaResponsable").on('change', function (e) {
+            $("#IdAsignadoA").empty();
+            var idAreaResponsable = $("#IdAreaResponsable").find(':selected').val()
+            $("#IdAsignadoA").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/AccountEntity/ListarAsignadoA/" + idAreaResponsable,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+
+        });
+
+        $("#btnBuscar").click(function () {
+            GenerarReporte();
+        });
+
+
+        const checkbox = $('#idcheckfirma');
+        const mensaje = $('#mensajetexbox');
+
+        checkbox.change(function () {
+            if (checkbox.is(':checked')) {
+                mensaje.text('Con firma').css('color', 'green');
+            } else {
+                mensaje.text('Sin firma').css('color', 'blue');
+            }
+        });
+
+
+
+
+
+    });
+
+</script>

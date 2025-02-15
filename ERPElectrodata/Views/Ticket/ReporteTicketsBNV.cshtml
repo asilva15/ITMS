@@ -1,0 +1,1031 @@
+﻿@{
+    //Layout = null;
+}
+
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">
+<script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+@*<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>*@
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<style>
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        margin-left: -20px !important;
+    }
+
+    .divFind {
+        width: 100%;
+        display: inline-block;
+        border: 1px #eee solid;
+    }
+
+    .divHead {
+        padding: 5px 10px 5px 10px;
+    }
+
+    .rowx {
+        float: left;
+        margin-left: 10px;
+    }
+</style>
+
+<input type="hidden" name="esGestorTareas" id="esGestorTareas" value="@ViewBag.esGestorTareas" />
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Reporte de Tickets @(ViewBag.Evento == 1 ? "Evento" : "")
+                <div class="page-title-subheading">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+
+<div class="tab-content">
+    @using (Html.BeginForm("ExportarReporteTicket", "Ticket", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+    {
+        <input type="hidden" id="Estados" name="Estados" />
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-header">
+                        Busqueda de Tickets por Área Responsable
+                    </div>
+                    <fieldset class="card-body">
+                        <div class="form-row">
+
+                            <div class="col-md-6 col-lg-3">
+
+                                <div class="form-group">
+                                    Área Responsable
+                                    @Html.Editor("ID_QUEU")
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="form-group">
+                                    <label id="txtEstado" for="txtEstado">Estado </label>
+                                    <select id="ID_ESTADO" class="select2" multiple="multiple" type="text" style="width:100%"></select>
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                <div class="form-group">
+                                    Sede de ticket o Locación
+                                    @Html.Editor("ID_LOCA")
+                                </div>
+                            </div>
+                            @if (ViewBag.Evento == 1)
+                            {
+                                <input id="ID_TYPE_TICKET" name="ID_TYPE_TICKET" type="hidden" value="EVENTO" />
+                            }
+                            else
+                            {
+                                <div class="col-md-6 col-lg-3">
+                                    <div class="form-group">
+                                        Tipo de Ticket
+                                        @Html.Editor("ID_TYPE_TICKET")
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Desde
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" id="FechaInicial" name="FechaInicial" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Hasta
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" id="FechaFinal" name="FechaFinal" />
+                                </div>
+                            </div>
+                            @*<div class="col-md-2">
+
+                                </div>*@
+                            <div class="col-md-2 col-lg-2">
+                                <div class="col-md-12">
+                                    <br />
+                                    <button onclick="ListarReporteTareas()" class="mb-2 mr-2 btn-block btn btn-primary btn-pill" type="button">BUSCAR</button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-lg-2">
+                                <div class="col-md-12">
+                                    <br />
+                                    <button onclick="Exportar()" id="export" class="mb-2 mr-2 btn-block btn btn-success btn-pill" type="button">EXPORTAR</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="card-title" id="titleForm">Reporte de Tickets</div>
+                <fieldset>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="position-relative form-group">
+                                <table id="tbReporteTicketBNV" class="display nowrap" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;">ID_TICK</th>
+                                            <th>Tipo Ticket</th>
+                                            <th>Código</th>
+                                            <th>Fecha de Creación</th>
+                                            <th>Tiempo de Resolución</th>
+                                            <th>Tiempo de Resolución (Horas)</th>
+                                            <th>Tiempo Real R (Horas)</th>
+                                            <th>Creado Por</th>
+
+                                            <th>Compañía</th>
+                                            <th>Solicitante</th>
+
+                                            <th>Usuario Final Afectado</th>
+                                            <th>Área Usuario Final Afectado</th>
+                                            <th>VIP</th>
+                                            <th>Prioridad</th>
+                                            <th>Acuerdo de Nivel de Servicio</th>
+
+                                            <th>Área Operativa</th>
+                                            <th>Asignado A</th>
+                                            <th>Estado</th>
+                                            <th>Espera Cliente</th>
+                                            <th>Fecha Programada</th>
+
+                                            <th>Desde</th>
+                                            <th>Hasta</th>
+                                            <th>Tiempo de Resolución Manual</th>
+
+                                            @*<th>Fecha expira Ticket</th>*@
+                                            <th>Tiempo Restante Expira</th>
+                                            <th>Unidad de Servicio</th>
+                                            <th>MacroServicio</th>
+                                            <th>Servicio</th>
+                                            <th>Incidente/Requerimiento</th>
+                                            <th>Fuente Info.</th>
+                                            <th>Motivo Regularización</th>
+                                            <th>Positivo - Falso Positivo</th>
+                                            <th>Comentario Resuelto</th>
+
+                                            <th>Ticket Padre</th>
+                                            <th>Solicitud</th>
+                                            @*<th>Control Remoto</th>*@
+
+
+
+
+
+
+                                            <th>Resuelto Por</th>
+
+                                            <th>Fecha Recepción Solicitud</th>
+                                            <th>Sede</th>
+                                            <th>Ticket Activo</th>
+                                            <th>En SLA</th>
+                                            <th>Tipo de Resolucion</th>
+
+                                            <th>Ticket Externo</th>
+                                            <th>Tipo Cliente</th>
+                                            <th>Solman</th>
+                                            <th>Razón</th>
+                                            <th>Modalidad Trabajo</th>
+                                            <th>Tipo Pase</th>
+                                            <th>Analista Bnv</th>
+
+                                            <th>Sede Ticket</th>
+                                            <th>Reportado Por</th>
+                                            <th>Fecha Inicio Real</th>
+                                            <th>Tiempo Respuesta (Hora)</th>
+                                            <th>Tiempo Respuesta</th>
+                                            <th>Tiempo Invertido Solución</th>
+                                            <th>Título de la Solicitud</th>
+                                            <th>SLA Correo MDA</th>
+                                            <th>SLA Escalamiento MDA</th>
+                                            <th>Fecha Transferencia MDA</th>
+                                            <th>Dias transcurridos</th>
+                                            <th>Dias Laborales transcurridos</th>
+                                            <th>Jefatura</th>
+                                            <th>Horas N3</th>
+                                            <th>TAG</th>
+                                            <th>Impacto del Servicio</th>
+                                            <th>Garantia del Proveedor</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#ID_LOCA").kendoComboBox({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data"
+                },
+                transport: {
+                    read: "/Location/ListarLocacionesxCompaniaBnv?var=" + Math.random()
+                },
+                sort: { field: "text", dir: "asc" }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_ESTADO").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: true,
+            allowClear: true,
+            ajax: {
+                url: "/StatusTicket/ListarEstado",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        if (@ViewBag.Evento == 0) {
+            $("#ID_TYPE_TICKET").kendoComboBox({
+                autoBind: false,
+                dataTextField: "NAM_TYPE_TICK",
+                dataValueField: "NAM_TYPE_TICK",
+                suggest: true,
+                dataSource: {
+                    serverFiltering: false,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/TypeTicket/List?var=" + Math.random()
+                    },
+                    requestEnd: function (e) {
+                        e.response.Data = e.response.Data.filter(function (item) {
+                            return item.NAM_TYPE_TICK !== "EVENTO";
+                        });
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+
+                @*var esGestorTarea = @ViewBag.esGestorTareas;*@
+                ActualizarReporteTickets();
+                var today = new Date();
+                var k_startdatetimepicker = $("#FechaInicial").kendoDatePicker({
+                    //value: today
+                }).data("kendoDateTimePicker");
+                var k_enddatetimepicker = $("#FechaFinal").kendoDatePicker({
+                    //value: today
+                }).data("kendoDateTimePicker");
+
+                var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+                    autoBind: true,
+                    dataTextField: "NAM_QUEU_REPO",
+                    dataValueField: "ID_QUEU",
+
+                    filter: "contains",
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    //template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+                    //    '<span><strong>${data.QUEU} |</strong>  ${data.DES_QUEU}</span>' +
+                    //    '</div>',
+                    dataSource: {
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/Ticket/ListaGrupoResolutorPorCuenta?var=" + Math.random()
+                        }
+                    }
+                }).data("kendoComboBox");
+
+
+
+
+
+
+
+            });
+
+    function ActualizarReporteTickets() {
+        //$("#tbReporteTicketBNV").dataTable().fnDestroy();
+        $("#tbReporteTicketBNV").DataTable({
+            responsive: false,
+            select: true,
+            dom: 'Bfrtip',
+            destroy: true,
+            scrollX: true,
+            ajax: {
+                url: "/Ticket/ListaReporteTicketBNV2",
+                data: { estado: 4 },
+                type: "GET",
+                error: function (xhr, error, thrown) {
+                    // Evitar mostrar la advertencia en la consola
+                }
+            },
+            columns: [
+                {
+                    data: "ID_TICK",
+                    visible: false, // Para ocultar la columna en la visualización
+                },
+                {
+                    data: "Type"
+                },
+                {
+                    data: "Code"
+                },
+                {
+                    data: "Creation_Date",
+                    "render": function (data) {
+                        return formatarFecha(data);
+                    },
+                     type: 'date', // Especifica el tipo de dato como "date"
+                    targets: [2] // Indica el índice de la columna
+                },
+                {
+                    data: "Resolution_Time"
+                },
+                {
+                    data: "Time_Resolution"
+                },
+                {
+                    data: "TiempoReal"
+                },
+                {
+                    data: "CreatedBy"
+                },
+
+                {
+                    data: "COM_NAME"
+                },
+                {
+                    data: "Requester"
+                },
+                //12
+
+
+                {
+                    data: "Affected_End_User"
+                },
+                {
+                    data: "Area_Affected_End_User"
+                },
+                {
+                    data: "UsuarioVIP"
+                },
+                {
+                    data: "Priority"
+                },
+                {
+                    data: "Service_Level_Agreement"
+                },
+                {
+                    data: "Queue"
+                },
+                {
+                    data: "Assigned"
+                },
+                {
+                    data: "Status"
+                },
+                {
+                    data: "EsperaCliente"
+                },
+                {
+                    data: "FEC_SCHE"
+                },
+                {
+                    data: "From_Date"
+                },
+                {
+                    data: "To_Date"
+                },
+                {
+                    data: "TiempoAtencion"
+                },
+                {
+                    data: "HOUR_EXPI_TICK"
+                },
+                {
+                    data: "Category"
+                },
+                {
+                    data: "SubCategory"
+                },
+                {
+                    data: "Class"
+                },
+                {
+                    data: "SubClass"
+                },
+                {
+                    data: "Source"
+                },
+                {
+                    data: "MotivoSource"
+                },
+                {
+                    data: "FalsoPositivo"
+                },
+                ////12
+                {
+                    data: "ComentarioResuelto"
+                },
+
+                {
+                    data: "Parent"
+                },
+                {
+                    data: "Summary"
+                },
+                //{
+                //    data: "Remote_Control"
+                //},
+                //{
+                //    data: "Adicional1"
+                //},
+                //////12
+
+                //{
+                //    data: "Adicional2"
+                //},
+                //{
+                //    data: "Attachments"
+                //},
+                //{
+                //    data: "FechaUltimoComent"
+                //},
+                //{
+                //    data: "UltimoComent"
+                //},
+
+
+
+
+
+                {
+                    data: "UsuarioResuelve"
+                },
+
+                {
+                    data: "FechaRecepcionSolicitud"
+                },
+                {
+                    data: "Sede"
+                },
+                {
+                    data: "TicketActivo"
+                },
+                {
+                    data: "EnSla"
+                },
+                {
+                    data: "TipoResolucion"
+                },
+
+                {
+                    data: "UltimoComent"
+                },
+                {
+                    data: "TipoCliente"
+                },
+                {
+                    data: "Solman"
+                },
+                {
+                    data: "NomRazon"
+                },
+                {
+                    data: "NomModTrabajo"
+                },
+                {
+                    data: "NomTipoPase"
+                },
+                {
+                    data: "NomAnalistaBnv"
+                },
+                ////12
+
+                {
+                    data: "SedeTicket"
+                },
+                {
+                    data: "GrupoReportador"
+                },
+                {
+                    data: "FechaInicioReal"
+                },
+                {
+                    data: "TiempoRespuestaHora"
+                },
+                {
+                    data: "TiempoRespuesta"
+                },
+                {
+                    data: "TiempoInvSolucion"
+                },
+                {
+                    data: "TituloTicket"
+                },
+                {
+                    data: "SlaCorreoMDA"
+                },
+                {
+                    data: "SlaEscalamientoMDA"
+                },
+                {
+                    data: "FechaTransferenciaMDA"
+                },
+                {
+                    data: "Dias_Transcurridos"
+                },
+                {
+                    data: "Dias_Laboral_Transcurridos"
+                },
+                {
+                    data: "Jefatura"
+                },
+                ////11
+
+                {
+                    data: "Horas_N3"
+                },
+                {
+                    
+                    data: "Tag"
+                },
+                {
+                    data: "ImpactoServicio"
+                },
+                {
+                    data: "GarantiaProveedor"
+                }
+            ],
+            order: [[0, 'desc']], // Ordena por la primera columna (ID_TICK) de forma descendente
+
+            buttons: [
+                 /*'excel'*/
+            ]
+        }).on('select', function (e, dt, type, indexes) {
+            if (type === 'row') {
+                window.open("/DetailsTicket/Index/" + dt.rows(indexes).data()[0].ID_TICK, "_blank");
+                //Por si se quiere dejar sin seleccionar la tabla luego de clickear
+                //dt.rows().deselect();
+            }
+        });
+    }
+            function Exportar() {
+                var fechaInicial = $("#FechaInicial").val();
+                var fechaFinal = $("#FechaFinal").val();
+
+                var estados = $("#ID_ESTADO option:selected").map(function () {
+                    return $(this).text();
+                }).get().join(',');
+                $("#Estados").val(estados);
+
+                // Validar si las fechas son nulas o "null"
+                if (fechaInicial === "" || fechaFinal === "" || fechaInicial === "null" || fechaFinal === "null") {
+                    // Mostrar mensaje emergente
+                    toastr.warning("Completar los campos de fecha");
+                } else {
+                    // Enviar el formulario si las fechas están completas
+                    $("#formExportar").submit();
+                }
+            }
+
+            function formatarFecha(date) {
+                // Convierte el formato /Date(1698936660887)/ a un objeto de fecha
+                var fecha = new Date(parseInt(date.substr(6)));
+
+                // Formatea la fecha como "DD/MM/YYYY hh:mm"
+                var formattedFecha = fecha.toLocaleString('es-ES', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+
+                return formattedFecha;
+            }
+
+
+
+
+            function ListarReporteTareas() {
+                var idqueu = $("#ID_QUEU").val();
+                var idLoca = $("#ID_LOCA").val();
+                var FechaInicial = $("#FechaInicial").val();
+                var FechaFinal = $("#FechaFinal").val();
+                var type_ticket = $("#ID_TYPE_TICKET").val();
+
+                var estados = $("#ID_ESTADO option:selected").map(function () {
+                    return $(this).text();
+                }).get().join(',');
+
+
+                $('#tbReporteTicketBNV').dataTable().fnDestroy();
+                var table = $('#tbReporteTicketBNV').dataTable({
+
+                    "order": [1, 'desc'],
+                    responsive: false,
+                    select: true,
+                    dom: 'Bfrtip',
+                    destroy: true,
+                    scrollX: true,
+					info:false,
+                    //buttons: [{
+                    //    extend: 'excelHtml5',
+                    //    text: '<i class="fa fa-file-excel-o"> Exportar Tabla</i>',
+                    //    titleAttr: 'Excel',
+                    //    action: function (e, dt, button, config) {
+                    //        var allData = dt.rows().data(); // Obtén todos los datos de DataTable
+
+                    //        // Aquí puedes agregar tu lógica para limitar los datos si es necesario
+                    //        // Por ejemplo, si tienes más de 4000 filas, puedes truncar el array
+                    //        allData = allData.slice(0, 800);
+
+                    //        var newData = allData.map(function (row) {
+                    //            return row.toArray();
+                    //        });
+                    //        var exportData = {
+                    //            body: newData,
+                    //            header: dt.columns().header().toArray()
+                    //        };
+
+                    //        button._action('exportData', {
+                    //            exportData: exportData,
+                    //            filename: config.filename
+                    //        });
+                    //    }
+                    //}],
+
+                    "bPaginate": true,
+                    "searching": true,
+
+                    ajax: {
+
+                        "url": "/Ticket/ListadoReporteTicketsBNV",
+                        "data": function (d) {
+                            d.ID_QUEU = idqueu;
+                            d.Estados = estados;
+                            d.FechaInicio = FechaInicial;
+                            d.FechaFin = FechaFinal;
+                            d.ID_LOCA = idLoca;
+                            d.Type_ticket = type_ticket;
+                        }
+
+
+                    },
+                    columns: [
+                        {
+                            data: "ID_TICK",
+                            visible: false, // Para ocultar la columna en la visualización
+                        },
+                        {
+                            data: "Type"
+                        },
+                        {
+                            data: "Code"
+                        },
+                        {
+                            data: "Creation_Date",
+                            "render": function (data) {
+                                return formatarFecha(data);
+                            },
+                            type: 'date', // Especifica el tipo de dato como "date"
+                            targets: [2] // Indica el índice de la columna
+                        },
+                        {
+                            data: "Resolution_Time"
+                        },
+                        {
+                            //data: "Time_Resolution"
+                            data: "Time_Resolution_HHMMSS"
+                        },
+                        {
+                            //data: "TiempoReal"
+                            data: "TiempoRealHHMMSS"
+                        },
+                        {
+                            data: "CreatedBy"
+                        },
+
+                        {
+                            data: "COM_NAME"
+                        },
+                        {
+                            data: "Requester"
+                        },
+                        //12
+
+
+                        {
+                            data: "Affected_End_User"
+                        },
+                        {
+                            data: "Area_Affected_End_User"
+                        },
+                        {
+                            data: "UsuarioVIP"
+                        },
+                        {
+                            data: "Priority"
+                        },
+                        {
+                            data: "Service_Level_Agreement"
+                        },
+                        {
+                            data: "Queue"
+                        },
+                        {
+                            data: "Assigned"
+                        },
+                        {
+                            data: "Status"
+                        },
+                        {
+                            data: "EsperaCliente"
+                        },
+                        {
+                            data: "FEC_SCHE"
+                        },
+                        {
+                            data: "From_Date"
+                        },
+                        {
+                            data: "To_Date"
+                        },
+                        {
+                            data: "TiempoAtencion"
+                        },
+                        {
+                            data: "HOUR_EXPI_TICK"
+                        },
+                        {
+                            data: "Category"
+                        },
+                        {
+                            data: "SubCategory"
+                        },
+                        {
+                            data: "Class"
+                        },
+                        {
+                            data: "SubClass"
+                        },
+                        {
+                            data: "Source"
+                        },
+                        {
+                            data: "MotivoSource"
+                        },
+                        {
+                            data: "FalsoPositivo"
+                        },
+                        ////12
+
+                        {
+                            data: "ComentarioResuelto"
+                        },
+                        {
+                            data: "Parent"
+                        },
+                        {
+                            data: "Summary"
+                        },
+                        //{
+                        //    data: "Remote_Control"
+                        //},
+                        //{
+                        //    data: "Adicional1"
+                        //},
+                        //////12
+
+                        //{
+                        //    data: "Adicional2"
+                        //},
+                        //{
+                        //    data: "Attachments"
+                        //},
+                        //{
+                        //    data: "FechaUltimoComent"
+                        //},
+                        //{
+                        //    data: "UltimoComent"
+                        //},
+
+
+
+
+
+                        {
+                            data: "UsuarioResuelve"
+                        },
+
+                        {
+                            data: "FechaRecepcionSolicitud"
+                        },
+                        {
+                            data: "Sede"
+                        },
+                        {
+                            data: "TicketActivo"
+                        },
+                        {
+                            data: "EnSla"
+                        },
+                        {
+                            data: "TipoResolucion"
+                        },
+
+                        {
+                            data: "UltimoComent"
+                        },
+                        {
+                            data: "TipoCliente"
+                        },
+                        {
+                            data: "Solman"
+                        },
+                        {
+                            data: "NomRazon"
+                        },
+                        {
+                            data: "NomModTrabajo"
+                        },
+                        {
+                            data: "NomTipoPase"
+                        },
+                        {
+                            data: "NomAnalistaBnv"
+                        },
+                        ////12
+
+                        {
+                            data: "SedeTicket"
+                        },
+                        {
+                            data: "GrupoReportador"
+                        },
+                        {
+                            data: "FechaInicioReal"
+                        },
+                        {
+                            data: "TiempoRespuestaHora"
+                        },
+                        {
+                            data: "TiempoRespuesta"
+                        },
+                        {
+                            data: "TiempoInvSolucion"
+                        },
+                        {
+                            data: "TituloTicket"
+                        },
+                        {
+                            data: "SlaCorreoMDA"
+                        },
+                        {
+                            data: "SlaEscalamientoMDA"
+                        },
+                        {
+                            data: "FechaTransferenciaMDA"
+                        },
+                        {
+                            data: "Dias_Transcurridos"
+                        },
+                        {
+                            data: "Dias_Laboral_Transcurridos"
+                        },
+                        {
+                            data: "Jefatura"
+                        },
+                        ////11
+
+                        {
+                            data: "Horas_N3"
+                        },
+                        {
+                            data: "Tag"  
+                        },
+                        {
+                            data: "ImpactoServicio"
+                        },
+                        {
+                            data: "GarantiaProveedor"
+                        }
+                    ],
+                    order: [[0, 'desc']], // Ordena por la primera columna (ID_TICK) de forma descendente
+
+                    buttons: [
+                        /*'excel'*/
+                    ]
+                });
+
+                uploadDoneBuscar("OK");
+            }
+
+            function SeleccionarAsignado(id) {
+
+                $("#lblTitulo").text("Asignar Colaborador");
+                $(".modal-dialog").removeClass("modal-xl");
+                $(".modal-dialog").removeClass("modal-lg");
+                $(".modal-dialog").removeClass("modal-sm");
+                $(".modal-dialog").addClass("modal-md");
+                $("#modal-content").empty();
+                $("#modal-content").load(`/Ticket/ReporteTareasSelecAsignado/${id}?var=${Math.random()}`);
+            }
+
+            function uploadDoneBuscar(msg, msgerror) {
+                var fechaInicial = $("#FechaInicial").val();
+                var fechaFinal = $("#FechaFinal").val();
+
+                // Validar si las fechas son nulas o "null"
+                if (fechaInicial === "" || fechaFinal === "" || fechaInicial === "null" || fechaFinal === "null") {
+                    // Mostrar mensaje emergente
+                    toastr.warning("Completar los campos de fecha");
+                }
+                else {
+                    if (msg == "OK") {
+                        toastr.warning(msgerror, "Para visualizar más de 900 registros utilice el boton Exportar.");
+                    }
+                    else {
+
+                        toastr.warning(msgerror, "Error al buscar");
+                    }
+                }
+
+        }
+
+
+
+</script>

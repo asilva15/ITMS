@@ -1,0 +1,112 @@
+﻿@{
+    ViewBag.Title = "CalendarioCertificaciones";
+    Layout = null;
+}
+
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+    <link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+    <link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>*@
+<script src="~/Content/themes/plugin/fullcalendar/moment.min.js"></script>
+    <script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+
+@*<script type="text/javascript" src="~/Content/ArchitectureUI/assets/scripts/main.js"></script>
+<link href="~/Content/ArchitectureUI/main.css" rel="stylesheet" />*@
+
+
+<div class="col-md-12">
+    @*<div id='calendar'></div>*@
+    <div id="calendarioCertificaciones">
+    </div>
+</div>
+<strong style="padding-left:15px">*Calendario de certificaciones programadas</strong>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        setTimeout(function () {
+            VerCalendario();
+        }, 1000);
+    });
+
+    function VerCalendario() {
+
+        $('#calendarioCertificaciones').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay,listWeek'
+            },
+            buttonText: {
+                today: 'hoy',
+                month: 'mes',
+                week: 'semana',
+                day: 'día'
+            },
+            allDaySlot: false,
+
+            //Random default events
+            events: function (start, end, timezone, callback) {
+                $.ajax({
+                    url: '/Certificado/ListarCertificados/1',
+                    type: "POST",
+                    datatype: 'json',
+                    //data: {
+                    //    start: start.format(),
+                    //    end: end.format()
+                    //},
+                    success: function (data) {
+                        var events = [];
+
+                        $.each(data['data'], function (index, value) {
+
+                            events.push({
+                                id: (data['data'][index]['Id']),
+                                title: (data['data'][index]['Marca']) + '-' + (data['data'][index]['Certificado']),
+                                description: (data['data'][index]['Certificado']),
+                                start: (data['data'][index]['FechaProgramada']),
+                                //backgroundColor: "#3F6AD8",
+                                //borderColor: "#3F6AD8",
+                                url: "javascript:VerProgramaciones()",
+                            });
+
+                        });
+
+                        callback(events);
+                    },
+                    error: function (err) {
+
+                    }
+                });
+            },
+            //eventRender: function (info) {
+            //    var tooltip = new Tooltip(info.el, {
+            //        title: info.event.extendedProps.description,
+            //        placement: 'top',
+            //        trigger: 'hover',
+            //        container: 'body'
+            //    });
+            //},
+            //eventRender: function (eventObj, $el) {
+            //    $el.popover({
+            //        title: eventObj.title,
+            //        content: eventObj.description,
+            //        trigger: 'hover',
+            //        placement: 'top',
+            //        container: 'body'
+            //    });
+            //},
+            navLinks: true, // agregado
+            editable: false, // era false
+            droppable: true, // this allows things to be dropped onto the calendar !!!
+            eventLimit: true,
+        });
+
+    }
+
+    function VerProgramaciones() {
+        //window.open("http://" + location.host + "/Certificado/ProgramacionCertificado/")
+    }
+
+</script>

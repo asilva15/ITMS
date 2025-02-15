@@ -1,0 +1,123 @@
+﻿@model ERPElectrodata.Models.PERSON_CONTRACT
+
+@{
+    Layout = null;
+}
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/4.0.6/sweetalert2.min.css" rel="stylesheet" />
+<div id="divTreeViewContracts" style="padding: 3px 0 0 7px;"></div>
+
+<script id="tvContract-tpt" type="text/kendo-ui-template">
+    <div class="no-gutters">
+        <div class="col-lg-12">
+            <div style="width:100%;">
+                <span style="font-size: .95em; text-transform:capitalize;"> #= item.TYPE #: #= item.NAME_PARA #</span>
+                <a href="/Adjuntos/Talent/Documents/#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.Download #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+                    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                </a>
+                # if (item.DELETE == true) { #
+                <i id='#: item.ID_PARA #' class='fa fa-remove' style="color:gray;cursor:pointer" href='' title='Remove'></i>
+                # } #
+            </div>
+        </div>
+        <div class="col-lg-10">
+            <span style="font-size: .9em; text-transform:capitalize;">@ResourceLanguaje.Resource.StartDateTalent: #= item.START_DATE #</span>
+        </div>
+        <div class="col-lg-10">
+            <span style="font-size: .9em; text-transform:capitalize;">@ResourceLanguaje.Resource.EndDateTalent: #= item.END_DATE #</span>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#divTreeViewContracts").empty();
+        homogeneous = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Person_Contract/ListContract/@ViewBag.ID_PERS_ENTI",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE"
+                }
+            }
+        });
+
+        $("#divTreeViewContracts").kendoTreeView({
+            template: kendo.template($("#tvContract-tpt").html()),
+            dataSource: homogeneous,
+            dataTextField: "ID_PARA",
+            dataValueField: "ID_PARA",
+            change: function (e) {
+                var id = this.text(this.select());
+                $("#divLoad").css("display", "block");
+
+                $("#divPanelIzq").height(360);
+                $("#divPanelDer").height(360);
+                $("#divDetailsContract").empty();
+                $("#divDetailsContract").load("/Person_Contract/ViewContract?id=" + id + "&id1=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+            }
+        });
+    });
+
+    $(document).on("click", ".fa-remove", function (e) {
+        e.preventDefault();
+        var ctrl = $(this);
+        var id = $(this).attr("id");
+
+        var span = document.createElement("span");
+        span.innerHTML = "<img src='/Content/Images/warning.png' width='80'/><p>¿Estás seguro de borrar el archivo adjunto?</p>";
+        swal({
+            type: "warning",
+            title: "@ResourceLanguaje.Resource.Delete",
+            content: span,
+            type: 'success',
+            buttons: {
+                eliminar: {
+                    text: "Si"
+                },
+                cancelar: {
+                    text: "No"
+                },
+            }
+        }).then((value) => {
+            switch (value) {
+                case "cancelar":
+                    break;
+                case "eliminar":
+                    $.ajax({
+                    url: "/Person_Contract/Delete/" + id,
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        elem = dato.split('|');
+
+                        if (elem[0] == 'OK') {
+                            toastr.success("Se actualizó el contrato.")
+                            $("#treeviewContract").empty();
+                            $("#treeviewContract").load("/Person_Contract/TreeViewContract?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+                            $("#divDetailsContract").empty();
+                            $("#divDetailsContract").load("/Person_Contract/ViewContract?id=" + elem[1] + "&var=" + Math.random());
+
+                            $("#ID_PERS_CONT").val(elem[1]);
+                            $("#divPanelIzq").height(320);
+                            $("#divPanelDer").height(320);
+                        }
+                        else { alert('ERROR'); }
+                    },
+                    error: function (dato) {
+                        alert('ERROR');
+                    }
+                });
+                    break;
+            }
+        });
+    });
+</script>

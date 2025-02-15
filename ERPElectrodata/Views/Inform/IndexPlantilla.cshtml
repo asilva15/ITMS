@@ -1,0 +1,1210 @@
+﻿@model ERPElectrodata.Models.InformePlantilla
+@{
+    ViewBag.Title = "IndexPlantilla";
+   Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<style type="text/css">
+    #caja {
+        /*border:1px solid black;*/
+        height: 30px;
+        padding-top: -5px;
+    }
+
+    #pagerdivPrograma {
+        margin-top: 0;
+        padding-top: 0;
+    }
+
+    .greenHeader {
+        color: white;
+        font-weight: 800;
+    }
+
+    #BtnEditar {
+        color: #2D5C88;
+        background: #ffffff;
+        border: 0;
+    }
+
+    /*
+    DAR STYLOS ALA TABLA
+    */
+
+    .k-grid {
+        border: none;
+    }
+
+    .k-grid-pager {
+        border: 1px solid #d5d5d5;
+    }
+
+    .k-grid .k-grid-header .k-header {
+        border-bottom: none;
+        background-color: #3f6ad8;
+        align-items: center;
+        text-align: center;
+    }
+
+        .k-grid .k-grid-header .k-header a {
+            color: white;
+        }
+
+    .k-pager-wrap {
+        background-color: rgb(205, 205, 205);
+        color: black;
+    }
+
+        .k-pager-wrap .k-link.k-selected {
+            background-color: lime;
+        }
+
+
+
+
+
+
+
+
+
+
+
+    /* DAR ESTILOS A LOS BOTONES*/
+    .botonefectoplantilla {
+        background: #bde7f6; /* color de fondo */
+        color: rgb(31, 30, 30); /* color de fuente */
+        border: none;
+        /* redondear bordes */
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+        display: inline-block;
+        font-weight: 700;
+    }
+
+        .botonefectoplantilla:hover {
+            color: rgb(0, 0, 0); /* color de fuente hover */
+            font-weight: 700;
+        }
+
+    .botonactivadoPlantillas:focus {
+        background-color: #3f6ad8;
+        color: rgb(242, 247, 244);
+        font-weight: 700;
+    }
+
+    .botonefectoplantilla::after {
+        border: none;
+        content: "";
+        background: #3f6ad8; /* color de fondo hover */
+        position: absolute;
+        z-index: -1;
+        padding: 16px 20px;
+        display: block;
+        border-radius: 50%;
+        left: -50%;
+        right: -50%;
+        top: -150%;
+        bottom: -150%;
+        transform: scale(0, 0);
+        transition: all 1s ease;
+    }
+
+    .botonefectoplantilla:hover::after {
+        transition: all 0.6s ease-out;
+        transform: scale(1, 1) rotate(0deg);
+    }
+    /*Al pasar el mouse es naranja claro, al hacer click es -....*/
+
+    .botonactivadoPlantillas {
+        background-color: #3f6ad8;
+        color: rgb(242, 247, 244);
+    }
+</style>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="col-md-6 ">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    Plantilla
+                    <div class="page-title-subheading">
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-2 ">
+            <div class="btn-actions-pane-right ">
+                <button type="button" style="display:none" class=" idListaInforme btn botonefectoplantilla btn-block rounded-pill btn-lg botonactivadoPlantillas" id="Buscar">Lista Informe</button>
+                <button type="button" class="  btn botonefectoplantilla btn-block rounded-pill btn-lg botonactivadoPlantillas" id="idListaInforme">Lista Informes</button>
+            </div>
+        </div>
+        <div class="col-md-2 ">
+            <div class="btn-actions-pane-right rounded-pill">
+                <button type="button" class="btn botonefectoplantilla btn-block rounded-pill btn-lg" id="idNuevaplantilla">Nueva Plantilla</button>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="btn-actions-pane-right rounded-pill">
+                <button type="button" class="btn botonefectoplantilla btn-block rounded-pill btn-lg" id="idOtrosFormatos">Otros Informes</button>
+            </div>
+
+        </div>
+
+
+    </div>
+</div>
+
+
+
+@*<div class="divFondoUno" style="padding:10px,10px,10px,10px;">
+        @Html.ValidationSummary(true)
+        <div  style="width:100px;padding-right:20px">
+            <button type="button" class="btn btn-primary " style="float:left;width:120px;" id="Buscar">Plantillas</button>
+        </div>
+        <div style="padding-left:140px" onclick="CrearPlantilla()">
+            <button type="button" class="btn btn-primary " style="float: left; width: 120px;" id="BtnCrear">Crear Plantilla</button>
+        </div>
+    </div>*@
+
+
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" hidden></iframe>
+<div class="row" id="primeraparte">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card element-block-example">
+            <div class="page-title-heading " style=" padding-top: 2%;">
+                <div class="page-title-icon text-center">
+                    <i class="fa fa-crosshairs icon-gradient  bg-mixed-hopes  fa-3x">
+                        <span>
+                            Lista Plantillas
+
+                        </span>
+                    </i>
+
+                </div>
+
+            </div>
+            <div class="card-body">
+
+                <div class="card-body" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+                    <div id="divComponente" class="contentView"></div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="position-relative form-group">
+                                <div id="pagerdivComponente" class="contentViewPager"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                </div>
+            </div>
+    </div>
+</div>
+
+
+@*EMPIEZA LA CREACION DEL NUEVO INFORME*@
+<div id="segundaparte" class="row" style="display:none;">
+
+    <div class="col-md-12">
+
+        <div class="main-card mb-3 card element-block-example">
+            <div class="page-title-heading " style=" padding-top: 2%;">
+                <div class="page-title-icon text-center">
+                    <i class="fa fa-crosshairs icon-gradient bg-happy-itmeo fa-3x">
+                        <span>
+                            Crear Plantilla
+
+                        </span>
+                    </i>
+
+                </div>
+
+            </div>
+            <div class="card-body">
+                @using (Html.BeginForm("Crear", "Inform", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormEditarSubTipoComponente", target = "upload_target" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+                    <div class="card-body" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <label id="" for="" class="">Titulo </label>
+                                    @Html.TextBoxFor(model => model.Titulo, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Titulo)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <div id="divInforme" class="contentView"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-10">
+                                <div class="position-relative form-group">
+                                    &nbsp;
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="position-relative form-group">
+                                    <button id="submit" class="mb-2 mr-2 btn-pill btn btn-primary btn-block"><span>Crear</span></button>
+                                    <iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" hidden></iframe>
+
+@*AQUI VA LA INTERFAS DE OTROS ACRIVOS PARTE*@
+<div id="parte3" style="display:none;" class="">
+    <div class="col-md-12">
+
+        <div class="main-card mb-3 card element-block-example">
+            <div class="page-title-heading " style=" padding-top: 2%;">
+                <div class="page-title-icon text-center">
+                    <i class="fa fa-crosshairs icon-gradient bg-mixed-hopes fa-3x">
+                        <span>
+                            Otras Plantillas
+
+                        </span>
+                    </i>
+
+                </div>
+
+            </div>
+            <div class="card-body">
+                <div class="card-body" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+                    <div class="row" id="FormTicketReport">
+                        <div class="col-md-12">
+                            <div class="main-card mb-3 card">
+                                <div class="card-body">
+                                    <div class="form-row">
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                Compañía inicial
+                                                <input class="form-control" id="idComp" name="idComp" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                Compañía final
+                                                <input class="form-control" id="idCompEnd" name="idCompEnd" />
+                                            </div>
+                                        </div>
+                                        @*<div class="col-md-4">
+                                    <div class="form-group">
+                                        Marca
+                                        <input class="form-control" id="idMarca" name="idMarca" />
+                                    </div>
+                                </div>*@
+                                        <div class="col-md-3">
+                                            <div class="form-group">
+                                                OP
+                                                <input class="form-control" id="idOP" name="idOP" />
+                                            </div>
+                                        </div>
+                                        @*<div class="col-md-3 align-self-center d-flex justify-content-center">
+                                    <button id="btnListarFormato" class="btn btn-primary btn-lg">Buscar Formato</button>
+                                </div>*@
+                                    </div>
+                                    <div class="form-row">
+                                        <div class="col-md-3">
+                                            <div class="position-relative form-group">
+                                                <label id="lblfechaInicio" for="fechaInicio" class="">Fecha Inicio</label>
+                                                <input id="fechaInicio" name="fechaInicio">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="position-relative form-group">
+                                                <label id="lblfechaFin" for="fechaFin" class="">Fecha Fin</label>
+                                                <input id="fechaFin" name="fechaFin">
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <script id="tmp-Comp" type="text/x-kendo-template">
+                        <div style="width: 100%; font-size: 1em;">
+                            <span style="width:100%; font-size:1em;">#= COM_NAME #</span>
+                            <div style="width:100%; font-size:0.9em; margin-top:-5px;">RUC: #= NUM_TYPE_DI #</div>
+                        </div>
+                    </script>
+
+
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="main-card mb-12 card">
+
+                                <div class="card-body">
+                                    <div class="card-title">Generar Informes</div>
+                                    <br>
+
+                                    <div class="form-row">
+
+
+
+                                        <div class="col-md-3">
+                                            <button type="button" id="linkTicketReport" data-toggle="dropdown" aria-haspopup="true" class="btn-shadow  btn-block btn btn-primary">
+                                                <span class="btn-icon-wrapper pr-2 opacity-7">
+                                                    <i class="fa fa-business-time fa-w-20"></i>
+                                                </span>
+                                                Generar Informe Resolucion
+                                            </button>
+                                        </div>
+                                        <div class="col-md-1">
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" id="linkTicketReport" data-toggle="dropdown" aria-haspopup="true" class="btn-shadow  btn-block btn btn-success">
+                                                <span class="btn-icon-wrapper pr-2 opacity-7">
+                                                    <i class="fa fa-business-time fa-w-20"></i>
+                                                </span>
+                                                Generar Informe Atencion
+                                            </button>
+
+
+                                        </div>
+
+                                        <div class="col-md-1">
+
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button type="button" id="linkTicketReport" data-toggle="dropdown" aria-haspopup="true" class="btn-shadow  btn-block btn btn-info">
+                                                <span class="btn-icon-wrapper pr-2 opacity-7">
+                                                    <i class="fa fa-business-time fa-w-20"></i>
+                                                </span>
+                                                Generar Informe Tabla
+                                            </button>
+
+                                        </div>
+
+
+
+
+
+
+
+                                        <div id="rowReporte" class="form-row hidden">
+                                            <div class="col-md-12">
+                                                <div class="form-group">
+                                                    <iframe id="RSformatoAutomatico" style="height:50px; width:75%;border: 0px #eee solid;padding-left:25%;"></iframe>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="titulokendo">
+    <div class="col-md-12">
+               <div class="form-group">
+                   <label>${Titulo}</label>
+               </div>
+           </div>
+</script>
+<script type="text/x-kendo-tmpl" id="estadokendo">
+    #if(Estado!=true){#
+     <div class="col-md-12">
+            <div class="form-group">
+                <button  onclick="DesabilitarEstadoPlantilla(${Id})" type="button" id="botonInforme" class="btn btn-danger">Desactiva...</button>
+            </div>
+        </div>
+     #}else{#
+      <div class="col-md-12">
+            <div class="form-group">
+                <button  onclick="DesabilitarEstadoPlantilla(${Id})" type="button" id="botonInforme" class="btn btn-info">Activado...</button>
+            </div>
+        </div>
+    #}#
+</script>
+<script type="text/x-kendo-tmpl" id="informeKendo">
+    #if(Estado!=true){#
+
+       <div class="col-md-12">
+              <div class="form-group">
+                  <button onclick="GenerarInforme(${Id})" type="button" id="BtnCrear" disabled="true" class="btn btn-success">Generar Informe</button>
+              </div>
+          </div>
+        #}else{#
+        <div class="col-md-12">
+              <div class="form-group">
+                  <button onclick="GenerarInforme(${Id})" type="button" id="BtnCrear" class="btn btn-success">Generar Informe</button>
+              </div>
+          </div>
+      #}#
+
+</script>
+<script type="text/x-kendo-tmpl" id="Botonkendo">
+    <div class="form-group">
+                  <button onclick="EditarPlantilla(${Id})" type="button" class="mb-2 mr-2 btn btn-outline-2x btn-outline-info"><i class="fa fa-edit"></i></button>
+                <button onclick="DesabilitarEstadoPlantilla(${Id})" type="button" class="mb-2 mr-2 btn btn-outline-2x btn-outline-danger"><i class="fa fa-trash" aria-hidden="true"></i></button>
+              </div>
+          </div>
+</script>
+<script type="text/x-kendo-tmpl" id="plantillaComponente">
+    <div class="form-row btn-outline-focus">
+        <div class="col-md-5">
+            <div class="form-group">
+                <label>${Titulo}</label>
+            </div>
+        </div>
+    #if(Estado!=true){#
+     <div class="col-md-2">
+            <div class="form-group">
+                <button  onclick="DesabilitarEstadoPlantilla(${Id})" type="button" id="botonInforme" class="btn btn-danger">Desactiva...</button>
+            </div>
+        </div>
+     #}else{#
+      <div class="col-md-2">
+            <div class="form-group">
+                <button  onclick="DesabilitarEstadoPlantilla(${Id})" type="button" id="botonInforme" class="btn btn-primary">Activado...</button>
+            </div>
+        </div>
+    #}#
+
+      #if(Estado!=true){#
+
+     <div class="col-md-2">
+            <div class="form-group">
+                <button onclick="GenerarInforme(${Id})" type="button" id="BtnCrear" disabled="true" class="btn btn-success">Generar Informe</button>
+            </div>
+        </div>
+      #}else{#
+      <div class="col-md-2">
+            <div class="form-group">
+                <button onclick="GenerarInforme(${Id})" type="button" id="BtnCrear" class="btn btn-success">Generar Informe</button>
+            </div>
+        </div>
+    #}#
+
+        <div class="col-md-2">
+
+        <div class="form-group">
+                <button onclick="EditarPlantilla(${Id})" type="button" class="mb-2 mr-2 btn btn-outline-2x btn-outline-info"><i class="fa fa-edit"></i></button>
+              <button onclick="DesabilitarEstadoPlantilla(${Id})" type="button" class="mb-2 mr-2 btn btn-outline-2x btn-outline-danger"><i class="fa fa-trash" aria-hidden="true"></i></button>
+            </div>
+        </div>
+
+    </div>
+</script>
+
+@*ESTA ES PARA LAS PLANTILLAS*@
+<script type="text/x-kendo-tmpl" id="plantillaInforme">
+    # if (sw1 != 0) { Agrupar(IdCategoria); } #
+    # if (sw1 == 0) { #
+    <div style="margin-top: 1%;"></div>
+    <div style="width:100%; Display:inline-block;">
+        <div style="width:96%; margin:0 auto;">
+            <div class="marcoAchie1" style="background-color:\\#E2DDDD">
+                <b>
+                    <input type="checkbox" id="Cat${IdCategoria}" name="${NombreCategorias}" value="${Expandible}" style="width:60px" onclick="informeDescripcion(this,${IdCategoria})" checked>
+                    <label for="Cat${IdCategoria}">
+                        ${NombreCategorias}
+                    </label>
+                </b>
+            </div>
+            <div class="marcoAchie2">
+                <div class="marcoAchie2Sangria">
+                    #if(Expandible==1){#
+                    <div class="card-body" style="padding-left:60px">
+                        <textarea class="form-control" cols="20" id="Descripcion${IdCategoria}" maxlength="1000" name="Descripcion${IdCategoria}" rows="5" style="width: 1000px; max-width: 1000px;"></textarea>
+                    </div>
+                    #}#
+                    <br />
+                    # if (NombreGraficos !="") { #
+                    <input type="checkbox" id="Graf${IdCategoriaGraf}" name="${NombreGraficos}" style="width:120px">
+                    <label for="Graf${IdCategoriaGraf}">
+                        ${NombreGraficos}
+                    </label>
+                    # } #
+
+                </div>
+                # swFirst(IdCategoria); #
+                # }else if (sw1 == sw2) { #
+                <div class="marcoAchie2Sangria">
+                    # if (NombreGraficos !="") { #
+                    <input type="checkbox" id="Graf${IdCategoriaGraf}" name="${NombreGraficos}" style="width:120px">
+                    <label for="Graf${IdCategoriaGraf}">
+                        ${NombreGraficos}
+                    </label>
+                    # } #
+
+                </div>
+                # } else { #
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 1%;"></div>
+    <div style="width:100%; Display:inline-block;">
+        <div style="width:96%; margin:0 auto;">
+            <div class="marcoAchie1" style="background-color:\\#E2DDDD">
+                <b>
+                    <input type="checkbox" id="Cat${IdCategoria}" name="${NombreCategorias}" value="${Expandible}" style="width:60px" onclick="informeDescripcion(this,${IdCategoria})" checked>
+                    <label for="Cat${IdCategoria}">
+                        ${NombreCategorias}
+                    </label>
+                </b>
+            </div>
+            <div class="marcoAchie2">
+                <div class="marcoAchie2Sangria">
+                    #if(Expandible==1){#
+                    <div class="card-body" style="padding-left:60px">
+                        <textarea class="form-control" cols="20" id="Descripcion${IdCategoria}" maxlength="1000" name="Descripcion${IdCategoria}" rows="5" style="width: 1000px; max-width: 1000px;"></textarea>
+                    </div>
+                    #}#
+                    <br />
+                    # if (NombreGraficos !="") { #
+
+                    <input type="checkbox" id="Graf${IdCategoriaGraf}" name="${NombreGraficos}" style="width:120px">
+                    <label for="Graf${IdCategoriaGraf}">
+                        ${NombreGraficos}
+                    </label>
+                    # } #
+
+                </div>
+                # swFirst(IdCategoria); #
+                # } #
+</script>
+<script type="text/javascript">
+    sw1 = 0;
+    $(document).ready(function () {
+
+        $("#Buscar").click(function () {
+
+            $("#pagerdivComponente").empty();
+            $("#divComponente").empty();
+
+            if ($("#divComponente").data("kendoListView")) {
+                $("#pagerdivComponente").data("kendoPager").destroy();
+                $("#divComponente").data("kendoListView").destroy();
+            }
+
+
+
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/Inform/ListarInformePlantilla/0?var",
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 5,
+                schema: {
+                    data: "Data",
+                    total: "Cantidad"
+                }
+            });
+
+            $("#gridprueba").kendoGrid({
+                toolbar: ["excel", "pdf", "search"],
+                excel: {
+                    allPages: true
+                },
+                columns: [
+                    { field: "Titulo" },
+                    {
+                        field: "Estado",
+                        exportable: false
+                    }
+                ],
+                dataSource: dataSource,
+                columnMenu: true,
+                width: 1000
+            });
+
+
+            $("#divComponente").kendoGrid({
+
+                toolbar: ["pdf"],
+                pdf: {
+                    allPages: true,
+                    avoidLinks: true,
+                    paperSize: "A4",
+                    margin: { top: "2cm", left: "1cm", right: "1cm", bottom: "1cm" },
+                    landscape: true,
+                    repeatHeaders: true,
+                    template: $("#page-template").html(),
+                    scale: 0.8
+                },
+                columns: [
+                    {
+                        field: "Titulo",
+                        title: "Titulo",
+                        headerTemplate: '<label class="greenHeader">Titulo</label>',
+                        width: "40%",
+                        template: kendo.template($("#titulokendo").html()),
+                        exportable: false
+                    },
+                    {
+                        field: "Estado",
+                        title: "Estado",
+                        headerAttributes: { "class": "k-text-center !k-justify-content-center" },
+                        attributes: { style: "text-align: center" },
+                        width: "20%",
+                        headerTemplate: '<label class="greenHeader">Estado</label>',
+                        template: kendo.template($("#estadokendo").html())
+
+                    },
+                    {
+
+                        title: "Informe",
+                        headerAttributes: { "class": "k-text-center !k-justify-content-center" },
+                        headerTemplate: '<label class="greenHeader">Informe</label>',
+                        attributes: { style: "text-align: center" },
+                        width: "20%",
+                        template: kendo.template($("#informeKendo").html())
+
+                    },
+                    {
+
+                        title: "Editar",
+                        headerAttributes: { "class": "k-text-center !k-justify-content-center" },
+                        headerTemplate: '<label class="greenHeader">Editar  </label>',
+                        attributes: { style: "text-align: center" },
+                        width: "10%",
+
+                        template: kendo.template($("#Botonkendo").html()),
+
+
+
+                    }
+                ],
+                columnMenu: true,
+                dataSource: dataSource
+
+            });
+
+            $("#pagerdivComponente").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [5, 10, 15],
+                refresh: true
+            });
+
+
+
+
+
+
+
+
+
+
+        });
+
+        $("#Buscar").click();
+        /* USADO PARA LLAMAR A EL NEUVO  */
+
+
+        sw1 = 0;
+        sw2 = 0;
+        var data = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Inform/ListarInformePlantillaTodo/0?var",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random(),
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Cantidad"
+            }
+        });
+
+        sw1 = 0;
+        $("#divInforme").kendoListView({
+            dataSource: data,
+            template: kendo.template($("#plantillaInforme").html())
+        });
+
+
+        $("#reset").click(function (event) {
+            ocultarDescripcion();
+        });
+
+
+
+
+        /*    AQUI VA EL CODIGO PARA OTROS FORMATOS QUE SE EJECUTARA DE MANERA AUTOMATICA*/
+        var fechaInicio = $("#fechaInicio").kendoDatePicker({
+            format: "dd/MM/yyyy"
+
+        });
+        var fechaFin = $("#fechaFin").kendoDatePicker({
+            format: "dd/MM/yyyy"
+        })
+        var idComp = $("#idComp").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            value: $("#ID_COMP").val(),
+            placeholder: "Empresa Inicial",
+            template: kendo.template($("#tmp-Comp").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount"
+                }
+            }
+        }).data("kendoComboBox");
+        var idCompEnd = $("#idCompEnd").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            value: $("#ID_COMP_END").val(),
+            placeholder: "Empresa Final",
+            template: kendo.template($("#tmp-Comp").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount"
+                }
+            }
+        }).data("kendoComboBox");
+        var idOP = $("#idOP").kendoComboBox({
+            placeholder: "Número de OP",
+            cascadeFrom: "idComp",
+            dataTextField: "NUM_DOCU_SALE",
+            dataValueField: "ID_DOCU_SALE",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                '<div style="float:left;"><strong>${data.NUM_DOCU_SALE}</strong></div><br/>' +
+                '<div style="float:left; ">${data.Titulo}</div>' +
+                '</div>',
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            value: $("#IdProyectoSLA").val(),
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarOPFormato",
+                }
+            }
+        }).data("kendoComboBox");
+        //Eventos de cambio
+        $('#idComp').change(function () {
+            swal({
+
+                title: "Loading Information...",
+                text: "Please wait...",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                closeOnConfirm: false
+                //allowEscapeKey: false
+            });
+
+            $("#idOP").load("/OrderForm/ListarOPFormato", function () {
+                swal.close();
+            });
+        });
+
+
+
+
+
+        //Generar Reporte de Reporting Services
+        $('#linkTicketReport').click(function () {
+            event.preventDefault();
+            document.getElementById('linkTicketReport').href = "/Reporting/Ticket/FormatoInformesAuto.aspx?" + $("#FormTicketReport").serialize();
+        });
+
+
+
+        /*    FIN DE CODIGO */
+
+
+    });
+
+
+
+
+
+
+
+
+    /*CONTROL DE BOTON INFORME PLANTILLA  */
+    $("#idListaInforme").click(function () {
+        var buscardisp = $("#primeraparte").css("display");
+        var segundaparte = $("#segundaparte").css("display");
+        var parte3 = $("#parte3").css("display");
+        /*  CONTROL DE BOTONES*/
+        if (buscardisp != "block") {
+            $("#primeraparte").attr("style", "display:block");
+        }
+
+        if (parte3 != "none") {
+            $("#parte3").attr("style", "display:none");
+        }
+        if (segundaparte != "none") {
+            $("#segundaparte").attr("style", "display:none");
+        }
+        $("#idListaInforme").addClass("botonactivadoPlantillas");
+        $("#idNuevaplantilla").removeClass("botonactivadoPlantillas");
+        $("#idOtrosFormatos").removeClass("botonactivadoPlantillas");
+
+    });
+    /*CONTROL DE BOTON NUEVA PANTILLA  */
+    $("#idNuevaplantilla").click(function () {
+        var buscardisp = $("#primeraparte").css("display");
+        var segundaparte = $("#segundaparte").css("display");
+        var segundaparte = $("#segundaparte").css("display");
+        if (buscardisp != "none") {
+            $("#primeraparte").attr("style", "display:none");
+        }
+        if (segundaparte != "block") {
+            $("#segundaparte").attr("style", "display:block");
+        }
+        var parte3 = $("#parte3").css("display");
+        if (parte3 != "none") {
+            $("#parte3").attr("style", "display:none");
+        }
+        $("#idNuevaplantilla").addClass("botonactivadoPlantillas");
+        $("#idListaInforme").removeClass("botonactivadoPlantillas");
+        $("#idOtrosFormatos").removeClass("botonactivadoPlantillas");
+
+    });
+
+    /* CONTROL DE BOTON OTROS FORMATOS */
+
+    $("#idOtrosFormatos").click(function () {
+        //var buscardisp = $("#primeraparte").css("display");
+
+        //var segundaparte = $("#segundaparte").css("display");
+        //if (buscardisp != "none") {
+        //    $("#primeraparte").attr("style", "display:none");
+        //}
+        //if (segundaparte != "none") {
+        //    $("#segundaparte").attr("style", "display:none");
+        //}
+        //var parte3 = $("#parte3").css("display");
+        //if (parte3 != "block") {
+        //    $("#parte3").attr("style", "display:block");
+        //}
+        //$("#idOtrosFormatos").addClass("botonactivadoPlantillas");
+        //$("#idListaInforme").removeClass("botonactivadoPlantillas");
+        //$("#idNuevaplantilla").removeClass("botonactivadoPlantillas");
+        window.open("/Inform/CrearFormato");
+        return false;
+
+    });
+
+
+
+
+
+    /* FIN */
+
+
+
+</script>
+
+@*SE USO PARA EL LLAMADO DE LOS DATOS DE NEUVA PLANTILLA*@
+<script type="text/javascript">
+
+    function swFirst(id) {
+        sw1 = id;
+    }
+
+    function Agrupar(id) {
+        sw2 = id;
+    }
+
+    function ocultarDescripcion() {
+        $('input[type=text], textarea').each(function () {
+            $(this).addClass("divHide");
+        });
+    }
+    function informeDescripcion(cb, id) {
+
+
+        if (cb.checked) {
+            $("#Descripcion" + id).removeClass("divHide");
+            //$("#Graf" + id).removeClass("divHide");
+
+        }
+        else {
+            $("#Descripcion" + id).addClass("divHide");
+            $("#Descripcion" + id).val('');
+
+            //$("#Graf" + id).addClass("divHide");
+            //$('#Graf" + id').each(function() {
+            //    $(this).addClass("divHide");
+            //});
+        }
+    }
+
+
+    function uploadDone(msg, code) {
+        if (msg == "OK") {
+
+            swal({
+                title: 'Información Guardada / Notificación Enviada',
+                type: 'success',
+                text: 'La información ha sido actualizada.',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                location = "http://" + location.host + "/Inform/IndexPlantilla";
+            })
+
+            //winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+            //    + "<div style='padding:10px 0px 10px 0px;'>La información ha sido actualizada.</div>"
+            //    + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+            //    "<button id='continues' class='k-button'>Continuar</button>" +
+            //    "</div></div>", 400, 160);
+            //$("#continues").focus();
+
+            //$("#continues").click(function () {
+            //    closeWinModalPopUp();
+            //    closeWinFormModalPopUp();
+
+            //    location = "http://" + location.host + "/IndexPlantilla/";
+            //});
+
+            //$("#closebtnmodal").click(function () {
+            //    closeWinModalPopUp();
+            //    closeWinFormModalPopUp();
+
+            //    location = "http://" + location.host + "/IndexPlantilla/";
+            //    //location = "http://" + location.host + "/Mantenimientos/";
+            //    //location.replace(location.href.replace("Edit", "Details"))
+            //});
+        }
+        else {
+            swal({
+                title: 'Error al registrar',
+                type: 'info',
+                text: code,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+            //winPopUpModal("Error al registrar", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            //    "<div style='padding:10px 0px 10px 0px;'>" + code + "</div>" +
+            //    "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+            //    "<button id='continuee' class='k-button'>Continuar</button>" +
+            //    "</div></div>"
+            //    , 400, 140);
+            //$("#continuee").focus();
+            //var undo = $("#continuee")
+            //    .bind("click", function () {
+            //        closeWinModalPopUp();
+            //    });
+        }
+
+
+
+    }
+</script>
+
+@*FIN PARA SCRIP DE NUEVA PLANTILLA*@
+
+
+@*USADO PARAN LISTAR PLANTILLA*@
+<script type="text/javascript">
+
+    function CrearPlantilla() {
+        window.open("/CrearPlantilla/");
+        return false;
+    }
+
+    function CrearFormato() {
+        window.open("/Inform/CrearFormato/");
+        return false;
+    }
+
+    function EditarPlantilla(id) {
+        window.open("/EditarPlantilla/" + id);
+        return false;
+    }
+
+
+    //function DesabilitarEstadoPlantilla(id) {
+
+    //    $.ajax({
+    //        data: datos,
+    //        url: "/Inform/DesabilitarEstadoPlantilla/" + id,
+    //        type: 'post',
+    //        success: function (response) {
+    //            console.log(response); // Imprimir respuesta del archivo
+    //        },
+    //        error: function (error) {
+    //            console.log(error); // Imprimir respuesta de error
+    //        }
+    //    });
+
+
+
+
+    //}
+
+    //function DesabilitarEstadoPlantilla(id, estado) {
+    //    $.ajax({
+    //        url: "/Inform/DesabilitarEstadoPlantilla/" + id,
+    //        type: "POST",
+    //        cache: false,
+    //        dataType: "json",
+
+    //        error: function (source) {
+    //            alert("Error Carga Json");
+    //        }
+    //    }
+
+    //    );
+
+
+    //    //ESTA FUNCION QUIERO LLAMARLA ARRIBA
+    //    refrescartabla();
+
+
+    //}
+
+    function DesabilitarEstadoPlantilla(id, estado) {
+        $.ajax({
+            url: "/Inform/DesabilitarEstadoPlantilla/" + id,
+            type: "POST",
+            cache: false,
+            dataType: "json",
+
+            error: function (source) {
+                alert("Error Carga Json");
+            },
+        }).done(function () {
+            refrescartabla();
+        });
+    }
+
+    function refrescartabla() {
+        // simulamos el click del mouse en el boton del formulario
+        $(".k-pager-refresh").click();
+        toastr.success("Cambio  Realizado", 'Informacion')
+    }
+
+
+    function GenerarInforme(id) {
+        window.open("/InformeAutomatico/" + id);
+        return false;
+    }
+
+</script>
+@*FIN LISTADO PLANTILLA*@
+
+
+@*USADO PARA OTRAS PLANTILLAS PLANTILLA*@
+
+<script type="text/javascript">
+
+    function EditarTicket(id) {
+        $("#lblTitulo").text("Editar Formato de Resolución de Atención");
+
+        $("#btnEditarTicket" + id).attr("data-style", "expand-right");
+        $("#btnEditarTicket" + id).attr("data-toggle", "modal");
+        $("#btnEditarTicket" + id).attr("data-target", "#miModal");
+
+        $(".modal-dialog").addClass("modal-xl");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/Ticket/EditarFormatoTicket/' + id);
+    }
+
+
+    $("a b").html(function (index, html) {
+        return html.replace(/\S/g, "<span>$&</span>");
+    });
+
+    $("a").click(function () {
+        $("a").addClass("loading");
+        setTimeout(function () {
+            $("a").removeClass("loading");
+        }, 8000);
+    });
+</script>
+
+
+@*FIN LISTADO OTRAS PLANTILLAS*@
+
+
+
+<script type="text/javascript">
+
+    function EditarPlantilla(id) {
+        window.open("/EditarPlantilla/" + id);
+        return false;
+    }
+
+</script>
+

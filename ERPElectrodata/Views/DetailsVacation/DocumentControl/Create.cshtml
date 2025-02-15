@@ -1,0 +1,353 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_CONTROL
+
+@{
+    ViewBag.Title = "Create";
+    Layout = null;
+}
+
+<div style="width:58%;">
+
+    <div class="titleForm" style="width:100%;">
+        <div style="display:inline-block; width:100%; height:20px;">
+            <div class="title" style="float:left;">
+                <span style="text-transform: none">New Document</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="bodyForm" style="width:100%;">
+        <div class="inBodyForm">
+            <div style="clear:both"></div>            
+
+                @* -------------------------------------FORMULARIO--------------------------------- *@
+
+                @using (Html.BeginForm("Create", "DocumentControl", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmDocumentControl", target = "FrmDocumentControl" }))
+                {
+                    @Html.AntiForgeryToken()
+                    @Html.ValidationSummary(true)
+
+                    <fieldset>
+                        <legend>DOCUMENT</legend>
+
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Company
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_CIA)
+                                    @Html.ValidationMessageFor(model => model.ID_CIA)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Source
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_DOCU_CONT_CARR)
+                                    @Html.ValidationMessageFor(model => model.ID_DOCU_CONT_CARR)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Description
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" id="SUB_DOCU" name="SUB_DOCU" class="k-textbox" />
+
+                                    @* @Html.EditorFor(model => model.SUB_DOCU)*@
+                                    @Html.ValidationMessageFor(model => model.SUB_DOCU)
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        <div class="divFondoDos">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Type
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_DOCU_CONT_TYPE)
+                                    @Html.ValidationMessageFor(model => model.ID_DOCU_CONT_TYPE)
+                                </div>
+                            </div>
+
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Serial Document
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" id="SER_DOCU" name="SER_DOCU" class="k-textbox" />
+                                </div>
+                            </div>
+
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                     Document Number
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" id="NUM_DOCU" name="NUM_DOCU" class="k-textbox" />
+
+                                </div>
+                            </div>
+                            
+                        </div>
+
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    @*<a title="Add New Receiver" onclick="AddNewReceiver(this)" style="cursor:pointer;">Receiver</a>*@
+                                    Receiver
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" id="ID_ENTI_RECE" name="ID_ENTI_RECE" />
+
+                                </div>
+                            </div>
+
+
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <input type="hidden" name="Cont" id="idcontreciever" value="0"/>
+                                <div id="NewReceiver"></div>
+                            </div>
+                        </div>
+                        
+
+                        <div style="clear:both;"></div>
+                        <div style="height:10px;"></div>
+
+                   
+                        <div style="margin:10px 15px 0px 10px; height:25px; border:0px solid black;">
+                            <div style="width: 99%; float:left; padding: 0px 0px 10px 8px; ">
+                                <input name="files" id="files" type="file" />
+                            </div>
+
+                            <div style="float:right;padding:0px 0px 0px 10px; ">
+                                <button id="submit" onclick="SubmitFormDocumentControl(this)" class="k-button">Send</button>
+                            </div>
+                            <button style="float:right;" id="reset" class="k-button">Cancel</button>
+                        </div>
+                        
+                        <div style="clear:both;"></div>
+                        <div style="height:15px;"></div>
+
+                    </fieldset>
+
+                }
+            </div>
+        </div>
+    </div>
+
+<iframe id="FrmDocumentControl" name="FrmDocumentControl" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#ID_DOCU_CONT_TYPE").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_TYPE_DOCU_CONT",
+            dataValueField: "ID_TYPE_DOCU_CONT",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DocumentControl/ListTypeDocumentControl"
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_DOCU_CONT_CARR").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAME_DOCU_SOUR",
+            dataValueField: "ID_DOCU_SOUR",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DocumentControl/ListDocumentSource"
+                }
+            }
+        }).data("kendoComboBox");
+
+
+        var ID_CIA = $("#ID_CIA").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            suggest: true,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DocumentControl/ListCIA"
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CIA.suggest();
+
+        $.get("/DocumentControl/Reciever", function (json) {
+
+            var ID_ENTI_RECE = $("#ID_ENTI_RECE").kendoComboBox({
+                index: 1,
+                dataTextField: "FIR_NAME",
+                dataValueField: "ID_PERS_ENTI",
+                template: '<div style="clear:both;"><div style="float:left"><img height="40" width="40" src=\"/Content/Fotos/${data.ID_FOTO}.jpg\" alt=\"#:data.ID_ENTI#\" /></div>' +
+                                  '<div style="" ><div style="height:40px ">&nbsp;${data.FIR_NAME}<br /></div></div></div>',
+               filter: "contains",
+                autoBind: false,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['Data'],
+                change: function (e) {
+                    AddNewReceiver()
+                },
+                
+            }).data("kendoComboBox");
+        });
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach"
+            }
+        });
+    });
+
+    function SubmitFormDocumentControl() {
+        $("#FrmDocumentControl").submit();
+    }
+
+    function AddNewReceiver()
+    {
+        var cont = $("#idcontreciever").val();       
+        cont= parseInt(cont) + 1;
+
+        var ID_ENTI_RECE = $("#ID_ENTI_RECE").data("kendoComboBox");
+
+        var Name = ID_ENTI_RECE.text();
+        var valor = ID_ENTI_RECE.value();
+
+        $("#NewReceiver").append("<div id='divname" + cont + "'>" + Name + "<input type='hidden' name='RECEIVER" + cont + "' id='RECEIVER" + cont + "' value='" + valor + "'><span>&nbsp;<a  onclick='DeleteReceiver("+cont+")' class='delete-link' title='Remove' href='#'></a></span></div>");
+
+       var v = parseInt(cont);
+       
+        $("#idcontreciever").val(v);
+        ID_ENTI_RECE.value("");
+       
+    }
+
+    function DeleteReceiver(id)
+    {
+        $("#divname" + id + "").remove();
+
+    }
+
+    $("#submit").click(function () {
+        winPopUpModalLoad('@ResourceLanguaje.Resource.SavingYourTicket', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+    });
+
+    $("#reset").click(function (event) {
+        event.preventDefault();
+
+        var title = '@ResourceLanguaje.Resource.OperationCancelled';
+        var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+        "<div style='padding:10px 0px 10px 0px;'>The operation to perform was cancelled</div>" +
+        "<div style='float:right; padding:20px 6px 0px 6px; font-size:0.9em;'>" +
+        "<button id='btnContinuer' class='k-button'>Continue</button>" +
+        "</div></div>";
+
+        winPopUpModal(title, body, 400, 150);
+
+        $("#btnContinuer").click(function () {
+
+            location = "http://" + location.host + "/DocumentControl";
+
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+
+            console.log
+            //ListDocument()
+        });
+
+        $("#closebtnmodal").click(function () {
+            //location.reload(true);
+            //ListDocument()
+            
+        });
+
+    });
+
+
+    function uploadDone(conf, msg) {
+        closeWinModalPopUpLoad();
+
+        if (conf == 'OK') {
+            var title = '@ResourceLanguaje.Resource.InformationSaved ';
+            var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                            "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                            "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                            "<button id='btnContinues' class='k-button'>Continue</button>" +
+                            "</div></div>";
+
+            winPopUpModal(title, body, 300, 130);
+
+            $("#closebtnmodal").click(function () {
+                //location.reload(true);
+                ListDocument()
+
+            });
+
+            $("#btnContinues").click(function () {
+                //location.reload(true);
+                ListDocument()
+            });
+        }
+        else {
+            
+                var title = '@ResourceLanguaje.Resource.InformationMissing';
+                var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                              "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                              "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                              "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                              "</div></div>";
+
+                winPopUpModal(title, body, 300, 130);
+
+                $("#btnContinuee").click(function () {
+                    $("#dlg").hide('200', "swing", function () {
+                        $("#bkg").fadeOut("300");
+                    });
+                });
+            }
+    }
+
+</script>

@@ -1,0 +1,807 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    ViewBag.Title = "BuscarTicketEdata";
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/FindTicket.css" rel="stylesheet" />
+
+<style>
+    .listHide .btn-group {
+        display: none;
+    }
+</style>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Busqueda avanzada
+                <div class="page-title-subheading">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            @using (Html.BeginForm("ExportFindTicket", "Ticket", FormMethod.Post, new { id = "FrmFindTicket" }))
+            {
+                <div class="card-body">
+                    <input type="hidden" name="HD_Estados" id="HD_Estados" value="" />
+                    <input type="hidden" name="Estados" id="Estados" />
+                    <input type="hidden" name="CompsFinal" id="CompsFinal" />
+                    <input type="hidden" name="OPS" id="OPS" />
+                    <div class="card-title">Buscar Ticket</div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Código Ticket</label>
+                            </div>
+                            <div class="editor-field k-textbox" style="width:100%">
+                                @Html.EditorFor(model => model.COD_TICK)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Estado</label>
+                            </div>
+                            <div class="editor-field">
+                                <select id="ID_STAT_END" class="select2" multiple="multiple" type="text" style="width:100%"></select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Compañia Solicitante</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_COMP)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Compañia Final</label>
+                            </div>
+                            <div class="editor-field listHide">
+                                @if (ViewBag.ID_ACCO == 4)
+                                {<select id="ID_COMP_END" multiple="multiple" type="text" style="width:100%"></select> }
+                                else
+                                {
+                                    @Html.EditorFor(model => model.ID_COMP_END)
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    @if (@ViewBag.ID_ACCO == 4)
+                    {
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="editor-label">
+                                    <label>Fecha Inicio OP</label>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.Editor("START_DATE_OP")
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="editor-label">
+                                    <label>Fecha Inicio OP</label>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.Editor("END_DATE_OP")
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="editor-label">
+                                    <label>Mostrar OP Cerradas</label>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.CheckBox("chbxMostrarOPCerradas", false)
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="editor-label">
+                                    <label>OP</label>
+                                </div>
+                                <div class="editor-field listHide">
+                                    @Html.ListBoxFor(model => model.IdProyectoSLA, new SelectList(new List<SelectListItem>(), "Value", "Text"), new { @class = "form-control", multiple = "multiple", data_bind = "value: IdProyectoSLA" })
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Solicitante</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_PERS_ENTI)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Usuario Final</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_PERS_ENTI_END)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Área Responsable</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_QUEU)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Asignado a</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_PERS_ENTI_ASSI)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Tipo Ticket</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_TYPE_TICK)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Prioridad</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_PRIO)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Unidad de Negocio</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_CATE)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Macroservicio</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.Editor("ID_SUB_CATE")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Servicio</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.Editor("ID_CLAS")
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Incidente/Requerimiento</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.Editor("ID_SUB_CLAS")
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Medio de Comunicación</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_SOUR)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Comentario</label>
+                            </div>
+                            <div class="editor-field k-textbox" style="width:100%">
+                                @Html.EditorFor(model => model.SUM_TICK)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Fecha Inicio</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.Editor("START_DATE")
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Fecha Fin</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.Editor("END_DATE")
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Servicio</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.CheckBox("SERVICE", false)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Creado por</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.UserId)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                <label>Fecha Programada</label>
+                            </div>
+                            <div class="editor-field">
+                                @Html.Editor("FechaProgramada")
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>&nbsp; </label>
+                                <button type="button" class="mb-2 mr-2 btn-pill btn btn-primary btn-block" onclick="BuscarTickets();"><span>Buscar</span></button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>&nbsp; </label>
+                                <button type="button" id="export" class="mb-2 mr-2 btn-pill btn btn-success btn-block" onclick="Exportar();"><span>Exportar</span></button>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+
+<div id="gridTickets" class="contentView">
+</div>
+<div style="clear:both;"></div>
+<div id="pagerTickets" class="contentViewPager">
+</div>
+
+<div id="listViewFindTicket">
+</div>
+
+<div id="loadingTicket" class="loader centered">
+    <div class="loadingio-spinner-spinner-xcf4ffee9sa">
+        <div class="ldio-bochyw1nkil">
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <a href="${URL}${ID_INCI}" class="text-decoration-none" target="_blank">
+        <div class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-4">
+                    <div class="small">
+                        ${NAM_TYPE_TICK} ${COD_INCI}
+                    </div>
+
+                    # if (VIS_COMP) { #
+                    <div class="small"><b>${REQU} </b></div>
+                    # } else { #
+                    <div class="small"><b>${REQU}</b></div>
+                    # } #
+                    <div class="small">Creado: ${CREATEBY} ${CREATE_INCI}</div>
+                    <div class="small">Actualizado: ${MODIFIED_INCI}</div>
+                </div>
+                <div class="col-6">
+                    <div class="small">Asignado a: ${ASSI}</div>
+                    <div class="small">${NAM_CATE} > ${NAM_SUBC} > </div>
+                </div>
+                <div class="d-none d-md-block col-2">
+                    <div class="row no-gutters align-items-center">
+
+                        <div class="media col-12 align-items-center">
+
+                            <div class="media-body flex-truncate ml-2">
+
+                                # if(NAM_PRIO.indexOf("p1") > -1) {#
+                                <div class="badge badge-danger"> ${NAM_STAT} | ${NAM_PRIO} </div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("p2") > -1) {#
+                                <div class="badge badge-warning"> ${NAM_STAT} | ${NAM_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("p3") > -1) {#
+                                <div class="badge badge-success"> ${NAM_STAT} | ${NAM_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("p4") > -1) {#
+                                <div class="badge badge-info"> ${NAM_STAT} | ${NAM_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("p5") > -1) {#
+                                <div class="badge badge-dark"> ${NAM_STAT} | ${NAM_PRIO}</div>
+                                # } #
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#FrmFindTicket').on('keydown', function (event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                BuscarTickets();
+            }
+        });
+
+        $('#export').on('click', function () {
+            $('#FrmFindTicket').submit();
+        });
+
+        var IdProyecto = $("#IdProyectoSLA").kendoMultiSelect({
+            placeholder: "Número de OP",
+            cascadeFrom: "ID_COMP",
+            dataTextField: "NUM_DOCU_SALE",
+            dataValueField: "ID_DOCU_SALE",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                '<div style="float:left;"><strong>${data.NUM_DOCU_SALE}</strong></div><br/>' +
+                '<div style="float:left; ">${data.Titulo}</div>' +
+                '</div>',
+            autoBind: false,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    //read: "/OrderForm/ListarCboOPEnFindTicket",
+                    read: {
+                        url: function () {
+                            return `/OrderForm/ListarCboOPEnFindTicket?valOpCerrada=${$("#chbxMostrarOPCerradas").prop('checked')}&valOpInicio=${$("#START_DATE_OP").val()}&valOpFin=${$("#END_DATE_OP").val()}`;
+                        }
+                    }
+                },
+                filter: { // Filtrar por el valor actual de ID_COMP
+                    field: "ID_ENTI",
+                    operator: "eq",
+                    value: function () {
+                        return $("#ID_COMP").data("kendoComboBox").value();
+                    }
+                }
+            }
+        }).data("kendoMultiSelect");
+
+
+        var START_DATE_OP = $("#START_DATE_OP").kendoDatePicker({
+            format: "MM/dd/yyyy",
+            change: function (e) {
+                IdProyecto.dataSource.read()
+            }
+        }).data("kendoDatePicker");
+
+        var END_DATE_OP = $("#END_DATE_OP").kendoDatePicker({
+            format: "MM/dd/yyyy",
+            change: function () {
+                IdProyecto.dataSource.read()
+            }
+        }).data("kendoDatePicker");
+
+        $("#chbxMostrarOPCerradas").change(function () {
+            IdProyecto.dataSource.read();
+        });
+
+        $("#ID_STAT_END").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: true,
+            allowClear: true,
+            ajax: {
+                url: "/StatusTicket/ListarEstadoEdata",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#ID_COMP").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            suggest: true,
+            filter: "contains",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                // Habilitar o deshabilitar el multiselector según si se selecciona un valor en ID_COMP
+                if ("@ViewBag.ID_ACCO" == "4") {
+                    var enableMultiSelect = e.sender.value() !== ""; // Verificar si se seleccionó un valor en ID_COMP
+                    IdProyecto.enable(enableMultiSelect); // Habilitar o deshabilitar el multiselector
+                    IdProyecto.dataSource.read(); // Recargar los datos del multiselector
+                }
+            }
+        }).data("kendoComboBox");
+
+        if ("@ViewBag.ID_ACCO" == "4") {
+            var ID_COMP_END = $("#ID_COMP_END").kendoMultiSelect({
+                autoBind: false,
+                dataTextField: "COM_NAME",
+                dataValueField: "ID_ENTI",
+                filter: "contains",
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+        } else {
+            var ID_COMP_END = $("#ID_COMP_END").kendoComboBox({
+                autoBind: false,
+                dataTextField: "COM_NAME",
+                dataValueField: "ID_ENTI",
+                filter: "contains",
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+
+        $("#ID_PERS_ENTI").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_COMP",
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByCIA?_=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_PERS_ENTI_END").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_COMP",
+            filter: "contains",
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByCIA?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_PERS_ENTI_ASSI").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            dataTextField: "ASSI",
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AssigneForFind?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_QUEU").kendoComboBox({
+            autoBind: false,
+            dataTextField: "DES_QUEU",
+            dataValueField: "ID_QUEU",
+            template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                '<span><strong>${data.QUEU}</strong></span>' +
+                '<span>${data.DES_QUEU}</span></div>',
+            filter: "contains",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_TYPE_TICK").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_TYPE_TICK",
+            dataValueField: "ID_TYPE_TICK",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeTicket/List?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_PRIO").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_PRIO",
+            dataValueField: "ID_PRIO",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Priority/List?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_CATE").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            filter: "contains",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_SUB_CATE").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            cascadeFrom: "ID_CATE",
+            filter: "contains",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_CLAS").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            cascadeFrom: "ID_SUB_CATE",
+            filter: "contains",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_SUB_CLAS").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            cascadeFrom: "ID_CLAS",
+            filter: "contains",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_SOUR").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_SOUR",
+            dataValueField: "ID_SOUR",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SourceTicket/List"
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#UserId").kendoComboBox({
+            autoBind: false,
+            dataTextField: "USUARIO",
+            dataValueField: "UserId",
+            filter: "contains",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/PersonCreateTicket?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#START_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        $("#END_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        $("#FechaProgramada").kendoDateTimePicker().data("kendoDateTimePicker");
+    });
+
+    function BuscarTickets() {
+        MostrarCarga(true);
+
+        var IdEstados = new String($("#ID_STAT_END").val());
+        if (IdEstados == null || IdEstados == "null") {
+            IdEstados = 0;
+        }
+
+        var IdProyectos = new String($("#IdProyectoSLA").val());
+        if (IdProyectos == null || IdProyectos == "null") {
+            IdProyectos = 0;
+        }
+
+        var IdComps = new String($("#ID_COMP_END").val());
+        console.log(IdComps);
+        if (IdComps == null || IdComps == "null") {
+            IdComps = 0;
+        }
+
+        $.ajax({
+            url: "/Ticket/FindResultTicket/0?" + $('#FrmFindTicket').serialize() + "&IdEstados=" + IdEstados + "&IdComps=" + IdComps + "&IdProyectos=" + IdProyectos,
+            type: 'GET',
+            success: function (result) {
+                ListarBusquedaTickets(result)
+            },
+            error: function (result) {
+            }
+        });
+    }
+
+    function ListarBusquedaTickets(data) {
+        $("#listViewFindTicket").empty();
+
+        $("#listViewFindTicket").kendoListView({
+            dataSource: {
+                data: data,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                pageSize: 10
+            },
+            template: kendo.template($("#template").html()),
+            pageable: true
+        });
+
+        MostrarCarga(false);
+        toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda agregar parámetros adicionales.');
+    }
+
+    function MostrarCarga(estado) {
+        if (estado === true) {
+            document.getElementById("loadingTicket").style.display = "flex"
+        } else {
+            document.getElementById("loadingTicket").style.display = "none"
+        }
+    }
+
+    function Exportar() {
+        var IdEstados = new String($("#ID_STAT_END").val());
+
+        if (IdEstados == null || IdEstados == "null") {
+            IdEstados = 0;
+        }
+        $("#HD_Estados").val(IdEstados);
+
+        var estados = $("#ID_STAT_END option:selected").map(function () {
+            return $(this).text();
+        }).get().join(',');
+        $("#Estados").val(estados);
+
+        var ops = $("#IdProyectoSLA option:selected").map(function () {
+            return $(this).text();
+        }).get().join(',');
+        $("#OPS").val(ops);
+
+        var comps = $("#ID_COMP_END option:selected").map(function () {
+            return $(this).text();
+        }).get().join(',');
+        $("#CompsFinal").val(comps);
+    }
+
+</script>

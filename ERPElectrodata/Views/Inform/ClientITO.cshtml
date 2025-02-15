@@ -1,0 +1,1350 @@
+﻿@{
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+    ViewBag.Title = "Inform";
+}
+
+<div id="divContent" class="afterMain">
+    <h1>@ResourceLanguaje.Resource.Inform</h1>
+    <div style="clear:both; width:100%; height:385px;">
+        
+        <div style="width: 49.5%; float:left;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.CallResolutionRate</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:375px;">
+                    <div id="INF_CRR" style="height:345px;width:98%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="width: 49.5%; float:right; ">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.AverageTimeResolution</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 375px;">
+                    <div id="INF_AVG_TIME_RESO" style="height: 345px; width:98%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="clear:both;width:100%;height:355px; margin-top:35px;">
+        <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.TicketsByLevel</div></div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:350px;">
+                <div style="height:345px;float:left;width:39%;">
+                    @*<div></div>*@
+                    <div id="INF_CATE_PIE" style="height:300px;"></div>
+                    <div style="width:100%;height:20px;margin:0 auto;font-size:.95em;">
+                        <div style="margin:0px 0px 0px 10px; float:left;">
+                            @Html.TextBox("TT_YEAR")
+                        </div>
+                        <div style="margin:0px 0px 0px 10px; float:left;">
+                            @Html.TextBox("TT_MONTH")
+                        </div>
+
+                    </div>
+                </div>
+                <div  style="height:345px;float:right;width:60%;">
+                    <div id="INF_CATE_BAR" style="height:345px;width:98%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="clear:both; width:100%; height:355px; margin-top:35px;">
+        <div style="width: 49.5%; float:left; height:350px;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.TicketsByStatus</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 350px;">
+                    <div style="width:39%;height:100px;float:right;margin:40px 0px 0px 0px;font-size:.95em;">
+                        @Html.TextBox("S_ID_ACCO_YEAR")
+                        <div style="margin:10px 0px 0px 0px;">
+                            @Html.TextBox("S_ID_ACCO_MONT")
+                        </div>
+                    </div>
+                    <div id="TicketsByStatus" style="width:60%;height:348px; float:left;"></div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 49.5%; float:right;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.TicketsByPriority</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 350px;">
+                    <div style="width:39%;height:100px;float:right;margin:40px 0px 0px 0px;font-size:.95em;">
+                        @Html.TextBox("P_ID_ACCO_YEAR")
+                        <div style="margin:10px 0px 0px 0px;">
+                            @Html.TextBox("P_ID_ACCO_MONT")
+                        </div>
+                    </div>
+                    <div id="TicketsByPriority" style="width:60%;height:348px; float:left;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="clear:both; width:100%; height:355px; margin-top:35px;">
+        
+        <div style="width: 49.5%; float:left;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.Workload</div></div>
+            <div class="bodyForm">
+                <div id="FilterWorkload" class="inBodyForm" style="height: 375px;">
+                    <div style="float:left; margin:20px 10px 0px 20px;font-size:.95em;">
+                        <input type="text" id="ID_QUEU" name="ID_QUEU" />
+                    </div>
+                    <div style="width:100%;height: 335px; clear:both">
+                        <div id="Workload" style="width:99%;height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="width: 49.5%; float:right;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.EscalationToLevel2</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 375px;">
+                    <div style="width:39%;height:100px;float:right;margin:40px 0px 0px 0px;font-size:.95em;">
+                        @Html.TextBox("TOLEVEL2ANIO")
+                        <div style="margin:10px 0px 0px 0px;">
+                            @Html.TextBox("TOLEVEL2MES")
+                        </div>
+                    </div>
+                    <div id="TOLEVEL2" style="width:60%;height:348px; float:left;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+
+    var myVarWorkload;
+    var myTicketPriority;
+    var myTicketStatus;
+    var myToLevel2;
+    var myINF_AVG_TIME_RESO;
+    var myINF_CRR;
+    var myTicketByClass;
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+    $(document).ready(function () {
+        $.get("/AccountingYear/ListIndependiente", function (json) {
+
+            var DEF_MONTH = json['MONTH'][0].DEFAULT - 1;
+            var DEF_YEAR = (json['YEAR'][0].DEFAULT).toString();
+
+            var TT_YEAR = $("#TT_YEAR").kendoComboBox({
+                index: 5,
+                dataTextField: "ID_ACCO_YEAR",
+                dataValueField: "ID_ACCO_YEAR",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['YEAR']
+            }).data("kendoComboBox");
+
+            var TT_MONTH = $("#TT_MONTH").kendoComboBox({
+                index: DEF_MONTH,
+                dataTextField: "NAM_ACCO_MONT",
+                dataValueField: "ACCO_MONT",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataBound: function (e) {
+                    INF_CATE();
+                },
+                dataSource: json['MONTH']
+            }).data("kendoComboBox");
+
+            TT_YEAR.bind("change", function (e) {
+                if (myINF_CATE) {
+                    clearTimeout(myINF_CATE);
+                }
+                INF_CATE();
+            });
+
+            TT_MONTH.bind("change", function (e) {
+                if (myINF_CATE) {
+                    clearTimeout(myINF_CATE);
+                }
+                INF_CATE();
+            });
+
+            var S_ID_ACCO_YEAR = $("#S_ID_ACCO_YEAR").kendoComboBox({
+                index: 5,
+                dataTextField: "ID_ACCO_YEAR",
+                dataValueField: "ID_ACCO_YEAR",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['YEAR']
+            }).data("kendoComboBox");
+
+            var S_ID_ACCO_MONT = $("#S_ID_ACCO_MONT").kendoComboBox({
+                index: DEF_MONTH,
+                cascadeFrom: "P_ID_ACCO_YEAR",
+                dataTextField: "NAM_ACCO_MONT",
+                dataValueField: "ACCO_MONT",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataBound: function (e) {
+                    TICKET_STATUS();
+                },
+                dataSource: json['MONTH']
+            }).data("kendoComboBox");
+
+            S_ID_ACCO_YEAR.bind("change", function (e) {
+                if (myTicketStatus) {
+                    clearTimeout(myTicketStatus);
+                }
+                TICKET_STATUS();
+            });
+
+            S_ID_ACCO_MONT.bind("change", function (e) {
+                if (myTicketStatus) {
+                    clearTimeout(myTicketStatus);
+                }
+                TICKET_STATUS();
+            });
+
+            var P_ID_ACCO_YEAR = $("#P_ID_ACCO_YEAR").kendoComboBox({
+                index: 5,
+                dataTextField: "ID_ACCO_YEAR",
+                dataValueField: "ID_ACCO_YEAR",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataBound: function (e) {
+                    //alert('2');
+                },
+                dataSource: json['YEAR']
+            }).data("kendoComboBox");
+
+            var P_ID_ACCO_MONT = $("#P_ID_ACCO_MONT").kendoComboBox({
+                index: DEF_MONTH,
+                dataTextField: "NAM_ACCO_MONT",
+                dataValueField: "ACCO_MONT",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataBound: function (e) {
+                    TICKET_PRIORITY();
+                },
+                dataSource: json['MONTH']
+            }).data("kendoComboBox");
+
+            P_ID_ACCO_YEAR.bind("change", function (e) {
+                if (myTicketPriority) {
+                    clearTimeout(myTicketPriority);
+                }
+                TICKET_PRIORITY();
+            });
+
+            P_ID_ACCO_MONT.bind("change", function (e) {
+                if (myTicketPriority) {
+                    clearTimeout(myTicketPriority);
+                }
+                TICKET_PRIORITY();
+            });
+
+            var TOLEVEL2ANIO = $("#TOLEVEL2ANIO").kendoComboBox({
+                index: 5,
+                dataTextField: "ID_ACCO_YEAR",
+                dataValueField: "ID_ACCO_YEAR",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['YEAR']
+            }).data("kendoComboBox");
+
+            var TOLEVEL2MES = $("#TOLEVEL2MES").kendoComboBox({
+                index: DEF_MONTH,
+                dataTextField: "NAM_ACCO_MONT",
+                dataValueField: "ACCO_MONT",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataBound: function(e) {
+                    TOLEVEL2();
+                },
+                dataSource: json['MONTH']
+            }).data("kendoComboBox");
+
+            TOLEVEL2ANIO.bind("change", function(e) {
+                if (myToLevel2) {
+                    clearTimeout(myToLevel2);
+                }
+                TOLEVEL2();
+            });
+
+            TOLEVEL2MES.bind("change", function(e) {
+                if (myToLevel2) {
+                    clearTimeout(myToLevel2);
+                }
+                TOLEVEL2();
+            });
+
+        });
+
+        $.get("/AccountQueue/ListByAcco",function(json){
+            json["Data"].push({QUEU: "All Queue", ID_QUEU: 0, ID_PERS_ENTI: 0,ID_STAT:0});
+
+            var cmbQUEU = $("#ID_QUEU").kendoComboBox({
+                index:0,
+                dataTextField: "QUEU",
+                dataValueField: "ID_QUEU",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                dataBound: function(e) {
+                    if (myVarWorkload) {
+                        clearTimeout(myVarWorkload);
+                    }
+                    UpdateWorkload();
+                },
+                suggest: true,
+                dataSource: json["Data"]
+            }).data("kendoComboBox");
+
+            cmbQUEU.bind("change", function(e) {
+                if (myVarWorkload) {
+                    clearTimeout(myVarWorkload);
+                }
+                UpdateWorkload();
+            });
+
+        });
+
+        INF_CRR();
+        INF_AVG_TIME_RESO()
+    });
+
+    function INF_CRR() {
+
+        $.ajax({
+            url: '/Inform/INF_CRR?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+
+                var NAM_PRIO = new Array();
+                var CAT = new Array();
+                var COL_PRIO = new Array();
+                var HOU_PRIO = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var total = 0;
+                var total2 = 0;
+                //var arr = JSON.parse(jsonx);
+                $.each(json['line'], function (index, value) {
+                    NAM_PRIO[index] = value['NAM_SERI'];//.substring(0,1).toUpperCase()+value['NAM_PRIO'].toString().substring(1,value['NAM_PRIO'].length);
+                    //CAT[index] = value['NAM_PRIO'].substring(0,1).toUpperCase()+value['NAM_PRIO'].toString().substring(1,value['NAM_PRIO'].length);
+                    COL_PRIO[index] = value['COL_SERI'];
+                    //HOU_PRIO[index] = value['HOU_PRIO'];
+                    MES1[index] = value['MES1'];
+                    MES2[index] = value['MES2'];
+                    MES3[index] = value['MES3'];
+                    MES4[index] = value['MES4'];
+                    MES5[index] = value['MES5'];
+                    MES6[index] = value['MES6'];
+
+                    MES7[index] = value['MES7'];
+                    MES8[index] = value['MES8'];
+                    MES9[index] = value['MES9'];
+                    MES10[index] = value['MES10'];
+                    MES11[index] = value['MES11'];
+
+                    total = total + 1;
+                });
+
+                $.each(json['legend'], function (index, value) {
+                    total2 = total2 + 1;
+                    CAT[index] = value['Mes'].substring(0, 1).toUpperCase() + value['Mes'].substring(1, 3) + ' ' +
+                    value['Anio'].toString().substring(2, value['Anio'].length);
+                });
+                // inicio chart
+
+                var series = [];
+                var datosSeries = [];
+                for (var i = 0; i < total; i++) {
+                    datosSeries = [];
+
+                    if (11 <= total2) {
+                        datosSeries.push(MES1[i])
+                    }
+                    if (10 <= total2) {
+                        datosSeries.push(MES2[i])
+                    }
+                    if (9 <= total2) {
+                        datosSeries.push(MES3[i])
+                    }
+                    if (8 <= total2) {
+                        datosSeries.push(MES4[i])
+                    }
+                    if (7 <= total2) {
+                        datosSeries.push(MES5[i])
+                    }
+                    if (6 <= total2) {
+                        datosSeries.push(MES6[i])
+                    }
+                    if (5 <= total2) {
+                        datosSeries.push(MES7[i])
+                    }
+                    if (4 <= total2) {
+                        datosSeries.push(MES8[i])
+                    }
+                    if (3 <= total2) {
+                        datosSeries.push(MES9[i])
+                    }
+                    if (2 <= total2) {
+                        datosSeries.push(MES10[i])
+                    }
+                    if (1 <= total2) {
+                        datosSeries.push(MES11[i])
+                    }
+
+                    // add browser data
+                    series.push({
+                        name: NAM_PRIO[i],
+                        color: COL_PRIO[i],
+                        data: datosSeries
+                    });
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'INF_CRR',
+                        zoomType: 'xy'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth: 1,
+                        categories: CAT,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+
+                    },
+                    yAxis: {
+                        minRange: 10,
+                        min: 0,
+                        lineWidth: 1,
+                        title: {
+                            text: 'Tickets',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: '#516882',
+                            value: 10,
+                            label: {
+                                text: 10
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Tickets',
+                        valueDecimals: 2
+                    },
+                    plotOptions: {
+                        line: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' },
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        }
+                    },
+                    series: series
+                });
+            }
+        });
+        myINF_CRR = setTimeout("INF_CRR();", 300000);
+    }
+
+    function INF_CATE() {
+
+        var TO_TT_YEAR = $("#TT_YEAR").data("kendoComboBox");
+        var TO_TT_MONTH = $("#TT_MONTH").data("kendoComboBox");
+
+        $.get("/Inform/INF_TYPE_TICK?YEAR=" + TO_TT_YEAR.dataItem().ID_ACCO_YEAR + "&MONTH=" + TO_TT_MONTH.dataItem().ACCO_MONT, function (json) {
+
+            //inicio pie
+            $('#INF_CATE_PIE').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    text: null
+                },
+                subtitle: {
+                    text: null
+                },
+                credits: {
+                    enabled: false
+                },
+                tooltip: {
+                    pointFormat: 'Percentage: {point.percentage:.2f}%<br>Quantity: {point.y}',
+                    headerFormat: headerFormat,
+                    percentageDecimals: 2
+                },
+                plotOptions: {
+                    series: {
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    INF_BY_TYPE_TICK(this.options.url);
+                                }
+                            }
+                        }
+                    },
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        size: '55%',
+                        showInLegend: true
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Browser share',
+                    data: json['Data'],
+                    dataLabels: {
+                        formatter: function () {
+                            return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                        }
+                    }
+                }]
+            });
+
+            INF_BY_TYPE_TICK("/Inform/INF_BY_TYPE_TICK/0/1/1/");
+            //fin pie
+        });
+        myINF_CATE = setTimeout("INF_CATE;", 300000);
+    }
+
+    function INF_BY_TYPE_TICK(url) {
+
+        var TO_TT_YEAR1 = $("#TT_YEAR").data("kendoComboBox");
+        var TO_TT_MONTH1 = $("#TT_MONTH").data("kendoComboBox");
+
+        $.get(url + "?YEAR=" + TO_TT_YEAR1.dataItem().ID_ACCO_YEAR + "&MONTH=" + TO_TT_MONTH1.dataItem().ACCO_MONT, function (json) {
+
+            var Cat = new Array();
+            var Serie = new Array();
+            var subtitle = null, color = null;
+            $.each(json['Data'], function (index, value) {
+
+                subtitle = value['title'];
+                color = value['color'];
+                Cat[index] = value['name'].substring(0, 1).toUpperCase() + value['name'].substring(1, value['name'].length);
+                Serie[index] = value['y'];//((value['InSLA']-value['OutSLA'])*100.00)/value['InSLA'];//(value['InSLA']-value['OutSLA'])/(value['InSLA'])*100;
+
+            });
+
+            $('#INF_CATE_BAR').highcharts({
+                chart: {
+                    zoomType: 'xy',
+                    type: 'column'
+                },
+
+                xAxis: {
+                    categories: Cat,
+                    lineWidth: 1,
+                    gridLineWidth: 1,
+                    title: {
+                        text: subtitle,
+                        align: 'high',
+                        style: {
+                            color: '#666',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                legend: {
+                    enabled: false
+                },
+                title: {
+                    text: null
+                },
+                subtitle: {
+                    text: null
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: '@ResourceLanguaje.Resource.Tickets',
+                        align: 'high',
+                        style: {
+                            color: '#666',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: headerFormat,
+                    pointFormat: pointFormat,
+                    percentageDecimals: 2
+                },
+                plotOptions: {
+                    series: {
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    INF_BY_TYPE_TICK(this.options.url);
+                                }
+                            }
+                        }
+                    }
+                },
+                series: [{
+                    name: '@ResourceLanguaje.Resource.Tickets',
+                    color: color,
+                    data: json['Data']
+                }]
+            });
+
+        });
+    }
+
+    function TICKET_STATUS() {
+        //
+        var A_S_ID_ACCO_MONT = $("#S_ID_ACCO_MONT").data("kendoComboBox");
+        var A_S_ID_ACCO_YEAR = $("#S_ID_ACCO_YEAR").data("kendoComboBox");
+
+        $.ajax({
+            url: '/Inform/TICKET_STATUS?var=' + Math.random(),
+            dataType: 'json',
+            data:{mes:A_S_ID_ACCO_MONT.dataItem().ACCO_MONT,anio:(A_S_ID_ACCO_YEAR.dataItem() ? A_S_ID_ACCO_YEAR.dataItem().ID_ACCO_YEAR : @ViewBag.Anio)},
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+            
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['name'].substring(0,1).toUpperCase()+value['name'].substring(1,value['name'].length);
+                    vValue[index] = value['y'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['y'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "#6A819B",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j)/(data[i].drilldown.data.length+20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]//Highcharts.Color(data[i].color).brighten(brightness).get()
+                            //color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'TicketsByStatus',
+                        type: 'pie'
+                    },
+                    credits:{enabled:false},
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip:{
+                        headerFormat:headerFormat,
+                        pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                        percentageDecimals: 2
+                    },
+                    series: [ {
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return  (this.y != null ? ('<b>' + this.point.name + '</b>'+( this.percentage < 100 ?  (': ' +Highcharts.numberFormat(this.percentage, 2) + ' %' ): '')) : null)+'<br><b>Qty</b>: '+this.y;
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+        //
+        //
+        myTicketStatus = setTimeout("TICKET_STATUS();", 300000);
+
+    }
+
+    function TICKET_PRIORITY() {
+        //
+        var A_P_ID_ACCO_MONT = $("#P_ID_ACCO_MONT").data("kendoComboBox");
+        var A_P_ID_ACCO_YEAR = $("#P_ID_ACCO_YEAR").data("kendoComboBox");
+
+        $.ajax({
+            url: '/Inform/TICKET_PRIORITY?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            data:{mes:A_P_ID_ACCO_MONT.dataItem().ACCO_MONT,anio: (A_P_ID_ACCO_YEAR.dataItem() ? A_P_ID_ACCO_YEAR.dataItem().ID_ACCO_YEAR : @ViewBag.Anio)},
+            async: true,
+            success: function (jsonx) {
+            
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['name'].substring(0,1).toUpperCase()+value['name'].substring(1,value['name'].length);;
+                    vValue[index] = value['y'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['y'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "##7CBB00",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j)/(data[i].drilldown.data.length+20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]//Highcharts.Color(data[i].color).brighten(brightness).get()
+                            //color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'TicketsByPriority',
+                        type: 'pie'
+                    },
+                    credits:{enabled:false},
+                    title: {
+                        text: ''
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total percent market share'
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true,
+                            tooltip:{
+                                headerFormat:headerFormat,
+                                pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                                percentageDecimals: 2
+                            }
+                        }
+                    },
+                    
+                    series: [{
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return  (this.y != null ? ('<b>' + this.point.name + '</b>'+( this.percentage < 100 ?  (': ' +Highcharts.numberFormat(this.percentage, 2) + ' %' ): '')) : null)+'<br><b>Qty</b>: '+this.y;
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+        //
+        //
+        myTicketPriority = setTimeout("TICKET_PRIORITY();", 300000);
+
+    }
+
+    function INF_AVG_TIME_RESO(){
+
+        $.ajax({
+            url: '/Inform/INF_AVG_TIME_RESO?var='+ Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var NAM_PRIO = new Array();
+                var CAT = new Array();
+                var COL_PRIO = new Array();
+                var HOU_PRIO = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var MES12 = new Array();
+                var total = 0;
+                var total2 = 0;
+
+                $.each(json['pie'],function (index,value){
+                    NAM_PRIO[index] = value['NAM_PRIO'].substring(0,1).toUpperCase()+value['NAM_PRIO'].toString().substring(1,value['NAM_PRIO'].length);
+                    //CAT[index] = value['NAM_PRIO'].substring(0,1).toUpperCase()+value['NAM_PRIO'].toString().substring(1,value['NAM_PRIO'].length);
+                    COL_PRIO[index] = value['COL_PRIO'];
+                    HOU_PRIO[index] = value['HOU_PRIO'];
+                    MES1[index] = value['MES1'];
+                    MES2[index] = value['MES2'];
+                    MES3[index] = value['MES3'];
+                    MES4[index] = value['MES4'];
+                    MES5[index] = value['MES5'];
+                    MES6[index] = value['MES6'];
+                    MES7[index] = value['MES7'];
+                    MES8[index] = value['MES8'];
+                    MES9[index] = value['MES9'];
+                    MES10[index] = value['MES10'];
+                    MES11[index] = value['MES11'];
+                    MES12[index] = value['MES12'];
+                    total = total +1;
+                });
+
+                $.each(json['legend'],function (index,value){
+                    total2 = total2 +1;
+                    CAT[index] = value['Mes'].substring(0,1).toUpperCase()+value['Mes'].substring(1,3)+' '+
+                    value['Anio'].toString().substring(2,value['Anio'].length);
+                });
+
+                var series = [];
+                var datosSeries = [];
+                for (var i = 0; i < total; i++) {
+                    datosSeries =[];
+
+                    if(12<=total2){
+                        datosSeries.push(MES1[i])
+                    }
+                    if(11<=total2){
+                        datosSeries.push(MES2[i])
+                    }
+                    if(10<=total2){
+                        datosSeries.push(MES3[i])
+                    }
+                    if(9<=total2){
+                        datosSeries.push(MES4[i])
+                    }
+                    if(8<=total2){
+                        datosSeries.push(MES5[i])
+                    }
+                    if(7<=total2){
+                        datosSeries.push(MES6[i])
+                    }
+                    if(6<=total2){
+                        datosSeries.push(MES7[i])
+                    }
+                    if(5<=total2){
+                        datosSeries.push(MES8[i])
+                    }
+                    if(4<=total2){
+                        datosSeries.push(MES9[i])
+                    }
+                    if(3<=total2){
+                        datosSeries.push(MES10[i])
+                    }
+                    if(2<=total2){
+                        datosSeries.push(MES11[i])
+                    }
+                    if(1<=total2){
+                        datosSeries.push(MES12[i])
+                    }
+                    
+                    // add browser data
+                    series.push({
+                        name: NAM_PRIO[i],
+                        color: COL_PRIO[i],
+                        data: datosSeries
+                    });
+                }
+
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop:20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'INF_AVG_TIME_RESO',
+                        zoomType: 'xy'
+                    },
+                    credits:{enabled:false},
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth:1,
+                        categories: CAT,
+                        gridLineWidth:1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                
+                    },
+                    yAxis: {
+                        minRange:50,
+                        min:0,
+                        lineWidth:1,
+                        title: {
+                            text: 'Time (Hours)',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        },{
+                            width: 2,
+                            dashStyle:'ShortDash',
+                            color: COL_PRIO[0],
+                            value: HOU_PRIO[0],
+                            label:{
+                                text:HOU_PRIO[0]
+                            }
+                        },{
+                            width: 2,
+                            dashStyle:'ShortDash',
+                            color: COL_PRIO[1],
+                            value: HOU_PRIO[1],
+                            label:{
+                                text:HOU_PRIO[1]
+                            }
+                        },{
+                            width: 2,
+                            dashStyle:'ShortDash',
+                            color: COL_PRIO[2],
+                            value: HOU_PRIO[2],
+                            label:{
+                                text:HOU_PRIO[2]
+                            }
+                        },{
+                            width: 2,
+                            dashStyle:'ShortDash',
+                            color: COL_PRIO[3],
+                            value: HOU_PRIO[3],
+                            label:{
+                                text:HOU_PRIO[3]
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Hours',
+                        valueDecimals:2
+                    },
+                    plotOptions: {
+                        line: { lineWidth: 3,
+                            marker: {symbol:'circle'},
+                            tooltip:{
+                                headerFormat:headerFormat,
+                                pointFormat:pointFormat
+                            }
+                        }
+                    },
+                    series:series
+
+                });
+            }});
+    
+        myINF_AVG_TIME_RESO = setTimeout("INF_AVG_TIME_RESO();", 300000);
+        //
+
+    }
+
+    function TOLEVEL2() {
+        //
+        var TOLEVEL2MES = $("#TOLEVEL2MES").data("kendoComboBox");
+        var TOLEVEL2ANIO = $("#TOLEVEL2ANIO").data("kendoComboBox");
+
+        $.ajax({
+            url: '/Inform/TOLEVEL2?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            data:{mes:TOLEVEL2MES.dataItem().ACCO_MONT,anio:(TOLEVEL2ANIO.dataItem() ? TOLEVEL2ANIO.dataItem().ID_ACCO_YEAR:@ViewBag.Anio)},
+            async: true,
+            success: function (jsonx) {
+            
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['name'].substring(0,1).toUpperCase()+value['name'].substring(1,value['name'].length);;
+                    vValue[index] = value['y'];
+                    Color[index] = value['LEV_QUEU'] == 1 ? '#7CBB00': '#516882';
+                    acumulado = acumulado + value['y'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "##7CBB00",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j)/(data[i].drilldown.data.length+20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]//Highcharts.Color(data[i].color).brighten(brightness).get()
+                            //color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'TOLEVEL2',
+                        type: 'pie'
+                    },
+                    credits:{enabled:false},
+                    title: {
+                        text: ''
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total percent market share'
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true,
+                            tooltip:{
+                                headerFormat:headerFormat,
+                                pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                                percentageDecimals: 2
+                            }
+                        }
+                    },
+                    series: [{
+                        //name: 'Versions',
+                        data: versionsData,
+                        //innerSize: '50%',
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return  (this.y != null ? ('<b>' + this.point.name + '</b>'+( this.percentage < 100 ?  (': ' +Highcharts.numberFormat(this.percentage, 2) + ' %' ): '')) : null)+'<br><b>Qty</b>: '+this.y;
+                            }
+                        }
+                    }]
+                });
+                //fin chart
+            }
+
+        });
+        //
+        //
+        myToLevel2 = setTimeout("TOLEVEL2();", 300000);
+
+    }
+
+    function UpdateWorkload(){
+        
+        var cmbQUEU = $("#ID_QUEU").data("kendoComboBox");
+        //var checkeado=$( "#ALL_QUEU:checked" ).length;
+
+        $.ajax({
+            url: '/Inform/INF_WORKLOAD?ID_QUEU='+(cmbQUEU.dataItem().ID_QUEU)+'&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+                        
+                var Serie = new Array();
+                var Active = new Array();
+                var Scheduled = new Array();
+                var Resolved = new Array();
+                var Closed = new Array();
+                var Color = new Array();
+
+                $.each(jsonx['workload'],function (index,value){
+                    Serie[index] = value['SERIE'];
+                    Active[index] = value['ACTIVE'];//((value['InSLA']-value['OutSLA'])*100.00)/value['InSLA'];//(value['InSLA']-value['OutSLA'])/(value['InSLA'])*100;
+                    Scheduled[index] = value['SCHEDULED'];
+                    Resolved[index] = value['RESOLVED'];
+                    Closed[index] = value['CLOSED'];
+                });
+
+                $.each(jsonx['color'],function (index,value){
+                    Color[index] = value['COL_GRAP_STAT'];
+                });
+                // inicio chart
+                chart = new Highcharts.Chart({
+    
+                    chart: {
+                        renderTo: 'Workload',
+                        type: 'column',
+                        zoomType: 'xy',
+                        margin:[20, 20, 80, 60]
+                    },
+                    colors: Color,
+                    title: {
+                        text: null
+                    },
+                    credits:{
+                        enabled:false
+                    },
+                    xAxis: {
+                        categories: Serie,
+                        gridLineWidth:1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+    
+                    yAxis: {
+                        lineWidth:1,
+                        gridLineWidth:1,
+                        title: {
+                            text: '@ResourceLanguaje.Resource.Tickets',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Calls',
+                        valueDecimals:0
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            shadow:false,
+                            tooltip:{
+                                headerFormat:headerFormat,
+                                pointFormat:pointFormat
+                            }
+                        },
+                        series: {
+                            events: {
+                                click: function(event) {
+                            
+                                }
+                            }
+                        }
+                    },
+    
+                    series: [{
+                        name: 'Active',
+                        data: Active
+                    }, {
+                        name: 'Scheduled',
+                        data: Scheduled
+                
+                    }, {
+                        name: 'Resolved',
+                        data: Resolved
+                
+                    }, {
+                        name: 'Closed',
+                        data: Closed
+                
+                    }]
+                });
+            }
+
+        });
+    
+        //myVarWorkload = setTimeout("UpdateWorkload();", 300000);
+    }
+
+</script>

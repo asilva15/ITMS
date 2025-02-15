@@ -1,0 +1,180 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+//Layout = null;
+}
+
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">
+<script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+
+
+
+<style>
+    .fc-time {
+        display: none;
+    }
+
+    .fc-title {
+        font-weight: bold;
+    }
+</style>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="card-title" id="titleForm">Reporte de Tareas</div>
+                <fieldset>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="position-relative form-group">
+                                <table id="tbDocumentos" class="table table-bordered table-striped table-responsive-lg">
+                                    <thead style="background: linear-gradient(to top, #1e3c72 0%, #1e3c72 1%, #2a5298 100%) !important; color: white; ">
+                                        <tr>
+                                            @*<th>Id</th>*@
+                                            <th> Codigo Tarea </th>
+                                            <th> Descripcion de Tarea </th>
+                                            <th> Area Responsable </th>
+                                            <th> Estado </th>
+                                            <th> Sede </th>
+                                            <th> Usuario afectado </th>
+                                            <th> Realizado por: </th>
+                                            <th> Fecha de Creación </th>
+                                            <th> Fecha de Realización </th>
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    <tfoot style="background: linear-gradient(to top, #1e3c72 0%, #1e3c72 1%, #2a5298 100%) !important; color: white; ">
+                                        <tr>
+                                            @*<th>Id</th>*@
+                                            <th> Codigo Tarea </th>
+                                            <th> Descripcion de Tarea </th>
+                                            <th> Area Responsable </th>
+                                            <th> Estado </th>
+                                            <th> Sede </th>
+                                            <th> Usuario afectado </th>
+                                            <th> Realizado por: </th>
+                                            <th> Fecha de Creación </th>
+                                            <th> Fecha de Realización </th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#SUMMARY").addClass("form-control");
+        ListarTablaDocumentos();
+    });
+
+
+    function ListarTablaDocumentos() {
+        // Setup - add a text input to each footer cell
+        //$('#tbDocumentos thead tr')
+        //    .clone(true)
+        //    .addClass('filters')
+        //    .appendTo('#tbDocumentos thead');
+
+
+        $('#tbDocumentos').dataTable().fnDestroy();
+        var table = $('#tbDocumentos').dataTable({
+
+            "order": [[0, 'asc']],
+            responsive: true,
+            "language": {
+                "url": "//cdn.datatables.net/plug-ins/1.10.16/i18n/Spanish.json"
+            },
+            dom: 'lBfrtip',
+            buttons: [
+                {
+                    extend: 'excelHtml5',
+                    text: '<i class="fa fa-file-excel-o"> Exportar Excel</i>',
+                    titleAttr: 'Excel'
+                },
+            ],
+
+            "bPaginate": false,
+            "searching": true,
+
+            ajax: {
+
+                "url": "/Ticket/ListadoReporteTareaXTicket",
+                "data": function (d) {
+                    d.ID_TICK = @ViewBag.ID_TICK;
+
+                }
+
+
+            },
+            columns: [
+
+                { data: "Cod_Tarea" },
+                { data: "Descripcion" },
+                { data: "AreaResponsable" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.Estado == 'No procede') {
+                            return '<div style="text-align:center"><div class="badge badge-danger">' + data.Estado + '</div></div>';
+                        } else if (data.Estado == 'Realizado') {
+                            return '<div style="text-align:center"><div class="badge badge-success">' + data.Estado + '</div></div>';
+
+                        } else if (data.Estado == 'Transferido' || data.Estado == 'Pendiente') {
+                            if (data.Asignado == '') {
+                                return '<div style="text-align:center"><div class="badge badge-secondary">' + "Sin Asignar" + '</div></div>';
+                            } else {
+                                return '<div style="text-align:center"><div class="badge badge-warning">' + "Pendiente" + '</div></div>';
+                            }
+                        } else if (data.Estado == 'Pendiente por Gestor' || data.Estado == 'Pendiente por Administrador de TI' || data.Estado == 'Pendiente por Usuario' || data.Estado == 'Pendiente por Consultor SAP' || data.Estado == 'Pendiente de Superintendente TI & OT') {
+                            return '<div style="text-align:center"><div class="badge badge-warning">' + data.Estado + '</div></div>';
+
+                        } else {
+                            return '<div style="text-align:center"><div class="badge badge-secondary">' + "Sin Asignar" + '</div></div>';
+                        }
+                    }
+                },
+                { data: "Sede" },
+                { data: "UsuarioAfectado" },
+                { data: "UsuarioSesion" },
+                { data: "FechaCreacion" },
+                { data: "FechaFin" }
+
+            ],
+            
+
+
+
+        });
+
+    }
+
+</script>

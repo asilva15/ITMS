@@ -1,0 +1,293 @@
+﻿@{
+    Layout = null;
+}
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+<div id="w1" class="menuVertical second w1">
+    <h1 onclick="OcultarTK()">
+        <a href="#/Inicio" style="text-decoration:none;color:white;">
+            <span class="IncidentesyRequerimientos">
+            </span>
+        </a>
+    </h1>
+    <hr />
+    <nav id="w2">
+        <ul id="w3">
+
+            <li onclick="OcultarTK()"><a href="#/Home"><div class="inLink"><span class="Tickets"></span></div></a></li>
+            @if (Convert.ToInt32(Session["USUARIO_EXTERNO_TICKET"].ToString()) == 0)
+            {
+                <li onclick="OcultarTK()"><a href="#/FindTicket"><div class="inLink"><span class="BúsquedaAvanzada"></span></div></a></li>
+                <li onclick="OcultarTK()"><a href="/Ticket/Create"><div class="inLink"><span class="NuevoTicket"></span></div></a></li>
+                <li onclick="OcultarTK()"><a href="Ticket/ListaTicketPortal"><div class="inLink"><span class="TicketsdelPortal"></span></div></a></li>
+            }
+        </ul>
+    </nav>
+    <br />
+    @if (Convert.ToInt32(Session["USUARIO_EXTERNO_TICKET"].ToString()) == 0)
+    {
+        <h1><span class="Reportes"></span></h1>
+        <hr />
+        <nav id="w2">
+            <ul id="w3">
+                <li onclick="OcultarTK()"><a href="/Ticket/ReporteActividadTicket"><div class="inLink"><span class="ActividadesporTicket"></span></div></a></li>
+                <li onclick="TicketReport(this)" id="liReport"><a><div class="inLink"><span class="ReportedeTicket"></span></div></a></li>
+                <li onclick="TicketReportSLA(this)" id="liReportSLA"><a><div class="inLink"><span class="ReporteSLA"></span></div></a></li>
+                <li onclick="OcultarTK()"><a href="Ticket/Work"><div class="inLink"><span class="ReporteDiario"></span></div></a></li>
+                <li onclick="OcultarTK()"><a href="ReportTicket/WorkLoad"><div class="inLink"><span class="CargadeTrabajo"></span></div></a></li>
+                <li onclick="OcultarTK()"><a href="#/Inform"><div class="inLink"><span class="InformeMensual"></span></div></a></li>
+                <li onclick="OcultarTK()"><a href="Inform/ViewReportTicket"><div class="inLink"><span class="Indicadores"></span></div></a></li>
+                <li onclick="OcultarTK()"><a href="Ticket/ReportesPlanos"><div class="inLink"><span class="ReportesPlanos"></span></div></a></li>
+            </ul>
+        </nav>
+        <br />
+        <h1><span class="TicketsProblema"></span></h1>
+        <hr />
+        <nav id="w2">
+            <ul id="w3">
+                <li onclick="OcultarTK()"><a href="Ticket/FindTicketProblema"><div class="inLink"><span class="BandejaProblema"></span></div></a></li>
+                <li onclick="OcultarTK()"><a href="Ticket/CrearTicketProblema"><div class="inLink"><span class="NuevoTicketProblema"></span></div></a></li>
+            </ul>
+        </nav>
+        <br />
+        <h1><span class="TicketsAutomáticos"></span></h1>
+        <hr />
+        <nav id="w2">
+            <ul id="w3">
+                <li onclick="OcultarTK()"><a href="Ticket/TicketAutomatico"><div class="inLink"><span class="ListadeTickets"></span></div></a></li>
+            </ul>
+        </nav>
+        <br />
+        <div id="tituloReporte" class="ReportedeTicket" style="display:none;"></div>
+    }
+</div>
+
+<script>
+
+    function OcultarTK() {
+
+        $("#w1").removeClass("w1AnimOne");
+    }
+
+    function TicketReport() {
+        $("#w1").removeClass("w1AnimOne");
+        var title = $("#tituloReporte").text();
+        var contHtml = '<div id="reportTicket"></div>';
+        var ancho = 500;
+        var alto = 200;
+        winPopUpModal(title, contHtml, ancho, alto);
+        $("#reportTicket").load("/Inform/VTicketReport?var=" + Math.random());
+    }
+
+    function TicketReportSLA() {
+        $("#w1").removeClass("w1AnimOne");
+        var title = $("#tituloReporte").text();
+        var contHtml = '<div id="reportTicket"></div>';
+        var ancho = 500;
+        var alto = 200;
+        winPopUpModal(title, contHtml, ancho, alto);
+        $("#reportTicket").load("/Inform/VTicketReportSLA?var=" + Math.random());
+    }
+</script>
+
+@*<script type="text/javascript">
+        var fl1 = 0;
+        var sw1 = 0;
+        var myVar;
+        var myVarOP;
+
+        function NewTicket(parm) {
+            if (sw1 == 1) { clearTimeout(myVarOP); sw1 = 0; }
+            DeseleccionarSale();
+            console.log("entra");
+            //$("#divContent").empty();
+            $("#divContent").load("/Ticket/Create?var=" + Math.random());
+        }
+        function FindTicket(parm) {
+            if (sw1 == 1) { clearTimeout(myVarOP); sw1 = 0; }
+            DeseleccionarSale();
+            $("#divContent").empty();
+            $("#divContent").load("/Ticket/FindTicket?var=" + Math.random());
+        }
+        function Sales(parm) {
+            clearTimeout(myVar);
+            SeleccionarSale();
+            sw1 = 1;
+            $("#divContent").empty();
+            $("#divContent").load("/Sales/Index?var=" + Math.random());
+        }
+
+        function FindSale() {
+            $("#divContent").empty();
+            $("#divContent").load("/Sales/FindSale?var=" + Math.random());
+        }
+
+        function FindOPSidige() {
+            $("#divContent").empty();
+            $("#divContent").load("/Sales/FindOPSidige?var=" + Math.random());
+        }
+
+        function Renovation() {
+            $("#divContent").empty();
+            $("#divContent").load("/OrderForm/Renovation?var=" + Math.random());
+        }
+
+        function SeleccionarSale() {
+            $("#aSale").css("color", "Black");
+            $("#aSale").css("font-weight", "bold");
+            $("#liSale").css("background-color", "#eaeaea");
+            $("#liReport").css("margin-right", "-4px");
+            fl1 = 1;
+            $("#navSubMenu1").css("display", "inline-block");
+        }
+        function DeseleccionarSale() {
+            if (fl1 == 1) {
+                $("#aSale").css("color", "White");
+                $("#aSale").css("font-weight", "initial");
+                $("#liSale").css("background-color", "#333333");
+                $("#liReport").css("margin-right", "-2px");
+                fl1 = 0;
+                $("#navSubMenu1").css("display", "none");
+            }
+        }
+        function Work(parm) {
+            if (sw1 == 1) {
+                clearTimeout(myVarOP);
+                sw1 = 0;
+            }
+            clearTimeout(myVar);
+            DeseleccionarSale();
+            $("#divContent").empty();
+            $("#divContent").load("/Ticket/Work?var=" + Math.random());
+        }
+        function WorkLoad(parm) {
+            if (sw1 == 1) {
+                clearTimeout(myVarOP);
+                sw1 = 0;
+            }
+            clearTimeout(myVar);
+            DeseleccionarSale();
+            $('#myModalLoading').modal('show');
+            $("#divContent").empty();
+            $("#divContent").load("/ReportTicket/WorkLoad?var=" + Math.random());
+        }
+
+        function LoadProject() {
+            if (sw1 == 1) {
+                clearTimeout(myVarOP);
+                sw1 = 0;
+            }
+            clearTimeout(myVar);
+            DeseleccionarSale();
+
+            $("#divContent").empty();
+            $("#divContent").load("/Project/ListProjects?var=" + Math.random());
+        }
+    </script>*@
+
+<script>
+    $(document).ready(function () {
+        $.ajaxSetup({ cache: false });
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        llaves = 'IncidentesyRequerimientos|Tickets|BúsquedaAvanzada|NuevoTicket|TicketsdelPortal|ActividadesporTicket|ReportedeTicket|ReporteSLA|ReporteDiario|CargadeTrabajo|InformeMensual|Indicadores|ReportesPlanos|BandejaProblema|NuevoTicketProblema|ListadeTickets|ReportedeTicket';
+        cambioIdiomaxLlave(llaves);
+        //cambioIdiomaTexto();
+    });
+
+    function cambioIdiomaxLlave(llaves) {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaxLlave?llaves=" + llaves,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+
+                    //alert(source);
+                    //alert(JSON.stringify(source));
+
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+    function cambioIdioma(id, idIdioma, llave) {
+        
+        //idIdioma = $("#IdIdioma").val();
+        //if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdioma?llave=" + llave + "&IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    $.each(data['Data'], function (index) {
+                        var valores = (data['Data'][index]).split("|");
+                        var cantValores = document.getElementsByClassName(valores[1]);
+                        alert(valores[1]);
+                        for (var i = 0; i < cantValores.length; i++) {
+                            cantValores[i].innerText = valores[0];
+                            alert(valores[0]);
+                        }
+                    });
+                },
+                error: function (source) {
+                }
+            });
+        //}
+    }
+
+    function cambioIdiomaTexto() {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaTexto?IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+
+                    //alert(source);
+                    //alert(JSON.stringify(source));
+
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+
+
+</script>

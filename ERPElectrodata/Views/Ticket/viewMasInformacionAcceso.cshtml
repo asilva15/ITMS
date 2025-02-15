@@ -1,0 +1,101 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+<style>
+    .k-button.k-upload-selected {
+        display: none !important
+    }
+
+    .k-button.k-clear-selected {
+        display: none !important
+    }
+</style>
+
+@*<input type="hidden" name="IdDocumentoContratoFianza" id="IdDocumentoContratoFianza" value="@ViewBag.IdDocumentoContratoFianza" />*@
+
+<input type="hidden" name="IdTick" id="IdTick" value="@ViewBag.ID_TICK" />
+
+
+<fieldset>
+
+    <h5 style="text-align: center; font-weight: bold;">¿Desea solicitar más información sobre el acceso?</h5>
+
+    <div class="form-group row">
+        <div class="col-md-12">
+            <div class="editor-label">
+                Comentario <span style="color:red">(*)</span>
+            </div>
+            <div>
+                <textarea id="Comentario" name="Comentario" class="form-control" rows="5" placeholder="Ingrese un comentario aquí..">@ViewBag.Comentario</textarea>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <div class="form-row">
+        <div class="col-md-6"></div>
+        <div class="col-md-3">
+            <button id="cancelAcceso" class="btn btn-light btn-block">Cancelar</button>
+        </div>
+        <div class="col-md-3">
+            <button id="masInformacionAcceso" class="btn btn-primary btn-block btn-warning">Solicitar</button>
+        </div>
+    </div>
+
+</fieldset>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#masInformacionAcceso").click(function () {
+
+            var params = {
+                IdTick: $("#IdTick").val(),
+                Comentario: $("#Comentario").val(),
+            };
+
+            $.ajax({
+                url: "/Ticket/MasInformacionAccesoBNV",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "JSON",
+                success: function (resp) {
+
+                    if (resp.Respuesta == "OK") {
+
+                        uploadDone(resp.Respuesta);
+                    }
+                    else {
+                        uploadDone(resp.Respuesta);
+                    }
+                }
+            });
+        });
+
+        $("#cancelAcceso").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        function uploadDone(msg, msgerror) {
+
+            if (msg == "OK") {
+                toastr.warning(msgerror, "Se solicitó información");
+                setTimeout(function () {
+                    $("[data-dismiss=modal]").trigger({ type: "click" });
+                    showDetailsIncident();
+                    //window.location.reload(); /*href = "/Home/Principal";*/
+                }, 3000);
+            }
+            else {
+
+                toastr.warning(msgerror, "Ingrese todos los campos requeridos");
+            }
+        }
+
+    });
+
+</script>

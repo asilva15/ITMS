@@ -1,0 +1,194 @@
+﻿@model ERPElectrodata.Models.PERSON_PAYMENT
+
+@{
+    Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<div id="divContent">
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="col-lg-3" style="width:95%;">
+                <div class="mb-3 card">
+                    <div class="card-header-tab card-header">
+                        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                            @ResourceLanguaje.Resource.ValidBankAccountTalent
+                        </div>
+                    </div>
+                    <div class="p-0 card-body">
+                        <div class="p-1 slick-slider-sm">
+                            <div style="width:100%;">
+                                <div class="inBodyForm" style="height:220px;" id="divAccountValid"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-8" id="divContNewAccount"  style="width:95%;">
+                <div class="mb-3 card">
+                    <div class="card-header-tab card-header">
+                        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                            @ResourceLanguaje.Resource.NewBankAccountTalent
+                        </div>
+                    </div>
+                    <div class="p-0 card-body">
+                        <div class="p-1 slick-slider-sm">
+                            <div style="width:100%;">
+                                <div class="inBodyForm" style="height:220px;" id="divContNewAccount">
+                                    @using (Html.BeginForm("NewPersonAccount", "Person_Payment", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormPersonAccount", name = "FormPersonAccount", target = "upload_targetPersonAccount" }))
+                                    {
+                                        <input type="hidden" name="ID_PERS_ENTI" id="ID_PERS_ENTI" value="@ViewBag.ID_PERS_ENTI" />
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="editor-label">
+                                                    @ResourceLanguaje.Resource.TypeAccountTalent
+                                                </div>
+                                                <div class="editor-field">
+                                                    <input type="text" name="ID_TYPE_PAYM_NEW" id="ID_TYPE_PAYM_NEW" />
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="editor-label">
+                                                    @ResourceLanguaje.Resource.BankTalent
+                                                </div>
+                                                <div class="editor-field">
+                                                    @Html.EditorFor(model => model.ID_BANK)
+                                                    @Html.ValidationMessageFor(model => model.ID_BANK)
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="editor-label">
+                                                    @ResourceLanguaje.Resource.NumberAccountTalent
+                                                </div>
+                                                <div class="k-textbox" style="width:100%;">
+                                                    @Html.EditorFor(model => model.NUM_ACCO)
+                                                    @Html.ValidationMessageFor(model => model.NUM_ACCO)
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="editor-label">
+                                                    @ResourceLanguaje.Resource.AccountOpeningDateTalent
+                                                </div>
+                                                <div class="editor-field">
+                                                    @Html.EditorFor(model => model.DAT_STAR)
+                                                    @Html.ValidationMessageFor(model => model.DAT_STAR)
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="divFondoUno" style="margin-bottom:5px;">
+                                            <div class="divSpace2" style="float:right;"></div>
+                                            <div style="display:inline-block; float:right; margin-top:15px;">
+                                                <button id="submit" class="btn btn-primary">@ResourceLanguaje.Resource.BtnSaveTalent</button>
+                                            </div>
+                                        </div>
+                                    }
+                                    <iframe id="upload_targetPersonAccount" name="upload_targetPersonAccount" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-12">
+        <div class="mb-3 card" style="width:100%;">
+            <div class="card-header-tab card-header">
+                <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                    @ResourceLanguaje.Resource.OldBankAccountsTalent
+                </div>
+            </div>
+            <div class="p-0 card-body">
+                <div class="p-1 slick-slider-sm">
+                    <div style="width:100%;">
+                        <div class="inBodyForm">
+                            <div class="inBodyForm" style="padding-top:10px;" id="divAccountOld">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#submit").click(function () {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingTalent @ResourceLanguaje.Resource.NewBankAccountTalent', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });
+
+        $("#ID_TYPE_PAYM_NEW").kendoComboBox({
+            dataTextField: "NAM_TYPE_PAYM",
+            dataValueField: "ID_TYPE_PAYM",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Person_Payment/ListTypePayment?var=" + Math.random()
+                }
+            }
+        });
+        var ID_TYPE_PAYM_NEW = $("#ID_TYPE_PAYM_NEW").data("kendoComboBox");
+
+        $("#ID_BANK").kendoComboBox({
+            dataTextField: "NAM_BANK",
+            dataValueField: "ID_BANK",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Bank/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_BANK = $("#ID_BANK").data("kendoComboBox");
+        var DAT_STAR = $("#DAT_STAR").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#divAccountValid").empty();
+        $("#divAccountValid").load("/PERSON_PAYMENT/PanelAccountValid?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+        $("#divAccountOld").empty();
+        $("#divAccountOld").load("/PERSON_PAYMENT/PanelAccountsOld?id=@ViewBag.ID_PERS_ENTI&id1=1&var=" + Math.random());
+
+        $("#titleOldBankAccounts").html('@ResourceLanguaje.Resource.OldBankAccountsTalent - Salario');
+    });
+
+    function mensaje(tipo, msg) {
+        if (tipo == "ERROR")
+            toastr.error(msg, "");
+        else {
+            toastr.success(msg, "");
+            $("#ID_TYPE_PAYM_NEW").data("kendoComboBox").value("");
+            $("#ID_BANK").data("kendoComboBox").value("");
+            $("#NUM_ACCO").val("");
+            var DAT_STAR = $("#DAT_STAR").kendoDateTimePicker().data("kendoDateTimePicker");
+            DAT_STAR.value(null);
+            dtp.trigger("change");
+            $("#divAccountValid").empty();
+            $("#divAccountValid").load("/PERSON_PAYMENT/PanelAccountValid?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+            $("#divAccountOld").empty();
+            $("#divAccountOld").load("/PERSON_PAYMENT/PanelAccountsOld?id=@ViewBag.ID_PERS_ENTI&id1=1&var=" + Math.random());
+        }
+    }
+</script>

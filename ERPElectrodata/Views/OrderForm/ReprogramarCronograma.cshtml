@@ -1,0 +1,99 @@
+﻿@{
+    ViewBag.Title = "ReprogramarCronograma";
+    Layout = null;
+}
+<style>
+    b {
+        color: #F83C50;
+    }
+</style>
+
+@using (Html.BeginForm("ReprogramarActividad", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormReprogramar", name = "FormReprogramar", target = "FormReprogramar" }))
+{
+            <div id="MensajeCronograma">
+            </div>
+            <input type="hidden" id="IdDocuSale" name="IdDocuSale" value="@ViewBag.ID_DOCU_SALE" />
+            <input type="hidden" value="@ViewBag.IdCronograma" name="IdCronograma" id="IdCronograma" />
+            <div style="width:100%">
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        <label for="dtFechaReprogramada"> Fecha Reprogramada <b>(*)</b></label>
+                        @*<input type="text" class="form-control" id="dtFechaReprogramada" name="dtFechaReprogramada" />*@
+                        <div class="input-group">
+                            <div class="input-group-prepend datepicker-trigger">
+                                <div class="input-group-text">
+                                    <i class="fa fa-calendar-alt"></i>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control" id="dtFechaReprogramada" name="dtFechaReprogramada" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-4">
+                        Tipo de Documento
+                        <select id="cbTipoDocumento" name="cbTipoDocumento" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                    </div>
+                    <div class="col-md-8">
+                        <br />
+                        <input id="documento" name="documento" type="file" />
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <label for="txtMotivo">Motivo de Reprogramación de Cronograma <b>(*)</b></label>
+                        <textarea id="txtMotivo" name="txtMotivo" class="form-control" rows="4" placeholder="Motivo de Reprogramación de Cronograma..."></textarea>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-7"></div>
+                    <div class="col-md-2">
+                        <button type="button" class="btn btn-primary btn-block" onclick="OcultarReprogramarFecha();">Cancelar</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="btnReprogramar" class="btn btn-primary btn-block">Reprogramar Cronograma</button>
+                    </div>
+                </div>
+            </div>
+}
+<iframe id="FormReprogramar" name="FormReprogramar" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+<script type='text/javascript'>
+    
+
+        $("#cbTipoDocumento").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeDocumentModule/ListarTipoDocumento/1",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+    $('#dtFechaReprogramada').datepicker({ autoclose: true });
+
+    function MensajeReprogramarCronograma(msg, msgDetalle) {
+        if (msg == 'OK') {
+            location.reload();
+        } else {
+            $('#MensajeCronograma').empty();
+            $('#MensajeCronograma').show("show");
+            $("#MensajeCronograma").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> " + msgDetalle + " </div>");
+            setTimeout(function () {
+                $("#MensajeCronograma").fadeOut(3000);
+            }, 1400);
+        }
+    }
+
+</script>

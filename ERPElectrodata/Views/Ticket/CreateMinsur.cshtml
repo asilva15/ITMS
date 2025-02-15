@@ -1,0 +1,2248 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    ViewBag.Title = "Create";
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+<style>
+    table.k-editor {
+        height: auto !important;
+    }
+    .editCombo {
+        position: absolute;
+        background-image: url(/Content/Images/Edit.png);
+        background-repeat: no-repeat;
+        width: 16px;
+        height: 16px;
+        top: 29px;
+        right: 60px;
+        cursor: pointer;
+        z-index: 999;
+    }
+    .btn-error {
+        color: #fff;
+        background-color: #d92550;
+        border-color: #d92550;
+    }
+    .k-list-item-text {
+        display: flex;
+    }
+    .custom-combobox .k-input-button.k-icon-button {
+        font-size: 20px;
+    }
+</style>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+</script>
+<div class="row">
+    <div class="col-md-8">
+        <div class="main-card mb-3 card">
+            @using (Html.BeginForm("Create", "Ticket", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmTicket", target = "upload_target" }))
+            {
+                <input type="hidden" name="hdnSubCuenta" id="hdnSubCuenta" value="" readonly />
+                @Html.ValidationSummary(true)
+                <div class="card-header">
+                    Nuevo Ticket - @ViewBag.DATE
+                </div>
+                <div class="card-body">
+                    <input type="hidden" name="ID_CIA" id="ID_CIA" value="0" />
+                    <input type="hidden" value="@ViewBag.UploadFile" name="KEY_ATTA" id="KEY_ATTA" readonly="readonly" />
+                    <input type="hidden" name="ID_CAT_N1" id="ID_CAT_N1" value="0" />
+                    <input type="hidden" name="ID_CAT_N2" id="ID_CAT_N2" value="0" />
+                    <input type="hidden" name="ID_CAT" id="ID_CAT" value="0" />
+                    <input type="hidden" name="FEC_TICK" id="FEC_TICK" value="@ViewBag.DATE" />
+                    <input type="hidden" name="IdSLA" id="IdSLA" value="@ViewBag.IdSLA" />
+
+                    <fieldset>
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Título de la Solicitud
+                                    @Html.TextBoxFor(model => model.TITLE_TICK, new { @class = "form-control", @placeholder = "Título de la Solicitud" })
+                                    @Html.ValidationMessageFor(model => model.TITLE_TICK)
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Medio de Comunicación
+                                    @*<label id="lblIdComunicacion" for="ID_SOUR" class="">Canal de Comunicación</label>*@
+                                    @Html.EditorFor(model => model.ID_SOUR, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_SOUR)
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Fecha de recepción de Solicitud
+                                    @Html.EditorFor(model => model.FechaRecepcionSolicitud, new { @class = "form-control", @placeholder = "Fecha Recepción de Solicitud" })
+                                    @Html.ValidationMessageFor(model => model.FechaRecepcionSolicitud)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    @*<label id="lblIdTipoSolicitud" for="ID_TYPE_TICK" class="">Tipo de Solicitud</label>*@
+                                    <div id="divRequest" class="editor-label">
+                                        <span class="">Solicitante</span>
+                                    </div>
+                                    @*<label id="divRequest">Solicitante</label>*@
+                                    <div id="divRequestNew" class="editor-label" data-toggle="modal" data-target="#miModal" onclick="NewContact()" style="cursor:pointer; display:none;" title="Register New Contact">
+                                        <span class="">Solicitante</span>
+                                    </div>
+                                    @Html.EditorFor(model => model.ID_PERS_ENTI, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                                </div>
+                                <div id="divEditCombo" style="display:none;" class="editCombo" data-toggle="modal" data-target="#miModal" onclick="EditContact()" title="Editar persona"></div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Usuario Afectado
+                                    @*<label id="lblFechaRegistro" for="FEC_TICK" class="">Fecha <span style="color:red">*</span></label>*@
+                                    @Html.EditorFor(model => model.ID_PERS_ENTI_END, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_END)
+                                </div>
+                            </div>
+                            <div class="col-md-4" hidden>
+                                <div class="form-group">
+                                    @*<label id="lblFechaRegistro" for="FEC_TICK" class="">Fecha <span style="color:red">*</span></label>*@
+                                    Activo
+                                    @Html.EditorFor(model => model.ID_ASSE, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_ASSE)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    Categoría 1
+                                    @*<label id="lblIdComunicacion" for="ID_SOUR" class="">Canal de Comunicación <span style="color:red">*</span></label>*@
+                                    @Html.Editor("ID_CATE_N1")
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    Categoría 2
+                                    @*<label id="lblIdTipoSolicitud" for="ID_TYPE_TICK" class="">Tipo de Solicitud</label>*@
+                                    @Html.Editor("ID_CATE_N2")
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group d-flex flex-column">
+                                    Categoría
+                                    <div class="d-flex">
+                                        <textarea id="nuevaCategoria" class="form-control w-100 d-inline" disabled="disabled" style="height:38px; overflow:auto; min-height:38px"></textarea>
+
+                                        @Html.TextBoxFor(model => model.ID_CATE, new { style = "display:none" })
+                                        <button class="btn-shadow btn btn-primary mr-1" type="button" style="height:38px" data-toggle="modal" data-target="#modalCategorias" onclick="AgregarCategoriaTicket();" id="AgregarCategoria" disabled>
+                                            +
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Tipo Ticket
+                                    @*<label id="lblIdTipoSolicitud" for="ID_TYPE_TICK" class="">Tipo de Solicitud</label>*@
+                                    @Html.EditorFor(model => model.ID_TYPE_TICK, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_TYPE_TICK)
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Prioridad
+                                    @*<label id="lblIdComunicacion" for="ID_SOUR" class="">Canal de Comunicación <span style="color:red">*</span></label>*@
+                                    @Html.EditorFor(model => model.ID_PRIO, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_PRIO)
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Estado
+                                    @Html.TextBoxFor(model => model.ID_STAT)
+                                    @Html.ValidationMessageFor(model => model.ID_STAT)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+
+                            <div class="col-md-4" id="divFecIniTick" hidden>
+                                <div class="form-group">
+                                    Fecha Programada
+                                    @Html.TextBoxFor(model => model.FEC_INI_TICK, new { @class = "form-control", @placeholder = "Fecha Programada" })
+                                    @Html.ValidationMessageFor(model => model.FEC_INI_TICK)
+                                </div>
+                            </div>
+
+                            <div class="col-md-4" hidden>
+                                <div class="form-group">
+                                    Ticket Externo
+                                    @{
+                                        if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 1)
+                                        {
+                                            @Html.TextBoxFor(model => model.TicketExterno, new { @class = "form-control" })
+                                            @Html.ValidationMessageFor(model => model.TicketExterno)
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Área Responsable
+                                    @*<label id="lblIdTipoSolicitud" for="ID_TYPE_TICK" class="">Tipo de Solicitud</label>*@
+                                    @Html.EditorFor(model => model.ID_QUEU, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_QUEU)
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    Asignado a
+                                    @*<label id="lblFechaRegistro" for="FEC_TICK" class="">Fecha <span style="color:red">*</span></label>*@
+                                    @Html.EditorFor(model => model.ID_PERS_ENTI_ASSI, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_ASSI)
+                                </div>
+                            </div>
+                            <div class="col-md-4" id="divFechaIngreso" hidden>
+                                <div class="form-group">
+                                    Fecha Ingreso / Cese
+                                    <input id="FechaIngreso" type="text" name="FechaIngreso" value="" />
+                                </div>
+                            </div>
+                            <div class="col-md-4" id="divMovil" hidden>
+                                <div class="form-group">
+                                    Proveedor
+                                    @Html.EditorFor(model => model.IdProveedorMovil, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.IdProveedorMovil)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    Control Remoto
+                                    @Html.CheckBox("REM_CTRL_TICK", false)
+                                    @Html.ValidationMessageFor(model => model.REM_CTRL_TICK)
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    Es Ticket Padre
+                                    @Html.CheckBox("IS_PARENT", false)
+                                    @Html.ValidationMessageFor(model => model.IS_PARENT)
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    Ticket Padre
+                                    @Html.EditorFor(model => model.ID_TICK_PARENT, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.ID_TICK_PARENT)
+                                </div>
+                            </div>
+
+                        </div>
+
+                        @if (Convert.ToInt32(Session["ID_ACCO"].ToString()) != 56
+                                           && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 57
+                                          && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 58)
+                        {
+                            <div class="form-row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        Grupo
+                                        <label id="cboGrupo" for="ID_GRUPO" class="">Grupo</label>
+                                        @Html.Editor("IDGRUPO")
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        Plantilla
+                                        <label id="cboPlantilla" for="ID_PLAN" class="">Plantilla</label>
+                                        @Html.Editor("IDPLAN")
+
+                                    </div>
+                                </div>
+                            </div>
+                        }
+
+
+                        @{
+
+                            if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 3)
+                            {
+
+                                <div class="form-row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            Servicio
+                                            @Html.CheckBox("SERVICE", false)
+                                            @Html.ValidationMessageFor(model => model.SERVICE)
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            Fecha Inicio Real
+                                            @Html.TextBoxFor(model => model.FEC_INI_REAL)
+                                            @Html.ValidationMessageFor(model => model.FEC_INI_REAL)
+                                        </div>
+                                    </div>
+                                </div>
+
+                            }
+
+                        }
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    @Html.TextAreaFor(model => model.SUM_TICK, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.SUM_TICK)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row" hidden>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.TextAreaFor(model => model.Adicional1, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Adicional1)
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    @Html.TextAreaFor(model => model.Adicional2, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.Adicional2)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+
+                                    <button type="button" data-toggle="modal" data-target="#miModal" onclick="AdjuntarNuevoTicket();" id="Adjuntar" class="mb-2 mr-2 btn-pill btn btn-success btn-block"><span>Adjuntar</span></button>
+
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <div class="d-block text-right card-footer">
+                    @*<button class="mr-2 btn btn-link" id="reset" type="button">Limpiar</button>*@
+                    <button id="submit" type="submit" hidden>Guardar</button>
+                    <button class="btn-shadow btn btn-primary" id="submitTicket" type="button">Guardar</button>
+                </div>
+                <input type="hidden" name="hdnTkAutomatico" id="hdnTkAutomatico" value="0" />
+                <input type="hidden" name="hdnTitulo" id="hdnTitulo" value="0" />
+                <input type="hidden" name="hdnFrecuencia" id="hdnFrecuencia" value="1" />
+                <input type="hidden" name="hdnDiaSemana" id="hdnDiaSemana" value="" />
+                <input type="hidden" name="hdnDiaPersonalizado" id="hdnDiaPersonalizado" value="" />
+                <input type="hidden" name="hdnDiaMes" id="hdnDiaMes" value="0" />
+                <input type="hidden" name="hdnVigencia" id="hdnVigencia" value="1" />
+                <input type="hidden" name="hdnVigenciaInicio" id="hdnVigenciaInicio" value="0" />
+                <input type="hidden" name="hdnVigenciaFin" id="hdnVigenciaFin" value="0" />
+                <input type="hidden" name="hdnHoraCreacion" id="hdnHoraCreacion" value="0" />
+            }
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Selector de Plantilla
+            </div>
+            <div class="card-body">
+                @*<div class="form-row">
+                    <div class="col-md-12">
+                        <div class="position-relative form-group">
+                            <label for="cbGrupoPlantilla">Grupo</label>
+                            <input id="cbGrupoPlantilla" class="form-control custom-combobox" />
+                        </div>
+                    </div>
+                </div>*@
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="position-relative form-group">
+                            <label for="cbNombrePlantilla">Plantilla</label>
+                            <input id="cbNombrePlantilla" class="form-control custom-combobox" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Tickets Automáticos
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <input type="checkbox" name="TicketAuto" id="chkTicketAuto" onclick="ValidarTicketAuto();" /> Ticket Automático
+                    </div>
+                    <div class="col-md-12" id="divTitulo" hidden>
+                        <div class="form-group">
+                            Titulo
+                            <input class="form-control" type="text" id="txtTituloTicketAuto" name="txtTituloTicketAuto" value="" />
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="divFrecuencia" hidden>
+                        <input type="radio" name="Frecuencia" id="rbtFrecuenciaSemanal" checked /> Semanal
+                        <input type="radio" name="Frecuencia" id="rbtFrecuenciaMensual" /> Mensual
+                    </div>
+                    <div class="col-md-12" id="divSemana" hidden>
+                        <input type="checkbox" name="" id="chkLunes" /> <label>Lunes</label>
+                        <input type="checkbox" name="" id="chkMartes" /> <label>Martes</label>
+                        <input type="checkbox" name="" id="chkMiercoles" /> <label>Miercoles</label>
+                        <input type="checkbox" name="" id="chkJueves" /> <label>Jueves</label>
+                        <input type="checkbox" name="" id="chkViernes" /> <label>Viernes</label><br />
+                        <input type="checkbox" name="" id="chkSabado" /> <label>Sabado</label>
+                        <input type="checkbox" name="" id="chkDomingo" /> <label>Domingo</label>
+                    </div>
+                    <div class="col-md-12" id="divDiaMes" hidden>
+                        <div class="form-group">
+                            Día del mes
+                            <input class="form-control" type="text" id="txtDiaMes" name="txtDiaMes" value="0" />
+                        </div>
+                    </div>
+                    <div class="col-md-12" id="divTiempo" hidden>
+                        <input type="radio" name="Tiempo" id="rbtTiempoIndeterminado" checked /> Indeterminado
+                        <input type="radio" name="Tiempo" id="rbtFechaVigencia" />Fecha de Vigencia
+                    </div>
+                    <div class="form-row" id="divFechaVigencia" hidden>
+                        <div class="col-md-6">
+                            Inicio
+                            <input id="FechaInicioVigencia" type="text" name="FechaInicioVigencia" value="" />
+                        </div>
+                        <div class="col-md-6">
+                            Fin
+                            <input id="FechaFinVigencia" type="text" name="FechaFinVigencia" value="" />
+                        </div>
+
+
+
+                    </div>
+                    <div class="col-md-12" id="divCreacion" hidden>
+                        <div class="form-group">
+                            Hora de Creación
+                            <input id="HoraCreacion" type="text" name="HoraCreacion" value="" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Detalles de Ticket
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="liveclock"></div>
+                            <div id="sla_nombre">SLA: </div>
+                            <div id="sla">Nivel de Servicio: </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Datos Del Usuario
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="divDetu">
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Activos Asignados Al Usuario
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+
+                    <div class="col-md-12" style="overflow-y:auto; height:360px; width:100%;">
+
+                        <div id="gridAssetByUser"></div>
+
+
+                    </div>
+                    <div class="col-md-12">
+
+                        <div id="pagerAssetByUser"></div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+<input id="usuarioVipMarcado" value="false" type="hidden" />
+<iframe id="upload_target" name="upload_target" src="" class="d-none"></iframe>
+
+@*@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}*@
+
+<!--Plantilla de Kendo para generar detalle de Usuario.-->
+<script type="text/x-kendo-tmpl" id="templdu">
+    @*<div class="du12">
+            <div class="duCont">
+                <div class="duContdet" style="text-transform:capitalize;margin:0px 5px 3px 5px;color:black;">
+                    Fotocheck: ${FOT_CLIE}<br>
+                    Usuario: ${NAM_CLIE}<br>
+                    <div style="float:left;padding:0px 5px 0px 0px">Tipo de Usuario: </div><div style="color:${COLOR};"> ${USE_TYPE}</div>
+                    Cargo: ${JOB_TITL}<br>
+                    Area: ${ARE_CLIE}<br>
+                    Gestión: ${MANA}<br>
+                    Compañia: ${CIA}<br>
+                    Anexo: ${EXT}<br>
+                    Celular: ${CEL_CLIE}<br>
+                    RPM: ${RPM_CLIE}
+                </div>
+                <div class="duContFot">
+
+                </div>
+            </div>
+        </div>*@
+    <div class="du12">
+        <div class="duCont">
+            <div class="duContdet" style="text-transform:capitalize;margin:0px 5px 3px 5px;color:black;">
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Fotocheck</label>: ${FOT_CLIE}<br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Usuario</label>: ${NAM_CLIE}<br>
+                <div style="float:left;padding:0px 5px 0px 0px"><label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Tipo De Usuario</label>: </div><label style="color:${COLOR};font-weight:bold;"> ${USE_TYPE}</label><br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Cargo</label>: ${JOB_TITL}<br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Área</label>: ${ARE_CLIE}<br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Gestión</label>: ${MANA}<br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Compañía</label>: ${CIA}<br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Extensión</label>: ${EXT}<br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Celular</label>: ${CEL_CLIE}<br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">RPM</label>: ${RPM_CLIE}<br>
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">Locación</label>: ${LOCACION}
+            </div>
+            <div class="duContFot">
+
+            </div>
+        </div>
+    </div>
+</script>
+
+<!--Plantilla de Kendo que sirve para generar detalle de equipos asignado a usuario.-->
+<script type="text/x-kendo-tmpl" id="templabu">
+    <div class="form-row">
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;">${NAM_TYPE_ASSE} </label> |
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;"> ${NAM_MANU} </label> |
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;"> ${NAM_STAT_ASSE} - ${NAM_COND} </label> |
+            </div>
+        </div>
+        <div class="col-xs-3">
+            <div class="form-group">
+                <label id="" for="" class="" style="text-transform:capitalize;font-weight:bold;"> ${COD_ASSE}</label>
+            </div>
+        </div>
+    </div>
+    @*<div class="FondoGris01">
+            <div class="casilla">
+                ${NAM_TYPE_ASSE}
+            </div>
+            <div class="casilla">
+                ${NAM_MANU}
+            </div>
+            <div class="casilla">
+                ${NAM_STAT_ASSE} - ${NAM_COND}
+            </div>
+            <div class="casilla">
+                ${COD_ASSE}
+            </div>
+        </div>
+        <div style="width:100%;height:4px;"></div>*@
+</script>
+
+<script type="text/javascript">
+    var idpriory = 0;
+    var swt = 0;
+    function MensajeError(msj, flag) {
+        //Cierre de la ventana de espera.
+        //closeWinModalPopUpLoad();
+
+        //$('#SmallModalContent').modal('show');
+        //$("#SmallModalTitle").empty();
+        //$("#SmallModalTitle").text("Mensaje");
+        //$("#SmallModalBody").empty();
+        //$("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + msj + "</div>");
+        //$("#SmallModalFooter").empty();
+        //$("#SmallModalFooter").append("<div style='float:right;'>" +
+        //                                  "<button id='continuee' class='k-button'>Continuar</button>" +
+        //                           "</div>");
+        //var undo = $("#continuee")
+        //.bind("click", function () {
+        //    $('#SmallModalContent').modal('hide');
+        //});
+
+        swal({
+            title: 'Mensaje',
+            type: 'info',
+            text: msj,
+            focusConfirm: false,
+            confirmButtonText:
+                'Continue',
+            confirmButtonAriaLabel: 'Thumbs up, great!'
+
+        })
+    }
+
+    //Función ejecutada despues de enviar datos al servidor y recibir respuesta.
+    function uploadDone(msg, code, id) {
+
+        //Cierre de la ventana de espera.
+        //closeWinModalPopUpLoad();
+
+        //Todo conforme se procede a mostrar mensaje de satisfacción.
+        if (msg == "OK") {
+            var title = 'Información Guardada / Notificación Enviada';
+            swal({
+                title: title,
+                type: 'success',
+                text: 'Ticket information was succesfully saved. Code : ' + code,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                var newurl = location.host + "/Home";
+                /*location = "http://" + location.host + "/Home";*/
+
+                location.reload()
+            })
+
+        }
+            //En caso exista disconformidad se muestra mensaje
+        else {
+            var title = 'Falta Información';
+
+            swal({
+                title: title,
+                type: 'info',
+                text: 'You should choose or complete the required information.',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+        }
+    }
+
+    function uploadDoneMinsur(msg, code, id) {
+
+        //Cierre de la ventana de espera.
+        //closeWinModalPopUpLoad();
+
+        //Todo conforme se procede a mostrar mensaje de satisfacción.
+        if (msg == "OK") {
+            var title = 'Información Guardada / Notificación Enviada';
+            swal({
+                title: title,
+                type: 'success',
+                text: 'Ticket information was succesfully saved. Code : ' + code,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                //var newurl = location.host + "/Home";
+                /*location = "http://" + location.host + "/Home";*/
+
+                location = "http://" + location.host + `/DetailsTicket/Index/${id}`;
+            })
+
+        }
+        //En caso exista disconformidad se muestra mensaje
+        else {
+            var title = 'Falta Información';
+
+            swal({
+                title: title,
+                type: 'info',
+                text: 'You should choose or complete the required information.',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+        }
+    }
+
+    function perdioSesion() {
+
+        swal({
+            title: 'Algo salio mal',
+            type: 'error',
+            text: 'Se perdió la conexión',
+            focusConfirm: false,
+            confirmButtonText: 'Continuar',
+        }, function () {
+
+            location = "http://" + location.host + '/Home/Principal';
+        })
+    }
+
+    $(document).ready(function () {
+
+        //let cbGrupoPlantilla = $("#cbGrupoPlantilla").kendoComboBox({
+        //    dataTextField: "DES_QUEU",
+        //    dataValueField: "ID_QUEU",
+        //    placeholder: "Seleccione...",
+        //    filter: "contains",
+        //    autoBind: true,
+        //    delay: 500,
+        //    minLength: 0,
+        //    suggest: true,
+        //    template: '<div style="text-transform:uppercase; display: width:100%;">' +
+        //        '${data.DES_QUEU}</div>',
+        //    //template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+        //    //            '<span><strong>${data.QUEU}</strong></span><br />' +
+        //    //            '<span style="position:absolute; top:15px;">${data.DES_QUEU}</span></div>',
+        //    dataSource: {
+        //        schema: {
+        //            data: "Data"
+        //        },
+        //        transport: {
+        //            read: "/Plantilla/ListarGruposUsuario?var=" + Math.random()
+        //        }
+        //    }
+        //}).data("kendoComboBox");
+
+        let cbNombrePlantilla = $("#cbNombrePlantilla").kendoComboBox({
+            filter: "contains",
+            dataValueField: "Id",
+            dataTextField: "Nombre",
+            placeholder: "Seleccionar plantilla... ",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data"
+                },
+                transport: {
+                    read: "/Plantilla/ListarPlantillasGrupo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        //cbGrupoPlantilla.bind("change", function () {
+        //    cbNombrePlantilla.enable(true);
+        //    cbNombrePlantilla.setDataSource({
+        //        transport: {
+        //            schema: {
+        //                data: "Data"
+        //            },
+        //            read: {
+        //                url: "/Plantilla/ListarPlantillasGrupo?IdGrupo=" + cbGrupoPlantilla.dataItem().ID_QUEU
+        //            }
+        //        }
+        //    });
+        //});
+
+        cbNombrePlantilla.bind("change", function () {
+            //Cargar Datos de Plantilla
+            $.ajax({
+                url: '/Plantilla/ObtenerPlantilla/',
+                data: { IdPlantilla: cbNombrePlantilla.dataItem().Id },
+                type: 'GET',
+                dataType: 'json',
+                success: function (data) {
+                    let plantilla = data;
+                    $("#TITLE_TICK").val(plantilla.TITLE_TICK);
+                    $("#ID_CATE_N1").data("kendoComboBox").value(plantilla.ID_CATE_N1);
+                    $("#ID_CATE_N2").data("kendoComboBox").value(plantilla.ID_CATE_N2);
+
+                    $.ajax({
+                        url: '/Plantilla/ObtenerCategorias/?idCat=' + plantilla.ID_CATE,
+                        type: 'GET',
+                        dataType: 'json',
+                        success: function (data) {
+                            $("#nuevaCategoria").val(data);
+                        }
+                    });
+
+                    $("#ID_CATE").val(plantilla.ID_CATE);
+                    $("#AgregarCategoria").removeAttr("disabled");
+                    var categoriasFecha = [27009, 27011, parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeMinsur"]), parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeMarcobre"]), parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeRaura"])];
+                    if (categoriasFecha.indexOf(parseInt(plantilla.ID_CATE)) != -1) {
+                        $("#divFechaIngreso").removeAttr('hidden');
+                        $("#FechaIngreso").kendoDateTimePicker({ value: new Date() }).data("kendoDateTimePicker");
+                    }
+                    if (plantilla.ID_CATE == 27158 || plantilla.ID_CATE == 28529 || plantilla.ID_CATE == 29900) {
+                        $("#divMovil").removeAttr('hidden');
+                    }
+
+                    $("#ID_TYPE_TICK").data("kendoComboBox").value(plantilla.ID_TYPE_TICK);
+                    $("#ID_PRIO").data("kendoComboBox").value(plantilla.ID_PRIO);
+
+                    $("#ID_STAT").data("kendoComboBox").value(plantilla.ID_STAT);
+                    if (plantilla.ID_STAT == 5) {
+                        $("#divFecIniTick").removeAttr("hidden");
+                        if (plantilla.FEC_INI_TICK != null) $("#FEC_INI_TICK").data("kendoDateTimePicker").value(new Date(parseInt(plantilla.FEC_INI_TICK.substr(6))));
+                        //$("#FEC_INI_TICK").kendoDateTimePicker({ value: plantilla.FEC_INI_TICK }).data("kendoDateTimePicker");
+                    }
+
+                    $("#ID_QUEU").data("kendoComboBox").value(plantilla.ID_QUEU);
+                    $("#ID_PERS_ENTI_ASSI").data("kendoComboBox").value(null);
+
+                    $.ajax({
+                        url: "/Ticket/ObtenerSLACategoria?id=" + plantilla.ID_CATE,
+                        type: "GET",
+                        success: function (response) {
+                            //alert(response.Data);
+                            if (response.Data != null) {
+                                var data = response.Data;
+
+                                if ($("#sla").length) {
+                                    $("#sla").html("Nivel de Servicio: " + data.TiempoAtencion + " Hours");
+                                    if (ID_PRIO.value() == 1) {
+                                        $('#sla').css('background', 'red');
+                                    } else if (ID_PRIO.value() == 2) {
+                                        $('#sla').css('background', 'orange');
+                                    } else if (ID_PRIO.value() == 3) {
+                                        $('#sla').css('background', 'yellow');
+                                    } else if (ID_PRIO.value() == 4) {
+                                        $('#sla').css('background', 'aqua');
+                                    } else {
+                                        $('#sla').css('background', 'gray');
+                                    }
+                                }
+                                $("#sla_nombre").html(data.Nombre);
+                                $("#IdSLA").val(data.Id);
+                                ID_PRIO.enable(false);
+                            } else {
+                                ID_PRIO.enable(true);
+                                if ($("#sla_nombre").length) {
+                                    $("#sla_nombre").html('SLA ESTANDAR');
+                                }
+                                $.ajax({
+                                    url: "/Ticket/ObtenerSLAId",
+                                    type: "GET",
+                                    success: function (data) {
+                                        if ($("#IdSLA").length) {
+                                            $("#IdSLA").val(data);
+                                        }
+                                    }
+                                });
+                                $("#ID_PRIO").data("kendoComboBox").trigger('change');
+                            }
+                        }
+                    });
+
+                    if (plantilla.REM_CTRL_TICK == true) {
+                        //$("#REM_CTRL_TICK").prop("checked", true);
+                        //$("#REM_CTRL_TICK").val(true);
+                        $("#REM_CTRL_TICK").iCheck('check');
+                    }
+
+                    if (plantilla.IS_PARENT == true) {
+                        $("#IS_PARENT").iCheck('check');
+                        //$("#ID_TICK_PARENT").data("kendoComboBox").enable(false);
+                    }
+                    $("#ID_TICK_PARENT").data("kendoComboBox").value(plantilla.ID_TICK_PARENT);
+                    $("#SUM_TICK").data("kendoEditor").value(plantilla.SUM_TICK);
+
+                },
+                error: function (data) {
+                },
+            });
+
+        });
+
+
+        var solicitanteSeteado = false;
+        var valores = new Array();
+        var IdTema = $("#IdTema").kendoComboBox({}).data("kendoComboBox");
+        var IdTicketIncidente = 1
+        //cambioIdiomaTexto();
+
+        //top.cambioIdiomaxLlave('NuevoTicket|TipoTicket|FechaTicket|MediodeComunicación|CompañíaSolicitante|Artículo|CompañíaFinal|Solicitante|UsuarioAfectado|Prioridad|ÁreaResponsable|Asignadoa|Estado|UnidaddeNegocio|Macroservicio|Servicio|Incidente/Requerimiento|ControlRemoto|FechaProgramada|¿EsTicketPadre?|TicketPadre|Monto|Activo|FechaRecepcionSolicitud|Servicio|Comentarios|Adjuntar|Crear|Cancelar|AdjuntarArchivos|TipodeDocumento|Cerrar|TicketsAutomáticos|TicketAutomático|Título|Lunes|Martes|Miércoles|Jueves|Viernes|Sábado|Domingo|Indeterminado|FechadeVigencia|HoradeCreación|SoportedeProductos|VerVigencia|DetallesdelTicket|TiempoestimadodeAtención|DatosdelUsuario|Activosasignadosalusuario');
+
+        //Tickets Automaticos
+        var hoy = new Date();
+        var HoraCreacion = $("#HoraCreacion").kendoDateTimePicker({ value: hoy, dateInput: true }).data("kendoDateTimePicker");
+        var FechaInicioVigencia = $("#FechaInicioVigencia").kendoDateTimePicker({ value: hoy }).data("kendoDateTimePicker");
+        var FechaFinVigencia = $("#FechaFinVigencia").kendoDateTimePicker({ value: hoy }).data("kendoDateTimePicker");
+
+        $("#submitTicket").on("click", function () {
+            if (@Session["ID_ACCO"] == 56 || @Session["ID_ACCO"] == 57 || @Session["ID_ACCO"] == 58) {
+                let msg = "";
+                let titulo = $("#TITLE_TICK").val();
+                let medioComunicacion = $("#ID_SOUR").val();
+                let fechaRecepcion = $("#FechaRecepcionSolicitud").val();
+                let solicitante = $("#ID_PERS_ENTI").val();
+                let afectado = $("#ID_PERS_ENTI_END").val();
+                let categoria = $("#ID_CATE").val();
+                let tipoTicket = $("#ID_TYPE_TICK").val();
+                let prioridad = $("#ID_PRIO").val();
+                let estado = $("#ID_STAT").val();
+                let asignado = $("#ID_PERS_ENTI_ASSI").val();
+
+                if (titulo.trim() == "") msg += "-Título <br>";
+                if (medioComunicacion == "") msg += "-Medio de Comunicación <br>";
+                if (fechaRecepcion == "") msg += "-Fecha de Recepción <br>";
+                if (solicitante == "") msg += "-Solicitante <br>";
+                if (afectado == "") msg += "-Usuario Afectado <br>";
+                if (categoria == "") msg += "-Categoría <br>";
+                if (tipoTicket == "") msg += "-Tipo de Ticket <br>";
+                if (prioridad == "") msg += "-Prioridad <br>";
+                if (estado == "") msg += "-Estado <br>";
+                if (asignado == "") msg += "-Usuario Asignado <br>";
+
+                if (msg == "") { $("#submit").click(); }
+                else { toastr.warning("Debe llenar los siguientes campos: <br>" + msg, "Advertencia"); }
+
+            } else {
+                $("#submit").click();
+            }
+        });
+
+        $('#chkTicketAuto').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#hdnTkAutomatico").val(1);
+
+                //$("#divFrecuencia").removeClass("divHide");
+                $("#divTitulo").removeAttr("hidden");
+                $("#divFrecuencia").removeAttr("hidden");
+                if ($("#rbtFrecuenciaSemanal").is(':checked')) {
+                    //$("#divDiaSemana").removeClass("divHide");
+                    //$("#divDiaMes").addClass("divHide");
+                    $("#divSemana").removeAttr("hidden");
+                    $("#divDiaMes").attr("hidden", true);
+                } else {
+                    //$("#divDiaMes").removeClass("divHide");
+                    //$("#divDiaSemana").addClass("divHide");
+                    $("#divSemana").attr("hidden", true);
+                    $("#divDiaMes").removeAttr("hidden");
+                }
+
+                //$("#divTiempo").removeClass("divHide");
+                $("#divTiempo").removeAttr("hidden");
+                if ($("#rbtTiempoIndeterminado").is(':checked')) {
+                    //$("#divFechaVigencia").addClass("divHide");
+                    $("#divFechaVigencia").attr("hidden", true);
+                    $("#divCreacion").removeAttr("hidden");
+                } else {
+                    //$("#divFechaVigencia").removeClass("divHide");
+                    $("#divCreacion").attr("hidden", true);
+                    $("#divFechaVigencia").removeAttr("hidden");
+                }
+            } else {
+                $("#hdnTkAutomatico").val(0);
+                //$("#divFrecuencia").addClass("divHide");
+                //$("#divDiaSemana").addClass("divHide");
+                //$("#divDiaMes").addClass("divHide");
+                //$("#divTiempo").addClass("divHide");
+                //$("#divFechaVigencia").addClass("divHide");
+                $("#DivCausa").removeAttr("hidden");
+                $("#divTitulo").attr("hidden", true);
+                $("#divFrecuencia").attr("hidden", true);
+                $("#divSemana").attr("hidden", true);
+                $("#divDiaMes").attr("hidden", true);
+                $("#divTiempo").attr("hidden", true);
+                $("#divFechaVigencia").attr("hidden", true);
+                $("#divCreacion").attr("hidden", true);
+            }
+        });
+
+        $('#rbtFrecuenciaSemanal').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#hdnFrecuencia").val(1);
+                //$("#divDiaSemana").removeClass("divHide");
+                //$("#divDiaMes").addClass("divHide");
+                $("#divSemana").removeAttr("hidden");
+                $("#divDiaMes").attr("hidden", true);
+            } else {
+                $("#hdnFrecuencia").val(2);
+                //$("#divDiaMes").removeClass("divHide");
+                //$("#divDiaSemana").addClass("divHide");
+                $("#divSemana").attr("hidden", true);
+                $("#divDiaMes").removeAttr("hidden");
+            }
+        });
+
+        $('#rbtTiempoIndeterminado').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#hdnVigencia").val(1);
+                //$("#divFechaVigencia").addClass("divHide");
+                $("#divFechaVigencia").attr("hidden", true);
+                $("#divCreacion").removeAttr("hidden");
+            } else {
+                $("#hdnVigencia").val(2);
+                //$("#divFechaVigencia").removeClass("divHide");
+                $("#divFechaVigencia").removeAttr("hidden");
+                $("#divCreacion").attr("hidden", true);
+            }
+        });
+
+        $('#chkLunes').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val() + '2-');
+            } else {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val().replace('2-', ''));
+            }
+        });
+        $('#chkMartes').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val() + '3-');
+            } else {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val().replace('3-', ''));
+            }
+        });
+        $('#chkMiercoles').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val() + '4-');
+            } else {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val().replace('4-', ''));
+            }
+        });
+        $('#chkJueves').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val() + '5-');
+            } else {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val().replace('5-', ''));
+            }
+        });
+        $('#chkViernes').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val() + '6-');
+            } else {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val().replace('6-', ''));
+            }
+        });
+        $('#chkSabado').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val() + '7-');
+            } else {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val().replace('7-', ''));
+            }
+        });
+        $('#chkDomingo').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val() + '1-');
+            } else {
+                $('#hdnDiaSemana').val($('#hdnDiaSemana').val().replace('1-', ''));
+            }
+        });
+
+        $('#submit').click(function () {
+            var mensaje = '';
+            let ID_CATE = $("#ID_CATE").val();
+            $('#hdnTitulo').val($('#txtTituloTicketAuto').val());
+            $('#hdnDiaMes').val($('#txtDiaMes').val());
+            $('#hdnVigenciaInicio').val($('#FechaInicioVigencia').val());
+            $('#hdnVigenciaFin').val($('#FechaFinVigencia').val());
+            $('#hdnHoraCreacion').val($('#HoraCreacion').val());
+
+            if ($('#hdnTkAutomatico').val() == 1) {
+                if ($('#hdnTitulo').val() == '') {
+                    mensaje = 'Ingrese un Título para el Ticket Automático. \n'
+                }
+                if ($('#hdnFrecuencia').val() == 1 && $('#hdnDiaSemana').val() == '') {
+                    mensaje = 'Seleccione un día como mínimo. \n'
+                }
+                if ($('#hdnFrecuencia').val() == 2 && ($('#hdnDiaMes').val() < 1 || $('#hdnDiaMes').val() > 31)) {
+                    mensaje = 'Seleccione un día del mes válido . \n'
+                }
+            }
+            var categoriasFecha = [27009, 27011, parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeMinsur"]), parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeMarcobre"]), parseInt(@System.Configuration.ConfigurationManager.AppSettings["IdIntermeRaura"])];
+            var idCate = parseInt($("#ID_CATE").val());
+            if (categoriasFecha.indexOf(idCate) != -1) {
+                if ($("#FechaIngreso").val() == '') {
+                    mensaje = 'Seleccione una fecha  . \n';
+                }
+            }
+
+            if (categoriasFecha.indexOf(idCate) != -1) {
+                if ($("#FechaIngreso").val() == '') {
+                    mensaje = 'Seleccione una fecha  . \n';
+                }
+            }
+
+            if (idCate == 27158 || idCate == 28529 || idCate == 29900) {
+                if ($("#IdProveedorMovil").val() == '') {
+                    mensaje = 'Seleccione un proveedor  . \n';
+                }
+            }
+
+            if (mensaje != "") {
+                //alert(mensaje);
+                toastr.info(mensaje, "Advertencia");
+                return false;
+            } else {
+                //winPopUpModalLoad('Guardando el Ticket', 'Espere por Favor', 300, 130);
+                toastr.info("Guardando el Ticket", "Espere por favor");
+            }
+
+        });
+
+        if ('@ViewBag.ACCESO_NEWREQ' == '1') {
+            $("#divRequest").css("display", "none");
+            $("#divRequestNew").css("display", "inline-block");
+        }
+
+        //Resetear o limpiar formulario.
+        $("#reset").click(function (event) {
+            event.preventDefault();
+
+            //var title = 'Operación Cancelada';
+            //var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+            //"<div style='padding:10px 0px 10px 0px;'>The operation to perform was cancelled</div>" +
+            //"<div style='float:right; padding:20px 6px 0px 6px; '>" +
+            //"<button id='btnContinuer' class='k-button'>Continue</button>" +
+            //"</div></div>";
+
+            //winPopUpModal(title, body, 400, 150);
+
+            //$("#btnContinuer").bind("click", function () {
+            //    //location.reload(true);
+            //    $("#dlg").hide('200', "swing", function () {
+            //        $("#bkg").fadeOut("300");
+            //    });
+
+            //    var newurl = location.host + "/Home";
+            //    location = "http://" + location.host + "/Home";
+            //});
+
+            //$("#closebtnmodal").click(function () {
+
+            //    //location.reload(true);
+            //    //var newurl = location.host + "/Home";
+            //    //location = "http://" + location.host + "/Home";
+            //});
+
+            swal({
+                    title: 'Operación Cancelada',
+                    type: 'info',
+                    text: 'The operation to perform was cancelled',
+                    focusConfirm: false,
+                    confirmButtonText:
+                        'Continue',
+                    confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                }, function () {
+                    var newurl = location.host + "/Home";
+                    location = "http://" + location.host + "/Home";
+                })
+
+        });
+
+        //Declaración de objeto ComboBox Kendo
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            //delay: 500,
+            //minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    //Establecer url de donde se consume recursos en Json.
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        //ID_PERS_ENTI.list.width(300);
+
+        var ID_PERS_ENTI_END = $("#ID_PERS_ENTI_END").kendoComboBox({ cascadeFrom: "ID_PERS_ENTI" }).data("kendoComboBox");
+
+        //Función para verificar cambio de registro seleccionado
+        ID_PERS_ENTI.bind("change", function (e) {
+            //Store para vista Detail User
+            if (solicitanteSeteado == false) {
+                detailUser(e.sender._old);
+                AssetByUser(e.sender._old);
+                solicitanteSeteado = true;
+            } else {
+                detailUser(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+                AssetByUser(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+                ID_PERS_ENTI_END.value(e.sender_old);
+                //ID_PERS_ENTI_END.value(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+            }
+            ID_PERS_ENTI_END.destroy();
+            ID_PERS_ENTI_END = $("#ID_PERS_ENTI_END").kendoComboBox({
+                cascadeFrom: "ID_PERS_ENTI",
+                dataTextField: "CLIE",
+                dataValueField: "ID_PERS_ENTI",
+                value: e.sender._old,
+                filter: "contains",
+                autoBind: false,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountEntity/AEUByAcco2?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            //$.ajax({
+            //    url: "/AccountEntity/DetailPerson/" + ID_PERS_ENTI.dataItem().ID_PERS_ENTI,
+            //    type: 'GET',
+            //    dataType: 'json',
+            //    success: function (data) {
+            //        if (data.Data[0].USE_TYPE == 'Usuario VIP') {
+            //            ID_TYPE_TICK.value(IdTicketIncidente)
+            //            $("#usuarioVipMarcado").val(false);
+            //        } else {
+            //            $("#usuarioVipMarcado").val(false);
+            //        }
+            //    },
+            //    error: function (data) {
+            //    },
+            //});
+
+            if (ID_PERS_ENTI.dataItem() === undefined) {
+                $("#divEditCombo").css("display", "none");
+            }
+            else {
+                if ('@ViewBag.ACCESO_NEWREQ' == '1') {
+                    $("#divEditCombo").css("display", "block");
+                }
+            }
+        });
+
+        ID_PERS_ENTI_END.bind("change", function (e) {
+            //Store para vista Detail User
+            detailUser(ID_PERS_ENTI_END.dataItem().ID_PERS_ENTI);
+            AssetByUser(ID_PERS_ENTI_END.dataItem().ID_PERS_ENTI);
+            ID_PRIO.value(ID_PERS_ENTI_END.dataItem().ID_PRIO);
+        });
+
+        var ID_PRIO = $("#ID_PRIO").kendoComboBox({
+            autoBind: false,
+            //index: 1,
+            //cascadeFrom: "ID_PERS_ENTI_END",
+            //placeholder: "Select Priority...",
+            dataTextField: "NAM_PRIO",
+            dataValueField: "ID_PRIO",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Priority/List"
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_PRIO.bind("dataBound", function (e) {
+            //console.log(ID_PERS_ENTI_END.dataItem());
+            if (ID_PERS_ENTI_END.dataItem()) {
+                //ID_PRIO.value(ID_PERS_ENTI_END.dataItem().ID_PRIO);
+                document.getElementById("sla").innerHTML = 'Nivel de Servicio: ' + ID_PRIO.dataItem().HOU_PRIO + ' Hours';
+            }
+            //else if { ID_PRIO.value(ID_PERS_ENTI_END.dataItem().ID_PRIO); }
+        });
+
+        ID_PRIO.bind("change", function (e) {
+            document.getElementById("sla").innerHTML = 'Nivel de Servicio: ' + ID_PRIO.dataItem().HOU_PRIO + ' Hours';
+            if (ID_PRIO.value() == 1) {
+                $('#sla').css('background', 'red');
+            } else if (ID_PRIO.value() == 2) {
+                $('#sla').css('background', 'orange');
+            } else if (ID_PRIO.value() == 3) {
+                $('#sla').css('background', 'yellow');
+            } else if (ID_PRIO.value() == 4) {
+                $('#sla').css('background', 'aqua');
+            } else {
+                $('#sla').css('background', 'gray');
+            }
+        });
+
+        //ID_PERS_ENTI.bind("change", function (e) {
+
+        //    //ID_PRIO.value(ID_PERS_ENTI.dataItem().ID_PRIO);
+        //});
+
+        //ID_PERS_ENTI.bind("change", function (e) {
+        //    //Validar si es usuario VIP
+        //    $.ajax({
+        //        url: "/AccountEntity/ValidarTipoUsuario/" + $("#ID_PERS_ENTI").val(),
+        //        type: "GET",
+        //        cache: false,
+        //        dataType: "json",
+        //        success: function (source) {
+        //            data = source;
+        //            //Asigna la prioridad
+        //            if ((data['Data'][0]) == 1) {
+        //                var idPrioridad = $("#ID_PRIO").data("kendoComboBox");
+        //                idPrioridad.value(1);
+        //                idPrioridad.trigger("change");
+        //            }
+        //        },
+        //        error: function (source) {
+        //            toastr.error("Error Carga Json Comercial", "Mensaje");
+        //        }
+        //    });
+        //});
+
+        //ID_PERS_ENTI_END.bind("change", function (e) {
+        //    ID_PRIO.value(ID_PERS_ENTI_END.dataItem().ID_PRIO);
+        //});
+
+        var ID_SOUR = $("#ID_SOUR").kendoComboBox({
+            //index: 1,
+            dataTextField: "NAM_SOUR",
+            dataValueField: "ID_SOUR",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SourceTicket/List"
+                },
+                filter: {
+                    field: "ID_SOUR", operator: "neq", value: 8
+                }
+            }
+        }).data("kendoComboBox");
+
+        var FEC_INI_TICK = $("#FEC_INI_TICK").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        if (parseInt(@Session["ID_ACCO"]) == 3) {
+            var FEC_INI_REAL = $("#FEC_INI_REAL").kendoDateTimePicker().data("kendoDateTimePicker");
+            FEC_INI_REAL.value("@ViewBag.DATE");
+        }
+        //var FEC_INI_REAL = $("#FEC_INI_REAL").kendoDateTimePicker().data("kendoDateTimePicker");
+        //FEC_INI_REAL.value("@ViewBag.DATE");
+
+        //var FEC_TICK = $("#FEC_TICK").kendoDateTimePicker().data("kendoDateTimePicker");
+        //FEC_TICK.value("@ViewBag.DATE");
+
+        var FechaRecepcionSolicitud = $("#FechaRecepcionSolicitud").kendoDateTimePicker().data("kendoDateTimePicker");
+        let currentDate = new Date("@ViewBag.DATETIMESERVER");
+        FechaRecepcionSolicitud.value(currentDate);
+
+        var ID_TYPE_TICK = $("#ID_TYPE_TICK").kendoComboBox({
+            autoBind: true,
+            //index: 0,
+            dataTextField: "NAM_TYPE_TICK",
+            dataValueField: "ID_TYPE_TICK",
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeTicket/List?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+
+        $("#SUM_TICK").val("Impacto en el Servicio: <br><br> Detalle:")
+
+                jQuery('#IDPLAN').on('change', function () {
+
+            $.ajax({
+                url: '/Plantilla/ObtenerDescripcionPlantilla/',
+                data: { IdGrupo: $("#IDGRUPO").val(), IdPlan: $("#IDPLAN").val() },
+                type: 'GET',
+                dataType: 'text',
+                success: function (data) {
+
+
+                    $("#SUM_TICK").data('kendoEditor').value(data);
+                    //alert(data);
+                    //jQuery("#SUM_TICK").data('kendoEditor').value(data);
+
+                },
+                error: function (data) {
+                },
+            });
+        });
+
+        $("#SUM_TICK").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: OnPaste
+        });
+
+        $("#Adicional1").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: OnPaste
+        });
+
+        $("#Adicional2").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: OnPaste
+        });
+        var jsonArr = [];
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            upload: function (e) {
+                e.data = {
+                    ID_TYPE_DOCU_ATTA: ArrayFile.dataItem().ID_TYPE_DOCU_ATTA,
+                    KEY_ATTA: '@ViewBag.UploadFile'
+                };
+            },
+            remove: function (e) {
+                e.data = {
+                    KEY_ATTA: '@ViewBag.UploadFile'
+                };
+            },
+            async: {
+                saveUrl: "/Attach/SaveAttachTicket",
+                removeUrl: "/Attach/RemoveAsyncAttachTicket"
+            }
+        });
+
+        var ArrayFile = $("#ArrayFile").kendoComboBox({
+            dataTextField: "NAM_TYPE_DOCU_ATTA",
+            dataValueField: "ID_TYPE_DOCU_ATTA",
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Total"
+                },
+                transport: {
+                    read: "/TypeDocumentModule/ListByModule/1?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+            dataTextField: "QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                    '<span><strong>${data.QUEU}</strong></span>' +
+                    '<span>${data.DES_QUEU}</span></div>',
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                },
+                sort: { field: "QUEU", dir: "asc" }
+            }
+        }).data("kendoComboBox");
+
+        ID_QUEU.bind("dataBound", function () {
+            @*cb = $("#ID_QUEU").data("kendoComboBox");
+            ds = cb.dataSource;
+            data = ds.data();
+            for (var i = 0; i <= data.length - 1; i++) {
+                if (parseInt('@ViewBag.ID_QUEU') == data[i].ID_QUEU && swt == 0) {
+                    ID_QUEU.value(data[i].ID_QUEU);
+                    swt = 1;
+                }
+            }
+            $.ajax({
+                url: "/AccountEntity/TicketSeleccionarAsignadoA/" + '@ViewBag.ID_QUEU',
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (source) {
+                    if (source != '0') {
+                        ID_PERS_ENTI_ASSI.value(source);
+                    }
+                    else {
+                        ID_PERS_ENTI_ASSI.value(@ViewBag.ID_PERS_ENTI_ASSI);
+                    }
+                    //ID_PERS_ENTI_ASSI.value(source);
+                    validaCapacidadUsuario($("#ID_PERS_ENTI_ASSI").val());
+                },
+                error: function (source) {
+                }
+            });*@
+
+        });
+
+        ID_QUEU.bind("change", function (e) {
+            ID_STAT.value(1);
+            if (ID_STAT.dataItem().ID_STAT == 5) {
+                //$("#divFecIniTick").removeClass('divHide');
+
+                $("#divFecIniTick").removeAttr("hidden");
+            }
+            else {
+                //$("#divFecIniTick").addClass('divHide');
+                $("#divFecIniTick").attr("hidden", true);
+                $("#FEC_INI_TICK").val('');
+                //FEC_INI_TICK.value("");
+            }
+            //ID_PERS_ENTI_ASSI.value(ID_QUEU.dataItem().ID_PERS_ENTI_ASSI_DEFA);
+            $.ajax({
+                url: "/AccountEntity/TicketSeleccionarAsignadoA/" + $("#ID_QUEU").val(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (source) {
+                    //alert(source);
+                    if (source != '0') {
+                        //alert(1);
+                        ID_PERS_ENTI_ASSI.value(source);
+                    }
+                    else {
+                        //alert(2);
+                        ID_PERS_ENTI_ASSI.value(@ViewBag.ID_PERS_ENTI_ASSI);
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        });
+
+        var ID_PERS_ENTI_ASSI = $("#ID_PERS_ENTI_ASSI").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_QUEU",
+            filter: "contains",
+            dataTextField: "ASSI",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                                      '<div style="float:left;">${data.ASSI}</div>' +
+                                      '<div style="float:right; ">(WL ${data.WorkLoad})</div>' +
+                                  '</div>',
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_PERS_ENTI_ASSI.bind("dataBound", function () {
+            cbPE = $("#ID_PERS_ENTI_ASSI").data("kendoComboBox");
+            ds = cbPE.dataSource;
+            data = ds.data();
+            for (var i = 0; i <= data.length - 1; i++) {
+                if (parseInt('@ViewBag.ID_PERS_ENTI_ASSI') == data[i].ID_PERS_ENTI && (swt == 0 || swt == 1)) {
+                    ID_PERS_ENTI_ASSI.value(data[i].ID_PERS_ENTI);
+                    ID_STAT = $("#ID_STAT").data("kendoComboBox");
+                    ID_STAT.value(1);
+                    swt = 2;
+                }
+            }
+        });
+
+        ID_PERS_ENTI_ASSI.bind("change", function (e) {
+            validaCapacidadUsuario($("#ID_PERS_ENTI_ASSI").val());
+        });
+
+        var ID_STAT = $("#ID_STAT").kendoComboBox({
+            autoBind: true,
+            index:0,
+            //cascadeFrom: "ID_QUEU",
+            //placeholder: "Select Status...",
+            dataTextField: "NAM_STAT",
+            dataValueField: "ID_STAT",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/StatusTicket/List"
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_STAT.bind("change", function (e) {
+
+            if (ID_STAT.dataItem().ID_STAT == 5) {
+                //$("#divFecIniTick").removeClass('divHide');
+
+                $("#divFecIniTick").removeAttr("hidden");
+            }
+            else {
+                //$("#divFecIniTick").addClass('divHide');
+                $("#divFecIniTick").attr("hidden", true);
+                $("#FEC_INI_TICK").val('');
+                    //FEC_INI_TICK.value("");
+            }
+        });
+
+        var ID_CATE_N1 = $("#ID_CATE_N1").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            //cascadeFrom: "ID_ACCOUNT_CAT",
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N1.bind("change", function (e) {
+            if (ID_CATE_N1.dataItem()) {
+                $('#ID_CAT_N1').attr('value', ID_CATE_N1.dataItem().ID_CATE);
+                $('#ID_CATE').val(null)
+                $('#nuevaCategoria').val('')
+                document.getElementById('AgregarCategoria').disabled = true
+            }
+            else {
+                $('#ID_CAT_N1').attr('value', 0);
+            }
+            if ($('#ID_CAT_N1').val() == 0) {
+                $('#ID_CATE').val(null)
+                $('#nuevaCategoria').val('')
+                document.getElementById('AgregarCategoria').disabled = true
+            }
+        });
+
+        var ID_CATE_N2 = $("#ID_CATE_N2").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N1",
+            dataTextField: "NAM_CATE2",
+            dataValueField: "ID_CATE2",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N2.bind("change", function (e) {
+            if (ID_CATE_N2.dataItem()) {
+                $('#ID_CAT_N2').attr('value', ID_CATE_N2.dataItem().ID_CATE2);
+                $('#ID_CATE').val(null)
+                $('#nuevaCategoria').val('')
+            }
+            else {
+                $('#ID_CAT_N2').attr('value', 0);
+            }
+            if ($('#ID_CAT_N2').val() != 0) {
+
+                document.getElementById('AgregarCategoria').disabled = false
+            }
+            else {
+                document.getElementById('AgregarCategoria').disabled = true
+                $('#ID_CATE').val(null)
+                $('#nuevaCategoria').val('')
+            }
+            if ($('#ID_CAT_N2').val() != 27154 && $('#ID_CAT_N2').val() != 28525 && $('#ID_CAT_N2').val() != 29896) {
+                $("#divMovil").attr('hidden', true);
+            }
+            if ($('#ID_CAT_N2').val() != 27007 && $('#ID_CAT_N2').val() != 28378 && $('#ID_CAT_N2').val() != 29749) {
+                $("#divFechaIngreso").attr('hidden', true);
+                $("#FechaIngreso").kendoDateTimePicker({ value: '' }).data("kendoDateTimePicker");
+            }
+        });
+
+        @*var ID_CATE_N3 = $("#ID_CATE_N3").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N2",
+            dataTextField: "NAM_CATE3",
+            dataValueField: "ID_CATE3",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory3?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N3.bind("change", function (e) {
+            if (ID_CATE_N3.dataItem()) {
+                $('#ID_CAT_N3').attr('value', ID_CATE_N3.dataItem().ID_CATE3);
+            }
+            else {
+                $('#ID_CAT_N3').attr('value', 0);
+            }
+        });*@
+
+        @*var ID_CATE_N4 = $("#ID_CATE").kendoComboBox({
+            autoBind: true,
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N3",
+            dataTextField: "NAM_CATE4",
+            dataValueField: "ID_CATE4",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory4?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N4.bind("change", function (e) {
+            if (ID_CATE_N4.dataItem()) {
+                $('#ID_CAT').attr('value', ID_CATE_N4.dataItem().ID_CATE4);
+                if (ID_CATE_N4.dataItem().ID_TYPE_TICK != 0) {
+                    ID_TYPE_TICK.value(ID_CATE_N4.dataItem().ID_TYPE_TICK);
+                }
+            }
+            else {
+                $('#ID_CAT').attr('value', 0);
+            }
+        });*@
+
+        var ID_TICK_PARENT = $("#ID_TICK_PARENT").kendoComboBox({
+            autoBind: false,
+            //cascadeFrom: "ID_CATE",
+            //enable: false,
+            dataTextField: "COD_TICK",
+            dataValueField: "ID_TICK",
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/TicketParent?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $('#IS_PARENT').click(function () {
+            var $this = $(this);
+            // $this will contain a reference to the checkbox
+            if ($this.is(':checked')) {
+                ID_TICK_PARENT.value("");
+                ID_TICK_PARENT.enable(false);
+                //alert('SI');
+            } else {
+                // the checkbox was unchecked
+                ID_TICK_PARENT.enable(true);
+            }
+        });
+
+        var ID_ASSE = $("#ID_ASSE").kendoComboBox({
+            autoBind: false,
+            dataTextField: "Codigo",
+            dataValueField: "IdActivo",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            //template: kendo.template($("#PlantillaActivo").html()),
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DeliveryReception/FiltrarActivoRecepcion?IdPersEnti=0"
+                }
+            }
+        }).data("kendoComboBox");
+        ID_ASSE.list.width(350);
+
+
+        var IDGRUPO = $("#IDGRUPO").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NOMBRE",
+            dataValueField: "IDGRUPO",
+            //placeholder: "Seleccione un grupo",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Grupo/ListarCboGrupoCuentaEstado?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IDPLAN = $("#IDPLAN").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IDGRUPO",
+            /*placeholder: "",*/
+            dataTextField: "NOMBRE",
+            dataValueField: "ID_PLAN",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Plantilla/ListarPlantillaGrupo?ID_TIPOPLAN=1"
+
+                }
+            }
+        }).data("kendoComboBox");
+
+        var Proveedor = $("#IdProveedorMovil").kendoComboBox({
+            dataTextField: "text",
+            dataValueField: "value",
+            dataSource: [{
+                text: "Claro",
+                value: "1"
+            }],
+            filter: "contains",
+        }).data("kendoComboBox");
+
+    });
+
+
+    function OnPaste(e) {
+        //var texto = e.html
+        //if ((/^<img src="/).test(e.html)) {
+        //    toastr.warning("No se permiten imágenes en este campo.");
+        //    e.html = "";
+        //}
+        //if (texto.includes('<img data-imagetype=')) {
+        //    toastr.warning("No se permiten imágenes en este campo.");
+        //    e.html = "";
+        //}
+        if (/<img\s+[^>]*>/i.test(e.html)) {
+            toastr.warning("No se permiten imágenes en este campo.");
+            e.html = "";
+        } else if ((/^<img src="data:image/).test(e.html)) {
+            toastr.warning("No se permiten imágenes en este campo.");
+            e.html = "";
+        }
+    }
+    function a_entero(valor) {
+        //intento convertir a entero.
+        //si era un entero no le afecta, si no lo era lo intenta convertir
+        valor = parseInt(valor);
+        //comprobamos si es un valor entero
+        if (isNaN(valor)) {
+            //no es entero 0
+            return 0;
+        } else {
+            //es un valor entero
+            return valor;
+        }
+    }
+    function EditContact() {
+        //var combobox = $("#ID_PERS_ENTI").data("kendoComboBox");
+        //if (a_entero(combobox.value()) > 0) {
+        //    var htmlForm = '<div id="FormEditClient"></div>';
+        //    winFormPopUpModal("Editar Contacto", htmlForm, 730, 330);
+        //    $("#FormEditClient").load("/AccountEntity/ViewEditClient?id=" + combobox.value() + "&var=" + Math.random());
+        //}
+        //else { $("#divEditCombo").css("display", "none"); }
+        var combobox = $("#ID_PERS_ENTI").data("kendoComboBox");
+
+        if (a_entero(combobox.value()) > 0) {
+            $("#lblTitulo").text("Editar Solicitante");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load("/AccountEntity/ViewEditClient?id=" + combobox.value() + "&var=" + Math.random());
+            @*var htmlForm = '<div id="FormEditClient"></div>';
+            winFormPopUpModal("@ResourceLanguaje.Resource.EditContact", htmlForm, 730, 330);
+            $("#FormEditClient").load("/AccountEntity/ViewEditClient?id=" + combobox.value() + "&var=" + Math.random());*@
+            }
+        else { $("#divEditCombo").css("display", "none"); }
+    }
+
+    function detailUser(id) {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/AccountEntity/DetailPerson/" + id,
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        ran: Math.random()
+                    },
+
+
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#divDetu").empty();
+
+        $("#divDetu").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#templdu").html()),
+        });
+    }
+
+    function AssetByUser(id) {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Asset/ListByIdPersEnty/" + id,
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 8,
+            schema: {
+
+
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerAssetByUser").kendoPager({
+            dataSource: dataSource,
+            buttonCount: 3,
+            messages: {
+                display: "{0} - {1} of {2}",
+                empty: "",
+                page: "Page",
+                of: "of {0}",
+                itemsPerPage: "",
+                first: "Go to the first page",
+                previous: "Go to the previous page",
+                next: "Go to the next page",
+                last: "Go to the last page",
+                refresh: "Refresh"
+            },
+            refresh: true
+        });
+
+        $("#gridAssetByUser").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#templabu").html())
+        });
+    }
+
+    function nuevotema() {
+        var idcategoria = $("#ID_CATE").val();
+        if (idcategoria == "") {
+            swal("Seleccione una Categoría", "Nuevo Tema", "info");
+            return false;
+        }
+        $("#myTema").empty();
+        $("#myTema").modal("show");
+        $.get('/KnowledgeManagement/_NewThemeTicket', { idCategoria: idcategoria }, function (html) {
+            $("#myTema").html(html);
+        })
+    }
+
+    function cargarTemas(id, idcatNivel1) {
+        var IdTema = $("#IdTema").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "Nomtema",
+            filter: "contains",
+            dataValueField: "IdTema",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/KnowledgeManagement/ListTemaLessonLearned?ID_ACCO=" + id + "&ID_CATE=" + idcatNivel1
+                }
+            }
+        }).data("kendoComboBox");
+    }
+
+    var key_atta = $("#KEY_ATTA").val()
+
+    function AdjuntarNuevoTicket() {
+        $("#lblTitulo").text("Adjuntar Documentos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/Ticket/AdjuntarArchivosNuevoTicket/?KEY_ATTA=' + key_atta);
+    }
+    function AgregarCategoriaTicket() {
+
+        var ID_CATE_N2 = $("#ID_CATE_N2").data("kendoComboBox");
+
+        $("#lblTituloCategoria").text("Seleccione una Categoria");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-contentCategoria').empty();
+        $('#modal-contentCategoria').load('/Ticket/AgregarCategoriasTicket?id=' + ID_CATE_N2.value() +"&idAcco=@Session["ID_ACCO"]");
+    }
+
+    function validaCapacidadUsuario(id) {
+        // Valida la capacidad del usuario relacionado a los tickets (por cuenta)
+        $.ajax({
+            url: "/Capacidad/ValidarCantidadTicket_PersAsignado/" + id,
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (source) {
+                if (source != "") {
+                    $("#capacidadTicket").removeClass("divHide");
+                    $("#capacidadTicket").attr("alt", source);
+                    $("#capacidadTicket").attr("title", source);
+                }
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    function NewContact() {
+        $("#lblTitulo").text("Nuevo Solicitante");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/AccountEntity/ViewNewClient?id=" + $("#ID_CIA").val() + "&var=" + Math.random());
+
+        @*var htmlForm = '<div id="FormNewClient"></div>';
+        winFormPopUpModal("@ResourceLanguaje.Resource.NewContact", htmlForm, 730, 390);
+        $("#FormNewClient").load("/AccountEntity/ViewNewClient?id=" + $("#ID_CIA").val() + "&var=" + Math.random());*@
+        }
+
+</script>
+
+<script type="text/javascript">
+    function NewClient() {
+        var htmlForm = '<div id="FormNewClient"></div>';
+        winFormPopUpModal("Nuevo Ciente", htmlForm, 740, 390);
+        $("#FormNewClient").load("/AccountEntity/ViewNewClient?var=" + Math.random());
+    }
+</script>
+
+<script type="text/javascript">
+    var vector = {}, ctime;
+    vector.s = 0;
+    vector.m = 0;
+    vector.h = 0;
+
+    function show5(vector) {
+        var hours = vector.h;
+        var minutes = vector.m;
+        var seconds = vector.s;
+
+        vector.s = vector.s + 1;
+        if (vector.s == 60) {
+            vector.s = 0;
+            vector.m = vector.m + 1;
+        }
+
+        if (vector.m == 60) {
+            vector.m = 0;
+            vector.h = vector.h + 1;
+        }
+        //change color
+        myclock = "Resolución de primera llamada: <span style='color:" + (vector.h >= 1 ? 'red' : (vector.m > 20 ? 'red' : 'black')) + "'>"
+            + (hours <= 9 ? '0' : '') + hours + ":"
+            + (minutes <= 9 ? '0' : '') + minutes + ":"
+            + (seconds <= 9 ? '0' : '') + seconds + "</span>";
+        if (document.layers) {
+            document.layers.liveclock.document.write(myclock)
+            document.layers.liveclock.document.close()
+        }
+        else if (document.all)
+            liveclock.innerHTML = myclock
+        else if (document.getElementById)
+            document.getElementById("liveclock").innerHTML = myclock;
+        ctime = setTimeout("show5(vector);", 1000);
+    }
+
+    if (ctime) {
+        clearTimeout(ctime);
+    }
+    show5(vector);
+</script>
+
+<script type="text/ecmascript">
+    var DivHeight = $("#divNewTicket").height();
+    var divDetailsTicket = $("#divDetailsTicket").height();
+    var divDetailsUser = $("#divDetailsUser").height();
+    var divTitleDetailsTicket = $("#divTitleDetailsTicket").height();
+    $("#divAssetByUser").height(DivHeight - divDetailsTicket - 20 - divTitleDetailsTicket * 2 - divDetailsUser - 2);
+    $("#gridAssetByUser").height(DivHeight - divDetailsTicket - 20 - divTitleDetailsTicket * 2 - divDetailsUser -2- 55);
+</script>

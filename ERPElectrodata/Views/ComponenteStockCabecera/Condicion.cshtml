@@ -1,0 +1,86 @@
+﻿@{
+    Layout = null;
+}
+
+    <div id="divCondicion">
+        <div class="form-group row">
+            <div class="col-md-12">
+                <div class="editor-label">
+                    Condición
+                </div>
+                <div class="editor-field">
+                    @Html.Editor("IdCondicion")
+                </div>
+            </div>
+        </div>
+        <div class="row" >
+            <div class="col-md-12">
+                <button id="btnActualiza" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Actualizar</button>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#IdCondicion").kendoComboBox({
+            dataTextField: "NAM_COND",
+            dataValueField: "ID_COND",
+            template: '<span style="font-weight:bold;">${ data.NAM_STAT_ASSE }</span> - ' +
+                            '<span>${ data.NAM_COND }</span>',
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data"
+                },
+                transport: {
+                    read: "/ComponenteStockCabecera/ListarCondicionComponentes/@ViewBag.Id?var=" + Math.random()
+                }
+            }
+        });
+        var IdCondicion = $("#IdCondicion").data("kendoComboBox");
+
+        //IdCondicion.value(@ViewBag.IdCondicion);
+
+        $('#btnActualiza').click(function () {
+
+            if (IdCondicion.value() == "") {
+                toastr.warning("Seleccione una condición para modificar.", "Mensaje");
+            }
+            else {
+                $.ajax({
+                    url: "/ComponenteStockCabecera/ActualizarCondicionComponente/",
+                    data: "id=" + @ViewBag.IdCompStockDet + "&cond=" + IdCondicion.value() + "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        uploadDone(resp);
+                    }
+                });
+            }
+        })
+
+        function uploadDone(msg) {
+            if (msg == "Ok") {
+
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+                toastr.success("Se actualizó la condición", "Información Guardada");
+
+                ObtenerStockComponenteDetalle();
+
+            }
+            else {
+                var mensaje = 'No se Actualizaron los Datos.'
+                toastr.error(mensaje, "Mensaje");
+            }
+        }
+
+    });
+</script>

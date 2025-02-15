@@ -1,0 +1,160 @@
+﻿@model List<ERPElectrodata.Models.ListarUsuariosPorCliente_Result>
+@{
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+
+<div class="app-page-title cabeceraBg">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="font-icon-wrapper font-icon-lg bg-white">
+                <i class="fa fa-file icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                <div class="titleModule"><b><span class="INCIDENTESYREQUERIMIENTOS">Coordinadores</span></b></div>
+                <div class="page-title-subheading">
+                    <span class="ListadeTicketsporcuentadesoporteporestado">Creación de coordinadores.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="mb-3">
+            <p class="card-title">Lista de clientes</p>
+            <select id="select" placeholder="Buscar usuario" onchange="cargarInformacion()">
+                <option value="" selected>Seleccionar usuario</option>
+            </select>
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <p class="card-title">INFORMACIÓN</p>
+                </div>
+                <div id="usuarioInfo">
+                    <div class="row">
+                        <div class="col" style="display:flex;justify-content:center">
+                            <img id="imagen" style="max-width:80%" src="~/Content/Images/LogoED.png" />
+                        </div>
+                        <div class="col">
+                            <p class="card-title">Nombres</p>
+                            <p id="nombre">Nombre completo</p>
+                            <p class="card-title">Cargo</p>
+                            <p id="cargo">Cargo completo</p>
+                            <div id="guardar" style="display:none">
+                                <button class="btn btn-primary" onclick="guardarDesdeInfo()">Agregar</button>
+                            </div>
+                            <div id="eliminar" style="display:none">
+                                <button class="btn btn-danger" onclick="eliminarDesdeInfo()">Eliminar</button>
+                            </div>
+                            <input type="hidden" id="userID" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div>
+                    <p class="card-title">Coordinadores creados</p>
+                </div>
+                <div>
+                    <ul class="list-group">
+                        @foreach (var coordinador in Model)
+                        {
+                            <li class="list-group-item">
+                                <div class="widget-content p-0">
+                                    <div class="widget-content-wrapper">
+                                        <div class="widget-content-left mr-3">
+                                            <img width="42" class="rounded-circle" src=@("/Content/Fotos/"+coordinador.FOT_PERS+".jpg") alt="">
+                                        </div>
+                                        <div class="widget-content-left">
+                                            <div class="widget-heading">@(coordinador.FIR_NAME+" "+coordinador.LAS_NAME)</div>
+                                            <div class="widget-subheading">@coordinador.CAR_PERS</div>
+                                        </div>
+                                        <div class="widget-content-right">
+                                            <button class="btn-pill btn-hover-shine btn  btn-sm btn-danger" onclick="eliminarDesdeLista(@coordinador.ID_PERS_ENTI)">Eliminar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let listaClientes=[];
+    function cargarUsuarios() {
+        //const selector = document.getElementById('select');
+        $.get("CargarUsuarios", function ({data}, status) {
+            data.forEach(user => {
+                listaClientes.push(user)
+                const option = document.createElement('option');
+                console.log(user)
+                let crearNombreCompleto = `${user.FIR_NAME} ${user.LAS_NAME}`
+                option.text = crearNombreCompleto
+                option.value = user.ID_PERS_ENTI
+                document.querySelector('select').appendChild(option)
+            })
+            
+        })
+    }
+    function cargarInformacion() {
+        var seleccion = document.getElementById("select").value
+        listaClientes.forEach(user => {
+            if (user.ID_PERS_ENTI == seleccion) {
+                let crearNombreCompleto = `${user.FIR_NAME} ${user.LAS_NAME}`
+                pintarUsuario(crearNombreCompleto, user.CAR_PERS, user.Coordinador, user.FOT_PERS, user.ID_PERS_ENTI)
+                return
+            }
+        })
+    }
+    function pintarUsuario(nombre, cargo,esGenerico,foto, id) {
+        document.getElementById("nombre").textContent=nombre
+        document.getElementById("cargo").textContent = cargo
+        document.getElementById("userID").value = id
+        var imagen = document.getElementById("imagen")
+        imagen.src = "../Content/Fotos/"+foto+".jpg"
+
+        if (esGenerico == null) {
+            document.getElementById("guardar").style.display = "block"
+            document.getElementById("eliminar").style.display = "none"
+        } else {
+            document.getElementById("guardar").style.display = "none"
+            document.getElementById("eliminar").style.display = "block"
+        }
+    }
+    function guardarDesdeInfo() {
+        let id = document.getElementById("userID").value
+        $.get("ModificarCoordinador", { id: id, tipoAccion: 1 }, function (res,status) {
+            //$.get("ActualizarPagina")
+            location.reload()
+        })
+        
+    }
+
+    function eliminarDesdeInfo() {
+        let id = document.getElementById("userID").value
+        $.get("ModificarCoordinador", { id: id, tipoAccion: 0 }, function (res, status) {
+            //$.get("ActualizarPagina")
+            location.reload()
+        })
+    }
+    function eliminarDesdeLista(id) {
+        $.get("ModificarCoordinador", { id: id, tipoAccion: 0 }, function (res, status) {
+            //$.get("ActualizarPagina")
+            location.reload()
+        })
+    }
+    cargarUsuarios()
+    $(document).ready(function () {
+        $('select').selectize({
+            sortField: 'text'
+        });
+    });
+</script>

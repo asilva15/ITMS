@@ -1,0 +1,316 @@
+﻿@{
+    ViewBag.Title = "DesempenoEvaluado";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<div style="height:700px; padding:10px 20px 10px 20px;">
+    @using (Html.BeginForm("ExportarListaDesempenoJefe", "EvaluacionPersonal", FormMethod.Post, new { id = "formExportarJ", name = "formExportarJ" }))
+    {
+        <form>
+            @*<div class="col-sm-1">
+                <br /><label for="cbPeriodo">Periodo</label>
+            </div>*@
+            <div class="form-group row">
+                <div class="col-sm-3">
+                    <br /><label for="cbPeriodo">Periodo</label><br />
+                    <input id="cbPeriodo" name="cbPeriodo" style="font-size:12px;" class="dropdownKendo" />
+                </div>
+                @*<div class="col-sm-1">
+            <br />  <label for="IdDesempenoJ">Desempeño</label><br />
+        </div>*@
+                <div class="col-sm-3">
+                    <br />  <label for="IdDesempenoJ">Desempeño</label><br />
+                    <input id="IdDesempenoJ" name="IdDesempenoJ" style="font-size:12px;" class="dropdownKendo" />
+                    @*<select id="IdDesempenoE" name="IdDesempenoE" class="form-control select2" style="width:80%"></select>*@
+                </div>
+                <div class="col-sm-3">
+                    <br /><br />
+                    <button type="button" class="btn btn-primary " onclick="ListadoDesempenoJefe()" id="btnReporteJefeDesemp">Buscar</button>
+                    <span>&nbsp;&nbsp;&nbsp;</span>
+                    <button type="button" class="btn btn-warning " onclick="ExportarDesempenoJefe(); " id="exportar">Exportar</button>
+                </div>
+                
+            </div>
+        </form>
+        @*<form>
+                <div class="col-sm-1" >
+                    <br /><label for="cbPeriodo">Periodo</label>
+                </div>
+                <div class="col-sm-3">
+                    <select id="cbPeriodo" name="cbPeriodo" class="form-control select2" style="width:80%"></select>
+                </div>
+                <div class="col-sm-1">
+                    <br /><label for="IdDesempenoJ">Desempeño</label><br />
+                </div>
+                <div class="col-sm-3">
+                    <select id="IdDesempenoJ" name="IdDesempenoJ" class="form-control select2" style="width:80%"></select>
+                </div>
+
+                <button type="button" class="btn btn-primary " onclick="ListadoDesempenoJefe()" id="btnReporteJefeDesemp">Buscar</button>
+                <span>&nbsp;&nbsp;&nbsp;</span>
+                <button type="button" class="btn btn-warning " onclick="ExportarDesempenoJefe(); " id="exportar">Exportar</button>
+            </form>*@
+    }
+    <br /><br />
+    <div class="tab-content">
+        <div class="tab-pane active" id="tab_2">
+            <div class="box">
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <table id="tablaDesempenoJefe" class="table table-bordered table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Evaluador</th>
+                                <th>Cantidad</th>
+                                <th>Porcentaje Evaluados</th>
+                                <th id="PorcentajeArea">Porcentaje Area</th>
+                                <th>Porcentaje Global</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        @*<tfoot>
+                            <tr>
+                                <th>Evaluador</th>
+                                <th>Cantidad</th>
+                                <th>Porcentaje</th>
+                                <th>Porcentaje Area</th>
+                                <th>Porcentaje Global</th>
+                            </tr>
+                        </tfoot>*@
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#cbPeriodo").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                var comboBox = $("#cbPeriodo").data("kendoDropDownList");
+                // Select the first item
+                comboBox.select(0);
+                // Trigger the change event to load the associated content
+                comboBox.trigger("change");
+            },
+            change: function (e) {
+                var desempenoCombo = $("#IdDesempenoJ").data("kendoDropDownList");
+                desempenoCombo.enable(true);
+                desempenoCombo.dataSource.read();
+                desempenoCombo.value("");
+            }
+        });
+
+        $("#IdDesempenoJ").kendoDropDownList({
+           
+           /* cascadeFrom: "cbPeriodo",*/
+            dataTextField: "text",
+            dataValueField: "id",
+            optionLabel: {
+                text: "Seleccionar",
+                id: null
+            },
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                //transport: {
+                //    read: "/EvaluacionPersonal/ListarDesempeno?var=" + Math.random()
+                //}
+                transport: {
+                    read: {
+                        url: function () {
+                            var periodoId = $("#cbPeriodo").val();
+                            return "/EvaluacionPersonal/ListarDesempeno?periodoId=" + periodoId + "&var=" + Math.random();
+                        },
+                        dataType: "json"
+                    }
+                }
+            }
+        });
+        @*$("#cbPeriodo").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $("#IdDesempenoJ").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/EvaluacionPersonal/ListarDesempeno",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        //Asignación inicial
+        var $newOption = $("<option></option>").val("@ViewBag.IdPeriodo").text("@ViewBag.Periodo");
+        $("#cbPeriodo").append($newOption).trigger('change');
+
+        setTimeout(function () { CargarTablaJefe() }, 1000);*@
+
+    });
+
+</script>
+<script type="text/javascript">
+
+    function ListadoDesempenoJefe() {
+        if ($("#cbPeriodo").val() == null ||$("#cbPeriodo").val() == 0 ) {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "Seleccione el Periodo." + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continuee' class='k-button'>Continuar</button>" +
+                                       "</div>");
+            var undo = $("#continuee")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        } else {
+            CargarTablaJefe()
+        }
+    }
+
+    function CargarTablaJefe() {
+        // Obtener el valor de cbPeriodo
+        var periodo = $("#cbPeriodo").val();
+
+        //// Mostrar u ocultar la columna "Porcentaje Area" basado en el valor del periodo
+        //if (periodo < 8) {
+        //    document.getElementById('PorcentajeArea').removeAttribute('hidden');
+        //} else {
+          
+        //    document.getElementById('PorcentajeArea').setAttribute('hidden', 'hidden');
+            
+        //}
+
+        // Destruir la DataTable existente si existe
+        $('#tablaDesempenoJefe').dataTable().fnDestroy();
+
+        // Inicializar la DataTable
+        $('#tablaDesempenoJefe').DataTable({
+            //"order": [[4, "asc"]],
+            dom: 'Bfrtip',
+            ajax: "/EvaluacionPersonal/ListarRptDesempeñoJefe/" + periodo + "/" + $("#IdDesempenoJ").val(),
+            columns: [
+                { data: "Evaluador" },
+                { data: "Cantidad" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style="width:100%">' +
+                            '<label/>' + data.Porcentaje + ' %' + '</label></div>';
+                    }
+                },
+                {
+                    data: null,
+                    visible: (periodo < 8), // Controlar visibilidad basado en el valor del periodo
+                    render: function (data, type, row) {
+                        return '<div style="width:100%">' +
+                            '<label/>' + data.PorcentajeArea + ' %' + '</label></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style="width:100%">' +
+                            '<label/>' + data.PorcentajeGlobal + ' %' + '</label></div>';
+                    }
+                }
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+</script>
+

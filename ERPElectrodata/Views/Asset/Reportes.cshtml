@@ -1,0 +1,402 @@
+﻿@{
+//Layout = null;
+}
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<div class="app-page-title mb-2">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-archive icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                <b>REPORTES</b>
+                <div class="page-title-subheading">Reporte por marca, tipo de activo y estado.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Marca
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-3">
+                <div class="editor-label">
+                    Tipo Activo
+                </div>
+                <div class="editor-field">
+                    <input id="ID_TYPE_ASSE" name="ID_TYPE_ASSE" />
+                </div>
+            </div>
+        </div>
+        <div id="divAssetByManu" style="height:350px;"></div>
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="col-md-6">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">
+                Tipo de Activo
+            </div>
+            <div class="card-body">
+                <div id="divAssetByType">
+                    <div id="EqbyType"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">
+                Activos por estado
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="editor-label">
+                            Tipo Activo
+                        </div>
+                        <div class="editor-field">
+                            <input id="ID_TYPE" name="ID_TYPE" />
+                        </div>
+                    </div>
+                </div>
+                <div id="divAssetByStatus">
+                    <div id="EqbyStatus"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#ID_TYPE_ASSE").kendoComboBox({
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/List?var=" + Math.random()
+                }
+            },
+            change: repMarca
+        });
+        var ID_TYPE_ASSE = $("#ID_TYPE_ASSE").data("kendoComboBox");
+
+        function repMarca() {
+            var IdTipo = $("#ID_TYPE_ASSE").val() == '' ? 0 : $("#ID_TYPE_ASSE").val();
+            ReporteMarca(IdTipo);
+        }
+
+        $("#ID_TYPE").kendoComboBox({
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/List?var=" + Math.random()
+                }
+            },
+            change: repEstado
+        });
+        var ID_TYPE_ASSE = $("#ID_TYPE").data("kendoComboBox");
+
+        function repEstado() {
+            var IdTipo = $("#ID_TYPE").val() == '' ? 0 : $("#ID_TYPE").val();
+            ReporteAsset(IdTipo);
+        }
+
+        function ReporteMarca(id) {
+            //Inicio AJAX
+            $.ajax({
+                url: '/TypeAsset/TypeByIdAcco',
+                data: { idTipoActivo: id },
+                dataType: 'json',
+                cache: false,
+                async: true,
+                success: function (json) {
+
+                    var Cat = new Array();
+                    var Value = new Array();
+                    var i = 0
+                    var pie = new Array();//[];
+                    //var acumulado;
+
+                    $.each(json['Data'], function (index, value) {
+                        Cat[index] = value['NAM_TYPE_ASSE'];
+                        Value[index] = value['COUNT'];
+                        i = index + 1;
+                    });
+
+                    $.each(json['pie'], function (index, value) {
+                        //Cat[index] = value['NAM_MANU'];
+                        //Value[index] = value['CANTIDAD'];
+                        pie[index] = [value['NAM_MANU'], value['CANTIDAD']]
+                    });
+
+                    //console.log(pie);
+
+                    if (json['Others'] > 0) {
+                        Cat[i] = "Others";
+                        Value[i] = json['Others'];
+                        //alert(i);
+                    }
+
+                    $('#divAssetBy').highcharts({
+                        chart: {
+                            type: 'column'
+                        },
+                        colors: ['#7CBB00'],
+                        title: {
+                            text: null
+                        },
+                        subtitle: {
+                            text: null
+                        },
+                        credits: {
+                            enabled: false,
+                        },
+                        legend: {
+                            enabled: false,
+                        },
+                        xAxis: {
+                            categories: Cat,
+                            gridLineWidth: 1,
+                        },
+                        yAxis: {
+                            min: 0,
+                            title: {
+                                text: 'Quantity'
+                            }
+                        },
+                        tooltip: {
+                            headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                            pointFormat: '<tr><td style="color:{series.color};padding:0">Quantity:&nbsp;</td>' +
+                                '<td style="padding:0"><b>{point.y}</b></td></tr>',
+                            footerFormat: '</table>',
+                            shared: true,
+                            useHTML: true
+                        },
+                        plotOptions: {
+                            column: {
+                                pointPadding: 0.2,
+                                borderWidth: 0
+                            }
+                        },
+                        series: [{
+                            name: 'Type Asset',
+                            data: Value
+
+                        }]
+                    });
+
+                    //Inicio Pie
+                    $('#divAssetByManu').highcharts({
+                        chart: {
+                            plotBackgroundColor: null,
+                            plotBorderWidth: null,
+                            plotShadow: false
+                        },
+                        colors: ['#B21E1E', '#7CBB00', '#FFBB00', '#EEBBBB', '#87CEEB', '#515151'],
+                        title: {
+                            text: null
+                        },
+                        tooltip: {
+                            pointFormat: '{series.name}: <b>{point.percentage:.2f}%</b><br>Qty: {point.y:.2f}'
+                        },
+                        credits: {
+                            enabled: false,
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                dataLabels: {
+                                    enabled: true,
+                                    color: '#000000',
+                                    connectorColor: '#000000',
+                                    format: '<b>{point.name}</b>: {point.percentage:.2f} %<br>Qty: {point.y:.2f}'
+                                }
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: 'Assets',
+                            data: pie
+                        }]
+                    });
+                    //Fin Pie
+                }
+            });
+            //Fin Ajax
+        }
+
+        function ReporteAsset(id) {
+            //INICIO DE LOS GRÁFICOS
+            $.ajax({
+                url: '/Asset/ReporteGrafico',
+                data: { idTipoActivo: id },
+                dataType: 'json',
+                cache: false,
+                async: true,
+                success: function (json) {
+                    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+                    var Cat = new Array();
+                    var vType = new Array();
+                    var Agree = new Array();
+                    var IndAgree = new Array();
+
+                    $.each(json['EqbyType'], function (index, value) {
+                        Cat[index] = value['name'].substring(0, 1).toUpperCase() + value['name'].substring(1, value['name'].length);;
+                        vType[index] = value['cantidad'];
+                    });
+
+                    //Primer Gráfico
+                    if (id == 0) {
+
+                        chart = new Highcharts.Chart({
+                            chart: {
+                                type: 'bar',
+                                renderTo: 'EqbyType',
+                                marginTop: 20//[20, 0, 80, 0]
+                            },
+                            colors: ["#516882"],
+                            title: {
+                                text: null
+                            },
+                            subtitle: {
+                                text: null
+                            },
+                            xAxis: {
+                                categories: Cat,
+                                title: {
+                                    text: null
+                                },
+                                gridLineWidth: 1,
+                                lineWidth: 1,
+                                labels: {
+                                    overflow: 'justify',
+                                    style: {
+                                        textTransform: 'capitalize'
+                                    }
+                                }
+
+                            },
+                            yAxis: {
+                                min: 0,
+                                title: {
+                                    text: null
+                                },
+                                labels: {
+                                    overflow: 'justify',
+                                    style: {
+                                        textTransform: 'capitalize'
+                                    }
+                                },
+                                lineWidth: 1,
+                                gridLineWidth: 1
+                            },
+                            tooltip: {
+                                valueSuffix: ' Und',
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            },
+                            plotOptions: {
+                                bar: {
+                                    dataLabels: {
+                                        enabled: true
+                                    },
+                                    shadow: false
+                                }
+                            },
+                            legend: {
+                                enabled: false
+                            },
+                            credits: {
+                                enabled: false
+                            },
+                            series: [{
+                                name: 'Total',
+                                data: vType
+                            }]
+                        });
+
+                    }
+                    //GRAFICA PIE
+                    chart1 = new Highcharts.Chart({
+                        chart: {
+                            plotBackgroundColor: null,
+                            plotBorderWidth: null,
+                            plotShadow: false,
+                            renderTo: 'EqbyStatus'
+                        },
+                        //colors: ["#7CBB00", "#FFBB00", "#516882", "#B21E1E"],
+                        colors: ['#B21E1E', '#EEBBBB', '#FFBB00', '#7CBB00', '#87CEEB', '#515151'],
+                        title: {
+                            text: null
+                        },
+                        credits: {
+                            enabled: false
+                        },
+                        tooltip: {
+                            headerFormat: headerFormat,
+                            pointFormat: 'Percentage: {point.percentage:.2f}%<br>Quantity: {point.y}'
+                        },
+                        plotOptions: {
+                            pie: {
+                                allowPointSelect: true,
+                                cursor: 'pointer',
+                                size: '30%',
+                                shadow: false,
+                                dataLabels: {
+                                    formatter: function () {
+                                        return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                                    },
+                                    distance: 10
+                                },
+                                showInLegend: true
+                            }
+                        },
+                        series: [{
+                            type: 'pie',
+                            name: 'Total',
+                            data: json['EqbyStatus']
+                        }]
+                    });
+                }
+            });
+        }
+
+        ReporteMarca(0);
+        ReporteAsset(0);
+
+    });
+
+    //$("#divAssetByStatus").height(DivHeight);
+    //$("#divAssetByType").height(DivHeight);
+    //$("#EqbyStatus").height(DivHeight - 2);
+    //$("#EqbyType").height(DivHeight - 2);
+
+
+</script>

@@ -1,0 +1,117 @@
+﻿@{
+    ViewBag.Title = "VerFacturacion";
+    Layout = null;
+}
+<div class="box-body">
+    <table id="tbFacturacion" class="table table-bordered table-striped" style="width:100%">
+        <thead>
+            <tr>
+                <th>Fecha Programada</th>
+                <th>Monto ($)</th>
+                <th>Fecha Facturada</th>
+                <th>Opción</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        <tfoot>
+            <tr>
+                <th>Fecha Programada</th>
+                <th>Monto ($)</th>
+                <th>Fecha Facturada</th>
+                <th>Opción</th>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        ListarMantenimientosPorFacturar();
+
+    });
+
+        function ListarMantenimientosPorFacturar(){
+            $('#tbFacturacion').dataTable().fnDestroy();
+            $('#tbFacturacion').DataTable({
+                //"order": [[4, "asc"]],
+                responsive: true,
+                dom: 'Bfrtip',
+                ajax: "/Facturacion/ListarMantenimientosPorFacturar/@ViewBag.ID_DOCU_SALE",
+                columns: [
+                    { data: "FechaProgramada" },
+                    { data: "Monto" },
+                    { data: "FechaFacturacion" },
+                    //{ data: "EstadoFacturado" },
+                    //{ data: "Correo" },
+                    { data: null,
+                        render: function (data, type, row) {
+                            var str = "";
+                            if(data.EstadoFacturado == "F")
+                            {
+                                str = '<span  id="' + data.IdFacturacion + '" title="Cancelar Facturación" class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px;" onclick="CancelarFacturacion('+data.IdFacturacion+');"></span>';
+                            }
+                            else
+                            {
+                                str =  '<input id="' + data.IdFacturacion + '" name="btnFacturar" class="btn btn-block btn-primary btn-sm" type="button" value="Facturar" onclick="FacturarMantenimiento('+data.IdFacturacion+')"/>';
+                            }
+                            return str;
+                        }
+                    }
+                ],
+                buttons: [
+                    {
+                        extend: 'collection',
+                        text: 'Export',
+                        buttons: [
+                            'excel',
+                            'csv',
+                            'pdf'
+                        ]
+                    }
+                ]
+            });
+        }
+
+        function FacturarMantenimiento(id){
+            $.ajax({
+                url: "/Facturacion/actualizarEstadoFacturacion/",
+                data: "IdFacturacion=" + id +
+                      "&Estado=1" +
+                      "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        ListarMantenimientosPorFacturar();
+                    } else
+                        if(resp == "ERROR"){
+                            toastr.warning("No se ha facturado.","Mensaje");
+                        }
+
+                }
+            });
+        }
+
+    function CancelarFacturacion(id) {
+        $.ajax({
+            url: "/Facturacion/actualizarEstadoFacturacion/",
+            data: "IdFacturacion=" + id +
+                "&Estado=0" +
+                "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    ListarMantenimientosPorFacturar();
+                } else
+                    if (resp == "ERROR") {
+                        toastr.warning("Error al cancelar la facturación.","Mensaje");
+                    }
+
+            }
+        });
+    }
+</script>

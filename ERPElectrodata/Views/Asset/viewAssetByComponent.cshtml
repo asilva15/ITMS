@@ -1,0 +1,295 @@
+﻿@{
+    ViewBag.Title = "Programas";
+    Layout = null;
+}
+
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte de Activos y Componentes
+    </div>
+    <div class="card-body">
+
+        @using (Html.BeginForm("ExportarListaActivoComponente", "Asset", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+        {
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Tipo de Activo
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdTipoActivo" name="IdTipoActivo">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Componente
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdComponente" name="IdComponente" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Subtipo de Componente
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdSubTipoComponente" name="IdSubTipoComponente">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Estado
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdEstado" name="IdEstado">
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Condición
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdCondicion" name="IdCondicion" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Locación
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdLocacion" name="IdLocacion" />
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <br />
+                    <button type="button" class="btn btn-light btn-block" onclick="ExportarProgramas();" id="exportar"><i class="fa fa-file-excel"></i> Exportar</button>
+
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button type="button" class="btn btn-primary btn-block" id="Buscar" onclick="CargarGrilla(this)"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <table id="tbComponente" class="table table-bordered table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Asignado a</th>
+                        <th>Tipo de Activo</th>
+                        <th>Código</th>
+                        <th>Activo</th>
+                        <th>Serie</th>
+                        <th>Componente</th>
+                        <th>Subtipo Componente</th>
+                        <th>Comentario</th>
+                        <th>Estado</th>
+                        <th>Condición</th>
+                        <th>Locación</th>
+                        <th>Creado por</th>
+                        <th>Fecha de Asig. Comp.</th>
+                        <th>Fecha de Asig. Activo</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var IdTipoActivo = $("#IdTipoActivo").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/ListarTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdComponente = $("#IdComponente").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IdTipoActivo",
+            filter: "contains",
+            dataTextField: "Nombre",
+            dataValueField: "IdComponente",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Componente/ListarComponente?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdSubTipoComponente = $("#IdSubTipoComponente").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IdComponente",
+            filter: "contains",
+            dataTextField: "Nombre",
+            dataValueField: "IdSubtComp",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SubTipoComponente/ListarSubTipoComponentes?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdEstado = $("#IdEstado").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_STAT_ASSE",
+            dataValueField: "ID_STAT_ASSE",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Componente/ListarEstadoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdCondicion = $("#IdCondicion").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IdEstado",
+            filter: "contains",
+            dataTextField: "NAM_COND",
+            dataValueField: "ID_COND",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Componente/ListarCondicionActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#IdLocacion").kendoComboBox({
+            dataTextField: "NAM_LOCA",
+            dataValueField: "ID_LOCA",
+            template: '<div style="font-weight:bold;">${ data.NAM_SITE }</div> - ' +
+                '<div>${ data.NAM_LOCA }</div>',
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Location/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_LOCA = $("#ID_LOCA").data("kendoComboBox");
+
+        CargarGrilla();
+    });
+
+    function ExportarProgramas() {
+        $("#formExportar").submit();
+    }
+
+    function CargarGrilla(sw) {
+
+        $('#tbComponente').dataTable().fnDestroy();
+
+        $('#tbComponente').DataTable({
+            responsive: true,
+            ajax: {
+                "url": "/Asset/ReporteActivoPorComponente/",
+                "data": function (d) {
+                        d.IdTipoActivo = $("#IdTipoActivo").val() == '' ? 0 : $("#IdTipoActivo").val(),
+                        d.IdComponente = $("#IdComponente").val() == '' ? 0 : $("#IdComponente").val(),
+                        d.IdSubTipoComponente = $("#IdSubTipoComponente").val() == '' ? 0 : $("#IdSubTipoComponente").val(),
+                        d.IdEstado = $("#IdEstado").val() == '' ? 0 : $("#IdEstado").val(),
+                        d.IdCondicion = $("#IdCondicion").val() == '' ? 0 : $("#IdCondicion").val(),
+                        d.IdLocacion = $("#IdLocacion").val() == '' ? 0 : $("#IdLocacion").val()
+                }
+            },
+            columns: [
+                { data: "UsuarioAsignado" },
+                { data: "TipoActivo" },
+                { data: "CodigoActivo" },
+                { data: "NombreActivo" },
+                { data: "SerieActivo" },
+                { data: "Componente" },
+                { data: "SubTipoComponente" },
+                { data: "ComentarioAsignacion" },
+                { data: "Estado" },
+                { data: "Condicion" },
+                { data: "Locacion" },
+                { data: "UsuarioCrea" },
+                { data: "FechaAsignacion" },
+                { data: "FechaAsignacionActivo" }
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+
+        });
+
+    }
+
+</script>

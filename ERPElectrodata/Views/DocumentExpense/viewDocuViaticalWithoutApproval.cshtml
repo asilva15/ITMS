@@ -1,0 +1,167 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_EXPENSE
+
+@{
+    Layout = null;
+}
+
+<div class="inBodyForm" style="display: inline-block; width: 100%; font-size: .95em; width: 99.7%;">
+    <div style="float: left; width: 13.8%; padding: 2px 0 2px 1%; border-bottom: 1px solid #808080; border-right: 1px solid #808080;">Number OP</div>
+    <div style="float: left; width: 7.8%; padding: 2px 0 2px 1%; border-bottom: 1px solid #808080; border-right: 1px solid #808080; ">Type</div>
+    <div style="float: left; width: 8.8%; padding: 2px 0 2px 1%; border-bottom: 1px solid #808080; border-right: 1px solid #808080; ">Date</div>
+    <div style="float: left; width: 13.8%; padding: 2px 0 2px 1%; border-bottom: 1px solid #808080; border-right: 1px solid #808080; ">Number</div>
+    <div style="float: left; width: 34%; padding: 2px 0 2px 1%; border-bottom: 1px solid #808080; border-right: 1px solid #808080;">Supplier</div>
+    <div style="float: left; width: 15%; padding: 2px 0 2px 1%; border-bottom: 1px solid #808080; ">Amount</div>
+</div>
+<div id="gridDocuVia" class="contentView" style="margin-top: 0px;"></div>
+<div style="background-color: #e8e8e8; padding: 2px 0px 2px 0; text-align: right; height: 66px; font-size: .95em; ">
+    <div style="width:100%; display:inline-block;">
+        <div id="divTotMob" style="float: right; width: 8%; padding: 2px 4% 0px 0; text-align: right;"></div>
+        <div id="divMonMob" style="float: right; width: 3%; padding: 2px 0px 0px 1%; text-align: center;"></div>
+        <div style="float: right; font-weight: bold; padding: 2px 0px 0px 1%; ">@ResourceLanguaje.Resource.Mobility:</div>
+    </div>
+    <div style="width: 100%; display: inline-block;">
+        <div id="divTotDoc" style="float: right; width: 8%; padding: 0px 4% 0px 0; text-align: right;"></div>
+        <div id="divMonDoc" style="float: right; width: 3%; padding: 0px 0px 0px 1%; text-align: center;"></div>
+        <div style="float: right; font-weight: bold; padding: 0px 0px 0px 1%; ">@ResourceLanguaje.Resource.Documents:</div>
+    </div>
+    <div style="width: 100%; display: inline-block;">
+        <div id="divTot" style="float: right; width: 8%; padding: 0px 4% 0px 0; text-align: right;"></div>
+        <div id="divMon" style="float: right; width: 3%; padding: 0px 0px 0px 1%; text-align: center;"></div>
+        <div style="float: right; font-weight: bold; padding: 0px 0px 0px 1%; ">Total:</div>
+    </div>
+</div>
+<div id="pagerDocuVia" class="contentViewPager" style="margin-top:0px; width:99.2%;"></div>
+
+<script type="text/x-kendo-tmpl" id="template2">
+    <div class="GridList">
+        #if (ID_TYPE_DOCU_EXPE != 4) {#
+        <div style="float: left; width: 14%; padding: 2px 0 2px 1%; ">${NUM_OP}</div>
+        <div style="float: left; width: 8%; padding: 2px 0 2px 1%; ">${TYPE}</div>
+        <div style="float: left; width: 9%; padding: 2px 0 2px 1%;">${DATE}</div>
+        <div style="float: left; width: 14%; padding: 2px 0 2px 1%; ">${NUMBER}</div>
+        <div style="float: left; width: 34%; padding: 2px 0 2px 1%; text-transform:capitalize;" title="${SUPPLIER}">${SUPPLIER_ABR}</div>
+        <div style="float: left; width: 3%; padding: 2px 0 2px 1%; text-align:center;">${COIN}</div>
+        <div style="float: left; width: 8%; padding: 2px 1% 2px 0; text-align:right;">${AMOUNT}</div>
+        <div class="IconDeleteGridList" title="@ResourceLanguaje.Resource.Delete" onclick="DeleteViatical(0,${ID_DOCU_EXPE},'${NUM_OP}','${SUPPLIER}','${TYPE}','${NUMBER}','${DATE}','${COIN} ${AMOUNT}')"></div>
+        # Totality(ttMob,ttDoc,COIN); } else { #
+        <div style="float: left; width: 14%; padding: 2px 0 2px 1%; ">${NUM_OP}</div>
+        <div style="float: left; width: 8%; padding: 2px 0 2px 1%; ">${TYPE}</div>
+        <div style="float: left; width: 9%; padding: 2px 0 2px 1%;">${DET_DATE}</div>
+        <div style="float: left; width: 49%; padding: 2px 0 2px 1%;" title="${MOBILITY}">${MOBILITY_ABR}</div>
+        <div style="float: left; width: 3%; padding: 2px 0 2px 1%; text-align:center;">${COIN}</div>
+        <div style="float: left; width: 8%; padding: 2px 1% 2px 0; text-align:right;">${DET_AMOUN}</div>
+        <div class="IconDeleteGridList" title="@ResourceLanguaje.Resource.Delete" onclick="DeleteViatical(1,${ID_DETA_MOVI},'${NUM_OP}','${MOBILITY_ABR}','${TYPE}','','${DET_DATE}','${COIN} ${DET_AMOUN}')"></div>
+        # Totality(ttMob,ttDoc,COIN);} #
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    function Totality(ttMob,ttDoc,mon){
+        $("#divTotMob").html(ttMob);
+        $("#divMonMob").html(mon);
+        $("#divTotDoc").html(ttDoc);
+        $("#divMonDoc").html(mon);
+        $("#divTot").html((parseFloat(ttMob) + parseFloat(ttDoc)).toFixed(2));
+        $("#divMon").html(mon);
+    }
+    $(document).ready(function () {
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/DocumentExpense/ListDocuVia?id=@ViewBag.ID_DELI_SUST&var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 1 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#gridDocuVia").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template2").html())
+        });
+
+        $("#pagerDocuVia").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15],
+            refresh: false
+        });
+    });
+
+    function DeleteViatical(sw,id,op,sup,typ,num,fec,tot) {
+        if(sw == 0){
+            winPopUpModal("@ResourceLanguaje.Resource.Notification", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+           "<div style='padding:5px 12px 10px 10px; font-size:.95em; height:130px;'><span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Number OP:</b> " + op + "</span><br>" +
+           "<b>@ResourceLanguaje.Resource.Supplier:</b> " + sup + "<br>" +
+           "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Type:</b> " + typ + "</span><br>"+
+           "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Number:</b> " + num + "</span><br>"+
+           "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Date:</b> " + fec + "</span><br>"+
+           "<span style='text-transform:capitalize;'><b>Total:</b> " + tot + "</span><br><br>@ResourceLanguaje.Resource.DeleteDocument</div>" +
+           "<div style='float:right; padding:20px 2px 0px 0px; '>" +
+           "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+           , 350, 235);
+        }
+        else{
+            winPopUpModal("@ResourceLanguaje.Resource.Notification", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+           "<div style='padding:5px 12px 10px 10px; font-size:.95em; height:130px;'><span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Number OP:</b> " + op + "</span><br>" +
+           "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Type:</b> " + typ + "</span><br>"+
+           "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Date:</b> " + fec + "</span><br>"+
+           "<span style='text-transform:capitalize;'><b>Total:</b> " + tot + "</span><br>"+
+           "<b>@ResourceLanguaje.Resource.Mobility:</b> " + sup + "<br>" +
+           "<br>@ResourceLanguaje.Resource.DeleteDocument</div>" +
+           "<div style='float:right; padding:20px 2px 0px 0px; '>" +
+           "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+           , 380, 235);
+        }
+
+        var undo = $("#btnYes")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                winPopUpModalLoad("@ResourceLanguaje.Resource.DeletingRecord", "@ResourceLanguaje.Resource.PleaseWait", 300, 130);
+
+                $.ajax({
+                    url: (sw == 0 ? "/DocumentExpense/Delete/" : "/DocumentExpense/DeleteMobility/") + id,
+                    data: "_var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (resp) {
+                        closeWinModalPopUpLoad();
+                        var ID_DELI_SUST = $("#ID_DELI_SUST_V").data("kendoComboBox");
+
+                        LoadListViaWithoutApp(ID_DELI_SUST.value());
+                        ID_DELI_SUST.setDataSource(ID_DELI_SUST.dataSource);
+                        ID_DELI_SUST.refresh();
+
+                        if(resp == 'ChangeStatus'){
+                            alert("@ResourceLanguaje.Resource.WarningDelete");
+                        }
+                        else if(resp == 'error'){
+                            alert("Error");
+                        }
+                    },
+                    error: function (source) {
+                        alert("Error");
+                    }
+                });
+            });
+
+        var undo = $("#btnNO")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+    }
+</script>

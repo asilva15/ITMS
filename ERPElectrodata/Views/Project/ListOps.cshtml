@@ -1,0 +1,432 @@
+﻿@{
+    ViewBag.Title = "List Ops";
+    Layout = null;
+}
+<input type="hidden" id="BandListaOps" value="@ViewBag.Bandera" />
+
+<div style="width:60%; float:left; padding-left:0px; margin-left:0px;">
+    <div class="titleForm">
+        <div class="title" id="">Select OP</div>
+    </div>
+
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            <div class=" inbodyformrbl" style="min-height:465px; display:inline-block; padding:10px;">
+
+               <div>Seclect OP <br />
+                   <input id="tickopproject" name="tickopproject" />
+                    <span>&nbsp;<img onclick="AddOPProject()" style="cursor:pointer;" title="Add OP to the Project" src="/Content/Images/AddNew.png" /></span>
+                </div>
+                <div style="height:20px;"></div>
+
+                <div id="grid"></div>
+
+               </div>  
+            </div>
+        </div>
+    </div>
+
+<script type="text/x-kendo-tmpl" id="TempAssiProj">
+    <div style="padding:10px 10px 10px 5px;">
+        <div>
+            <div class="burbujaop">
+                <div style="padding:5px 10px 5px 10px;">
+                    <div style="border-bottom:1px dotted grey; width:100%;">
+                        <div style="display:inline-block; width:20%;"><b>${NAMEOP}</b></div>
+                        <div style="display: inline-block; width: 20%;">${MONEY} ${AMOUNT}</div>
+                        <div style="display: inline-block; width: 38%;">&nbsp;</div>
+                        <div style="display: inline-block; width: 20%; text-align:right;"><b>${NAM_TYPE_DELI_SUST}</b></div>
+                    </div>
+                </div>
+                <div style="padding:5px 10px 5px 10px;">${JUSTIFICATION}</div>
+            </div>
+        </div>
+    </div>
+</script>
+ 
+ <script type="text/x-kendo-template" id="template">
+
+        <div class="tabstrip">
+            <ul>
+                <li class="k-state-active">
+                    Details
+                </li>                
+            </ul>
+            <div>
+                <div class="DetailsOp"></div>
+            </div>          
+        </div>
+
+    </script>
+
+    <script>
+        $(document).ready(function () {
+
+            $("#tickopproject").kendoComboBox({
+                dataTextField: "NAMEOP",
+                dataValueField: "ID_TICK",
+                template: '<div style="width:100%; display:inline-block;">' +
+                            '<div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; "><span>OP: </span><b>${COD_TYPE_DOCU_SALE}&nbsp;${NUM_DOCU_SALE}</b></div>' +
+                            '<div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; "><span>Code: </span><b>${COD_TICK}</b></div>' +
+                        
+                          '</div>',
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                index: 0,
+                dataSource: {
+                    serverFiltering: false,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Project/DataListOps?var=" + Math.random()
+                    }
+                }
+            });
+
+            ListOpsAssignedProject();
+        });
+
+
+        function PopUpOps(conf, msg) {
+
+            if (conf == "OK") {
+                var title = '@ResourceLanguaje.Resource.InformationSaved ';
+                var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                                "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                                "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                                "<button id='btnContinues' class='k-button'>Continue</button>" +
+                                "</div></div>";
+
+                winPopUpModal(title, body, 300, 140);
+
+                $("#btnContinues").click(function () {
+
+                    $("#dlg").hide('200', "swing", function () {
+                        $("#bkg").fadeOut("300");
+
+                        $("#grid").empty();
+                        ListOpsAssignedProject();
+                    });
+
+                });
+            }
+            else {
+                var title = 'Error';
+                var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                                "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                                "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                                "<button id='btnContinues' class='k-button'>Continue</button>" +
+                                "</div></div>";
+
+                winPopUpModal(title, body, 300, 140);
+
+                $("#btnContinues").click(function () {
+
+                    $("#dlg").hide('200', "swing", function () {
+                        $("#bkg").fadeOut("300");
+
+                    });
+                });
+            }
+        }
+
+        function ListOpsAssignedProject() {         
+           
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/Project/DataListOpsAssiProj/@ViewBag.ID_PROJ_OP?var=" + Math.random(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 10,
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    model: {
+                        fields: {
+                            CANT: { type: "number" },
+                            ID_TICK: { type: "number" },
+                            COD_TICK: { type: "string" },
+                            NAMEOP: { type: "string" },
+                            NUM_DOCU_SALE: { type: "string" },
+                            CREATED: { type: "date" },
+                            TOTAL: { type: "number" },
+                            COIN: { type: "string" },
+                        }
+                    }
+                },
+
+                //aggregate: [{ field: "CANT", aggregate: "sum" }]
+            });
+
+            var element = $("#grid").kendoGrid({
+
+                dataSource: dataSource,
+                //height: 550,
+                sortable: true,
+                pageable: false,
+                detailTemplate: kendo.template($("#template").html()),
+                detailInit: detailInit,
+                dataBound: function () {
+                    //this.expandRow(this.tbody.find("tr.k-master-row").first());
+                },
+                columns: [
+                    {
+                        field: "NAMEOP",
+                        title: "OP",
+                        width: "120px",
+                        attributes: {
+                            "class": "table-cell",
+                            style: "text-align: center; font-size: 12px"
+                        },
+                        headerAttributes: {
+                            "class": "table-header-cell",
+                            style: "text-align: center; font-size: 12px; font-weight:bold;"
+                        }
+                    },
+                    {
+                        field: "COD_TICK",
+                        title: "Code",
+                        width: "150px",
+                        attributes: {
+                            "class": "table-cell",
+                            style: "text-align: center; font-size: 12px"
+                        },
+                        headerAttributes: {
+                            "class": "table-header-cell",
+                            style: "text-align: center; font-size: 12px; font-weight:bold;"
+                        },
+                    },
+                    {
+                        field: "NUM_DOCU_SALE",
+                        title: "Document",
+                        width: "120px",
+                        attributes: {
+                            "class": "table-cell",
+                            style: "text-align: center; font-size: 12px"
+                        },
+                        headerAttributes: {
+                            "class": "table-header-cell",
+                            style: "text-align: center; font-size: 12px; font-weight:bold;"
+                        },
+                    },
+
+                      {
+                          field: "CANT",
+                          title: "Quantity",
+                          width: "120px",
+                          attributes: {
+                              "class": "table-cell",
+                              style: "text-align: center; font-size: 12px"
+                          },
+                          headerAttributes: {
+                              "class": "table-header-cell",
+                              style: "text-align: center; font-size: 12px; font-weight:bold;"
+                          },
+                      },
+
+                     {
+                         field: "COIN",
+                         title: " ",
+                         width: "30px",
+                         attributes: {
+                             "class": "table-cell",
+                             style: "text-align: center; font-size: 12px"
+                         },
+                         headerAttributes: {
+                             "class": "table-header-cell",
+                             style: "text-align: center; font-size: 12px; font-weight:bold;"
+                         },
+                     },
+                    {
+                        field: "TOTAL",
+                        title: "Total",
+                        width: "120px",
+                        attributes: {
+                            "class": "table-cell",
+                            style: "text-align: center; font-size: 12px;",
+                        },
+                        headerAttributes: {
+                            "class": "table-header-cell",
+                            style: "text-align: center; font-size: 12px; font-weight:bold;",
+                        },
+                    },
+                ]
+            });
+
+            function detailInit(e) {
+                var detailRow = e.detailRow;
+
+                detailRow.find(".tabstrip").kendoTabStrip({
+                    animation: {
+                        open: { effects: "fadeIn" }
+                    }
+                });
+
+              
+
+                detailRow.find(".DetailsOp").kendoGrid({
+                    dataSource: {
+                        type: "GET",
+                        dataType: "json",
+                        transport: {
+                            read: "/Project/DataListDeatailsOps?var" + Math.random(),
+                        },
+                        serverFiltering: true,
+                        filter: { field: "ID_TICK", operator: "eq", value: e.data.ID_TICK },
+                        schema: {
+                            data: "Data",
+                            total: "Count",
+                            model: {
+                                fields: {
+                                    JUSTIFICATION: { type: "string" },
+                                    NAM_TYPE_DELI_SUST: { type: "string" },
+                                    DOC_NUMB: { type: "string" },
+                                    COD_REQU_EXPE: { type: "string" },
+                                    AMOUNT: { type: "number" },
+                                }
+                            },
+                        },
+                        //aggregate: [{ field: "AMOUNT", aggregate: "sum" }]
+                    },
+
+                    columns: [
+                        {
+                            field: "NAME",
+                            title: "Requester",
+                            width: "140px",
+                            attributes: {
+                                "class": "table-cell",
+                                style: "text-align: left; font-size: 12px"
+                            },
+                            headerAttributes: {
+                                "class": "table-header-cell",
+                                style: "text-align: left; font-size: 12px; font-weight:bold;"
+                            },
+                        },
+                        {
+                            field: "NAM_TYPE_DELI_SUST",
+                            title: "Type",
+                            width: "75px",
+                            attributes: {
+                                "class": "table-cell",
+                                style: "text-align: center; font-size: 12px"
+                            },
+                            headerAttributes: {
+                                "class": "table-header-cell",
+                                style: "text-align: center; font-size: 12px; font-weight:bold;"
+                            },
+                        },
+                          {
+                              field: "JUSTIFICATION",
+                              title: "Justification",
+                              width: "150px",
+                              attributes: {
+                                  "class": "table-cell",
+                                  style: "text-align: left; font-size: 12px"
+                              },
+                              headerAttributes: {
+                                  "class": "table-header-cell",
+                                  style: "text-align: center; font-size: 12px; font-weight:bold;"
+                              },
+                          },
+
+                          {
+                              field: "DAT_REGI",
+                              title: "Date",
+                              width: "75px",
+                              attributes: {
+                                  "class": "table-cell",
+                                  style: "text-align: center; font-size: 12px"
+                              },
+                              headerAttributes: {
+                                  "class": "table-header-cell",
+                                  style: "text-align: center; font-size: 12px; font-weight:bold;"
+                              },
+                          },
+
+                           {
+                               field: "COD_REQU_EXPE",
+                               title: "Code",
+                               width: "70px",
+                               attributes: {
+                                   "class": "table-cell",
+                                   style: "text-align: center; font-size: 12px"
+                               },
+                               headerAttributes: {
+                                   "class": "table-header-cell",
+                                   style: "text-align: center; font-size: 12px; font-weight:bold;"
+                               },
+                           },
+
+                            {
+                                field: "COIN",
+                                title: " ",
+                                width: "30px",
+                                attributes: {
+                                    "class": "table-cell",
+                                    style: "text-align: center; font-size: 12px"
+                                },
+                                headerAttributes: {
+                                    "class": "table-header-cell",
+                                    style: "text-align: center; font-size: 12px; font-weight:bold;"
+                                },
+                            },
+
+                            {
+                                field: "AMOUNT",
+                                title: "Amount",
+                                width: "70px",
+                                attributes: {
+                                    "class": "table-cell",
+                                    style: "text-align: center; font-size: 12px"
+                                },
+                                headerAttributes: {
+                                    "class": "table-header-cell",
+                                    style: "text-align: center; font-size: 12px; font-weight:bold;"
+                                },
+                            },
+                    ],
+
+                    scrollable: false,
+                    sortable: true,
+                    //pageable: true,
+
+                });
+            }
+        }
+
+        function AddOPProject() {
+            var idtick = $("#tickopproject").data("kendoComboBox");
+            var ID_TICK = idtick.dataItem().ID_TICK;
+
+            $.get("/Project/SaveOPProject/@ViewBag.ID_PROJ_OP/" + ID_TICK + "?var=" + Math.random(), function (data) {
+
+                var str = data;
+                var res = str.split(",", 2);
+
+                PopUpOps(res[0], res[1]);
+            });
+        }
+
+        
+    </script>
+
+
+
+
+

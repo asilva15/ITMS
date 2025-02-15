@@ -1,0 +1,81 @@
+﻿@{
+    Layout = null;
+}
+
+<div style="width: 49%; float:left;">
+    <div class="titleForm">
+        <div class="title">
+            <img src="~/Content/Images/AlertaRoja.png" />
+            Usuario con Mayores Incidencias (Últimos 3 meses)
+        </div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm" style="height:100%; background-color:white">
+            <div class="bg-primary" style="width:100%">
+                <div class="bg-primary" style="float:left; width:100%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:47%"><strong>TIPO ACTIVO</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:50%"><strong>CANTIDAD</strong></div>
+                <!--<div class="bg-primary" style="float:left; width:24%"><strong>REQUERIMIENTO</strong></div>
+                <div class="bg-primary" style="float:left; width:14%"><strong>TOTAL</strong></div>-->
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+            </div>
+            <div style="float:left; width:100%"><hr /></div>
+            <div id="divActivoTicket" class="contentView"></div>
+            <div id="pagerActivoTicket" class="contentViewPager" style="width:99%"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaActivo">
+    <div>
+        <div style="float:left; width:1%;">&nbsp;</div>
+        <div style="float:left; width:47%;">${TipoActivo}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:50%;"><a href="\\Supervision/TicketActivoDetalle/${IdTipoActivo}/1" target="_blank">${Cantidad}</a></div>
+        <div style="float:left; width:1%;">&nbsp;</div>
+        <div style="float:left; width:100%;"><hr /></div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //Usuario Incidente
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Supervision/ObtenerTicketxActivo",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 5,
+            schema: {
+                data: "ListaTicket",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerActivoTicket").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divActivoTicket").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaActivo").html())
+        });
+
+    });
+
+</script>

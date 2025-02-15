@@ -1,0 +1,214 @@
+﻿@model ERPElectrodata.Models.SCHEDULER
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<div style="width:100%; margin-top:10px;">
+    <div class="titleForm"><div class="title">Chart</div></div>
+    <div class="bodyForm">
+        <div class="inBodyFormxx">
+            <div id="divScheduleSale"></div>
+        </div>
+    </div>
+</div>
+
+<div class="divFondoDos">
+    <div style="width: 95.5%; float:left; padding: 0 0 0 15px;">
+        <div class="editor-label">
+            @ResourceLanguaje.Resource.Employee
+        </div>
+        <div class="editor-field">
+            <input type="text" name="ID_PERS_ENI" id="ID_PERS_ENTI" />&nbsp;&nbsp;
+            <div style="margin-top:2px; display:none;" id="divDisplayArea">
+                <input type="checkbox" id="AreaSale" name="AreaSale" style="cursor:pointer;"/>&nbsp;include area events
+            </div>            
+        </div>
+    </div>
+</div>
+<div style="width:100%;" id="contentScheduler"></div>
+
+<script type="text/javascript">
+    var acceso = "0";
+    $(document).ready(function () {
+
+        $.get("/Sales/LIST_ORGANIZATION_BY_ID_PERS_ENTI?var=" + Math.random(), function (json) {
+            json["Data"].push({ PERSON: "Area Sales", ID_PERS_ENTI: 0, ID_PERS_ENTI: 0, NAM_CHAR: "Sales", ID_PHOTO: "area.png" });
+
+            $("#ID_PERS_ENTI").kendoComboBox({
+                dataTextField: "PERSON",
+                dataValueField: "ID_PERS_ENTI",
+                template: '<div style="width:100%; height:48px;">' +
+                            '<div style="width:17%; min-width:40px; float:left; height:45px; margin-top:3px;"><img style="border:1px solid lavender;" src="/Content/Fotos/${ID_PHOTO}" height="40" width="40"/></div>' +
+                            '<div style="width:70%; float:left; height:19px; text-transform:capitalize; margin-top:3px;"><b>${PERSON}</b></div>' +
+                            '<div style="width:70%; float:left; height:19px; text-transform:capitalize;font-size:.85em; margin-top:-2px;">${NAM_CHAR}</div>' +
+                          '</div>',
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json["Data"],
+                value: 0,
+            });
+            var ID_PERS_ENTI = $("#ID_PERS_ENTI").data("kendoComboBox");
+            ID_PERS_ENTI.list.width(300);
+
+            ID_PERS_ENTI.bind("change", function (e) {
+
+                if (ID_PERS_ENTI.dataItem().ID_PERS_ENTI != 0) {
+                    $("#divDisplayArea").css("display", "block");
+                }
+                else {
+                    $("#divDisplayArea").css("display", "none");
+                    $("#AreaSale").prop("checked", false);
+                }
+
+                $.ajax({
+                    url: "/ResponsibleChartScheduled/AccEdit/" + ID_PERS_ENTI.dataItem().ID_PERS_ENTI,
+                    data: "_var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (acso) {
+                        acceso = acso;
+                        loadScheduler(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+                    },
+                    error: function (dato) {
+                        alert("ERROR");
+                    }
+                });
+
+            });
+
+            $.ajax({
+                url: "/ResponsibleChartScheduled/AccEdit/0",
+                data: "_var=" + Math.random(),
+                type: "GET",
+                dataType: "text",
+                success: function (acso) {
+                    acceso = acso;
+                    loadScheduler(0);
+                },
+                error: function (dato) {
+                    alert("ERROR");
+                }
+            });
+
+        });
+
+    });
+
+    $('#AreaSale').click(function () {
+        loadScheduler($("#ID_PERS_ENTI").val());
+    });
+
+    function loadScheduler(id) {
+        acso = acceso;
+        var chck = $('#AreaSale');
+        if (chck.is(':checked')) {
+            id1 = 0;
+            acso = "0";
+        } else {
+            id1 = -1;            
+        }
+
+        $("#contentScheduler").empty();
+        $("#contentScheduler").load("/Scheduler/viewSchedulerPersonal?id=" + id + "&acceso=" + acso + "&id1=" + id1);
+    }
+</script>
+
+
+
+@*<script type="text/javascript">
+
+    function AddEvent(e) {        
+        var start = escape(String(e.event.start));
+        var end = escape(String(e.event.end));
+        $("#divContent").empty();
+        if (typeof (e.event.title) === "undefined") {
+            $("#divContent").load('/Scheduler/viewCreateEvent?_=' + Math.random() + '&acc=new&start=' + start + '&end=' + end);
+        }
+        else {
+            var title = escape(String(e.event.title));
+            var desc = escape(String(e.event.description));
+            var id = escape(String(e.event.id));
+            $("#divContent").load('/Scheduler/viewCreateEvent?_=' + Math.random() + '&acc=edit&id=' + id + '&start=' + start + '&end=' + end + 
+                '&title=' + title + "&desc=" + desc);
+
+        }
+    }
+
+    function Schedulerx(id) {
+        
+        if ($("#divScheduleSale").data("kendoScheduler")) {
+            $("#divScheduleSale").empty();
+            $("#divScheduleSale").data("kendoScheduler").destroy();
+        }
+
+        $("#divScheduleSale").kendoScheduler({
+            date: new Date("@ViewBag.Date"),
+            //timezone: "America/Lima",
+            height: 620,
+            selectable: true,
+            editable: {                
+                resize: false,
+                move: false,
+                destroy: false,
+            },
+            views: [
+                "day",
+                {
+                    type: "workWeek",
+                    selected: true,
+                },
+                "week",
+                "month",
+                "agenda"
+            ],
+            dataSource: {
+                batch: true,
+                transport: {
+                    read: {
+                        url: "/ResponsibleChartScheduled/ListByIdChar/" + id,
+                        type: "GET",
+                        dataType: "json"
+                    },
+                    update: {
+                        url: "/Scheduler/UpdateRoom",
+                        dataType: "jsonp"
+                    }
+                },
+                serverFiltering: true
+            },
+            add: function (e) {
+                e.preventDefault();
+                console.log("Add");
+                console.log(e.event);
+            },
+            edit: function (e) {
+                e.preventDefault();
+                console.log("Edit");                
+            }
+            //add: function (e) {
+            //    e.preventDefault();
+            //    AddEvent(e);
+            //},
+            //edit: function (e) {
+            //    //lala("edit");                
+            //    e.preventDefault();
+            //    console.log("Editing", e.event.title);
+            //},
+            //navigate: function (e) {
+            //    e.sender.dataSource
+            //    e.sender.dataSource.filter([{ field: "year", operator: "eq", value: e.date.getFullYear() }, { field: "month", operator: "eq", value: e.date.getMonth() + 1 }]);
+            //},
+        });
+    }
+
+    $(document).ready(function () {
+        //Schedulerx(5);
+    });
+
+</script>*@

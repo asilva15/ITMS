@@ -1,0 +1,2373 @@
+﻿@{
+    ViewBag.Title = "Inform";
+    //Layout = null;
+}
+
+<style>
+    .select2 {
+        width: 100% !important;
+    }
+</style>
+@*<link href="~/Bootstrap/css/bootstrap.css" rel="stylesheet" />*@
+@*<link href="~/Bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />*@
+<link href="~/Content/sweet-alert.css" rel="stylesheet" />
+@*<script src="~/Bootstrap/js/bootstrap.min.js"></script>*@
+<script src="~/Scripts/sweet-alert.js"></script>
+@*<script src="~/Scripts/bootstrap-tags.js"></script>
+    <script src="~/Scripts/bootstrap-tags.min.js"></script>*@
+@*<script src="~/Scripts/Itms/Plugins/jquery.validate.min.js"></script>*@
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Informe
+                <div class="page-title-subheading">
+                    Gráficos de Tickets, Incidentes y Requerimientos.
+                </div>
+            </div>
+
+        </div>
+        <div class="btn-actions-pane-right">
+            <a href="/Inform/IndexPlantilla" class="btn btn-primary"> Informe Automático </a>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="form-row">
+                    @*<div class="col-md-2">
+            <div class="form-group">
+                <label id="txtClientes" for="txtClientes" class="right">Clientes </label>
+                <select id="ID_CLIE_REP" name="ID_CLIE_REP" class="form-control select2" />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label id="txtClienteFinal" for="txtClienteFinal" class="">Cliente Final </label>
+                <select id="ID_CLIE_FIN" name="ID_CLIE_FIN" class="form-control select2" />
+            </div>
+        </div>*@
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtFechaInicio" for="txtFechaInicio" class="right">Fecha Inicio </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend datepicker-trigger">
+                                    <div class="input-group-text">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control" id="dtFechaInicio" name="dtFechaInicio" value="@ViewBag.FechaInicio" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="txtFechaFin" for="txtFechaFin" class="right">Fecha Fin </label>
+                            <div class="input-group">
+                                <div class="input-group-prepend datepicker-trigger">
+                                    <div class="input-group-text">
+                                        <i class="fa fa-calendar"></i>
+                                    </div>
+                                    <input type="text" class="form-control" id="dtFechaFin" name="dtFechaFin" value="@ViewBag.FechaActual" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label id="" for="" class="">&nbsp; </label>
+                            <button type="button" id="btnBuscar" onclick="BuscarTickets();" class="mb-2 mr-2 btn-pill btn btn-primary btn-block"><span>Buscar</span></button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Tickets por nivel (No aplica filtro de Tipo de Ticket)
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div id="INF_CATE_PIE"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <div id="INF_CATE_BAR"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Tickets por Estado
+            </div>
+            <div class="card-body">
+
+
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="TicketsByStatus"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Tickets por Prioridad
+            </div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="TicketsByPriority">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Tiempo medio de Resolución
+            </div>
+            <div class="card-body">
+
+
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="INF_AVG_TIME_RESO">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Escalamiento al nivel 2
+            </div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="TOLEVEL2">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Tickets por acuerdo de nivel de servicio
+            </div>
+            <div class="card-body">
+
+
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="RANK_PERS">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Tickets por Personal/Estado
+            </div>
+            <div class="card-body">
+
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="TBPBS">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Tasa de resolución de llamadas
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="INF_CRR" style="height:483px">
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Trabajo
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label id="" for="" class="">Día corte: </label>
+                            <input type="number" class="form-control" id="DiaCorte" name="DiaCorte" min="0" max="31" />
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label id="" for="" class=""> &nbsp; &nbsp; </label>
+                            <button type="button" class="mb-2 mr-2 btn-pill btn btn-primary btn-block" onclick="UpdateWorkload(0);">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div id="Workload">
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    var myVarWorkload;
+    var myTicketPriority;
+    var myTicketStatus;
+    var myToLevel2;
+    var myINF_AVG_TIME_RESO;
+    var myINF_CRR;
+    var myTicketByClass;
+    var myRTTOTAL;
+    var myINF_CATE;
+    var myTBPBS;
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+    $(document).ready(function () {
+        $('#dtFechaInicio').datepicker({
+            autoclose: true
+        });
+        $('#dtFechaFin').datepicker({
+            autoclose: true
+        });
+
+        setTimeout(function () {
+            BuscarTickets();
+        }, 4500);
+
+    });
+
+
+    $(document).ready(function () {
+        $.get("/AccountQueue/ListByAcco", function (json) {
+            json["Data"].push({ QUEU: "All Queue", ID_QUEU: 0, ID_PERS_ENTI: 0, ID_STAT: 0 });
+
+            var cmbQUEU = $("#ID_QUEU").kendoComboBox({
+                index: 0,
+                dataTextField: "QUEU",
+                dataValueField: "ID_QUEU",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                dataBound: function (e) {
+                    $("#Workload").empty();
+
+                    $("#Workload").append("<div id='Mensaje' style='text-align: center;'>" +
+                                                "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+
+                    if (myVarWorkload) {
+                        clearTimeout(myVarWorkload);
+                    }
+                    var idclient = '';
+                    UpdateWorkload(idclient);
+                },
+                suggest: true,
+                dataSource: json["Data"]
+            }).data("kendoComboBox");
+
+            cmbQUEU.bind("change", function (e) {
+                $("#Workload").empty();
+                $("#Workload").append("<div id='Mensaje' style='text-align: center;'>" +
+                                            "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+
+                if (myVarWorkload) {
+                    clearTimeout(myVarWorkload);
+                }
+                var idclient = '';
+                UpdateWorkload(idclient);
+            });
+
+        });
+    });
+
+    function BuscarTickets() {
+        $("#INF_CATE_PIE").empty()
+
+        $("#INF_CATE_PIE").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 28%; width: 28%; text-align: center;'></div>");
+        $("#INF_CATE_BAR").empty()
+
+        $("#INF_CATE_BAR").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 18%; width: 18%; text-align: center;'></div>");
+        $("#TicketsByStatus").empty()
+
+        $("#TicketsByStatus").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif'' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#TicketsByPriority").empty()
+
+        $("#TicketsByPriority").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#INF_AVG_TIME_RESO").empty()
+
+        $("#INF_AVG_TIME_RESO").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#TOLEVEL2").empty()
+
+        $("#TOLEVEL2").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#RANK_PERS").empty()
+
+        $("#RANK_PERS").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><br /><br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#TBPBS").empty()
+
+        $("#TBPBS").append("<div id='Mensaje' style='text-align: center;' >" +
+                                    "<br /><br /><br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#INF_CRR").empty()
+
+        $("#INF_CRR").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#Workload").empty()
+
+        $("#Workload").append("<div id='Mensaje' style='text-align: center;'>" +
+                                    "<br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+
+        var idclient = $("#ID_CLIE_REP").val();
+
+        INF_AVG_TIME_RESO(idclient);
+        INF_CRR(idclient);
+        INF_CATE(idclient);
+        RTTOTAL(idclient);
+        TICKET_STATUS(idclient);
+        TICKET_PRIORITY(idclient);
+        TOLEVEL2(idclient);
+        TBPBS(idclient);
+        UpdateWorkload(idclient);
+    }
+
+    function UpdateKSA(idclient) {
+        //
+        var m = $("#MESES").val();
+        var a = $("#ANIO").val();
+
+
+        $.ajax({
+            url: '/Inform/INF_KSA?a=' + a + '&m=' + m + '&ID_CLIE_REP=' + 0 + '&ID_CLIE_FIN=' + 0 + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+                //alert(m+"---"+a);
+                if (!m) {
+                    m = '@DateTime.Now.Month';
+                }
+
+                if (!a) {
+                    a = '@DateTime.Now.Year';
+                }
+                console.log(m);
+                $("#Legend").empty();
+                $.ajax({
+                    url: '/Inform/LEGEND_KSA?id=1&MONTH=' + m + '&YEAR=' + a + '&var=' + Math.random(),
+                    dataType: 'json',
+                    cache: false,
+                    async: true,
+                    success: function (jsonx) {
+                        $.each(jsonx['Cantlegend'], function (index, value) {
+                            //Legend
+                            $("#Legend").append('<div style="clear:both;border:1px solid #909090;border-radius:5px; height:42px;"></div>');
+                            $("#Legend").append('<div style="margin:-40px 7px 2px 7px;text-transform:capitalize;font-size:0.8em;">' + value['NAM_CATE'].toLowerCase() + '</div>');
+                            $.each(jsonx['legend'], function (indexs, values) {
+                                if (values['ID_CATE'] == value['ID_CATE']) {
+                                    $("#Legend").append('<div style="margin-left:7px;float:left;padding:8px;border-radius:4px;background-color:' + values['COLOR'] + '">' + '</div');
+                                    $("#Legend").append('<div style="float:left;width:65px;padding-left:5px;font-size:0.8em;">' + values['VAL_TARG_SEGM'] + '</div');
+                                }
+                            });
+                            $("#Legend").append('<div style="clear:both;height:15px;">');
+                        });
+                    }
+                });
+                var Cat = new Array();
+                var namCat = new Array();
+                var catSub = new Array();
+
+                var vMes1 = new Array();
+                var vMes2 = new Array();
+                var vMes3 = new Array();
+                var vMes1Color = new Array();
+                var vMes2Color = new Array();
+                var vMes3Color = new Array();
+
+
+                var total = jsonx['total'];
+
+                $.each(jsonx['fcr'], function (index, value) {
+
+                    namCat[index] = value['NAM_CATE'];
+                    Cat[index] = value['ACR_CATE'];
+                    vMes1[index] = value['MES1'];
+                    vMes2[index] = value['MES2'];
+                    vMes3[index] = value['MES3'];
+                    vMes1Color[index] = value['MES1COLOR'];
+                    vMes2Color[index] = value['MES2COLOR'];
+                    vMes3Color[index] = value['MES3COLOR'];
+
+                });
+
+                $.each(jsonx['serie'], function (index, value) {
+                    //
+                    if (value['ID'] <= 3) {
+                        catSub[3 - value['ID']] = value['SERIE'];
+                    }
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+               colorPie = "#6A819B",
+            categories = Cat,
+            name = 'Browser brands',
+            data = [{
+                y: vMes1[0] + vMes2[0] + vMes3[0],
+                color: colorPie,
+                drilldown: {
+                    name: 'MSIE versions',
+                    categories: catSub,
+                    data: [vMes1[0], vMes2[0], vMes3[0]],
+                    color: colors[0]
+                }
+            }, {
+                y: vMes1[1] + vMes2[1] + vMes3[1],
+                color: colorPie,
+                drilldown: {
+                    name: 'Firefox versions',
+                    categories: catSub,
+                    data: [vMes1[1], vMes2[1], vMes3[1]],
+                    color: colors[1]
+                }
+            }, {
+                y: vMes1[2] + vMes2[2] + vMes3[2],
+                color: colorPie,
+                drilldown: {
+                    name: 'Chrome versions',
+                    categories: catSub,
+                    data: [vMes1[2], vMes2[2], vMes3[2]],
+                    color: colors[2]
+                }
+            }, {
+                y: vMes1[3] + vMes2[3] + vMes3[3],
+                color: colorPie,
+                drilldown: {
+                    name: 'Safari versions',
+                    categories: catSub,
+                    data: [vMes1[3], vMes2[3], vMes3[3]],
+                    color: colors[3]
+                }
+            }, {
+                y: vMes1[4] + vMes2[4] + vMes3[4],
+                color: colorPie,
+                drilldown: {
+                    name: 'Opera versions',
+                    categories: catSub,
+                    data: [vMes1[4], vMes2[4], vMes3[4]],
+                    color: colors[4]
+                }
+            }];
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color,
+                        x: namCat[i],
+                    });
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = 0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'KSA',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: false
+                        }
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            if (isNaN(this.point.x)) {
+                                return this.y > 5 ? '<div style="text-transform:capitalize">' + (this.point.x).toLowerCase() + '</div>' : null;
+                            }
+                            else {
+                                return '<span style="font-size: 12px;font-weight:bold;text-transform:capitalize;">'
+                                    + this.point.name + '</span><br/><span style="color:' + this.point.color + ';">KSA: </span>' + this.point.y + '%';
+                            }
+                        }
+                    },
+                    series: [{
+                        //name: 'Browsers',
+                        data: browserData,
+                        size: '45%',
+                        dataLabels: {
+                            formatter: function () {
+                                return this.y > 5 ? this.point.name : null;
+                            },
+                            color: 'white',
+                            distance: -30
+                        }
+                    }, {
+                        //name: 'Versions',
+                        data: versionsData,
+                        innerSize: '55%',
+                        size: '62%',
+                        dataLabels: {
+                            formatter: function () {
+                                // display only if larger than 1
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.y < 100 ? (': ' + this.y + ' %') : '')) : null);
+                            }
+                        }
+                    }]
+                });
+                //fin chart
+            }
+
+        });
+        //
+        //
+        myVar = setTimeout("UpdateKSA(idclient);", 300000);
+    }
+
+    function UpdateSLA(idclient) {
+        var m = $("#MESES").val();
+        var a = $("#ANIO").val();
+
+        if (!m) {
+            m = '@DateTime.Now.Month';
+        }
+
+        if (!a) {
+            a = '@DateTime.Now.Year';
+        }
+        //data:{ID_CLIE_REP: $("#ID_CLIE_REP").val() == '' ? 0 : $("#ID_CLIE_REP").val(),
+        //        ID_CLIE_FIN: $("#ID_CLIE_FIN").val() == '' ? 0 : $("#ID_CLIE_FIN").val(),
+        //
+        $.ajax({
+            url: '/Inform/INF_SLA?a=' + a + '&m=' + m + '&ID_CLIE_REP=' + 0 + '&ID_CLIE_FIN=' + 0 + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                $("#LegendSLA").empty();
+                $.ajax({
+                    url: '/Inform/LEGEND_KSA?id=2&MONTH=' + m + '&YEAR=' + a + '&var=' + Math.random(),
+                    dataType: 'json',
+                    cache: false,
+                    async: true,
+                    success: function (jsonx) {
+                        $.each(jsonx['Cantlegend'], function (index, value) {
+                            //Legend
+                            $("#LegendSLA").append('<div style="clear:both;border:1px solid #909090;border-radius:5px; height:42px;"></div>');
+                            $("#LegendSLA").append('<div style="margin:-40px 7px 2px 7px;text-transform:capitalize;font-size:0.8em;">' + value['NAM_CATE'].toLowerCase() + '</div>');
+                            $.each(jsonx['legend'], function (indexs, values) {
+                                if (values['ID_CATE'] == value['ID_CATE']) {
+                                    $("#LegendSLA").append('<div style="margin-left:7px;float:left;padding:8px;border-radius:4px;background-color:' + values['COLOR'] + '">' + '</div');
+                                    $("#LegendSLA").append('<div style="float:left;width:65px;padding-left:5px;font-size:0.8em;">' + values['VAL_TARG_SEGM'] + '</div');
+                                }
+                            });
+                            $("#LegendSLA").append('<div style="clear:both;height:15px;">');
+                        });
+                    }
+                });
+                var Cat = new Array();
+                var namCat = new Array();
+                var catSub = new Array();
+
+                var vMes1 = new Array();
+                var vMes2 = new Array();
+                var vMes3 = new Array();
+                var vMes4 = new Array();
+                var vMes5 = new Array();
+                var vMes6 = new Array();
+                var vMes1Color = new Array();
+                var vMes2Color = new Array();
+                var vMes3Color = new Array();
+                var vMes4Color = new Array();
+                var vMes5Color = new Array();
+                var vMes6Color = new Array();
+
+
+                var total = jsonx['total'];
+
+                $.each(jsonx['sla'], function (index, value) {
+
+                    namCat[index] = value['NAM_CATE'];
+                    Cat[index] = value['ACR_CATE'];
+                    vMes1[index] = value['MES1'];
+                    vMes2[index] = value['MES2'];
+                    vMes3[index] = value['MES3'];
+                    vMes4[index] = value['MES4'];
+                    vMes5[index] = value['MES5'];
+                    vMes6[index] = value['MES6'];
+                    vMes1Color[index] = value['MES1COLOR'];
+                    vMes2Color[index] = value['MES2COLOR'];
+                    vMes3Color[index] = value['MES3COLOR'];
+                    vMes4Color[index] = value['MES4COLOR'];
+                    vMes5Color[index] = value['MES5COLOR'];
+                    vMes6Color[index] = value['MES6COLOR'];
+
+                });
+
+                $.each(jsonx['serie'], function (index, value) {
+                    //
+                    if (value['ID'] <= 3) {
+                        catSub[3 - value['ID']] = value['SERIE'];
+                    }
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+               colorPie = "#6A819B",
+            categories = Cat,
+            name = 'Browser brands',
+            data = [{
+                y: vMes4[0] + vMes5[0] + vMes6[0],
+                color: colorPie,
+                drilldown: {
+                    name: Cat[0],
+                    categories: catSub,
+                    data: [vMes4[0], vMes5[0], vMes6[0]],
+                    color: colors[0]
+                }
+            }, {
+                y: vMes4[1] + vMes5[1] + vMes6[1],
+                color: colorPie,
+                drilldown: {
+                    name: 'Firefox versions',
+                    categories: catSub,
+                    data: [vMes4[1], vMes5[1], vMes6[1]],
+                    color: colors[1]
+                }
+            }, {
+                y: vMes4[2] + vMes5[2] + vMes6[2],
+                color: colorPie,
+                drilldown: {
+                    name: 'Chrome versions',
+                    categories: catSub,
+                    data: [vMes4[2], vMes5[2], vMes6[2]],
+                    color: colors[2]
+                }
+            }, {
+                y: vMes4[3] + vMes5[3] + vMes6[3],
+                color: colorPie,
+                drilldown: {
+                    name: 'Safari versions',
+                    categories: catSub,
+                    data: [vMes4[3], vMes5[3], vMes6[3]],
+                    color: colors[3]
+                }
+            }, {
+                y: vMes4[4] + vMes5[4] + vMes6[4],
+                color: colorPie,
+                drilldown: {
+                    name: 'Opera versions',
+                    categories: catSub,
+                    data: [vMes4[4], vMes5[4], vMes6[4]],
+                    color: colors[4]
+                }
+            }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color,
+                        x: namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = 0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: (j == 0 ? vMes4Color[i] : (j == 1 ? vMes5Color[i] : vMes6Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'SLA',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total percent market share'
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: false
+                        }
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            if (isNaN(this.point.x)) {
+                                return this.y > 5 ? '<div style="text-transform:capitalize">' + (this.point.x).toLowerCase() + '</div>' : null;
+                            }
+                            else {
+                                return '<span style="font-size: 12px;font-weight:bold;text-transform:capitalize;">'
+                                    + this.point.name + '</span><br/><span style="color:' + this.point.color + ';">SLA: </span>' + this.point.y + '%';
+                            }
+                        }
+                    },
+                    series: [{
+                        //name: 'Browsers',
+                        data: browserData,
+                        size: '45%',
+                        dataLabels: {
+                            formatter: function () {
+
+                                return this.y > 5 ? this.point.name : null;
+                            },
+                            color: 'white',
+                            distance: -30
+                        }
+                    }, {
+                        //name: 'Versions',
+                        data: versionsData,
+                        innerSize: '55%',
+                        size: '62%',
+                        dataLabels: {
+                            formatter: function () {
+                                // display only if larger than 1
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.y < 100 ? (': ' + this.y + ' %') : '')) : null);
+                            }
+                        }
+                    }]
+                });
+                //fin chart
+            }
+        });
+        //
+        //
+        myVar = setTimeout("UpdateSLA(idclient);", 300000);
+    }
+
+    function UpdateWorkload(idclient) {
+
+        var cmbQUEU = $("#ID_QUEU").data("kendoComboBox");
+        var IdArea = cmbQUEU == null ? 0 : cmbQUEU.dataItem().ID_QUEU;
+        //var checkeado=$( "#ALL_QUEU:checked" ).length;
+
+        $.ajax({
+            url: '/Inform/INF_WORKLOAD?ID_QUEU=' + IdArea+
+                '&ID_CLIE_REP=' + 0 +
+                '&ID_CLIE_FIN=' + 0 +
+                '&dtFechaInicio=' + $("#dtFechaInicio").val() +
+                '&dtFechaFin=' + $("#dtFechaFin").val() +
+                "&DiaCorte=" + $("#DiaCorte").val()+ '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Serie = new Array();
+                var Active = new Array();
+                var Scheduled = new Array();
+                var Resolved = new Array();
+                var Closed = new Array();
+                var Color = new Array();
+
+                $.each(jsonx['workload'], function (index, value) {
+                    Serie[index] = value['SERIE'];
+                    Active[index] = value['ACTIVE'];//((value['InSLA']-value['OutSLA'])*100.00)/value['InSLA'];//(value['InSLA']-value['OutSLA'])/(value['InSLA'])*100;
+                    Scheduled[index] = value['SCHEDULED'];
+                    Resolved[index] = value['RESOLVED'];
+                    Closed[index] = value['CLOSED'];
+                });
+
+                $.each(jsonx['color'], function (index, value) {
+                    Color[index] = value['COL_GRAP_STAT'];
+                });
+                // inicio chart
+                chart = new Highcharts.Chart({
+
+                    chart: {
+                        renderTo: 'Workload',
+                        type: 'column',
+                        zoomType: 'xy',
+                        margin: [20, 20, 80, 60]
+                    },
+                    //colors: (Highcharts.theme && Highcharts.theme.textColor) || 'gray',
+                    colors: Color,
+                    title: {
+                        text: null
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    xAxis: {
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+
+                    yAxis: {
+                        lineWidth: 1,
+                        gridLineWidth: 1,
+                        title: {
+                            text: '@ResourceLanguaje.Resource.Tickets',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080'
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Calls',
+                        valueDecimals: 0
+                    },
+                    plotOptions: {
+                        column: {
+                            stacking: 'normal',
+                            shadow: false,
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        },
+                        series: {
+                            events: {
+                                click: function (event) {
+
+                                }
+                            }
+                        }
+                    },
+
+                    series: [{
+                        name: 'Active',
+                        data: Active
+                    }, {
+                        name: 'Scheduled',
+                        data: Scheduled
+
+                    }, {
+                        name: 'Resolved',
+                        data: Resolved
+
+                    }, {
+                        name: 'Closed',
+                        data: Closed
+
+                    }]
+                });
+            }
+
+        });
+
+        myVarWorkload = setTimeout("UpdateWorkload(idclient);", 300000);
+    }
+
+    //function UpdateBacklog(){
+
+    //        $.ajax({
+    //                    url: '/Inform/INF_BACKLOG?var=' + Math.random(),
+    //                    dataType: 'json',
+    //                    cache: false,
+    //                    async: true,
+    //                    success: function (jsonx) {
+
+    //                        var Serie = new Array();
+    //                        var Active = new Array();
+    //                        var Scheduled = new Array();
+    //                        var Resolved = new Array();
+    //                        var Closed = new Array();
+    //                        var Color = new Array();
+
+    //                        var TotActive = 0;
+    //                        var TotScheduled = 0;
+    //                        var TotResolved = 0;
+    //                        var TotClosed = 0;
+    //                        //var arr = JSON.parse(jsonx);
+    //                        //console.log(jsonx.length);
+    //                        $.each(jsonx['backlog'],function (index,value){
+    //                            //console.log(value['Anio']);
+    //                            Serie[index] = value['SERIE'];
+    //                            Active[index] = value['UNO'];//((value['InSLA']-value['OutSLA'])*100.00)/value['InSLA'];//(value['InSLA']-value['OutSLA'])/(value['InSLA'])*100;
+    //                            Scheduled[index] = value['DOS'];
+    //                            Resolved[index] = value['TRES'];
+    //                            Closed[index] = value['FINAL'];
+
+    //                            TotActive = TotActive +value['UNO'];
+    //                            TotScheduled = TotScheduled +value['DOS'];
+    //                            TotResolved = TotResolved + value['TRES'];
+    //                            TotClosed = TotClosed +value['FINAL'];
+    //                        });
+
+    ////                        $.each(jsonx['color'],function (index,value){
+    ////                            Color[index] = value['COL_GRAP_STAT'];
+    ////                        });
+    //// inicio chart
+    //        chart = new Highcharts.Chart({
+
+    //            chart: {
+    //                renderTo: 'Backlog',
+    //                zoomType: 'xy',
+    //                margin:[20, 20, 80, 60]
+    //            },
+    //            colors: ["#516882","#7CBB00","#FFBB00","#B21E1E"],
+    //            title: {
+    //                text: null
+    //            },
+    //            credits:{
+    //                enabled:false
+    //                },
+    //            xAxis: {
+    //                categories: Serie,
+    //                gridLineWidth:1
+    //            },
+
+    //            yAxis: {
+    //                /*allowDecimals: true,*/
+    //                min: 0,
+    //                lineWidth:1,
+    //                gridLineWidth:1,
+    //                title: {
+    //                    text: 'Tickets'
+    //                },
+    //                plotLines: [{
+    //                    value: 0,
+    //                    width: 1,
+    //                    color: '#808080'
+    //                }]
+    //            },
+
+    //            tooltip: {
+    //                formatter: function() {
+    //                    return '<b>'+ (this.x == null ? this.key : this.x) +'</b><br/>'+
+    //                        this.series.name +': '+ this.y +'<br/>';//+'Total: '+ this.point.stackTotal;
+    //                }
+    //            },
+
+    //            plotOptions: {
+    //                column: {
+    //                    stacking: 'normal',
+    //                    shadow:false
+    //                },
+    //                series: {
+    //                    events: {
+    //                        click: function(event) {
+    //                            console.log(this);
+    //                        }
+    //                    }
+    //                }
+    //            },
+
+    //            series: [{
+    //                name: '7-13 (Days)',
+    //                data: Active,
+    //                type: 'column',
+    //                stack: '7-13'
+    //            }, {
+    //                name: '14-29 (Days)',
+    //                data: Scheduled,
+    //                type: 'column',
+    //                stack: '14-29'
+
+    //            }, {
+    //                name: '30-59 (Days)',
+    //                data: Resolved,
+    //                type: 'column',
+    //                stack: '39-59'
+
+    //            }, {
+    //                name: '60 + (Days)',
+    //                data: Closed,
+    //                type: 'column',
+    //                stack: '60 +'
+
+    //            },{
+    //                type: 'pie',
+    //                name: 'Total',
+    //                data: [{
+    //                    name: '7-13',
+    //                    y: TotActive,
+    //                    color: '#516882' // Jane's color
+    //                }, {
+    //                    name: '14-29',
+    //                    y: TotScheduled,
+    //                    color: '#7CBB00' // John's color
+    //                }, {
+    //                    name: '30-59',
+    //                    y: TotResolved,
+    //                    color: '#FFBB00' // Joe's color
+    //                }, {
+    //                    name: '60+',
+    //                    y: TotClosed,
+    //                    color: '#B21E1E' // Joe's color
+    //                }],
+    //                center: [100, 80],
+    //                size: 100,
+    //                showInLegend: false,
+    //                dataLabels: {
+    //                    enabled: true,
+    //                    distance:10
+    //                },
+    //                shadow:false
+    //            }]
+    //        });
+    ////fin chart
+
+    //                    }
+
+    //                });
+
+    //        myVarWorkload = setTimeout("UpdateBacklog();", 300000);
+    //    }
+
+    function TICKET_STATUS(idclient) {
+        $.ajax({
+            url: '/Inform/TICKET_STATUS?var=' + Math.random(),
+            dataType: 'json',
+            data: {
+                ID_CLIE_REP: 0,
+                ID_CLIE_FIN: 0,
+                FechaInicio: $("#dtFechaInicio").val(),
+                FechaFin: $("#dtFechaFin").val()
+            },
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['name'].substring(0, 1).toUpperCase() + value['name'].substring(1, value['name'].length);
+                    vValue[index] = value['y'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['y'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "#6A819B",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]//Highcharts.Color(data[i].color).brighten(brightness).get()
+                            //color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'TicketsByStatus',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                        percentageDecimals: 2
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+        //
+        //
+        myTicketStatus = setTimeout("TICKET_STATUS(idclient);", 300000);
+
+    }
+
+    function TICKET_PRIORITY(idclient) {
+
+        $.ajax({
+            url: '/Inform/TICKET_PRIORITY?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            data: {
+                ID_CLIE_REP: 0,
+                ID_CLIE_FIN: 0,
+                FechaInicio: $("#dtFechaInicio").val(),
+                FechaFin: $("#dtFechaFin").val()
+            },
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['name'].substring(0, 1).toUpperCase() + value['name'].substring(1, value['name'].length);;
+                    vValue[index] = value['y'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['y'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "##7CBB00",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]//Highcharts.Color(data[i].color).brighten(brightness).get()
+                            //color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'TicketsByPriority',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total percent market share'
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true,
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                                percentageDecimals: 2
+                            }
+                        }
+                    },
+
+                    series: [{
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+        //
+        //
+        myTicketPriority = setTimeout("TICKET_PRIORITY(idclient);", 300000);
+
+    }
+
+    function TOLEVEL2(idclient) {
+
+        $.ajax({
+            url: '/Inform/TOLEVEL2?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            data: {
+                ID_CLIE_REP: 0,
+                ID_CLIE_FIN: 0,
+                FechaInicio: $("#dtFechaInicio").val(),
+                FechaFin: $("#dtFechaFin").val()
+            },
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['name'].substring(0, 1).toUpperCase() + value['name'].substring(1, value['name'].length);;
+                    vValue[index] = value['y'];
+                    Color[index] = value['LEV_QUEU'] == 1 ? '#7CBB00' : '#516882';
+                    acumulado = acumulado + value['y'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "##7CBB00",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]//Highcharts.Color(data[i].color).brighten(brightness).get()
+                            //color: (j == 0 ? vMes1Color[i] : (j == 1 ? vMes2Color[i] : vMes3Color[i]))
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'TOLEVEL2',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Total percent market share'
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true,
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                                percentageDecimals: 2
+                            }
+                        }
+                    },
+                    series: [{
+                        //name: 'Versions',
+                        data: versionsData,
+                        //innerSize: '50%',
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+                //fin chart
+            }
+
+        });
+        //
+        //
+        myToLevel2 = setTimeout("TOLEVEL2(idclient);", 300000);
+
+    }
+
+    function INF_AVG_TIME_RESO(idclient) {
+        $.ajax({
+            url: '/Inform/INF_AVG_TIME_RESO?&ID_CLIE_REP=' + 0 + "&ID_CLIE_FIN=" + 0 + '&dtFechaFin=' + $("#dtFechaFin").val() + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+
+                var Serie = new Array();
+                var Critico = new Array();
+                var Alto = new Array();
+                var Medio = new Array();
+                var Bajo = new Array();
+
+                var Nombre = new Array();
+                var Color = new Array();
+                var Horas = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var MES12 = new Array();
+
+                $.each(json['pie'], function (index, value) {
+                    Serie[index] = value['SERIE'];
+                    Critico[index] = value['CRITICO'];
+                    Alto[index] = value['ALTO'];
+                    Medio[index] = value['MEDIO'];
+                    Bajo[index] = value['BAJO'];
+
+                });
+                MES1[0] = Critico[0];
+                MES1[1] = Alto[0];
+                MES1[2] = Medio[0];
+                MES1[3] = Bajo[0];
+                MES2[0] = Critico[1];
+                MES2[1] = Alto[1];
+                MES2[2] = Medio[1];
+                MES2[3] = Bajo[1];
+                MES3[0] = Critico[2];
+                MES3[1] = Alto[2];
+                MES3[2] = Medio[2];
+                MES3[3] = Bajo[2];
+                MES4[0] = Critico[3];
+                MES4[1] = Alto[3];
+                MES4[2] = Medio[3];
+                MES4[3] = Bajo[3];
+                MES5[0] = Critico[4];
+                MES5[1] = Alto[4];
+                MES5[2] = Medio[4];
+                MES5[3] = Bajo[4];
+                MES6[0] = Critico[5];
+                MES6[1] = Alto[5];
+                MES6[2] = Medio[5];
+                MES6[3] = Bajo[5];
+                MES7[0] = Critico[6];
+                MES7[1] = Alto[6];
+                MES7[2] = Medio[6];
+                MES7[3] = Bajo[6];
+                MES8[0] = Critico[7];
+                MES8[1] = Alto[7];
+                MES8[2] = Medio[7];
+                MES8[3] = Bajo[7];
+                MES9[0] = Critico[8];
+                MES9[1] = Alto[8];
+                MES9[2] = Medio[8];
+                MES9[3] = Bajo[8];
+                MES10[0] = Critico[9];
+                MES10[1] = Alto[9];
+                MES10[2] = Medio[9];
+                MES10[3] = Bajo[9];
+                MES11[0] = Critico[10];
+                MES11[1] = Alto[10];
+                MES11[2] = Medio[10];
+                MES11[3] = Bajo[10];
+                MES12[0] = Critico[11];
+                MES12[1] = Alto[11];
+                MES12[2] = Medio[11];
+                MES12[3] = Bajo[11];
+
+                Nombre[0] = 'P1-Critico';
+                Nombre[1] = 'P2-Alto';
+                Nombre[2] = 'P3-Medio';
+                Nombre[3] = 'P4-Bajo';
+
+                Color[0] = '#B21E1E';
+                Color[1] = '#FFBB00';
+                Color[2] = '#7CBB00';
+                Color[3] = '#4B627C';
+
+                Horas[0] = 4;
+                Horas[1] = 8;
+                Horas[2] = 24;
+                Horas[3] = 48;
+                // inicio chart
+
+                var series = [];
+                var datosSeries = [];
+
+
+                for (var i = 0; i < 4; i++) {
+                    datosSeries = []
+                    //datosSeries.push(Total[i])
+
+                    //datosSeries.push(Resolved[i])
+                    datosSeries.push(MES1[i])
+
+                    datosSeries.push(MES2[i])
+
+                    datosSeries.push(MES3[i])
+
+                    datosSeries.push(MES4[i])
+
+                    datosSeries.push(MES5[i])
+
+                    datosSeries.push(MES6[i])
+
+                    datosSeries.push(MES7[i])
+
+                    datosSeries.push(MES8[i])
+
+                    datosSeries.push(MES9[i])
+
+                    datosSeries.push(MES10[i])
+
+                    datosSeries.push(MES11[i])
+
+                    datosSeries.push(MES12[i])
+
+                    // add browser data
+                    series.push({
+                        name: Nombre[i],
+                        color: Color[i],
+                        data: datosSeries
+                    });
+                }
+
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'INF_AVG_TIME_RESO',
+                        zoomType: 'xy'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth: 1,
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+
+                    },
+                    yAxis: {
+                        minRange: 50,
+                        min: 0,
+                        lineWidth: 1,
+                        title: {
+                            text: 'Time (Hours)',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: Color[0],
+                            value: Horas[0],
+                            label: {
+                                text: Horas[0]
+                            }
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: Color[1],
+                            value: Horas[1],
+                            label: {
+                                text: Horas[1]
+                            }
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: Color[2],
+                            value: Horas[2],
+                            label: {
+                                text: Horas[2]
+                            }
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: Color[3],
+                            value: Horas[3],
+                            label: {
+                                text: Horas[3]
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Hours',
+                        valueDecimals: 2
+                    },
+                    plotOptions: {
+                        line: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' },
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        }
+                    },
+                    series: series
+
+                });
+            }
+        });
+
+        myINF_AVG_TIME_RESO = setTimeout("INF_AVG_TIME_RESO(idclient);", 300000);
+
+
+    }
+
+    function INF_CRR(idclient) {
+        $.ajax({
+            url: '/Inform/INF_CRR?ID_CLIE_REP=' + 0 + "&ID_CLIE_FIN=" + 0 + '&dtFechaFin=' + $("#dtFechaFin").val() + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+
+                var Serie = new Array();
+                var Total = new Array();
+                var Resolved = new Array();
+
+                var Nombre = new Array();
+                var Color = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var MES12 = new Array();
+
+                $.each(json['line'], function (index, value) {
+                    Serie[index] = value['SERIE'];
+                    Total[index] = value['Total'];
+                    Resolved[index] = value['Resolved'];
+
+                });
+                MES1[0] = Total[0];
+                MES1[1] = Resolved[0];
+                MES2[0] = Total[1];
+                MES2[1] = Resolved[1];
+                MES3[0] = Total[2];
+                MES3[1] = Resolved[2];
+                MES4[0] = Total[3];
+                MES4[1] = Resolved[3];
+                MES5[0] = Total[4];
+                MES5[1] = Resolved[4];
+                MES6[0] = Total[5];
+                MES6[1] = Resolved[5];
+                MES7[0] = Total[6];
+                MES7[1] = Resolved[6];
+                MES8[0] = Total[7];
+                MES8[1] = Resolved[7];
+                MES9[0] = Total[8];
+                MES9[1] = Resolved[8];
+                MES10[0] = Total[9];
+                MES10[1] = Resolved[9];
+                MES11[0] = Total[10];
+                MES11[1] = Resolved[10];
+                MES12[0] = Total[11];
+                MES12[1] = Resolved[11];
+
+                Nombre[0] = 'Total';
+                Nombre[1] = 'Resuelto';
+
+                Color[0] = '#B21E1E';
+                Color[1] = '#7CBB00';
+
+                // inicio chart
+
+                var series = [];
+                var datosSeries = [];
+
+
+                for (var i = 0; i < 2; i++) {
+                    datosSeries = []
+                    //datosSeries.push(Total[i])
+
+                    //datosSeries.push(Resolved[i])
+                    datosSeries.push(MES1[i])
+
+                    datosSeries.push(MES2[i])
+
+                    datosSeries.push(MES3[i])
+
+                    datosSeries.push(MES4[i])
+
+                    datosSeries.push(MES5[i])
+
+                    datosSeries.push(MES6[i])
+
+                    datosSeries.push(MES7[i])
+
+                    datosSeries.push(MES8[i])
+
+                    datosSeries.push(MES9[i])
+
+                    datosSeries.push(MES10[i])
+
+                    datosSeries.push(MES11[i])
+
+                    datosSeries.push(MES12[i])
+
+                    // add browser data
+                    series.push({
+                        name: Nombre[i],
+                        color: Color[i],
+                        data: datosSeries
+                    });
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'INF_CRR',
+                        zoomType: 'xy'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth: 1,
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+
+                    },
+                    yAxis: {
+                        minRange: 10,//json['agree'],
+                        min: 0,
+                        lineWidth: 1,
+                        title: {
+                            text: 'Calls',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: '#516882',
+                            value: json['agree'],
+                            label: {
+                                text: json['agree']
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Calls',
+                        valueDecimals: 2
+                    },
+                    plotOptions: {
+                        line: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' },
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        }
+                    },
+                    series: series
+                });
+            }
+        });
+        myINF_CRR = setTimeout("INF_CRR(idclient);", 300000);
+
+    }
+
+    function INF_CATE(idclient) {
+
+        $.get("/Inform/INF_TYPE_TICK?FechaInicio=" + $("#dtFechaInicio").val() +
+            "&FechaFin=" + $("#dtFechaFin").val() + "&ID_CLIE_REP=" + 0 + "&ID_CLIE_FIN=" + 0, function (json) {
+
+                //inicio pie
+                $('#INF_CATE_PIE').highcharts({
+                    chart: {
+                        plotBackgroundColor: null,
+                        plotBorderWidth: null,
+                        plotShadow: false
+                    },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    tooltip: {
+                        pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                        percentageDecimals: 2
+                    },
+                    plotOptions: {
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function () {
+                                        var idclient = '';
+                                        INF_BY_TYPE_TICK(this.options.url, idclient);
+                                    }
+                                }
+                            }
+                        },
+                        pie: {
+                            allowPointSelect: true,
+                            cursor: 'pointer',
+                            size: '55%',
+                            showInLegend: true
+                        }
+                    },
+                    series: [{
+                        type: 'pie',
+                        name: 'Browser share',
+                        data: json['Data'],
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+                var idclient = '';
+                INF_BY_TYPE_TICK("/Inform/INF_BY_TYPE_TICK/0/1/1/", idclient);
+                //fin pie
+            });
+        myINF_CATE = setTimeout("INF_CATE(idclient);", 300000);
+    }
+
+    function INF_BY_TYPE_TICK(url, idclient) {
+
+        $.get(url + "?FechaInicio=" + $("#dtFechaInicio").val() +
+            "&FechaFin=" + $("#dtFechaFin").val()
+            + "&ID_CLIE_REP=" + 0 + "&ID_CLIE_FIN=" + 0, function (json) {
+
+                var Cat = new Array();
+                var Serie = new Array();
+                var subtitle = null, color = null;
+                $.each(json['Data'], function (index, value) {
+
+                    subtitle = value['title'];
+                    color = value['color'];
+                    Cat[index] = value['name'].substring(0, 1).toUpperCase() + value['name'].substring(1, value['name'].length);
+                    Serie[index] = value['y'];//((value['InSLA']-value['OutSLA'])*100.00)/value['InSLA'];//(value['InSLA']-value['OutSLA'])/(value['InSLA'])*100;
+
+                });
+
+                $('#INF_CATE_BAR').highcharts({
+                    chart: {
+                        zoomType: 'xy',
+                        type: 'column'
+                    },
+
+                    xAxis: {
+                        categories: Cat,
+                        lineWidth: 1,
+                        gridLineWidth: 1,
+                        title: {
+                            text: subtitle,
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '@ResourceLanguaje.Resource.Tickets',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    plotOptions: {
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function () {
+                                        var idclient = '';
+                                        INF_BY_TYPE_TICK(this.options.url, idclient);
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    series: [{
+                        name: '@ResourceLanguaje.Resource.Tickets',
+                        color: color,
+                        data: json['Data']
+                    }]
+                });
+
+
+
+            });
+    }
+
+    function TBPBS(idclient) {
+
+        $.ajax({
+            url: '/Inform/INF_RANKING_TICKETS?var=' + Math.random(),
+            dataType: 'json',
+            data: {
+                ID_CLIE_REP: 0,
+                ID_CLIE_FIN: 0,
+                FechaInicio: $("#dtFechaInicio").val(),
+                FechaFin: $("#dtFechaFin").val()
+            },
+            cache: false,
+            async: true,
+            success: function (json) {
+                var Cat = new Array();
+                var Quantity = new Array();
+                var Assigned = new Array();
+                var Cancelled = new Array();
+                var Resolved = new Array();
+                var Scheduled = new Array();
+                var Closed = new Array();
+
+                $.each(json['Data'], function (index, value) {
+                    Cat[index] = value['Person'];
+                    Assigned[index] = value['Assigned'] + value['Open'];
+                    Cancelled[index] = value['Cancelled'];
+                    Resolved[index] = value['Resolved'];
+                    Scheduled[index] = value['Scheduled'];
+                    Closed[index] = value['Closed'];
+                });
+
+                $('#TBPBS').highcharts({
+                    chart: {
+                        type: 'bar'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: Cat,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Staff',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '@ResourceLanguaje.Resource.Tickets',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    legend: {
+                        backgroundColor: '#FFFFFF',
+                        reversed: true
+                    },
+                    tooltip:{
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Calls',
+                        valueDecimals:0,
+                        headerFormat:headerFormat,
+                        pointFormat:pointFormat
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal',
+                        }
+
+                    },
+                    series: [{
+                        name: 'Active',
+                        color:'#B21E1E',
+                        data: Assigned
+                    }, {
+                        name: 'Scheduled',
+                        color:'#FFBB00',
+                        data: Scheduled
+                    }, {
+                        name: 'Resolved',
+                        color:'#7CBB00',
+                        data: Resolved
+                    }, {
+                        name: 'Closed',
+                        color:'#516882',
+                        data: Closed
+                    }, {
+                        name: 'Cancelled',
+                        color:'#333333',
+                        data: Cancelled
+                    }]
+                });
+
+            }
+        });
+    }
+
+    function RTTOTAL(idclient){
+        $.ajax({
+            url: '/Inform/INF_RANKING_TICKETS?var='+ Math.random(),
+            dataType: 'json',
+            data:{ID_CLIE_REP: 0,
+                 ID_CLIE_FIN: 0,
+                 FechaInicio:$("#dtFechaInicio").val(),
+                 FechaFin:$("#dtFechaFin").val()},
+            cache: false,
+            async: true,
+            success: function (json) {
+                var Cat = new Array();
+                var Quantity = new Array();
+                var Assigned = new Array();
+                var Top4 = new Array();
+                var Top3 = new Array();
+                var Top2 = new Array();
+                var Top1 = new Array();
+                var inSLA = new Array();
+                var outSLA = new Array();
+                var Planning = new Array();
+                //var Cancelled = new Array();
+
+                $.each(json['Data'],function (index,value){
+                    Cat[index] = value['Person'];
+                    Top1[index] = null;
+                    Top2[index] = null;
+                    Top3[index] = null;
+                    Top4[index] = null;
+                    inSLA[index] = value['InSLA'];
+                    outSLA[index] = value['OutSLA'];
+                    Planning[index] = value['Planning'];
+                    //Cancelled[index] = value['Cancelled'];
+                    //if(index<2)
+                    //{Top1[index] = value['Quantity'];}
+                    //else if(index<5)
+                    //{Top2[index] = value['Quantity'];}
+                    //else if(index<9)
+                    //{Top3[index] = value['Quantity'];}
+                    //else
+                    //{Top4[index] = value['Quantity'];}
+                });
+
+                $('#RANK_PERS').highcharts({
+                    chart: {
+                        type: 'bar'
+                    },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: Cat,
+                        gridLineWidth: 1,
+                        title: {
+                            align: 'high',
+                            text: 'Staff',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '@ResourceLanguaje.Resource.Tickets',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Tickets',
+                        valueDecimals: 0,
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal',
+                        },
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            showInLegend: true
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'In SLA',
+                        color: '#516882',
+                        data: inSLA
+                    }, {
+                        name: 'Out SLA',
+                        color: '#B21E1E',
+                        data: outSLA
+                    }, {
+                        name: 'Planning',
+                        color: '#7CBB00',
+                        data: Planning
+                    }/*, {
+                    name: 'Cancelled',
+                    color:'#333333',
+                    data: Cancelled
+                },{
+                    //name: 'Top1',
+                    color:'#516882',
+                    data: Top1
+                }, {
+                    //name: 'Top2',
+                    color:'#7CBB00',
+                    data: Top2
+                }, {
+                    //name: 'Top3',
+                    color:'#FFBB00',
+                    data: Top3
+                }, {
+                    //name: 'Top4',
+                    color:'#B21E1E',
+                    data: Top4
+                }*/]
+                });
+            }
+        });
+
+    }
+    var idclient = '';
+    //UpdateKSA(idclient);
+    //UpdateSLA(idclient);
+    //UpdateBacklog();
+    //INF_AVG_TIME_RESO(idclient);
+    //INF_CRR(idclient);
+</script>
+<script type="text/javascript">
+    function NewTicket(){
+        var title = '@ResourceLanguaje.Resource.TicketReport';
+        var contHtml = '<div id="reportTicket"></div>';
+        var ancho = 500;
+        var alto = 180;
+        winPopUpModal(title, contHtml, ancho, alto);
+        $("#reportTicket").load("/Inform/VTicketReport?var=" + Math.random());
+    }
+</script>

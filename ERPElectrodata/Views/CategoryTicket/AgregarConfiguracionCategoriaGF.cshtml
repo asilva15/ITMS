@@ -1,0 +1,381 @@
+﻿@{
+    ViewBag.Title = "AgregarConfiguracionCategoriaGF";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<fieldset>
+    <div class="form-row">
+        <div class="col-sm-6">
+            <div class="editor-label">
+                Categoria 1
+            </div>
+            @Html.Editor("ID_CATE_N10")
+        </div>
+        <div class="col-sm-6">
+            <div class="editor-label">
+                Categoria 2
+            </div>
+            @Html.Editor("ID_CATE_N20")
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-sm-6">
+            <div class="editor-label">
+                Categoria 3
+            </div>
+            @Html.Editor("ID_CATE_N30")
+        </div>
+        <div class="col-sm-6">
+            <div class="editor-label">
+                Categoria 4
+            </div>
+            @Html.Editor("ID_CATE_N40")
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-sm-6">
+            <div class="editor-label">
+                Área Responsable
+            </div>
+            @Html.Editor("ID_QUEU2")
+        </div>
+        <div class="col-sm-6">
+            <div class="editor-label">
+                Personal Asignado
+            </div>
+            @Html.Editor("ID_PERS_ENTI2")
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-sm-12">
+            <div class="form-group form-check-inline" style="margin-top: 10px;">
+                <label class="form-check-label" style="padding-right: 10px;">
+                    @Html.CheckBox("EsTicketPadre", false) ¿Es Ticket Padre?
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-sm-12">
+            <div class="form-group form-check-inline" style="margin-top: 10px;">
+                <label class="form-check-label" style="padding-right: 10px;">
+                    @Html.CheckBox("EsTicketHijo", false) ¿Es Ticket Hijo?
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-row" id="ticketsPadresRow" style="display: none;">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="TicketsPadres">Tickets Padres</label>
+                @Html.Editor("TicketsPadres")
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="DetalleCabecera">Detalle de cabecera</label>
+                <input type="text" class="form-control" id="DetalleCabecera" name="DetalleCabecera">
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <button type="button" class="btn btn-primary" onclick="agregar()">Agregar</button>
+    </div>
+</fieldset>
+<script>
+    $(document).ready(function () {
+
+        $("#EsTicketPadre").change(function () {
+            if ($(this).is(":checked")) {
+                // If "EsTicketPadre" is checked, uncheck "EsTicketHijo"
+                $("#EsTicketHijo").prop("checked", false);
+                $("#ticketsPadresRow").hide();
+            }
+        });
+
+        $("#EsTicketHijo").change(function () {
+            if ($(this).is(":checked")) {
+                $("#ticketsPadresRow").show();
+            } else {
+                $("#ticketsPadresRow").hide();
+            }
+        });
+
+        $("#EsTicketHijo").change(function () {
+            if ($(this).is(":checked")) {
+                var TicketsPadres = $("#TicketsPadres").kendoComboBox({
+                    autoBind: false,
+                    filter: "contains",
+                    dataTextField: "NAM",
+                    dataValueField: "IdConfiguracionCategoria",
+                    dataSource: {
+                        serverFiltering: false,
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/CategoryTicket/ObtenerTicketsPadres?var=" + Math.random()
+                        }
+                    }
+                }).data("kendoComboBox");
+
+                $("#EsTicketPadre").prop("checked", false);
+                $("#ticketsPadresRow").show();
+            } else {
+                $("#ticketsPadresRow").hide();
+            }
+        });
+
+
+        var ID_QUEU2 = $("#ID_QUEU2").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            dataTextField: "QUEU",
+            dataValueField: "ID_QUEU",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_QUEU2.dataItem()) {
+                    $('#ID_QUEU2').attr('value', ID_QUEU2.dataItem().ID_QUEU);
+                }
+                else {
+                    $('#ID_QUEU2').attr('value', 0);
+                }
+                $("#ID_PERS_ENTI2").data("kendoComboBox").value("");
+            }
+        }).data("kendoComboBox");
+
+        var ID_PERS_ENTI2 = $("#ID_PERS_ENTI2").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_QUEU2",
+            filter: "contains",
+            dataTextField: "ASSI",
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N10 = $("#ID_CATE_N10").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategoryGF?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N10.dataItem()) {
+                    $('#ID_CAT_N10').attr('value', ID_CATE_N10.dataItem().ID_CATE);
+                }
+                else {
+                    $('#ID_CAT_N10').attr('value', 0);
+                }
+                $("#ID_CATE_N20").data("kendoComboBox").value("");
+                $("#ID_CATE_N30").data("kendoComboBox").value("");
+                $("#ID_CATE_N40").data("kendoComboBox").value("");
+                $('#ID_CAT_N40').attr('value', 0);
+                $('#ID_CAT_N30').attr('value', 0);
+                $('#ID_CAT_N20').attr('value', 0);
+
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N20 = $("#ID_CATE_N20").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_CATE_N10",
+            filter: "contains",
+            dataTextField: "NAM_CATE2",
+            dataValueField: "ID_CATE2",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory2?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N20.dataItem()) {
+                    $('#ID_CAT_N20').attr('value', ID_CATE_N20.dataItem().ID_CATE2);
+                }
+                else {
+                    $('#ID_CAT_N20').attr('value', 0);
+                }
+                $("#ID_CATE_N30").data("kendoComboBox").value("");
+                $("#ID_CATE_N40").data("kendoComboBox").value("");
+                $('#ID_CAT_N40').attr('value', 0);
+                $('#ID_CAT_N30').attr('value', 0);
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N30 = $("#ID_CATE_N30").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_CATE_N20",
+            filter: "contains",
+            dataTextField: "NAM_CATE3",
+            dataValueField: "ID_CATE3",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory3?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N30.dataItem()) {
+                    $('#ID_CAT_N30').attr('value', ID_CATE_N30.dataItem().ID_CATE3);
+                }
+                else {
+                    $('#ID_CAT_N30').attr('value', 0);
+                }
+                $("#ID_CATE_N40").data("kendoComboBox").value("");
+                $('#ID_CAT_N40').attr('value', 0);
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N40 = $("#ID_CATE_N40").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_CATE_N30",
+            filter: "contains",
+            dataTextField: "NAM_CATE4",
+            dataValueField: "ID_CATE4",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory4?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N40.dataItem()) {
+                    $('#ID_CAT_N40').attr('value', ID_CATE_N40.dataItem().ID_CATE4);
+                }
+                else {
+                    $('#ID_CAT_N40').attr('value', 0);
+                }
+            }
+        }).data("kendoComboBox");
+    });
+
+    function agregar() {
+
+        if ($("#EsTicketHijo").is(":checked")) {
+            var ticketsPadresValue = $("#TicketsPadres").data("kendoComboBox").value();
+            if (!ticketsPadresValue) {
+                showErrorToast("Por favor, selecciona un ticket padre.");
+                return;
+            }
+        }
+
+        if ($("#ID_CATE_N10").data("kendoComboBox").value() === "" ||
+            $("#ID_CATE_N20").data("kendoComboBox").value() === "" ||
+            $("#ID_CATE_N30").data("kendoComboBox").value() === "" ||
+            $("#ID_CATE_N40").data("kendoComboBox").value() === "") {
+            showErrorToast("No se han seleccionado todas las categorías.");
+            return;
+        }
+
+        if ($("#ID_PERS_ENTI2").data("kendoComboBox").value() === "") {
+            showErrorToast("Por favor, selecciona un personal asignado.");
+            return;
+        }
+
+        if (!$("#EsTicketPadre").is(":checked") && !$("#EsTicketHijo").is(":checked")) {
+            showErrorToast("Por favor, selecciona al menos si es ticket padre o hijo.");
+            return;
+        }
+
+        if ($("#DetalleCabecera").val().trim() === "") {
+            showErrorToast("Por favor, ingresa un valor en el último textbox.");
+            return;
+        }
+
+        var ticketsPadresValue = $("#EsTicketHijo").is(":checked") ? $("#TicketsPadres").data("kendoComboBox").value() : "";
+
+        var datos = {
+            ID_CATE_N10: $("#ID_CATE_N10").data("kendoComboBox").value(),
+            ID_CATE_N20: $("#ID_CATE_N20").data("kendoComboBox").value(),
+            ID_CATE_N30: $("#ID_CATE_N30").data("kendoComboBox").value(),
+            ID_CATE_N40: $("#ID_CATE_N40").data("kendoComboBox").value(),
+            ID_PERS_ENTI2: $("#ID_PERS_ENTI2").data("kendoComboBox").value(),
+            EsTicketPadre: $("#EsTicketPadre").is(":checked"),
+            EsTicketHijo: $("#EsTicketHijo").is(":checked"),
+            TicketsPadres: ticketsPadresValue,
+            DetalleCabecera: $("#DetalleCabecera").val().trim()
+        };
+
+        console.log(datos);
+
+        $.ajax({
+            url: "/CategoryTicket/AgregarConfiguracionCategoria",
+            type: "POST",
+            data: datos,
+            success: function (response) {
+                if (response.success) {
+                    swal({
+                        title: 'Configuracion Agregada',
+                        type: 'success',
+                        confirmButtonText: 'Continuar',
+                    }, function (isConfirmed) {
+                        // If the user clicks "Continuar", reload the page
+                        if (isConfirmed) {
+                            window.location.reload();
+                        }
+                    });
+                } else {
+                    toastr.error(response.message, 'Error al agregar la configuración');
+                }
+            },
+            error: function () {
+                console.error("Error");
+            }
+        });
+
+
+    }
+
+    function showErrorToast(message) {
+        toastr.error(message, "Error");
+    }
+
+</script>

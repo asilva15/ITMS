@@ -1,0 +1,908 @@
+﻿@model ERPElectrodata.Models.ACTIVITY_LOG
+@{
+    ViewBag.Title = "ListarActividades";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+    <link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+    <script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+    <link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+    <link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+    <script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/datatables.min.js"></script>
+    <link href="~/Content/themes/plugin/DataTables/datatables.min.css" rel="stylesheet" />
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+    <script src="//cdn.datatables.net/plug-ins/1.10.16/sorting/datetime-moment.js"></script>
+
+    <script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+    <link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+    <style>
+        table.dataTable tbody tr.selected {
+            color: #ffffff;
+            background-color: #eeeeee; /* Not working */
+        }
+    </style>
+    @if (Convert.ToInt32(Session["ID_ACCO"].ToString()) != 56
+            && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 57
+            && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 58)
+        {
+        <script>window.location.href = "DetailsActivity";</script>
+        }
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    Lista de Actividades con Detalle
+                    <div class="page-title-subheading">
+                        Visualización de detalles de las actividades registradas.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        @using (Html.BeginForm("ExportarExcelMinsurMarcobreRaura", "Activity", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+        {
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="main-card mb-3 card">
+                        <div class="card-body">
+                            <div class="card-title">Filtrar</div>
+                            <form class="">
+                                <div class="form-row">
+                                    <div class="col-md-3">
+                                        <div class="position-relative form-group">
+                                            <label id="lblEstado" for="ID_CLIE" class="">Cliente</label>
+                                            @Html.Editor("ID_CLIE")
+
+
+                                        </div>
+                                    </div>
+                                    @*<div class="col-md-2">
+                                            <div class="position-relative form-group">
+                                                <label id="lblID_ENTI_FILTER" for="ID_ENTI_FILTER" class="">Usuario</label>
+                                                @Html.Editor("ID_ENTI_FILTER")
+
+                                            </div>
+                                        </div>*@
+                                    <div class="col-md-3">
+                                        <div class="position-relative  form-group">
+                                            <label id="" for="" class="">Área Responsable</label>
+
+                                            @*<label id="lblIdTipoSolicitud" for="ID_TYPE_TICK" class="">Tipo de Solicitud</label>*@
+                                            @Html.Editor("ID_QUEU")
+                                            @*@Html.EditorFor(model => model.ID_QUEU, new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(model => model.ID_QUEU)*@
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="position-relative form-group">
+                                            <label id="" for="" class="">Asignado a</label>
+
+                                            @*<label id="lblFechaRegistro" for="FEC_TICK" class="">Fecha <span style="color:red">*</span></label>*@
+                                            @Html.Editor("ID_PERS_ENTI_ASSI")
+                                            @*@Html.EditorFor(model => model.ID_PERS_ENTI_ASSI, new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_ASSI)*@
+                                        </div>
+                                    </div>
+
+
+
+
+                                    <div class="form-row">
+
+                                        <div class="col-md-3">
+                                            <div class="position-relative form-group">
+                                                <label id="lblSIN_DATE" for="SIN_DATE" class="">Desde</label>
+                                                @Html.TextBox("SIN_DATE")
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="position-relative form-group">
+                                                <label id="lblTO_DATE" for="TO_DATE" class="">Hasta</label>
+                                                @Html.TextBox("TO_DATE")
+
+
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1">
+
+                                        </div>
+                                        <div class="col-md-1 float-right">
+                                            <div class="position-relative form-group right">
+                                                <br />
+                                                <button id="btnBuscar" type="button" class="mt-2 btn btn-primary">
+                                                    Buscar
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-1"></div>
+                                        <div class="col-md-2 float-right">
+                                            <div class="position-relative form-group right">
+                                                <br />
+                                                <button id="Buscar" type="button" class="mt-2 btn btn-success"
+                                                        onclick="ValidarFechas2()">
+                                                    Exportar Excel
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="tab-content table-responsive">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card element-block-example">
+                    <div class="card-body">
+                        <div class="card-title">Actividades</div>
+
+                        <fieldset>
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <table id="tbDocumentos" class="table table-bordered table-striped table-responsive-lg">
+                                            <thead>
+                                                <tr>
+                                                    @*<th>Id</th>*@
+
+
+                                                    <th>Cliente</th>
+                                                    <th class="text-center">Ticket</th>
+                                                    <th class="text-center">Especialista</th>
+                                                    <th class="text-center">Tipo de Actividad</th>
+                                                    <th class="text-center">Comentario/Descripcion</th>
+                                                    <th class="text-center">Tiempo</th>
+                                                    <th class="text-center">Fecha Inicio</th>
+                                                    <th class="text-center">Fecha Fin</th>
+
+
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                            <tfoot>
+                                                <tr>
+                                                    @*<th>Id</th>*@
+
+
+                                                    <th>Cliente</th>
+                                                    <th class="text-center">Ticket</th>
+                                                    <th class="text-center">Especialista</th>
+                                                    <th class="text-center">Tipo de Actividad</th>
+                                                    <th class="text-center">Comentario/Descripcion</th>
+                                                    <th class="text-center">Tiempo</th>
+                                                    <th class="text-center">Fecha Inicio</th>
+                                                    <th class="text-center">Fecha Fin</th>
+
+
+                                                </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<div class="row" id="primeraparte">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card element-block-example">
+                    <div class="page-title-heading " style=" padding-top: 2%;">
+                        <div class="page-title-icon text-center">
+                            <i class="fa fa-crosshairs icon-gradient  bg-mixed-hopes  fa-3x">
+                                <span>
+                                    Lista Plantillas
+
+                                </span>
+                            </i>
+
+                        </div>
+
+                    </div>
+                    <div class="card-body">
+
+                        <div class="card-body" style="border: 1px solid #E2DDDD; border-radius: 25px;">
+                            <div id="divComponente" class="contentView"></div>
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <div id="pagerdivComponente" class="contentViewPager"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+
+
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+
+           
+            toastr.warning("", "Se muestran 5000 registros como maximo");
+
+
+        });
+
+
+        $(document).ready(function () {
+
+
+
+            $(".block-element-btn-example-1").click(function () {
+                $(".element-block-example").block({
+                    message: t('<div class="loader mx-auto">\n                            <div class="ball-grid-pulse">\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                            </div>\n                        </div>')
+                })
+            });
+
+
+            //var today = new Date();
+            //var yesterday = new Date(today.getTime());
+            //yesterday.setDate(today.getDate() - 1);
+
+            //var FechaInicio = $("#SIN_DATE").kendoDatePicker({
+            //    format: "dd/MM/yyyy",
+            //    value: yesterday
+            //});
+
+            //var FechaFin = $("#TO_DATE").kendoDatePicker({
+            //    format: "dd/MM/yyyy",
+            //    value: today
+            //});
+            var today = new Date();
+            var yesterday = new Date(today.getTime());
+            yesterday.setDate(today.getDate() - 1);
+
+            var FechaInicio = $("#SIN_DATE").kendoDatePicker({
+                format: "dd/MM/yyyy",
+                value: yesterday
+            });
+
+            var FechaFin = $("#TO_DATE").kendoDatePicker({
+                format: "dd/MM/yyyy",
+                value: today,
+                max: today // desactivar fechas posteriores a la fecha actual
+            });
+
+            //var FechaInicio = $("#SIN_DATE").kendoDatePicker({
+            //    format: "dd/MM/yyyy"
+            //});
+
+            //var FechaFin = $("#TO_DATE").kendoDatePicker({
+            //    format: "dd/MM/yyyy"
+            //});
+
+            $("#PALABRA_CLAVE").kendoMaskedTextBox({
+                mask: ""
+            });
+
+
+            $("#ID_CLIE").kendoComboBox({
+                dataTextField: "COM_NAME",
+                placeholder: "Seleccione un cliente",
+                dataValueField: "ID_ENTI",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Activity/ListCompanyByAccount?var=" + Math.random()
+                    }
+                },
+            });
+
+
+
+
+
+
+
+
+
+
+
+            //$("#ID_CLIE").kendoComboBox({
+            //    autoBind: true,
+            //    dataTextField: "COM_NAME",
+            //    placeholder: "Seleccione un cliente",
+            //    dataValueField: "ID_ENTI",
+            //    filter: "contains",
+            //    delay: 500,
+            //    minLength: 0,
+            //    suggest: true,
+            //    dataSource: {
+            //        schema: {
+            //            data: "Data",
+            //            total: "Count"
+            //        },
+            //        transport: {
+            //            read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+            //        }
+
+            //    }
+            //});
+
+            //var ID_ENTI_FILTER = $("#ID_ENTI_FILTER").kendoComboBox({
+            //    autoBind: true,
+            //    placeholder: "Seleccione un usuario",
+            //    filter: "contains",
+            //    delay: 500,
+            //    minLength: 0,
+            //    suggest: true,
+            //    dataSource: {
+            //        schema: {
+            //            data: "Data",
+            //            total: "Count",
+            //            ID_ENTI: "ID_ENTI"
+            //        },
+            //        transport: {
+            //            read: "/Activity/ListPersonActivity?var=" + Math.random()
+            //        }
+            //    },
+            //    dataTextField: "PERSON",
+            //    dataValueField: "ID_PERS_ENTI",
+            //}).data("kendoComboBox");
+
+            var param_url = !!location.href.match(/&/);
+            if (param_url == false) {
+                function endChange() {
+                    var endDate = FechaFin.value(),
+                        startDate = FechaInicio.value();
+                    if (endDate) {
+                        endDate = new Date(endDate);
+                        endDate.setDate(endDate.getDate());
+                        FechaInicio.max(endDate);
+                    } else if (startDate) {
+                        FechaFin.min(new Date(startDate));
+                    } else {
+                        endDate = new Date();
+                        FechaInicio.max(endDate);
+                        FechaFin.min(endDate);
+                    }
+                }
+            }
+            else {
+                $.urlParam = function (name) {
+                    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+                    if (results == null) {
+                        return null;
+                    }
+                    else {
+                        return results[1] || 0;
+                    }
+                }
+                var DateIni = $.urlParam('SIN_DATE');
+                var DateFin = $.urlParam('TO_DATE');
+                var DateInDTP = $("#SIN_DATE").kendoDatePicker({ format: "dd/MM/yyyy", value: DateIni }).data("kendoDatePicker");
+                var DateEndDTP = $("#TO_DATE").kendoDatePicker({ format: "dd/MM/yyyy", value: DateFin }).data("kendoDatePicker");
+                ID_ENTI_FILTER.value(unescape($.urlParam('PALABRA_CLAVE')));
+
+                //$("#ID_ENTI_FILTER").data("kendoComboBox").value(unescape($.urlParam('PALABRA_CLAVE')));
+                //var combobox = $("#ID_ENTI_FILTER").data("kendoComboBox");
+
+            }
+
+
+            // AREAS NUEVAS
+            var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+                dataTextField: "QUEU",
+                dataValueField: "ID_QUEU",
+
+                filter: "contains",
+                placeholder: "Seleccione un Area",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+         template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+                        '<span><strong>${data.QUEU}</strong></span><br />' +
+                        '<span style="position:absolute; top:15px;">${data.DES_QUEU}</span></div>',
+                dataSource: {
+                    schema: {
+                        data: "data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Activity/ListarAreaMinsurMarcobreReura?var=" + Math.random()
+                    }
+                },
+                cascade: function (e) {
+                    // set ID_PERS_ENTI_ASSI to null when ID_QUEU changes
+                    ID_PERS_ENTI_ASSI.value(null);
+                }
+            }).data("kendoComboBox");
+
+            var ID_PERS_ENTI_ASSI = $("#ID_PERS_ENTI_ASSI").kendoComboBox({
+                autoBind: false,
+
+                cascadeFrom: "ID_QUEU",
+                placeholder: "Seleccione un Colaborador",
+                filter: "contains",
+                dataTextField: "ASSI",
+                dataValueField: "ID_PERS_ENTI",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Activity/AssigneByQueue?var=" + Math.random()
+                    }
+                }
+
+            }).data("kendoComboBox");
+
+
+
+
+
+            //var dataSource = new kendo.data.DataSource({
+            //    transport: {
+            //        read: {
+            //            url: "/Activity/ListarInformePlantilla/0?var",
+            //            type: "GET",
+            //            dataType: "json",
+            //            data: {
+            //                ID_ENTI: $("#ID_CLIE").val() == '' ? 0 : $("#ID_CLIE").val(),
+            //                ID_TYPE_DOCU: $("#ID_ENTI_FILTER").val() == '' ? 0 : $("#ID_ENTI_FILTER").val(),
+            //                FechaIngresoInicio: $("#SIN_DATE").val() == '' ? '' : $("#SIN_DATE").val(),
+            //                FechaIngresoFin: $("#TO_DATE").val() == '' ? '' : $("#TO_DATE").val()
+            //            }
+            //        }
+            //    },
+            //    autoSync: true,
+            //    serverFiltering: true,
+            //    serverPaging: true,
+            //    pageSize: 5,
+            //    schema: {
+            //        data: "Data",
+            //        total: "Cantidad"
+            //    }
+            //});
+
+            //$("#divComponente").kendoGrid({
+
+            //    toolbar: ["excel"],
+            //    excel: {
+            //        allPages: true
+            //    },
+            //    pdf: {
+            //        allPages: true,
+            //        avoidLinks: true,
+            //        paperSize: "A4",
+            //        margin: { top: "2cm", left: "1cm", right: "1cm", bottom: "1cm" },
+            //        landscape: true,
+            //        repeatHeaders: true,
+            //        template: $("#page-template").html(),
+            //        scale: 0.8
+            //    },
+            //    columns: [
+            //        {
+            //            field: "Cliente"
+            //        },
+            //        {
+            //            field: "Ticket"
+            //        },
+            //        {
+            //            field: "Especialista"
+            //        },
+            //        {
+            //            field: "TipodeActividad"
+            //        },
+            //        {
+            //            field: "ComentarioDescripcion"
+            //        },
+            //        {
+            //            field: "Tiempo"
+            //        },
+            //        {
+            //            field: "FechaInicio"
+            //        },
+
+            //        {
+            //            field: "FechaFin"
+            //        }
+            //    ],
+            //    columnMenu: true,
+            //    dataSource: dataSource
+
+            //});
+
+            //$("#pagerdivComponente").kendoPager({
+            //    dataSource: dataSource,
+            //    pageSizes: [15,25,100],
+            //    refresh: true
+            //});
+            /* ListarActividades();*/
+            //ListarTablaDocumentos();
+            /*  listarpdf();*/
+            ValidarFechas();
+            /*     ListarTablaDocumentos();*/
+        });
+
+
+
+
+        function convertirSegundosAHorasMinutosSegundos(segundos) {
+            var horas = Math.floor(segundos / 3600);
+            var minutos = Math.floor((segundos % 3600) / 60);
+            var segundosRestantes = segundos % 60;
+
+            return horas + ":" + minutos + ":" + segundosRestantes;
+        }
+        function listarpdf() {
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/Activity/ListarInformePlantilla/0?var",
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            ID_ENTI: $("#ID_CLIE").val() == '' ? 0 : $("#ID_CLIE").val(),
+                            /*   ID_TYPE_DOCU: $("#ID_ENTI_FILTER").val() == '' ? 0 : $("#ID_ENTI_FILTER").val(),*/
+                            FechaIngresoInicio: $("#SIN_DATE").val() == '' ? '' : $("#SIN_DATE").val(),
+                            FechaIngresoFin: $("#TO_DATE").val() == '' ? '' : $("#TO_DATE").val()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 5,
+                schema: {
+                    data: "Data",
+                    total: "Cantidad"
+                }
+            });
+
+            $("#divComponente").kendoGrid({
+
+                toolbar: ["excel"],
+                excel: {
+                    allPages: true
+                },
+                pdf: {
+                    allPages: true,
+                    avoidLinks: true,
+                    paperSize: "A4",
+                    margin: { top: "2cm", left: "1cm", right: "1cm", bottom: "1cm" },
+                    landscape: true,
+                    repeatHeaders: true,
+                    template: $("#page-template").html(),
+                    scale: 0.8
+                },
+                columns: [
+                    {
+                        field: "Cliente"
+                    },
+                    {
+                        field: "Ticket"
+                    },
+                    {
+                        field: "Especialista"
+                    },
+                    {
+                        field: "TipodeActividad"
+                    },
+                    {
+
+                        field: "ComentarioDescripcion",
+                        title: "Comentario Descripcion",
+                        template: "#= formatoComentario(ComentarioDescripcion) #"
+
+
+                    },
+                    {
+                        field: "Tiempo"
+                    },
+                    {
+                        field: "FechaInicio",
+                        template: "#= kendo.toString(kendo.parseDate(FechaInicio, 'yyyy-MM-dd'), 'dd/MM/yyyy') #"
+
+                    },
+
+                    {
+                        field: "FechaFin",
+                        template: "#= kendo.toString(kendo.parseDate(FechaFin, 'yyyy-MM-dd'), 'dd/MM/yyyy') #"
+
+                    }
+                ],
+                columnMenu: true,
+                //groupable: true,
+                //scrollable: true,
+                //sortable: true,
+                //pageable: true,
+                dataSource: dataSource
+
+            });
+
+            $("#pagerdivComponente").kendoPager({
+                pageSizes: [15, 25, 100],
+                refresh: true
+            });
+
+
+
+        }
+        function formatoComentario(valor) {
+            // Crear un elemento div y establecer su contenido HTML en el valor de la columna
+            var div = document.createElement("div");
+            div.innerHTML = valor;
+            // Eliminar cualquier etiqueta HTML del contenido utilizando una expresión regular
+            var texto = div.textContent || div.innerText || "";
+            texto = texto.replace(/(<([^>]+)>)/gi, "");
+            // Devolver el texto formateado
+            return texto.trim();
+        }
+
+
+        function ExportarExcelMinsurMarcobreRaura() {
+            fechainicio = document.getElementById("SIN_DATE").value;
+            fechafin = document.getElementById("TO_DATE").value;
+
+
+            console.log(fechainicio);
+            console.log(fechafin);
+
+
+            if (!fechainicio.length && !fechafin.length) {
+                toastr.warning("Por favor coloque las fechas")
+                return false;
+
+            } else if ((!fechainicio.length && fechafin.length) || (fechainicio.length && !fechafin.length)) {
+                toastr.warning("Es necesario llenar las 2 fechas")
+                return false;
+
+            } else {
+                $("#formExportar").submit();
+
+
+
+            }
+
+        }
+
+        function ValidarFechas2() {
+            var sin_date = $("#SIN_DATE").val();
+            var to_date = $("#TO_DATE").val();
+            var diffInMonths = moment(to_date, "DD/MM/YYYY").diff(moment(sin_date, "DD/MM/YYYY"), 'months');
+
+            var sin_date = $("#SIN_DATE").val();
+            var to_date = $("#TO_DATE").val();
+            if (sin_date === "" || to_date === "") {
+                toastr.warning("Es necesario llenar las  fechas")
+            } else if (moment(to_date, "DD/MM/YYYY").isBefore(moment(sin_date, "DD/MM/YYYY"))) {
+                toastr.warning("La fecha final no puede ser anterior a la fecha inicial");
+            }
+            else if (diffInMonths > 6) {
+                toastr.warning("El rango de fechas no debe ser mayor a 6 meses");
+            }
+            else {
+                ExportarExcelMinsurMarcobreRaura();
+            }
+        }
+
+
+
+
+
+
+
+
+
+        //validacion de las fecha
+
+
+        //BOITON BUSCAR FUNCIONES
+
+
+        function ValidarFechas() {
+            var sin_date = $("#SIN_DATE").val();
+            var to_date = $("#TO_DATE").val();
+            var diffInMonths = moment(to_date, "DD/MM/YYYY").diff(moment(sin_date, "DD/MM/YYYY"), 'months');
+
+            var sin_date = $("#SIN_DATE").val();
+            var to_date = $("#TO_DATE").val();
+            if (sin_date === "" || to_date === "") {
+                toastr.warning("Es necesario llenar las  fechas")
+            } else if (moment(to_date, "DD/MM/YYYY").isBefore(moment(sin_date, "DD/MM/YYYY"))) {
+                toastr.warning("La fecha final no puede ser anterior a la fecha inicial");
+            }
+            else if (diffInMonths > 6) {
+                toastr.warning("El rango de fechas no debe ser mayor a 6 meses");
+            }
+            else {
+                ListarTablaMinsurMarcobreRaura();
+            }
+        }
+
+
+        $("#btnBuscar").on("click", function () {
+            ValidarFechas();
+        });
+
+
+        function ListarTablaMinsurMarcobreRaura() {
+            $('#tbDocumentos').dataTable().fnDestroy();
+            var parametros = {
+                ID_ENTI: $("#ID_CLIE").val() == '' ? 0 : $("#ID_CLIE").val(),
+                /*  ID_TYPE_DOCU: $("#ID_ENTI_FILTER").val() == '' ? 0 : $("#ID_ENTI_FILTER").val(),*/
+                FechaIngresoInicio: $("#SIN_DATE").val() == '' ? '' : $("#SIN_DATE").val(),
+                FechaIngresoFin: $("#TO_DATE").val() == '' ? '' : $("#TO_DATE").val(),
+                ID_QUEU: $("#ID_QUEU").val() == '' ? 0 : $("#ID_QUEU").val(),
+                ID_PERS_ENTI_ASSI: $("#ID_PERS_ENTI_ASSI").val() == '' ? 0 : $("#ID_PERS_ENTI_ASSI").val()
+            };
+            var table = $('#tbDocumentos').dataTable({
+                /*    "order": [[1, "asc"], [1, "asc"]],*/
+                responsive: true,
+                autoWidth: false,
+                dom: 'lBfrtip',
+                "bPaginate": true,
+                "searching": true,
+                ajax: {
+                    "url": "/Activity/ListarTablaActividadesMinsur",
+                    "data": parametros,
+
+                },
+                columns: [
+                    //{ data: "Id" },
+                    {
+                        data: "Cliente",
+                        width: "15%"
+                    },
+                    {
+                        data: "Ticket",
+                        width: "15%"
+                    },
+                    {
+                        data: "Especialista",
+                        width: "15%"
+                    },
+                    {
+                        data: "TipodeActividad",
+                        width: "15%"
+                    },
+                    {
+                        data: "ComentarioDescripcion",
+                        width: "30%",
+                        render: function (data, type, row, meta) {
+                            return $('<div/>').html(data).text(); // Convierte el HTML a texto plano
+                        }
+                    },
+
+                    {
+                        data: "Tiempo",
+                        width: "10%"
+                    },
+                    {
+                        data: "FechaInicio",
+                        width: "10%",
+                        render: function (data) {
+                            return moment(data).format("DD/MM/YYYY");
+                        }
+                    },
+                    {
+                        data: "FechaFin",
+
+                        width: "10%",
+                        render: function (data) {
+                            return moment(data).format("DD/MM/YYYY");
+                        }
+                    },
+                ]
+            });
+
+
+        }
+
+
+        // FIN DEL BOTON BUSCAR
+
+
+
+    </script>
+
+
+    <script type="text/javascript">
+
+        function MostrarMensaje(msg, descripcion) {
+
+            setTimeout(function () {
+                $(".modal-backdrop").remove();
+                $("#miModal").removeClass("show")
+            }, 180);
+
+            if (msg == "OK") {
+                toastr.success(descripcion, "");
+
+                var tabla = $('#tbListadoSolicitudes').DataTable();
+
+                tabla.ajax.reload();
+
+            }
+            else if (msg == "VACIO") {
+                toastr.warning("Por favor, seleccione una solicitud como mínimo", "Mensaje");
+            }
+            else {
+                toastr.danger("Contacte al administrador.", "Error");
+            }
+        }
+        function secondsToTime(seconds) {
+            var hours = Math.floor(seconds / 3600);
+            var minutes = Math.floor((seconds - (hours * 3600)) / 60);
+            var time = "";
+
+            if (hours != 0) {
+                time = hours + ":";
+            }
+            if (minutes != 0 || time !== "") {
+                minutes = (minutes < 10 && time !== "") ? "0" + minutes : String(minutes);
+                if (hours != 0)
+                    time += minutes;
+                else {
+                    if (minutes < 9)
+                        time += "0:" + "0" + minutes;
+                    else
+                        time += "0:" + minutes;
+                }
+            }
+            return time;
+        }
+
+        function editarActividad(id) {
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $(".modal-content").empty();
+            $("#lblTitulo").text("Mantenimiento Prioridad");
+            $(".modal-content").load('/Activity/EditarActividad?id=' + id);
+        }
+
+        function eliminarActividad(idAct) {
+            $.ajax({
+                url: "/Activity/EliminarActividad",
+                method: "POST",
+                data: { id: idAct }
+            });
+        }
+    </script>

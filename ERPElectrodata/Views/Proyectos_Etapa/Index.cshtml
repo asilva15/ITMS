@@ -1,0 +1,222 @@
+﻿@{
+    ViewBag.Title = "Etapa";
+    Layout = null;
+}
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<input type="hidden" value="I" id="Tipo"/>
+<div class="main-card mb-2 card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-10">
+                <div class="position-relative form-group">
+                    <label for="txtEtapa">Etapa</label>
+                    <input id="txtEtapa" type="text" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="position-relative form-group">
+                    <label for="">Estado</label><br>
+                    <input id="chkEstadoEtapa" type="checkbox" />
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 ml-auto">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-secondary btn-block" onclick="CancelarEtapa();">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-primary btn-block" onclick="GuardarEtapa()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    <div class="card-body">
+        <div class="tab-content">
+            <div class="tab-pane active">
+                <table id="tbEtapa" class="table table-hover table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Etapa</th>
+                            <th>Estado</th>
+                            <th width="10">Opciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var idEtapa = 0;
+        //Lista de etapas
+        ListarEtapa();
+        //Dando estilo al input
+        $("#txtEtapa").kendoMaskedTextBox({
+            mask: ""
+        });
+        //Dando estilo iCheck a checkbox
+        $('#chkEstadoEtapa').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+        $('#chkEstadoEtapa').iCheck('check');
+    });
+
+    function GuardarEtapa() {
+        var msjEtapa = '';
+        if ($("#txtEtapa").val() == '') {
+            msjEtapa = msjEtapa + 'Etapa.'
+        }
+        if (msjEtapa == '') {
+            var url = "/Proyectos_Etapa/NuevaEtapa?etapa=" + $("#txtEtapa").val() +
+                "&estado=" + $("#chkEstadoEtapa").iCheck('update')[0].checked;
+            if ($("#Tipo").val() == "U")
+                url = "/Proyectos_Etapa/EditarEtapa?id=" + idEtapa + "&etapa=" + $("#txtEtapa").val() +
+                    "&estado=" + $("#chkEstadoEtapa").iCheck('update')[0].checked;
+            $.ajax({
+                type: "POST",
+                url: url,
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("La etapa ya se encuentra registrada.", "Advertencia");
+                    } else {
+                        toastr.success("Registro Actualizado", "Exito!");
+                        setTimeout(function () { location.reload(); }, 500);
+                        
+                    }
+                }
+            });
+        } else {
+            toastr.warning(msjEtapa, 'Complete los siguientes campos:');
+        }
+    }
+
+    function ListarEtapa() {
+        //Variable de lenguaje para tablas
+        var leng_espEtapa = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+        //Limpieza de Tablas
+        $("#tbEtapa").dataTable().fnDestroy();
+        //Carga de Tablas
+        $('#tbEtapa').DataTable({
+            order: [[1, "asc"]],
+            responsive: true,
+            dom: 'frtip',
+            select: true,
+            ajax: {
+                url: "/Proyectos_Etapa/ListarEtapa",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "Id"
+                },
+                {
+                    data: "Nombre"
+                },
+                {
+                    data: "Estado"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div role="group" class="btn-group-lg btn-group">' +
+                            '<button class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3" title="Editar Etapa" onclick="DetalleEtapa(' + data.Id + ');"> <i class="fa fa-edit" aria-hidden="true"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            columnDefs: [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                }
+            ],
+            language: leng_espEtapa
+        });
+    }
+
+    function DetalleEtapa(id) {
+        $("#lblTitulo").empty();
+        $("#lblTitulo").text("Editar Etapa");
+        idEtapa = id;
+        $.ajax({
+            type: "GET",
+            url: "/Proyectos_Etapa/DetalleEtapa?id=" + id,
+            cache: false,
+            success: function (data) {
+                $("#Tipo").val("U");
+                $.each(data, function (index, value) {
+                    if (value.EstadoEtapa == true) {
+                        $('#chkEstadoEtapa').iCheck('check');
+                    } else {
+                        $('#chkEstadoEtapa').iCheck('uncheck');
+                    }
+                    $("#txtEtapa").val(value.Nombre);
+
+                });
+
+            },
+            error: function (data) {
+                toastr.danger("", "Error")
+            }
+        });
+    }
+
+    function CancelarEtapa() {
+        $("#txtEtapa").val("");
+        $('#chkEstadoEtapa').iCheck('check');
+        $("#Tipo").val("I");
+        $("lblTitulo").empty();
+        $("#lblTitulo").text("Nueva Etapa");
+    }
+</script>

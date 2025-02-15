@@ -1,0 +1,107 @@
+﻿@{
+//Layout = null;
+}
+
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="card mb-3">
+    <div class="card-header">Consolidado de Solicitudes</div>
+    <div class="card-body">
+        <form id="Parametro">
+            <div class="form-row">
+                <div class="col-md-3">
+                    Tipo de Cambio
+                    <div class="editor-field">
+                        <input id="idChangeType" name="idChangeType" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    Estado
+                    <input id="idApproved" name="idApproved" style="width:100%" />
+                </div>
+                <div class="col-md-2">
+                    Fecha Inicio <b style="color:red">(*)</b>
+                    <div class="editor-field">
+                        <input type="text" id="FechaInicio" name="FechaInicio" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    Fecha Fin <b style="color:red">(*)</b>
+                    <div class="editor-field">
+                        <input type="text" id="FechaFin" name="FechaFin" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button id="btnBuscar" type="button" class="btn btn-light btn-block"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <iframe id="RSListRequest" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport() {
+        window.frames["RSListRequest"].src = "/Reporting/GestionCambios/GestCambios.aspx?" + $("#Parametro").serialize();
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#idChangeType").kendoComboBox({
+            dataTextField: "details",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                },
+                transport: {
+                    read: "/ChangeRequest/ListChangeType?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var FechaInicio = $("#FechaInicio").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaFin = $("#FechaFin").kendoDateTimePicker().data("kendoDateTimePicker");
+        $("#idApproved").kendoComboBox({
+            dataTextField: "detail",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                },
+                transport: {
+                    read: "/ChangeRequest/ListApproved?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#btnBuscar").click(function (event) {
+            event.preventDefault();
+
+            if ($("#FechaInicio").val() == "" || $("#FechaFin").val() == "") {
+                toastr.warning("Complete los campos obligatorios", "¡Alerta!");
+            } else {
+                GenerateReport();
+            }
+
+            return false;
+        });
+    });
+
+</script>

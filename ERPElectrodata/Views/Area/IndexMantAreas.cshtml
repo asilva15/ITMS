@@ -1,0 +1,323 @@
+﻿@model ERPElectrodata.Models.PLANTILLA
+
+@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<style type="text/css">
+
+
+    .bg-primary {
+        background-color: rgb(81, 104, 130);
+        font-size: 13px;
+    }
+
+    .detalle {
+        font-size: 13px;
+        color: #7F7F7F;
+    }
+
+    .contenido {
+        background: #DCDCDE;
+    }
+
+    #Buscar {
+        margin-right: 20px;
+    }
+
+    #BtnEditar {
+        border: 0;
+    }
+
+    #caja {
+        height: 30px;
+        padding-top: -5px;
+    }
+
+    b {
+        color: #F83C50;
+    }
+</style>
+@if (Convert.ToInt32(Session["ID_ACCO"].ToString()) != 55)
+{
+    <script>window.location.href = "~/Maintenance/IndexMantenimiento";</script>
+}
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <div class="editor-label">
+                                    Área principal
+                                </div>
+                                <div>
+                                    <input id="areaprincialvista" name="areaprincialvista" class="form-control" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <div class="editor-label">
+                                    Nombre área
+                                </div>
+                                <div>
+                                    <input id="txtNombreArea" name="txtNombreArea" class="form-control" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-1">
+                            <div class="form-group ">
+                                <div class="editor-label">
+                                    <div class="editor-label">
+                                        ACTIVO
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" id="checkAreaActiva" name="checkAreaActiva">
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group ">
+                                <div class="editor-label">
+                                    <div class="editor-label">
+                                        Area Principal
+                                    </div>
+                                    <div>
+                                        <input type="checkbox" id="checkAreaPrincipalActiva" name="checkAreaPrincipalActiva">
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label>&nbsp;</label><br />
+                                <button id="btnBuscar" type="button" class="btn btn-primary" onclick="ListarAreaSecundaria(); return false;">Buscar</button>
+                                <button id="btnCrear" type="button" class="btn btn-warning" data-toggle="modal" data-target="#miModal" onclick="CreaPlantilla(); return false;">Crear</button>
+                            </div>
+                        </div>
+                    </div>
+                    <table id="tbareasecundaria" class="table table-bordered table-striped" style="width:100%;">
+                        <thead>
+                            <tr>
+                                <th>Cuenta</th>
+                                <th>Área Principal</th>
+                                <th>Área Secundaria</th>
+                                <th>Estado</th>
+
+                                <th>Opciones</th>
+
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+
+                    </table>
+
+
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+
+            <div id="Grafica" style="width:100%;display:none;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+
+
+
+
+
+
+    $(document).ready(function () {
+   
+        //.data("kendoComboBox");
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+
+        ListarAreaprincipal();
+
+
+
+
+      
+
+
+
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            location.reload(true);
+        });
+
+        ListarAreaSecundaria();
+
+    });
+
+
+
+
+    function ListarAreaprincipal() {
+
+
+        //ListarAreaSecundaria();
+        $("#areaprincialvista").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NOM_AREA",
+            placeholder: "Seleccione un área",
+            dataValueField: "ID_AREA",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Area/ListarAreaprincipal"
+                }
+
+            }
+        }).data("kendoComboBox");
+
+
+
+        var cbGrupo = $("#txtNombreArea").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "areaprincial",
+            dataTextField: "NOM_AREA",
+            dataValueField: "ID_AREA",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Area/ListarGruposPorArea?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+
+
+
+
+
+
+    }
+
+
+    function ListarAreaSecundaria() {
+   
+        $('#tbareasecundaria').dataTable().fnDestroy();
+        $('#tbareasecundaria').DataTable({
+            "order": [[0, "asc"]],
+            dom: 'Bfrtip',
+            ajax: {
+                "url": "/Area/ListarAreaTodo/",
+                "data": function (d) {
+                    d.IdAreaPrincipal = $("#areaprincialvista").val() == '' ? '' : $("#areaprincialvista").val(),
+                        d.IdAreaSecubdaria = $("#txtNombreArea").val() == '' ? '' : $("#txtNombreArea").val(),
+                        d.Estado = $("#checkAreaActiva").is(":checked") ? 1 : 0;
+                    d.nivelarea = $("#checkAreaPrincipalActiva").is(":checked") ? 1 : 0;
+                    
+                }
+            },
+            columns: [
+                { data: "NAM_ACCO" },
+                { data: "NOM_AREA_PARENT" },
+                { data: "NOM_AREA" },
+                { data: "ESTADO" },
+
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        //    '</div>';
+                        var idAreaParent = data.ID_AREA_PARENT || 0; 
+                        return '<div style="text-align:center;">' +
+                            '<button type="button" id="BtnEditar" class="btn btn-outline-dark" title="Editar" data-toggle="modal" data-target="#miModal" onclick="EditarLocacion(' + idAreaParent + ',' + data.ID_AREA + ')">' +
+                            '<i class="fas fa-pencil-alt"></i>' +
+                            '</button>' +
+                            '</div>';
+                    }
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+
+        ListarAreaprincipal();
+    }
+
+    function CreaPlantilla() {
+        $("#lblTitulo").text("Registrar Areas");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-md");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Area/CrearAreas/");
+    }
+
+    function EditarLocacion(Id, IdCuenta) {
+        $("#lblTitulo").text("Editar Area");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-md");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Area/EditarAreas/" + Id + "/" + IdCuenta);
+    }
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,85 @@
+﻿@model ERPElectrodata.Models.AplicacionMovil
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("CreateAplicacion", "Maintenance", FormMethod.Post, new { enctype = "multipart/form-data", name = "FrmAplicacion", id = "FrmAplicacion", target = "utAplicacion" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <input type="hidden" id="idGrupoAct" name="idGrupoAct" value="@ViewBag.IdGrupo" />
+        <div class="form-group row">
+            <div class="col-sm-12 col-lg-12">
+                <div class="editor-label">
+                    Aplicación <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.Nombre)
+                    @Html.ValidationMessageFor(model => model.Nombre)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-lg-4">
+                <br />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="cancelNewAplicacion" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="submitNewAplicacion" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="utAplicacion" name="utAplicacion" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitNewAplicacion").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewAplicacion").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    function uploadDoneAplicacion(msg, code, text) {
+
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se registró correctamente la aplicación.", "Información Guardada");
+
+            if ("@ViewBag.Mantenimiento" == "1") {
+                ListarTabla();
+            } else {
+                var option = new Option(text, code, true, true);
+                $("#aplicacionesMovil").append(option).trigger('change');
+            }
+
+        }
+        else {
+            var messageAsset = '';
+            if (code == '0') {
+                messageAsset = 'Complete los datos obligatorios.';
+            }
+            else if (code == '1') {
+                messageAsset = 'Contacte al administrador.';
+            }
+            else {
+                messageAsset = 'La aplicación ya existe.';
+            }
+
+            toastr.warning(messageAsset, "Mensaje");
+        }
+    }
+</script>

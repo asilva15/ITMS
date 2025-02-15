@@ -1,0 +1,123 @@
+﻿@model ERPElectrodata.Models.MANUFACTURER
+
+@{
+    Layout = null;
+}
+
+@* CREATE MANUFACTURER *@
+
+@using (Html.BeginForm("Create", "Manufacturer", FormMethod.Post, new { enctype = "multipart/form-data", name = "FrmManufacturer", id = "FrmManufacturer", target = "utManu" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <input type="hidden"  id="idGrupoAct" name="idGrupoAct" value="@ViewBag.IdGrupo" />
+        <div class="form-group row">
+            <div class="col-sm-6 col-lg-6">
+                <div class="editor-label">
+                    Marca <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.NAM_MANU)
+                    @Html.ValidationMessageFor(model => model.NAM_MANU)
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Descripción <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.DESC_MANU)
+                    @Html.ValidationMessageFor(model => model.DESC_MANU)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-lg-4">
+                <br />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="cancelNewManufacturer" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="submitNewManufacturer" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+    }
+<iframe id="utManu" name="utManu" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitNewManufacturer").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewManufacturer").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#DESC_MANU").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    function uploadDoneManufacturer(msg, code) {
+
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se registró correctamente la marca.", "Información Guardada");
+
+            if ("@ViewBag.Mantenimiento" == "1") {
+                $("#cbMarca").data("kendoComboBox").dataSource.read();
+                ListarTabla();
+            } else {
+                $("#ID_MANU").data("kendoComboBox").dataSource.read();
+                var ID_MANU = $("#ID_MANU").data("kendoComboBox");
+                ID_MANU.value(code);
+            }
+
+        }
+        else {
+            var messageAsset = '';
+            if (code == '0') {
+                messageAsset = 'Complete los datos obligatorios.';
+            }
+            else if (code == '1') {
+                messageAsset = 'Contacte al administrador.';
+            }
+            else {
+                messageAsset = 'La marca ya existe.';
+            }
+
+            toastr.warning(messageAsset, "Mensaje");
+        }
+    }
+</script>

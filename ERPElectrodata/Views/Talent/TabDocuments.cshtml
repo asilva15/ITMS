@@ -1,0 +1,671 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<style>
+    .tree-node {
+        cursor: pointer;
+        user-select: none;
+    }
+
+    .sub-tree {
+        display: none;
+    }
+
+    .icon {
+        margin-right: 5px;
+        color: #3f6ad8;
+    }
+
+    #treeviewAchi {
+        max-height: 150px;
+        overflow-y: scroll; /* Cambiado de 'auto' a 'scroll' */
+        overflow-x: auto;
+    }
+
+    .sub-tree {
+        overflow-x: auto;
+    }
+</style>
+
+
+
+<div id="divContent">
+    <div class="row col-sm-12 col-lg-12">
+        <div class="col-sm-12 col-lg-4">
+            <div class="col-sm-12 col-lg-12">
+                <div class="mb-3 card">
+                    <div class="card-header-tab card-header">
+                        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                            @ResourceLanguaje.Resource.DocumentsTalent
+                        </div>
+                    </div>
+                    <div class="p-0 card-body">
+                        <div class="p-1 slick-slider-sm">
+                            <div style="width:100%;">
+                                <div id="treeviewDocs" style="padding: 3px 0 0 7px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-lg-4 m-0">
+            <div class="col-sm-12 col-lg-12" style="height:150px;">
+                <div class="mb-3 card">
+                    <div class="card-header-tab card-header">
+                        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                            @ResourceLanguaje.Resource.AchievementsTalent
+                        </div>
+                    </div>
+                    <div class="p-0 card-body" wid>
+                        <div class="p-1 slick-slider-sm">
+                            <div style="width:100%;">
+
+                                <div id="treeviewAchi" style="padding: 3px 0 0 7px; height: 150px; overflow-y: auto;">
+                                    <div class="tree-node" onclick="toggleNode(this)">
+                                        <span class="icon">▶</span> CV
+                                    </div>
+                                    <div id="Grupo1" class="sub-tree" style="padding: 3px 0 0 7px;">
+                                        <!-- Contenido del Grupo1 aquí -->
+                                    </div>
+                                    <div class="tree-node" onclick="toggleNode(this)">
+                                        <span class="icon">▶</span> Grado Académico
+                                    </div>
+                                    <div id="Grupo2" class="sub-tree" style="padding: 3px 0 0 7px;">
+                                        <!-- Contenido del Grupo2 aquí -->
+                                    </div>
+                                    <div class="tree-node" onclick="toggleNode(this)">
+                                        <span class="icon">▶</span> Cursos y Certificaciones
+                                    </div>
+                                    <div id="Grupo3" class="sub-tree" style="padding: 3px 0 0 7px;">
+                                        <!-- Contenido del Grupo3 aquí -->
+                                    </div>
+                                    <div class="tree-node" onclick="toggleNode(this)">
+                                        <span class="icon">▶</span> Constancias de Trabajo
+                                    </div>
+                                    <div id="Grupo4" class="sub-tree" style="padding: 3px 0 0 7px;">
+                                        <!-- Contenido del Grupo4 aquí -->
+                                    </div>
+                                    <div class="tree-node" onclick="toggleNode(this)">
+                                        <span class="icon">▶</span> Antecedentes
+                                    </div>
+                                    <div id="Grupo5" class="sub-tree" style="padding: 3px 0 0 7px;">
+                                        <!-- Contenido del Grupo5 aquí -->
+                                    </div>
+                                    <div class="tree-node" onclick="toggleNode(this)">
+                                        <span class="icon">▶</span> Documentos Personales
+                                    </div>
+                                    <div id="Grupo6" class="sub-tree" style="padding: 3px 0 0 7px;">
+                                        <!-- Contenido del Grupo6 aquí -->
+                                    </div>
+                                    <div class="tree-node" onclick="toggleNode(this)">
+                                        <span class="icon">▶</span> Documentos Derechohabientes
+                                    </div>
+                                    <div id="Grupo7" class="sub-tree" style="padding: 3px 0 0 7px;">
+                                        <!-- Contenido del Grupo7 aquí -->
+                                    </div>
+
+                                </div>
+
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br />
+            <br />
+            <br />
+            <br />
+            <div class="col-sm-12 col-lg-12" style="width:100%;">
+                <div class="mb-3 card">
+                    <div class="card-header-tab card-header">
+                        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                            @ResourceLanguaje.Resource.IssuesTalent
+                        </div>
+                    </div>
+                    <div class="p-0 card-body">
+                        <div class="p-1 slick-slider-sm">
+                            <div style="width:100%;">
+                                <div id="ListIssue"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-lg-3 m-0">
+            <div class="col-sm-12 col-lg-12">
+                <div class="mb-3 card">
+                    <div class="card-header-tab card-header">
+                        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                            @ResourceLanguaje.Resource.AttachTalent
+                        </div>
+                    </div>
+                    <div class="p-0 card-body">
+                        <div class="p-1 slick-slider-sm">
+                            <div style="width:100%;">
+                                <div id="cargarDocs"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!--PESTAÑA DOCUMENTACION-->
+<script id="treeviewDocs-template" type="text/kendo-ui-template">
+        # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 2) { #
+        <a href="" style="text-decoration:none;" onclick="AuthorizationDownload('#: item.NAM_FILE #','#: item.ID_TYPE_DOCU #','#: item.ID_PARA #'); return false;" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #@Environment.NewLine@ResourceLanguaje.Resource.StartDateContractTalent: #: item.STAR_DATE #@Environment.NewLine@ResourceLanguaje.Resource.EndDateContractTalent: #: item.END_DATE #" target="_blank">
+            <img src="/Content/Images/pdf.gif" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        </a>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 8) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+            <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        </a>
+        # } else if (item.ATTACH == true && item.CONT == 1) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+            <img src="/Content/Images/#: item.ICONO #" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        </a>
+        # } else if (item.ATTACH == true) { #
+        <a href="" style="text-decoration:none;" onclick="AuthorizationDownload('#: item.NAM_FILE #','#: item.ID_TYPE_DOCU #','#: item.ID_PARA #'); return false;" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank">
+            <img src="/Content/Images/pdf.gif" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        </a>
+        # } #
+</script>
+
+@*PESTAÑA LOGROS*@
+<script id="treeviewAchi-template" type="text/kendo-ui-template" style="height:170px;">
+<ul>
+    <li>
+        # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 24) { #
+        <a href="#: item.NAM_FILE #" title="Descripcion: #: item.Descripcion #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        # }  else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        <span>&nbsp;&nbsp;&nbsp;Adjuntado: #: kendo.toString(new Date(parseInt(item.CREATE_ATTA.substr(6))), 'dd/MM/yyyy') #</span>
+        <span style="margin-left:10px">
+        <a id="eliminarDocumento_#: item.ID_PARA #" class="eliminar-documento" data-type-document="#: item.ID_PARA #" style="color:red;cursor:pointer">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        </span>
+        # } #
+    </li>
+</ul>
+
+</script>
+
+<script id="treeviewAchi-template-GR2" type="text/kendo-ui-template" style="height:170px;">
+<ul>
+    <li>
+        # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 24) { #
+        <a href="#: item.NAM_FILE #" title="Descripcion: #: item.Descripcion #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        # }  else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        <span>&nbsp;&nbsp;&nbsp;Adjuntado: #: kendo.toString(new Date(parseInt(item.CREATE_ATTA.substr(6))), 'dd/MM/yyyy') #</span>
+        <span style="margin-left:10px">
+        <a id="eliminarDocumento_#: item.ID_PARA #" class="eliminar-documento" data-type-document="#: item.ID_PARA #" style="color:red;cursor:pointer">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        </span>
+        # } #
+    </li>
+</ul>
+
+</script>
+
+<script id="treeviewAchi-template-GR3" type="text/kendo-ui-template" style="height:170px;">
+<ul>
+    <li>
+        # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 24) { #
+        <a href="#: item.NAM_FILE #" title="Descripcion: #: item.Descripcion #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        # }  else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        <span>&nbsp;&nbsp;&nbsp;Adjuntado: #: kendo.toString(new Date(parseInt(item.CREATE_ATTA.substr(6))), 'dd/MM/yyyy') #</span>
+        <span style="margin-left:10px">
+        <a id="eliminarDocumento_#: item.ID_PARA #" class="eliminar-documento" data-type-document="#: item.ID_PARA #" style="color:red;cursor:pointer">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        </span>
+        # } #
+    </li>
+</ul>
+
+</script>
+
+<script id="treeviewAchi-template-GR4" type="text/kendo-ui-template" style="height:170px;">
+<ul>
+    <li>
+        # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 24) { #
+        <a href="#: item.NAM_FILE #" title="Descripcion: #: item.Descripcion #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        # }  else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        <span>&nbsp;&nbsp;&nbsp;Adjuntado: #: kendo.toString(new Date(parseInt(item.CREATE_ATTA.substr(6))), 'dd/MM/yyyy') #</span>
+        <span style="margin-left:10px">
+        <a id="eliminarDocumento_#: item.ID_PARA #" class="eliminar-documento" data-type-document="#: item.ID_PARA #" style="color:red;cursor:pointer">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        </span>
+        # } #
+    </li>
+</ul>
+
+</script>
+
+<script id="treeviewAchi-template-GR5" type="text/kendo-ui-template" style="height:170px;">
+<ul>
+    <li>
+        # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 24) { #
+        <a href="#: item.NAM_FILE #" title="Descripcion: #: item.Descripcion #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        # }  else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        <span>&nbsp;&nbsp;&nbsp;Adjuntado: #: kendo.toString(new Date(parseInt(item.CREATE_ATTA.substr(6))), 'dd/MM/yyyy') #</span>
+        <span style="margin-left:10px">
+        <a id="eliminarDocumento_#: item.ID_PARA #" class="eliminar-documento" data-type-document="#: item.ID_PARA #" style="color:red;cursor:pointer">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        </span>
+        # } #
+    </li>
+</ul>
+
+</script>
+
+<script id="treeviewAchi-template-GR6" type="text/kendo-ui-template" style="height:170px;">
+<ul>
+    <li>
+        # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 24) { #
+        <a href="#: item.NAM_FILE #" title="Descripcion: #: item.Descripcion #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        # }  else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        <span>&nbsp;&nbsp;&nbsp;Adjuntado: #: kendo.toString(new Date(parseInt(item.CREATE_ATTA.substr(6))), 'dd/MM/yyyy') #</span>
+        <span style="margin-left:10px">
+        <a id="eliminarDocumento_#: item.ID_PARA #" class="eliminar-documento" data-type-document="#: item.ID_PARA #" style="color:red;cursor:pointer">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        </span>
+        # } #
+    </li>
+</ul>
+
+</script>
+
+<script id="treeviewAchi-template-GR7" type="text/kendo-ui-template" style="height:170px;">
+<ul>
+    <li>
+        # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 24) { #
+        <a href="#: item.NAM_FILE #" title="Descripcion: #: item.Descripcion #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        # }  else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='A|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        <span>&nbsp;&nbsp;&nbsp;Adjuntado: #: kendo.toString(new Date(parseInt(item.CREATE_ATTA.substr(6))), 'dd/MM/yyyy') #</span>
+        <span style="margin-left:10px">
+        <a id="eliminarDocumento_#: item.ID_PARA #" class="eliminar-documento" data-type-document="#: item.ID_PARA #" style="color:red;cursor:pointer">
+            <i class="fas fa-trash-alt"></i>
+        </a>
+        </span>
+        # } #
+    </li>
+</ul>
+
+</script>
+
+
+
+
+<script type="text/javascript">
+    function toggleNode(node) {
+        var subTree = node.nextElementSibling;
+        if (subTree.style.display === 'none') {
+            subTree.style.display = 'block';
+            node.querySelector('.icon').textContent = '▼';
+        } else {
+            subTree.style.display = 'none';
+            node.querySelector('.icon').textContent = '▶';
+        }
+    }
+
+    $(document).on("click", ".eliminar-documento", function (e) {
+        e.preventDefault();
+        var id = $(this).attr("id").split("_")[1];
+        var typeDocument = $(this).data("type-document");
+
+            $.ajax({
+                url: "/Talent/EliminarDocumento",
+                data: { typeDocument: typeDocument },
+                type: "POST",
+                success: function (result) {
+                    $("#treeviewAchi").data("kendoTreeView").dataSource.read();
+                },
+                error: function (xhr, status, error) {
+                    alert("Error al intentar eliminar el documento.");
+                }
+            });
+
+    });
+
+        $(document).on("click", ".delete-link", function (e) {
+            e.preventDefault();
+            var ctrl = $(this);
+            var id = $(this).attr("id");
+            var elem = id.split('|');
+            winPopUpModal("@ResourceLanguaje.Resource.Delete", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Are you sure to delete the document?</div>" +
+       "<div style='float:right; padding:21px 4px 0 0;'>" +
+       "<button id='btnYes' class='k-button' style='font-size:.9em;'>Si</button>&nbsp;&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+       , 350, 130);
+            var undo = $("#btnYes")
+                .bind("click", function () {
+                    cl = elem[1];
+                    if (elem[1].length > 3) {
+                        if (elem[1].substring(0, 3) == 'ISO') {
+                            var resp = elem[1].split('*');
+                            cl = resp[1];
+                        }
+                    }
+                    $.ajax({
+                        url: "/Talent/DeleteAttachDocs/" + cl,
+                        data: "var=" + Math.random(),
+                        type: "GET",
+                        dataType: "text",
+                        success: function (dato) {
+                            if (dato == 'OK') {
+                                var treeview = $("#treeviewAchi").data("kendoTreeView");
+                                treeview.remove(ctrl.closest(".k-item"));
+                                closeWinModalPopUp();
+                            }
+                            else { closeWinModalPopUp(); alert('ERROR'); }
+                        },
+                        error: function (dato) {
+                            alert('ERROR');
+                        }
+                    });
+                });
+
+            var undo = $("#btnNO")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+        });
+</script>
+<script type="text/javascript">
+        $(document).ready(function () {
+            homogeneousDocs = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "/Talent/TreeDocs/@ViewBag.ID_PERS_ENTI",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "ID_PARA",
+                        hasChildren: "HAS_VALUE"
+                    }
+                }
+            });
+
+            $("#treeviewDocs").kendoTreeView({
+                template: kendo.template($("#treeviewDocs-template").html()),
+                dataSource: homogeneousDocs,
+                dataTextField: "NAME_PARA"
+            });
+          // Filtrar los datos para mostrar solo los elementos con GRUPO igual a 1
+            var homogeneousAchiGrupo1 = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "ID_PARA",
+                        hasChildren: "HAS_VALUE"
+                    }
+                }
+            });
+            homogeneousAchiGrupo1.filter({
+                field: "GRUPO",
+                operator: "eq",
+                value: 1
+            });
+            $("#Grupo1").kendoTreeView({
+                template: kendo.template($("#treeviewAchi-template").html()),
+                dataSource: homogeneousAchiGrupo1,
+                dataTextField: "NAME_PARA"
+            });
+         // Filtrar los datos para mostrar solo los elementos con GRUPO igual a 2
+            var homogeneousAchiGrupo2 = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "ID_PARA",
+                        hasChildren: "HAS_VALUE"
+                    }
+                }
+            });
+            homogeneousAchiGrupo2.filter({
+                field: "GRUPO",
+                operator: "eq",
+                value: 2
+            });
+            $("#Grupo2").kendoTreeView({
+                template: kendo.template($("#treeviewAchi-template-GR2").html()),
+                dataSource: homogeneousAchiGrupo2,
+                dataTextField: "NAME_PARA"
+            });
+             // Filtrar los datos para mostrar solo los elementos con GRUPO igual a 3
+            var homogeneousAchiGrupo3 = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "ID_PARA",
+                        hasChildren: "HAS_VALUE"
+                    }
+                }
+            });
+            homogeneousAchiGrupo3.filter({
+                field: "GRUPO",
+                operator: "eq",
+                value: 3
+            });
+            $("#Grupo3").kendoTreeView({
+                template: kendo.template($("#treeviewAchi-template-GR3").html()),
+                dataSource: homogeneousAchiGrupo3,
+                dataTextField: "NAME_PARA"
+            });
+             // Filtrar los datos para mostrar solo los elementos con GRUPO igual a 4
+            var homogeneousAchiGrupo4 = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "ID_PARA",
+                        hasChildren: "HAS_VALUE"
+                    }
+                }
+            });
+            homogeneousAchiGrupo4.filter({
+                field: "GRUPO",
+                operator: "eq",
+                value: 4
+            });
+            $("#Grupo4").kendoTreeView({
+                template: kendo.template($("#treeviewAchi-template-GR4").html()),
+                dataSource: homogeneousAchiGrupo4,
+                dataTextField: "NAME_PARA"
+            });
+             // Filtrar los datos para mostrar solo los elementos con GRUPO igual a 5
+            var homogeneousAchiGrupo5 = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "ID_PARA",
+                        hasChildren: "HAS_VALUE"
+                    }
+                }
+            });
+            homogeneousAchiGrupo5.filter({
+                field: "GRUPO",
+                operator: "eq",
+                value: 5
+            });
+            $("#Grupo5").kendoTreeView({
+                template: kendo.template($("#treeviewAchi-template-GR5").html()),
+                dataSource: homogeneousAchiGrupo5,
+                dataTextField: "NAME_PARA"
+            });
+             // Filtrar los datos para mostrar solo los elementos con GRUPO igual a 6
+            var homogeneousAchiGrupo6 = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "ID_PARA",
+                        hasChildren: "HAS_VALUE"
+                    }
+                }
+            });
+            homogeneousAchiGrupo6.filter({
+                field: "GRUPO",
+                operator: "eq",
+                value: 6
+            });
+            $("#Grupo6").kendoTreeView({
+                template: kendo.template($("#treeviewAchi-template-GR6").html()),
+                dataSource: homogeneousAchiGrupo6,
+                dataTextField: "NAME_PARA"
+            });
+             // Filtrar los datos para mostrar solo los elementos con GRUPO igual a 7
+            var homogeneousAchiGrupo7 = new kendo.data.HierarchicalDataSource({
+                transport: {
+                    read: {
+                        url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    model: {
+                        id: "ID_PARA",
+                        hasChildren: "HAS_VALUE"
+                    }
+                }
+            });
+            homogeneousAchiGrupo7.filter({
+                field: "GRUPO",
+                operator: "eq",
+                value: 7
+            });
+            $("#Grupo7").kendoTreeView({
+                template: kendo.template($("#treeviewAchi-template-GR7").html()),
+                dataSource: homogeneousAchiGrupo7,
+                dataTextField: "NAME_PARA"
+            });
+            $.ajax({
+                url: "/Talent/ListIssuesUser/@ViewBag.ID_PERS_ENTI",
+                data: "var=" + Math.random(),
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    loadDataIssue();
+                },
+                error: function (source) {
+                    //alert("Error Carga Json");
+                }
+            });
+            $("#cargarDocs").empty();
+            $("#cargarDocs").load("/Talent/AttachDocs?id=@ViewBag.ID_PERS_ENTI&id1=@ViewBag.ID_PERS_STAT&var=" + Math.random());
+        });
+        function AuthorizationDownload(arc, id_type, iddocu) {
+            NameArc = "/Adjuntos/Talent/Documents/" + arc;
+            if (id_type == 3) {
+                window.open(NameArc, "_blank");
+            }
+            else {
+                var htmlForm = '<div id="FormAuthorization"></div>';
+                winFormPopUpModal("@ResourceLanguaje.Resource.ValidationsOfCredentials", htmlForm, 260, 205);
+                $("#FormAuthorization").load("/Account/ViewAuthorization?var=" + Math.random() + "&id=@ViewBag.ID_PERS_ENTI&id1=" + iddocu + "&fd=Documents&acc=edit");
+            }
+            return false;
+        }
+        function loadDataIssue() {
+            var strHtml1 = '';
+            $.each(data['data'], function (index, value) {
+                strHtml1 = strHtml1 +
+                    '<div class ="divFondoUno"><div style="float:left; width:90%; padding: 0 0 0 10px;">' +
+                    '<img src="/Content/Images/pdf.gif" style="width:14px; height:14px;" />' +
+                    '<a href="'+(data['data'][index]['Ruta']) + (data['data'][index]['NAM_ATTA']) + '_' + (data['data'][index]['ID_PERS_DOCU']) + (data['data'][index]['EXT_ATTA']) + '" target="_blank" title="@ResourceLanguaje.Resource.Download ' + (data['data'][index]['NAM_ATTA']) + '" style="cursor:pointer;color:#444444;font-size: .9em;text-transform: none;text-decoration:none; margin-left:5px;">' + (data['data'][index]['NAM_ATTA']) + '</a></div>' +
+                        '</div></div><br />';
+            });
+            $("#ListIssue").append(strHtml1);
+        }
+
+        function mensaje() {
+            toastr.success("Información guardada", "Information Saved");
+        }
+
+</script>

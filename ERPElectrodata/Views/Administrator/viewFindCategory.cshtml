@@ -1,0 +1,793 @@
+﻿@model ERPElectrodata.Models.CATEGORY
+
+@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<style>
+    .botonDelete {
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        background-color: #c35a50;
+        font-family: Arial;
+        font-size: 40px;
+        text-align: center;
+        color: black;
+        position: relative;
+        border-left: 1px solid white;
+        border-right: 1px solid white;
+        border-bottom: 1px solid white;
+    }
+
+    .divCont2 {
+        /* min-width: 220px; */
+        width: 220px;
+        float: left;
+    }
+
+    #tamCategoria {
+        width: 70% !important;
+    }
+</style>
+
+<div class="afterMain">
+    <div style="float:left; width:100%;" class="card">
+        <div class="card-header"><div class="title">Buscar Categorias</div></div>
+        <div class="card-body">
+            <div id="divFindCategory" class="inBodyForm">
+                @using (Html.BeginForm("ExportarCategoria", "Administrator", FormMethod.Post, new { id = "FormCategoria", name = "FormCategoria", target = "ut_category" }))
+                {
+                    @Html.ValidationSummary(true)
+                    <input type="hidden" name="ID_ACCO_CAT" id="ID_ACCO_CAT" value="0" />
+                    <input type="hidden" name="ID_CAT_N1" id="ID_CAT_N1" value="0" />
+                    <input type="hidden" name="ID_CAT_N2" id="ID_CAT_N2" value="0" />
+                    <input type="hidden" name="ID_CAT_N3" id="ID_CAT_N3" value="0" />
+                    <input type="hidden" name="ID_CAT_N4" id="ID_CAT_N4" value="0" />
+                    <input type="hidden" name="ID_CAT_N5" id="ID_CAT_N5" value="0" />
+                    <input type="hidden" name="ID_CAT_N6" id="ID_CAT_N6" value="0" />
+                    <fieldset>
+                        <div class="form-group row">
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Nombre de Cuenta
+                                </div>
+                                <div class="editor-field">
+                                    @Html.Editor("ID_ACCO")
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Estado
+                                </div>
+                                <div class="editor-field">
+                                    @Html.Editor("Estado")
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="editor-label">
+                                    Palabra Clave
+                                </div>
+                                <div class="editor-field">
+                                    <input id="keyword" name="keyword" class="k-textbox" style="width:100%;" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Categoria 1
+                                </div>
+                                <div class="editor-field">
+                                    @Html.Editor("ID_CATE_N1")
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Categoria 2
+                                </div>
+                                <div class="editor-field">
+                                    @Html.Editor("ID_CATE_N2")
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Categoria 3
+                                </div>
+                                <div class="editor-field">
+                                    @Html.Editor("ID_CATE_N3")
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Categoria 4
+                                </div>
+                                <div style="color:gray;">
+                                    @Html.Editor("ID_CATE_N4")
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Categoria 5
+                                </div>
+                                <div style="color:gray;">
+                                    @Html.Editor("ID_CATE_N5")
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Categoria 6
+                                </div>
+                                <div style="color:gray;">
+                                    @Html.Editor("ID_CATE_N6")
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Tipo Ticket
+                                </div>
+                                <div style="color:gray;">
+                                    @Html.Editor("ID_TYPE_TICK")
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                &nbsp; <br />
+                                <button id="btnBuscar" type="button" class="btn btn-primary btn-md"><i class="fa fa-search"></i> Buscar</button>
+                            </div>
+                            <div class="col-md-1">
+                                &nbsp; <br />
+                                <button id="btnexportarCategoria" type="button" class="btn btn-warning btn-md">Exportar</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                }
+                <iframe id="ut_category" name="ut_category" src="" style="width:0px;height:0px;border-width:0px; display:none;"></iframe>
+            </div>
+        </div>
+    </div>
+    <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+</div>
+<div style="clear:both;"></div>
+<div class="modal fade" id="modaleditarCategoria" role="dialog" aria-labelledby="modaleditarCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" id="tamCategoria">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Editar Categoría</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divEditarCategoria"></div>
+                <!-- CONTENIDO -->
+            </div>
+        </div>
+    </div>
+</div>
+@*<div id="gridCategory" class="contentView"></div>
+    <div style="clear:both;"></div>
+    <div id="pagerCategory" class="contentViewPager"></div>*@
+
+<div class="bodyForm">
+    <div class="inBodyForm" style="height:100%; background-color:white">
+        <div style="width:100%">
+            <table id="tbTipoServicio" class="table table-hover table-striped table-bordered" style="width:100%">
+                <thead class="bg-primary" style="color:white">
+                    <tr>
+                        <th>CATEGORIA 1</th>
+                        <th>CATEGORIA 2</th>
+                        <th>CATEGORIA 3</th>
+                        <th>CATEGORIA 4</th>
+                        <th>CATEGORIA 5</th>
+                        <th>CATEGORIA 6</th>
+                        <th>TIPO TICKET</th>
+                        <th>CUENTA</th>
+                        <th>TIPO DE GESTIÓN DE CAMBIO(TICKET)</th>
+                        <th>TICKET PROBLEMA</th>
+                        <th>GESTIÓN ACTIVOS</th>
+                        <th>APLICA NOTIFICACIÓN</th>
+                        <th>TIENE TAREA</th>
+                        <th>ESTADO</th>
+                        <th>OPCIONES</th>
+                    </tr>
+                </thead>
+            </table>
+            <div id="loadingSpinner" style="display: none; text-align: center;">
+                <i class="fas fa-spinner fa-spin fa-3x"></i>
+                <p>Cargando...</p>
+            </div>
+        </div>
+        <div style="float:left; width:100%"><hr /></div>
+        <div id="gridCategory" class="contentView"></div>
+        <div id="pagerCategory" class="contentViewPager" style="width:99%"></div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="tmp-category">
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:10%">${Categoria1}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:10%">${Categoria2}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:10%">${Categoria3}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:10%">${Categoria4}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:10%">${TipoTicket}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:8%">${Cuenta}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:8%">${TipoGestionCambio}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:8%">${TicketProblema}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:5%">${GestionActivos}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:5%">${Estado}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:5%">
+        <span class="fa fa-pencil-alt btnAbrirModal" style="cursor: pointer;" onclick="EditCategory(${IdCategoria4},${IdCuenta})"></span>
+        <span class="fa fa-window-close btnAbrirModal" onclick="deleteCategory(${IdCategoria4},${IdCuenta})" style="cursor: pointer;"></span>
+    </div>
+    <div style="float:left; width:100%"><hr /></div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var ID_ACCOUNT_CAT = $("#ID_ACCO").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Account/AccountsByUser?var=" + Math.random()
+                },
+            },
+            filter: "contains",
+            suggest: true,
+        });
+        $("#Estado").kendoComboBox({
+            dataTextField: "texto",
+            dataValueField: "valor",
+            dataSource: [
+                { texto: "Activo", valor: 1 },
+                { texto: "Inactivo", valor: 2 }
+            ]
+        });
+
+        var ID_TYPE_TICK = $("#ID_TYPE_TICK").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_TYPE_TICK",
+            filter: "contains",
+            dataValueField: "ID_TYPE_TICK",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeTicket/List"
+                }
+            }
+        }).data("kendoComboBox");
+        var ID_CATE_N1 = $("#ID_CATE_N1").kendoComboBox({}).data("kendoComboBox");
+        var ID_CATE_N2 = $("#ID_CATE_N2").kendoComboBox({}).data("kendoComboBox");
+        var ID_CATE_N3 = $("#ID_CATE_N3").kendoComboBox({}).data("kendoComboBox");
+        var ID_CATE_N4 = $("#ID_CATE_N4").kendoComboBox({}).data("kendoComboBox");
+        var ID_CATE_N5 = $("#ID_CATE_N5").kendoComboBox({}).data("kendoComboBox");
+        var ID_CATE_N6 = $("#ID_CATE_N6").kendoComboBox({}).data("kendoComboBox");
+        //var Estado = $("#Estado").kendoComboBox({}).data("kendoComboBox");
+
+        ID_ACCOUNT_CAT.bind("change", function (e) {
+            limpiarCategorias();
+            if (ID_ACCOUNT_CAT.val()) {
+                $('#ID_ACCO_CAT').attr('value', ID_ACCOUNT_CAT.val());
+                var id_acco_cat = $('#ID_ACCO_CAT').val();
+                buscarCategorias(id_acco_cat);
+            }
+            else {
+                $('#ID_ACCO_CAT').attr('value', '');
+            }
+        });
+
+    });
+    function buscarCategorias(id) {
+        var ID_CATE_N1 = $("#ID_CATE_N1").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_ACCOUNT_CAT",
+            filter: "contains",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N1.dataItem()) {
+                    $('#ID_CAT_N1').attr('value', ID_CATE_N1.dataItem().ID_CATE);
+                }
+                else {
+                    $('#ID_CAT_N1').attr('value', 0);
+                }
+                $("#ID_CATE_N2").data("kendoComboBox").value("");
+                $("#ID_CATE_N3").data("kendoComboBox").value("");
+                $("#ID_CATE_N4").data("kendoComboBox").value("");
+                $("#ID_CATE_N5").data("kendoComboBox").value("");
+                $("#ID_CATE_N6").data("kendoComboBox").value("");
+                $('#ID_CAT_N6').attr('value', 0);
+                $('#ID_CAT_N5').attr('value', 0);
+                $('#ID_CAT_N4').attr('value', 0);
+                $('#ID_CAT_N3').attr('value', 0);
+                $('#ID_CAT_N2').attr('value', 0);
+
+            }
+        }).data("kendoComboBox");
+            
+
+        var ID_CATE_N2 = $("#ID_CATE_N2").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_CATE_N1",
+            filter: "contains",
+            dataTextField: "NAM_CATE2",
+            dataValueField: "ID_CATE2",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory2?ID_ACCO=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N2.dataItem()) {
+                    $('#ID_CAT_N2').attr('value', ID_CATE_N2.dataItem().ID_CATE2);
+                }
+                else {
+                    $('#ID_CAT_N2').attr('value', 0);
+                }
+                $("#ID_CATE_N3").data("kendoComboBox").value("");
+                $("#ID_CATE_N4").data("kendoComboBox").value("");
+                $("#ID_CATE_N5").data("kendoComboBox").value("");
+                $("#ID_CATE_N6").data("kendoComboBox").value("");
+                $('#ID_CAT_N6').attr('value', 0);
+                $('#ID_CAT_N5').attr('value', 0);
+                $('#ID_CAT_N4').attr('value', 0);
+                $('#ID_CAT_N3').attr('value', 0);
+            }
+        }).data("kendoComboBox");
+
+
+        var ID_CATE_N3 = $("#ID_CATE_N3").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_CATE_N2",
+            filter: "contains",
+            dataTextField: "NAM_CATE3",
+            dataValueField: "ID_CATE3",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory3?ID_ACCO=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N3.dataItem()) {
+                    $('#ID_CAT_N3').attr('value', ID_CATE_N3.dataItem().ID_CATE3);
+                }
+                else {
+                    $('#ID_CAT_N3').attr('value', 0);
+                }
+                $("#ID_CATE_N4").data("kendoComboBox").value("");
+                $("#ID_CATE_N5").data("kendoComboBox").value("");
+                $("#ID_CATE_N6").data("kendoComboBox").value("");
+                $('#ID_CAT_N6').attr('value', 0);
+                $('#ID_CAT_N5').attr('value', 0);
+                $('#ID_CAT_N4').attr('value', 0);
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N4 = $("#ID_CATE_N4").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_CATE_N3",
+            filter: "contains",
+            dataTextField: "NAM_CATE4",
+            dataValueField: "ID_CATE4",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory4?ID_ACCO=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N4.dataItem()) {
+                    $('#ID_CAT_N4').attr('value', ID_CATE_N4.dataItem().ID_CATE4);
+                }
+                else {
+                    $('#ID_CAT_N4').attr('value', 0);
+                }
+                $("#ID_CATE_N5").data("kendoComboBox").value("");
+                $("#ID_CATE_N6").data("kendoComboBox").value("");
+                $('#ID_CAT_N6').attr('value', 0);
+                $('#ID_CAT_N5').attr('value', 0);
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N5 = $("#ID_CATE_N5").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_CATE_N4",
+            filter: "contains",
+            dataTextField: "NAM_CATE5",
+            dataValueField: "ID_CATE5",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory5?ID_ACCO=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N5.dataItem()) {
+                    $('#ID_CAT_N5').attr('value', ID_CATE_N5.dataItem().ID_CATE5);
+                }
+                else {
+                    $('#ID_CAT_N5').attr('value', 0);
+                }
+                $("#ID_CATE_N6").data("kendoComboBox").value("");
+                $('#ID_CAT_N6').attr('value', 0);
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N6 = $("#ID_CATE_N6").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_CATE_N5",
+            filter: "contains",
+            dataTextField: "NAM_CATE6",
+            dataValueField: "ID_CATE6",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory6?ID_ACCO=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N6.dataItem()) {
+                    $('#ID_CAT_N6').attr('value', ID_CATE_N6.dataItem().ID_CATE6);
+                }
+                else {
+                    $('#ID_CAT_N6').attr('value', 0);
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#btnexportarCategoria").off("click").on("click", function () {
+            if ($('#ID_ACCO_CAT').val() != "" && $('#ID_ACCO_CAT').val() != 0) {
+                toastr.info("Descargando excel...");
+                $("#FormCategoria").submit();
+            } else {
+                toastr.warning('Seleccione una cuenta.');
+            }
+        });
+
+    }
+
+    function buscarCategoriasxfiltro() {
+        var leng_esp = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "",
+            "sEmptyTable": "",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+        //$("#tbTipoServicio").dataTable().fnDestroy();
+        var table = $('#tbTipoServicio').DataTable();
+        table.clear().destroy();
+        //Carga de Tablas
+        
+        $('#tbTipoServicio').DataTable({
+            responsive: true,
+            dom: 'frtip',
+            select: true,
+            ajax: {
+                url: "/Administrator/BuscarCategoria/?var=" + Math.random() + "&" + $('#FormCategoria').serialize(),
+                type: "GET",
+                dataSrc: "Data",
+                beforeSend: function () {
+                    $("#loadingSpinner").show();
+                },
+                complete: function () {
+                    $("#loadingSpinner").hide();
+                }
+            },
+            columns: [
+                {
+                    data: "Categoria1"
+                },
+                {
+                    data: "Categoria2"
+                },
+                {
+                    data: "Categoria3"
+                },
+                {
+                    data: "Categoria4"
+                },
+                {
+                    data: "Categoria5"
+                },
+                {
+                    data: "Categoria6"
+                },
+                {
+                    data: "TipoTicket"
+                },
+                {
+                    data: "Cuenta"
+                },
+                {
+                    data: "TipoGestionCambio"
+                },
+                {
+                    data: "TicketProblema"
+                },
+                {
+                    data: "GestionActivos"
+                },
+                {
+                    data: "AplicaNotificacion"
+                },
+                {
+                    data: "TieneTarea"
+                },
+                {
+                    data: "Estado"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let categoryId = 0;
+                        if (data.IdCategoria6 != 0) {
+                            categoryId = data.IdCategoria6;
+                        } else if (data.IdCategoria5 != 0) {
+                            categoryId = data.IdCategoria5;
+                        } else if (data.IdCategoria4 != 0) {
+                            categoryId = data.IdCategoria4;
+                        } else {
+                            categoryId = data.IdCategoria3;
+                        }
+
+                        return '<div><center>' +
+                            '<span class="fa fa-pencil-alt btnAbrirModal" style="cursor: pointer;" onclick="EditCategory(' + categoryId + ',' + data.IdCuenta + ')"></span> ' +
+                            '<span class="fa fa-window-close" onclick="deleteCategory(' + categoryId + ',' + data.IdCuenta + ')" style="cursor: pointer;"></span>' +
+                            '</center></div>';
+                    }
+
+                }
+            ],
+            drawCallback: function (settings) {
+                var api = this.api();
+                if (api.rows().count() === 0) {
+                    // Si no hay datos, oculta el spinner y muestra el mensaje " "
+                    $("#loadingSpinner").hide();
+                }
+            },
+          
+            language: leng_esp
+        });
+
+       
+    }
+
+    function limpiarCategorias() {
+        $("#ID_CATE_N1").data("kendoComboBox").value("");
+        $("#ID_CATE_N2").data("kendoComboBox").value("");
+        $("#ID_CATE_N3").data("kendoComboBox").value("");
+        $("#ID_CATE_N4").data("kendoComboBox").value("");
+        $("#ID_CATE_N5").data("kendoComboBox").value("");
+        $("#ID_CATE_N6").data("kendoComboBox").value("");
+    }
+
+    function deleteCategory(id, account) {
+        swal({
+            title: "¿Desea eliminar la categoría?",
+            text: "",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-warning",
+            confirmButtonText: "Si, eliminar",
+            cancelButtonText: "No, cancelar",
+            closeOnConfirm: false,
+            closeOnCancel: true
+        },
+            function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        url: "/Administrator/DeleteCategory/",
+                        data: "id=" + id + "&account=" + account + "&var=" + Math.random(),
+                        type: "GET",
+                        dataType: "text",
+                        success: function (dato) {
+                            $("#divListVacation" + id).hide(1000);
+                            buscarCategoriasxfiltro();
+                            swal("Eliminado", "Registro eliminado", "success");
+                            //setTimeout(function () {
+                            //    MensajeCategoria("Mensaje", "El Registro ha sido eliminado");
+                            //}, 450);
+                        },
+                        error: function (dato) {
+
+                        }
+                    });
+                } else {
+
+                    //swal("Cancelled", "Your imaginary file is safe :)", "error");
+                }
+            });
+        //$('#SmallModalContent').modal('show');
+        //$("#SmallModalTitle").empty();
+        //$("#SmallModalTitle").text("Mensaje");
+        //$("#SmallModalBody").empty();
+        //$("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>¿Desea Eliminar la Categoria?</div>");
+        //$("#SmallModalFooter").empty();
+        //$("#SmallModalFooter").append("<div style='float:right;'>" +
+        //    "<button id='continues' class='k-button'>Si</button>" +
+        //    "<span>&nbsp;&nbsp;</span>" +
+        //    "<button id='cancel' class='k-button'>No</button>" +
+        //    "</div>");
+        //var undo = $("#continues")
+        //    .bind("click", function () {
+        //        $('#SmallModalContent').modal('hide');
+
+        //        $.ajax({
+        //            url: "/Administrator/DeleteCategory/",
+        //            data: "id=" + id + "&account=" + account + "&var=" + Math.random(),
+        //            type: "GET",
+        //            dataType: "text",
+        //            success: function (dato) {
+        //                $("#divListVacation" + id).hide(1000);
+        //                buscarCategoriasxfiltro();
+        //                setTimeout(function () {
+        //                    MensajeCategoria("Mensaje", "El Registro ha sido eliminado");
+        //                }, 450);
+        //            },
+        //            error: function (dato) {
+
+        //            }
+        //        });
+
+        //    });
+
+        //var cancel = $("#cancel")
+        //    .bind("click", function () {
+        //        $('#SmallModalContent').modal('hide');
+        //    });
+
+
+    }
+
+    function EditCategory(id, id_acco) {
+
+        $(".btnAbrirModal").attr("data-style", "expand-right");
+        $(".btnAbrirModal").attr("data-toggle", "modal");
+        $(".btnAbrirModal").attr("data-target", "#miModal");
+        $("#lblTitulo").text("Editar Categoría");
+
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-lg");
+        $("#modal-content").empty();
+
+        $("#modal-content").load("/Administrator/viewEditCategory?id=" + id + "&ID_ACCO=" + id_acco + "&var=" + Math.random());
+    }
+
+    $("#btnBuscar").click(function (event) {
+        event.preventDefault();
+        if ($('#ID_ACCO_CAT').val() != "" && $('#ID_ACCO_CAT').val() != 0) {
+            buscarCategoriasxfiltro();
+        } else {
+            toastr.warning('Seleccione una cuenta.');
+        }
+    });
+
+    function ExportarCategoria() {
+        $.ajax({
+            url: "/Administrator/ExportarCategoria/",
+            data: $('#FormCategoria').serialize(),
+            type: "POST",
+            dataType: "text",
+            success: function (dato) {
+                closeWinModalPopUpLoad();
+            },
+            error: function (dato) {
+                alert('ERROR');
+                closeWinModalPopUpLoad();
+            }
+        });
+    }
+    function MensajeCategoria(msg, texto) {
+        if (msg == 'Mensaje') {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + texto + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                "<button id='continuar' class='k-button'>Continuar</button>" +
+                "</div>");
+            var undo = $("#continuar")
+                .bind("click", function () {
+                    $('#SmallModalContent').modal('hide');
+                });
+        }
+
+        else {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Error al Guardar");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "No se Actualizaron los Datos.\n\n Contacte al Administrador." + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                "<button id='continuee' class='k-button'>Continuar</button>" +
+                "</div>");
+            var undo = $("#continuee")
+                .bind("click", function () {
+                    $('#SmallModalContent').modal('hide');
+                });
+        }
+    }
+</script>

@@ -1,0 +1,462 @@
+﻿@model ERPElectrodata.Models.PMO
+@{
+    Layout = null;
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.modal-body input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+</script>
+<style>
+    b {
+        color: #F83C50;
+    }
+</style>
+@using (Html.BeginForm("AsignarResponsable", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAsignarPM", target = "upload_target" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @Html.Hidden("Id")
+    @Html.Hidden("Aplica")
+    @Html.Hidden("DiasCronograma")
+    <div id="mensaje"></div>
+    <div class="element-block-example">
+        <div class="mb-3 card ">
+            <div class="card-body">
+                <div class="card-title">Asigna Gerente de Proyectos</div>
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div>Asigna a <b>(*)</b></div>
+                        @Html.DropDownListFor(model => model.idPM, new SelectList(Model.ListarPorCola, "id", "text"), new { htmlAttributes = new { @class = "form-control select2 tamanioCombo" } })
+                        @Html.ValidationMessageFor(model => model.idPM, "", new { @class = "text-danger" })
+                    </div>
+                    <div class="col-md-6">
+                        <div>Tipo de Proyecto <b>(*)</b></div>
+                        @Html.DropDownListFor(model => model.idTipoProyecto, new SelectList(Model.ListarTipoProyecto, "id", "text"), new { htmlAttributes = new { @class = "form-control select2 tamanioCombo" } })
+                        @Html.ValidationMessageFor(model => model.idTipoProyecto, "", new { @class = "text-danger" })
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-3 card" id="divEspecialista">
+            <div class="card-body">
+                <div class="card-title">Asignar Especialista</div>
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="checkbox">
+                            <label><input type="checkbox" value="" id="chkAplica">&nbsp;&nbsp;&nbsp;No aplica</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-12">
+                    </div>
+                </div>
+                <div class="form-row cjAplica">
+                    <div class="col-md-6">
+                        <div>Área responsable <b>(*)</b></div>
+                        <select id="AreaResp" name="AreaResp" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                    </div>
+                    <div class="col-md-6">
+                        <div>Asignar a <b>(*)</b></div>
+                        <select id="Asignado" name="Asignado" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                    </div>
+                </div>
+                <div class="form-group-sm cjAplica">
+                    <div class="col-md-6">
+                        <div id="CantidadOP" style="color:darkred"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="card-title">Documentos Obligatorios&nbsp;&nbsp;&nbsp;<span id="btnCrearDocumento" style="cursor:pointer"><b> [+] </b></span></div>
+                <div id="documentosObligatorios">
+                    <div id="documentos">
+                        <!-- LISTA DE DOCUMENTOS OBLIGATORIOS -->
+                    </div>
+                    <div class="form-row" id="nuevoDocumento">
+                        <div id="mensajeDocumento" class="col-md-12"></div>
+                        <div class="col-md-10">
+                        </div>
+                        <div class="col-md-2" style="float:right;">
+                            <span id="btnGuardarDocumento" title="Guardar Documento" class="fa fa-file" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px;" onclick="GuardarModuloDocumento();"></span>
+                            &nbsp;&nbsp;
+                            <span id="btnCreaCancelar" title="Cancelar" class="fa fa-chevron-up" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px;"></span>
+                        </div>
+                        <div class="col-md-12">
+                            Documento<input id="txtDocumentoModulo" name="txtDocumentoModulo" class="form-control" type="text" style="width:100%;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card" style="width:100%;">
+            <div class="card-body">
+                <div class="card-title">Generar Cronograma</div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="checkbox">
+                                <label><input type="checkbox" value="" id="chkDiasCronograma">&nbsp;&nbsp;&nbsp;No aplica</label>
+                            </div>
+                        </div>
+                        <div class="col-md-6" id="cjDiasCronograma">
+                            <span style="font-size:12px">Días para generar cronograma: <b>(*)</b></span><input id="txtDias" name="txtDias" class="form-control" type="number" style="width:100%;" min="0" />
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-8">
+                        </div>
+                        <div class="col-md-4">
+                            <button id="submit" class="btn btn-primary btn-block">Asignar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="form-group-sm">
+            <div class="col-md-12"></div>
+            <div class="col-md-12"></div>
+        </div>
+        <div class="form-group-sm">
+            <div class="col-md-12"></div>
+            <div class="col-md-12"></div>
+        </div>
+    </div>
+}
+
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+<script type="text/javascript">
+    $(document).ready(function () {
+        if(@ViewBag.PmoOutsourcing == 2){
+            $("#divEspecialista").hide();
+            $("#divAsignarEspecialista").hide();
+        }
+
+        $(".block-element-btn-example-1").click(function () {
+            $(".element-block-example").block({
+                message: t('<div class="loader mx-auto">\n<div class="ball-grid-pulse">\n<div class="bg-white"></div>\n<div class="bg-white"></div>\n<div class="bg-white"></div>\n                                <div class="bg-white"></div>\n<div class="bg-white"></div>\n<div class="bg-white"></div>\n<div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n</div>\n                        </div>')
+            })
+        });
+
+        $('.modal-body #mensaje').hide();
+        setTimeout(function () { ListarDocumentosObligatorios() }, 800);
+        //Inicializa en 'Si aplica especialista'
+        $(".modal-body #Aplica").val("true");
+        $(".modal-body #nuevoDocumento").hide();
+        $('.modal-body #chkAplica').on('ifToggled', function (event) {
+            if ($('.modal-body #chkAplica').is(':checked')) {
+                //Checkeado
+                $(".modal-body .cjAplica").hide();
+                $(".modal-body #Asignado").empty();
+                $(".modal-body #AreaResp").empty();
+                $(".modal-body #CantidadOP").empty();
+                //No aplica especialista
+                $(".modal-body #Aplica").val("false");
+            } else {
+                //No Checkeado
+                $(".modal-body .cjAplica").show();
+                //Si aplica especialista
+                $(".modal-body #Aplica").val("true");
+            }
+        });
+
+        $(".modal-body #DiasCronograma").val("true");
+        $('.modal-body #chkDiasCronograma').on('ifToggled', function (event) {
+            if ($('.modal-body #chkDiasCronograma').is(':checked')) {
+                //Checkeado
+                $(".modal-body #cjDiasCronograma").hide();
+                $(".modal-body #txtDias").empty();
+                //No aplica especialista
+                $(".modal-body #DiasCronograma").val("false");
+            } else {
+                //No Checkeado
+                $(".modal-body #cjDiasCronograma").show();
+                //Si aplica especialista
+                $(".modal-body #DiasCronograma").val("true");
+            }
+        });
+        listarTipoDocumentos();
+        //$('.modal-body #msjAgregaMarca').append('hide');
+        //$("#reset").click(function (event) {
+        //    event.preventDefault();
+        //    closeWinFormModalPopUp();
+        //});
+
+        $("Id").val(@ViewBag.ID_DOCU_SALE);
+
+        $(".modal-body #idPM").select2({ width: '100%' });
+        $(".modal-body #idTipoProyecto").select2({ width: '100%' });
+
+        //Carga combo de 'Area responsable'
+        $(".modal-body #AreaResp").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountQueue/ListaOperaciones?var=" + Math.random(),
+                dataType: 'json',
+                //type: "POST",
+                //params: {
+                //    contentType: 'application/json; charset=utf-8'
+                //},
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page,
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+
+        $(".modal-body #AreaResp").change(function () {
+            $(".modal-body #Asignado").empty();
+            var idAreaResp = $(".modal-body #AreaResp").find(':selected').val();
+            //Carga combo de 'Asignar a especialista'
+            $(".modal-body #Asignado").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/AccountEntity/ListarPorCola?AreaResp=" + idAreaResp + "&var=" + Math.random(),
+                    dataType: 'json',
+                    //type: "POST",
+                    //params: {
+                    //    contentType: 'application/json; charset=utf-8'
+                    //},
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page,
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                }
+            });
+        });
+
+        $(".modal-body #Asignado").change(function () {
+            var IdIngeniero = $(".modal-body #Asignado").find(':selected').val();
+            ValidarCantidadOP(IdIngeniero);
+        });
+
+        $(".modal-body #btnCrearDocumento").click(function () {
+            $(".modal-body #nuevoDocumento").show("show");
+        });
+
+        $(".modal-body #btnCreaCancelar").click(function () {
+            $(".modal-body #nuevoDocumento").hide('hide');
+        });
+        //Asignación inicial
+        if ("@ViewBag.IdQueue" == "0") {
+        } else {
+            var $newOption = $("<option></option>").val("@ViewBag.IdQueue").text("@ViewBag.Area");
+            $(".modal-body #AreaResp").append($newOption).trigger('change');
+            var $newOption = $("<option></option>").val("@ViewBag.IdPersEntiAssi").text("@ViewBag.AreaPersonaAsignado");
+            $(".modal-body #Asignado").append($newOption).trigger('change');
+        }
+    });
+
+    function listarTipoDocumentos() {
+        $.ajax({
+                    url: "/TypeDocumentModule/ListarTipoDocumentos/",
+                    type: "GET",
+                    cache: false,
+                    dataType: "json",
+                    success: function (source) {
+                        mostrarTipoDocumentos(source);
+                    },
+                    error: function (source) {
+                        alert("Error Carga Json Tipo de Documentos");
+                    }
+        });
+    }
+
+
+    function mostrarTipoDocumentos(data) {
+        $('.modal-body #documentos').empty();
+        $.each(data['Data'], function (index, value) {
+             $('.modal-body #documentos').append(
+                 '<div class="form-row col-md-12"><div class="col-md-2"><input type="checkbox" id="Doc' + (data['Data'][index]['ID_TYPE_DOCU_ATTA']) + '" name="' + (data['Data'][index]['NAM_TYPE_DOCU_ATTA']) + '"> </div><div class="col-md-10">' + (data['Data'][index]['NAM_TYPE_DOCU_ATTA']) + "</div></div>"
+             );
+         });
+     }
+
+    function ValidarCantidadOP(IdIngeniero) {
+        $.ajax({
+            url: "/OrderForm/CantidadOP/" + IdIngeniero,
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (source) {
+                if (source != '') {
+                    $(".modal-body #CantidadOP").empty();
+                    $(".modal-body #CantidadOP").html(source);
+                } else {
+                    $(".modal-body #CantidadOP").empty();
+                }
+            },
+            error: function (source) {
+                alert("Error Carga Json Cantidad de OP's");
+            }
+        });
+    }
+
+    function GuardarDocumento() {
+        alert($('.modal-body #txtDocumento').val());
+        $.ajax({
+            url: "/OrderForm/GuardarDocumento/",
+            data: "IdDocuSale=" + $("#txtDocumento").val() +
+                  "&IdAccoPara=" + $("#cbTipoContacto").val() +
+                  "&IdPersEnti=" + $("#cbContacto").val() +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    $('#MensajeConfirmacion').modal({ backdrop: 'static', keyboard: false });
+                } else
+                    if (resp == "ERROR") {
+                        //$("#MensajeError").modal("show");
+                        $('#MensajeError').modal({ backdrop: 'static', keyboard: false });
+                    } else
+                        if (resp == "EXISTE") { // Ya existe el contacto en este proyecto
+                            //$("#MensajeError").modal("show");
+                            $('#MensajeErrorExiste').modal({ backdrop: 'static', keyboard: false });
+                        }
+
+            }
+        });
+    }
+
+    function GuardarModuloDocumento() {
+        //var documento = $('#modalAsignarPM .modal-dialog .modal-content .modal-body #txtDocumentoModulo').val()
+        $.ajax({
+            url: "/OrderForm/GuardarModuloDocumento/",
+            data: "Documento=" + $('#txtDocumentoModulo').val() + "&var=" + Math.random(),
+            cache: false,
+            type: "POST",
+            dataType: "text",
+            success: function (resp) {
+
+                if (resp == "OK") {
+                    $('.modal-body #mensajeDocumento').empty();
+                    $(".modal-body #mensajeDocumento").append("<div class='alert alert-success'><strong>¡Alerta!</strong> Información Actualizada. </div>");
+                    $('.modal-body #mensajeDocumento').show("show"); setTimeout(function () {
+                        $(".modal-body #mensajeDocumento").fadeOut(3000);
+                    }, 1000);
+                    $('#txtDocumentoModulo').val('')
+                    $('#modalAsignarPM .modal-dialog .modal-content .modal-body #documentos').empty();
+                    setTimeout(function () { listarTipoDocumentos() }, 800);
+                    setTimeout(function () { ListarDocumentosObligatorios() }, 1000);
+                } else if (resp == "EXISTE") { // Ya existe el contacto en este proyecto
+                    $('.modal-body #mensajeDocumento').empty();
+                    $(".modal-body #mensajeDocumento").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> El Nombre del Documento ya existe. </div>");
+                    $('.modal-body #mensajeDocumento').show("show"); setTimeout(function () {
+                        $(".modal-body #mensajeDocumento").fadeOut(3000);
+                    }, 1000);
+                }
+            }
+        });
+    }
+
+    function ListarDocumentosObligatorios() {
+        $.ajax({
+            url: "/OrderForm/ObtenerDocumentosObligatorios/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                $.each(data1['Data'], function (index, value) {
+                    $(".modal-body #txtDias").empty();
+                    $(".modal-body #Doc" + data1['Data'][index]['IdTypeDocuAtta']).attr('checked', true);
+                    if (data1['Data'][index]['DiasCronograma'] != 0) {
+                        $(".modal-body #txtDias").val(data1['Data'][index]['DiasCronograma']);
+                        $(".modal-body #txtDias").attr("disabled", true);
+                        $(".modal-body #chkDiasCronograma").attr("disabled", true);
+
+                    } else {
+                        $(".modal-body #txtDias").val('');
+                    }
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    @*function ObtenerDiasCronograma() {
+        $(".modal-body #txtDias").val('');
+        $.ajax({
+            url: "/OrderForm/ObtenerDiasCronograma/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (data) {
+                $(".modal-body #txtDias").val((data['Data'][index]['DiasCronograma']));
+            },
+            error: function (source) {
+                alert("Error Carga Json");
+            }
+        });
+    }*@
+
+    function mostrarMensaje(msg, code) {
+        if (msg == "ERROR") {
+            if (code == 1) {
+                toastr.warning("Debe registrar al especialista.", "¡Alerta!");
+            }
+            if (code == 2) {
+                toastr.warning("Ingrese los días para generar el cronograma.", "¡Alerta!");
+            }
+        }
+    }
+
+
+    function MensajeAsignarResponsable(msg, msnErr) {
+
+        if (msg == 'OK') {
+
+            toastr.success("", "Información Actualizada.");
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            MostrarMensajeCronograma(@ViewBag.ID_DOCU_SALE);
+        }
+
+        else if (msg == 'Mensaje') {
+            toastr.warning(msnErr, "Mensaje");
+        }
+
+        else {
+            toastr.error("No se Actualizaron los Datos.\n\n Contacte al Administrador." , "Mensaje");
+        }
+    }
+</script>

@@ -1,0 +1,95 @@
+﻿@model ERPElectrodata.Models.EVALUATION
+
+@{
+    Layout = null;
+}
+
+@* INDEX EVALUATION  *@
+
+<nav class="navSubMenu">
+    <ul>
+        <li><a href="#" onclick="NewTraining()">@ResourceLanguaje.Resource.NewEvaluation</a></li>
+        @*<li onclick="FindTraining()"><a href="#">@ResourceLanguaje.Resource.FindTraining</a></li>*@
+    </ul>
+</nav>
+
+<div id="divSubContent">
+    <div id="gridEvaluation" class="contentView">
+    </div>
+
+    <div id="pagerEvaluation" class="contentViewPager">
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="tpt-Evaluation">
+    <div class="incidentHomeList">
+        <div class="incidentHomeListBlock1 hasLayout">
+            <div class="incidentHomeListHeader">
+                <div class="FondoNegro">
+                    <div id="${ID_EVAL}" onclick="child(this)">
+                    </div>
+                    <div class="status">
+                        ${NAM_STAT_EVAL}
+                    </div>
+                    <div class="incidentHomeRequesterIcon" style="width:80%;">
+                        ${NAM_EVAL}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="incidentHomeSumary">
+            <a href="/Evaluation/Details/${ID_EVAL}" target='_BLANK' style="height:95%;">
+                #= DES_EVAL #
+            </a>
+        </div>
+        <div class="contraya">
+            <div class="raya"></div>
+        </div>
+        <div class="incidentHomeRes">
+            <div class="ticket"><span style="color:gray;">@ResourceLanguaje.Resource.Code:</span> ${COD_EVAL}</div>
+            <div class="cateTicket"><span style="color:gray;">@ResourceLanguaje.Resource.From </span>${DAT_START} <span style="color:gray;">@ResourceLanguaje.Resource.To </span>${DAT_END}</div>
+            <div class="cateTicket"><span style="color:gray;">@ResourceLanguaje.Resource.Created:</span> ${CREATED}</div>
+            <div class="viaTicket"><span style="color:gray;">@ResourceLanguaje.Resource.CreatedBy:</span> ${USER}</div>
+        </div>
+    </div>
+    <div style="clear:both">
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var ds_evaluation = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Evaluation/List?var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerEvaluation").kendoPager({
+            dataSource: ds_evaluation,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridEvaluation").kendoListView({
+            dataSource: ds_evaluation,
+            template: kendo.template($("#tpt-Evaluation").html())
+        });
+    });
+</script>

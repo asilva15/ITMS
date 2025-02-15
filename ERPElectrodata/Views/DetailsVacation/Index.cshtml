@@ -1,0 +1,319 @@
+﻿@model ERPElectrodata.Models.DETAILS_VACATION
+
+@{
+    ViewBag.Title = "Index";
+}
+
+<div style="float:left; width:60%;">
+    <div class="titleForm">
+        <div style="display:inline-block; width:100%; height:20px;">
+            <div class="title" style="float:left; width:30%;">@ResourceLanguaje.Resource.Code # @ViewBag.COD_VACA</div>
+            <div style="padding-top:3px; padding-right:1%; float:right; width:64%; text-transform:capitalize; text-align:right;" id="divCIA"></div>
+        </div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            <div id="divVacation">
+            </div>
+            <div style="clear:both;">
+                @using (Html.BeginForm("Create", "DetailsVacation", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmDetailVacation", name = "FrmDetailVacation", target = "ut_DetailsVacation" }))
+                {
+                    @Html.ValidationSummary(true)
+                    <input type="hidden" name="ID_VACA" value="@ViewBag.ID_VACA" />
+                    <div class="divFondoDos">
+                        <div class="divSpace2_a"></div>
+                        <div class="divCont2">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Type
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_TYPE_DETA_VACA)
+                                @Html.ValidationMessageFor(model => model.ID_TYPE_DETA_VACA)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divFondoUno">
+                        <div class="divSpace2_a"></div>
+                        <div style="width:96%;float:left">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Comment
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextAreaFor(model => model.COM_DETA_VACA, new { rows = "20" })
+                                @Html.ValidationMessageFor(model => model.COM_DETA_VACA)
+                            </div>
+                        </div>
+                    </div>
+                    <div style="width: 96%; float:left; padding: 0px 0px 0 15px; ">
+                        <input name="files" id="files" type="file" />
+                    </div>
+                    <div style="margin:0px 15px 0px 0px; height:25px; border:0px solid black;">
+                        <div style="float:right;padding:10px 0px 0px 0px; ">
+                            <button id="submit" class="k-button">Create</button>
+                        </div>
+                    </div>
+                    <iframe id="ut_DetailsVacation" name="ut_DetailsVacation" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+                    <div style="clear:both; padding-top:10px;"></div>
+                }
+            </div>
+            <div class="divFondoUno">
+                <div id="divCommentVacation"></div>
+            </div>
+            <div style="clear:both; padding-bottom:5px;"></div>
+        </div>
+    </div>
+</div>
+<div style="float:right; width:39%;">
+    <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.Activities</div></div>
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            <div id="divActivities" style="padding:5px;">
+            </div>
+        </div>
+    </div>
+
+    @*<div style="height:10px;"></div>
+
+    <div class="titleForm" id="divTitleDetailsTicket"><div class="title">@ResourceLanguaje.Resource.DetailsUser</div></div>
+    <div class="bodyForm" id="divDetailsUser">
+        <div class="inBodyForm" style="height:195px;">
+            <div id="divDetu" style="border:0px solid black;padding:5px 5px 0px 5px; margin:0px;">
+            </div>
+        </div>
+    </div>*@
+</div>
+
+
+<script type="text/javascript">
+
+    $("#submit").click(function () {
+        $("#submit").prop("disabled", false);
+        winPopUpModalLoad('@ResourceLanguaje.Resource.Saving @ResourceLanguaje.Resource.Vacation', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+    });
+
+    $(document).ready(function () {
+        $.ajax({
+            url: "/DetailsVacation/ListByIdVaca/@ViewBag.ID_VACA",
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                showDetailsVaca();
+                //console.log(data1);
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+
+        var ID_TYPE_DETA_VACA = $("#ID_TYPE_DETA_VACA").kendoComboBox({
+            autoBind: true,
+            index: 0,
+            dataTextField: "NAM_TYPE_DETA_VACA",
+            dataValueField: "ID_TYPE_DETA_VACA",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeDetailsVacation/List"
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#COM_DETA_VACA").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach"
+            }
+        });
+    });
+
+    function showDetailsVaca() {
+        $.each(data1['Data'], function (index, value) {
+            $("#divVacation").append(
+                '<div class="divFondoUno">' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Status</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['NAM_VACA_STAT']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Employee</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Employee']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Email</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Email']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.CellPhone</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Cell']) + '</div>' +
+                    '</div>' +
+                    '<div style="min-width: 100px; height: 40px; width: auto; margin-right:6px; float: right; display: inline-block;">' +
+                        '<div style="width: 40px; height: 40px; background-color: #00a8e6; float: right; color: White; text-align: center;">' +
+                            '<div style="width:100%; text-align:center; font-size:1.5em; font-family:"Segoe UI";"><b>' + (data1['Data'][index]['NUM_DAYS']) + '</b></div>' +
+                            '<div style="width:100%; text-align:center; font-size:.85em; margin-top:-3px; ">@ResourceLanguaje.Resource.Days</div>' +
+                        '</div>' +
+                        '<div style="float:right; width:33.33%; height:100%; position:relative;">' +
+                            '<div class="botonDownload" title="Download File"></div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="divFondoDos">' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.SinceDate</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['DAT_STAR']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.ToDate</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['DAT_END']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.DateReturn</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['DAT_RETU']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="divFondoUno">' +
+                    '<div class="detailsSummary">' +
+                        '<div id="detSummary">' +
+                            '<div class="containerdt">' +
+                                '<div class ="userData">' +
+                                    '<div class="asignedImage"><a><img src="/Content/Fotos/' + (data1['Data'][index]['ID_FOTO']) + '.jpg"/></a></div>' +
+                                '</div>' +
+                                '<div class="messageData">' +
+                                    '<div class="messageArrow"></div>' +
+                                    '<div class="messageBoxDet">' +
+                                        '<div class="msgBoxDetUser">' + '@ResourceLanguaje.Resource.CreatedBy ' + (data1['Data'][index]['User']) +
+                                        '</div>' +
+                                        '<div class="msgBoxDetUserAssi">' + '@ResourceLanguaje.Resource.CreatedDate ' + (data1['Data'][index]['DAT_REGI']) +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="msgBoxBody">' + (data1['Data'][index]['SUMMARY']) +
+                                    '</div>' +
+                                    '<div class="dadjuntos">' + (data1['Data'][index]['NAM_ATTA']) +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>'
+                );
+        });
+
+        $.each(data1['Details'], function (index, value) {
+
+            $("#divActivities").append(
+                '<div class="listActCont">' +
+                    '<div class="listActContGris">' +
+                        (data1['Details'][index]['NAM_TYPE_DETA_VACA']) +
+                    '</div>' +
+                    '<div class="listActContGrisR">' +
+                        (data1['Details'][index]['User']) +
+                    '</div>' +
+                    '<div class="listActContGrisC">' +
+                        (data1['Details'][index]['DAT_REGI']) +
+                    '</div>' +
+                '</div>'
+                );
+
+            $("#divCommentVacation").append(
+            '<div class="detailsSummary">' +
+                '<div id="detSummary">' +
+                    '<div class="containerdt">' +
+                        '<div class="userData">' +
+                            '<div class="asignedImage"><a href="#"><img src="/Content/Fotos/' + (data1['Details'][index]['ID_FOTO']) + '.jpg"/></a></div>' +
+                        '</div>' +
+                        '<div class="messageData">' +
+                            '<div class="messageArrow"></div>' +
+                                '<div class ="messageBoxDet">' +
+                                    '<div class ="msgBoxDetUser">' +
+                                        (data1['Details'][index]['User']).toLowerCase() +
+                                    '</div>' +
+                                    '<div class ="msgBoxDetCreate">' +
+                                        (data1['Details'][index]['DAT_REGI']) +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class ="messageBoxDet2">' +
+                                    '<div class ="msgBoxDetTDI' + (data1['Details'][index]['ID_TYPE_DETA_VACA']) + '">' +
+                                        (data1['Details'][index]['NAM_TYPE_DETA_VACA']).toLowerCase() +
+                                    '</div>' +
+                                '</div>' +
+                            '<div class="msgBoxBody">' +
+                                (data1['Details'][index]['COM_DETA_VACA']) +
+                            '</div>' +
+                            '<div class ="dadjuntos">' +
+                                (data1['Details'][index]['ATTA']) +
+                            '</div>' +
+                        '</div>' +//message Data
+                    '</div>' +
+                '</div>' +
+            '</div>');
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    function uploadDoneVaca(msg, msn) {
+        closeWinModalPopUpLoad();
+        if(msg == 'OK'){
+
+            winPopUpModal("@ResourceLanguaje.Resource.InformationSaved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.msnRegisterComplete</div>"
+           + "<div></div>" +
+           "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+           "</div></div>"
+             , 400, 160);
+
+            var undo = $("#continues")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                location.reload(true);
+            });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+                location.reload(true);
+            });
+        }
+        else {
+            
+            winPopUpModal("@ResourceLanguaje.Resource.InformationMissing", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + msn + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+</script>

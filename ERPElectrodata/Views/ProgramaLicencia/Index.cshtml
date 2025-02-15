@@ -1,0 +1,172 @@
+﻿@{
+    ViewBag.Title = "ProgramaLicencia";
+    //Layout = null;
+}
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Programas
+        <div class="btn-actions-pane-right">
+            @*{
+                if (ViewBag.CantidadLicencias > 0)
+                {
+                    <a href="/ProgramaLicencia/LicenciasPorVencer/" class="btn btn-light btn-sm" id="btnLicencias">Licencias por vencer:  @ViewBag.CantidadLicencias</a>;
+                }
+            }*@
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-2">
+                <label for="IdPrograma">Programa</label>
+                <input type="text" class="form-control" id="IdPrograma" name="IdPrograma" />
+            </div>
+            <div class="col-md-2">
+                <label for="IdProveedor">Proveedor</label>
+                <input type="text" class="form-control" id="IdProveedor" />
+            </div>
+            <div class="col-md-8 text-right">
+                <button type="button" class="btn btn-primary btn-hover-shine" id="Buscar" onclick="CargarGrilla(this)">
+                    <i class="fa fa-search"></i> Buscar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3" id="cabecera">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <div class="col-md-2"><strong>PROGRAMA</strong></div>
+            <div class="col-md-2"><strong>CODIGO</strong></div>
+            <div class="col-md-2"><strong>VERSIÓN PROGRAMA</strong></div>
+            <div class="col-md-2"><strong>PROVEEDOR</strong></div>
+            <div class="col-md-2"><strong>CONTACTO</strong></div>
+            <div class="col-md-2"><strong>TELÉFONO</strong></div>
+        </div>
+    </div>
+    <div id="divProgramaLicencia" class="contentView"></div>
+    <div id="pagerdivProgramaLicencia" class="contentViewPager"></div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaLicencia">
+    <a href="/ProgramaLicencia/Detalle/?programa=${IdPrograma}&proveedor=${IdProveedor}&version=${VersionPrograma}" target="_blank" class="text-decoration-none" style="width:100%">
+        <div class="card-body py-3 btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-2">${Programa}</div>
+                <div class="col-md-2">${CodigoPrograma}</div>
+                <div class="col-md-2">${VersionPrograma}</div>
+                <div class="col-md-2">${Proveedor}</div>
+                <div class="col-md-2">${ContactoProveedor}</div>
+                <div class="col-md-2">${TelefonoProveedor}</div>
+            </div>
+        </div>
+        <hr class="m-0" />
+    </a>
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#IdPrograma").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Programa/ListarProgramas?var=" + Math.random()
+                }
+            }
+        });
+
+
+        $("#IdProveedor").kendoComboBox({
+            dataTextField: "NombreProveedor",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proveedor/Listar?var=" + Math.random()
+                }
+            }
+        });
+
+
+       CargarGrilla();
+    });
+
+    function CargarGrilla(sw) {
+        $("#checkAll").prop("checked", false);
+        $("#divBandeja").css("top", "20px");
+        $("#divCheckAll").css("margin-top", "0px");
+        $("#divButtons").css("display", "none");
+
+        $("#divProgramaLicencia").empty();
+        $("#pagerdivProgramaLicencia").empty();
+
+        if ($("#divProgramaLicencia").data("kendoListView")) {
+            $("#pagerdivProgramaLicencia").data("kendoPager").destroy();
+            $("#divProgramaLicencia").data("kendoListView").destroy();
+        }
+
+        var programaId = $("#IdPrograma").data("kendoComboBox").value();
+        var proveedorId = $("#IdProveedor").data("kendoComboBox").value();
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/ProgramaLicencia/newObtenerLicencias",  
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random(),
+                        Programa: programaId,
+                        Proveedor: proveedorId,
+                        CodigoPrograma: $("#CodigoPrograma").val() == '' ? 0 : $("#CodigoPrograma").val(),
+                        IdPrograma: $("#IdPrograma").val() == '' ? 0 : $("#IdPrograma").val(),
+                        IdProveedor: $("#IdProveedor").val() == '' ? 0 : $("#IdProveedor").val(),
+                        VersionPrograma: $("#VersionPrograma").val() == '' ? 0 : $("#VersionPrograma").val(),
+                        ContactoProveedor: $("#ContactoProveedor").val() == '' ? 0 : $("#ContactoProveedor").val(),
+                        TelefonoProveedor: $("#TelefonoProveedor").val() == '' ? 0 : $("#TelefonoProveedor").val(),
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "ListaPrioridad",
+                total: "Cantidad"
+            }
+        });
+
+
+        $("#pagerdivProgramaLicencia").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true,
+        });
+
+        $("#divProgramaLicencia").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaLicencia").html())
+        });
+        document.getElementById("cabecera2").style.display = "none";
+
+    }
+
+</script>

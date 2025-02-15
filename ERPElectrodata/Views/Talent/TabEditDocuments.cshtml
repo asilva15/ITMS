@@ -1,0 +1,126 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+<div id="divContent">
+    <div class="row">
+        <div class="col-lg-4" style="height:200px;">
+            <div class="mb-3 card">
+                <div class="card-header-tab card-header">
+                    <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                        @ResourceLanguaje.Resource.DocumentsTalent
+                    </div>
+                </div>
+                <div class="p-0 card-body">
+                    <div class="p-1 slick-slider-sm">
+                        <div style="width:100%;">
+                            <div class="inBodyForm" style="overflow-y: auto; height:511px;" id="divContDocuments">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4" style="height:170px;">
+            <div class="col-sm-12 col-lg-12">
+                <div class="mb-3 card">
+                    <div class="card-header-tab card-header">
+                        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                            @ResourceLanguaje.Resource.AchievementsTalent
+                        </div>
+                    </div>
+                    <div class="p-0 card-body" wid>
+                        <div class="p-1 slick-slider-sm">
+                            <div style="width:100%;">
+                                <div id="divContAchievements" style="padding: 3px 0 0 7px;height:170px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-12" style="width:100%;">
+                <div class="mb-3 card">
+                    <div class="card-header-tab card-header">
+                        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                            @ResourceLanguaje.Resource.IssuesTalent
+                        </div>
+                    </div>
+                    <div class="p-0 card-body">
+                        <div class="p-1 slick-slider-sm">
+                            <div style="width:100%;">
+                                <div id="ListIssue"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3">
+            <div class="mb-3 card">
+                <div class="card-header-tab card-header">
+                    <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                        @ResourceLanguaje.Resource.AttachTalent
+                    </div>
+                </div>
+                <div class="p-0 card-body">
+                    <div class="p-1 slick-slider-sm">
+                        <div style="width:100%;">
+                            <div id="cargarDocs"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript"> 
+    $(document).ready(function () {
+
+        $("#divContDocuments").empty();
+        $("#divContDocuments").load("/Talent/ListDocuments?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+        $("#divContAchievements").empty();
+        $("#divContAchievements").load("/Talent/ListAchievements?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+        $.ajax({
+            url: "/Talent/ListIssuesUser/@ViewBag.ID_PERS_ENTI",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showInfoIssues();
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+
+        $("#cargarDocs").empty();
+        $("#cargarDocs").load("/Talent/AttachDocs?id=@ViewBag.ID_PERS_ENTI&id1=@ViewBag.ID_PERS_STAT&var=" + Math.random());
+        
+
+    });
+
+    function showInfoIssues() {
+        var strHtml1 = '';
+
+        $("#ListIssue").empty();
+        $.each(data['data'], function (index, value) {
+            strHtml1 = strHtml1 +
+                '<div class ="divFondoUno" id="S' + (data['data'][index]['ID_PERS_DOCU']) + '"><div style="float:left; width:90%; padding: 0 0 0 10px;">' +
+                '<img src="/Content/Images/pdf.gif" style="width:14px; height:14px;" />' +
+                '<a href="' + (data['data'][index]['NAM_ATTA']) + '_' + (data['data'][index]['ID_PERS_DOCU']) + (data['data'][index]['EXT_ATTA']) + '" target="_blank" title="@ResourceLanguaje.Resource.DownloadTalent' + (data['data'][index]['NAM_ATTA']) + '" style="cursor:pointer;color:#444444;font-size: .9em;text-transform: none;text-decoration:none;">' + (data['data'][index]['NAM_ATTA']) + '</a><a id="S|' + (data['data'][index]['ID_PERS_DOCU']) + '" class="delete-link" href="\#" title="Remove"></a></div>' +
+                    '</div></div><br />';
+        });
+        $("#ListIssue").append(strHtml1);
+    }
+
+    function mensaje() {
+        toastr.success("Información guardada", "Information Saved");
+    }
+</script>

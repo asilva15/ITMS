@@ -1,0 +1,160 @@
+﻿@{
+    ViewBag.Title = "AgregarMenu";
+    Layout = null;
+}
+
+<input id="IdRol" type="text" style="display:none" value="@ViewBag.IdRol"/>
+<div class="main-card mb-2 card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="position-relative form-group">
+                <div class="col-md-12">
+                    <input id="chbSelecTodo" type="checkbox" />
+                    <label for="chbSelecTodo">Seleccionar Todo</label>
+                </div>
+            </div>
+            <table id="menu2Table" class="table table-hover table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th style="width:7%"></th>
+                        <th style="width:93%">Menú</th>
+                    </tr>
+                </thead>
+                @*<tfoot>
+                        <tr>
+                            <th>Id</th>
+                            <th style="width:10%"></th>
+                            <th style="width:90%">Menú</th>
+                        </tr>
+                    </tfoot>*@
+            </table>
+        </div>
+        <br />
+        <div class="form-row">
+            <div class="col-md-3 ml-auto">
+                <div class="position-relative form-group">
+                    <button type="button" class="btn btn-primary btn-block" id="AgregarMenus" onclick="Agregar()" data-dismiss="modal">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        //variable de Idioma
+        var leng_esp = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+
+        $("#menu2Table").dataTable().fnDestroy();
+        $("#menu2Table").DataTable({
+            responsive: true,
+            dom: 'frtip',
+            bAutoWidth: false,
+            ajax: {
+                url: "/Role/ListaMenusNoRol?idRol=" + $("#rolid").val(),
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "Id"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<input id="chb' + data.Id + '" type="checkbox" />';
+                    }
+                },
+                {
+                    data: "Menu"
+                }
+            ],
+            columnDefs: [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                },
+                { "width": "7%", "targets": 1 }, { "width": "93%", "targets": 2 }
+            ],
+            language: leng_esp
+        });
+
+    });
+
+    $(document).ajaxComplete(function () {
+        //Dando estilo iCheck a checkboxex
+        $('#miModal :checkbox').iCheck({
+            checkboxClass: 'icheckbox_flat-blue'
+        });
+
+        $('#chbSelecTodo').on('ifChecked', function (event) {
+            $('#miModal :checkbox').iCheck('check');
+        });
+        $('#chbSelecTodo').on('ifUnchecked', function (event) {
+            $('#miModal :checkbox').iCheck('uncheck');
+        });
+    });
+
+    function Agregar() {
+        var menus = new Array;
+        $.each($('#miModal :checkbox').not('#chbSelecTodo'), function () {
+            var id = "#" + $(this).attr('id');
+
+            var tr = $(id).iCheck('update')[0].checked;
+            if ($(id).iCheck('update')[0].checked == true) {
+                menus[menus.length++] = id.substr(4);
+            }
+        });
+
+        if (menus == "") {
+            toastr.warning("No se ha seleccionado ningún menú.");
+        } else {
+            $.ajax({
+                type: "POST",
+                url: "/Role/AgregarMenu?idRol=" + $("#IdRol").val(),
+                data: JSON.stringify(menus),
+                contentType: 'application/json; charset=utf-8',
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else {
+                        toastr.success("Menu Agregado", "Exito!");
+                        $('#menuTable').DataTable().ajax.reload();
+                    }
+                }
+            });
+        }
+    }
+</script>

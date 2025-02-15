@@ -1,0 +1,241 @@
+﻿@model ERPElectrodata.Models.PLANTILLA
+@{
+    Layout = null;
+}
+
+<style>
+    b {
+        color: #F83C50;
+    }
+</style>
+
+<div style="width:100%; display:inline-block;">
+    @using (Html.BeginForm("CrearNuevaPlantilla", "Plantilla", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormNewRequest", name = "FormNewRequest", target = "ut_NewRequest" }))
+    {
+        @Html.ValidationSummary(true)
+        <div class="col-md-12">
+
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="editor-label">
+                            Cuenta <b>*</b>
+                        </div>
+                        <div>
+                            <input id="cbCuentaCrea" name="cbCuentaCrea" class="" type="text" />
+                        </div>
+                    </div>
+                </div>
+            </div>                            
+
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="editor-label">
+                            Grupo <b>*</b>
+                        </div>
+                        <div>
+                            <input id="cbGrupoCrea" name="cbGrupoCrea" class="" type="text" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="editor-label">
+                            Tipo Plantilla <b>*</b>
+                        </div>
+                        <div>
+                            <input id="cbTipoPlantillaCrea" name="cbTipoPlantillaCrea" class="form-control" type="text" />
+                        </div>
+                    </div>
+                </div>
+
+            </div> 
+
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="editor-label">
+                            Plantilla <b>*</b>
+                        </div>
+                        <div>
+                            <input id="PlantillaCrea" name="PlantillaCrea" class="form-control" type="text" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="editor-label">
+                            Descripción <b>*</b>
+                        </div>
+                        <div class="form-row">
+                            @Html.TextAreaFor(model => model.DESCRIPCION, new { @class = "form-control", @rows = "8" })
+                            @Html.ValidationMessageFor(model => model.DESCRIPCION)
+                            @*<textarea class="form-control" id="TextareaGrupo" name="TextareaGrupo" rows="8"></textarea>*@
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+        </div>
+
+
+
+
+        @*---------------------------Footer--------------------------------------------------------*@
+
+            <div class="card-footer">
+
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-3">
+
+                        </div>
+                        <div class="col-md-3">
+                            <button id="submitRequest" type="submit"  class="btn btn-primary btn-block">Crear</button>
+                        </div>
+                        <div class="col-md-3">
+                            <button id="btnCancelar" class="ladda-button mb-2 btn btn-gradient-light btn-block widthMax" data-style="expand-right" data-dismiss="modal">
+                                <span class="ladda-label">Cancelar</span><span class="ladda-spinner"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+
+    }
+    <iframe id="ut_NewRequest" name="ut_NewRequest" src="" class="d-none" @*style="width:0px;height:0px;border-width:0px;display:none;"*@></iframe>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#cbCuentaCrea").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione una cuenta",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListarCuentas_Kendo"
+                }
+
+            }
+        });
+
+           //.data("kendoComboBox");
+
+        var cbGrupoCrea = $("#cbGrupoCrea").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "cbCuentaCrea",
+            dataTextField: "NOMBRE",
+            dataValueField: "ID_GRUPO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Plantilla/ListarGruposCuenta?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            location.reload(true);
+        });
+
+
+
+        var cbTipoPlantillaCrea = $("#cbTipoPlantillaCrea").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NOMBRE",
+            dataValueField: "ID",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Plantilla/ListarTipoPlantillaCombo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+  
+
+        $("#DESCRIPCION").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: function (e) {
+                if (/<img\s+[^>]*>/i.test(e.html)) {
+                    toastr.warning("No se permiten imágenes en este campo.");
+                    e.html = "";
+                } else if ((/^<img src="data:image/).test(e.html)) {
+                    toastr.warning("No se permiten imágenes en este campo.");
+                    e.html = "";
+                }
+            }
+        });
+
+        //ListarPlantilla();
+    });
+
+
+    function uploadDoneNR(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success(msnErr);
+            $("#btnBuscar").click();
+            $("#btnCancelar").click();
+        }
+        else {
+            toastr.error(msnErr);
+        }
+    }
+
+</script>
+

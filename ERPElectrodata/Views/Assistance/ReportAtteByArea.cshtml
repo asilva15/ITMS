@@ -1,0 +1,83 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="main-card mb-3 card">
+    <div class="card-body">
+        <div class="col-sm-12 col-lg-12" style="width:100%;" id="allPerformance">
+            <form id="ParamByArea">
+                <div class="row">
+                    <div class="col-sm-12 col-xl-3">
+                        Area :<br />
+                        <input type="text" id="ID_CHAR_PARE" name="ID_CHAR_PARE" style="width:100%;"/>
+                    </div>
+                    <div class="col-sm-12 col-xl-3">
+                        Since Day :<br />
+                        <input type="text" id="SIN_DATE" name="SIN_DATE" style="width:100%;"/>
+                    </div>
+                    <div class="col-sm-12 col-xl-3">
+                        To Day :<br />  
+                        <input type="text" id="TO_DATE" name="TO_DATE" style="width:100%;"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="main-card mb-3 card">
+    <div class="card-body">
+        <iframe id="MSRSAtteByArea" style="height:400px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport3() {
+        window.frames["MSRSAtteByArea"].src = "/Reporting/Attendance/ByArea.aspx?var=" + Math.random() + "&" + $("#ParamByArea").serialize();
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var ID_ENTI = $("#ID_CHAR_PARE").kendoComboBox({
+            dataTextField: "NAM_CHAR",
+            dataValueField: "ID_CHAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Assistance/ListByArea?var=" + Math.random()
+                }
+            },
+            change: function () {
+                GenerateReport3();
+            },
+            dataBound: function (e) {
+                GenerateReport3();
+            }
+        });
+
+        $("#SIN_DATE").kendoDatePicker({
+            value: new Date('@DateTime.Now.Year', @DateTime.Now.Month-1, 1),
+            change: function () {
+                GenerateReport3();
+            }
+        });
+        $("#TO_DATE").kendoDatePicker({
+            value: new Date('@DateTime.Now.Year', @DateTime.Now.Month-1, '@DateTime.Now.Day'),
+            change: function () {
+                GenerateReport3();
+            }
+        });
+
+    });
+
+</script>

@@ -1,0 +1,126 @@
+﻿@{
+    ViewBag.Title = "ReportesPlanos";
+    //Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+@*<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />*@
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+@*<link href="~/Content/ITMS/styles.css" rel="stylesheet" />*@
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-file icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Reportes Planos
+                <div class="page-title-subheading">
+                   
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="main-card mb-3 card element-block-example">
+            <div class="card-body">
+                <div class="card-title">Opciones</div>
+                <form class="">
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="position-relative form-group">
+                                <button id="btnRptCategoria" class="mt-1 btn btn-primary btn-block block-element-btn-example-1" type="button">Por Categoría</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="position-relative form-group">
+                                <button id="btnRptGestionDeCambio" class="mt-1 btn btn-primary btn-block block-element-btn-example-1" type="button">Por Gestión de Cambios</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <div class="main-card mb-3 card element-block-example">
+            <div id="divCuerpo">
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div style="visibility:hidden" id="tReporteporCategoría" class="ReporteporCategoría"></div>
+<div style="visibility:hidden" id="tReporteporGestionCambios" class="ReportedeTicketscerradosporGestióndeCambios"></div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        cambioIdiomaTexto();
+
+        //$("#spanTitulo").html(ttlCat);
+        $("#divCuerpo").load("/Ticket/ReportePlanoCategoria?var=" + Math.random());
+
+        $("#btnRptCategoria").click(function () {
+            $("#divCuerpo").empty();
+            //$("#spanTitulo").html(ttlCat);
+            $("#divCuerpo").load("/Ticket/ReportePlanoCategoria?var=" + Math.random());
+        });
+
+        $("#btnRptGestionDeCambio").click(function () {
+            $("#divCuerpo").empty();
+            //$("#spanTitulo").html("<script>cambioIdioma('ReportedeTicketscerradosporGestióndeCambios', $('#IdIdioma').val(), 'ReportedeTicketscerradosporGestióndeCambios');</scr" + "ipt>");
+            $("#divCuerpo").load("/Ticket/ReporteTicketGestionDeCambio?var=" + Math.random());
+        });
+    });
+
+    function cambioIdiomaTexto() {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaTexto?IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+</script>

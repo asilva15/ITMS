@@ -1,0 +1,266 @@
+﻿@{
+    ViewBag.Title = "MantContratoBNV";
+    Layout = null;
+}
+
+<div class="form-row">
+    <div class="col-md-3">
+        <div class="editor-label">
+            Grupo
+        </div>
+        <div class="editor-field">
+            <input id="cbGrupo" name="cbGrupo" value="@ViewBag.IdGrupo" />
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="editor-label">
+            Contrato
+        </div>
+        <div class="editor-field">
+            <input id="cbContrato" name="cbContrato" />
+        </div>
+    </div>
+    <div class="col-md-2">
+        <br />
+        <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="btnBuscar" onclick="ListarContratoBNV()"><i class="fa fa-search"></i> Buscar</button>
+    </div>
+    <div class="col-md-2">
+        <br />
+        <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="btnNuevoContrato" onclick="NuevoContratoBNV()"><i class="fa fa-plus"></i> Nuevo</button>
+    </div>
+</div>
+
+<div class="table-responsive mt-3">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%;" id="tbListado">
+                <thead>
+                    <tr>
+                        <th class="text-center">Nombre</th>
+                        <th class="text-center">Descripción</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var cbGrupo = $("#cbGrupo").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarGruposSuperBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cbContrato = $("#cbContrato").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            cascadeFrom: 'cbGrupo',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarProyectosBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ListarTabla();
+
+    });
+
+    function ListarContratoBNV() {
+        var cbGrupo = $("#cbGrupo").data("kendoComboBox");
+
+        if (cbGrupo.dataItem() === undefined) {
+            toastr.warning("Seleccione un grupo.", "Mensaje");
+        } else {
+            ListarTabla();
+        }
+    }
+
+    function ListarTabla() {
+        const parametros = {
+            IdGrupo: $("#cbGrupo").val(),
+            IdContrato: $("#cbContrato").val()
+        };
+        var table = $('#tbListado').DataTable();
+        table.clear().destroy();
+        $('#tbListado').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: `/Contrato/ListadoContratosBNV`,
+                data: parametros,
+                type: "GET"
+            },
+            columns: [
+                {
+                    data: "Nombre",
+                    width: "30%"
+                },
+                {
+                    data: "Descripcion",
+                    width: "40%"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let color, text = '';
+                        if (data.Estado == 1) { color = 'success'; text = 'Activo' } else { color = 'danger'; text = 'Inactivo' };
+                        let label = `<div class="badge badge-${color}">${text}</div>`
+                        return label;
+                    },
+                    width: "15%",
+                    className: 'text-center'
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let boton;
+                        if (data.Estado == 1) {
+                            boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                        <button type="button" id="btnEliminarContrato" onclick="EliminarContratoBNV(${data.Id})" class="btn-shadow btn-hover-shine btn btn-danger btn-sm btn-pill pl-3"><i class="fa fa-edit" aria-hidden="true"></i> Desactivar</button>
+                                    </div>`
+                        } else {
+                            boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                        <button type="button" id="btnActivarContrato" onclick="ActivarContratoBNV(${data.Id})" class="btn-shadow btn-hover-shine btn btn-success btn-sm btn-pill pl-3"><i class="fa fa-edit" aria-hidden="true"></i> Activar</button>
+                                    </div>`
+                        }
+                        return boton;
+                    },
+                    width: "15%",
+                    className: 'text-center'
+                },
+            ],
+            order: [[2, 'asc'], [0, 'asc']],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+    }
+
+    function NuevoContratoBNV() {
+        $("#btnNuevoContrato").removeAttr("data-toggle");
+        $("#btnNuevoContrato").removeAttr("data-target");
+
+        var cbGrupo = $("#cbGrupo").data("kendoComboBox");
+
+        if (cbGrupo.dataItem() === undefined) {
+            toastr.warning("Seleccione un grupo.", "Mensaje");
+        } else {
+            $("#lblTitulo").text("Nuevo Contrato");
+
+            $("#btnNuevoContrato").attr("data-toggle", "modal");
+            $("#btnNuevoContrato").attr("data-target", "#miModal");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Contrato/Nuevo/' + cbGrupo.dataItem().Id + '?mant=1');
+        }
+    }
+
+    function EliminarContratoBNV(id) {
+        swal({
+            title: `¿Desea desactivar este contrato?`,
+            text: `Se desactivará el contrato seleccionado`,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Guardar",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        }, function (dismiss) {
+            if (dismiss) {
+                $.ajax({
+                    url: "/Contrato/ModificarEstadoContratoBNV/" + id + "?idEstado=0&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == 'ERROR') {
+                            toastr.error("Error al desactivar el contrato.", "Mensaje");
+                        } else {
+                            toastr.success("Se desactivó el contrato.", "Información Guardada");
+                            ListarTabla();
+                            $("#cbContrato").data("kendoComboBox").dataSource.read();
+                            swal.close();
+                        }
+                    }
+                });
+            }
+            else {
+                swal("Cancelado", "Ha cancelado la operación", "error");
+            }
+        });
+    }
+
+    function ActivarContratoBNV(id) {
+        swal({
+            title: `¿Desea activar este contrato?`,
+            text: `Se activará el contrato seleccionado`,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Guardar",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        }, function (dismiss) {
+            if (dismiss) {
+                $.ajax({
+                    url: "/Contrato/ModificarEstadoContratoBNV/" + id + "?idEstado=1&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == 'ERROR') {
+                            toastr.error("Error al activar el contrato.", "Mensaje");
+                        } else {
+                            toastr.success("Se activó el contrato.", "Información Guardada");
+                            ListarTabla();
+                            $("#cbContrato").data("kendoComboBox").dataSource.read();
+                            swal.close();
+                        }
+                    }
+                });
+            }
+            else {
+                swal("Cancelado", "Ha cancelado la operación", "error");
+            }
+        });
+    }
+
+    function uploadDone(msg, code, idActivo) { }
+
+</script>

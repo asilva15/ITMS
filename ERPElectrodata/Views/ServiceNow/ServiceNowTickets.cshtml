@@ -1,0 +1,205 @@
+﻿@{
+    ViewBag.Title = "ServiceNowTickets";
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+<link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+<script src="~/Scripts22/datatable/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="app-page-title cabeceraBg">
+    <div class="page-title-wrapper d-flex">
+        <div class="page-title-heading">
+            <div class="font-icon-wrapper font-icon-lg bg-white">
+                <i class="fa fa-file icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                <div class="titleModule"><b><span class="INCIDENTESYREQUERIMIENTOS">Tickets de ServiceNow</span></b></div>
+                <div class="page-title-subheading">
+                    <span class="ListadeTicketsporcuentadesoporteporestado">Lista de tickets de ServiceNow.</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex-grow-1 d-flex justify-content-end" hidden>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#miModal"  onclick="agregarFila()">Agregar a registro</button>
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="main-card card">
+            <div class="card-header">
+                Filtros
+            </div>
+            <div class="card-body d-flex">
+                <div class="d-flex">
+                    <div class="d-flex flex-column mr-3">
+                        <label>Fecha Inicio</label>
+                        <input type="date" id="iniFecha" class="form-control" />
+                    </div>
+                    <div class="d-flex flex-column">
+                        <label>Fecha Fin</label>
+                        <input type="date" id="finFecha" class="form-control" />
+                    </div>
+                </div>
+                <div class="flex-grow-1 d-flex justify-content-end align-items-center">
+                    <button class="btn btn-primary" onclick="cargarDatos()">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card card">
+            <div class="card-body">
+                <table id="tbTicketsServiceNow" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Grupo de Asignación</th>
+                            <th>Descripción</th>
+                            <th>Atribuido A</th>
+                            <th>Numero</th>
+                            <th>Prioridad</th>
+                            <th>Motivo de poner espera</th>
+                            <th>Tiempo de Resolución</th>
+                            <th>Categoria</th>
+                            <th>Creado Por</th>
+                            <th>Abierto</th>
+                            <th>Fecha de Vencimiento</th>
+                            <th>Unidad de Negocio</th>
+                            <th>Solicitante</th>
+                            <th>Canal</th>
+                            <th>Actualizado</th>
+                            <th>Estado de Incidente</th>
+                            <th>Abierto por</th>
+                            <th>Subcategoria</th>
+                            <th>Cerrado por</th>
+                            <th>Actualizado por</th>
+                            <th>Fecha de creación</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    @*<div id="contenedorFormulario" class="col-md-12 col-xl-6">
+        </div>*@
+</div>
+<iframe id="upload_target" name="upload_target" src="" class="d-none"></iframe>
+<script type="text/javascript">
+    let datos = []
+
+    $(document).ready(function () {
+        const table = $("#tbTicketsServiceNow").DataTable({
+            scrollX: true,
+            order: [[22, 'desc']],
+            ajax: `/ServiceNow/ObtenerTicketsServiceNow?fechaInicio=${document.getElementById("iniFecha").value}&fechaFin=${document.getElementById("finFecha").value}`,
+            columns: [
+                { data: "id_servicesNow" },
+                { data: "GrupoDeAsignacion" },
+                { data: "BreveDescripcion" },
+                { data: "AtribuidoA" },
+                { data: "Numero" },
+                { data: "Prioridad" },
+                { data: "MotivoPonerEspera" },
+                { data: "TiempoResolucion" },
+                { data: "Categoria" },
+                { data: "CreadoPor" },
+                {
+                    data: "Abierto",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                {
+                    data: "FechaVencimiento",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                { data: "UnidadNegocio" },
+                { data: "Solicitante" },
+                { data: "Canal" },
+                {
+                    data: "Actualizado",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                { data: "EstadoIncidencia" },
+                { data: "AbiertoPor" },
+                { data: "SubCategoria" },
+                { data: "CerradoPor" },
+                { data: "ActualizadoPor" },
+                {
+                    data: "created_at",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            console.log(data)
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                {
+                    data: "id_servicesNow",
+                    render: function (data, type, row) {
+                        return '<button class="btn btn-primary" data-toggle="modal" data-target="#miModal" onclick="editarFila(' + data + ')">Editar</button>';
+                    },
+                }
+            ]
+        });
+    });
+    function editarFila(id) {
+        $("#lblTitulo").text("Editar Ticket ServiceNow");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-xl");
+        $('#modal-content').load("/ServiceNow/EditarServiceNowTickets/" + id);
+    }
+    function agregarFila() {
+        $("#lblTitulo").text("Agregar Ticket ServiceNow");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-xl");
+        $('#modal-content').load("/ServiceNow/AgregarServiceNowTickets/");
+    }
+    function uploadDone(msg, code) {
+        toastr.success("Se guardaron los cambios correctamente");
+        var table = $('#tbTicketsServiceNow').DataTable();
+        var currentIndex = table.page();
+        table.ajax.reload(function () {
+            table.page(currentIndex).draw(false);
+        });
+
+        let btnCloseModal = document.getElementById("closeModal")
+        btnCloseModal.click()
+    }
+    function cargarDatos() {
+        $("#tbTicketsServiceNow").DataTable().ajax.url(`/ServiceNow/ObtenerTicketsServiceNow?fechaInicio=${document.getElementById("iniFecha").value}&fechaFin=${document.getElementById("finFecha").value}`).load()
+    }
+</script>

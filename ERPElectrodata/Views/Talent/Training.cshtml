@@ -1,0 +1,205 @@
+﻿@model ERPElectrodata.Models.PERSON_TRAINING
+
+@{
+    Layout = null;
+}
+
+<div id="divContent">
+    <div id="ticketsByStatus">
+        <div id="homInc1" class="ticketByStatusP4" onclick="Click(this)">
+            <div class="tabStatus1" >
+                <div id="boxActive" class="boxQty">@ViewBag.TProcessing</div>
+                <div id="letrashomInc1" class="letras">
+                    <div>@ResourceLanguaje.Resource.Processing</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc1" class="tab-active-marks2"></div>
+                </div>
+            </div>
+            <div id="homInc2" class="ticketByStatusP4" onclick="Click(this)">
+            <div class="tabStatus2" >
+                <div id="boxSCHEDULED" class="boxQty">@ViewBag.TByApproving</div>
+                <div id="letrashomInc2" class="letras">
+                    <div>@ResourceLanguaje.Resource.ByApproving</div>
+                    <div style="clear:both;"></div>
+                </div>
+                <div id="StatusSelecthomInc2"></div>
+            </div>
+        </div>
+        <div id="homInc3" class="ticketByStatusP4" onclick="Click(this)">
+            <div class="tabStatus3" >
+                <div id="boxRESOLVED" class="boxQty">@ViewBag.TApprovals</div>
+                <div id="letrashomInc3" class="letras">
+                    <div>@ResourceLanguaje.Resource.Approvals</div>
+                    <div style="clear:both;"></div>
+                </div>
+                <div id="StatusSelecthomInc3"></div>
+            </div>
+        </div>
+        <div id="homInc4" class="ticketByStatusP4" onclick="Click(this)">
+            <div class="tabStatus4" >
+                <div id="boxCLOSED" class="boxQty">@ViewBag.TResults</div>
+                <div id="letrashomInc4" class="letras letrasActive">
+                    <div>@ResourceLanguaje.Resource.Results</div>
+                    <div style="clear:both;"></div>
+                </div>
+                <div id="StatusSelecthomInc4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gridTraining" style="margin:10px 0 0 0; padding-bottom:1%;">
+    </div>
+
+    <div id="pagerTraining" class="contentViewPager">
+    </div>
+@*    <br /><br />
+    <div id="gridTrai"></div>*@
+</div>
+
+<script type="text/x-kendo-tmpl" id="tpt-Training">
+    <div class="incidentHomeList">
+        <div class = "incidentHomeListBlock1 hasLayout">
+            <div class = "incidentHomeListHeader">  
+                <div class="FondoNegro">
+                    <div class="condition">
+                        ${NAM_TRAI}
+                    </div>
+                    <div class="incidentHomeRequesterIcon" title="Request">
+                        ${Request}
+                    </div>
+                    <div class="incidentHomeCreate" title="Record date">
+                        @ResourceLanguaje.Resource.Requester: ${DAT_REQU}
+                    </div>
+                </div>
+        </div>
+        <div class = "incidentHomeSumary" >
+            <a href="/Training/Details/${ID_PERS_TRAI}" target="_blank" style="height: 60px">
+                <div style="float:left;width:100%;">
+                    <div style="clear:both; width:60%; float:left;">
+                        <div class="titleSummary">@ResourceLanguaje.Resource.Name ${NAM_TRAI} :</div><div class="textSummary">  ${NAM_REVIEW}</div>
+                    </div>
+                    <div style="clear:both;width:30%; float:left;">
+                        <div class="titleSummary">@ResourceLanguaje.Resource.Manufacturer :</div><div class="textSummary"> ${NAM_MANU}</div>
+                    </div>
+                    <div style="clear:both;width:65%; float:left;"></div>
+                    <div style="clear:both;width:30%; float:left;">
+                        <div class="titleSummary">@ResourceLanguaje.Resource.Cost :</div><div class="textSummary"> ${MONEY} ${AMOUNT}</div>
+                    </div>
+                    <div style="clear:both;width:65%; float:left;"></div>
+                    <div style="clear:both;width:30%; float:left;">
+                        <div class="titleSummary">@ResourceLanguaje.Resource.Date ${NAM_TRAI} :</div><div class="textSummary"> ${DAT_REVIEW}</div>
+                    </div>
+                </div>
+
+            </a>
+        </div> 
+        <div class="contraya">
+            <div class="raya"></div>
+        </div>
+        <div class="incidentHomeRes">
+            <div style="background-repeat: no-repeat; display:block; float:left; width:25%; padding:3px 0px 3px 5px;text-transform:capitalize;">Supervisor: ${Supervisor}</div>
+            <div style="background-repeat: no-repeat; display:block; float:left; width:20%; padding:3px 0px 3px 5px;text-transform:capitalize;">@ResourceLanguaje.Resource.Approved : ${DAT_APPR_SUPE}</div> 
+            <div style="background-repeat: no-repeat; display:block; float:left; width:25%; padding:3px 0px 3px 5px;text-transform:capitalize;">Operations Manager: ${GGOperaciones}</div>
+            <div style="background-repeat: no-repeat; display:block; float:left; width:20%; padding:3px 0px 3px 5px;text-transform:capitalize;">@ResourceLanguaje.Resource.Approved : ${DAT_APPR_OPER}</div>            
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var DS_Training = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Training/ListByStatus/0?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerTraining").kendoPager({
+            dataSource: DS_Training,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridTraining").kendoListView({
+            dataSource: DS_Training,
+            template: kendo.template($("#tpt-Training").html())
+        });
+
+        //$("#gridTrai").kendoGrid({
+        //    dataSource: DS_Training,
+        //    groupable: false,
+        //    sortable: true,
+        //    pageable: {
+        //        refresh: true,
+        //        pageSizes: [15, 30, 65]
+        //    },
+        //    columns: [{
+        //        field: "Request",
+        //        width: 150,
+        //        title: "Request"
+        //    }, {
+        //        field: "NAM_REVIEW",
+        //        width: 250,
+        //        title: "Name Review"
+        //    }, {
+        //        width: 100,
+        //        field: "DAT_REVIEW",
+        //        title: "Date Review"
+        //    }, {
+        //        field: "Supervisor",
+        //        width: 200,
+        //    //}, {
+        //    //    field: "BirthDate",
+        //    //    title: "Birth Date",
+        //        //template: '#= kendo.toString(BirthDate,"dd MMMM yyyy") #'
+        //    }, {
+        //        width: 200,
+        //        field: "GGOperaciones"
+        //    }
+        //    ]
+        //});
+    });
+
+    function Click(parm) {
+
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 0;
+        if (parm.id == "homInc2") {
+            bandera = 1;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 2;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 2;
+        }
+        var listView = $("#gridTraining").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+    }
+</script>

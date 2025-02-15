@@ -1,0 +1,452 @@
+﻿@{
+//Layout = null;
+}
+
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<style>
+    .color {
+        width: 70%;
+        padding: 2px 15px;
+        color: white;
+        font-size: 11px;
+    }
+
+    .rojo {
+        background: #BA141A;
+    }
+
+    .amarillo {
+        background: #F2BA0C;
+    }
+
+    .verde {
+        background: #679700;
+    }
+
+    #leyenda {
+        width: 100%;
+        margin: 0 auto;
+    }
+
+
+    #btnOP {
+        cursor: pointer;
+    }
+</style>
+
+<div class="form-row">
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">RENOVACIONES</div>
+        <div class="col-md-12">
+            <div class="main-card mb-1">
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label for="cbAnno">Año</label>
+                                <input id="cbAnno" type="text">
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label for="cbMes">Mes</label><br />
+                                <input id="cbMes" type="text">
+                            </div>
+                        </div>
+                        <div class="col-sm-2">
+                            <div class="form-group">
+                                <label for="txtOP">OP</label><br />
+                                <input id="txtOP" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-1">
+                            <label for="">&nbsp;</label><br />
+                            <input id="btnBuscar" name="btnBuscar" class="btn btn-warning btn-sm" type="button" value="Buscar" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <table id="tablaRenovaciones" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Número OP</th>
+                            <th>Cliente</th>
+                            <th>Cliente Final</th>
+                            <th>Título de la OP</th>
+                            <th>Marcas</th>
+                            <th>Fec Creación</th>
+                            <th>Vendedor - Contacto</th>
+                            <th>T. Moneda</th>
+                            <th>Monto Total(con igv)</th>
+                            <th>T. para Vencer(días)</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Número OP</th>
+                            <th>Cliente</th>
+                            <th>Cliente Final</th>
+                            <th>Título de la OP</th>
+                            <th>Marcas</th>
+                            <th>Fec Creación</th>
+                            <th>Vendedor - Contacto</th>
+                            <th>T. Moneda</th>
+                            <th>Monto Total(con igv)</th>
+                            <th>T. para Vencer(días)</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <div id="leyenda">
+                <span title="Renovado" class="fa fa-check" aria-hidden="true" style="color: #679700; cursor: pointer; font-size:15px;"></span>
+                <span style="color:#333;font-size:14px;">RENOVADO</span>
+                &nbsp; &nbsp; &nbsp; &nbsp;
+                <span title="Elimina de la lista" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:15px;"></span>
+                <span style="color:#333;font-size:14px;">ELIMINAR DE LA LISTA</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<button type="button" id="btnEliminarRenovacion" data-toggle="modal" data-target="#miModal" style="display:none"></button>
+
+<script type="text/javascript">
+
+    const fecha = new Date();
+    const annoActual = fecha.getFullYear();
+    const mesActual = fecha.getMonth() + 1;
+    var op = "";
+    $(document).ready(function () {
+        cargarListaProyectos(annoActual, mesActual, op);
+        $("#btnBuscar").click(function () {
+            var anno = $("#cbAnno").val();
+            var mes = $("#cbMes").val();
+            op = $("#txtOP").val();
+            cargarListaProyectos(anno, mes, op);
+
+        });
+        $("#cbAnno").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un año",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/ListarAñosCbx"
+                }
+
+            }
+        });
+
+        $("#cbMes").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un mes",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/ListarMesesCbx"
+                }
+
+            }
+        });
+    });
+
+    function cargarListaProyectos(anno, mes, op) {
+        $('#tablaRenovaciones').dataTable().fnDestroy();
+        $('#tablaRenovaciones').DataTable({
+            //"order": [[1, "asc"]],
+            dom: 'Bfrtip',
+            responsive: true,
+            //ajax: "OrderForm/ListarOPsIniciales?anno=" + $("#cbAnno").val() + "&mes=" + $("#cbMes").val(),
+            ajax: "/OrderForm/ListarOPsIniciales?anno=" + anno + "&mes=" + mes + "&op=" + op,
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<span id="btnOP" data-toggle="modal" data-target="#miModal" onclick="abrirModal(' + data.Id + ')"><b>' + data.OP + '</b></span>';
+                    }
+                },
+                { data: "Cliente" },
+                { data: "ClienteFinal" },
+                { data: "TituloOP" },
+                { data: "Marcas" },
+                { data: "FechaCreacion" },
+                { data: "VendedorContacto" },
+                { data: "TipoMoneda" },
+                { data: "MontoTotal" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var clase = "";
+                        if (data.DiasParaVencer <= 30) {
+                            clase = "rojo";
+                        } else
+                            if (data.DiasParaVencer > 30 && data.DiasParaVencer <= 90) {
+                                clase = "amarillo";
+                            } else {
+                                clase = "verde";
+                            }
+                        return '<span class="' + clase + ' color">' + data.DiasParaVencer + '</span>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var opcionProducto = "";
+                        if (data.OpcionProducto == "SI")
+                            opcionProducto = '<button type="button" class="btn btn-focus" data-toggle="modal" data-target="#miModal" onclick="abrirModalListaProductos(' + data.Id + ');"><i title="Lista de Productos" class="fa fa-edit" aria-hidden="true" style="color: white; cursor: pointer; font-size:10px;"></i></button>';
+                        var opcion = "";
+                        opcion = '<div role="group" class="btn-group-sm btn-group btn-group-toggle" data-toggle="buttons">' +
+                            '<button type="button" class="btn btn-focus"><i title="Renovar" class="fa fa-check" aria-hidden="true" style="color: white; cursor: pointer; font-size:10px;" data-toggle="modal" data-target="#miModal" onclick="abrirModalRenovacion(' + data.Id + ');"></i></button>' +
+                            '<button type="button" class="btn btn-focus"><i title="Eliminar" class="fa fa-times" aria-hidden="true" style="color: white; cursor: pointer; font-size:10px;" onclick="eliminarListaRenovacion(' + data.Id + ');"></i></button>' +
+                            '<button type="button" class="btn btn-focus" data-toggle="modal" data-target="#miModal" onclick="abrirModalContactos(' + data.Id + ',\'' + data.OP +'\');"><i title="Contactos asignados" class="fa fa-address-book" aria-hidden="true" style="color: white; cursor: pointer; font-size:10px;"></i></button>' +
+                            '<button type="button" class="btn btn-focus" data-toggle="modal" data-target="#miModal" onclick="abrirModalNuevoContacto(' + data.Id + ',\''+data.OP+'\');"><i title="Nuevo Contacto" class="fa fa-users" aria-hidden="true" style="color: white; cursor: pointer; font-size:10px;"></i></button>' +
+                            opcionProducto +
+                            '</div>';
+
+
+                        //'<span  id="' + data.Id + '" title="Renovar" class="fa fa-check" aria-hidden="true" style="color: #679700; cursor: pointer; font-size:15px;" data-toggle="modal" data-target="#miModal" onclick="abrirModalRenovacion(' + data.Id + ');"></span>' +
+                        //'&nbsp; &nbsp; &nbsp; ' +
+                        //'<span  id="' + data.Id + '" title="Eliminar" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:15px;" onclick="eliminarListaRenovacion(' + data.Id + ');"></span>' +
+                        //'&nbsp; &nbsp; &nbsp; ' +
+                        //'<span  id="' + data.Id + '" title="Contactos" class="fa fa-users" aria-hidden="true" style="color: #679700; cursor: pointer; font-size:15px;" data-toggle="modal" data-target="#miModal" onclick="abrirModalRenovacion(' + data.Id + ');"></span>' +
+                        //'&nbsp; &nbsp; &nbsp; ' +
+                        //'<span  id="' + data.Id + '" title="Contactos" class="fa fa-edit" aria-hidden="true" style="color: #679700; cursor: pointer; font-size:15px;" data-toggle="modal" data-target="#miModal" onclick="abrirModalRenovacion(' + data.Id + ');"></span>';
+                        return opcion;
+                    }
+
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+
+    function abrirModal(id) {
+
+        $("#lblTitulo").text("Productos");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/OrderForm/ProductosOP/' + id);
+    }
+
+    function abrirModalRenovacion(id) {
+
+        $("#lblTitulo").text("Mensaje de confirmación");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/OrderForm/RenovacionOP/' + id);
+    }
+
+    function abrirModalContactos(id,op) {
+        $("#lblTitulo").text("Asignación de Contactos | OP: " + op);
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-xl");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/Contacto/ContactoRenovacion/' + id);
+    }
+
+    function abrirModalNuevoContacto(id,op) {
+        $("#lblTitulo").text("Nuevo Contacto | OP: " + op);
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-xl");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/Contacto/NuevoContactoRenovacion/' + id);
+    }
+
+    function abrirModalListaProductos(id) {
+        $("#lblTitulo").text("Lista de Productos");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-xl");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/ListaProductos/' + id);
+    }
+
+    function mensajeConfirmacion(msg, msnErr, id, op, tipo) {
+
+        if (tipo == 'eliminar') {
+            if (msg == 'OK') {
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+
+                toastr.success("Información actualizada", "");
+            }
+            else if (msg == 'Mensaje') {
+
+                $("#lblTitulo").text("Mensaje de confirmación");
+                $(".modal-dialog").removeClass("modal-sm");
+                $(".modal-dialog").removeClass("modal-lg");
+                $("#modal-content").empty();
+                $("#modal-content").html("<div class='form-row'>" + msnErr + "</div><div class='form-group'></div>" +
+                    "<div class='form-row'>" +
+                    "<div class='col-md-6'><br /></div>" +
+                    "<div class='col-md-3' style='text-align:right'><button id='eliminar' class='btn btn-primary btn-primary'>ELIMINAR</button></div>" +
+                    "<div class='col-md-3' style='text-align:right'><button id='cancelar' class='btn btn-primary btn-primary'>CANCELAR</button></div>" +
+                    "</div>");
+
+
+                var undo = $("#cancelar")
+                    .bind("click", function () {
+                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                    });
+
+                var eli = $("#eliminar").bind("click", function () {
+
+                    $.ajax({
+                        url: "/OrderForm/EliminarProyectoDeRenovacion/",
+                        data: "IdDocuSale=" + id +
+                            "&var=" + Math.random(),
+                        type: "GET",
+                        cache: false,
+                        dataType: "text",
+                        success: function (resp) {
+                            if (resp == "OK") {
+                                msjEliminar('Mensaje', 'Se ha eliminado la ' + op + ' de la lista de renovaciones');
+                                $("[data-dismiss=modal]").trigger({ type: "click" });
+                            } else
+                                if (resp == "ERROR") {
+                                    msjEliminar('Mensaje', 'No se ha podido eliminar la ' + op + ' de la lista de renovaciones');
+                                }
+                        }
+                    });
+                });
+            }
+        } else
+            if (tipo == 'renovar') {
+                if (msg == 'OK') {
+                    $("[data-dismiss=modal]").trigger({ type: "click" });
+
+                    toastr.success("Información actualizada", "");
+                }
+                else if (msg == 'Mensaje') {
+                    $('#reset').click();
+                    $('#SmallModalContent').modal('show');
+                    $("#SmallModalTitle").empty();
+                    $("#SmallModalTitle").text("Mensaje de Confirmación");
+                    $("#SmallModalBody").empty();
+                    $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + msnErr + "</div>" +
+                        "</br> </br>" +
+                        "<input type='checkbox' value='' id='chkAplicaFabricante'>");
+                    $("#SmallModalFooter").empty();
+                    $("#SmallModalFooter").append("<div style='width:70%;margin:0 auto;'>" +
+                        "<button id='renovar' style='float:left;' class='btn btn-primary btn-primary'>RENOVAR</button>" +
+                        "&nbsp; &nbsp; &nbsp;" +
+                        "<button id='cancelar' class='btn btn-primary btn-primary'>CANCELAR</button>" +
+                        "</div>");
+                    var undo = $("#cancelar")
+                        .bind("click", function () {
+                            $('#SmallModalContent').modal('hide');
+                            //$("#btnAutoEvaluacion").click();
+                        });
+
+                    var eli = $("#eliminar").bind("click", function () {
+                        $.ajax({
+                            url: "/OrderForm/EliminarProyectoDeRenovacion/",
+                            data: "IdDocuSale=" + id +
+                                "&var=" + Math.random(),
+                            type: "GET",
+                            cache: false,
+                            dataType: "text",
+                            success: function (resp) {
+                                if (resp == "OK") {
+                                    msjEliminar('Mensaje', 'Se ha eliminado la ' + op + ' de la lista de renovaciones');
+                                } else
+                                    if (resp == "ERROR") {
+                                        msjEliminar('Mensaje', 'No se ha podido eliminar la ' + op + ' de la lista de renovaciones');
+                                    }
+                            }
+                        });
+                    });
+                }
+            }
+    }
+
+    function eliminarListaRenovacion(id) {
+
+        $.ajax({
+            url: "/OrderForm/ObtenerDatosOP/" + id,
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $.each(data['Data'], function (index, value) {
+                    $("#btnEliminarRenovacion").click();
+                    var OP = String(data['Data'][index]['OP']);
+                    mensajeConfirmacion('Mensaje', '¿Está seguro de eliminar la ' + value + ' de la lista de renovaciones? </br></br> <span style="color:#BA141A">- Esta OP ya no volverá a visualizarse en la lista</span>', id, value, 'eliminar');
+                });
+            },
+            error: function (source) {
+                toastr.error("Error al cargar los datos del contacto", "");
+            }
+        });
+    }
+
+    function msjEliminar(msg, msnErr) {
+
+        if (msg == 'ERROR') {
+            toastr.error("", msnErr);
+        }
+        else if (msg == 'Mensaje') {
+            toastr.info("", msnErr);
+            cargarListaProyectos(annoActual, mesActual, op);
+        }
+    }
+</script>

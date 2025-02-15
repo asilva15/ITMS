@@ -1,0 +1,321 @@
+﻿@{
+    ViewBag.Title = "UsuarioExterno";
+    Layout = null;
+}
+
+@using (Html.BeginForm("RegistroUsuarioExterno", "Seguridad", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormNewRequest", name = "FormNewRequest", target = "ut_NewRequest" }))
+{
+    <div class="panel panel-primary" style="width:100%;float:left;">
+        <div class="panel-heading">
+            <span>Usuario externo</span>
+        </div>
+        <div class="panel-body">
+            <div class="bodyForm">
+                <div class=" inbodyform">
+                    <div style="width: 100%; margin:5px auto;"></div>
+
+                    <div class="panel panel-default" style="width:100%;float:left;">
+                        <div class="panel-heading">
+                            <span>Datos personales</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-md-3">
+                                Primer nombre <strong style="color:red">(*)</strong>
+                                <input id="txtPrimerNombre" name="txtPrimerNombre" class="form-control" type="text" />
+                            </div>
+                            <div class="col-md-3">
+                                Apellido Paterno <strong style="color:red">(*)</strong>
+                                <input id="txtApePaterno" name="txtApePaterno" class="form-control" type="text" />
+                            </div>
+                            <div class="col-md-3">
+                                Apellido Materno
+                                <input id="txtApeMaterno" name="txtApeMaterno" class="form-control" type="text" />
+                            </div>
+                            <div class="col-md-3">
+                                Sexo <strong style="color:red">(*)</strong>
+                                <select id="cbSexo" name="cbSexo" class="form-control select2">
+                                    <option value="F">Femenino</option>
+                                    <option value="M">Masculino</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                Celular
+                                <input id="txtCelular" name="txtCelular" class="form-control" type="text" />
+                            </div>
+                            <div class="col-md-3">
+                                Correo Personal <strong style="color:red">(*)</strong>
+                                <input id="txtCorreo" name="txtCorreo" class="form-control" type="text" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="panel panel-default " style="width:100%;float:left;">
+                        <div class="panel-heading">
+                            <span>Usuario externo</span>
+                        </div>
+                        <div class="panel-body">
+                            <div class="col-md-3">
+                                Tipo de usuario <strong style="color:red">(*)</strong>
+                                <select id="cbTipoUsuario" name="cbTipoUsuario" class="form-control select2" type="text" style="width:100%" ></select>
+                            </div>
+                            <div class="col-md-3">
+                                Cuenta <strong style="color:red">(*)</strong>
+                                <select id="cbCuenta" name="cbCuenta" class="form-control select2" type="text" style="width:100%" ></select>
+                            </div>
+                            <div class="col-md-3">
+                                Cola de cuenta <strong style="color:red">(*)</strong>
+                                <select id="cbColaCuenta" name="cbColaCuenta" class="form-control select2" type="text" style="width:100%" ></select>
+                            </div>
+                            <div class="col-md-3">
+                                Cargo <strong style="color:red">(*)</strong>
+                                <div id="divCargoOrg">
+                                    <select id="cbCargo" name="cbCargo" class="form-control select2" type="text" style="width:100%"></select>
+                                </div>
+                                <div id="divCargo">
+                                    <input id="txtCargo" name="txtCargo" class="form-control" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                Area <strong style="color:red">(*)</strong>
+                                <select id="cbArea" name="cbArea" class="form-control select2" type="text" style="width:100%" ></select>
+                            </div>
+                            @*<div class="col-md-3">
+                                <div class="editor-label">
+                                    Ver todo
+                                </div>
+                                <div class="editor-field">
+                                    <input type="checkbox" id="Estado" name="Estado" style="width:80%">
+                                </div>
+                            </div>*@
+                            <div class="col-md-3">
+                                <br />
+                                <button class="btn btn-warning" >GUARDAR</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<iframe id="ut_NewRequest" name="ut_NewRequest" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+
+<script type="text/javascript">
+
+    $('input').iCheck({
+        checkboxClass: 'icheckbox_square-blue',
+        radioClass: 'iradio_square-blue',
+        increaseArea: '20%' // optional
+    });
+
+
+    //  Ocultar
+    $("#divCargoOrg").hide()
+    //$("#divCargo").hide();
+
+
+    $("#cbCuenta").select2({
+        id: function (e) { return e.id; },
+        placeholder: 'Seleccione...',
+        minimumInputLength: 0,
+        multiple: false,
+        allowClear: true,
+        ajax: {
+            url: "/Administrator/ListarCuentas",
+            dataType: 'json',
+            quietMillis: 100,
+            data: function (params) {
+                return {
+                    q: params.term,
+                    page: params.page,
+                };
+            },
+            processResults: function (data, page) {
+                return { results: data };
+            },
+        }
+    });
+
+    $("#cbTipoUsuario").select2({
+        id: function (e) { return e.id; },
+        placeholder: 'Seleccione...',
+        minimumInputLength: 0,
+        multiple: false,
+        allowClear: true,
+        ajax: {
+            url: "/TypeClient/ListarTipoCliente",
+            dataType: 'json',
+            quietMillis: 100,
+            data: function (params) {
+                return {
+                    q: params.term,
+                    page: params.page,
+                };
+            },
+            processResults: function (data, page) {
+                return { results: data };
+            },
+        }
+    });
+
+
+    $("#cbCuenta").on('change', function (e) {
+        $("#cbColaCuenta").empty();
+        var IdCuenta = $("#cbCuenta").find(':selected').val()
+
+        $("#cbColaCuenta").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountQueue/ListarColaCuenta/" + IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $('#cbCargo').empty();
+        $('#txtCargo').val('');
+        $("#cbArea").empty();
+
+        $.ajax({
+            url: "/Seguridad/ObtenerCuentaCargo/" + IdCuenta,
+            cache: false,
+            type: "GET",
+            dataType: "text",
+            success: function (data) {
+                if (data == "1") {                    
+                    $("#divCargoOrg").show();
+                    $("#divCargo").hide();
+                } else {                    
+                    $("#divCargoOrg").hide();
+                    $('#divCargo').show();
+                }
+            },
+            error: function (source) {
+            }
+        });
+
+        $("#cbCargo").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarCargo/" + IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#cbArea").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Area/ListarAreasCuenta/" + IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+    });
+
+
+    function Mensaje(msg, msnErr) {
+        if (msg == 'OK') {
+            //$('#SmallModalContent').modal('show');
+            //$("#SmallModalTitle").empty();
+            //$("#SmallModalTitle").text("Mensaje")
+            //$("#SmallModalBody").empty();
+            //$("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + msnErr + "</div>");
+            //$("#SmallModalFooter").empty();
+            //$("#SmallModalFooter").append("<div style='float:right;'><button id='continues' class='k-button'>Continuar</button></div>");
+            //var undo = $("#continues")
+            //.bind("click", function () {
+            //    $('#SmallModalContent').modal('hide');
+            //    $("#btnUsuarioExterno").click();
+            //});
+
+            //$("#closebtnmodal").click(function () {
+            //    $("#btnUsuarioExterno").click();
+            //});
+            swal({
+                title: 'Se guardo la información correctamente',
+                type: 'success',
+                text: 'Usuario creado correctamente',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continuar',
+                //confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                location = "http://" + location.host + "/Seguridad";
+            })
+        }
+        else {
+
+            //$('#SmallModalContent').modal('show');
+            //$("#SmallModalTitle").empty();
+            //$("#SmallModalTitle").text("Error")
+            //$("#SmallModalBody").empty();
+            //$("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + msnErr + "</div>");
+            //$("#SmallModalFooter").empty();
+            //$("#SmallModalFooter").append("<div style='float:right;'><button id='continues' class='k-button'>Continuar</button></div>");
+            //var undo = $("#continues")
+            //.bind("click", function () {
+            //    $('#SmallModalContent').modal('hide');
+            //});
+
+            //$("#closebtnmodal").click(function () {
+            //});
+            swal({
+                title: 'Ocurrio un error',
+                type: 'error',
+                text: 'Contactarse con el administrador',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continuar',
+                //confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                //location = "http://" + location.host + "/Seguridad";
+            })
+        }
+    }
+
+</script>

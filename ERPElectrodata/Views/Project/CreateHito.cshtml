@@ -1,0 +1,211 @@
+﻿@model ERPElectrodata.Models.HITO
+
+@{
+    ViewBag.Title = "CreateHito";
+    Layout = null;
+}
+
+                @using (Html.BeginForm("SaveHito", "Project", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormCreateHito", target = "upload_targetHito" }))
+                {
+                    @Html.ValidationSummary(true)
+                    <input type="hidden" name="ID_PROJ" value="@ViewBag.ID_PROJE" />
+
+                    <div class="divFondoDos">   
+                        <div class="divSpace3"></div>                   
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                Type Milestone
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_TYPE_HITO)
+                                @Html.ValidationMessageFor(model => model.ID_TYPE_HITO)
+                            </div>
+                        </div>
+
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                Date
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.STAR_DATE)
+                                @Html.ValidationMessageFor(model => model.STAR_DATE)
+                            </div>
+                        </div>
+
+                        @*<div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                Name of Milestone
+                            </div>
+                            <div class="k-textbox">
+                                @Html.EditorFor(model => model.NAM_HITO)
+                                @Html.ValidationMessageFor(model => model.NAM_HITO)
+                            </div>
+                        </div>*@
+                    </div>
+
+                    @*<div class="divFondoDos">
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                From
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.STAR_DATE)
+                                @Html.ValidationMessageFor(model => model.STAR_DATE)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                To
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.END_DATE)
+                                @Html.ValidationMessageFor(model => model.END_DATE)
+                            </div>
+                        </div>
+                    </div>*@
+
+                    <div class="divFondoUno">
+                        <div class="divSpace3"></div>
+                        <div class="divCont3" style="width:95%;">
+                            <div class="editor-label">
+                                Description
+                            </div>
+                            <div class="editor-field">
+                                <div class="editor-field">
+                                    @Html.TextAreaFor(model => model.DES_HITO)
+                                    @Html.ValidationMessageFor(model => model.DES_HITO)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @*<div class="divFondoUno" style="margin:10px 0px 0px 0px;">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="k-button" data-toggle="modal" data-target="#myModal">
+                                    Attach
+                                </div>
+                            </div>
+                        </div>*@
+
+                    <div class="divFondoUno" style="margin:0px 0px 10px 0px;">                     
+                        <div class="divSpace3"></div>
+                        <div id="divmensaje" style="float: left; width: 50%; display: inline-block; "></div>
+
+                        <div style="display:inline-block; float:right; padding:5px 15px 0px 5px;">
+                            <div style=" float:left; padding:0px 15px 0px 0px; ">
+                                
+                                <input type="submit" id="submit"  onclick="LoadGrafHitos()" class="k-button" value="@ResourceLanguaje.Resource.BtnSave" />
+                            </div>
+                            <input onclick="FuncCancel()"  type="button" id="reset" class="k-button" value="Cancel" />
+                        </div>
+                    </div>                   
+                }
+
+               
+  <iframe id="upload_targetHito" name="upload_targetHito" src="" class="frameHidden"></iframe>
+
+@*----------------------------POPUP SMALL GUARDANDO-------------------------------*@
+
+<div id="PopupSavingHito" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Saving</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divsaving">Saving...</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="k-button" data-dismiss="modal" onclick="ClosePopupProject()">Ok</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+   <script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#DES_HITO").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        var DATE_STAR = $("#STAR_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        DATE_STAR.value(new Date('@ViewBag.DATE_HITO'));
+
+        var DATE_END = $("#END_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        var ID_TYPE_HITO = $("#ID_TYPE_HITO").kendoComboBox({
+            dataTextField: "NAM_TYPE_HITO",
+            dataValueField: "ID_TYPE_HITO",
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Project/ListTypeHito/?var=" + Math.random(),
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_TYPE_HITO.value(1);
+
+    })
+
+    function PopUpHito(conf, msg) {
+
+        if (conf == "OK") {
+
+            $("#PopupSavingHito").modal('show');
+            $("#divsaving").empty();
+            $("#divsaving").html('<span> ' + msg + '</span>');
+          
+        }
+        else {
+
+            $("#divmensaje").html('<span style="color:red; font-style:italic;">* '+msg+'</span>');
+        }
+    }
+
+       function FuncCancel()
+       {
+            $('#myModalMilestone').modal('hide');
+       }
+
+      
+</script>

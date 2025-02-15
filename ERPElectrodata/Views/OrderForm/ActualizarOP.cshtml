@@ -1,0 +1,500 @@
+﻿@{
+    /**/
+
+    Layout = null;
+}
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    .colorCeleste {
+        color: #00BAAD;
+        cursor: pointer;
+    }
+</style>
+@using (Html.BeginForm("ActualizarProyecto", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAsignarPM", target = "upload_target" }))
+{
+    <input type="hidden" value="@ViewBag.Id" name="IdDocuSale" id="IdDocuSale" />
+    <div class="col-md-12">
+        <div class="form-row">
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label for="txtOC">OC</label>
+                    <input id="txtOC" name="txtOC" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label for="cboProducto" class="colorCeleste" onclick="mantenimiento(this,1);" id="lProducto">Producto</label>
+                    <input id="cboProducto" name="cboProducto" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label for="cboDescripcionProd" class="colorCeleste" onclick="mantenimiento(this,1);" id="lDescProducto">Descripción del producto</label>
+                    <input id="cboDescripcionProd" name="cboDescripcionProd" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-row">
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label for="cboTipoServicio" class="colorCeleste" onclick="mantenimiento(this,1);" id="lTipoServicio">Tipo de servicio</label>
+                    <input id="cboTipoServicio" name="cboTipoServicio" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label for="cboFrecuenciaFab" class="colorCeleste" onclick="mantenimiento(this,1);" id="lFrecuenciaFab">Frecuencia (Fabricante)</label>
+                    <input id="cboFrecuenciaFab" name="cboFrecuenciaFab" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label for="cboTipo" class="colorCeleste" onclick="mantenimiento(this,1);" id="lTipo">Tipo</label>
+                    <input id="cboTipo" name="cboTipo" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="form-row">
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label for="cboProveedor" class="colorCeleste" onclick="mantenimiento(this,1);" id="lProveedor">Proveedor</label>
+                    <input id="cboProveedor" name="cboProveedor" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    <label for="cboFrecuenciaED" class="colorCeleste" onclick="mantenimiento(this,1);" id="lFrecuenciaED">Frecuencia (Electrodata)</label>
+                    <input id="cboFrecuenciaED" name="cboFrecuenciaED" class="form-control" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="position-relative form-group">
+                    <label><br /></label>
+                    <button id="btnBuscar" class="btn btn-primary btn-block" style="color:white;">
+                        <i class="fa fa-save"></i> Actualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<hr />
+
+<div class="main-card card">
+    <div class="card-header" id="tituloMant"></div>
+    <div class="card-body" id="divMantenimiento">
+    </div>
+</div>
+
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+
+<script type="text/javascript">
+    var sNombre;
+    var tipo;
+    var idMant;
+    var nombre;
+    $(document).ready(function () {
+        var cboProducto = $("#cboProducto").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Producto",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarCboActualizacionOP?Tabla=Producto"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cboDescripcionProd = $("#cboDescripcionProd").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Descripción Producto",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarCboActualizacionOP?Tabla=DescripcionProducto"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cboTipoServicio = $("#cboTipoServicio").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Tipo Servicio",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarCboActualizacionOP?Tabla=TipoServicio"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cboFrecuenciaFab = $("#cboFrecuenciaFab").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Frecuencia Fabricante",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarCboActualizacionOP?Tabla=Frecuencia"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cboTipo = $("#cboTipo").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Tipo",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarCboActualizacionOP?Tabla=Tipo"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cboProveedor = $("#cboProveedor").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Proveedor",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarCboActualizacionOP?Tabla=Proveedor"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cboFrecuenciaED = $("#cboFrecuenciaED").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Frecuencia Electrodata",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarCboActualizacionOP?Tabla=Frecuencia"
+                }
+            }
+        }).data("kendoComboBox");
+    })
+
+    function Mensaje(msg, descripcion) {
+        if (msg == 'OK') {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success(descripcion);
+            if ($("#tbConsolidadoClientes")) {
+                var tbConsolidadoClientes = $('#tbConsolidadoClientes').DataTable();
+                tbConsolidadoClientes.ajax.reload();
+            }
+        }
+        else {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.error(descripcion);
+        }
+    }
+
+    function mantenimiento(parm, id) {
+        tipo = 'I';
+        var str = '';
+        var tabla = '', titulo = '';
+        if ((parm.id == 'lProducto' && id == 1) || (parm == 'lProducto' && id == 0)) {
+            nombre = 'Producto';
+            tabla = 'Producto';
+            if(tipo == 'I')
+                titulo = 'Nuevo Producto';
+            else
+                titulo = 'Editar Producto';
+        } else if ((parm.id == 'lDescProducto' && id == 1) || (parm == 'lDescProducto' && id == 0)) {
+            nombre = "Descripción de producto";
+            tabla = 'DescripcionProducto';
+            if (tipo == 'I')
+                titulo = 'Nueva Descripción de producto';
+            else
+                titulo = 'Editar Descripción de producto';
+        } else if ((parm.id == 'lTipoServicio' && id == 1) || (parm == 'lTipoServicio' && id == 0)) {
+            nombre = "Tipo de Servicio";
+            tabla = 'TipoServicio';
+            if (tipo == 'I')
+                titulo = 'Nuevo Tipo de Servicio';
+            else
+                titulo = 'Editar Tipo de Servicio';
+        } else if ((parm.id == 'lFrecuenciaFab' && id == 1) || (parm == 'lFrecuenciaFab' && id == 0)) {
+            nombre = "Frecuencia";
+            tabla = 'Frecuencia';
+            if (tipo == 'I')
+                titulo = 'Nueva Frecuencia';
+            else
+                titulo = 'Editar Frecuencia';
+        } else if ((parm.id == 'lTipo' && id == 1) || (parm == 'lTipo' && id == 0)) {
+            nombre = "Tipo";
+            tabla = 'Tipo';
+            if (tipo == 'I')
+                titulo = 'Nuevo Tipo';
+            else
+                titulo = 'Editar Tipo';
+        } else if ((parm.id == 'lProveedor' && id == 1) || (parm == 'lProveedor' && id == 0)) {
+            nombre = "Proveedor";
+            tabla = 'Proveedor';
+            if (tipo == 'I')
+                titulo = 'Nuevo Proveedor';
+            else
+                titulo = 'Editar Proveedor';
+        } else if ((parm.id == 'lFrecuenciaED' && id == 1) || (parm == 'lFrecuenciaED' && id == 0)) {
+            nombre = "Frecuencia";
+            tabla = 'Frecuencia';
+            if (tipo == 'I')
+                titulo = 'Nueva Frecuencia';
+            else
+                titulo = 'Editar Frecuencia';
+        }
+        var parametro = parm.id;
+        sNombre = nombre;
+        if (id == 0)
+            parametro = parm;
+        $("#tituloMant").empty();
+        $("#tituloMant").append(titulo);
+        str = '<div class="col-md-12">' +
+            '<div class="form-row">' +
+            '<div class="col-md-5"> ' +
+            '<div class="position-relative form-group">' +
+            '<label for="txtNombre">' + nombre + '</label>' +
+            '<input id="txtNombre" name="txtNombre" class="form-control" />' +
+            '</div>' +
+            '</div> ' +
+            '<div class="col-md-1">' +
+            '<div class="position-relative form-group">' +
+            '<label for="cboProducto">Estado' +
+            '<input class="mt-2" type="checkbox" id="chkEstado" name="chkEstado" style="width:20px;height:20px;"/></label>' +
+            '</div>' +
+            '</div>' +
+            '<div class="col-md-3">' +
+            '<div class="position-relative form-group">' +
+            '<label><br /></label>' +
+            '<button id="btnGuardar" class="btn btn-warning btn-block" style="color:white;" onclick="guardarMantenimiento(\'' + tabla + '\',\'' + parametro + '\');">' +
+            'Guardar' +
+            '</button>' +
+            '</div>' +
+            '</div>' +
+            '<div class="col-md-3">' +
+            '<div class="position-relative form-group">' +
+            '<label><br /></label>' +
+            '<button id="btnCancelar" class="btn btn-primary btn-block" style="color:white;" onclick="cancelarMantenimiento();">Cancelar</button>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<table id="tbMantenimientoDesplegable" class="table table-bordered table-hover nowrap">' +
+            '<thead>' +
+            '<tr>' +
+            '<th>' + nombre + '</th>' +
+            '<th>Estado</th>' +
+            '<th>Opción</th>' +
+            '</tr>' +
+            '</thead>' +
+            '<tbody></tbody>' +
+
+            '</table>';
+        $("#divMantenimiento").empty();
+        $("#divMantenimiento").append(str);
+        ListarMantenimientos(tabla);
+    }
+
+    function guardarMantenimiento(tabla, parm) {
+        if (tipo == 'I') {
+            $.ajax({
+                url: "/OrderForm/GuardarMantenimiento",
+                data: "tabla=" + tabla +
+                    "&nombre=" + $("#txtNombre").val() +
+                    "&estado=" + $('#chkEstado').is(':checked'),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        toastr.success("Información actualizada.");
+                        cancelarMantenimiento();
+                        mantenimiento(parm, 0);
+                    } else
+                        if (resp == "ERROR") {
+                            toastr.error("Ha ocurrido un error, por favor contacte al administrador.");
+                        } else
+                            if (resp == "EXISTE") {
+                                toastr.warning("El valor ingresado ya se encuentra registrado.");
+                            } else if (resp == "VALOR") {
+                                toastr.warning("Por favor ingrese el nombre.");
+                            }
+
+                }
+            });
+        } else {
+            $.ajax({
+                url: "/OrderForm/ActualizarMantenimiento",
+                data: "tabla=" + tabla +
+                    "&nombre=" + $("#txtNombre").val() +
+                    "&estado=" + $('#chkEstado').is(':checked') +
+                    "&id=" + idMant,
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        toastr.success("Información actualizada.");
+                        cancelarMantenimiento();
+                        mantenimiento(parm, 0);
+                    } else
+                        if (resp == "ERROR") {
+                            toastr.error("Ha ocurrido un error, por favor contacte al administrador.");
+                        } else
+                            if (resp == "EXISTE") {
+                                toastr.warning("El valor ingresado ya se encuentra registrado.");
+                            } else if (resp == "VALOR") {
+                                toastr.warning("Por favor ingrese el nombre.");
+                            }
+
+                }
+            });
+        }
+    }
+
+    function editarMantenimiento(id, nombre, estado, tabla) {
+        var titulo;
+        tipo = 'U';
+        idMant = id;
+        $("#txtNombre").val(nombre);
+        if (estado == 'Activo')
+            $("#chkEstado").prop("checked", true);
+        else
+            $("#chkEstado").prop("checked", false);
+        titulo = 'Editar ' + nombre;
+        $("#tituloMant").empty();
+        $("#tituloMant").append(titulo);
+    }
+
+    function cancelarMantenimiento() {
+        tipo = 'I';
+        var titulo;
+        $("#txtNombre").val("");
+        $("#chkEstado").prop("checked", true);
+        titulo = 'Nuevo ' + nombre;
+        if (nombre == 'Descripción deProducto')
+            titulo = 'Nueva ' + nombre;
+        else if (nombre == 'Frecuencia')
+            titulo = 'Nueva ' + nombre;
+        $("#tituloMant").empty();
+        $("#tituloMant").append(titulo);
+    }
+    function ListarMantenimientos(tabla) {
+        $('#tbMantenimientoDesplegable').dataTable().fnDestroy();
+        $('#tbMantenimientoDesplegable').DataTable({
+            "order": [[0, "asc"]],
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                "url": "/OrderForm/ListarDesplegables/",//?IdCuenta=4&Nombre=" + '' + "&EstadoSLA=" + '',
+                "data": function (d) {
+                    d.Tabla = tabla
+                }
+            },
+            columns: [
+                { data: "Nombre" },
+                { data: "Estado" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div role="group" class="mb-1 btn-group-lg btn-group">' +
+                            '<button class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3" title = "Editar" onclick="editarMantenimiento(' + data.Id + ',\'' + data.Nombre + '\',\'' + data.Estado + '\',\'' + tabla + '\');">' +
+                            '<i class="fa fa-edit" aria-hidden="true"></i>' +
+                            '</button>' +
+                            '</div>';
+                    }
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ],
+            pageLength: 5,
+        });
+    }
+</script>

@@ -1,0 +1,712 @@
+﻿@model ERPElectrodata.Models.PERSON_ENTITY
+
+@{
+    ViewBag.Title = "GestionUsuarioSolicitante";
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<style>
+    .editCombo {
+        position: absolute;
+        background-image: url(/Content/Images/Edit.png);
+        background-repeat: no-repeat;
+        width: 16px;
+        height: 16px;
+        top: 29px;
+        right: 60px;
+        cursor: pointer;
+    }
+</style>
+
+
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css">
+
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+
+
+
+    });
+</script>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"></i>
+            </div>
+            <div>
+                Usuario Solicitante
+                <div class="page-title-subheading">
+                    Buscar, añadir y/o eliminar
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            @*@using (Html.BeginForm("Buscar", "Usuario", FormMethod.Post, new { id = "FrmBuscarUsuario" }))
+                {
+                    @Html.ValidationSummary(true)*@
+            <div class="card-body">
+                <input type="hidden" name="HD_Estados" id="HD_Estados" value="" />
+                <div class="card-title">Buscar Usuario</div>
+
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label id="txtCompania" for="txtCompania" class="">Unidad Minera</label>
+                            <span style="color:red">(*)</span>
+                            <input id="comboBoxUnidadMinera" />
+                            @*<select id="ID_COMP" class="select2" multiple="multiple" typeof="text" style="width:100%" />
+                                <br /><br /> <br />*@
+
+                        </div>
+                    </div>
+
+
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label id="" for="" class="">&nbsp; </label>
+                            <button id="Buscar" type="button" class="btn btn-primary btn-block btn-primary" onclick="listarUsuarios()">Buscar</button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="main-card mb-3 card">
+            @using (Html.BeginForm("CreateClient2", "AccountEntity", FormMethod.Post, new { id = "FrmGuardarUsuario", target = "upload_target" }))
+            {
+                @Html.ValidationSummary(true)
+                <input type="hidden" name="HD_ID_EMP" id="HD_ID_EMP" value="@ViewBag.ID_COMP" />
+
+                <div class="card-body">
+                    <div class="card-title">Crear - Editar Usuario</div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtCompania" for="txtCompania" class="">Unidad Minera</label>
+                                <span style="color:red">(*)</span>
+                                @*<input id="comboBoxUnidadMineraEditar" type="text" name="comboBoxUnidadMineraEditar" class="=form-control">*@
+                                <select id="comboBoxUnidadMineraEditar" name="comboBoxUnidadMineraEditar" class="=form-control" value =""></select>
+
+
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtUsuario" class="">Nombres </label>
+                                <span style="color:red">(*)</span>
+                                <input id="txtNombreUsuario1" type="text" name="txtNombreUsuario1" class="form-control" style="width: 100%;height:38px;" />
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtApelliPat" class="">Apellido Paterno </label>
+                                <span style="color:red">(*)</span>
+                                <input id="txtApellidoPat" type="text" name="txtApellidoPat" class="form-control" style="width: 100%;height:38px;" />
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtApellMat" class="">Apellido Materno </label>
+                                <span style="color:red">(*)</span>
+                                <input id="txtApellidoMat" name="txtApellidoMat" type="text" class="form-control" style="width: 100%;height:38px;" />
+
+                            </div>
+                        </div>
+                        <input type="hidden" id="txtuad" name="txtuad">
+                        <input type="hidden" id="persEnti" name="persEnti">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtCorreo" class="">Correo</label>
+                                <input id="txtCorreoPers" type="text" name="txtCorreoPers" class="form-control" style="width: 100%;height:38px;" />
+
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtCorreo" class="">Celular</label>
+                                @Html.TextBoxFor(model => model.CEL_PERS, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.CEL_PERS)
+                            </div>
+                        </div>
+                        @*<div class="col-md-6">
+                        <div class="form-group">
+                            <label id="txtUsuario" for="txtUsuario" class="">Usuario Red</label>
+                            @Html.TextBoxFor(model => model.UAD_PERS, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.UAD_PERS)
+                        </div>
+                    </div>*@
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtUsuario" class="">CIP</label>
+                                @Html.TextBoxFor(model => model.FOT_PERS, new { @class = "form-control", @type = "text", @id = "age", @name = "age", @onkeypress = "return valideKey(event);" })
+                                @Html.ValidationMessageFor(model => model.FOT_PERS)
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtDNI" class="">DNI/RUC</label>
+                                <span style="color:red">(*)</span>
+                                <input id="txtDniPers" type="text" name="txtDniPers" class="form-control" style="width: 100%;height:38px;" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtTypeUusario" class="">Tipo de Usuario </label>
+                                <span style="color:red">(*)</span>
+                                @Html.TextBoxFor(model => model.ID_TYPE_CLIE)
+                                @Html.ValidationMessageFor(model => model.ID_TYPE_CLIE)
+                            </div>
+                        </div>
+                        @*<div class="col-md-6">
+                        <div class="form-group">
+                            <label id="txtUsuario" for="txtTypeUusario" class="">Cargo</label>
+                            @Html.TextBoxFor(model => model.ID_CHAR, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.ID_CHAR)
+                        </div>
+                    </div>*@
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="txtUsuario" for="txtSede" class="">Sede </label>
+                                <span style="color:red">(*)</span>
+                                @{
+                                    @Html.Editor("ID_LOCA2")
+                                }
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="" for="" class="">&nbsp; </label>
+                                <button id="submitNewClient" class="btn btn-primary btn-block" type="submit"><span>Guardar</span></button>
+                                <div id="" for="" class=""> &nbsp;</div>
+                                <button type="button" class="btn btn-secondary" onclick="limpiar();">Limpiar Campos</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            }
+                    
+             
+
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="card-title">Lista de Usuarios</div>
+                <div style="width: 100%; height:100%;" id="divBandeja">
+                    <fieldset>
+                        <div form-row>
+                            <table id="tbUsuarios" class="table table-bordered table-striped table-responsive-lg">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre</th>
+                                        <th>UsuarioAD</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </fieldset>
+                    @*<div id="gridUsuario" class="contentView"></div>
+                        <div id="pagerUsuario" class="contentViewPager"></div>*@
+
+
+                </div>
+            </div>
+
+
+
+
+        </div>
+    </div>
+
+
+
+</div>
+
+
+<iframe id="upload_target" name="upload_target" src="" class="d-none"></iframe>
+
+
+@*<script>
+        async function cargarContenido() {
+
+            $("#listViewFindTicket").empty()
+            $("#listViewFindTicket").append("<div id='Mensaje' style='text-align: center;'>" +
+                "<br /><br /><br /><br /><br /><br /><h4>Cargando Tickets ...</h4><br /><img src='../../Images/spinner.gif' style='height: 40px; width: 40px; text-align: center;'></div>");
+        }
+    </script>*@
+<style>
+    /* Modificar el tamaño del texto */
+    .dataTables_paginate span, .dataTables_paginate a {
+        font-size: 10px;
+    }
+
+    /* Modificar el tamaño de los botones */
+    .dataTables_paginate .paginate_button {
+        padding: 0.25rem 0.5rem;
+        font-size: 10px;
+    }
+
+        /* Modificar el espaciado entre los botones */
+        .dataTables_paginate .paginate_button:not(:last-child) {
+            margin-right: 5px;
+        }
+
+    /* Modificar el espaciado entre los botones y el texto */
+    .dataTables_paginate .paginate_button, .dataTables_paginate .ellipsis {
+        margin-right: 20px;
+    }
+
+    .dataTables_wrapper {
+        border: none;
+    }
+
+    th,
+    td {
+        border: none;
+    }
+</style>
+
+<script type="text/javascript">
+    function uploadDoneForm(msg, code) {
+        //closeWinModalPopUpLoad();
+
+        if (msg == "OK") {
+
+            swal({
+                title: 'Informacion Guardada',
+                type: 'success',
+                text: 'La información ha sido actualizada.',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                var newurl = location.host + "/Home";
+                /*location = "http://" + location.host + "/#/Home";*/
+
+                location = "http://" + location.host + "/Home/Init_Cuentas";
+            })
+        }
+        else {
+            if (code == 'DNI') {
+                titleTK = 'Error de Formato';
+                messageAsset = 'Valide el formato del Fotocheck / DNI';
+            }
+            else if (code == '1') {
+                titleTK = 'Usuario no modificable';
+                messageAsset = 'El usuario seleccionado no puede ser modificado';
+            }
+            else if (code == '2') {
+                titleTK = 'Usuario no encontrado';
+                messageAsset = 'El usuario seleccionado no puede ser modificado';
+            }
+            else if (code == '3') {
+                titleTK = 'Validar DNI/RUC';
+                messageAsset = 'El numero de DNI o RUC ya ha sido registrado';
+            }
+            else if (code == '4') {
+                titleTK = 'Validar DNI/RUC';
+                messageAsset = 'El numero de DNI o RUC ya ha sido registrado';
+            }
+            else {
+                titleTK = 'Error';
+                messageAsset = 'Validar';
+            }
+            swal({
+                title: titleTK,
+                type: 'info',
+                text: messageAsset,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+        }
+    }
+    function limpiar() {
+        /*document.getElementById('FrmGuardarUsuario').reset();*/
+        //activateFields('FrmGuardarUsuario');
+        var form = document.getElementById('FrmGuardarUsuario');
+        var inputs = form.getElementsByTagName('input');
+        for (var i = 0; i < inputs.length; i++) {
+            inputs[i].removeAttribute('disabled');
+            inputs[i].removeAttribute('readonly');
+        }
+        var input = document.getElementById("txtCorreoPers");
+        input.disabled = false;
+        var input = document.getElementById("CEL_PERS");
+        input.disabled = false;
+        var input = document.getElementById("age");
+        input.disabled = false;
+        $('#submitNewClient').show();
+        $('#txtNombreUsuario1').val("");
+        $('#txtApellidoPat').val("");
+        $('#txtApellidoMat').val("");
+        $('#txtCorreoPers').val("");
+        $('#CEL_PERS').val("");
+        $("#age").val("");
+        $('#txtDniPers').val("");
+        $('#txtuad').val("");
+        $('#persEnti').val("");
+        $('#comboBoxUnidadMineraEditar').data("kendoComboBox").enable(true);
+        $('#comboBoxUnidadMineraEditar').data("kendoComboBox").value("");
+        $("#ID_TYPE_CLIE").data("kendoComboBox").enable(true);
+        $("#ID_TYPE_CLIE").data("kendoComboBox").value("");
+        $("#ID_LOCA2").data("kendoComboBox").enable(true);
+        $("#ID_LOCA2").data("kendoComboBox").value("");
+
+    }
+</script>
+
+<script>
+    
+    listarUsuarios();
+    function listarUsuarios() {
+        $('#divbandeja').empty();
+        $('#tbUsuarios').DataTable().destroy();
+        var table = $('#tbUsuarios').DataTable({
+            order: [[0, "asc"]],
+            ajax: {
+                "url": "/AccountEntity/ListSolicitante",
+                "data": function (d) {
+                    var unidadMinera = $("#comboBoxUnidadMinera").val();
+                    d.ID_ENTI = unidadMinera !== null ? unidadMinera : 78251;
+                    //d.ID_ENTI = 78251;
+                }
+            },
+            "language": {
+                "info": ""
+            },
+            columns: [
+                { data: "CLIE" },
+                { data: "UAD" },
+                {
+                    data: null,
+                    defaultContent: '<button class="btnEditar">Editar</a></button> <button class="btnEliminar">Eliminar</button>'
+                }
+            ],
+            columnDefs: [{
+                targets: -1,
+                searchable: false,
+                orderable: false,
+                className: 'dt-body-center',
+                render: function (data, type, full, meta) {
+                    if (data.UAD == "-") {
+                        return '<button class="btnEditar" style="padding: 10px; border: none;cursor:pointer;" data-id="' + data.ID_PERS_ENTI + '" onclick="editarUsuario(' + data.ID_PERS_ENTI + ');"><i class="fas fa-edit"></i></button><button class="btnEliminar" style="padding: 10px; border: none;" data-id="' + data.ID_PERS_ENTI + '" onclick="eliminarUsuario(' + data.ID_PERS_ENTI + ');"><i class="fas fa-trash-alt"></i></button>'
+                    } else {
+                        return '<button class="btnEditar" style="padding: 10px; border: none;cursor:pointer;" data-id="' + data.ID_PERS_ENTI + '" onclick="editarUsuario(' + data.ID_PERS_ENTI + ');"><i class="fas fa-eye"></i></button>'
+                    }
+                }
+            }]
+        });
+    }
+</script>
+
+
+
+<script type="text/javascript">
+    var idpriory = 0;
+    var swt = 0;
+    var ID_COMP = $("#comboBoxUnidadMinera").kendoComboBox({
+        dataTextField: "COM_NAME",
+        dataValueField: "ID_ENTI",
+        filter: "contains",
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        placeholder: "Seleccionar ... ",
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountEntity/ListCompanyByAccount"
+            }
+        },
+        index: 0
+        //change: onChange
+    }).data("kendoComboBox");
+
+    ID_COMP.list.width(350);
+
+        $("#ID_TYPE_CLIE").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeClient/List2"
+                }
+            },
+            index: 7
+        });
+
+
+        var ID_COMP_EDIT = $("#comboBoxUnidadMineraEditar").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Seleccionar ... ",
+            //placeholder: "Empresa Inicial",
+            //template: kendo.template($("#tmp-CIA").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount"
+                }
+            }
+        }).data("kendoComboBox");
+
+
+        /*ID_COMP_EDIT.list.width(350);*/
+        
+
+
+
+    $("#ID_LOCA2").kendoComboBox({
+        dataTextField: "NAM_LOCA",
+        dataValueField: "ID_LOCA",
+        template: '<div><div style="font-weight:bold">${ data.NAM_SITE }</div>' +
+            '<div>${ data.NAM_LOCA }</div></div>',
+        filter: "contains",
+        autoBind: false,
+        suggest: true,
+        dataSource: {
+            serverFiltering: false,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/Location/List?var=" + Math.random()
+            }
+        }
+    });
+    var ID_LOCA = $("#ID_LOCA2").data("kendoComboBox");
+
+   
+    function editarUsuario(idPersEnti) {
+        $.ajax({
+            url: "/AccountEntity/GetSolicitante",
+            data: { ID_PERS_ENTI: idPersEnti },
+            type: 'GET',
+            success: function (response) {
+                
+                data = response;
+                $('#txtuad').val(data['data'][0]['UAD']);
+                var valor = $('#txtuad').val();
+                $('#persEnti').val(data['data'][0]['ID_PERS_ENTI']);
+                if (valor != "-") {
+                    //alert(data['data'][0]['TYPE_CLIENT']);
+                    limpiar();
+                    $('#txtNombreUsuario1').val(data['data'][0]['CLIE']);
+                    var txtNombreUsuario1 = document.getElementById("txtNombreUsuario1");
+                    txtNombreUsuario1.setAttribute('readonly', 'true');
+                    $('#txtApellidoPat').val(data['data'][0]['LAS_NAME']);
+                    var txtApellidoPat = document.getElementById("txtApellidoPat");
+                    txtApellidoPat.disabled = true;
+                    $('#txtApellidoMat').val(data['data'][0]['MOT_NAME']);
+                    var txtApellidoMat = document.getElementById("txtApellidoMat");
+                    txtApellidoMat.disabled = true;
+                    $('#txtCorreoPers').val(data['data'][0]['EMA_PERS']);
+                    var txtCorreoPers = document.getElementById("txtCorreoPers");
+                    txtCorreoPers.disabled = true;
+                    $('#CEL_PERS').val(data['data'][0]['CEL_PERS']);
+                    var CEL_PERS = document.getElementById("CEL_PERS");
+                    CEL_PERS.disabled = true;
+                    $("#age").val(data['data'][0]['CIP']);
+                    var age = document.getElementById("age");
+                    age.disabled = true;
+                    $('#txtDniPers').val(data['data'][0]['DNI']);
+                    var txtDniPers = document.getElementById("txtDniPers");
+                    txtDniPers.disabled = true;
+                    $('#submitNewClient').hide();
+                    var comp = parseInt(data['data'][0]['ID_ENTI']);
+                  
+                    ID_COMP_EDIT.value(parseInt(data['data'][0]['ID_ENTI']));
+                    $('#comboBoxUnidadMineraEditar').data("kendoComboBox").enable(false);
+                    if ((data['data'][0]['TYPE_CLIENT']) != null) {
+                        $("#ID_TYPE_CLIE").data("kendoComboBox").value(parseInt(data['data'][0]['TYPE_CLIENT']));
+                    }
+                    $("#ID_TYPE_CLIE").data("kendoComboBox").enable(false);
+                    if ((data['data'][0]['ID_LOCA']) != null) {
+                        $("#ID_LOCA2").data("kendoComboBox").value(parseInt(data['data'][0]['ID_LOCA']));
+                    }
+                    $("#ID_LOCA2").data("kendoComboBox").enable(false);
+                } else {
+                    limpiar();
+                    $('#submitNewClient').show();
+                    $('#txtNombreUsuario1').val(data['data'][0]['CLIE']);
+                    var txtNombreUsuario1 = document.getElementById("txtNombreUsuario1");
+                    txtNombreUsuario1.setAttribute('readonly', 'true');
+                    $('#txtApellidoPat').val(data['data'][0]['LAS_NAME']);
+                    var txtApellidoPat = document.getElementById("txtApellidoPat");
+                    txtApellidoPat.setAttribute('readonly', 'true');
+                    $('#txtApellidoMat').val(data['data'][0]['MOT_NAME']);
+                    var txtApellidoMat = document.getElementById("txtApellidoMat");
+                    txtApellidoMat.setAttribute('readonly', 'true');
+                    $('#txtCorreoPers').val(data['data'][0]['EMA_PERS']);
+                    $('#CEL_PERS').val(data['data'][0]['CEL_PERS']);
+                    $("#age").val(data['data'][0]['CIP']);
+                    $('#txtDniPers').val(data['data'][0]['DNI']);
+                    var txtDniPers = document.getElementById("txtDniPers");
+                    txtDniPers.disabled = true;
+                    ID_COMP_EDIT.value(parseInt(data['data'][0]['ID_ENTI']));
+                    $("#ID_TYPE_CLIE").data("kendoComboBox").value(parseInt(data['data'][0]['TYPE_CLIENT']));
+                    $("#ID_LOCA2").data("kendoComboBox").value(parseInt(data['data'][0]['ID_LOCA']));
+                    $('#submitNewClient').show();
+                    $('#txtuad').val(data['data'][0]['UAD']);
+                    $('#persEnti').val(data['data'][0]['ID_PERS_ENTI']);
+                }
+
+            },
+            error: function (error) {
+                console.log(error);
+            }
+        });
+    }
+
+    function eliminarUsuario(idPersEnti) {
+        debugger;
+        swal({
+            title: '¿Estás seguro que deseas eliminar este usuario?',
+            type: 'info',
+            focusConfirm: false,
+            confirmButtonText: 'Continuar',
+            confirmButtonAriaLabel: 'Thumbs up, great!',
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            cancelButtonColor: '#d33',
+            preConfirm: function () {
+                // Code to execute when the second button is clicked
+                console.log('Second button clicked');
+            }
+        },function () {
+            // Code to execute when the first button is clicked (i.e., the confirm button)
+            $.ajax({
+                url: "/AccountEntity/DeleteSolicitante",
+                data: { ID_PERS_ENTI: idPersEnti },
+                type: 'POST',
+                success: function (response) {
+                    swal({
+                        title: 'Usuario Eliminado',
+                        type: 'success',
+                        confirmButtonText: 'Continuar',
+                    });
+                    listarUsuarios();
+                    limpiar();
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        })
+    }
+        //if (confirm("¿Estás seguro que deseas eliminar este usuario?")) {
+        //    $.ajax({
+        //        url: "/AccountEntity/DeleteSolicitante",
+        //        data: { ID_PERS_ENTI: idPersEnti },
+        //        type: 'POST',
+        //        success: function (response) {
+        //            alert("El usuario ha sido eliminado exitosamente");
+        //            listarUsuarios();
+        //        },
+        //        error: function (error) {
+        //            console.log(error);
+        //        }
+        //    });
+        //}
+
+
+
+
+
+
+
+
+</script>
+<script type="text/javascript">
+    
+    var ID_COMP = $("#comboBoxUnidadMinera").kendoComboBox({
+        dataTextField: "COM_NAME",
+        dataValueField: "ID_ENTI",
+        filter: "contains",
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        placeholder: "Seleccionar ... ",
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountEntity/ListCompanyByAccount"
+            }
+        }
+        //change: onChange
+    }).data("kendoComboBox");
+
+    ID_COMP.list.width(350);
+
+
+</script>
+

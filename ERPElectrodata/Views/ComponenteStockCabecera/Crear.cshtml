@@ -1,0 +1,279 @@
+﻿@model ERPElectrodata.Models.ComponenteStockCabecera
+@{
+    ViewBag.Title = "Nuevo Componente";
+    //Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Generar Componente - Stock
+    </div>
+    <div class="card-body">
+        <!--Declaración de Formulario-->
+        @using (Html.BeginForm("Crear", "ComponenteStockCabecera", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmComponente", target = "upload_target" }))
+        {
+            @Html.ValidationSummary(true)
+            <fieldset>
+                <div class="form-row">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="editor-label">
+                            Tipo de Activo <b style="color:red">(*)</b>
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextBoxFor(model => model.IdTipoActivo)
+                            @Html.ValidationMessageFor(model => model.IdTipoActivo)
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="editor-label">
+                            Componente <b style="color:red">(*)</b>
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextBoxFor(model => model.IdComponente)
+                            @Html.ValidationMessageFor(model => model.IdComponente)
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="editor-label">
+                            Subtipo de Componente <b style="color:red">(*)</b>
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextBoxFor(model => model.IdSubTipoComponente)
+                            @Html.ValidationMessageFor(model => model.IdSubTipoComponente)
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="editor-label">
+                            Stock <b style="color:red">(*)</b>
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextBoxFor(model => model.CantidadTotal)
+                            @Html.ValidationMessageFor(model => model.CantidadTotal)
+                        </div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="editor-label">
+                            Nombre de Stock <b style="color:red">(*)</b>
+                        </div>
+                        <div class="k-textbox" style="width:100%">
+                            @Html.TextBoxFor(model => model.Nombre)
+                            @Html.ValidationMessageFor(model => model.Nombre)
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="editor-label">
+                            SOLPED
+                        </div>
+                        <div class="k-textbox" style="width:100%">
+                            @Html.TextBoxFor(model => model.Solped)
+                            @Html.ValidationMessageFor(model => model.Solped)
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="editor-label">
+                            Fecha de Adquisición
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextBoxFor(model => model.FechaAdquisicion)
+                            @Html.ValidationMessageFor(model => model.FechaAdquisicion)
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="editor-label">
+                            Locación
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextBoxFor(model => model.IdLocacion)
+                            @Html.ValidationMessageFor(model => model.IdLocacion)
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        <div class="editor-label">
+                            Descripción
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextAreaFor(model => model.Descripcion)
+                            @Html.ValidationMessageFor(model => model.Descripcion)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="col-md-6"></div>
+                    <div class="col-md-3">
+                        <button id="reset" type="button" class="btn btn-light btn-block">Cancelar</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="submit" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+                    </div>
+                </div>
+
+            </fieldset>
+        }
+    </div>
+</div>
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var FechaAdquisicion = $("#FechaAdquisicion").kendoDateTimePicker().data("kendoDateTimePicker");
+        $("#CantidadTotal").kendoNumericTextBox({
+            min: 0,
+            decimals: 0,
+            format: '#'
+        });
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            location.reload(true);
+        });
+
+        $("#Descripcion").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        var IdTipoActivo = $("#IdTipoActivo").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/ListarTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdComponente = $("#IdComponente").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IdTipoActivo",
+            filter: "contains",
+            dataTextField: "Nombre",
+            dataValueField: "IdComponente",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Componente/ListarComponente?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdSubTipoComponente = $("#IdSubTipoComponente").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IdComponente",
+            filter: "contains",
+            dataTextField: "Nombre",
+            dataValueField: "IdSubtComp",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SubTipoComponente/ListarSubTipoComponentes?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+    });
+
+    $("#IdLocacion").kendoComboBox({
+        dataTextField: "NAM_LOCA",
+        dataValueField: "ID_LOCA",
+        template: '<div><div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+            '<div>${ data.NAM_LOCA }</div></div>',
+        filter: "contains",
+        autoBind: false,
+        suggest: true,
+        dataSource: {
+            serverFiltering: false,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/Location/List?var=" + Math.random()
+            }
+        },
+        select: function(e) {
+            var userId = parseInt(@Html.Raw(Json.Encode(Session["UserId"])));
+
+            var selectedDataItem = this.dataItem(e.item.index());
+
+            if (selectedDataItem.ID_LOCA === 173015) {
+                if (userId == 293 || userId == 187 || userId == 34) {
+                    return;
+                } else {
+                    e.preventDefault();
+                    uploadDone("INFO", "Esta locación está restringida para este usuario.", null);
+                }
+            }
+        }
+    });
+    var ID_LOCA = $("#ID_LOCA").data("kendoComboBox");
+
+    function uploadDone(msg, code, idComponente) {
+        if (msg == "OK") {
+            toastr.success("Se actualizaron los datos.", "Información Guardada");
+            setTimeout(function () {
+                location = "http://" + location.host + "/ComponenteStockCabecera/Detalle/" + idComponente;
+            }, 1000);
+        }
+        else if (msg == "INFO") {
+            toastr.warning(code, "Mensaje");
+        } else {
+            toastr.warning("Por favor complete la información requerida.", "Mensaje");
+        }
+    }
+
+</script>

@@ -1,0 +1,305 @@
+﻿@{
+    ViewBag.Title = "ViewLessonsMensual";
+    Layout = null;
+}
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+
+<div class="card-body">
+    <div class="card-title">Reporte Mensual (Últimos 12 meses)</div>
+    <div class="form-row">
+        <div class="col-md-3">
+            <div class="position-relative form-group">
+                <label id="" for="" class="">Año </label>
+                <input type="text" id="ANIO" />
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="position-relative form-group">
+                <label id="" for="" class="">Mes </label>
+                <input type="text" id="MESES" />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="position-relative form-group">
+                <label id="" for="" class=""> &nbsp; </label>
+                <button id="btnBuscarMensual" class="mb-2 mr-2 btn-pill btn btn-primary btn-block">Buscar</button>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="position-relative form-group">
+                &nbsp;
+            </div>
+
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <div class="card-title">Lecciones Aprendidas por Mes</div>
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="position-relative form-group">
+                <div id="RptLeccionesMensuales" style="height: 360px; width:98%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+    function GenerarReporte() {
+        event.preventDefault();
+        var ANIO = $("#ANIO").data("kendoComboBox");
+        var MES = $("#MESES").data("kendoComboBox");
+        
+        if ($("#ANIO").val() == "") {
+            toastr.warning("Seleccione un año.", "Error.");
+        } else if ($("#MESES").val() == "") {
+            toastr.warning("Seleccione un mes.", "Error.");
+        } else {
+            ListarLeccionesMensuales();
+
+        }
+    }
+</script>
+
+<script type="text/javascript">
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+    setTimeout(function () { ListarLeccionesMensuales() }, 1500);
+    $(document).ready(function () {
+        $.get("/AccountingYear/ListIndependiente", function (json) {
+            var DEF_MONTH = json['MONTH'][0].DEFAULT - 1;
+
+            var ANIO = $("#ANIO").kendoComboBox({
+                index: 7,
+                dataTextField: "ID_ACCO_YEAR",
+                dataValueField: "ID_ACCO_YEAR",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['YEAR'],
+                change: function (e) {
+                    //var idclient=$("#ID_CLIE_REP").val();
+                    //UpdateSLA(idclient);
+                    //UpdateKSA(idclient);
+                }
+            }).data("kendoComboBox");
+
+            var MESES = $("#MESES").kendoComboBox({
+                index: DEF_MONTH,
+                dataTextField: "NAM_ACCO_MONT",
+                dataValueField: "ACCO_MONT",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['MONTH'],
+                dataBound: function (e) {
+
+                },
+                change: function (e) {
+                }
+
+            }).data("kendoComboBox");
+        });
+
+
+        $("#btnBuscarMensual").click(function (event) {
+            GenerarReporte();
+        });
+
+    });
+
+    function ListarLeccionesMensuales() {
+
+        var MES = $("#MESES").data("kendoComboBox");
+        var ANIO = $("#ANIO").data("kendoComboBox");
+
+        $.ajax({
+            url: '/KnowledgeManagement/ListarLeccionesAprendidasMensuales?ANIO=' + (ANIO.dataItem().ID_ACCO_YEAR) + '&MONTH=' + (MES.dataItem().ACCO_MONT) + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+
+                var Serie = new Array();
+                var Cantidad = new Array();
+
+                var Nombre = new Array();
+                var Color = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var MES12 = new Array();
+
+                $.each(json['line'], function (index, value) {
+                    Serie[index] = value['Serie'];
+                    Cantidad[index] = value['Cantidad'];
+
+                });
+
+                MES1[0] = Cantidad[0];
+                MES2[0] = Cantidad[1];
+                MES3[0] = Cantidad[2];
+                MES4[0] = Cantidad[3];
+                MES5[0] = Cantidad[4];
+                MES6[0] = Cantidad[5];
+                MES7[0] = Cantidad[6];
+                MES8[0] = Cantidad[7];
+                MES9[0] = Cantidad[8];
+                MES10[0] = Cantidad[9];
+                MES11[0] = Cantidad[10];
+                MES12[0] = Cantidad[11];
+
+                Nombre[0] = 'Total';
+
+                Color[0] = '#B21E1E';
+
+                // inicio chart
+
+                var series = [];
+                var datosSeries = [];
+
+
+                datosSeries.push(MES1[0])
+                datosSeries.push(MES2[0])
+                datosSeries.push(MES3[0])
+                datosSeries.push(MES4[0])
+                datosSeries.push(MES5[0])
+                datosSeries.push(MES6[0])
+                datosSeries.push(MES7[0])
+                datosSeries.push(MES8[0])
+                datosSeries.push(MES9[0])
+                datosSeries.push(MES10[0])
+                datosSeries.push(MES11[0])
+                datosSeries.push(MES12[0])
+
+                // add browser data
+                series.push({
+                    name: Nombre[0],
+                    color: Color[0],
+                    data: datosSeries
+                });
+
+
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'RptLeccionesMensuales',
+                        zoomType: 'xy'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth: 1,
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+
+                    },
+                    yAxis: {
+                        minRange: 10,//json['agree'],
+                        min: 0,
+                        lineWidth: 1,
+                        title: {
+                            text: 'N° de Lecciones',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }
+                            , {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: '#516882',
+                            value: json['agree'],
+                            label: {
+                                text: json['agree']
+                            }
+                        }
+                        ]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Lecciones',
+                        valueDecimals: 2
+                    },
+                    plotOptions: {
+                        line: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' },
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        }
+                    },
+                    series: series
+                });
+            }
+        });
+
+    }
+
+
+</script>
+
+
+<script type="text/javascript">
+
+
+
+    function uploadDone(msg) {
+        if (msg == "ERROR") {
+            winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                "<div style='padding:10px 0px 10px 0px;'>Completar la información solicitada</div>" +
+                "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                "<button id='continuee' class='k-button'>Continuar</button>" +
+                "</div></div>"
+                , 400, 140);
+            $("#continuee").focus();
+            var undo = $("#continuee")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+        }
+    }
+</script>

@@ -1,0 +1,89 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="mb-2 card">
+    <div class="card-header-tab card-header">Actividades</div>
+    <div class="card-body">
+        <div id="divActividades"></div>
+    </div>
+</div>
+
+<div class="mb-2 card">
+    <div class="card-header-tab card-header">Comentarios</div>
+    <div class="card-body">
+        <div id="divComentarios"></div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+      $.ajax({
+            url: "/ClientAsset/ActivoComentarios/" + "@ViewBag.ID_ASSE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $("#divActividades").empty();
+                $("#divComentarios").empty();
+                var comentarios = "", actividades = "";
+                $.each(data['Data'], function (index) {
+
+                    actividades = actividades +
+                    '<div class="form-group row no-gutters">'+
+                            '<div class="col-sm-6 col-lg-2">'+
+                                (data['Data'][index]['NAM_TYPE_ASSE_CLIE']) + 
+                            '</div>'+
+                            '<div class="col-sm-6 col-lg-2">'+
+                                (data['Data'][index]['NAM_STAT_ASSE']) + '<br>'+ (data['Data'][index]['NAM_COND'])+
+                            '</div>'+
+                            '<div class="col-sm-6 col-lg-3">'+
+                                (data['Data'][index]['CLIE']) + '<br>'+ (data['Data'][index]['NAME_AREA'])+
+                            '</div>'+
+                            '<div class="col-sm-6 col-lg-3">'+
+                                'Inicio: '+ (data['Data'][index]['DAT_STAR']) + '<br>Fin:'+ (data['Data'][index]['DAT_END'])+
+                            '</div>'+
+                            '<div class="col-sm-6 col-lg-2">'+
+                                '<a href="/Adjuntos/Asset/'+ (data['Data'][index]['LINK']) + '" style="font-size:11px" TARGET="_BLANK">'+ (data['Data'][index]['ADJ']) + '<img src="'+ (data['Data'][index]['IMG']) + '"></a>'+
+                            '</div>'+
+                    '</div>';
+
+                    comentarios = comentarios +
+                        '<div class="chat-wrapper">' +
+                            '<div class="chat-box-wrapper" >' +
+                                '<div>' +
+                                    '<div class="avatar-icon-wrapper mr-1">' +
+                                        '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                            '<img src="/Content/Fotos/' + (data['Data'][index]['FOTO'])  + '" />' +
+                                        '</div>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div>' +
+                                    '<div class="chat-box" style="font-size:12.5px">' +
+                                            (data['Data'][index]['NAM_TYPE_ASSE_CLIE']) + ' | ' +  (data['Data'][index]['NAM_STAT_ASSE']) + ' - '+
+                                            (data['Data'][index]['NAM_COND']) + ' | '+ (data['Data'][index]['CLIE']) + ' | Inicio: '+
+                                            (data['Data'][index]['DAT_STAR']) + ' - Fin: '+ (data['Data'][index]['DAT_END']) + '<br/>'+
+                                            (data['Data'][index]['SUM_CLIE_ASSE']) +
+                                    '</div>' +
+                                    '<small class="opacity-7">'+
+                                        (data['Data'][index]['CREATE_BY']) +
+                                        ' <i class="fa fa-calendar-alt mr-1"></i>'+
+                                        (data['Data'][index]['CREATE_DATE']) +
+                                        '<br />'+
+                                        (data['Data'][index]['ATTA']) +
+                                    '</small>'+
+                                 '</div>' +
+                            '</div>' +
+                        '</div>';
+
+
+                });
+                $("#divActividades").append(actividades);
+                $("#divComentarios").append(comentarios);
+            },
+            error: function (source) {
+                toastr.error("Error Carga Json Comercial", "Mensaje");
+            }
+        });
+</script>

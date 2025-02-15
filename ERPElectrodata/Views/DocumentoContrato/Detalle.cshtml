@@ -1,0 +1,491 @@
+﻿@{
+    ViewBag.Title = "Detalle";
+    //Layout = null;
+}
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Opciones</div>
+            <div class="card-body">
+                <div id="divOpciones" style="padding:5px;">
+                    <center>
+                        <button id="btnEditar" class="btn btn-block btn-primary btn-hover-shine" data-toggle="modal" data-target="#miModal">Editar</button>
+                        <button id="btnVerArchivos" class="btn btn-block btn-primary btn-hover-shine" data-toggle="modal" data-target="#miModal">Documentos</button>
+                        <button id="btnAdjuntar" class="btn btn-block btn-primary btn-hover-shine" data-toggle="modal" data-target="#miModal">Adjuntar</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <div class="mb-3 card">
+            <div class="card-header">
+                Datos del Registro de Contrato
+            </div>
+            <div class="card-body">
+                <div id="divDatoRegistro"></div>
+            </div>
+            <div class="card-header">
+                Fianzas Asociadas
+            </div>
+            <div class="card-body">
+                <div>
+                    <button type="button" class="btn btn-primary" style="float:right;" data-toggle="modal" data-target="#miModal" onclick="EditarFianza(0)">Agregar Fianza</button>
+                </div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Fianza</th>
+                            <th>Importe</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th style="width:300px">Descripción</th>
+                            <th>Archivos</th>
+                            <th style="border-left: 1px solid #e2e2e2; ">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TablaFianza"></tbody>
+                </table>
+            </div>
+            <div class="card-header">
+                Polizas Asociadas
+            </div>
+            <div class="card-body">
+                <div>
+                    <button type="button" class="btn btn-primary" style="float:right;" data-toggle="modal" data-target="#miModal" onclick="EditarPoliza(0)">Agregar Poliza</button>
+                </div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Poliza</th>
+                            <th>Importe</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th style="width:300px">Descripción</th>
+                            <th>Archivos</th>
+                            <th style="border-left: 1px solid #e2e2e2; ">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TablaPoliza"></tbody>
+                </table>
+            </div>
+        </div>        
+    </div>
+</div>
+
+@*@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}*@
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#btnVerArchivos").click(function () {
+            $("#lblTitulo").text("Documentos");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").removeClass("modal-xl");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $("#modal-content").empty();
+            $("#modal-content").load("/DocumentoContrato/VerDocumento/@ViewBag.IdDocumentoContrato?var=" + Math.random());
+        });
+
+        $("#btnEditar").click(function () {
+            $("#lblTitulo").text("Editar Documento de Contrato");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-xl");
+
+            $("#modal-content").empty();
+            $("#modal-content").load("/DocumentoContrato/EditarDocumento/@ViewBag.IdDocumentoContrato?var=" + Math.random());
+        });
+
+        $("#btnAdjuntar").click(function () {
+            $("#lblTitulo").text("Adjuntar archivos");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").removeClass("modal-xl");
+
+            $("#modal-content").empty();
+            $("#modal-content").html(
+                '<div class="form-row mb-2">'+
+                    '<div class="col-md-6">' +
+                        '<div class="editor-label">'+
+                               'Tipo de Documento'+
+                        '</div>'+
+                        '<div class="editor-label">'+
+                                '@Html.TextBox("IdTipoDocumento")'+
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6">'+
+                        '<div class="editor-label">'+
+                               'Número de Documento'+
+                        '</div>'+
+                        '<div class="k-textbox" style="width:100%">'+
+                                '@Html.TextBox("NumeroDocumento")'+
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="form-row">' +
+                    '<div class="col-md-12">' +
+                        '<input name="files" id="files" type="file" />'+
+                    '</div>'+
+                '</div>'
+            );
+
+            var IdTipoDocumento = $("#IdTipoDocumento").kendoComboBox({
+                dataTextField: "NAM_TYPE_DOCU_ATTA",
+                dataValueField: "ID_TYPE_DOCU_ATTA",
+                filter: "contains",
+                index: 1,
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Total"
+                    },
+                    transport: {
+                        read: "/TypeDocumentModule/ListByModule/3?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#files").kendoUpload({
+                localization: {
+                    select: "Adjuntar"
+                },
+                upload: function (e) {
+                    e.data = {
+                        IdTipoDocumento: IdTipoDocumento.dataItem().ID_TYPE_DOCU_ATTA,
+                        idDocContrato: '@ViewBag.IdDocumentoContrato',
+                        NumDoc: $("#NumeroDocumento").val()
+                    };
+                },
+                remove: function (e) {
+                    e.data = {
+
+                    };
+                },
+                async: {
+                    saveUrl: "/DocumentoContrato/AdjuntarArchivo",
+                    removeUrl: "/DocumentoContrato/RemoverArchivo"
+                },
+                complete: onComplete
+            });
+
+
+
+        });
+
+        ObtenerDatosRegistroContrato();
+        ObtenerDatosFianza();
+        ObtenerDatosPoliza();
+    });
+
+    function onComplete(e) {
+        $("#NumeroDocumento").val('');
+    }
+
+    function ObtenerDatosRegistroContrato() {
+        $.ajax({
+            url: "/DocumentoContrato/ObtenerDatosRegistroContrato/@ViewBag.IdDocumentoContrato",            //De donde trae la data (controlador)
+            type: "GET",                                                                      //Tipo de solicitud: GET, POST
+            cache: false,                                                                     //Defecto
+            dataType: "json",                                                                 //Tipo de retorno de la solicitud al controlador
+            success: function (source) {                                                      //Lo que pasa si la solicitud es correcta, source es lo que devuelve el controlador
+                data1 = source;
+                mostrarDatosRegistroContrato();                                                       //Funcion que llena el html con la data que hemos recibido
+            },
+            error: function (source) {                                                        //Lo que pasa si la solicitud es incorrecta
+                alert("Error Carga Json Contratos");
+            }
+        });
+    }
+
+    function ObtenerDatosFianza() {
+        $.ajax({
+            url: "/DocumentoContrato/ObtenerDatosFianza/@ViewBag.IdDocumentoContrato",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                mostrarDatosFianza();
+            },
+            error: function (source) {
+                alert("Error Carga Json Fianzas");
+            }
+        });
+    }
+
+    function ObtenerDatosPoliza() {
+        $.ajax({
+            url: "/DocumentoContrato/ObtenerDatosPoliza/@ViewBag.IdDocumentoContrato",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                mostrarDatosPoliza();
+            },
+            error: function (source) {
+                alert("Error Carga Json Marcas");
+            }
+        });
+    }
+
+    //*************************************************************
+
+    $("#submit").click(function () {
+        $("#submit").prop("disabled", false);
+        toastr.success('Guardando Registro', 'Espere Por Favor');
+    });
+
+    function mostrarDatosRegistroContrato() {
+        $("#divDatoRegistro").empty();
+
+        $.each(data1['Data'], function (index, value) {
+            $("#divDatoRegistro").append(
+                '<div class="form-group row">' +
+
+                    '<div class="col-md-2">' +
+                            '<div style="font-weight:bold">Concepto</div>' +
+                            '<div class="smallField">' + (data1['Data'][index]['ConceptoContrato']) + '</div>' +
+                        '</div>' +
+                    '<div class="col-md-2">' +
+                            '<div style="font-weight:bold">OP</div>' +
+                            '<div class="smallField">' + (data1['Data'][index]['NumeroOP']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-4">' +
+                        '<div style="font-weight:bold">Cliente</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['CLIENTE']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-4">' +
+                        '<div style="font-weight:bold">Cliente Final</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['CLIENTEFINAL']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="form-group row">' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Estado de Firma</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['EstadoFirmaContrato']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Nombre de Documento</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['NombreDocumentoContrato']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-4">' +
+                        '<div style="font-weight:bold">Titulo o Referencia</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Titulo']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Firmado por</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Firmante']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha de Firmado</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FechaFirmaContrato']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="form-group row">' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Tipo de Moneda</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['TipoMonedaContrato']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Monto Con IGV</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['MontoConIgv']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Visado Legal y/o ZR</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Visado'] == 0? "No" : "Si" ) + '</div>' +
+                    '</div>' +
+                '<div class="col-md-6">' +
+                        '<div style="font-weight:bold">Porcentajo Máximo de Penalidad</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['PorcentajeMaximo']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="form-group row">' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Inicio Contrato</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHAINICIOC']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Fin Contrato</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHAFINC']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Inicio Soporte</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHAINICIOS']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Fin Soporte</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHAFINS']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Creado por</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['NOMBRECREA']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Creación</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHACREA']) + '</div>' +
+                    '</div>' +
+                 '</div>' +
+
+                 '<div class="form-row">' +
+                    '<div class="col-md-12">' +
+                        '<div style="font-weight:bold">Observaciones</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Observaciones']) + '</div>' +
+                    '</div>' +
+                 '</div>'
+            );
+
+        });
+    }
+
+    function retornarEnlacesArchivos(cadenaArchivos) {
+        console.log(cadenaArchivos);
+        links = "";
+        if (!cadenaArchivos) return '';
+        archivos = cadenaArchivos.split(",");
+        archivos.forEach(function (el) {
+            links += "<a href='/Adjuntos/DocumentControl/RegistrosOP/" + el + "' target='_blank'>" + el + "</a>";
+        })
+        console.log(links);
+        return links;
+    }
+
+    function mostrarDatosFianza() {
+        $("#TablaFianza").empty();
+        $.each(data1['Data'], function (index, value) {
+            $("#TablaFianza").append(
+                '<tr id="' + (data1['Data'][index]['Id']) + '">' +
+                    '<td>' + (data1['Data'][index]['Tipo']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['Importe']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['FechaInicio']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['FechaFin']) + '</td>' +
+                    '<td style="width:300px">' + (data1['Data'][index]['Descripcion']) + '</td>' +
+
+                    '<td>' + retornarEnlacesArchivos(data1['Data'][index]['Archivos']) + '</td>' +
+
+                    '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                        '<span  id="' + (data1['Data'][index]['Id']) + '" title="Editar" class="fa fa-pen" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px;" data-toggle="modal" data-target="#miModal" onclick="EditarFianza(' + (data1['Data'][index]['Id']) + ')"></span>' +
+                        '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                        (@ViewBag.Permitido == 1 ? '<span id="R' + (data1['Data'][index]['Id']) + '" title="Eliminar" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="EliminarFianza(' + (data1['Data'][index]['Id']) + ')"></span>' : '') +
+                    '</td>' +
+                '</tr>'
+            );
+        });
+    }
+
+    function mostrarDatosPoliza() {
+        $("#TablaPoliza").empty();
+        $.each(data1['Data'], function (index, value) {
+            $("#TablaPoliza").append(
+                '<tr id="' + (data1['Data'][index]['Id']) + '">' +
+                    '<td>' + (data1['Data'][index]['Tipo']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['Importe']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['FechaInicio']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['FechaFin']) + '</td>' +
+                    '<td style="width:300px">' + (data1['Data'][index]['Descripcion']) + '</td>' +
+
+                    '<td>' + retornarEnlacesArchivos(data1['Data'][index]['Archivos']) + '</td>' +
+
+                    '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                        '<span  id="' + (data1['Data'][index]['Id']) + '" title="Editar" class="fa fa-pen" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px;" data-toggle="modal" data-target="#miModal" onclick="EditarPoliza(' + (data1['Data'][index]['Id']) + ')"></span>' +
+                        '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                        (@ViewBag.Permitido == 1 ? '<span id="R' + (data1['Data'][index]['Id']) + '" title="Eliminar" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="EliminarPoliza(' + (data1['Data'][index]['Id']) + ')"></span>' : '') +
+                    '</td>' +
+                '</tr>'
+            );
+        });
+    }
+
+    function EditarFianza(id) {
+        $("#lblTitulo").text("Crear/Editar Fianza Asociada");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-xl");
+
+        $("#modal-content").empty();
+        $("#modal-content").load("/DocumentoContrato/CrearEditarFianza/" + id + "?dv=@ViewBag.IdDocumentoContrato&var=" + Math.random());
+    }
+    function EditarPoliza(id) {
+        $("#lblTitulo").text("Crear/Editar Poliza Asociada");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-xl");
+
+        $("#modal-content").empty();
+        $("#modal-content").load("/DocumentoContrato/CrearEditarPoliza/" + id + "?dv=@ViewBag.IdDocumentoContrato&var=" + Math.random());
+    }
+
+    function EliminarFianza(id) {
+        $.ajax({
+            url: "/DocumentoContrato/EliminarFianza/" + id + "",
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (source) {
+                uploadDone("OK",1);
+            },
+            error: function (source) {
+                alert("Error Eliminación Fianzas");
+            }
+        });
+    }
+    function EliminarPoliza(id) {
+        $.ajax({
+            url: "/DocumentoContrato/EliminarPoliza/" + id + "",
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (source) {
+                uploadDone("OK", 1);
+            },
+            error: function (source) {
+                alert("Error Eliminación Polizas");
+            }
+        });
+    }
+
+    function uploadDone(msg, code) {
+
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+
+            if (code == 0) {
+                ObtenerDatosRegistroContrato();
+            }
+            if (code == 1) {
+                ObtenerDatosFianza();
+                ObtenerDatosPoliza();
+            }
+
+            toastr.success("Información actualizada", "Guardado");
+        }
+        else {
+
+            var mensaje = 'No se Actualizaron los Datos.\n\n';
+            if (code == 1) {
+                mensaje = 'Ya Existe la Fianza o Poliza.\n\n';
+            }
+            if (code == 2) {
+                mensaje = 'Por favor seleccione los campos obligatorios.';
+            }
+            toastr.error(mensaje,"Advertencia");
+        }
+    }
+
+</script>

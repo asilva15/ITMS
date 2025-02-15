@@ -1,0 +1,185 @@
+﻿@{
+    ViewBag.Title = "Programas";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<style type="text/css">
+</style>
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte por Área
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-3">
+                <div class="editor-label">
+                    Área
+                </div>
+                <div class="editor-field">
+                    <input id="ID_AREA" name="ID_AREA" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <br />
+                <button type="button" class="btn btn-light btn-block" id="btnDescargarExcel"><i class="fa fa-file-excel"></i> Exportar</button>
+            </div>
+            <div class="col-md-6">
+                <br />
+                <button type="button" class="btn btn-primary btn-sm" id="Buscar" onclick="CargarGrilla(this)">
+                    <i class="fa fa-search"></i> Buscar
+                </button>
+                <div style="background-color:white; background: url('/Content/Images/origen.jpg') no-repeat;height:10px; width:23px; z-index:2; position:absolute;"></div>
+                <div style="border-radius: 2px 2px 2px 2px; border: 1px solid #aaaaaa; margin-top: 6px; padding: 3px 3px 3px 3px; color: #38607d; z-index:1; text-align:justify">
+                    Recuerde, la búsqueda es en base a la previsualización de los primeros 5,000 registros, al exportar si obtendra toda la información completa.
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <table id="tbArea" class="table table-bordered table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Área</th>
+                        <th>Asignado a</th>
+                        <th>Tipo de Activo</th>
+                        <th>Código</th>
+                        <th>Activo</th>
+                        <th>Serie</th>
+                        <th>Estado</th>
+                        <th>Condición</th>
+                        <th>Creado Por</th>
+                        <th>Fecha de creación</th>
+                        <th>Fecha de Asig.</th>
+                        @{
+                            try
+                            {
+                                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 61 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 62 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 63 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 64 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 65 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 66 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 67 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 68 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 69 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 70 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 71 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 72)
+                                {
+                                    <th>Unidad Negocio</th>
+
+                                }
+                            }
+                            catch { }
+                        }
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#ID_AREA").kendoComboBox({
+            dataTextField: "NOM_AREA",
+            dataValueField: "ID_AREA",
+            template: '<div><div style="font-weight:bold;">${ data.NOM_AREA_PARE }</div>' +
+                '<div>${ data.NOM_AREA }</div></div>',
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarAreas?var=" + Math.random()
+                }
+            }
+        });
+        var ID_AREA = $("#ID_AREA").data("kendoComboBox");
+        ID_AREA.list.width(300);
+
+        CargarGrilla();
+    });
+
+     
+    $('#btnDescargarExcel').click(function () {
+        var areaFiltro = $("#ID_AREA").val();
+        var link = document.createElement('a');
+        link.href = '/Asset/DescargarExcelTicket?area=' + areaFiltro;
+        link.target = '_blank'; 
+        link.download = 'ExcelTicket_' + getCurrentDateTime() + '.xls'; 
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    });
+
+    function getCurrentDateTime() {
+        var now = new Date();
+        return now.toISOString().replace(/[-:]/g, '').replace(/[TZ]/g, '').substring(0, 14);
+    }
+    
+
+
+
+    function CargarGrilla(sw) {
+        $('#tbArea').dataTable().fnDestroy();
+
+        $('#tbArea').DataTable({
+            'destroy': true,
+            "autoWidth": false,
+            responsive: true,
+            ajax: {
+                "url": "/Asset/ReportePorArea/",
+                "data": function (d) {
+                    d.ID_AREA = $("#ID_AREA").val() == '' ? 0 : $("#ID_AREA").val()
+                }
+            },
+            columns: [
+                { data: "Area" },
+                //{ data: "UnidadNegocio" },
+                { data: "Usuario" },
+                { data: "TipoActivo" },
+                { data: "CodigoActivo" },
+                { data: "NombreActivo" },
+                { data: "SerieActivo" },
+                { data: "EstadoActivo" },
+                { data: "Condicion" },
+                { data: "CreadoPor" },
+                { data: "FechaCreacion" },
+                { data: "FechaAsignacion" },
+                {
+                    data: "UnidadNegocio" ,
+                    visible: @Session["ID_ACCO"] == 60 ? true : false
+                }
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+        });
+
+    }
+
+</script>

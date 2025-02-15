@@ -1,0 +1,128 @@
+﻿@model ERPElectrodata.Models.ComponenteStockCabecera
+
+@{
+    ViewBag.Title = "Editar";
+    Layout = null;
+}
+
+@using (Html.BeginForm("Editar", "ComponenteStockCabecera", FormMethod.Post, new { enctype = "multipart/form-data", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        @Html.HiddenFor(model => model.IdAcco)
+        @Html.HiddenFor(model => model.IdComponente)
+        @Html.HiddenFor(model => model.IdCompStockCab)
+        @Html.HiddenFor(model => model.IdSubTipoComponente)
+        @Html.HiddenFor(model => model.IdTipoActivo)
+        @Html.HiddenFor(model => model.Descripcion)
+        @Html.HiddenFor(model => model.CantidadTotal)
+        @Html.HiddenFor(model => model.CantidadEnUso)
+        @Html.HiddenFor(model => model.CantidadDisponible)
+        @Html.HiddenFor(model => model.FechaCrea)
+        @Html.HiddenFor(model => model.UsuarioCrea)
+        @Html.HiddenFor(model => model.Estado)
+        <div class="form-group row">
+            <div class="col-md-12">
+                <div class="editor-label">
+                    Nombre <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.EditorFor(model => model.Nombre)
+                    @Html.ValidationMessageFor(model => model.Nombre)
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="editor-label">
+                    Actualizar Stock <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    <input name="stock" id="stock" value="@ViewBag.CantidadActual" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="editor-label">
+                    SOLPED
+                </div>
+                <div class="k-textbox">
+                    @Html.EditorFor(model => model.Solped)
+                    @Html.ValidationMessageFor(model => model.Solped)
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-6">
+                <div class="editor-label">
+                    Fecha de Adquisión
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.FechaAdquisicion)
+                    @Html.ValidationMessageFor(model => model.FechaAdquisicion)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4">
+                <button id="reset" type="button" class="btn btn-light btn-block" onclick="cancel(); return false;">Cancelar</button>
+            </div>
+            <div class="col-md-4">
+                <button id="submit" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var FechaAdquisicion = $("#FechaAdquisicion").kendoDateTimePicker().data("kendoDateTimePicker");
+        $("#stock").kendoNumericTextBox({
+            min: @ViewBag.CantidadActual,
+            decimals: 0,
+            format: '#'
+        });
+
+        $("#reset").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#submit").click(function () {
+            toastr.info("Guardando...", "Espere por favor");
+        });
+
+    });
+
+    function uploadDone(msg, code) {
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se actualizaron los datos.", "Información Guardada");
+
+            ObtenerStockComponenteDetalle();
+            ObtenerDetalleStockCabecera();
+        }
+        else {
+            if (code == 1) {
+                toastr.warning("Ingrese un stock mayor al actual.", "Mensaje");
+            }
+            else if (code == 2) {
+                toastr.warning("Por favor complete la información requerida.", "Mensaje");
+            }
+            else if (code == 3) {
+                toastr.warning("Inicie nuevamente sesión.", "Mensaje");
+            }
+            else if (code == 4) {
+                toastr.error("Contacte al administrador.", "Mensaje");
+            }
+        }
+    }
+</script>

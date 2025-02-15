@@ -1,0 +1,412 @@
+﻿@{
+    ViewBag.Title = "Tipo Servicio";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+@*--------------------------------Plugin iCheck--------------------------------*@
+<link href="~/Content/themes/plugin//iCheck/flat/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+@*-----------------------Plugin DataTable + Bootstrap---------------------------------------------------------*@
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<div class="app-page-title" style="margin-bottom: 2%; padding: 1% 2.5%;">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Mantenimiento Tipo de Servicio / Actividades
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-2 card">
+                <div class="card-body" style="padding-bottom: 1%;">
+                    <div class="card-title">Tipo de Servicio</div>
+                    <hr style="margin-top: 0%; margin-bottom: 1%;" />
+                    <form class="">
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblUnidadNegocio" for="unidadNegocio">Unidad de Negocio</label>
+                                    <input id="cboUnidadNegocio" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblMacroservicio" for="macroservicio">Macroservicio</label>
+                                    <input id="cboMacroservicio" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblServicio" for="servicio">Servicio</label>
+                                    <input id="cboServicio" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblIncidenteReq" for="incidentereq">Incidente/Requerimiento</label>
+                                    <input id="cboIncidenteReq" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblTipoServicio" for="tiposervicio" style="color:#648AE3;cursor:pointer;" data-toggle="modal" data-target="#miModal" onclick="AbrirModalTipoActividad()">Tipo de servicio</label>
+                                    <input id="cboTipoServicio" type="text" />
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <div class="position-relative form-group">
+                                    <label for="chkEstado">Estado</label><br>
+                                    <input id="chkEstado" type="checkbox" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                            </div>
+                            <div class="col-md-1">
+                                <div class="position-relative form-group">
+                                    <br>
+                                    <button id="btnCrear" type="button" class="btn btn-primary btn-block">Guardar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active">
+                            <table id="tbTipoServicio" class="table table-hover table-striped table-bordered" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Unidad de negocio</th>
+                                        <th>Macroservicio</th>
+                                        <th>Servicio</th>
+                                        <th>Incidente / Requerimiento</th>
+                                        <th>Tipo de servicio</th>
+                                        <th>Estado</th>
+                                        <th>Opciones</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="body-block-example-1 d-none">
+    <div class="loader bg-transparent no-shadow p-0">
+        <div class="ball-grid-pulse">
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+        </div>
+    </div>
+</div>
+
+@*<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>*@
+<script>
+
+    $(document).ready(function () {
+        $("#btnCrear").click(function () {
+            NuevoTipoServicio();
+        });
+        // ESTILO DE COMBOS
+        var cboUnidadNegocio = $("#cboUnidadNegocio").kendoComboBox({
+            placeholder: "",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        });
+        var cboMacroservicio = $("#cboMacroservicio").kendoComboBox({
+            cascadeFrom: "cboUnidadNegocio",
+            placeholder: "",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        });
+        var cboServicio = $("#cboServicio").kendoComboBox({
+            cascadeFrom: "cboMacroservicio",
+            placeholder: "",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        });
+        var cboIncidenteReq = $("#cboIncidenteReq").kendoComboBox({
+            cascadeFrom: "cboServicio",
+            placeholder: "",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        });
+        cargarCboTipoActividad();
+        //Dando estilo iCheck a los checkbox
+        $('#chkEstado').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+        $('#chkEstado').iCheck('check');
+
+        //Variable de lenguaje para tablas
+        var leng_esp = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+
+        //Limpieza de Tablas
+        $("#tbTipoServicio").dataTable().fnDestroy();
+        //Carga de Tablas
+        $('#tbTipoServicio').DataTable({
+            order: [[1, "asc"]],
+            responsive: true,
+            dom: 'frtip',
+            select: true,
+            ajax: {
+                url: "/Actividad_TipoServicio/ListarTipoServicio",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "Id"
+                },
+                {
+                    data: "UnidadNegocio"
+                },
+                {
+                    data: "Macroservicio"
+                },
+                {
+                    data: "Servicio"
+                },
+                {
+                    data: "IncidenteReq"
+                },
+                {
+                    data: "TipoServicio"
+                },
+                {
+                    data: "Estado"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div role="group" class="btn-group-lg btn-group">' +
+                            '<button class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3" title="Editar Tipo de Servicio" data-toggle="modal" data-target="#miModal" onclick="Editar(' + data.Id + ');"> <i class="fa fa-edit" aria-hidden="true"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            columnDefs: [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                }
+            ],
+            language: leng_esp
+        });
+    });
+
+    function NuevoTipoServicio() {
+        var mensajeAdvertencia = '';
+        if ($("#cboUnidadNegocio").val() == "") {
+            mensajeAdvertencia = mensajeAdvertencia + "- Unidad de negocio. <br/>";
+        } 
+        if ($("#cboMacroservicio").val() == "") {
+            mensajeAdvertencia = mensajeAdvertencia + "- Macroservicio. <br/>";
+        } 
+        if ($("#cboServicio").val() == "") {
+            mensajeAdvertencia = mensajeAdvertencia + "- Servicio. <br/>";
+        } 
+        if ($("#cboIncidenteReq").val() == "") {
+            mensajeAdvertencia = mensajeAdvertencia + "- Incidente/Requerimiento. <br/>";
+        } 
+        if ($("#cboTipoServicio").val() == "") {
+            mensajeAdvertencia = mensajeAdvertencia + "- Tipo de Servicio. <br/>";
+        }
+
+        if (mensajeAdvertencia == '') {
+            $.ajax({
+                type: "POST",
+                url: "/Actividad_TipoServicio/NuevoTipoServicio?incidenteReq=" + $("#cboIncidenteReq").val() +
+                    "&type_act=" + $("#cboTipoServicio").val() +
+                    "&estado=" + $("#chkEstado").iCheck('update')[0].checked,
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("El tipo de servicio ingresado ya se encuentra registrado.", "Advertencia");
+                    } else if (data == "OK") {
+                        toastr.success("Registro Creado", "Exito!");
+                        $("#cboUnidadNegocio").data("kendoComboBox").value("");
+                        $("#cboMacroservicio").data("kendoComboBox").value("");
+                        $("#cboServicio").data("kendoComboBox").value("");
+                        $("#cboIncidenteReq").data("kendoComboBox").value("");
+                        $("#cboTipoServicio").data("kendoComboBox").value("");
+                        $('#tbTipoServicio').DataTable().ajax.reload();
+                    } else {
+                        toastr.warning("+La categoría ya se encuentra registrada", "Advertencia");
+                    }
+                }
+            });
+        } else {
+            toastr.warning(mensajeAdvertencia,'Complete los siguientes campos:');
+        }
+    }
+
+    function Editar(Id) {
+        $("#lblTitulo").text("Editar Tipo de Servicio");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/Actividad_TipoServicio/Editar?id=' + Id);
+    }
+
+    function AbrirModalTipoActividad() {
+        $("#lblTitulo").text("Nueva Tipo de Actividad");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-md");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/Type_Act_log/Index');
+    }
+
+    function cargarCboTipoActividad() {
+        var cboTipoServicio = $("#cboTipoServicio").kendoComboBox({
+            placeholder: "",
+            dataTextField: "DES_ACT",
+            dataValueField: "ID_TYPE_ACT",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Type_Act_Log/CboListarTypeActLog"
+                }
+            }
+        });
+    }
+
+</script>

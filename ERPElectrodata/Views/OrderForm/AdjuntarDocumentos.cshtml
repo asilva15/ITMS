@@ -1,0 +1,100 @@
+﻿@{
+    ViewBag.Title = "AdjuntarDocumentos";
+    Layout = null;
+}
+
+<div class="form-row">
+    <div class="col-md-6">
+        <div class="position-relative form-group">
+            <label id="lblTipoDocumento" for="lblTipoDocumento">
+                Tipo de Documento
+            </label>
+            <select id="ArrayFile" name="ArrayFile" class="form-control input-sm select2" type="text" style="width:100%"></select>
+        </div>
+    </div>
+    <div class="col-md-6" id="divFechaActa">
+        <div class="position-relative form-group">
+            <label id="lblFechaActa"></label>
+            <input id="FechaActa" name="FechaActa" />
+        </div>
+    </div>
+</div>
+
+<div class="form-row">
+    <div class="col-md-12">
+        <div class="position-relative form-group">
+            <input name="files" id="files" type="file" />
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var ArrayFile = $("#ArrayFile").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeDocumentModule/ListarTipoDocumento/1",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+            $("#ArrayFile").change(function () {
+                var flag = $("#ArrayFile").val();
+                if (flag == 1 || flag == 22) {
+                    $("#divFechaActa").show();
+                    if (flag == 1) $("#lblFechaActa").text("Fecha Firma Acta de Conformidad");
+                    if (flag == 22) $("#lblFechaActa").text("Fecha real de entrega de equipos");
+                } else {
+                    $("#divFechaActa").hide();
+                    $("#lblFechaActa").text("");
+                }
+            });
+
+            var FechaActa = $("#FechaActa").kendoDateTimePicker().data("kendoDateTimePicker");
+            FechaActa.value("@ViewBag.DATE");
+            $("#divFechaActa").hide();
+        
+    
+            $("#files").kendoUpload({
+                localization: {
+                    select: "Adjuntar"
+                },
+                upload: function (e) {
+                    e.data = {
+                        ID_TYPE_DOCU_ATTA: $("#ArrayFile").val(),
+                        KEY_ATTA: '@ViewBag.UploadFile',
+                        ID_DOCU_SALE: '@ViewBag.ID_DOCU_SALE',
+                        FechaActa: $("#ArrayFile").val() == 1 ? $("#FechaActa").val() : ($("#ArrayFile").val() == 22 ? $("#FechaActa").val() : '')
+                    };
+                },
+                remove: function (e) {
+                    e.data = {
+                        KEY_ATTA: '@ViewBag.UploadFile'
+                    };
+                },
+                async: {
+                    saveUrl: "/Attach/AdjuntarArchivosOP",
+                    removeUrl: "/Attach/RemoverArchivosOP"
+                }
+            });
+    });
+
+
+    
+
+</script>

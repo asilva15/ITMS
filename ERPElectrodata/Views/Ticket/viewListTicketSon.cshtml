@@ -1,0 +1,117 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    Layout = null;
+}
+
+<div id="gridTicketSon" class="contentView">
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="tpt_TicketSon">
+    <div style="width:100%; height:100%; display:inline-block;">
+        # if(TTSON == Contador(TTSON,ID_TICK_PARENT)) { #
+        <div style="width: 3%; height: 100%; float: left; position:relative;">
+            <div style="width: 45%; height: 90px; float: right; margin-top:-20px; border-left: 1px solid \#808080; border-bottom: 1px solid \#808080;"></div>
+        </div>
+        # } else { #
+        <div style="width: 3%; height: 100%; float: left; position: relative; display: inline-block;">
+            <div style="width: 50%; height: 155px; float: left; margin-top:-20px; border-right: 1px solid \#808080; "></div>
+            <div style="width: 45%; height: 80px; float: left; margin-top:-10px; border-bottom: 1px solid \#808080;"></div>
+        </div>
+        # } #
+        <div style="width: 97%; height: 100%; float: left;">
+            <div class="incidentHomeList">
+                <div class="incidentHomeListBlock1 hasLayout">
+                    <div class="incidentHomeListHeader">
+                        <div class="FondoNegro">
+                            <div id="SON_${ID_INCI}" onclick="child(this)" class="${PARENT}">
+                            </div>
+                            <div class="status">
+                                ${NAM_STAT}
+                            </div>
+                            <div class="incidentHomeRequesterIcon" title="Affected End User">
+                                ${REQU}
+                            </div>
+                            <div class="incidentHomeCreate" title="Creation date @ResourceLanguaje.Resource.DateFormat">
+                                @ResourceLanguaje.Resource.Created: ${CREATE_INCI}
+                            </div>
+                            <div class="incidentHomeModified" title="Modification date @ResourceLanguaje.Resource.DateFormat">
+                                Modified: ${MODIFIED_INCI}
+                            </div>
+                            <div class="incidentHomeExpTime" title="Expiration Time">
+                                Expiration Time: ${EXP_TIME}
+                            </div>
+                        </div>
+                        <div class="${ICO_PRIO}">
+                            ${NAM_PRIO}
+                        </div>
+                    </div>
+                </div>
+                <div class="incidentHomeSumary">
+                    <a href="${URL}${ID_INCI}" target='_BLANK'>#= SUM_INCI #</a>
+                </div>
+                <div class="contraya">
+                    <div class="raya"></div>
+                </div>
+                <div class="incidentHomeRes">
+                    <div class="ticket">
+                        ${NAM_TYPE_TICK} \\#
+                        ${COD_INCI}
+                    </div>
+                    <div class="cateTicket">${NAM_CATE} - ${NAM_SUBC}</div>
+                    <div class="viaTicket">Via ${NAM_SOUR}</div>
+                    <div class="createBy">@ResourceLanguaje.Resource.CreatedBy: ${CREATEBY}</div>
+                    <div class="assignedTo">Assigned To: ${ASSI}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="btn${ID_INCI}">
+    </div>
+
+    <div style="clear:both">
+    </div>
+</script>
+
+<script type="text/javascript">
+    var ctd = 0;
+    function Contador(tt,id) {
+        ctd = ctd + 1;
+        if (tt == ctd) {
+            $("#divLoading" + id).css("display", "none");
+        }
+        return ctd;
+    }
+
+    $(document).ready(function () {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Ticket/ListTicketsSon/@ViewBag.ID_TICK?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+
+        $("#gridTicketSon").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#tpt_TicketSon").html())
+        });
+    });
+</script>

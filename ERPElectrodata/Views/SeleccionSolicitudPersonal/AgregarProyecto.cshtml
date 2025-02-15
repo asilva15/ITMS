@@ -1,0 +1,159 @@
+﻿@model  ERPElectrodata.Models.SolicitudPersonal
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("AgregarProyecto", "SeleccionSolicitudPersonal", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAgregarOPSolicitud", target = "upload_target" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <input type="hidden" id="IdSolicitudAgregarOP" name="IdSolicitudAgregarOP" value="@ViewBag.Id" />
+    <div class="row">
+        <div class="col-md-12" style="text-align:center">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form>
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="position-relative form-group">
+                                    <label>Cliente <span style="color:red">*</span></label>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="text" name="cbCliente" id="cbCliente" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="position-relative form-group">
+                                    <label>Proyecto (OP) <span style="color:red">*</span></label>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.IdProyecto)
+                                @Html.ValidationMessageFor(model => model.IdProyecto)
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="position-relative form-group">
+                                    <label>Fecha Fin de Proyecto</label>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                @Html.TextBoxFor(model => model.FechaFinProyecto)
+                                @Html.ValidationMessageFor(model => model.FechaFinProyecto)
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="position-relative form-group">
+                                    <label>Presupuesto</label>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.Presupuesto)
+                                @Html.ValidationMessageFor(model => model.Presupuesto)
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-12" style="text-align:center;">
+                                <div class="position-relative form-group">
+                                    <button id="btnGuardarOP" type="submit" class="btn-shadow btn btn-success btn-sm">Agregar Proyecto</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" style="display:none"></iframe>
+
+<script>
+    $(document).ready(function () {
+
+        $("#cbCliente").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdProyecto").kendoComboBox({
+            cascadeFrom: "cbCliente",
+            placeholder: "",
+            dataTextField: "PROYECTO",
+            dataValueField: "ID_DOCU_SALE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ListarProyectoVigente?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#FechaFinProyecto").kendoDatePicker({
+            format: "dd/MM/yyyy"
+        });
+
+        $("#Presupuesto").kendoNumericTextBox({
+            format: "#.#",
+            decimals: 0,
+            min: 0,
+            value: 0
+        });
+
+        $("#FrmAgregarOPSolicitud").submit(function (e) {
+            $("#btnGuardarOP").prop("disabled", true);
+        });
+
+    });
+
+    function uploadDoneAgregarOP(msg) {
+        $("#btnGuardarOP").prop("disabled", false);
+
+        if (msg == "OK") {
+            try {
+                ObtenerDatosSolicitud();
+            } catch (ex) {
+                setTimeout(function () {
+                    location.reload();
+                }, 1000);
+            }
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se añadió el proyecto con exito.", "Proyecto Añadido");
+        }
+        else if (msg == "ERROR") {
+            toastr.error("Por favor vuelva a intertar", "Ha ocurrido un error");
+        }
+        else {
+            toastr.warning(msg, "Complete la información");
+        }
+
+    }
+</script>

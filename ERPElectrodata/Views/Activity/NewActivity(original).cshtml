@@ -1,0 +1,1111 @@
+﻿@model ERPElectrodata.Models.ACTIVITY_LOG
+@{
+    Layout = null;
+}
+<style> 
+    .contain-newAct {
+        min-width: 100%;
+        max-width: 100%;
+        float: left;
+    }
+
+    .backgroundcad {
+        max-width: 100%;
+        min-width: 100%;
+    }
+
+    .text-box {
+        width: 220px;
+        height: 26px;
+    }
+
+    #COMENTARIO {
+        width: 100%;
+        height: 250px;
+    }
+
+    .delete-link {
+        background: transparent url("/Content/Images/close_active.png") no-repeat 50% 50%;
+    }
+
+    #DES_ASUNTO {
+        width: 350px;
+        height: 26px;
+    }
+
+    #NamSubTipo {
+        margin-bottom: 0px !important;
+        font-weight: normal !important;
+    }
+</style>
+<div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+@using (Html.BeginForm("CreateNewActivity", "Activity", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmNewActivity", target = "FrmNewActivity" }))
+{
+    <div class="contain-newAct">
+        <div class="titleForm">
+            <div class="title">Registro de Actividades</div>
+        </div>
+        <div class="inBodyForm">
+            @Html.ValidationSummary(true)
+            <div style="width:100%;">
+                <div>
+                    <input type="hidden" name="ID_ENTI_ACT" id="ID_ENTI_ACT" value="0" />
+                    <input type="hidden" name="ID_USR_ACT" id="ID_USR_ACT" value="0" />
+                    <input type="hidden" value="@ViewBag.UploadFile" name="KEY_ATTA" readonly="readonly" />
+                    <input type="hidden" name="TIEMPO_ACT" id="TIEMPO_ACT" value="0" />
+                    <fieldset>
+                        <legend>Actividades</legend>
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div style="float: left">
+                                <div id="divClient" class="editor-label">
+                                    Cliente
+                                </div>
+                                <div id="divNewClient" class="editor-label" onclick="NewClient()" style="cursor: pointer; display: none; text-decoration: underline; color: red; " title="Registrar Nuevo Cliente">
+                                    <b>Cliente</b>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_CLIE)@*, new { @class = "kendo-force-validation" })*@
+                                    @Html.ValidationMessageFor(model => model.ID_CLIE)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float: left">
+                                <div class="editor-label">
+                                    Tipo de Actividad
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_TYPE_ACT)
+                                    @Html.ValidationMessageFor(model => model.ID_TYPE_ACT)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float: left">
+                                <div class="editor-label">
+                                    Fecha de Inicio
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.DATE_INIC)
+                                    @Html.ValidationMessageFor(model => model.DATE_INIC)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float: left">
+                                <div class="editor-label">
+                                    Fecha de Fin
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.DATE_END)
+                                    @Html.ValidationMessageFor(model => model.DATE_END)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoDos">
+                            <div class="divSpace3"></div>
+                            <div style="float: left" id="SubTipo">
+                                <div id="divMarca" class="editor-label">
+                                    <label id="NamSubTipo"></label>
+                                </div>
+                                <div id="divNewMarca" class="editor-label" onclick="NewMarca()" style="cursor: pointer; display: none; text-decoration: underline; color: red; " title="Registrar Nueva Marca">
+                                    <b>Marca</b>
+                                </div>
+                                <div id="editorSubType" class="editor-field">
+                                    <input type='hidden' name="COD_SUBTYPE_ACT" id="COD_SUBTYPE_ACT" value="0" />
+                                    <input type='hidden' name="NAM_SUBTYPE_ACT" id="NAM_SUBTYPE_ACT" value="" />
+                                    @Html.EditorFor(model => model.ID_SUBTYPE_ACT)
+                                    @Html.ValidationMessageFor(model => model.ID_SUBTYPE_ACT)
+                                    <a id="linkhelp">
+                                        <img id="helpst" src="/Content/Images/info.png" height="25" class="HelpSubType divHide" />
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="sendMailSD" style="margin-left: 15px; float: left">
+                                <div class="divSpace3"></div>
+                                <div class="CloseTicket" style="float: left">
+                                    <div class="editor-label">
+                                        ¿Desea cerrar el Ticket?
+                                    </div>
+                                    <div class="">
+                                        @Html.CheckBox("CloseTicketNA")
+                                    </div>
+                                </div>
+                                <div class="divSpace3"></div>
+                                <div class="SchedulerTicket" style="float: left">
+                                    <div style="float: left">
+                                        <div class="editor-label">
+                                            ¿Desea Programar el Ticket?
+                                        </div>
+                                        <div class="">
+                                            @Html.CheckBox("SchedulerTicketNA")
+                                        </div>
+                                    </div>
+                                    <div id="fechaScheduled" class="divHide" style="float: left">
+                                        <div class="editor-label">
+                                            Fecha de Programación
+                                        </div>
+                                        <div class="editor-field">
+                                            <input type="text" id="DATE_SCHEDULE" name="DATE_SCHEDULE" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="CloseOP" style="float: left">
+                                    <div style="float: left">
+                                        <div class="editor-label">
+                                            Ticket OP
+                                        </div>
+                                        <div class="editor-field">
+                                            @Html.EditorFor(model => model.ID_TICKET_OP)
+                                            @Html.ValidationMessageFor(model => model.ID_TICKET_OP)
+                                        </div>
+                                    </div>
+                                    <div style="float: left">
+                                        <div class="editor-label">
+                                            ¿Desea cerrar el ticket OP?
+                                        </div>
+                                        <div class="editor-field">
+                                            @Html.CheckBox("CloseOPNA")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div style="float: left">
+                                <div class="editor-label">
+                                    Contacto <b style="color:red">(Opcional)</b>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.CONTACTO)
+                                    @Html.ValidationMessageFor(model => model.CONTACTO)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float: left">
+                                <div class="editor-label">
+                                    Enviar a:
+                                </div>
+                                <div class="editor-field">
+                                    <input id="ID_ENTI" name="ID_ENTI" />
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float: left">
+                                <div class="editor-label">
+                                    Destinatarios:
+                                </div>
+                                <div class="editor-field">
+                                    <div class="divCont3 ShowReceiver">
+                                        <input type="hidden" name="Cont" id="idcontreciever" value="0" />
+                                        <div id="NewReceiver"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoDos">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Asunto (Maximo 50 Caracteres)
+                                </div>
+                                <div class="editor-field">
+                                    <input id="DES_ASUNTO" name="DES_ASUNTO" maxlength="50" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div style="float: left; width: 66%">
+                                <div class="editor-label">
+                                    Comentarios <b>(Breve detalle de la actividad)</b>
+                                </div>
+                                <div>
+                                    @Html.TextAreaFor(model => model.COMENTARIO, new { maxlength = 500, rows = "5" })
+                                    @Html.ValidationMessageFor(model => model.COMENTARIO)
+                                </div>
+                                <font size="1">(Caracteres Maximos: 500)<br></font>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float: right">
+
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div class="divFondoUno" id="AdjuntarArchivo">
+                                <div class="divSpace3"></div>
+                                <div class="divCont3">
+                                    <div class="k-button" data-toggle="modal" data-target="#myModal">
+                                        Adjuntar
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="divFondoUno" style="margin-bottom:5px;">
+                                <div class="divSpace2"></div>
+                                <div style="display:inline-block; float:right; padding:5px 47px 0px 5px;">
+                                    <div style="float:left; padding:0px 10px 0px 0px; ">
+                                        <button id="btnGrabar" class="k-button" onclick="SaveNewActivity(this); return false;">Grabar</button>
+                                    </div>
+                                    <button id="reset" class="k-button">Cancelar</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                        <h4 class="modal-title" id="myModalLabel">Adjuntar Archivos</h4>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="editor-label">
+                                            Tipo de Documento
+                                        </div>
+                                        <div class="editor-field">
+                                            @Html.TextBox("ArrayFile")
+                                        </div>
+                                        <br />
+                                        <input name="files" id="files" type="file" />
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="k-button" data-dismiss="modal">Cerrar</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<iframe id="FrmNewActivity" name="FrmNewActivity" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+<script id="tmp-OP" type="text/x-kendo-template">
+    <div style="width: 100%; font-size: 1em;">
+        <div style="width:100%; font-size:0.9em; margin-top:-5px;">#= NAM_TYPE_OPDOC_SALE #</div>
+        <span style="width:100%; font-size:1em;">#= OP_TITLE #</span>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#ID_USR_ACT').val(parseInt(@Session["UserId"]));
+        FnAddNewActivity();
+        $(".ShowReceiver").hide();
+        $("#idcontreciever").hide();
+        $(".sendMailSD").addClass("divHide");
+        $("#AdjuntarArchivo").addClass("divHide");
+        $("#divATTACH").addClass("divHide");
+    });
+
+    function FnAddNewActivity() {
+        $("#TBNewActivity").removeClass("divHide");
+        $("#TBNewActivityContacto").removeClass("divHide");
+
+        var today = new Date();
+        function addMins(theDate, min) {
+            return new Date(theDate.getTime() + min * 60 * 1000);
+        }
+        function addDays(theDate, days) {
+            return new Date(theDate.getTime() + days * 24 * 60 * 60 * 1000);
+        }
+        var newDate = addMins(new Date(), 1);
+        var disableDay = addDays(new Date(), -10);
+
+        var k_startdatetimepicker = $("#DATE_INIC").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+
+        var k_enddatetimepicker = $("#DATE_END").kendoDateTimePicker({
+            value: newDate
+        }).data("kendoDateTimePicker");
+
+        $("#ID_CLIE").val('');
+
+        if (@Session["ID_ACCO"] == 4){
+            var ID_CLIE = $("#ID_CLIE").kendoComboBox({
+                autoBind: false,
+                placeholder: "SELECCIONAR CLIENTE",
+                dataTextField: "COM_NAME",
+                dataValueField: "ID_ENTI",
+                filter: "contains",
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                    }
+                },
+                change: function (e) {
+                    if (ID_CLIE.dataItem()) {
+                        $('#ID_ENTI_ACT').attr('value', ID_CLIE.dataItem().ID_ENTI);
+                        $('#ID_SUBTYPE_ACT').val('');
+                        if ($('#ID_TYPE_ACT').val() != "") {
+                            switch ($('#ID_TYPE_ACT').val()) {
+                                case "1":
+                                    fnMostrarOP(ID_CLIE.dataItem().ID_ENTI);
+                                    break;
+                                case "2":
+                                    fnMostrarTICKET(ID_CLIE.dataItem().ID_ENTI);
+                                    break
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    else {
+                        $('#ID_ENTI_ACT').attr('value', 0);
+                    }
+                }
+            }).data("kendoComboBox");
+        }else{
+            var ID_CLIE = $("#ID_CLIE").kendoComboBox({
+                index: 0,
+                autoBind: true,
+                placeholder: "SELECCIONAR CLIENTE",
+                dataTextField: "COM_NAME",
+                dataValueField: "ID_ENTI",
+                filter: "contains",
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                    }
+                },
+                change: function (e) {
+                    if (ID_CLIE.dataItem()) {
+                        $('#ID_ENTI_ACT').attr('value', ID_CLIE.dataItem().ID_ENTI);
+                        $('#ID_SUBTYPE_ACT').val('');
+                        if ($('#ID_TYPE_ACT').val() != "") {
+                            switch ($('#ID_TYPE_ACT').val()) {
+                                case "1":
+                                    fnMostrarOP(ID_CLIE.dataItem().ID_ENTI);
+                                    break;
+                                case "2":
+                                    fnMostrarTICKET(ID_CLIE.dataItem().ID_ENTI);
+                                    break
+                                default:
+                                    break;
+                            }
+                        }
+                    }
+                    else {
+                        $('#ID_ENTI_ACT').attr('value', 0);
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+
+        var ID_TYPE_ACT = $("#ID_TYPE_ACT").kendoComboBox({
+            autoBind: false,
+            placeholder: "SELECCIONAR TIPO",
+            dataTextField: "DES_ACT",
+            dataValueField: "ID_TYPE_ACT",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListTypeActivity?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+
+                $('#ID_SUBTYPE_ACT').val('');
+                if (ID_TYPE_ACT.dataItem()) {
+                    var id_subtype = ID_TYPE_ACT.dataItem().ID_SUBTYPE_ACT;
+                    $('#COD_SUBTYPE_ACT').val(ID_TYPE_ACT.dataItem().ID_SUBTYPE_ACT);
+                    switch (id_subtype) {
+                        case 1:
+                            var id = $('#ID_ENTI_ACT').val();
+                            if (id != "0") {
+                                if (ID_CLIE.value() == "9") {
+                                    $("#ID_CLIE").data("kendoComboBox").value("");
+                                    $("#ID_TYPE_ACT").data("kendoComboBox").value("");
+                                    validar2('El Cliente Electrodata no puede ser Implementación.');
+                                }
+                                fnMostrarOP(id);
+                                $("#SubTipo").removeClass("divHide");
+                                $("#divClient").css("display", "inline-block");
+                                $("#divNewClient").css("display", "none");
+                                $("#divMarca").css("display", "inline-block");
+                                $("#divNewMarca").css("display", "none");
+                                $('#NamSubTipo').text('OP');
+                                $(".HelpSubType").removeClass("divHide");
+                                $(".sendMailSD").removeClass("divHide");
+                                $(".CloseOP").removeClass("divHide");
+                                $(".CloseTicket").addClass("divHide");
+                                $(".SchedulerTicket").addClass("divHide");
+                                $("#divATTACH").addClass("divHide");
+                                $("#AdjuntarArchivo").removeClass("divHide");
+                            }
+                            else {
+                                if (ID_CLIE.value() == "9") {
+                                    $("#ID_CLIE").data("kendoComboBox").value("");
+                                    $("#ID_TYPE_ACT").data("kendoComboBox").value("");
+                                    validar2('El Cliente Electrodata no puede ser Implementación.');
+                                }
+                                else {
+                                    validar2('Debe seleccionar el Cliente.');
+                                }
+                                $("#ID_TYPE_ACT").data("kendoComboBox").value("");
+                                $("#SubTipo").addClass("divHide");
+                                ID_CLIE.enable();
+                                $("#SubTipo").addClass("divHide");
+                                $(".HelpSubType").addClass("divHide");
+                                $(".sendMailSD").addClass("divHide");
+                            }
+                            break;
+                        case 2: case 8: case 11: case 14: case 17: case 20:
+                            var id = $('#ID_ENTI_ACT').val();
+                            if (id != "0") {
+                                if (ID_CLIE.value() == "9") {
+                                    $("#ID_CLIE").data("kendoComboBox").value("");
+                                    $("#ID_TYPE_ACT").data("kendoComboBox").value("");
+                                    validar2('El Cliente Electrodata no puede ser Soporte Externo.');
+                                }
+                                $("#SubTipo").removeClass("divHide");
+                                fnMostrarTICKET(ID_CLIE.value());
+                                $("#divClient").css("display", "inline-block");
+                                $("#divNewClient").css("display", "none");
+                                $("#divMarca").css("display", "inline-block");
+                                $("#divNewMarca").css("display", "none");
+                                $('#NamSubTipo').text('Ticket');
+                                $(".HelpSubType").removeClass("divHide");
+                                $(".sendMailSD").removeClass("divHide");
+                                $(".CloseOP").addClass("divHide");
+                                $(".CloseTicket").removeClass("divHide");
+                                $(".SchedulerTicket").removeClass("divHide");
+                                $("#DATE_SCHEDULE").kendoDateTimePicker({ value: new Date() }).data("kendoDateTimePicker");
+                                $('#SchedulerTicketNA').change(function () {
+                                    if (this.checked) {
+                                        $(".CloseTicket").addClass("divHide");
+                                        $("#fechaScheduled").removeClass("divHide");
+                                    }
+                                    else {
+                                        $(".CloseTicket").removeClass("divHide");
+                                        $("#fechaScheduled").addClass("divHide");
+                                    }
+                                });
+                                $('#CloseTicketNA').change(function () {
+                                    if (this.checked)
+                                        $(".SchedulerTicket").addClass("divHide");
+                                    else
+                                        $(".SchedulerTicket").removeClass("divHide");
+                                });
+                                $("#AdjuntarArchivo").removeClass("divHide");
+                                $("#divATTACH").addClass("divHide");
+                            }
+                            else {
+                                if (ID_CLIE.value() == "9") {
+                                    $("#ID_CLIE").data("kendoComboBox").value("");
+                                    $("#ID_TYPE_ACT").data("kendoComboBox").value("");
+                                    validar2('El Cliente Electrodata no puede ser Soporte Externo.');
+                                }
+                                else {
+                                    validar2('Debe seleccionar el Cliente.');
+                                }
+                                $("#ID_TYPE_ACT").data("kendoComboBox").value("");
+                                $("#SubTipo").addClass("divHide");
+                                $(".sendMailSD").addClass("divHide");
+                                $("#SubTipo").addClass("divHide");
+                                $(".HelpSubType").addClass("divHide");
+                                $(".sendMailSD").addClass("divHide");
+                            }
+                            break;
+                        case 3:
+                            fnMostrarAREA();
+                            $("#SubTipo").removeClass("divHide");
+                            $("#divClient").css("display", "inline-block");
+                            $("#divNewClient").css("display", "none");
+                            $("#divMarca").css("display", "inline-block");
+                            $("#divNewMarca").css("display", "none");
+                            $('#NamSubTipo').text('Area');
+                            $(".HelpSubType").addClass("divHide");
+                            $(".sendMailSD").addClass("divHide");
+                            $("#AdjuntarArchivo").addClass("divHide");
+                            $("#divATTACH").addClass("divHide");
+                            ID_CLIE.value(9);
+                            break;
+                        case 4:
+                            fnMostrarVENDEDOR();
+                            $("#SubTipo").removeClass("divHide");
+                            $("#divClient").css("display", "none");
+                            $("#divNewClient").css("display", "inline-block");
+                            $("#divMarca").css("display", "inline-block");
+                            $("#divNewMarca").css("display", "none");
+                            $('#NamSubTipo').text('Vendedor');
+                            $(".HelpSubType").addClass("divHide");
+                            $(".sendMailSD").addClass("divHide");
+                            $("#AdjuntarArchivo").addClass("divHide");
+                            $("#divATTACH").addClass("divHide");
+                            if (ID_CLIE.value() == "9") {
+                                $("#ID_CLIE").data("kendoComboBox").value("");
+                                $("#ID_TYPE_ACT").data("kendoComboBox").value("");
+                                validar2('El Cliente Electrodata no puede tener Apoyo Comercial.');
+                            }
+                            break;
+                        case 6: case 9: case 12: case 15: case 18: case 21:
+                            fnMostrarMARCA();
+                            $("#SubTipo").removeClass("divHide");
+                            $("#divClient").css("display", "inline-block");
+                            $("#divNewClient").css("display", "none");
+                            $("#divMarca").css("display", "none");
+                            $("#divNewMarca").css("display", "inline-block");
+                            $('#NamSubTipo').text('Marca');
+                            $(".HelpSubType").addClass("divHide");
+                            $(".sendMailSD").addClass("divHide");
+                            $("#AdjuntarArchivo").addClass("divHide");
+                            $("#divATTACH").addClass("divHide");
+                            if (@ViewBag.ID_ACCO == 4){
+                                ID_CLIE.value(9);
+                            }
+                            break;
+                        case 7: case 10: case 13: case 16: case 19: case 22: case 23: case 24:
+                        case 25: case 26: case 27: case 28:case 29:case 30:
+                            $("#SubTipo").addClass("divHide");
+                            $('#NamSubTipo').text('Marca');
+                            $(".HelpSubType").addClass("divHide");
+                            $(".sendMailSD").addClass("divHide");
+                            $("#AdjuntarArchivo").addClass("divHide");
+                            $("#divATTACH").addClass("divHide");
+                            if (@ViewBag.ID_ACCO == 4){
+                                ID_CLIE.value(9);
+                            }
+                            break;
+                        case 9:
+                        default:
+                    }
+                }
+                else {
+                    $('#ID_SUBTYPE_ACT').val('');
+                    $('#ID_SUBTYPE_ACT').attr('value', 0);
+                }
+            }
+        }).data("kendoComboBox");
+        var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+            autoBind: true,
+            placeholder: "SELECCIONAR DESTINATARIO",
+            dataTextField: "NAME_USER",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListPersonEmail?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                AddNewReceiver()
+            },
+        }).data("kendoComboBox");
+        //attachment
+        $("#files").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach"
+            },
+            upload: function (e) {
+                e.data = {
+                    ID_TYPE_DOCU_ATTA: ArrayFile.dataItem().ID_TYPE_DOCU_ATTA,
+                    KEY_ATTA: '@ViewBag.UploadFile'
+                };
+            },
+            remove: function (e) {
+                e.data = {
+                    KEY_ATTA: '@ViewBag.UploadFile'
+                };
+            },
+            async: {
+                saveUrl: "/Attach/SaveDetailTicket",
+                removeUrl: "/Attach/RemoveDetailTicket"
+            }
+        });
+
+        var ArrayFile = $("#ArrayFile").kendoComboBox({
+            dataTextField: "NAM_TYPE_DOCU_ATTA",
+            dataValueField: "ID_TYPE_DOCU_ATTA",
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Total"
+                },
+                transport: {
+                    read: "/TypeDocumentModule/ListByModule/1?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        //if (@Session["ID_ACCO"] == 4){ID_CLIE.value(""); ID_CLIE.text("");}//Electrodata
+        $('#ID_ENTI_ACT').attr('value', ID_CLIE.value());
+    }
+    function fnMostrarOP(id) {
+        var ID_SUBTYPE_ACT = $("#ID_SUBTYPE_ACT").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_TYPE_OPDOC_SALE",
+            dataValueField: "ID_DOCU_SALE",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            template: kendo.template($("#tmp-OP").html()),
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListOPActivityClient?id=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#NAM_SUBTYPE_ACT').val(ID_SUBTYPE_ACT.dataItem().NAM_TYPE_OPDOC_SALE);
+                $('#subtipo').text('OP');
+                $(".HelpSubType").removeClass("divHide");
+                $("#ID_TICKET_OP").val('');
+                detalleOP(ID_SUBTYPE_ACT.dataItem().ID_DOCU_SALE);
+                fnMostrarTicketOP(ID_SUBTYPE_ACT.dataItem().ID_DOCU_SALE);
+            }
+        }).data("kendoComboBox");
+    }
+    function fnMostrarTicketOP(id) {
+        var ID_TICKET_OP = $("#ID_TICKET_OP").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_TICKET_OP",
+            dataValueField: "ID_TICKET_OP",
+            filter: "contains",
+            index: 0,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListTicketOPActivity?id=" + id + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+    }
+    function fnMostrarTICKET(id) {
+        var ID_SUBTYPE_ACT = $("#ID_SUBTYPE_ACT").kendoComboBox({
+            autoBind: true,
+            dataTextField: "COD_TICK",
+            dataValueField: "ID_TICK",
+            filter: "contains",
+            delay: 500,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListTicketsNotClosed?id=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#NAM_SUBTYPE_ACT').val(ID_SUBTYPE_ACT.dataItem().COD_TICK);
+                $(".HelpSubType").removeClass("divHide");
+                detalleTicket(ID_SUBTYPE_ACT.dataItem().ID_TICK);
+            }
+        }).data("kendoComboBox");
+    }
+    function fnMostrarAREA() {
+        var ID_AREA_ACT = $("#ID_SUBTYPE_ACT").kendoComboBox({
+            dataTextField: "ID_DETALLE",
+            dataValueField: "ID_AREA_ACT",
+            filter: "contains",
+            autoBind: false,
+            index: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListArea?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                var AREA_ACT = ID_AREA_ACT.dataItem().ID_DETALLE;
+                $(".HelpSubType").addClass("divHide");
+                $('#NAM_SUBTYPE_ACT').val(AREA_ACT);
+                $('#subtipo').val('AREA');
+            }
+        }).data("kendoComboBox");
+    }
+    function fnMostrarMARCA() {
+        var ID_MARCA_ACT = $("#ID_SUBTYPE_ACT").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: false,
+            index: 0,
+            suggest: true,
+            minLength: 3,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#NAM_SUBTYPE_ACT').val(ID_MARCA_ACT.dataItem().NAM_MANU);
+                $(".HelpSubType").addClass("divHide");
+                $('#subtipo').val('MARCA');
+            }
+        }).data("kendoComboBox");
+    }
+    function fnMostrarVENDEDOR() {
+
+        var ID_SUBTYPE_ACT = $("#ID_SUBTYPE_ACT").kendoComboBox({
+            dataTextField: "NAM_VENDOR",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListarVendedoresActivos?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#NAM_SUBTYPE_ACT').val(ID_SUBTYPE_ACT.dataItem().NAM_VENDOR);
+                $(".HelpSubType").addClass("divHide");
+                $('#subtipo').val('VENDEDOR');
+            }
+        }).data("kendoComboBox");
+    }
+    function AddNewReceiver() {
+        $("#idcontreciever").show();
+        $(".ShowReceiver").show();
+
+        var cont = $("#idcontreciever").val();
+        cont = parseInt(cont) + 1;
+
+        var ID_ENTI = $("#ID_ENTI").data("kendoComboBox");
+        var Name = ID_ENTI.text();
+        var valor = ID_ENTI.value();
+
+        $("#NewReceiver").append("<div id='divname" + cont + "'>" + Name +
+        "<input type='hidden' name='RECEIVER" + cont + "' id='RECEIVER" + cont + "' value='" + valor + "'>" +
+        "<span>&nbsp;<a  onclick='DeleteReceiver(" + cont + ")' class='delete-link' title='Remove' href='javascript:void(0)'></a></span></div>");
+        var v = parseInt(cont);
+        $("#idcontreciever").val(v);
+        ID_ENTI.value('');
+        $("#ID_ENTI").val('');
+    }
+    function DeleteReceiver(id) {
+        $("#divname" + id + "").remove();
+        var cont = $("#idcontreciever").val();
+        cont = parseInt(cont) - 1;
+        $("#idcontreciever").val(cont);
+    }
+    function uploadDone(conf, msg) {
+        if (conf == 'OK') {
+            var title = 'Operación Exitosa';
+            var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                           "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                           "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                           "<button id='btnContinues' class='k-button'>Continuar</button>" +
+                           "</div></div>";
+
+            winPopUpModal(title, body, 300, 130);
+
+            $("#closebtnmodal").click(function () {
+                location = "http://" + location.host + "/NewActivity";
+            });
+
+            $("#btnContinues").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+                location.reload(true);
+            });
+            //var idUser = $('#ID_USR_ACT').val();
+            //LoadActivityByPerson(idUser);
+        }
+        else {
+            var title = 'Error al Guardar';
+            var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                              "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                              "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                              "<button id='btnContinuee' class='k-button'>Continuar</button>" +
+                              "</div></div>";
+
+            winPopUpModal(title, body, 300, 130);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+    function uploadDoneSession(msg) {
+        var title = 'Advertencia';
+        var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                          "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                          "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                          "<button id='btnContinuee' class='k-button'>Continuar</button>" +
+                          "</div></div>";
+
+        winPopUpModal(title, body, 300, 130);
+
+        $("#btnContinuee").click(function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+                var newurl = location.host + "/Home";
+                location = "http://" + location.host + "/Home";
+            });
+        });
+
+    }
+    function NewClient() {
+        var htmlForm = '<div id="FormNewClient"></div>';
+        winFormPopUpModal("Crear Nuevo Cliente", htmlForm, 650, 180);
+        $("#FormNewClient").load("/Activity/ViewNewClient?var=" + Math.random());
+    }
+    function NewMarca() {
+        var htmlForm = '<div id="FormNewMarca"></div>';
+        winFormPopUpModal("Crear Nueva Marca", htmlForm, 650, 350);
+        $("#FormNewMarca").load("/Activity/viewNewMarca?var=" + Math.random());
+    }
+    function validar(msg) {
+        var title = 'Advertencia';
+        var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                          "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                          "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                          "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                          "</div></div>";
+
+        winPopUpModal(title, body, 300, 130);
+
+        $("#btnContinuee").click(function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+    }
+    function validar2(msg) {
+        var title = 'Error';
+        var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                          "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                          "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                          "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                          "</div></div>";
+
+        winPopUpModal(title, body, 300, 130);
+
+        $("#btnContinuee").click(function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+    }
+    function detalleOP(id) {
+        $.ajax({
+            url: "/Activity/ListDetailOP?id=" + id + "&var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                var title = $.parseHTML(data.Data)[0].data;
+                $("#helpst").attr("alt", title);
+                $("#helpst").attr("title", title);
+                $("#linkhelp").prop("href", '/DocumentSaleActivity/Index/' + id);
+                $("#linkhelp").attr("target", "_blank");
+            }
+        });
+    }
+    function detalleTicket(id) {
+        $.ajax({
+            url: "/Activity/ListDetailTicket?id=" + id + "&var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                var title = $.parseHTML(data.Data)[0].data;
+                $("#helpst").attr("alt", title);
+                $("#helpst").attr("title", title);
+                $("#linkhelp").prop("href", '/DetailsTicket/Index/' + id);
+                $("#linkhelp").attr("target", "_blank");
+            }
+        });
+    }
+    function SaveNewActivity() {
+
+        var datein = $('#DATE_INIC').val();
+        var datefn = $('#DATE_END').val();
+        var DateInicial = new Date(Date.parse(datein));
+        var DateFinal = new Date(Date.parse(datefn));
+        var DifDate = (DateFinal - DateInicial) / 60000;
+
+        $('#TIEMPO_ACT').attr('value', DifDate * 60);
+
+        if (ID_CLIE.value == "") {
+            validar('Debe seleccionar el Cliente.');
+        }
+        else if (DATE_INIC.value == "" || DATE_END.value == "") {
+            validar('Debe Ingresar las fechas');
+        }
+        else if (Date.parse(DATE_INIC.value) > Date.parse(DATE_END.value) || Date.parse(DATE_INIC.value) == Date.parse(DATE_END.value)) {
+            validar('La fecha de Inicio no puede ser <br/>mayor o igual a la fecha de Fin.');
+        }
+        else if (ID_TYPE_ACT.value == "") {
+            validar('Debe Ingresar el tipo de Actividad.');
+        }
+        else if (ID_SUBTYPE_ACT.value == "" && ID_TYPE_ACT.value != "8" && ID_TYPE_ACT.value != "11" && ID_TYPE_ACT.value != "14" 
+            && ID_TYPE_ACT.value != "17" && ID_TYPE_ACT.value != "20"  && ID_TYPE_ACT.value != "23" 
+            && ID_TYPE_ACT.value != "24" && ID_TYPE_ACT.value != "25" && ID_TYPE_ACT.value != "26"
+            && ID_TYPE_ACT.value != "27" && ID_TYPE_ACT.value != "28" && ID_TYPE_ACT.value != "29"
+            &&  ID_TYPE_ACT.value != "30" && ID_TYPE_ACT.value != "31") {
+            validar('Debe Ingresar la Actividad Relacionada');
+        }
+        else if (ID_CLIE.value == "9" && ID_TYPE_ACT.value == "1") {
+            validar('El Cliente "GRUPO ELECTRODATA SAC" <br/> no puede ser Implementacion.');
+        }
+        else if (ID_CLIE.value != "9" && ID_TYPE_ACT.value == "3") {
+            validar('Solo el Cliente "GRUPO ELECTRODATA SAC" <br/> puede elegir "Soporte Interno".');
+        }
+        else if (ID_CLIE.value == "9" && ID_TYPE_ACT.value == "2") {
+            validar('El Cliente "GRUPO ELECTRODATA SAC" <br/> no puede ser Soporte Externo.');
+        }
+        else if (ID_CLIE.value == "9" && ID_TYPE_ACT.value == "4") {
+            validar('El Cliente "GRUPO ELECTRODATA SAC" <br/> no puede ser del tipo Apoyo Comercial.');
+        }
+        else if (ID_CLIE.value != "9" && ID_TYPE_ACT.value == "6") {
+            validar('Solo "GRUPO ELECTRODATA SAC" <br/> puede elegir "CAPACITACION/ESTUDIOS"');
+        }
+        else if (ID_CLIE.value != "9" && ID_TYPE_ACT.value == "8") {
+            validar('Solo "GRUPO ELECTRODATA SAC" <br/> puede elegir "REUNION AREA/PERMISOS"')
+        }
+        else if (idcontreciever.value == "" || idcontreciever.value == "0") {
+            validar('Se debe Ingresar los destinatarios.');
+        }
+        else if (DES_ASUNTO.value == "") {
+            validar('Debe Ingresar el Asunto de la Actividad.');
+        }
+        else if (COMENTARIO.value == "") {
+            validar('Debe Ingresar un Comentario de la Actividad.');
+        }
+        else {
+
+            if (DifDate > 480) {
+                winPopUpModal("ADVERTENCIA", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;font-size:12px;font-weight:bold;'>" +
+                  "<img src='/Content/Images/warning.png' width='32px' height='32px'/><div style='margin: -30px 0 0px 50px; width: 250px; padding: 0px 0px 10px 0px;'>¿Desea Crear la actividad con duración <b style='color:red'>mayor a 8 horas?.</b></div>" +
+
+                  "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                  "<button id='btnYes' class='k-button' style='font-size:.9em;'>Si</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+                  , 350, 130);
+                var undo = $("#btnYes")
+                    .bind("click", function () {
+
+                        closeWinModalPopUp();
+                        $("#FrmNewActivity").submit();
+                        @*winPopUpModalLoad('Guardando Actividad', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);*@
+                        $("#bkg").fadeOut("300");
+                    });
+                var undo = $("#btnNO")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+            }
+            else if (DifDate < 60) {
+                winPopUpModal("ADVERTENCIA", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;font-size:12px;font-weight:bold;'>" +
+                  "<img src='/Content/Images/warning.png'width='32px' height='32px'/><div style='margin: -30px 0 0px 50px; width: 250px; padding: 0px 0px 10px 0px;'>¿Desea Crear la actividad con duración <b style='color:red'>menor a 1 hora?   .</b></div>" +
+                  "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                  "<button id='btnYes' class='k-button' style='font-size:.9em;'>Si</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+                  , 350, 130);
+                var undo = $("#btnYes")
+                    .bind("click", function () {
+
+                        closeWinModalPopUp();
+                        $("#FrmNewActivity").submit();
+                        @*winPopUpModalLoad('Guardando Actividad', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);*@
+                        $("#bkg").fadeOut("300");
+                    });
+                var undo = $("#btnNO")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+            }
+            else {
+                winPopUpModal("Nuevo", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+                  "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Desea Crear la Actividad.</div>" +
+                  "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                  "<button id='btnYes' class='k-button' style='font-size:.9em;'>Si</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+                  , 350, 130);
+                var undo = $("#btnYes")
+                    .bind("click", function () {
+
+                        closeWinModalPopUp();
+                        $("#FrmNewActivity").submit();
+                        @*winPopUpModalLoad('Guardando Actividad', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);*@
+                        $("#bkg").fadeOut("300");
+                    });
+                var undo = $("#btnNO")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+            }
+        }
+    }
+    $("#reset").click(function (event) {
+        event.preventDefault();
+        var title = 'Operación Cancelada';
+        var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+        "<div style='padding:10px 0px 10px 0px;'>La operación a realizar fue cancelado</div>" +
+        "<div style='float:right; padding:20px 6px 0px 6px; font-size:0.9em;'>" +
+        "<button id='btnContinuer' class='k-button'>Continuar</button>" +
+        "</div></div>";
+        winPopUpModal(title, body, 400, 150);
+
+        $("#btnContinuer").bind("click", function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+            var newurl = location.host + "/DetailsActivity";
+            location = "http://" + location.host + "/DetailsActivity";
+        });
+    });
+</script>

@@ -1,0 +1,242 @@
+﻿@{
+    ViewBag.Title = "Programas";
+    Layout = null;
+}
+
+@*<link href="~/Content/ITMS/styles.css" rel="stylesheet" />*@
+<style>
+    .bg-primary {
+        background-color: rgb(81, 104, 130);
+        font-size:13px;
+    }
+    .detalle {
+        font-size:13px;
+        color:#7F7F7F;
+    }
+    #caja {
+        /*border:1px solid black;*/
+        height:30px;
+        padding-top:-5px;
+    }
+    #pagerdivPrograma {
+        margin-top:0;
+        padding-top:0;
+    }
+    #exportar {
+        /*clear:both;*/
+        float:right;
+        height:28px;
+    }
+    #Buscar {
+        margin-right: 20px;
+    }
+</style>
+
+<div id="divContent">
+    <h1 class="titleModule">Programas</h1>
+    <div class="divFondoDos" style="padding:10px,10px;">
+        <div style="float:left; width:100%">
+            <div class="editor-label" style="float:left; padding: 5px;">
+                Usuario
+            </div>
+            <div class="editor-field" style="float:left;">
+                <input id="IdPersEnti" name="IdPersEnti" />
+            </div>
+            <div class="editor-label" style="float:left; padding: 5px;">
+                Proveedor
+            </div>
+            <div class="editor-field" style="float:left;">
+                <input id="IdProveedor">
+            </div>
+            <div class="editor-label" style="float:left; padding: 5px;">
+                Criticidad
+            </div>
+            <div class="editor-field" style="float:left;">
+                <input id="Criticidad">
+            </div>
+            @*<div class="editor-label" style="float:left; padding: 5px;" title="">
+                Palabra Clave
+            </div>
+            <div class="k-textbox" style="float:left;" title="">
+                <input id="PalabraClave">
+            </div>*@
+            <div class="editor-label" style="float:left; padding: 5px;">
+            </div>
+            @using (Html.BeginForm("ExportarListaProgramas", "Programa", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+            {
+                <button type="button" class="btn btn-primary btn-warning" onclick="ExportarProgramas();" id="exportar">Exportar</button>
+            }
+            <button type="button" class="btn btn-primary btn-sm" style="float:right;" id="Buscar">Buscar</button>
+        </div>
+    </div>
+</div>
+
+
+<div style="width: 100%; float:left;" id="cabecera">
+    <div class="bodyForm">
+        <div class="inBodyForm" style="height:100%; background-color:white">
+            <div class="bg-primary" style="width:100%; height:35px">
+                <div class="bg-primary" style="float:left; width:100%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:20%"><strong>Nombre</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:15%"><strong>Código</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:11%"><strong>Serie</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:24%"><strong>Proveedor</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:7%"><strong>Versión</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:10%"><strong>Fecha de Compra</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:6%"><strong>Criticidad</strong></div>
+            </div>
+            @*<div style="float:left; width:100%"><hr /></div>*@
+            <div id="divPrograma" class="contentView"></div>
+            <div id="pagerdivPrograma" class="contentViewPager" style="width:99%"></div>
+        </div>
+    </div>
+</div>
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="" style="height:50px;">
+        <a href="\\ProgramaDetalle/${IdPrograma}" target="_blank" style="height: 60px">
+            <div style="float:left; width:1%">&nbsp;</div>
+            <div style="float:left; width:20%" class="detalle">${Nombre}</div>
+            <div style="float:left; width:1%">&nbsp;</div>
+            <div style="float:left; width:15%" class="detalle">${Codigo}</div>
+            <div style="float:left; width:1%">&nbsp;</div>
+            <div style="float:left; width:11%" class="detalle">${Serie}</div>
+            <div style="float:left; width:1%">&nbsp;</div>
+            <div style="float:left; width:24%" class="detalle">${Proveedor}</div>
+            <div style="float:left; width:1%">&nbsp;</div>
+            <div style="float:left; width:7%" class="detalle">${Version}</div>
+            <div style="float:left; width:1%">&nbsp;</div>
+            <div style="float:left; width:10%" class="detalle">${FechaCompra}</div>
+            <div style="float:left; width:1%">&nbsp;</div>
+            <div style="float:left; width:6%" class="detalle">${Criticidad}</div>
+            <div style="float:left; width:100%" id="caja"><hr /></div> 
+        </a>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#IdProveedor").kendoComboBox({
+            dataTextField: "NombreProveedor",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proveedor/Listar?var=" + Math.random()
+                }
+            }
+        });
+        var IdProveedor = $("#IdProveedor").data("kendoComboBox");
+
+        $("#IdPersEnti").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                }
+            }
+        });
+        var IdPersEnti = $("#IdPersEnti").data("kendoComboBox");
+
+        var IdUsuario = $("#IdUsuario").kendoComboBox({
+            autoBind: false,
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            delay: 500,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarxParametro?idparametro=44"
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#Criticidad").kendoComboBox({
+            dataTextField: "texto",
+            dataValueField: "valor",
+            dataSource: [
+                { texto: "Crítico", valor: 1 },
+                { texto: "No Crítico", valor: 2 }
+            ]
+        });
+
+        $("#Buscar").click(function () {
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/Programa/Listar?var" + Math.random(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random(),
+                            //IdUsuario: $("#IdUsuario").val() == '' ? 0 : $("#IdUsuario").val(),
+                            IdPersEnti: $("#IdPersEnti").val() == '' ? 0 : $("#IdPersEnti").val(),
+                            IdProveedor: $("#IdProveedor").val() == '' ? 0 : $("#IdProveedor").val(),
+                            Criticidad: $("#Criticidad").val() == '' ? 0 : $("#Criticidad").val(),
+                            //Clave: $("#PalabraClave").val()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 15,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                }
+            });
+
+            $("#pagerdivPrograma").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [5, 10, 15],
+                refresh: true
+            });
+
+            $("#divPrograma").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#template").html())
+            });
+
+        });
+
+        $("#Buscar").click();
+
+    });
+
+    function ExportarProgramas() {
+        $("#formExportar").submit();
+    }
+
+</script>

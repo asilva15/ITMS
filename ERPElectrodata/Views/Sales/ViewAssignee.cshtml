@@ -1,0 +1,166 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_SALE
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("AssignedTo", "Sales", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormAssignedTo", name = "FormAssignedTo", target = "ut_AssignedTo" }))
+{
+    <input type="hidden" name="ID_DOCU_SALE_HF" id="ID_DOCU_SALE_HF" value="@ViewBag.ID_DOCU_SALE" />
+    <input type="hidden" name="ID_PERS_ENTI_HF" id="ID_PERS_ENTI_HF" value="@ViewBag.ID_PERS_ENTI" />
+    <input type="hidden" name="ID_COMP_HF" id="ID_COMP_HF" value="@ViewBag.ID_COMP" />
+    <input type="hidden" name="Proc_HF" id="Proc_HF" value="@ViewBag.Proc" />
+     
+    <div class="divFondoUno">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.Queue
+            </div>
+            <div class="editor-field">
+                <input type="text" name="ID_QUEU" id="ID_QUEU" value=" " />
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.AssignedTo
+            </div>
+            <div class="editor-field">
+                <input type="text" name="ID_PERS_ENTI_ASSI" id="ID_PERS_ENTI_ASSI" value=" " />
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.Category
+            </div>
+            <div class="editor-field">
+                <input type="text" name="ID_CATE" id="ID_CATE" />
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos">
+        <div style="width: 95.5%; float:left; padding: 0 0 0 15px;">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.Summary
+            </div>
+            <div class="editor-field">
+                @Html.TextAreaFor(model => model.SUM_DOCU_SALE)
+                @Html.ValidationMessageFor(model => model.SUM_DOCU_SALE)
+            </div>
+        </div>
+    </div>
+    <div class="divFondoUno">
+        <div style="display:inline-block; float:right; padding:7px 12px 5px 0px;">
+            <div style=" float:left; padding:0px 10px 0px 0px; ">
+                <button id="btnAddArticle" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+            </div>
+            <button id="cancelAdd" class="k-button">Cancel</button>
+        </div>
+    </div>
+}
+<iframe id="ut_AssignedTo" name="ut_AssignedTo" src="" style="width:0px;height:0px;border-width:0px;display:none; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+
+    $("#btnAddArticle").click(function () {
+        winPopUpModalLoad("@ResourceLanguaje.Resource.SalesMsn07", "@ResourceLanguaje.Resource.PleaseWait", 300, 130);
+    });
+
+    $("#cancelAdd").click(function (event) {
+
+        event.preventDefault();
+        closeWinFormModalPopUp2();
+    });
+
+    var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+        dataTextField: "QUEU",
+        dataValueField: "ID_QUEU",
+        filter: "contains",
+        autoBind: true,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+                    '<span><strong>${data.QUEU}</strong></span><br />' +
+                    '<span style="font-size:.9em; position:absolute; top:15px;">${data.DES_QUEU}</span></div>',
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountQueue/ListByAcco?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    var ID_PERS_ENTI_ASSI = $("#ID_PERS_ENTI_ASSI").kendoComboBox({
+        autoBind: false,
+        index: 1,
+        cascadeFrom: "ID_QUEU",
+        dataTextField: "ASSI",
+        template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                                  '<div style="float:left;">${data.ASSI}</div>' +
+                                  '<div style="float:right; ">(WL ${data.WorkLoad})</div>' +
+                              '</div>',
+        dataValueField: "ID_PERS_ENTI",
+        dataSource: {
+            //type: "odata",
+            serverFiltering: true,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    $("#ID_CATE").kendoComboBox({
+        autoBind: true,
+        filter: "contains",
+        dataTextField: "NAM_CATE",
+        dataValueField: "ID_CATE",
+        template: '<div style="font-weight:bold;">${data.NAM_CATE_1}</div>' +
+                    '<div style="margin-left:5px;" >  ${data.NAM_CATE_2} </div>' +
+                    '<div style="margin-left:10px;">${data.NAM_CATE_3}</div>' +
+                    '<div style="margin-left:15px;">${data.NAM_CATE_4}</div>',
+        dataSource: {
+            serverFiltering: false,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/CategoryTicket/List"
+            }
+        }
+    }).data("kendoComboBox");
+    var ID_CATE = $("#ID_CATE").data("kendoComboBox");
+    ID_CATE.list.width(300);
+
+    $("#SUM_DOCU_SALE").kendoEditor({
+        tools: [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "foreColor",
+            "backColor",
+            "justifyLeft",
+            "justifyCenter",
+            "justifyRight",
+            "justifyFull",
+            "insertUnorderedList",
+            "insertOrderedList",
+            "indent",
+            "outdent",
+            "subscript",
+            "superscript"
+        ], encoded: false
+    });
+
+</script>

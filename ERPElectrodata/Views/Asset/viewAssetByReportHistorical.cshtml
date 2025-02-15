@@ -1,0 +1,207 @@
+﻿@{
+    ViewBag.Title = "Programas";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<style type="text/css">
+</style>
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte Histórico
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-3">
+                <div class="editor-label">
+                    Usuario
+                </div>
+                <div class="editor-field">
+                    <input id="ID_PERS_ENTI" class="form-control" name="ID_PERS_ENTI" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                @using (Html.BeginForm("ExportarReporteHistoricoActivos", "Asset", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+                {
+                    <br />
+                    <button type="button" class="btn btn-light btn-block" onclick="ExportarReporteHistorico();" id="exportar"><i class="fa fa-file-excel"></i> Exportar</button>
+                }
+            </div>
+            <div class="col-md-2">
+                <br />
+                <button type="button" class="btn btn-primary btn-block" id="Buscar" onclick="CargarGrilla(this)"><i class="fa fa-search"></i> Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <table id="tbHistorico" class="table table-bordered table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Estado</th>
+                        <th>Asignado a</th>
+                        <th>Tipo de Activo</th>
+                        <th>Código</th>
+                        <th>Activo</th>
+                        <th>Serie</th>
+                        <th>Fecha de Asig.</th>
+                        <th>Fecha de Recepción</th>
+                        <th>Fecha de Creación</th>
+                        @{
+                            try
+                            {
+                                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 61 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 62 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 63 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 64 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 65 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 66 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 67 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 68 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 69 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 70 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 71 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 72)
+                                {
+                                    <th>Tipo Movimiento</th>
+                                    <th>Unidad Negocio</th>
+                                    <th>Área</th>
+                                }
+                            }
+                            catch { }
+                        }
+                        @*@{
+                                try
+                                {
+                                    if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 61 ||
+                                        Convert.ToInt32(Session["ID_ACCO"].ToString()) == 62 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 63 ||
+                                        Convert.ToInt32(Session["ID_ACCO"].ToString()) == 64 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 65 ||
+                                        Convert.ToInt32(Session["ID_ACCO"].ToString()) == 66 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 67 ||
+                                        Convert.ToInt32(Session["ID_ACCO"].ToString()) == 68 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 69 ||
+                                        Convert.ToInt32(Session["ID_ACCO"].ToString()) == 70 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 71 ||
+                                        Convert.ToInt32(Session["ID_ACCO"].ToString()) == 72)
+                                    {
+
+                                    }
+                                }
+                                catch { }
+                            }*@
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $.ajax({
+            url: "/AccountEntity/AllRequesterByAcco",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                if (data && data.Data && data.Data.length > 0) {
+                        $('#ID_PERS_ENTI').kendoComboBox({
+                        placeholder: "Seleccionar o escribir",
+                        dataTextField: "CLIE",
+                        dataValueField: "ID_PERS_ENTI",
+                        filter: "contains",
+                        suggest: true,
+                        dataSource: {
+                            serverFiltering: false,
+                            schema: {
+                                data: "Data",
+                                total: "Count"
+                            },
+                            transport: {
+                                read: "/AccountEntity/AllRequesterByAcco?var=" + Math.random()
+                            }
+                        }
+                    }).data("kendoComboBox");
+
+                }
+            },
+            error: function (error) {
+                console.error("Error al obtener datos:", error);
+            }
+        });
+
+        
+
+    });
+
+    function ExportarReporteHistorico() {
+        $("#formExportar").submit();
+    }
+
+    function CargarGrilla(sw) {
+
+        event.preventDefault();
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").data("kendoComboBox");
+        if ((ID_PERS_ENTI.value()) != 0) {
+            //$('#tbHistorico').dataTable().fnDestroy();
+
+            $('#tbHistorico').DataTable({
+                destroy: true,
+                "autoWidth": false,
+                responsive: true,
+                ajax: {
+                    "url": "/Asset/ReporteActivosHistorico/",
+                    "data": function (d) {
+                        d.ID_PERS_ENTI = $("#ID_PERS_ENTI").val() == '' ? 0 : $("#ID_PERS_ENTI").val()
+                    }
+                },
+                columns: [
+                    { data: "Estado" },
+                    { data: "Usuario" },
+                    { data: "TipoActivo" },
+                    //{ data: "TipoMovimiento" },
+                    { data: "CodigoActivo" },
+                    { data: "NombreActivo" },
+                    { data: "SerieActivo" },
+                    { data: "FechaAsignacion" },
+                    { data: "FechaRecepcion" },
+                    { data: "FechaCreacion" },
+                    {
+                        data: "TipoMovimiento" ,
+                        visible: @Session["ID_ACCO"] == 60 ? true : false
+                    },
+                    //{ data: "UnidadNegocio" },
+                    {
+                        data: "UnidadNegocio" ,
+                        visible: @Session["ID_ACCO"] == 60 ? true : false
+                    },
+                    //{ data: "Area" }
+                    {
+                        data: "Area" ,
+                        visible: @Session["ID_ACCO"] == 60 ? true : false
+                    }
+                ],
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                    "infoEmpty": "No hay registros disponibles",
+                    "infoFiltered": "(filtrada de _MAX_ registros)",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar:",
+                    "zeroRecords": "No se encontraron registros coincidentes",
+                    "paginate": {
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                },
+
+            });
+        }
+        else {
+            toastr.warning("Seleccione un usuario.", "Mensaje");
+        }
+
+    }
+
+</script>

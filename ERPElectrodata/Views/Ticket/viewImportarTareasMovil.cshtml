@@ -1,0 +1,318 @@
+﻿@{
+    Layout = null;
+}
+
+<div>
+    <div style="margin-bottom: 10px;">
+        <a href="@Url.Action("DescargarPlantillaExcel", "Ticket")">Plantilla Excel</a>
+    </div>
+
+    @using (Html.BeginForm("ImportarTareasMovil", "Ticket", FormMethod.Post, new { enctype = "multipart/form-data", target = "upload_targetTMovil", id = "formExcelTMovil" }))
+    {
+        <input type="file" name="excelFile" id="excelDoc" />
+        <button type="submit" class="btn btn-primary" id="CargarExcel" style="margin-top: 10px;">Cargar</button>
+        <iframe id="upload_targetTMovil" name="upload_targetTMovil" src="" hidden></iframe>
+    }
+</div>
+<div class="x_content importTareaMovil" id="importTareaMovil" style="margin-top: 20px;">
+    <ul class="todo-list-wrapper list-group list-group-flush" style='overflow-x: hidden; overflow-y: scroll; max-height: 450px;'></ul>
+</div>
+<div style="text-align: right;">
+    <button type="button" class="btn btn-primary" id="btnImpTareasM" style="margin-top: 15px;">Importar</button>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var excelInput = $("#excelDoc").kendoUpload({
+            localization: {
+                select: "Seleccione el excel"
+            },
+            select:
+                function (e) {
+                    var selectedFile = e.files[0];
+                    if (selectedFile && selectedFile.extension.toLowerCase() !== ".xlsx") {
+                        e.preventDefault();
+                        toastr.warning("Por favor, carga un archivo con extensión .xlsx", "Extensión de archivo incorrecta");
+                    }
+                },
+            multiple: false,
+        });
+
+        $("#formExcelTMovil").submit(function (event) {
+            event.preventDefault();
+            toastr.info("Cargando el excel", "Espere por favor");
+
+            var formData = new FormData($(this)[0]);
+            $("#excelDoc").data("kendoUpload").clearAllFiles();
+
+            $.ajax({
+                url: $(this).attr("action"),
+                type: $(this).attr("method"),
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (response) {
+                    $(".importTareaMovil ul").html('');
+
+                    if (response.Msg == 'OK') {
+                        var data = response.Data;
+
+                        $.each(data, function (index, item) {
+                            $(".importTareaMovil ul").append(`<li id="formImp_${index}" class="mb-3"> <div class="form-row mr-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        Tipo de Servicio<span style="color:red">*</span>
+                                        <input id="tipoServicioImp_${index}" type="text" name="TipoServicio" value="${item.TipoServicio != null ? item.TipoServicio : ''}" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        Moneda<span style="color:red">*</span>
+                                        <input id="monedaImp_${index}" type="text" name="Moneda" value="${item.Moneda != null ? item.Moneda : ''}" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-row">
+                                        <div class="col-md-10">
+                                            <div class="form-group">
+                                                Monto<span style="color:red">*</span>
+                                                <input id="montoImp_${index}" type="text" name="Monto" value="${item.Monto}" />
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="button" class="close" onclick="EliminarFormImpMovil(${index})">
+                                                <span aria-hidden="true">×</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row mr-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        Sede Imputado<span style="color:red">*</span>
+                                        <input id="sedeImputadoImp_${index}" type="text" name="SedeImputado" value="${item.SedeImputado != null ? item.SedeImputado : ''}" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        CeCo Imputado
+                                        <input id="ceCoImputadoImp_${index}" type="text" name="CeCoImputado" value="${item.CeCoImputado}" class="k-textbox" style="width:100%; height:30px;" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="form-group">
+                                        Partida Presupuestal
+                                        <input id="partidaPresupuestalImp_${index}" type="text" name="PartidaPresupuestal" value="${item.PartidaPresupuestal}" class="k-textbox" style="width:100%; height:30px;" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row mr-3">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        Persona Asignada<span style="color:red">*</span>
+                                        <input id="IdPers_${index}" type="text" name="IdPers" value="${item.IdPers != null && item.IdPers != 0 ? item.IdPers : ''}" />
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        Fecha Ejecutada<span style="color:red">*</span>
+                                        <input id="fechaEjecutadaImp_${index}" type="text" name="FechaEjecutada" value="${item.FechaEjecutada}" />
+                                    </div>
+                                </div>
+                            </div></li>`
+                            );
+
+                            $("#sedeImputadoImp_" + index).kendoComboBox({
+                                dataTextField: "Nombre",
+                                dataValueField: "Id",
+                                dataSource: {
+                                    schema: {
+                                        data: "Data"
+                                    },
+                                    transport: {
+                                        read: "/Ticket/ListarTareaMovilSedes?var=" + Math.random()
+                                    }
+                                },
+                                filter: "contains",
+                            }).data("kendoComboBox");
+                            $("#tipoServicioImp_" + index).kendoComboBox({
+                                dataTextField: "Nombre",
+                                dataValueField: "Id",
+                                dataSource: {
+                                    schema: {
+                                        data: "Data"
+                                    },
+                                    transport: {
+                                        read: "/Ticket/ListarTareaMovilTipo?var=" + Math.random()
+                                    }
+                                },
+                                filter: "contains",
+                            }).data("kendoComboBox");
+                            $("#fechaEjecutadaImp_" + index).kendoDateTimePicker({
+                                format: "dd/MM/yyyy HH:mm",
+                            });
+                            $("#monedaImp_" + index).kendoComboBox({
+                                dataTextField: "text",
+                                dataValueField: "value",
+                                dataSource: [{
+                                    text: "PEN",
+                                    value: "1"
+                                }, {
+                                    text: "USD",
+                                    value: "2"
+                                }],
+                                filter: "contains",
+                            }).data("kendoComboBox");
+                            $("#montoImp_" + index).kendoNumericTextBox({
+                                format: "n2",
+                                decimals: 2,
+                                spinners: false
+                            });
+                            $("#IdPers_" + index).kendoComboBox({
+                                dataTextField: "ASSI",
+                                dataValueField: "ID_PERS_ENTI",
+                                dataSource: {
+                                    transport: {
+                                        read: "/Home/ListaUsuariosPorCola?ID_QUEU=9&var=" + Math.random()
+                                    }
+                                },
+                                filter: "contains",
+                            }).data("kendoComboBox");
+                        });
+                    } else {
+                        toastr.warning(response.Msg, "No se pudo cargar el excel");
+                    }
+
+                }
+            });
+        });
+
+        $("#btnImpTareasM").click(function () {
+            var tareasMovilImp = [];
+
+            $(".importTareaMovil ul > li").each(function (index) {
+                var sedeImputado = $(this).find("input[name='SedeImputado']").val();
+                var moneda = $(this).find("input[name='Moneda']").val();
+                var monto = $(this).find("input[name='Monto']").val();
+                var ceCoImputado = $(this).find("input[name='CeCoImputado']").val();
+                var partidaPresupuestal = $(this).find("input[name='PartidaPresupuestal']").val();
+                var tipoServicio = $(this).find("input[name='TipoServicio']").val();
+                var fechaEjecutada = $(this).find("input[name='FechaEjecutada']").val();
+                var idPers = $(this).find("input[name='IdPers']").val();
+
+                if (tipoServicio && moneda && monto && sedeImputado && fechaEjecutada && idPers) {
+                    var formulario = {
+                        SedeImputado: sedeImputado,
+                        Moneda: moneda,
+                        Monto: monto,
+                        CeCoImputado: ceCoImputado,
+                        PartidaPresupuestal: partidaPresupuestal,
+                        TipoServicio: tipoServicio,
+                        FechaEjecutada: fechaEjecutada,
+                        IdPers: idPers
+                    };
+                    tareasMovilImp.push(formulario);
+
+                    $(this).addClass("creada");
+                }
+            });
+
+            if (tareasMovilImp.length > 0) {
+                swal({
+                    title: `¿Deseas importar estas tareas?`,
+                    text: `Se importarán las tareas con todos los campos obligatorios llenos`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: '/Ticket/ImpTareasMovil?idTicket=' + idTicket,
+                            type: 'POST',
+                            data: JSON.stringify(tareasMovilImp),
+                            contentType: "application/json",
+                            success: function (response) {
+                                if (response == 'OK') {
+                                    idSetTimeout = setTimeout(function (element) {
+                                        $(".ticketHijoIndex ul > .divListTMinsur").html('');
+                                        $(".ticketHijoIndex ul > .divCrearTMinsur").html('');
+
+                                        $.ajax({
+                                            contentType: 'application/json; charset=utf-8',
+                                            url: "/Ticket/ListarTareasPendientes",
+                                            type: "Get",
+                                            data: { idTicket: idTicket },
+                                            datatype: "json",
+                                            cache: false,
+                                            success: function (data) {
+                                                if (data) {
+                                                    tejerTareasPendientesMovil(data["tareaPendiente"]);
+
+                                                    swal.close();
+                                                }
+                                            }
+                                        });
+                                    }, 2000, $(this));
+
+                                    if ($(".importTareaMovil ul > li:not(.creada)").length == 0) {
+                                        //toastr.success("Todas los tareas han sido importadas", "Se importaron las tareas");
+                                        swal({
+                                            title: 'Se importaron las tareas',
+                                            type: 'success',
+                                            text: 'Todas las tareas han sido importadas',
+                                            confirmButtonColor: "#DD6B55",
+                                            focusConfirm: false,
+                                            confirmButtonText:
+                                                'Continue',
+                                            confirmButtonAriaLabel: 'Thumbs up, great!'
+                                        });
+                                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                                    } else {
+                                        //toastr.warning("No se pudieron importar porque faltan completar los datos", "Quedan tareas por importar");
+                                        swal({
+                                            title: 'Quedan tareas por importar',
+                                            type: 'info',
+                                            text: 'COMPLETE LOS CAMPOS OBLIGATORIOS',
+                                            confirmButtonColor: "#DD6B55",
+                                            focusConfirm: false,
+                                            confirmButtonText: 'Continue',
+                                            confirmButtonAriaLabel: 'Thumbs up, great!'
+                                        })
+                                        $(".importTareaMovil ul > li.creada").remove();
+                                    }
+                                } else if (response == 'ERROR') {
+                                    swal({
+                                        title: 'Warning',
+                                        type: 'info',
+                                        text: 'ERROR EN LA IMPORTACIÓN',
+                                        confirmButtonColor: "#DD6B55",
+                                        focusConfirm: false,
+                                        confirmButtonText: 'Continue',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!'
+                                    })
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Cancelado", "Ha cancelado la importación", "error");
+                    }
+                });
+            } else {
+                toastr.warning("Ninguna tarea para importar", "No hay tareas disponibles");
+            }
+        });
+
+    });
+
+    function EliminarFormImpMovil(index) {
+        $("#formImp_" + index).remove();
+    }
+
+</script>

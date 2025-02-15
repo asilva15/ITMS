@@ -1,0 +1,262 @@
+﻿@model ERPElectrodata.Models.DETAILS_TICKET
+
+@{
+    Layout = null;
+}
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+</script>
+
+@using (Html.BeginForm("UpdateDatesDetailsTicket", "DetailsTicket", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEditDetailsTicket", target = "upload_target" }))
+{
+
+<div class="main-card card">
+    @Html.ValidationSummary(true)
+    @Html.HiddenFor(model => model.ID_DETA_TICK)
+    @Html.HiddenFor(model => model.ID_TICK)
+    <input type="hidden" value="@ViewBag.UploadFile" name="KEY_ATTA" readonly="readonly" />
+    <input type="hidden" name="ID_STAT_EDIT" value="@ViewBag.ID_STAT_EDIT" />
+    <input type="hidden" name="ID_TYPE_DETA_TICK_EDIT" value="@ViewBag.ID_TYPE_DETA_TICK_EDIT" />
+
+    <input type="hidden" id="SECOND_CREATE_DETA_INCI_EDIT" name="SECOND_CREATE_DETA_INCI_EDIT" />
+    <input type="hidden" id="MILLISECOND_CREATE_DETA_INCI_EDIT" name="MILLISECOND_CREATE_DETA_INCI_EDIT" />
+    <input type="hidden" id="SECOND_FEC_SCHE_EDIT" name="SECOND_FEC_SCHE_EDIT" />
+    <input type="hidden" id="MILLISECOND_FEC_SCHE_EDIT" name="MILLISECOND_FEC_SCHE_EDIT" />
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-6">
+                Creado
+                <input id="CREATE_DETA_INCI_EDIT" name="CREATE_DETA_INCI_EDIT" />
+            </div>
+
+            <div class="col-md-6" id="divfechaschedule" hidden>
+                Fecha Programada
+                <input id="FEC_SCHE_EDIT" name="FEC_SCHE_EDIT" />
+
+            </div>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-6">
+                Fecha inicio
+                <input id="FechaInicio" name="FechaInicio" />
+            </div>
+            <div class="col-md-6">
+                Fecha fin
+                <input id="FechaFin" name="FechaFin" />
+            </div>
+        </div>
+    </div>
+    @{
+        if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 4 && ViewBag.MinEfectivos > 0)
+        {
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        Minutos Efectivos
+                        <input type="number" id="MinEfectivos" name="MinEfectivos" value="@ViewBag.MinEfectivos"/>
+                    </div>
+                </div>
+            </div>
+        }
+    }
+    @{
+        if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 3 && Model.ID_STAT == 4)
+        {
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        Fecha Fin Real
+                        <input id="FEC_END_REAL_EDIT" name="FEC_END_REAL_EDIT" />
+                    </div>
+
+                </div>
+            </div>
+        }
+    }
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-12">
+                Comentario
+                <textarea name="COM_DETA_TICK_EDIT" id="COM_DETA_TICK_EDIT">@ViewBag.COM_DETA_TICK_EDIT</textarea>
+            </div>
+
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-12" style="text-align:center">
+                ¿Ver en el Portal?
+                @Html.CheckBox("PortalComent", "@ViewBag.PortalComent")
+                @Html.ValidationMessageFor(model => model.PortalComent)
+            </div>
+
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-12">
+                <input name="archivos" id="archivos" type="file" />
+            </div>
+
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-9">
+                &nbsp;
+            </div>
+            <div class="col-md-3">
+                <button id="submit" class="btn btn-warning btn-block">Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+   
+
+   
+}
+
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" hidden></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#archivos").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            upload: function (e) {
+                e.data = {
+                    ID_TYPE_DOCU_ATTA: $("#ArrayFile").val(),
+                    KEY_ATTA: '@ViewBag.UploadFile'
+                };
+            },
+            remove: function (e) {
+                e.data = {
+                    KEY_ATTA: '@ViewBag.UploadFile'
+                };
+            },
+            async: {
+                saveUrl: "/Attach/EditSaveAttachTicket",
+                removeUrl: "/Attach/EditRemoveAsyncAttachTicket"
+            }
+        });
+        $("#COM_DETA_TICK_EDIT").kendoEditor({
+            encoded: false,
+            paste: OnPaste
+        });
+        $("#FechaInicio").kendoDateTimePicker();
+        var fI = new Date('@ViewBag.FechaInicio');
+        var FechaInicio = $("#FechaInicio").data("kendoDateTimePicker");
+        FechaInicio.value(new Date(fI.getFullYear(), fI.getMonth(), fI.getDate(), fI.getHours(), fI.getMinutes(), fI.getSeconds(), fI.getMilliseconds()));
+        
+        $("#FechaFin").kendoDateTimePicker();
+        var fF = new Date('@ViewBag.FechaFin');
+        var FechaFin = $("#FechaFin").data("kendoDateTimePicker");
+        FechaFin.value(new Date(fF.getFullYear(), fF.getMonth(), fF.getDate(), fF.getHours(), fF.getMinutes(), fF.getSeconds(), fF.getMilliseconds()));
+
+        $("#CREATE_DETA_INCI_EDIT").kendoDateTimePicker();
+        var CREATE_DETA_INCI_EDIT = $("#CREATE_DETA_INCI_EDIT").data("kendoDateTimePicker");
+        var f = new Date('@ViewBag.CREATE_DETA_INCI_EDIT');
+        CREATE_DETA_INCI_EDIT.value(new Date(f.getFullYear(), f.getMonth(), f.getDate(), f.getHours(), f.getMinutes(), f.getSeconds(), f.getMilliseconds()));
+
+        $("#SECOND_CREATE_DETA_INCI_EDIT").val(f.getSeconds());
+        $("#MILLISECOND_CREATE_DETA_INCI_EDIT").val(f.getMilliseconds());
+
+        if (parseInt('@ViewBag.ID_STAT_EDIT') == 5 && parseInt('@ViewBag.ID_TYPE_DETA_TICK_EDIT') == 3) {
+            //$("#divfechaschedule").removeClass("divHide");
+            $("#divfechaschedule").removeAttr("hidden");
+            //$("#divfechaschedule").attr("hidden", true);
+            $("#FEC_SCHE_EDIT").kendoDateTimePicker();
+
+            var d = new Date('@ViewBag.FEC_SCHE_EDIT');
+            var FEC_SCHE_EDIT = $("#FEC_SCHE_EDIT").data("kendoDateTimePicker");
+            FEC_SCHE_EDIT.value(new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()));
+
+            $("#SECOND_FEC_SCHE_EDIT").val(d.getSeconds());
+            $("#MILLISECOND_FEC_SCHE_EDIT").val(d.getMilliseconds());
+        }
+
+        if (parseInt(@Session["ID_ACCO"]) == 3 && parseInt(@ViewBag.ID_STAT_EDIT) == 4) {
+            $("#FEC_END_REAL_EDIT").kendoDateTimePicker();
+            var FEC_END_REAL_EDIT = $("#FEC_END_REAL_EDIT").data("kendoDateTimePicker");
+            var endReal = new Date('@ViewBag.FEC_END_REAL_EDIT');
+            if ('@ViewBag.FEC_END_REAL_EDIT' != '') {
+                FEC_END_REAL_EDIT.value(new Date(endReal.getFullYear(), endReal.getMonth(), endReal.getDate(), endReal.getHours(), endReal.getMinutes(), endReal.getSeconds(), endReal.getMilliseconds()));
+            }
+        }
+
+    });
+
+    function uploadDoneEditDeta(val, msg) {
+        if (val == "OK") {
+            swal({
+                title: 'Información Guardada / Notificación Enviada',
+                type: 'success',
+                text: msg,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                location.reload();
+            })
+           // $('#EditCommentModal').modal('hide');
+           // winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           //        + "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>"
+           //        + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           //        "<button id='continues' class='k-button'>Continuar</button>" +
+           //        "</div></div>", 400, 160);
+
+           // $("#continues").focus();
+           // var undo = $("#continues")
+           //.bind("click", function () {
+           //    closeWinFormModalPopUp();
+           //    closeWinModalPopUp();
+           //    location.reload();
+           //});
+
+           // $("#closebtnmodal").click(function () {
+           //     closeWinFormModalPopUp();
+           //     closeWinModalPopUp();
+           //     location.reload();
+           // });
+        }
+        else {
+            swal({
+                title: 'Error al registrar',
+                type: 'info',
+                text: msg,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+            //$('#EditCommentModal').modal('hide');
+            //winPopUpModal("Error al registrar", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            //   "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+            //   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+            //   "<button id='continuee' class='k-button'>Continuar</button>" +
+            //   "</div></div>"
+            //   , 400, 140);
+
+            //$("#continuee").focus();
+            //var undo = $("#continuee")
+            //.bind("click", function () {
+            //    closeWinModalPopUp();
+            //});
+        }
+    }
+</script>

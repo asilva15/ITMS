@@ -1,0 +1,396 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+<link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" rel="stylesheet" />
+<script src="~/Scripts22/datatable/jquery.dataTables.min.js"></script>
+
+<link href="~/Scripts22/select2/select2.min.css" rel="stylesheet" />
+<script src="~/Scripts22/select2/select2.min.js"></script>
+<link rel="stylesheet" href="~/Scripts22/select2/select2-bootstrap.min.css" />
+
+<style>
+    .select2{
+        max-width:100%
+    }
+</style>
+<div class="app-page-title cabeceraBg">
+    <div class="page-title-wrapper d-flex">
+        <div class="page-title-heading">
+            <div class="font-icon-wrapper font-icon-lg bg-white">
+                <i class="fa fa-file icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                <div class="titleModule"><b><span class="INCIDENTESYREQUERIMIENTOS">LookerStudio</span></b></div>
+                <div class="page-title-subheading">
+                    <span class="ListadeTicketsporcuentadesoporteporestado">Información de LookerStudio.</span>
+                </div>
+            </div>
+        </div>
+        <div class="flex-grow-1 d-flex justify-content-end">
+            <button class="btn btn-primary" data-toggle="modal" data-target="#miModal" onclick="agregarFila()">Agregar a registro</button>
+        </div>
+    </div>
+</div>
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="main-card card">
+            <div class="card-header">
+                Filtros
+            </div>
+            <div class="card-body" style="width:100%">
+                <div class="col-md-12">
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Fecha Inicio</label>
+                                <input type="date" id="iniFecha" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Fecha Fin</label>
+                                <input type="date" id="finFecha" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Tipo</label>
+                                <select id="TipoSelect" class="form-control" style="max-width:100%">
+                                    <option value="0">&nbsp;</option>
+                                    <option value="1">Vacio</option>
+                                    <option value="2">Con dato pero diferente a RQ/IN</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3" style="width:100%">
+                            <div class="form-group">
+                                <label>Atribuido A</label>
+                                <select id="EquivalenciaSelect" class="form-control">
+                                    <option value="">&nbsp;</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Tipo de Atención</label>
+                            <select id="AtencionSelect" class="form-control">
+                                <option value="">&nbsp;</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-grow-1 d-flex justify-content-end align-items-center">
+                    <button class="btn btn-primary" onclick="cargarDatos()">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card card">
+            <div class="card-body">
+                <table id="tbLookerStudio" class="display" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Acción</th>
+                            <th>Grupo de Asignación</th>
+                            <th>Area</th>
+                            <th>Descripción</th>
+                            <th>Tipo</th>
+                            <th>Tipo de Atención</th>
+                            <th>Atribuido A</th>
+                            <th>Numero</th>
+                            <th>Prioridad</th>
+                            <th>Motivo de poner espera</th>
+                            <th>Categoria</th>
+                            <th>Creado Por</th>
+                            <th>Abierto</th>
+                            <th>Fecha de Vencimiento</th>
+                            <th>Mes</th>
+                            <th>Numero de mes</th>
+                            <th>Unidad de Negocio</th>
+                            <th>Solicitante</th>
+                            <th>Canal</th>
+                            <th>Actualizado</th>
+                            <th>Estado de Incidencia</th>
+                            <th>Tiempo de Resolución</th>
+                            <th>Abierto Por</th>
+                            <th>SubCategoria</th>
+                            <th>Resolución (Horas)</th>
+                            <th>Cerrado Por</th>
+                            <th>Actualizado Por</th>
+                            <th>Tiempo Estimado de supervisión</th>
+                            <th>Tiempo Real de supervisión</th>
+                            <th>Infraestructura Estimado</th>
+                            <th>Infraestructura Real</th>
+                            <th>HelpDesk Estimado</th>
+                            <th>HelpDesk Real</th>
+                            <th>Soporte Usuario Estimado</th>
+                            <th>Soporte Usuario Real</th>
+                            <th>Soporte Arquitectura Estimado</th>
+                            <th>Soporte Arquitectura Real</th>
+                            <th>ServicioDBA Estimado</th>
+                            <th>ServicioDBA Real</th>
+                            <th>Total de Horas Estimado</th>
+                            <th>Total de Horas Real</th>
+                            <th>Comentario</th>
+                            <th>Fecha de Creación</th>
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<iframe id="upload_target" name="upload_target" src="" class="d-none"></iframe>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#TipoSelect').select2({
+            theme: "bootstrap"
+        })
+        $('#TipoSelect').val('0').trigger('change');
+        $("#tbLookerStudio").DataTable({
+            //"processing": true,
+            //"serverSide": true,
+            scrollX: true,
+            order: [[43, 'desc']],
+            ajax: `/ServiceNow/ObtenerTicketsLookerStudio?fechaInicio=${document.getElementById("iniFecha").value}&fechaFin=${document.getElementById("finFecha").value}&tipo=${$('#TipoSelect').select2('data')[0].id}&atribuidoA=&tipoAtencion=`,
+            columns: [
+                { data: "id_TablaLookerStudio" },
+                {
+                    data: "id_TablaLookerStudio",
+                    render: function (data, type, row) {
+                        return '<button class="btn btn-primary" data-toggle="modal" data-target="#miModal" onclick="editarFila(' + data + ')">Editar</button>';
+                    }
+                },
+                { data: "GrupoDeAsignacion" },
+                { data: "Area" },
+                { data: "BreveDescripcion" },
+                { data: "Tipo" },
+                { data: "TipoAtencion" },
+                { data: "AtribuidoA" },
+                { data: "Numero" },
+                { data: "Prioridad" },
+                { data: "MotivoPonerEspera" },
+                { data: "Categoria" },
+                { data: "CreadoPor" },
+                {
+                    data: "Abierto",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                {
+                    data: "FechaVencimiento",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                { data: "Mes" },
+                { data: "NumMes" },
+                { data: "UnidadNegocio" },
+                { data: "Solicitante" },
+                { data: "Canal" },
+                {
+                    data: "Actualizado",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                { data: "EstadoIncidencia" },
+                { data: "TiempoResolucion" },
+                { data: "AbiertoPor" },
+                { data: "SubCategoria" },
+                { data: "ResolucionHrs" },
+                { data: "CerradoPor" },
+                { data: "ActualizadoPor" },
+                {
+                    data: "Supervision_estimado",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "Supervision_real",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "Infraestructura_estimado",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "Infraestructura_real",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "HelpDesk_estimado",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "HelpDesk_real",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "SoporteUser_estimado",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "SoporteUser_real",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "Arquitectura_estimado",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "Arquitectura_real",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "ServicioDBA_estimado",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "ServicioDBA_real",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "TotalHoras_estimado",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                {
+                    data: "TotalHoras_real",
+                    render: function (data, type, row) {
+                        return convertirNumeroAHoras(data)
+                    }
+                },
+                { data: "Comentario" },
+                {
+                    data: "created_at",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                }
+
+            ]
+        });
+
+        $.ajax({
+            url: '/ServiceNow/ListaAtribuidoA',
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $('#EquivalenciaSelect').select2({
+                    data: data.data,
+                    theme: "bootstrap"
+                });
+            }
+        })
+
+        $.ajax({
+            url: '/ServiceNow/TipoAtencion',
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $('#AtencionSelect').select2({
+                    data: data.data,
+                    theme: "bootstrap"
+                });
+            }
+        })
+
+    });
+    function agregarFila() {
+        $("#lblTitulo").text("Agregar LookerStudio");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-xl");
+        $(".modal-dialog").addClass("modal-xl");
+        $('#modal-content').load("/ServiceNow/AgregarLookerStudio/");
+    }
+
+    function editarFila(id) {
+        $("#lblTitulo").text("Editar LookerStudio");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-xl");
+        $(".modal-dialog").addClass("modal-xl");
+        $('#modal-content').load("/ServiceNow/EditarLookerStudio/" + id);
+    }
+    function uploadDone(msg, code) {
+        toastr.success("Se guardaron los cambios correctamente");
+        var table = $('#tbLookerStudio').DataTable();
+        var currentIndex = table.page();
+        table.ajax.reload(function () {
+            table.page(currentIndex).draw(false);
+        });
+        let btnCloseModal = document.getElementById("closeModal")
+        btnCloseModal.click()
+    }
+    function cargarDatos() {
+        console.log($('#TipoSelect').select2('data'))
+        $("#tbLookerStudio").DataTable().ajax.url(`/ServiceNow/ObtenerTicketsLookerStudio?fechaInicio=${document.getElementById("iniFecha").value}&fechaFin=${document.getElementById("finFecha").value}&tipo=${$('#TipoSelect').select2('data')[0].id}&atribuidoA=${$('#EquivalenciaSelect').select2('data')[0].id}&tipoAtencion=${$('#AtencionSelect').select2('data')[0].id}`).load()
+    }
+    function convertirNumeroAHoras(numero) {
+        // Obtén la parte entera y decimal del número
+        var horas = Math.floor(numero);
+        var minutos = Math.round((numero % 1) * 60);
+        // Formatea las horas y minutos como cadena
+        var horasStr = horas < 10 ? '0' + horas : horas;
+        var minutosStr = minutos < 10 ? '0' + minutos : minutos;
+
+        // Retorna la cadena en formato "HH:mm"
+        return horasStr + ':' + minutosStr;
+    }
+</script>

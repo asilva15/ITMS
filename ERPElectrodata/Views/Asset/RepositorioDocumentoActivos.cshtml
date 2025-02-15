@@ -1,0 +1,463 @@
+﻿@model ERPElectrodata.Models.ASSET
+
+@{
+    //Layout = null; }
+}
+
+<style>
+
+    .colorTab {
+        color: #2651be;
+        font-size: 1.3em;
+    }
+
+    .tActivo {
+        display: block;
+    }
+
+    .tInactivo {
+        display: none;
+    }
+</style>
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div id="divContent">
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="font-icon-wrapper font-icon-lg">
+                    <i class="fa fa-users icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <div class="titleModule"><b>Activos - Documentos</b></div>
+                    <div class="page-title-subheading">
+                        Repositorio de Documentos de Activos
+                    </div>
+                </div>
+                <div class="derecha">
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <br />
+
+    <div class="col-sm-12 col-lg-12" style="width:100%;">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">
+                <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                    Buscar archivos
+                </div>
+            </div>
+            <div class="p-3 card-body">
+                <div class="p-1 slick-slider-sm">
+                    <div style="width:100%;">
+                        @using (Html.BeginForm("BuscarArchivo", "Asset", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmFindAchievements", name = "FrmFindAchievements", target = "ut_FindAchie" }))
+                        {
+                            <div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Serie
+                                        </div>
+                                        <div class="k-textbox" style="width:100%;">
+                                            @Html.EditorFor(model => model.SER_NUMB)
+                                            @Html.ValidationMessageFor(model => model.SER_NUMB)
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Usuario asignado
+                                        </div>
+                                        <div class="editor-field" style="width:100%;">
+                                            @Html.Editor("ID_PERS_ENTI")
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Tipo Formato
+                                        </div>
+                                        <div class="editor-field" style="width:100%;">
+                                            @Html.Editor("ID_TYPE_FORM")
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            &nbsp;
+                                        </div>
+                                        <div style="padding:0;width:100%;">
+                                            <button id="submit" class="mb-2 mr-2 btn btn-primary" onclick="BuscarArchivo(); return false;" style="width:35%;">Buscar</button>
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-lg-2">
+                                    </div>
+
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+    <div class="mb-3 card">
+        <div class="tabs-lg-alternate card-header">
+            <ul class="nav nav-justified">
+                <li class="nav-item" id="divAgrupada">
+                    <a data-toggle="tab" class="tabAgrupada tab nav-link active">
+                        <div class="tab-subheading colorTab">
+                            <span class="pr-2 opactiy-6">
+                                <i class="fa fa-object-group"></i>
+                            </span>
+                            Vista agrupada
+                        </div>
+                    </a>
+                </li>
+                <li class="nav-item" id="divDesplegada">
+                    <a data-toggle="tab" class="tabDesplegada nav-link">
+                        <div class="tab-subheading colorTab">
+                            <span class="pr-2 opactiy-6">
+                                <i class="fa fa-list"></i>
+                            </span>
+                            Vista desplegada
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane tabAgrupada active tActivo" id="dAgrupada" role="tabpanel">
+                <div class="card-body">
+                    <div id="resultFind" style="margin:10px 0 0 0; padding-bottom:1%; ">
+                    </div>
+                    <div id="pagerFind" style="margin:10px 0 0 0">
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane tabDesplegada tInactivo" id="dDesplegada" role="tabpanel">
+                <div class="card-body">
+                    <table id="tbDocumentos" class="align-middle mb-0 table table-borderless table-striped table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Tipo Formato</th>
+                                <th class="text-center">Activo</th>
+                                <th class="text-center">Ticket</th>
+                                <th class="text-center">Usuario Asignado</th>
+                                <th class="text-center">Fecha Creación</th>
+                                <th class="text-center">Documento</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="clear:both;"></div>
+
+
+<script type="text/x-kendo-tmpl" id="tpt-Achievements">
+    # if (sw1 != 0) { Agrupar(ID_PERS_ENTI); } #
+    # if (sw1 == 0) { #
+
+    <div style="margin-top: 1%;"></div>
+    <div style="width:100%; Display:inline-block;">
+        <div style="width:98%; margin:0 auto;">
+            <div class="marcoAchie1" style="background-color:rgb(244, 240, 240);padding:.6em;"><b style="color:gray;font-size:.9em">${ASIGNADO}</b></div>
+            <div class="marcoAchie2" style="padding:.8em;">
+                <div class="marcoAchie2Sangria">
+                    ${NAM_TYPE_FORM}:
+                    # if (data.ID_ATTA_TICK_FORM != null){ #
+                    <a href="/${ARCHIVO}" style="text-decoration:none;" title="${NAM_ATTA}${EXT_ATTA}" target="_blank">
+                        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                        <span style="text-transform:capitalize;">${NAM_ATTA}${EXT_ATTA}</span>
+                    </a>
+                    # } else{#
+                    @*<img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />*@
+                    <span style="text-transform:capitalize;">"Sin archivos adjuntos"</span>
+                    #}#
+
+                    - ${SER_NUMB} -
+                    <a href="/DeliveryReception/Details/${ID_TICK}" target="_blank"><span class="il">${COD_TICK}</span></a>
+
+                </div>
+                # swFirst(ID_PERS_ENTI); #
+                # } else if (sw1 == sw2) { #
+                <div class="marcoAchie2Sangria">
+                    ${NAM_TYPE_FORM}:
+                    # if (data.ID_ATTA_TICK_FORM != null){ #
+                    <a href="/${ARCHIVO}" style="text-decoration:none;" title="${NAM_ATTA}${EXT_ATTA}" target="_blank">
+                        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                        <span style="text-transform:capitalize;">${NAM_ATTA}${EXT_ATTA}</span>
+                    </a>
+                    # } else{#<span style="text-transform:capitalize;">Sin archivos adjuntos</span>#}#
+
+                    - ${SER_NUMB} - <a href="/DeliveryReception/Details/${ID_TICK}" target="_blank"><span class="il">${COD_TICK}</span></a>
+                </div>
+                # } else { #
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 1%;"></div>
+    <div style="width:100%; Display:inline-block;">
+        <div style="width:98%; margin:0 auto;">
+            <div class="marcoAchie1" style="background-color:rgb(244, 240, 240);padding:.6em;"><b style="color:gray;font-size:.9em">${ASIGNADO}</b></div>
+            <div class="marcoAchie2" style="padding:.8em;">
+                <div class="marcoAchie2Sangria">
+                    ${NAM_TYPE_FORM}:
+                    # if (data.ID_ATTA_TICK_FORM != null){ #
+                    <a href="/${ARCHIVO}" style="text-decoration:none;" title="${NAM_ATTA}${EXT_ATTA}" target="_blank">
+                        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                        <span style="text-transform:capitalize;">${NAM_ATTA}${EXT_ATTA}</span>
+                    </a>
+                    # } else{#<span style="text-transform:capitalize;">Sin archivos adjuntos</span>#}#
+
+                    - ${SER_NUMB} - <a href="/DeliveryReception/Details/${ID_TICK}" target="_blank"><span class="il">${COD_TICK}</span></a>
+                </div>
+                # swFirst(ID_PERS_ENTI); #
+                # } #
+
+</script>
+
+<script type="text/javascript">
+    var sw1 = 0;
+    var sw2 = 0;
+    $(document).ready(function () {
+        /* TABS */
+        $("#divAgrupada").click(function () {
+            $(".tabAgrupada").addClass("active");
+            $(".tabDesplegada").removeClass("active");
+            $("#dAgrupada").removeClass("tInactivo");
+            $("#dAgrupada").addClass("tActivo");
+        });
+        $("#divDesplegada").click(function () {
+            $(".tabDesplegada").addClass("active");
+            $(".tabAgrupada").removeClass("active");
+            $("#dDesplegada").removeClass("tInactivo");
+            $("#dDesplegada").addClass("tActivo");
+        });
+        $("#ID_TYPE_FORM").kendoComboBox({
+            dataTextField: "NAM_TYPE_FORM",
+            dataValueField: "ID_TYPE_FORM",
+            filter: "contains",
+            autoBind: true,
+            //delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeFormat/ListFormatActivos?var=" + Math.random()
+                }
+            }
+        });
+        var ID_TYPE_FORM = $("#ID_TYPE_FORM").data("kendoComboBox");
+
+        var IdPersona = $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/PersonaPorCompania?var=" + Math.random()  /*RequesterByAcco*/
+                }
+            }
+        });
+
+        BuscarArchivo();
+    });
+
+    function BuscarArchivo() {
+        toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda agregar parámetros adicionales.');
+        ListaDesplegadaArchivos();
+        sw1 = 0;
+        sw2 = 0;
+        var dataSource = null;
+        var pager = null;
+
+        $("#pagerFind").empty();
+        $("#resultFind").empty();
+
+        if ($("#resultFind").data("kendoListView")) {
+            $("#pagerFind").data("kendoPager").destroy();
+            $("#resultFind").data("kendoListView").destroy();
+        }
+
+        dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Asset/BuscarArchivoActivos?var=" + Math.random() + "&" + $('#FrmFindAchievements').serialize(),
+                    type: "GET",
+                    dataType: "json"
+                }
+
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#resultFind").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#tpt-Achievements").html())
+        });
+
+        pager = $("#pagerFind").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 60],
+            refresh: true
+        });
+
+        return false;
+    }
+
+    function swFirst(id) {
+        sw1 = id;
+    }
+
+    function Agrupar(id) {
+        sw2 = id;
+    }
+
+    function ListaDesplegadaArchivos() {
+        //$('#tbDocumentos').dataTable().fnDestroy();
+
+        $('#tbDocumentos').dataTable({
+            "destroy": true,
+            "order": [[3, "asc"]],
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: "/Asset/BuscarArchivoActivosD?" + $('#FrmFindAchievements').serialize(),
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.NAM_TYPE_FORM
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.SER_NUMB
+                    }
+                },
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        return data.COD_TICK
+                //    }
+                //},
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.ID_TICK != null) {
+
+                            return '<a href="/DeliveryReception/Details/' + data.ID_TICK + '" style="text-decoration:none;" title="' + data.COD_TICK + '" target="_blank">' +
+                                '<span style="text-transform:capitalize;">' + data.COD_TICK + '</span>' +
+                                '</a>'
+                        }
+                        else {
+                            return ''
+                        }
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.ASIGNADO
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.CREATE_TICK
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+
+                        if (data.ID_ATTA_TICK_FORM != null) { /*(data.ARCHIVO != null)*/
+
+                            return '<a href="/' + data.ARCHIVO + '" style="text-decoration:none;" title="' + data.NAM_ATTA + data.EXT_ATTA + '" target="_blank">' +
+                                '<img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />&nbsp;' +
+                                '<span style="text-transform:capitalize;">' + data.NAM_ATTA + '</span>' +
+                                '</a>'
+                        }
+                        else {
+                            return data.ARCHIVO;
+                            //return 'Sin archivos adjuntos'
+                        }
+
+                    }
+                },
+            ],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ],
+            "pageLength": 15,
+            "columnDefs": [
+                { "width": "10%", "targets": 0, "className": "text-center" },
+                { "width": "10%", "targets": 1, "className": "text-center" },
+                { "width": "10%", "targets": 2, "className": "text-center" },
+                { "width": "30%", "targets": 3, "className": "text-center" },
+                { "width": "10%", "targets": 4, "className": "text-center" },
+                { "width": "30%", "targets": 5, "className": "text-center" },
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ Registros por página",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+
+        });
+
+    }
+</script>
+
+
+
+

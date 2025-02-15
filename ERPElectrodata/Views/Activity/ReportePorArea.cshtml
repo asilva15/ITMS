@@ -1,0 +1,360 @@
+﻿@{
+    Layout = null;
+}
+<link href="~/Content/ArchitectureUI/main.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.common.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.rtl.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.default.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.default.mobile.min.css" rel="stylesheet" />
+<link href="~/Content19/all.css" rel="stylesheet" />
+
+<script src="~/Scripts19/kendo/2019.3.1023/jquery.min.js"></script>
+<script src="~/Scripts19/kendo/2019.3.1023/jszip.min.js"></script>
+<script src="~/Scripts19/kendo/2019.3.1023/kendo.all.min.js"></script>
+
+
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<script src="~/Scripts/highcharts/highcharts.js"></script>
+<script src="~/Scripts/highcharts/highcharts-more.js"></script>
+<script src="~/Scripts/highcharts/modules/solid-gauge.src.js"></script>
+<script src="~/Scripts/jquery.tinycarousel.min.js"></script>
+<script src="~/Scripts/highcharts/modules/exporting.js"></script>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form id="Parametro">
+                        <div class="form-row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="cbArea">Área</label>
+                                    <input id="cbArea" type="text">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="cbUsuario">Usuario</label>
+                                    <input id="cbUsuario" type="text">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="dtFechaInicio">Fecha Inicial</label>
+                                    <input type="text" class="form-control pull-right" id="dtFechaInicio">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <label id="" for="" class="">&nbsp;</label><br />
+                                <button id="btnBuscar" type="button" class="btn btn-warning" onclick="MostrarGrafica(); return false;">Buscar</button>
+
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+
+            <div id="Grafica" style="width:100%;display:none;">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="~/Content/ArchitectureUI/assets/scripts/main.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#cbArea").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un área",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListarAreaxOrganigramaCbx"
+                }
+
+            }
+        });
+        $("#cbUsuario").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "cbArea",
+            dataTextField: "valorUsuario",
+            placeholder: "Seleccione un área",
+            dataValueField: "idUsuario",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListPersonalActividadxAreaCbx2"
+                }
+
+            }
+        });
+        $("#dtFechaInicio").kendoDatePicker({
+            format: "MM/dd/yyyy",
+        });
+    });
+
+    function listarUsuario(codigo) {
+        $("#cbUsuario").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un usuario",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListPersonalActividadxAreaCbx/" + codigo,
+                }
+            }
+        });
+    }
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+    function MostrarGrafica() {
+        /*if ($("#cbArea").val() == null || $("#cbArea").val() == 0) {
+            Mensaje("Seleccione un área.")
+        }
+        else */
+        //$.ajax({
+        //    url: "/Activity/ValidarPersonalxUsuario",
+        //    cache: false,
+        //    type: "GET",
+        //    dataType: "json",
+        //    success: function (data) {
+        //        if ((data['Data'][0]['Cantidad']) != 0) {
+        if ($("#dtFechaInicio").val() == null || $("#dtFechaInicio").val() == "") {
+            Mensaje("Seleccione una fecha.")
+        }
+        else if ($("#cbUsuario").val() == null || $("#cbUsuario").val() == "") {
+            document.getElementById("Grafica").style.display = "block";
+            $("#Grafica").empty();
+            var idArea = $("#cbArea").val();
+            if (idArea == "" || idArea == null)
+                idArea = 0;
+            $.ajax({
+                url: "/Activity/ListarPersonalxArea/" + idArea,
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    $.each(data['Data'], function (index, value) {
+                        $("#Grafica").append(
+                            '<div class="col-md-12"><div class="main-card mb-3 card"><div style="clear:both; width:99%; height:420px; margin-top:10px;" class="panel">' +
+                            '<div style="width: 100%; float:left; " class="panel panel-primary">' +
+                            '<div class="card-header">Actividades - ' + (data['Data'][index]['text']) + '</div>' +
+                            '<div class="panel-body">' +
+                            '<div id="ActividadesHoras' + (data['Data'][index]['id']) + '" style="width:70%;height:348px; float:left;"></div>' +
+                            '<div id="HorasCantidad' + (data['Data'][index]['id']) + '" style="width:24%;height:348px; float:right;"></div>' +
+                            '</div>' +
+                            '</div>' +
+                            '</div></div></div>'
+                        );
+                        ListarHorasUsuario('ActividadesHoras' + data['Data'][index]['id'], data['Data'][index]['id'], 1);
+                    });
+                },
+                error: function (source) {
+                }
+            });
+        }
+        else {
+            $("#Grafica").empty();
+            $("#Grafica").append(
+                '<div class="col-md-12"><div class="main-card mb-3 card"><div style="clear:both; width:99%; height:420px; margin-top:10px;" class="panel">' +
+                '<div style="width: 100%; float:left; " class="panel panel-primary">' +
+                '<div class="card-header">Actividades</div>' +
+                '<div class="panel-body">' +
+                '<div id="ActividadesHoras' + $("#cbUsuario").val() + '" style="width:70%;height:348px; float:left;"></div>' +
+                '<div id="HorasCantidad' + $("#cbUsuario").val() + '" style="width:24%;height:348px; float:right;"></div>' +
+                '</div>' +
+                '</div>' +
+                '</div></div></div>'
+            );
+            ListarHorasUsuario('ActividadesHoras' + $("#cbUsuario").val(), $("#cbUsuario").val(), 2);
+        }
+    }
+
+    function ListarHorasUsuario(Nombre, IdPersEnti, cat) {
+        flag = 0;
+        $.ajax({
+            url: '/Activity/ListarHorasAreaUsuario?var=' + Math.random(),
+            dataType: 'json',
+            data: {
+                FechaInicio: $("#dtFechaInicio").val(),
+                Usuario: IdPersEnti,
+            },
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var Cantidad = new Array();
+                var Porcentaje = new Array();
+                var Color = new Array();
+                var acumulado, acumuladoHoras;
+                var usuario;
+
+                $.each(jsonx['pie'], function (index, value) {
+
+                    Cat[index] = value['Nombre'];
+                    Cantidad[index] = value['TotalHoras'];
+                    Porcentaje[index] = value['Porcentaje'];
+                    acumuladoHoras = acumulado + value['TotalHoras'];
+                    acumulado = acumulado + value['Porcentaje'];
+                    usuario = value['Usuario'];
+
+                });
+                $("#HorasCantidad" + IdPersEnti).append(
+                    '</br></br></br></br>' +
+                    '<div style="clear:both; width:75%;" class="panel">' +
+                    '<div style="width: 100%; float:left; " class="panel panel-default">' +
+                    '<div class="panel-heading">TOTAL DE HORAS</div>' +
+                    '<div class="panel-body">' +
+                    '<b>Implementación: </b>' + Cantidad[0] + ' h' +
+                    '</br><b>Soporte: </b>' + Cantidad[1] + ' h' +
+                    '</br><b>Otros: </b>' + Cantidad[2] + ' h' +
+                    '</br><b>Sin Reportar: </b>' + Cantidad[3] + ' h' +
+                    '</div>' +
+                    '</div>' +
+                    '</div>'
+                );
+                Color[0] = '#B21E1E';
+                Color[1] = '#FFBB00';
+                Color[2] = '#7CBB00';
+                Color[3] = '#4B627C';
+
+                var colors = Highcharts.getOptions().colors,
+                    colorPie = "#6A819B",
+                    categories = ["All"],
+                    name = 'Status',
+                    data = [{
+                        y: acumulado,
+                        h: acumuladoHoras,
+                        color: colorPie,
+                        drilldown: {
+                            name: 'Status',
+                            categories: Cat,
+                            data: Porcentaje,
+                            data2: Cantidad,
+                            color: colors[0]
+                        }
+                    }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        //cantidad: data2[i].h,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: Nombre,
+                        type: 'pie'
+                    },
+
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Porcentaje: <b>{point.y}%</b>',//+'<br>Total de horas: <b>{point.percentage:.2f}</b>',
+                        percentageDecimals: 2
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + ': </b>' + (this.y + ' %')) : null) + '<br>';//+'<b>Total de Horas</b>: ' + this.y;
+                            }
+                        },
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    debugger;
+                                    var hoy = new Date();
+                                    var fechaInicial = $("#dtFechaInicio").val();
+                                    var inic = fechaInicial.substr(3, 2) + "/" + fechaInicial.substr(0, 2) + "/" + fechaInicial.substr(6, 4);
+                                    var dia = hoy.getDay();
+                                    var mes = hoy.getMonth() + 1;
+                                    if (dia.length == 1)
+                                        dia = '0' + dia;
+                                    if (mes.length == 1)
+                                        mes = '0' + mes;
+                                    var fin = dia + "/" + mes + "/" + hoy.getFullYear();
+                                    var usr = usuario;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    //var url = "http://" + location.host + "/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+    }
+    function Mensaje(msj) {
+        toastr.warning(msj, "Mensaje");
+    }
+</script>

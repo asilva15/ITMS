@@ -1,0 +1,143 @@
+﻿@model ERPElectrodata.Models.TareaDetalle
+
+@{
+    Layout = null;
+}
+ 
+<input id="IdTareaDetalle" value="@Model.IdTareaDetalle" hidden />
+@if (ViewBag.IdCate == 32465 || ViewBag.IdCate == 32466 || ViewBag.IdCate == 32467)
+{
+    <div class="form-row">
+        <div class="col-md-7">
+            <div class="form-group">
+                Usuario SAP <span style="color:red">*</span>
+                <input id="editUsuarioSap" value="@Model.IdUsuarioSap" />
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="form-group">
+                Grupo de Autorización <span style="color:red">*</span>
+                <input id="editGrupoAutoriza" value="@Model.IdGrupoAutoriza" />
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="form-group">
+                Desde <span style="color:red">*</span>
+                <input id="editFechaDesde" value="@Model.FechaDesde" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                Hasta <span style="color:red">*</span>
+                <input id="editFechaHasta" value="@Model.FechaEjecutada" />
+            </div>
+        </div>
+    </div>
+}
+<div class="form-row">
+    <div class="col-md-3">
+        <button onclick="EditarTareaMinsur(@ViewBag.IdCate);" type="button" class="btn btn-primary"> <i class="fa fa-save"></i> Guardar</button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#editUsuarioSap").kendoComboBox({
+            dataTextField: "Usuario",
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    count: "Count"
+                },
+                transport: {
+                    read: "/Tarea/ListarUsuariosSAPContable?var=" + Math.random()
+                }
+            },
+            filter: "contains",
+        }).data("kendoComboBox");
+        $("#editFechaDesde").kendoDateTimePicker({
+            format: "dd/MM/yyyy HH:mm",
+        });
+        $("#editFechaHasta").kendoDateTimePicker({
+            format: "dd/MM/yyyy HH:mm",
+        });
+        $("#editGrupoAutoriza").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    count: "Count"
+                },
+                transport: {
+                    read: "/Tarea/ListarGrupoAutorizaContable?var=" + Math.random()
+                }
+            },
+            filter: "contains",
+        }).data("kendoComboBox");
+
+    });
+
+    function EditarTareaMinsur(idCate) {
+        var idTareaDetalle = $("#IdTareaDetalle").val();
+        var tareaEdit;
+
+        if (idCate == 32465 || idCate == 32466 || idCate == 32467) {
+            var usuarioSAP = $("#editUsuarioSap").val();
+            var grupoAutoriza = $("#editGrupoAutoriza").val();
+            var desde = $("#editFechaDesde").val();
+            var hasta = $("#editFechaHasta").val();
+
+            if (usuarioSAP && grupoAutoriza && desde && hasta) {
+                var fechaDesdeISO = ConvertirAFechaTarea(desde);
+                var fechaHastaISO = ConvertirAFechaTarea(hasta);
+
+                tareaEdit = {
+                    IdTareaDetalle: idTareaDetalle,
+                    IdUsuarioSap: usuarioSAP,
+                    IdGrupoAutoriza: grupoAutoriza,
+                    FechaDesde: fechaDesdeISO,
+                    FechaEjecutada: fechaHastaISO
+                };
+            }
+        }
+
+        if (tareaEdit) {
+            swal({
+                title: `¿Deseas editar esta tarea?`,
+                text: `Se editará la tarea: @Model.Cod_Tarea`,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Guardar",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: false,
+                closeOnCancel: false
+            }, function (dismiss) {
+                if (dismiss) {
+                    $.ajax({
+                        url: '/Tarea/EditarTareaCreada?idCate=' + idCate,
+                        type: 'POST',
+                        data: tareaEdit,
+                        success: function (response) {
+                            if (response.message == 'OK') {
+                                $("[data-dismiss=modal]").trigger({ type: "click" });
+                            }
+
+                            MensajeConfirmacionTareasMinsur(response.message);
+                        }
+                    });
+                }
+                else {
+                    swal("Cancelado", "Ha cancelado la edición", "error");
+                }
+            });
+        } else {
+            toastr.warning("Complete los datos obligatorios", "Advertencia");
+        }
+    }
+
+</script>

@@ -1,0 +1,267 @@
+﻿@{
+    ViewBag.Title = "VerContacto";
+    Layout = null;
+}
+<style>
+    .editCombo {
+        position: absolute;
+        background-image: url(/Content/Images/Edit.png);
+        background-repeat: no-repeat;
+        width: 16px;
+        height: 16px;
+        top: 35px;
+        right: 55px;
+        cursor: pointer;
+    }
+
+    .divHide {
+        display: none;
+    }
+</style>
+<div id="agregarContacto">
+    <div class="mb-3 card">
+        <div class="card-body">
+            <div class="widget-chart-wrapper widget-chart-wrapper-lg opacity-10 m-0">
+                <div id="chart-apex-negative"></div>
+            </div>
+            <input type="hidden" id="IdDocuSale" name="IdDocuSale" value="@ViewBag.ID_DOCU_SALE" />
+            <div class="mt-3 row" id="divAsigContacto">
+                <!-- ASIGNAR CONTACTO -->
+                <div class="col-md-12">
+                    <div class="main-card mb-1">
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label for="cbTipoContacto">Tipo de Contacto</label>
+                                        <input id="cbTipoContacto" name="cbTipoContacto" type="text">
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label for="cbContacto">Contacto</label><br />
+                                        <input id="cbContacto" name="cbContacto" type="text">
+                                    </div>
+                                    <div id="divEditCombo" style="display:none;" class="editCombo" onclick="HabilitarEditarContacto()" title="Editar persona"></div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label for="txtCorreo">Correo</label><br />
+                                        <input id="txtCorreo" name="txtCorreo" type="email" class="form-control" disabled>
+                                    </div>
+                                </div>
+                                <div class="col-sm-3">
+                                    <div class="form-group">
+                                        <label for="txtCelular">Celular</label>
+                                        <input id="txtCelular" name="txtCelular" type="text" class="form-control" disabled>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="ml-auto">
+                                    <button id="btnAgregar" name="btnAgregar" class="btn btn-warning btn-lg" value="Agregar" onclick="GuardarContacto();"><i class="fa fa-save"></i><span id="lblAgregar"> Agregar</span></button>
+                                </div>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <div class="ml-auto">
+                                    <button id="btnActualizarYAgregar" name="btnAgregarYActualizar" class="btn btn-warning btn-lg d-none" onclick="ActualizarYAgregarContacto();"><i class="fa fa-save"></i><span id="lblAgregar"> Actualizar y Agregar</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <iframe id="agregarContacto" name="agregarContacto" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="listaContacto"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        ListarContactos();
+        ListaCboContacto();
+        $("#cbTipoContacto").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un tipo de contacto",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Contacto/ListarTipoContacto?idparametro=48"
+                }
+
+            }
+        });
+        $("#cbContacto").change(function () {
+            $("#txtCelular").val('');
+            $("#txtCorreo").val('');
+            CargarCelularCorreo();
+        });
+        $("#cbContacto").bind("change", function (e) {
+            //Store para vista Detail User
+            if ($("#cbContacto").val() == "" || $("#cbContacto").val() == null) {
+                $("#divEditCombo").css("display", "none");
+            }
+            else {
+                $("#divEditCombo").css("display", "block");
+            }
+            $('#txtCorreo').attr('disabled', 'disabled');
+            $('#txtCelular').attr('disabled', 'disabled');
+            $("#btnActualizarYAgregar").addClass('d-none');
+            $("#btnAgregar").removeClass('d-none');
+        });
+    });
+    function ListaCboContacto() {
+        $("#cbContacto").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un contacto",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Contacto/ListarContactosOPRenovacion?IdDocuSale="+@ViewBag.ID_DOCU_SALE,
+                }
+
+            }
+        });
+    }
+    function ListarContactos() {
+        $('#listaContacto').empty();
+        $('#listaContacto').load('/Contacto/VerContacto/@ViewBag.ID_DOCU_SALE');
+    }
+    function GuardarContacto() {
+            $.ajax({
+                url: "/Contacto/GuardarContacto/",
+                data: "IdDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                      "&IdAccoPara=" + $("#cbTipoContacto").val() +
+                      "&IdPersEnti=" + $("#cbContacto").val() +
+                      "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        ListarContactos();
+                        MensajeDatosProductosServicios('OK', 'El contacto se ha registrado con éxito.');
+                        $("#txtCelular").val('');
+                        $("#txtCorreo").val('');
+                        $("#cbContacto").data("kendoComboBox").value("");
+                        $("#cbTipoContacto").data("kendoComboBox").value("");
+                        $("#divEditCombo").css("display", "none");
+                    } else {
+                        if (resp == "ERROR") {
+                            MensajeDatosProductosServicios('Mensaje', 'Verifique los datos porfavor.');
+                        } else
+                            if (resp == "EXISTE") { // Ya existe el contacto en este proyecto
+                                MensajeDatosProductosServicios('Mensaje', 'Ya existe el contacto en este proyecto');
+                                $("#txtCelular").val('');
+                                $("#txtCorreo").val('');
+                                $("#cbContacto").data("kendoComboBox").value("");
+                                $("#cbTipoContacto").data("kendoComboBox").value("");
+                                $("#divEditCombo").css("display", "none");
+                            }
+                    }
+
+                }
+            });
+    }
+    function MensajeDatosProductosServicios(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success(msnErr, "Información Actualizada.");
+        }
+
+        else if (msg == 'Mensaje') {
+            toastr.warning(msnErr, "Mensaje");
+        }
+    }
+    function CargarCelularCorreo() {
+        var idContacto = $("#cbContacto").val();
+        $.ajax({
+            url: "/OrderForm/ListarDatosContactos/" + idContacto,
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $.each(data['Data'], function (index, value) {
+                    $("#txtCelular").val((data['Data'][index]['TEL_ENTI']));
+                    $("#txtCorreo").val((data['Data'][index]['EMA_ENTI']));
+                });
+            },
+            error: function (source) {
+                alert("Error al cargar los datos del contacto");
+            }
+        });
+    }
+    function HabilitarEditarContacto() {
+        $('#txtCorreo').removeAttr('disabled');
+        $('#txtCelular').removeAttr('disabled');
+        $("#btnActualizarYAgregar").removeClass('d-none');
+        $("#btnAgregar").addClass('d-none');
+    }
+    function ActualizarYAgregarContacto() {
+            $.ajax({
+                url: "/Contacto/ActualizarYAgregar/",
+                data: "IdDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                      "&IdAccoPara=" + $("#cbTipoContacto").val() +
+                      "&IdPersEnti=" + $("#cbContacto").val() +
+                      "&Celular=" + $("#txtCelular").val() +
+                      "&Correo=" + $("#txtCorreo").val() +
+                      "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        ListarContactos();
+                        MensajeDatosProductosServicios('OK', 'El contacto se ha registrado con éxito.');
+                        $("#txtCelular").val('');
+                        $("#txtCorreo").val('');
+                        $('#txtCelular').attr('disabled', 'disabled');
+                        $('#txtCorreo').attr('disabled', 'disabled');
+                        //$("#cbContacto").data("kendocombobox").value("");
+                        //$("#cbTipocontacto").data("kendocombobox").value("");
+                        $("#cbContacto").data("kendoComboBox").select(-1);
+                        $("#cbTipoContacto").data("kendoComboBox").select(-1);
+                        $("#btnActualizarYAgregar").addClass('d-none');
+                        $("#btnAgregar").removeClass('d-none');
+                        $("#divEditCombo").css("display", "none");
+                    } else {
+                        if (resp == "ERROR") {
+                            MensajeDatosProductosServicios('Mensaje', 'Verifique los datos porfavor.');
+                        } else
+                            if (resp == "EXISTE") { // Ya existe el contacto en este proyecto
+                                MensajeDatosProductosServicios('Mensaje', 'Ya existe el contacto en este proyecto');
+                                $("#txtCelular").val('');
+                                $("#txtCorreo").val('');
+                                $('#txtCelular').attr('disabled', 'disabled');
+                                $('#txtCorreo').attr('disabled', 'disabled');
+                                $("#cbContacto").data("kendoComboBox").value("");
+                                $("#cbTipoContacto").data("kendoComboBox").value("");
+                                $("#btnActualizarYAgregar").addClass('d-none');
+                                $("#btnAgregar").removeClass('d-none');
+                                $("#divEditCombo").css("display", "none");
+                            }
+                    }
+                }
+            });
+    }
+
+</script>

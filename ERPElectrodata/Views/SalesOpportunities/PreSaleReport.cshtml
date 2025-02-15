@@ -1,0 +1,323 @@
+﻿@{
+    Layout = null;
+}
+
+<style>
+    .divFind {
+        width: 100%;
+        display: inline-block;
+        border: 1px #eee solid;
+        margin-bottom:15px;
+    }
+
+    .divHead {
+        padding: 5px 10px 5px 10px;
+    }
+
+    .row {
+        float: left;
+    }
+</style>
+
+<h1>Pre Sales Report</h1>
+
+<div class="divFind">
+    <div class="divHead">
+        @using (Html.BeginForm("xx", "Assistance", FormMethod.Post, new { id = "FrmSOPreSale" }))
+        {
+            <div class="divFondoUno">
+
+                <div class="row" style="margin-left:10px;">
+                    <div class="editor-label">
+                        Since
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBox("SIN_DATE")
+                    </div>
+                </div>
+
+                <div class="row" style="margin-left:10px;">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.To
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBox("TO_DATE")
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+<div style="width:100%;">
+    <div style="float:left;width:49.5%">
+        <div class="titleForm"><div class="title">Opportinities By Status</div></div>
+        <div class="bodyForm" >
+            <div class="inBodyForm" style="height:400px;">
+                <div style="height:398px; width:98%" id="psr1">
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="float:right;width:49.5%">
+        <div class="titleForm"><div class="title">Opportinities By Status / Staff</div></div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:400px;">
+                <div style="height:398px; width:98%" id="psr2">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function getObjects(obj, key, val) {
+        var objects = [];
+        for (var i in obj) {
+            if (!obj.hasOwnProperty(i)) continue;
+            if (typeof obj[i] == 'object') {
+                objects = objects.concat(getObjects(obj[i], key, val));
+            } else
+                //if key matches and value matches or if key matches and value is not passed (eliminating the case where key matches but passed value does not)
+                if (i == key && obj[i] == val || i == key && val == '') { //
+                    objects.push(obj);
+                } else if (obj[i] == val && key == '') {
+                    //only add if the object is not already in the array
+                    if (objects.lastIndexOf(obj) == -1) {
+                        objects.push(obj);
+                    }
+                }
+        }
+        return objects;
+    }
+
+    function CreateGraphPS(type) {
+        $.get("/SalesOpportunities/PreSaleReportData?" + ($("#FrmSOPreSale").serialize()), function (json) {
+            var seriesUno = [];
+            var seriesDos = [];
+            var dataUno = [];
+            var solicitante = [];
+            var grupos = [];
+
+            /*GRAFICO POR 3 ESTADOS*/
+            $.each(json['groups'], function (indexD, valueD) {
+                //    //solicitante.push(valueD['name']);
+                var idg = valueD['id'];
+                var aa = getObjects(json['datagroups'], 'id', idg);
+                var dataAA = [];
+                var dataBB = [];
+
+                $.each(json['vendors'], function (indexD, valueD) {
+                    var id_pers_enti = valueD['id'];
+                    var bb = getObjects(aa, 'ID_PERS_ENTI', id_pers_enti);
+
+                    if (bb.length > 0) {
+                        //dataAA.push(type = 1 ? bb[0].qty : bb[0].ammount);
+                        dataAA.push(bb[0].qty);
+                        dataBB.push(bb[0].ammount);
+                    }
+                    else {
+                        dataAA.push(0);
+                        dataBB.push(0);
+                    }
+                });
+
+                seriesDos.push({
+                    name: valueD['name'],
+                    color: valueD['color'],
+                    //data: type == 1 ? dataAA : dataBB
+                    data: dataAA
+                });
+
+                //seriesDos.push({
+                //    name: valueD['name'],
+                //    color: valueD['color'],
+                //    data: dataAA
+                //}, {
+                //    name: valueD['name']+'C',
+                //    color: valueD['color'],
+                //    data: dataBB
+                //});
+
+            });
+
+            $.each(json['vendors'], function (indexD, valueD) {
+                solicitante.push(valueD['name']);
+
+            });
+
+            /*GRAFICO POR ESTADOS*/
+            $.each(json['status'], function (index, value) {
+                var id_status = value['ID_STAT_SALE_OPPO'];
+                var xx = getObjects(json['data'], 'ID_STAT_SALE_OPPO', id_status);
+                var dataX = [];
+
+                $.each(json['vendors'], function (indexD, valueD) {
+
+                    var id_pers_enti = valueD['id'];
+                    var yy = getObjects(xx, 'ID_PERS_ENTI', id_pers_enti);
+
+                    if (yy.length > 0) {
+                        dataX.push(yy[0].QTY);
+                    }
+                    else {
+                        dataX.push(0);
+                    }
+                });
+
+                seriesUno.push({
+                    name: value['NAM_STAT_SALE_OPPO'],
+                    data: dataX,
+                    color: value['color']
+                });
+            });
+
+
+
+            $('#psr1').highcharts({
+                chart: {
+                    type: 'column'
+                },
+                title: {
+                    text: null
+                },
+                credits: { enabled: false },
+                xAxis: {
+                    categories: solicitante,
+                    gridLineWidth: 1,
+                    title: {
+                        text: 'Staff',
+                        align: 'high',
+                        style: {
+                            color: '#666',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labels: {
+                        rotation: -45,
+                        align:'right'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    stackLabels: {
+                        enabled: false,
+                        style: {
+                            fontWeight: 'bold',
+                            color: (Highcharts.theme && Highcharts.theme.textColor) || 'gray'
+                        }
+                    },
+                    title: {
+                        text: 'Opportunities',
+                        align: 'high',
+                        style: {
+                            color: '#666',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name} </td><td>:</td>' +
+                        '<td style="padding:0"><b>{point.y:.0f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        stacking: 'normal',
+                        dataLabels: {
+                            enabled: false,
+                            color: (Highcharts.theme && Highcharts.theme.dataLabelsColor) || 'white',
+                            style: {
+                                textShadow: '0 0 3px black, 0 0 3px black'
+                            }
+                        }
+                    }
+                },
+                series: seriesUno
+            });
+
+
+            //grafica 2
+            $('#psr2').highcharts({
+                chart: {
+                    type: 'column'
+                },
+                credits: { enabled: false },
+                title: {
+                    text: null
+                },
+                //subtitle: {
+                //    text: 'Source: WorldClimate.com'
+                //},
+                xAxis: {
+                    categories: solicitante,
+                    gridLineWidth: 1,
+                    title: {
+                        text: 'Staff',
+                        align: 'high',
+                        style: {
+                            color: '#666',
+                            fontWeight: 'bold'
+                        }
+                    },
+                    labels: {
+                        rotation: -45,
+                        align: 'right'
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Opportunities',
+                        align: 'high',
+                        style: {
+                            color: '#666',
+                            fontWeight: 'bold'
+                        }
+                    }
+                },
+                tooltip: {
+                    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name} </td><td>:</td>' +
+                        '<td style="padding:0"><b>{point.y:.0f}</b></td></tr>',
+                    footerFormat: '</table>',
+                    shared: true,
+                    useHTML: true
+                },
+                plotOptions: {
+                    column: {
+                        pointPadding: 0.2,
+                        borderWidth: 0
+                    }
+                },
+                series: seriesDos
+            });
+
+        });
+    }
+
+    $(document).ready(function () {
+
+        $("#SIN_DATE").kendoDatePicker({
+            value: new Date('@DateTime.Now.Year', @DateTime.Now.Month-1, 1),
+            change: function () {
+                CreateGraphPS(2);
+            }
+        });
+        $("#TO_DATE").kendoDatePicker({
+            value: new Date('@DateTime.Now.Year', @DateTime.Now.Month-1, '@DateTime.Now.Day'),
+            change: function () {
+                CreateGraphPS(2);
+            }
+        });
+
+        CreateGraphPS(1);
+    });
+</script>

@@ -1,0 +1,329 @@
+﻿@{
+    Layout = null;
+}
+ 
+<div>
+    <div style="margin-bottom: 10px;">
+        <a href="@Url.Action("DescargarPlantillaExcel", "Tarea", new { idCate = ViewBag.IdCate })">Plantilla Excel</a>
+    </div>
+
+    @using (Html.BeginForm("ImportarTareas", "Tarea", FormMethod.Post, new { enctype = "multipart/form-data", id = "formExcelTMasiva" }))
+    {
+        <input type="file" name="excelFile" id="excelFileImportar" />
+        <button type="submit" class="btn btn-primary" style="margin-top: 10px;">Cargar</button>
+        <iframe id="upload_targetTMasiva" name="upload_targetTMasiva" src="" hidden></iframe>
+    }
+</div>
+<div class="x_content importTareasMasivas" style="margin-top: 20px;">
+    <ul class="todo-list-wrapper list-group list-group-flush" style='overflow-x: hidden; overflow-y: scroll; max-height: 450px;'></ul>
+</div>
+<div style="text-align: right;">
+    <button type="button" class="btn btn-primary" id="ImportarTareasMasivas" style="margin-top: 15px;">Importar</button>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#excelFileImportar").kendoUpload({
+            localization: {
+                select: "Seleccione el excel"
+            },
+            select:
+                function (e) {
+                    var selectedFile = e.files[0];
+                    if (selectedFile && selectedFile.extension.toLowerCase() !== ".xlsx") {
+                        e.preventDefault();
+                        toastr.warning("Por favor, cargar un archivo con extensión .xlsx", "Extensión de archivo incorrecta");
+                    }
+                },
+            multiple: false,
+        });
+
+        $("#formExcelTMasiva").submit(function (event) {
+            event.preventDefault();
+            toastr.info("Cargando el excel", "Espere por favor");
+
+            var formData = new FormData($(this)[0]);
+            var fileInput = $(this).find('input[type="file"]')[0];
+            var file = fileInput.files[0];
+
+            if (file) {
+                $.ajax({
+                    url: '/Tarea/ImportarTareas?idCate=@ViewBag.IdCate',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (response) {
+                        $(".importTareasMasivas ul").html('');
+
+                        if (response.message == 'OK') {
+                            var data = response.data;
+
+                            if ('@ViewBag.IdCate' == 32465 || '@ViewBag.IdCate' == 32466 || '@ViewBag.IdCate' == 32467) {
+                                tejerImportarTareaContable(data);
+                            }
+
+
+                        } else {
+                            toastr.warning(response.message, "No se pudo cargar el excel");
+                        }
+
+                    }
+                });
+
+            } else {
+                toastr.warning("Seleccione un Excel");
+            }
+
+            $("#excelFileImportar").data("kendoUpload").clearAllFiles();
+        });
+
+        $("#ImportarTareasMasivas").click(function () {
+            var tareasMasivasImp = [];
+
+            $(".importTareasMasivas ul > li").each(function (index) {
+
+                if ('@ViewBag.IdCate' == 32465 || '@ViewBag.IdCate' == 32466 || '@ViewBag.IdCate' == 32467) {
+                    var usuarioSAP = $(this).find("input[name='ImpTContableUsuarioSAP']").val();
+                    var grupoAutoriza = $(this).find("input[name='ImpTContableGrupoAutoriza']").val();
+                    var desde = $(this).find("input[name='ImpTContableFechaDesde']").val();
+                    var hasta = $(this).find("input[name='ImpTContableFechaHasta']").val();
+                    var idAsignado = $(this).find("input[name='ImpTIdPersAsignado']").val();
+
+                    if (usuarioSAP && grupoAutoriza && desde && hasta && idAsignado) {
+                        var fechaDesdeISO = ConvertirAFechaTarea(desde);
+                        var fechaHastaISO = ConvertirAFechaTarea(hasta);
+
+                        var formulario = {
+                            IdUsuarioSap: usuarioSAP,
+                            IdGrupoAutoriza: grupoAutoriza,
+                            FechaDesde: fechaDesdeISO,
+                            FechaEjecutada: fechaHastaISO,
+                            Id_Pers_Enti: idAsignado
+                        };
+                        tareasMasivasImp.push(formulario);
+
+                        $(this).addClass("creada");
+                    }
+                }
+            });
+
+            if (tareasMasivasImp.length > 0) {
+                swal({
+                    title: `¿Deseas importar estas tareas?`,
+                    text: `Se importarán las tareas con todos los campos obligatorios llenos`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: '/Tarea/CrearTareasMasivas?idTicket=@ViewBag.IdTick',
+                            type: 'POST',
+                            data: JSON.stringify(tareasMasivasImp),
+                            contentType: "application/json",
+                            success: function (response) {
+                                if (response.message == 'OK') {
+                                    idSetTimeout = setTimeout(function (element) {
+                                        $(".ticketHijoIndex ul > .divListTMinsur").html('');
+                                        $(".ticketHijoIndex ul > .divCrearTMinsur").html('');
+
+                                        $.ajax({
+                                            contentType: 'application/json; charset=utf-8',
+                                            url: "/Ticket/ListarTareasPendientes",
+                                            type: "Get",
+                                            data: { idTicket: idTicket },
+                                            datatype: "json",
+                                            cache: false,
+                                            success: function (data) {
+                                                if (data) {
+
+                                                    if ('@ViewBag.IdCate' == 32465 || '@ViewBag.IdCate' == 32466 || '@ViewBag.IdCate' == 32467) {
+                                                        tejerTareasPendientesContable(data["tareaPendiente"]);
+
+                                                    }
+
+                                                    swal.close();
+                                                }
+                                            }
+                                        });
+                                    }, 2000, $(this));
+
+                                    if ($(".importTareasMasivas ul > li:not(.creada)").length == 0) {
+                                        swal({
+                                            title: 'Se importaron las tareas',
+                                            type: 'success',
+                                            text: 'Todas las tareas han sido importadas',
+                                            confirmButtonColor: "#DD6B55",
+                                            focusConfirm: false,
+                                            confirmButtonText:
+                                                'Continue',
+                                            confirmButtonAriaLabel: 'Thumbs up, great!'
+                                        });
+                                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                                    } else {
+                                        swal({
+                                            title: 'Quedan tareas por importar',
+                                            type: 'info',
+                                            text: 'COMPLETE LOS CAMPOS OBLIGATORIOS',
+                                            confirmButtonColor: "#DD6B55",
+                                            focusConfirm: false,
+                                            confirmButtonText: 'Continue',
+                                            confirmButtonAriaLabel: 'Thumbs up, great!'
+                                        })
+                                        $(".importTareasMasivas ul > li.creada").remove();
+                                    }
+                                } else if (response.message == 'ERROR') {
+                                    swal({
+                                        title: 'Warning',
+                                        type: 'info',
+                                        text: 'ERROR EN LA IMPORTACIÓN',
+                                        confirmButtonColor: "#DD6B55",
+                                        focusConfirm: false,
+                                        confirmButtonText: 'Continue',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!'
+                                    })
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Cancelado", "Ha cancelado la importación", "error");
+                    }
+                });
+            } else {
+                toastr.warning("Ninguna tarea para importar", "No hay tareas disponibles");
+            }
+        });
+
+    });
+
+
+    function tejerImportarTareaContable(data) {
+        $.each(data, function (index, item) {
+            $(".importTareasMasivas ul").append(`<li id="formImportar_${index}" class="mb-3"> <div class="form-row mr-3">
+                        <div class="col-md-10">
+                        </div>
+                        <div class="col-md-2">
+                            <button type="button" class="close" onclick="EliminarFormImpTarea(${index})">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-row mr-3">
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                Usuario SAP <span style="color:red">*</span>
+                                <input id="ImpTContableUsuarioSAP_${index}" name="ImpTContableUsuarioSAP" />
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                Grupo de Autorización <span style="color:red">*</span>
+                                <input id="ImpTContableGrupoAutoriza_${index}" name="ImpTContableGrupoAutoriza" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row mr-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                Desde <span style="color:red">*</span>
+                                <input id="ImpTContableFechaDesde_${index}" name="ImpTContableFechaDesde" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                Hasta <span style="color:red">*</span>
+                                <input id="ImpTContableFechaHasta_${index}" name="ImpTContableFechaHasta" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row mr-3">
+                        <div class="col-md-6">
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                Asignado <span style="color:red">*</span>
+                                <input id="ImpIdPers_${index}" name="ImpTIdPersAsignado" />
+                            </div>
+                        </div>
+                    </div></li>`
+            );
+
+
+            var ImpAsignado = $("#ImpIdPers_" + index).kendoComboBox({
+                dataTextField: "ASSI",
+                dataValueField: "ID_PERS_ENTI",
+                dataSource: {
+                    transport: {
+                        read: "/Home/ListaUsuariosPorCola?ID_QUEU=78&var=" + Math.random()
+                    }
+                },
+                filter: "contains",
+            }).data("kendoComboBox");
+            if (item.Id_Pers_Enti != null) {
+                ImpAsignado.value(item.Id_Pers_Enti);
+            }
+
+            var ImpUsuarioSap = $("#ImpTContableUsuarioSAP_" + index).kendoComboBox({
+                dataTextField: "Usuario",
+                dataValueField: "ID_PERS_ENTI",
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        count: "Count"
+                    },
+                    transport: {
+                        read: "/Tarea/ListarUsuariosSAPContable?var=" + Math.random()
+                    }
+                },
+                filter: "contains",
+            }).data("kendoComboBox");
+            if (item.IdUsuarioSap != null) {
+                ImpUsuarioSap.value(item.IdUsuarioSap);
+            }
+
+            var desde = $("#ImpTContableFechaDesde_" + index).kendoDateTimePicker({
+                format: "dd/MM/yyyy HH:mm",
+            }).data("kendoDateTimePicker");;
+            if (item.FechaDesde != null) {
+                desde.value(item.FechaDesde);
+            }
+
+            var hasta = $("#ImpTContableFechaHasta_" + index).kendoDateTimePicker({
+                format: "dd/MM/yyyy HH:mm",
+            }).data("kendoDateTimePicker");;
+            if (item.FechaEjecutada != null) {
+                hasta.value(item.FechaEjecutada);
+            }
+
+            var ImpGrupoAutoriza = $("#ImpTContableGrupoAutoriza_" + index).kendoComboBox({
+                dataTextField: "Nombre",
+                dataValueField: "Id",
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        count: "Count"
+                    },
+                    transport: {
+                        read: "/Tarea/ListarGrupoAutorizaContable?var=" + Math.random()
+                    }
+                },
+                filter: "contains",
+            }).data("kendoComboBox");
+            if (item.IdGrupoAutoriza != null) {
+                ImpGrupoAutoriza.value(item.IdGrupoAutoriza);
+            }
+        });
+    }
+
+    function EliminarFormImpTarea(index) {
+        $("#formImportar_" + index).remove();
+    }
+
+</script>

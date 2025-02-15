@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "EditarRol";
+    Layout = null;
+}
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="main-card mb-2 card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-6">
+                <div class="position-relative form-group">
+                    <label for="nombreRol">Rol</label><br />
+                    <input id="nombreRol" type="text" />
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-2">
+                <div class="position-relative form-group">
+                    <label for="chbEstado">Estado</label><br>
+                    <input id="chbEstado" type="checkbox" />
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 ml-auto">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" data-dismiss="modal" class="btn btn-secondary btn-block">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-primary btn-block" onclick="GuardarRol()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        //Dando estilo al input
+        $("#nombreRol").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        //Dando estilo iCheck a checkbox
+        $('#chbEstado').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+
+        //Rellenando datos
+        $("#nombreRol").val("@ViewBag.NombreRol");
+
+        if ("@ViewBag.EstadoRol" == "True") {
+            $('#chbEstado').iCheck('check');
+        } else {
+            $('#chbEstado').iCheck('uncheck');
+        }
+
+    });
+
+    function GuardarRol() {
+        if ($("#nombreRol").val() == "") {
+            toastr.warning("El campo nombre no puede estar vacío", "Advertencia");
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/Role/EditarRol?id=" + "@ViewBag.IdRol" + "&Nombre=" + $("#nombreRol").val() + "&Estado=" + $("#chbEstado").iCheck('update')[0].checked,
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("El nombre ingresado ya ha sido registrado anteriormente", "Advertencia");
+                    } else {
+                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                        toastr.success("Registro Actualizado", "Exito!");
+                        $('#roleTable').DataTable().ajax.reload();
+                    }
+                }
+            });
+        }
+    }
+
+</script>

@@ -1,0 +1,204 @@
+﻿@model List<ERPElectrodata.Models.ListaUsuarioLocacion_Result>
+@{
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+<input type="hidden" id="usuarioId" name="usuarioId" value="" />
+<input type="hidden" id="locacionId" name="locacionId" value="" />
+<div class="app-page-title cabeceraBg">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="font-icon-wrapper font-icon-lg bg-white">
+                <i class="fa fa-file icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                <div class="titleModule"><b><span class="INCIDENTESYREQUERIMIENTOS">Locaciones de usuario</span></b></div>
+                <div class="page-title-subheading">
+                    <span class="ListadeTicketsporcuentadesoporteporestado">Asociar locaciones a usuarios.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="mb-3">
+            <p class="card-title">Lista de usuarios</p>
+            @*<select id="select-usuarios" placeholder="Buscar usuario" onchange="cargarLocacionesVinculados()">
+                    <option value="" selected>Seleccionar usuario</option>
+                </select>*@
+            <input id="listaUsuarios" name="listaUsuarios" type="text" style="width:100%">
+        </div>
+        <div class="mb-3">
+            <p class="card-title">Lista de locaciones</p>
+            @*<select id="select-locacion" placeholder="Buscar locación" onchange="CargarInformacionGrupo()">
+                    <option value="" selected>Seleccionar locación</option>
+                </select>*@
+            <input id="listaLocaciones" name="listaLocaciones" type="text" style="width:100%">
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <p class="card-title">INFORMACIÓN DE LOCACIÓN</p>
+                </div>
+                <div id="usuarioInfo">
+                    <div class="row">
+                        <div class="col">
+                            <p class="card-title">Region</p>
+                            <p id="nombre">Nombre completo</p>
+                            <p class="card-title">Locación</p>
+                            <p id="abreviatura">Abreviatura</p>
+                            <div id="guardar" style="display:block">
+                                <button class="btn btn-primary" onclick="guardarDesdeInfo()">Agregar</button>
+                            </div>
+                            <div id="eliminar" style="display:none">
+                                @*<button class="btn btn-danger" onclick="eliminar()">Eliminar</button>*@
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div>
+                    <p class="card-title">Locaciones asociadas</p>
+                </div>
+                <div id="listaLocacionesVinculados">
+                    @Html.Partial("_ListaUsuarioLocacion", Model)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        let listaClientes = []
+        let listaLocaciones = []
+        $("#listaUsuarios").kendoComboBox({
+            dataTextField: "FULL_NAME",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            value:"",
+            dataSource: {
+                schema: {
+                    data: "data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/UsuarioLocacion/CargarUsuarios"
+                }
+            },
+            change: function (e) {
+                var comboBox = e.sender;
+
+                idPersEnti = comboBox.value(); 
+
+
+                $.post("CargarLocacionesVinculadas", { id: idPersEnti }, function (response) {
+                    $("#listaLocacionesVinculados").html(response);
+                });
+                $("#usuarioId").val(idPersEnti);
+
+
+            }
+        });
+
+        $("#listaLocaciones").kendoComboBox({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            value:"",
+            dataSource: {
+                schema: {
+                    data: "data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/UsuarioLocacion/CargarLocaciones"
+                }
+            },
+            change: function (e) {
+                var comboBox = e.sender;
+
+                var seleccion = comboBox.value();
+
+
+                listaLocaciones = comboBox.dataSource.data();
+
+                var locacionSeleccionado = listaLocaciones.find(function (locacion) {
+                    return locacion.id.toString() === seleccion;
+                });
+
+                if (locacionSeleccionado) {
+                    let partes = locacionSeleccionado.text.split(" - "); // Asegúrate de incluir espacios alrededor del guion si son parte del separador.
+                    let site= partes[0];
+                    let loca = partes[1];
+                    //pintarGrupo(locacionSeleccionado.NAM_SITE, locacionSeleccionado.NAM_LOCA, locacionSeleccionado.id)
+                    pintarGrupo(site, loca)
+                }
+                $("#locacionId").val(seleccion);
+            }
+        });
+
+
+    });
+    //Coloca los datos de la locación seleccionada por el usuario
+    function pintarGrupo(region, locacion) {
+            document.getElementById("nombre").textContent = region
+            document.getElementById("abreviatura").textContent = locacion
+            document.getElementById("guardar").style.display = "block"
+        }
+
+    function guardarDesdeInfo() {
+        let seleccionLocacion = document.getElementById("locacionId").value;
+        let seleccionUsuario = document.getElementById("usuarioId").value;
+        var locaciones=[];
+        $.post("CargarArregloLocacionesVinculadas", { id: seleccionUsuario }, function (response) {
+            for (var i = 0; i < response.length; i++) {
+                locaciones.push(response[i].ID_LOCA);
+            }
+            let flag = "";
+            if (seleccionLocacion == "" || seleccionUsuario == "") {
+                if (seleccionUsuario == "") {
+                    flag += "-Seleccione un usuario.</br>";
+                }
+                if (seleccionLocacion == "") {
+                    flag += "-Seleccione una locación.";
+                }
+                toastr.error("", flag);
+            }
+            else {
+                console.log(locaciones);
+                console.log(seleccionLocacion);
+                if (locaciones.includes(parseInt(seleccionLocacion))) {
+                    toastr.warning("", "El usuario ya tiene la locación asignada.</br>Por favor seleccione una locación diferente");
+                } else {
+                    $.post("GuardarLocacionVinculado", { idLocacion: seleccionLocacion, idUsuario: seleccionUsuario }, function (response) {
+                        $("#listaLocacionesVinculados").html(response);
+                        toastr.success("", "El registro ha sido guardado.");
+                    }).fail(function (error) {
+                        toastr.error("Error al guardar la información.");
+                    });
+                }
+
+            }
+        });
+        
+
+        }
+    function eliminarDesdeLista(seleccionGrupo) {
+            var idUsuario = document.getElementById("usuarioId").value
+            $.post("EliminarLocacionVinculado", { idUsuario: idUsuario, idUsuarioLocacion: seleccionGrupo }, function (response) {
+                $("#listaLocacionesVinculados").html(response);
+                toastr.success("", "El registro ha sido eliminado.");
+            })
+        }
+
+</script>

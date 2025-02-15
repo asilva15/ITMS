@@ -1,0 +1,335 @@
+﻿@model ERPElectrodata.Models.BENEFICIARY
+
+@{
+    Layout = null;
+}
+<div class="col-sm-12 col-lg-11" style="width:90%;">
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">
+            <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                Nuevo Beneficiario
+            </div>
+        </div>
+        <div class="p-0 card-body">
+            <div class="p-1 slick-slider-sm">
+                <div style="width:100%;">
+                    @using (Html.BeginForm("Create", "Beneficiary", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormNewBeneficiary", name = "FormNewBeneficiary", target = "upload_targetBene" }))
+                    {
+                        <input type="hidden" name="ID_PERS_ENTI" value="@ViewBag.ID_PERS_ENTI" />
+                        <input type="hidden" name="KEY_ATTA" value="@ViewBag.UploadFile" />
+                        <div class="row">
+                            <div class="col-sm-10 col-lg-3">
+                                <div class="editor-label">
+                                    @ResourceLanguaje.Resource.KindredTalent
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_KINDRED)
+                                    @Html.ValidationMessageFor(model => model.ID_KINDRED)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10 col-lg-3">
+                                <div class="editor-label">
+                                    @ResourceLanguaje.Resource.FirstNameTalent
+                                </div>
+                                <div class="k-textbox" style="width:100%;">
+                                    <input type="text" name="FIR_NAME" id="FIR_NAME" />
+                                </div>
+                            </div>
+                            <div class="col-sm-10 col-lg-3">
+                                <div class="editor-label">
+                                    @ResourceLanguaje.Resource.SecondNameTalent
+                                </div>
+                                <div class="k-textbox" style="width:100%;">
+                                    <input type="text" name="SEC_NAME" id="SEC_NAME" />
+                                </div>
+                            </div>
+                            <div class="col-sm-10 col-lg-3">
+                                <div class="editor-label">
+                                    @ResourceLanguaje.Resource.LastNameTalent
+                                </div>
+                                <div class="k-textbox" style="width:100%;">
+                                    <input type="text" name="LAS_NAME" id="LAS_NAME" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-10 col-lg-3">
+                                <div class="editor-label">
+                                    @ResourceLanguaje.Resource.MotherNameTalent
+                                </div>
+                                <div class="k-textbox" style="width:100%;">
+                                    <input type="text" name="MOT_NAME" id="MOT_NAME" />
+                                </div>
+                            </div>
+                            <div class="col-sm-10 col-lg-3">
+                                <div class="editor-label">
+                                    @ResourceLanguaje.Resource.DateBirthTalent
+                                </div>
+                                <div class="editor-field" style="width:100%;">
+                                    <input type="text" name="DATE_BIRTH" id="DATE_BIRTH" />
+                                </div>
+                            </div>
+                            <div class="col-sm-10 col-lg-3">
+                                <div class="editor-label">
+                                    DNI
+                                </div>
+                                <div class="k-textbox" style="width:100%;">
+                                    <input type="text" name="NUMB_DNI" id="NUMB_DNI" />
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div style="width:100%">
+                                <div style="width: 97%; margin:0 auto;" id="divAttackBene">
+                                    <div class="k-button" style="margin-left:10px;" onclick="adjuntar()" data-toggle="modal" data-target="#miModal">
+                                        Adjuntar
+                                    </div>
+                                    @*<input name="filesDNI" id="filesDNI" type="file" />*@
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="row">
+                            <div style="width:100%">
+                                <div style="width: 97%; margin:0 auto;" id="">
+                                    <div>
+                                        <div class="ml-auto pl-2">
+                                            <button id="submitInvoice" class="btn-wide mb-2 mr-2 btn btn-primary" type="submit">@ResourceLanguaje.Resource.BtnSave</button>
+                                            <button id="EditReset" class="btn-wide mb-2 mr-2 btn btn-link" onclick="cancel(); return false;" style=" margin: 0px 15px 0px 0px;">Cancel</button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe id="upload_targetBene" name="upload_targetBene" src="" style="width:0px;height:0px;border-width:0px;display:none; visibility:hidden;"></iframe>
+
+
+<script type="text/javascript">
+    function cancel() {
+        $("#ID_BENI_EDIT").val(0);
+        $("#divTitleBene").html('@ResourceLanguaje.Resource.New @ResourceLanguaje.Resource.BeneficiaryTalent');
+        $("#ID_KINDRED").data("kendoComboBox").value('');
+        $("#FIR_NAME").val('');
+        $("#LAS_NAME").val('');
+        $("#NUMB_DNI").val('');
+        $("#DATE_BIRTH").val('');
+        $("#SEC_NAME").val('');
+        $("#MOT_NAME").val('');
+        $("#addnewbene").hide("slow");
+        $("#newbeneficiary").show("slow");
+        $("#divListBeneficiaries").animate({ width: 'show' }, "slow");
+        
+    }
+
+    var DATE_BIRTH = $("#DATE_BIRTH").kendoDatePicker().data("kendoDatePicker");
+    DATE_BIRTH.max("@ViewBag.TODAY");
+
+    $("#files").kendoUpload({
+        localization: {
+            select: "@ResourceLanguaje.Resource.Attach"
+        },
+        upload: function (e) {
+            e.data = {
+                ID_TYPE_ATTA_BENE: ArrayFile.dataItem().ID_TYPE_ATTA_BENE,
+                KEY_ATTA_BENE: '@ViewBag.UploadFile'
+            };
+        },
+        remove: function (e) {
+            e.data = {
+                ID_TYPE_ATTA_BENE: ArrayFile.dataItem().ID_TYPE_ATTA_BENE,
+                KEY_ATTA_BENE: '@ViewBag.UploadFile',
+            };
+        },
+
+        async: {
+            saveUrl: "/AttachBeneficiary/SaveAttachBeneficiary/?ID_PERS_ENTI=" + @ViewBag.ID_PERS_ENTI +"",
+            removeUrl: "/AttachBeneficiary/RemoveAttachBeneficiary/?ID_PERS_ENTI=" + @ViewBag.ID_PERS_ENTI +"",
+        },
+        autoUpload: false
+    });
+
+
+    var ArrayFile = $("#ArrayFile").kendoComboBox({
+        dataTextField: "NAM_ATTA_BENE",
+        dataValueField: "ID_TYPE_ATTA_BENE",
+        filter: "contains",
+        index: 1,
+        autoBind: true,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Total"
+            },
+            transport: {
+                read: "/Beneficiary/ListTypeAttaBene/?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    $("#ID_KINDRED").kendoComboBox({
+        dataTextField: "NAM_KIND",
+        dataValueField: "ID_KINDRED",
+        filter: "contains",
+        autoBind: true,
+        delay: 500,
+        minLength: 0,
+        suggest: false,
+        dataSource: {
+            schema: {
+                data: "data",
+                total: "Count"
+            },
+            transport: {
+                read: "/Kindred/List?var=" + Math.random()
+            }
+        }
+    });
+
+    function mensaje(conf, msg) {
+        if (conf == 'OK') {
+            toastr.success(msg, '@ResourceLanguaje.Resource.InformationSaved');
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+            $("#divBeneficiaries").empty();
+            $("#divBeneficiaries").load("/Talent/ListBeneficiaries?id=@ViewBag.ID_PERS_ENTI&id1=1&var=" + Math.random());
+            $("#newbeneficiary").show("slow");
+        } else {
+            toastr.warning(msg, '@ResourceLanguaje.Resource.InformationMissing');
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        }
+    }
+
+
+    function uploadDone(conf, msg) {
+        closeWinModalPopUpLoad();
+
+        if (conf == 'OK') {
+            var title = '@ResourceLanguaje.Resource.InformationSaved ';
+            var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                            "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                            "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                            "<button id='btnContinues' class='k-button'>Continue</button>" +
+                            "</div></div>";
+
+            winPopUpModal(title, body, 300, 130);
+
+            $("#closebtnmodal").click(function () {
+
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+
+                $("#divBeneficiaries").empty();
+                $("#divBeneficiaries").load("/Talent/ListBeneficiaries?id=@ViewBag.ID_PERS_ENTI&id1=1&var=" + Math.random());
+
+            });
+
+            $("#btnContinues").click(function () {
+
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+
+                $("#divBeneficiaries").empty();
+                $("#divBeneficiaries").load("/Talent/ListBeneficiaries?id=@ViewBag.ID_PERS_ENTI&id1=1&var=" + Math.random());
+                $("#newbeneficiary").show("slow");
+            });
+        }
+        else {
+
+            var title = '@ResourceLanguaje.Resource.InformationMissing';
+            var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                          "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                          "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                          "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                          "</div></div>";
+
+            winPopUpModal(title, body, 300, 130);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+
+    function adjuntar() {
+        $("#modal-content").empty();
+        $("#modal-content").append('<div class="editor-label">'+
+                        'Tipo de Documento'+
+                    '</div>'+
+                    '<div class="editor-field" style="font-size:0.9em">'+
+                        '@Html.TextBox("ArrayFile")<span style="font-style: oblique;"> *Solo Extension .pdf</span>'+
+                    '</div>'+
+                    '<br />'+
+            '<input name="files" id="files" type="file" />');
+        $("#modal-footer").empty();
+        $("#modal-footer").append('<div class="modal-footer">'+
+            '<button type = "button" class= "k-button" data-dismiss="modal"> Hecho!</button>'+
+            '</div>');
+
+        $("#files").kendoUpload({
+        localization: {
+            select: "@ResourceLanguaje.Resource.Attach"
+        },
+        upload: function (e) {
+            e.data = {
+                ID_TYPE_ATTA_BENE: ArrayFile.dataItem().ID_TYPE_ATTA_BENE,
+                KEY_ATTA_BENE: '@ViewBag.UploadFile'
+            };
+        },
+        remove: function (e) {
+            e.data = {
+                ID_TYPE_ATTA_BENE: ArrayFile.dataItem().ID_TYPE_ATTA_BENE,
+                KEY_ATTA_BENE: '@ViewBag.UploadFile',
+            };
+        },
+
+        async: {
+            saveUrl: "/AttachBeneficiary/SaveAttachBeneficiary/?ID_PERS_ENTI=" + @ViewBag.ID_PERS_ENTI +"",
+            removeUrl: "/AttachBeneficiary/RemoveAttachBeneficiary/?ID_PERS_ENTI=" + @ViewBag.ID_PERS_ENTI +"",
+        },
+        autoUpload: false
+    });
+
+
+     ArrayFile = $("#ArrayFile").kendoComboBox({
+        dataTextField: "NAM_ATTA_BENE",
+        dataValueField: "ID_TYPE_ATTA_BENE",
+        filter: "contains",
+        index: 1,
+        autoBind: true,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Total"
+            },
+            transport: {
+                read: "/Beneficiary/ListTypeAttaBene/?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+    }
+
+</script>

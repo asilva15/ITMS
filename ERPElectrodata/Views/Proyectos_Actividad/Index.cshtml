@@ -1,0 +1,258 @@
+﻿@{
+    ViewBag.Title = "Actividad";
+    Layout = null;
+}
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="main-card mb-2 card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-6">
+                <div class="position-relative form-group">
+                    <label for="cboEtapaAct">Etapa</label>
+                    <input id="cboEtapaAct" type="text" />
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="position-relative form-group">
+                    <label for="txtActividad">Actividad</label>
+                    <input id="txtActividad" type="text" />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="position-relative form-group">
+                    <label for="chkEstadoActividad">Estado</label><br>
+                    <input id="chkEstadoActividad" type="checkbox" />
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 ml-auto">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-secondary btn-block" onclick="CancelarActividad();">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-primary btn-block" onclick="GuardarActividad()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    <div class="card-body">
+        <div class="tab-content">
+            <div class="tab-pane active">
+                <table id="tbActividad" class="table table-hover table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Etapa</th>
+                            <th>Actividad</th>
+                            <th>Estado</th>
+                            <th width="10">Opciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var tipo = "I";
+    $(document).ready(function () {
+        var idActividad = 0;
+        //Carga de combo etapa
+        var cboEtapaAct = $("#cboEtapaAct").kendoComboBox({
+            placeholder: "",
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proyectos_Etapa/CboListarEtapa"
+                }
+            }
+        });
+        //Lista de etapas
+        ListarActividad();
+        //Dando estilo al input
+        $("#txtActividad").kendoMaskedTextBox({
+            mask: ""
+        });
+        //Dando estilo iCheck a checkbox
+        $('#chkEstadoActividad').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+        $('#chkEstadoActividad').iCheck('check');
+    });
+
+    function GuardarActividad() {
+        var msjActividad = '';
+        var idEtapa = 0;
+        if ($("#txtActividad").val() == '') {
+            msjActividad = msjActividad + 'Actividad.'
+        }
+        if ($("#cboEtapaAct").val() != '')
+            idEtapa = $("#cboEtapaAct").val();
+        if (msjActividad == '') {
+            var url = "/Proyectos_Actividad/NuevaActividad?idEtapa=" + idEtapa +
+                "&actividad=" + $("#txtActividad").val() + "&estado=" + $("#chkEstadoActividad").iCheck('update')[0].checked;
+            if (tipo == "U")
+                url = "/Proyectos_Actividad/EditarActividad?id=" + idActividad + "&idEtapa=" + idEtapa +
+                    "&actividad=" + $("#txtActividad").val() + "&estado=" + $("#chkEstadoActividad").iCheck('update')[0].checked;
+            $.ajax({
+                type: "POST",
+                url: url,
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("La actividad ya se encuentra registrada.", "Advertencia");
+                    } else {
+                        toastr.success("Registro Actualizado", "Exito!");
+                        setTimeout(function () { location.reload(); }, 500);
+                    }
+                }
+            });
+        } else {
+            toastr.warning(msjActividad, 'Complete los siguientes campos:');
+        }
+    }
+
+    function ListarActividad() {
+        //Variable de lenguaje para tablas
+        var leng_espAct = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+        //Limpieza de Tablas
+        $("#tbActividad").dataTable().fnDestroy();
+        //Carga de Tablas
+        $('#tbActividad').DataTable({
+            order: [[1, "asc"]],
+            responsive: true,
+            dom: 'frtip',
+            select: true,
+            ajax: {
+                url: "/Proyectos_Actividad/ListarActividad",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "IdActividad"
+                },
+                {
+                    data: "Etapa"
+                },
+                {
+                    data: "Actividad"
+                },
+                {
+                    data: "Estado"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div role="group" class="btn-group-lg btn-group">' +
+                            '<button class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3" title="Editar Actividad" onclick="DetalleActividad(' + data.IdActividad + ');"> <i class="fa fa-edit" aria-hidden="true"></i></button>' +
+                            '</div>';
+                    }
+                }
+            ],
+            columnDefs: [
+                {
+                    "targets": [0],
+                    "visible": false,
+                    "searchable": false
+                }
+            ],
+            language: leng_espAct
+        });
+    }
+
+    function DetalleActividad(id) {
+        $("#lblTitulo").empty();
+        $("#lblTitulo").text("Editar actividad");
+        idActividad = id;
+        $.ajax({
+            type: "GET",
+            url: "/Proyectos_Actividad/DetalleActividad?id=" + id,
+            cache: false,
+            success: function (data) {
+                tipo = "U";
+                $.each(data, function (index, value) {
+                    // setear valores de la actividad
+                    if (value.EstadoActividad == true) {
+                        $('#chkEstadoActividad').iCheck('check');
+                    } else {
+                        $('#chkEstadoActividad').iCheck('uncheck');
+                    }
+                    $("#txtActividad").val(value.Actividad);
+                    if (value.IdEtapa != 0)
+                        $("#cboEtapaAct").data("kendoComboBox").value(value.IdEtapa);
+                });
+
+            },
+            error: function (data) {
+                toastr.danger("", "Error")
+            }
+        });
+    }
+
+    function CancelarActividad() {
+        $("#cboEtapaAct").data("kendoComboBox").value("");
+        $("#txtActividad").val("");
+        $('#chkEstadoActividad').iCheck('check');
+        tipo = "I";
+        $("lblTitulo").empty();
+        $("#lblTitulo").text("Nueva Actividad");
+    }
+</script>

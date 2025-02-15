@@ -1,0 +1,356 @@
+﻿@model ERPElectrodata.Models.REQUEST_EXPENSE
+
+@{
+    Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    .divHide {
+        display:none;
+    }
+</style>
+<div style="width:100%; display:inline-block;">
+    @using (Html.BeginForm("Create", "RequestExpense", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormNewRequest", name = "FormNewRequest", target = "ut_NewRequest" }))
+    {
+        <div class="modal-body">
+            <input type="hidden" name="HF_CONC" id="HF_CONC" value="" />
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Type
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_TYPE_DELI_SUST)
+                        @Html.ValidationMessageFor(model => model.ID_TYPE_DELI_SUST)
+                    </div>
+                </div>
+                <div class="col-sm-6">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Tickets
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_TICK)
+                        @Html.ValidationMessageFor(model => model.ID_TICK)
+                    </div>
+                </div>
+            </div>
+            <div class="divHide" id="divViatical">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.NumberDays
+                        </div>
+                        <div style="margin-top:0px;">
+                            @Html.EditorFor(model => model.NUM_DAYS)
+                            @Html.ValidationMessageFor(model => model.NUM_DAYS)
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.DepartureDate
+                        </div>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.DAT_DEPA)
+                            @Html.ValidationMessageFor(model => model.DAT_DEPA)
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row" id="divCurrency">
+
+                <div class="col-sm-6">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Currency
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.CURRENCY)
+                        @Html.ValidationMessageFor(model => model.CURRENCY)
+                    </div>
+                </div>
+
+                <div class="col-sm-6" id="divAmount">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Amount
+                    </div>
+                    <div style="margin-top:0px;">
+                        @Html.EditorFor(model => model.AMOUNT)
+                        @Html.ValidationMessageFor(model => model.AMOUNT)
+                    </div>
+                </div>
+                <div class="col-sm-6 divHide" id="divDestination">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Destination
+                    </div>
+                    <div class="k-textbox">
+                        @Html.EditorFor(model => model.DESTINATION)
+                        @Html.ValidationMessageFor(model => model.DESTINATION)
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 divHide" id="divGridTypeVia">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Concepts
+                    </div>
+                    <div>
+                        <div id="gridTypeViatical"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12" id="divJustification">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Justification
+                    </div>
+                    <div class="k-textbox" style="width:100%;">
+                        <input type="text" name="JUSTIFICATION" id="JUSTIFICATION" />
+                    </div>
+                </div>
+            </div>
+        </div>@*----Fin Body----*@
+
+        @*---------------------------Footer--------------------------------------------------------*@
+        <div style='width:95%; margin:0 auto; text-align:right;'>
+            <button id="submitRequest" class="k-button">Guardar</button>
+        </div>
+        <iframe id="upload_target" name="upload_target" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+    }
+    <iframe id="ut_NewRequest" name="ut_NewRequest" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+</div>
+
+<script type="text/javascript">
+    var idx = 0;
+    var ids = '';
+    var c = 0;
+    $(document).ready(function () {
+        var alt = 250;
+        var ID_TYPE_DELI_SUST = $("#ID_TYPE_DELI_SUST").kendoComboBox({
+            dataTextField: "NAM_TYPE_DELI_SUST",
+            dataValueField: "ID_TYPE_DELI_SUST",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            index:2,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeDeliSust/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_TYPE_DELI_SUST = $("#ID_TYPE_DELI_SUST").data("kendoComboBox");
+
+        //viaticos primera vez
+        $("#divViatical").removeClass("divHide");
+        $("#divDestination").removeClass("divHide");
+        $("#divGridTypeVia").removeClass("divHide");
+        $("#divAmount").addClass("divHide");
+
+        ID_TYPE_DELI_SUST.bind("change", function (e) {
+            if (ID_TYPE_DELI_SUST.dataItem().ID_TYPE_DELI_SUST == 2) {
+                //$("#divViatical").css("display", "block");
+                $("#divViatical").removeClass("divHide");
+                $("#divDestination").removeClass("divHide");
+                //$("#divDestination").css("display", "block");
+                $("#divGridTypeVia").removeClass("divHide");
+                //$("#divGridTypeVia").css("display", "block");
+                //$("#divAmount").css("display", "none");
+                $("#divAmount").addClass("divHide");
+                //$("#dlgF").height(450);
+                //$("#divJustification").attr('class', 'divFondoDos');
+                //$("#divCurrency").attr("class", "divFondoUno");
+            }
+            else
+            {
+                //$("#divViatical").css("display", "none");
+                $("#divViatical").addClass("divHide");
+                $("#divDestination").addClass("divHide");
+                //$("#divDestination").css("display", "none");
+                //$("#divGridTypeVia").css("display", "none");
+                $("#divGridTypeVia").addClass("divHide");
+                //$("#divAmount").css("display", "block");
+                $("#divAmount").removeClass("divHide");
+                //$("#dlgF").height(alt);
+                //$("#divJustification").attr('class', 'divFondoUno');
+                //$("#divCurrency").attr("class", "divFondoDos");
+            }
+            //recentrarForm();
+        });
+
+        var ID_TICK = $("#ID_TICK").kendoComboBox({
+            dataTextField: "SELECTVAL",
+            dataValueField: "ID_TICK",
+            template: '<div style="width:100%; display:inline-block;">' +
+                '# if(ID_DOCU_SALE != 0) { # <div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; "><b>${COD_TICK}</b> - ${TYPE_OP}: ${NUM_OP}</div> # } ' +
+                ' else { # <div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; "><b>${COD_TICK}</b></div> # } #' +
+                '<div style="width:100%; float:left; text-transform:capitalize;font-size:.9em; margin-top:-2px;">Intermediary customer: ${INT_CIA}</div>' +
+                '<div style="width:100%; float:left; text-transform:capitalize;font-size:.9em; margin-top:-4px;">Final customer: ${FIN_CIA}</div>' +
+                '</div>',
+                //'<div style="width:100%; display:inline-block;">' +
+                //'<div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; "><b>${COD_TICK}</b> # if(ID_DOCU_SALE != 0) { # - ${TYPE_OP}: ${NUM_OP} # } #</div>' +
+                //'<div style="width:100%; float:left; text-transform:capitalize;font-size:.9em; margin-top:-2px;">Intermediary customer: ${INT_CIA}</div>' +
+                //'<div style="width:100%; float:left; text-transform:capitalize;font-size:.9em; margin-top:-4px;">Final customer: ${FIN_CIA}</div>' +
+                //'</div>',
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 2, // Aumenta el valor si es apropiado
+            suggest: true,
+            dataSource: {
+                serverFiltering: false, // Habilita solo si es necesario
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: {
+                        url: "/Ticket/ListTicketsActive",
+                        dataType: "json"
+                    }
+                }
+            }
+        });
+        var ID_TICK = $("#ID_TICK").data("kendoComboBox");
+        ID_TICK.list.width(350);
+
+
+        var moneda = [{ text: "@ResourceLanguaje.Resource.PeruvianNuevoSol", value: "MN" }, { text: "@ResourceLanguaje.Resource.DollarAmerican", value: "ME" }];
+        var CURRENCY = $("#CURRENCY").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            dataValueField: "value",
+            suggest: true,
+            dataSource: moneda,
+            index: 0,
+        }).data("kendoComboBox");
+
+        $("#AMOUNT").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#NUM_DAYS").kendoNumericTextBox({
+            min: 1,
+            decimals: 0,
+        });
+
+        var DAT_DEPA = $("#DAT_DEPA").kendoDatePicker().data("kendoDatePicker");
+
+        window.ds = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/RequestViatical/List?var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            pageSize: 10,
+            batch: true,
+            schema: {
+                data: "Data",
+                total: "Count",
+                id: "ID_TYPE_VIAT",
+                fields: {
+                    ID_TYPE_VIAT: { type: "number", editable: false, nullable: true },
+                    NAM_TYPE_VIAT: { type: "string", editable: false, nullable: true },
+                    AMOUNT: { type: "number" }
+                }
+            }
+        });
+
+        $("#gridTypeViatical").kendoGrid({
+            dataSource: window.ds,
+            //scrollable: false,
+            editable: true,
+            resizable: false,
+            columns: [
+                {
+                    field: "NAM_TYPE_VIAT", title: "Type",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px;"
+                    },
+                    footerTemplate: "<div style='text-align:right; width:100%;'>Total:</div>"
+                },
+                {
+                    field: "AMOUNT", title: "Amount", format: "{0:N2}", width: 80,
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px;"
+                    },
+                    footerTemplate: "<div style='text-align:right; width:100%;'>#=window.calc()#</div>"
+                }
+            ],
+            save: function (e) {
+                e.sender.refresh();
+            },
+            edit: function (e) {
+                $('input[name *= "NAM_TYPE_VIAT"]').attr("disabled", true);
+                //$('input[name *= "AMOUNT"]').attr("onfocus", function (p) {
+                //    console.log(p);
+                //    console.log(e);
+                //});
+            }
+        });
+    });
+
+    function calc() {
+        // assume this to be dynamically determined
+        var field = "AMOUNT";
+        var idvia = "ID_TYPE_VIAT";
+        // assume this to be dynamically determined
+        var dataSource = window.ds;
+        // some custom calc logic
+        var newValue = 0;
+        $("#HF_CONC").val('');
+        var ctd = 1;
+        $.each(dataSource.data(), function (index, model) {
+            newValue += model.get(field);
+            var CONC = $("#HF_CONC").val();
+            if (model.get(field) > 0) {
+                if (ctd == 1) {
+                    $("#HF_CONC").val(model.get(idvia) + "|" + model.get(field));
+                }
+                else { $("#HF_CONC").val(CONC + '*' + model.get(idvia) + "|" + model.get(field)); }
+                ctd = ctd + 1;
+            }
+
+        });
+
+        return newValue.toFixed(2);
+    }
+</script>
+
+<script type="text/javascript">
+    
+    function uploadDoneNR(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success("@ResourceLanguaje.Resource.PettyCashMsn00", "@ResourceLanguaje.Resource.InformationSaved");
+            location.href = "/DeliverySustain";
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            
+        }
+        else {
+            toastr.warning(msnErr,"Mensaje");
+        }
+    }
+</script>

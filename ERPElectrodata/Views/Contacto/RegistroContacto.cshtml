@@ -1,0 +1,159 @@
+﻿@{
+    ViewBag.Title = "RegistroContacto";
+    Layout = null;
+}
+
+<div class="alert alert-danger alert-dismissable" id="mensajeAlertaContacto">
+    <strong>¡Alerta!</strong> Verifique los datos porfavor.
+</div>
+<div class="alert alert-warning alert-dismissable" id="mensajeAlertaContactoDoble">
+    <strong>¡Cuidado!</strong> Este Contacto ya existe.
+</div>
+<div class="alert alert-success alert-dismissable" id="mensajeCreaCorrecto">
+    <strong>¡Bien hecho!</strong> El contacto se ha creado correctamente.
+</div>
+
+<div style="width:100%">
+    <div class="form-row">
+        <div class="col-md-4">
+            <div>Compañía <b>(*)</b></div>
+            <input id="txtCompania" name="txtCompania" class="form-control input-sm" type="text" disabled="disabled" />
+        </div>
+        <div class="col-md-4">
+            Nombres <b>(*)</b>
+            <input id="txtFirName" name="txtFirName" class="form-control input-sm" type="text" />
+        </div>
+        <div class="col-md-4">
+            Apellidos <b>(*)</b>
+            <input id="txtLasName" name="txtLasName" class="form-control input-sm" type="text" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-4">
+            <div>Sexo <b>(*)</b></div>
+            @*<select id="cbSexo" class="form-control input-sm select2" type="text" style="width:100%" />*@
+            <select class="form-control select2" style="width: 100%;" id="cbSexo">
+                <option value="M">Masculino</option>
+                <option value="F">Femenino</option>
+            </select>
+        </div>
+        <div class="col-md-4">
+            Celular
+            <input id="txtCelPers" name="txtCelPers" class="form-control input-sm" type="text" />
+        </div>
+        <div class="col-md-4">
+            RPM
+            <input id="txtRpmPers" name="txtRpmPers" class="form-control input-sm" type="text" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-4">
+            Extensión
+            <input id="txtExtPers" name="txtExtPers" class="form-control input-sm" type="text" />
+        </div>
+        <div class="col-md-4">
+            Correo Personal <b>(*)</b>
+            <input id="txtEmaPers" name="txtEmaPers" class="form-control input-sm" type="email" />
+        </div>
+        <div class="col-md-4">
+            Cargo
+            <input id="txtCarPers" name="txtCarPers" class="form-control input-sm" type="text" />
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-12">
+            Observaciones
+            <input id="txtObservacion" name="txtObservacion" class="form-control input-sm" type="text" />
+        </div>        
+    </div>
+    <div class="form-row">
+        <div class="col-md-8">
+            &nbsp;
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+            <input id="btnLimpiar" name="btnLimpiar" class="btn btn-block btn-light btn-sm" type="button" value="Limpiar" onclick="LimpiarCamposNuevoContacto();" />
+        </div>
+        <div class="col-md-2">
+            &nbsp;
+            <button id="btnGuardarNuevoContacto" name="btnGuardarNuevoContacto" class="btn btn-block btn-primary btn-sm" type="button" onclick="GuardarNuevoContacto();"><i class="fa fa-save"></i> Guardar</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        // Oculta el mensaje de Alerta al crear un nuevo contacto
+        $("#mensajeAlertaContacto").hide();
+        $("#mensajeAlertaContactoDoble").hide();
+        $("#mensajeCreaCorrecto").hide();
+
+        // Carga la compañía para la creación del nuevo contacto
+        CargarCompania();
+    });
+    
+    function CargarCompania() {
+        $.ajax({
+            url: "/Contacto/CargarCompania/",
+            data: "IdDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp != "ERROR") {
+                    $("#txtCompania").val(resp);
+                }
+            }
+        });
+    }
+
+    function GuardarNuevoContacto(id) {
+            $.ajax({
+                url: "/Contacto/AgregarNuevoContacto/",
+                data: "IdDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                      "&FirName=" + $("#txtFirName").val() +
+                      "&LasName=" + $("#txtLasName").val() +
+                      "&SexEnti=" + $("#cbSexo").val() +
+                      "&CelPers=" + $("#txtCelPers").val() +
+                      "&RpmPers=" + $("#txtRpmPers").val() +
+                      "&ExtPers=" + $("#txtExtPers").val() +
+                      "&CarPers=" + $("#txtCarPers").val() +
+                      "&EmaPers=" + $("#txtEmaPers").val() +
+                      "&Observacion=" + $("#txtObservacion").val() +
+                      "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        // Contacto creado
+                        toastr.success("El contacto se registró correctamente.", "¡Bien hecho!");
+                        LimpiarCamposNuevoContacto();
+                    }
+                    else
+                        if(resp == "1"){ //Campos vacíos
+                            toastr.warning("Verifique los datos porfavor.", "¡Alerta!");
+                        } else
+                            if(resp == "2"){ //Repetido
+                                toastr.warning("El contacto ya existe.", "¡Alerta!");
+                            }
+                }
+            });
+    }
+
+    function LimpiarCamposNuevoContacto() {
+        $("#txtFirName").val("");
+        $("#txtLasName").val("");
+        $("#txtCelPers").val("");
+        $("#txtRpmPers").val("");
+        $("#txtExtPers").val("");
+        $("#txtEmaPers").val("");
+        $("#txtCarPers").val("");
+        $("#cbSexo").val("M");
+        $("#txtObservacion").val("");
+    }
+</script>

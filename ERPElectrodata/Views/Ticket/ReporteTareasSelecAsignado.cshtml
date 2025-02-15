@@ -1,0 +1,124 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+<style>
+    .k-button.k-upload-selected {
+        display: none !important
+    }
+
+    .k-button.k-clear-selected {
+        display: none !important
+    }
+</style>
+
+<input type="hidden" name="IdTareaDetalle" id="IdTareaDetalle" value="@ViewBag.IdTareaDetalle" />
+
+<fieldset>
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="editor-label">
+                Seleccionar colaborador <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="Colaborador" type="text" name="Colaborador">
+            </div>
+        </div>
+    </div>
+    <br>
+
+    <div class="form-row">
+        <div class="col-md-12"></div>
+        <div class="col-md-6">
+            <button id="cancelColaborador" class="btn btn-light btn-block">Cancelar</button>
+        </div>
+        <div class="col-md-6">
+            <button id="GuardarColaborador" class="btn btn-primary btn-block">Guardar</button>
+        </div>
+    </div>
+
+</fieldset>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var idQueu = @ViewBag.AreaResponsable;
+        
+
+        $("#Colaborador").kendoComboBox({
+            autoBind: true,
+            dataTextField: "ASSI",
+            dataValueField: "ID_PERS_ENTI",
+            placeholder: "Seleccione el colaborador a asginar",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: {
+                        url: "/Ticket/AsignadoPorCola",
+                        data: { idQueu: idQueu, var: Math.random() }
+                    }
+                }
+            }
+        }).data("kendoComboBox");
+
+        var Colaborador = $("#Colaborador").data("kendoComboBox");
+        Colaborador.value(@ViewBag.Colaborador);
+
+
+
+        $("#GuardarColaborador").click(function () {
+            var idPersEnti = $("#Colaborador").data("kendoComboBox").value();
+            var idTareaDetalle = $("#IdTareaDetalle").val();
+
+            var params = {
+                ID_PERS_ENTI: idPersEnti,
+                IdTareaDetalle: idTareaDetalle
+            };
+
+            $.ajax({
+                url: "/Ticket/GuardarColaborador",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "JSON",
+                success: function (resp) {
+                    uploadDoneColaborador("OK");
+                    ListarReporteTareas();
+                },
+                error: function (source) {
+                    alert("Debe seleccionar un colaborador asignado");
+                }
+            });
+        });
+
+        $("#cancelColaborador").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+
+        function uploadDoneColaborador(msg, msgerror) {
+
+            if (msg == "OK") {
+                toastr.success(msgerror, "Colaborador Guardado");
+
+                setTimeout(function () {
+                    $("[data-dismiss=modal]").trigger({ type: "click" });
+                }, 500);
+            }
+            else {
+
+                toastr.warning(msgerror, "Información Incompleta");
+            }
+        }
+
+    });
+
+</script>

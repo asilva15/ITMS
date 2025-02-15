@@ -1,0 +1,319 @@
+﻿@{
+    Layout = null;
+    var idsSeleccionados = ViewData["idsSeleccionados"] as string;
+    var cantidad = ViewData["cantidad"] as int?;
+}
+
+
+<style>
+
+    #textFecha {
+        cursor: help;
+    }
+
+    #Validacion,
+    #textFecha {
+        display: inline;
+    }
+
+
+    .editor-field input {
+        margin-bottom: 10px;
+    }
+
+    .text-center {
+        margin-top: 10px;
+    }
+
+    .fondo-suave {
+        background-color: #f0f0f0;
+        padding: 3px;
+        border-radius: 5px;
+        font-size: 11px;
+    }
+
+</style>
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Renovar</title>
+</head>
+<body>
+    <input type="checkbox" id="RenovacionMasiva" name="RenovacionMasiva" />
+    <p id="textFecha" title="Establece renovación masiva para todos los registros del programa actual, tomando en cuenta como registro pre determinado el nombre del programa.">Renovación Masiva</p>
+    <hr />
+
+    <div class="form-row">
+
+        <div class="col-md-4">
+            <div class="editor-label">Proveedor <b style="color:red">(*)</b></div>
+            <input name="IdProveedor" id="IdProveedor" />
+        </div>
+
+        <div class="col-md-4">
+            <div class="editor-label">Fecha Adquisición <b style="color:red">(*)</b></div>
+            <input name="FechaComprav" id="FechaComprav" />
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="editor-label">Costo <b style="color:red">(*)</b></div>
+            <div class="k-textbox" style="width:100%">
+                <input type="text" name="Costo" id="Costo" />
+                <label>  <input type="radio" name="TipoMoneda" value="S" checked /> S/.</label>
+                <label><input type="radio" name="TipoMoneda" value="D" /> $</label>
+            </div>
+            <p class="fondo-suave">NO INCLUYE IGV</p>
+        </div>
+
+        <div class="col-md-4">
+            <div class="editor-label">Cantidad</div>
+            <input name="LicenciasDisponibles" title="Si la cantidad es mayor al total actual de licencias registradas por proveedor y version, se añadiran nuevas licencias" id="LicenciasDisponibles" value="@cantidad" style="cursor: help;" />
+        </div>
+
+
+
+    </div>
+
+    <div class="form-row">
+
+        <div class="col-md-4">
+            <div class="editor-label">Fecha Activación <b id="valFecha" style="color:red">(*)</b> <i id="nuevo" class="fas fa-plus-circle"></i> </div>
+            <input name="FechaActivacion" id="FechaActivacion" />
+        </div>
+
+        <div class="col-md-4">
+            <div class="editor-label">Periodo de caducidad <b style="color:red">(*)</b></div>
+            <input name="IdTipoLicencia" id="IdTipoLicencia" />
+        </div>
+
+        <div class="col-md-4">
+            <div class="editor-label">Solped  <b style="color:red">(*)</b><i id="nuevo" class="fas fa-plus-circle"></i> </div>
+            <input name="Solped" id="Solped" />
+        </div>
+
+    </div>
+
+
+    <div class="form-row">
+
+        <div class="col-md-4">
+            <div class="editor-label">Tipo de Licencia <b style="color:red">(*)</b><i id="nuevo" class="fas fa-plus-circle"></i> </div>
+            <input name="TipoLicencia" id="TipoLicencia" />
+        </div>
+
+    </div>
+
+    <div class="form-row">
+        <div class="col-md-12 text-right">
+            <button id="btnRenovarSend" class="btn btn-hover-shine btn-primary m-2"><i class="fa fa-retweet"></i> Renovar</button>
+        </div>
+    </div>
+
+    <div class="alert alert-primary" role="alert" id="aviso">
+        Los campos que incluyen el icono <i id='nuevo' class='fas fa-plus-circle'></i> se aplican exclusivamente a nuevos registros. Los campos sin un icono asociado están destinados tanto a la renovación como a la creación de nuevas licencias.
+    </div>
+
+</body>
+</html>
+
+<script type="text/javascript">
+
+    var cantidadInicial = @cantidad;
+    var registro = 0;
+
+    $(document).ready(function () {
+
+        $("#IdProveedor").kendoComboBox({
+            dataTextField: "NombreProveedor",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proveedor/Listar?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#RenovacionMasiva").on("change", function () {
+            
+            if ($(this).is(":checked")) {
+
+                $("#LicenciasDisponibles").closest(".col-md-4").hide();
+                $("#FechaActivacion").closest(".col-md-4").hide();
+                $("#TipoLicencia").closest(".col-md-4").hide();
+                $("#Solped").closest(".col-md-4").hide();
+                $("#aviso").hide();
+
+                $("#IdProveedor").closest(".col-md-4").show();
+                $("#IdTipoLicencia").closest(".col-md-4").show();
+            } else {
+
+                $("#LicenciasDisponibles").data("kendoNumericTextBox").value(cantidadInicial);
+
+                $("#LicenciasDisponibles").closest(".col-md-4").show();
+                $("#IdTipoLicencia").closest(".col-md-4").hide();
+                $("#IdProveedor").closest(".col-md-4").hide();
+            }
+        });
+
+
+        function toggleCamposSegunCantidad() {
+            var cantidadActual = parseInt($("#LicenciasDisponibles").val());
+
+            if (cantidadActual > cantidadInicial) {
+
+                $("#FechaActivacion").closest(".col-md-4").show();
+                $("#TipoLicencia").closest(".col-md-4").show();
+                $("#Solped").closest(".col-md-4").show();
+                $("#IdTipoLicencia").closest(".col-md-4").show();
+                $("#aviso").show();
+            } else {
+
+                $("#FechaActivacion").closest(".col-md-4").hide();
+                $("#TipoLicencia").closest(".col-md-4").hide();
+                $("#Solped").closest(".col-md-4").hide();
+                $("#IdTipoLicencia").closest(".col-md-4").hide();
+                $("#IdProveedor").closest(".col-md-4").hide();
+                $("#aviso").hide();
+            }
+        }
+
+        $("#LicenciasDisponibles").on("change", function () {
+            toggleCamposSegunCantidad();
+        });
+
+        toggleCamposSegunCantidad();
+
+
+        $("#Solped").kendoComboBox({
+            dataValueField: "Solped",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Programa/ListarOP"
+                }
+            }
+        });
+
+
+        $("#IdTipoLicencia").kendoComboBox({
+            dataTextField: "NombrePeriodo",
+            dataValueField: "IdPeriodo",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ProgramaLicencia/ListarTipoLicencia?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#TipoLicencia").kendoComboBox({
+            dataSource: ["Volumen", "Unitario"],
+            change: function (e) {
+                console.log("Seleccionado: " + this.value());
+                if (this.value() === "Unitario") {
+                    $("#FechaActivacion").data("kendoDateTimePicker").enable(false);
+                    $("#valFecha").hide();
+                } else {
+                    $("#FechaActivacion").data("kendoDateTimePicker").enable(true);
+                    $("#valFecha").show();
+                }
+            },
+
+            dataBound: function (e) {
+                $(this.ul[0]).find("li").each(function (index) {
+                    var text = $(this).text();
+                    var tooltipText = obtenerTextoTooltip(text);
+                    $(this).attr({
+                        "title": tooltipText,
+                        "style": "cursor: help;"
+                    });
+                });
+            }
+
+        });
+
+        function obtenerTextoTooltip(valor) {
+            if (valor === "Volumen") {
+                return "La fecha de Activación es igual para todas las licencias registradas";
+            } else if (valor === "Unitario") {
+                return "Opción para activar la licencia posterior al registro";
+            }
+            return "Información por defecto";
+        }
+
+
+
+        $("#btnRenovarSend").on("click", function () {
+
+            var idsSeleccionados = "@idsSeleccionados";
+            var cantidadEnvio = parseInt($("#LicenciasDisponibles").val());
+            registros = Math.abs(cantidadEnvio - cantidadInicial);
+
+
+            $.ajax({
+                url: '@Url.Action("RenovarLicencia", "ProgramaLicencia")',
+                type: 'POST',
+                data: {
+                    idsProgramaLicencia: idsSeleccionados,
+                    registro: registros,
+                    FechaComprav: $("#FechaComprav").val(),
+                    FechaActivacion: $("#FechaActivacion").val(),
+                    Costo : $("#Costo").val(),
+                    Solped : $("#Solped").data("kendoComboBox").value(),
+                    IdTipoLicencia : $("#IdTipoLicencia").data("kendoComboBox").value(),
+                    IdProveedor: $("#IdProveedor").data("kendoComboBox").value(),
+                    TipoLicencia: $("#TipoLicencia").data("kendoComboBox").value(),
+                    TipoMoneda: $("input[name='TipoMoneda']:checked").val(),
+                    renovacionMasiva: $("#RenovacionMasiva").is(":checked")
+                },
+                success: function (source) {
+
+                    if (source.error == false) {
+                        toastr.success("Se renovó correctamente la licencia", "OK");
+                        $(".modal-dialog .close").click();
+                        ObtenerDatosLicencia();
+                        actualizarDatosLicenciaGeneral();
+                    } else {
+                        toastr.error("Error al renovar licencia, validar el registro correcto de los datos", "Error");
+                    }
+                },
+                error: function () {
+                }
+            });
+        });
+
+        $("#LicenciasDisponibles").kendoNumericTextBox({
+            min: @cantidad,
+            decimals: 0,
+            format: '#'
+        });
+
+        var FechaComprav = $("#FechaComprav").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaActivacion = $("#FechaActivacion").kendoDateTimePicker().data("kendoDateTimePicker");
+
+    });
+</script>

@@ -1,0 +1,220 @@
+﻿@{
+    ViewBag.Title = "RenovacionOP";
+    Layout = null;
+}
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<style>
+    #tamModalMsjError {
+        width:26% !important;
+        margin:10% auto;
+    }
+</style>
+<div style='padding:10px 0 10px 0;font-size:14px;'><b>¿Estás seguro de renovar la @ViewBag.TipoOP @ViewBag.OP ? </b></div>
+<br />
+<label>
+    <input type="checkbox" value="" id="chkNoAplicaOP" style="float:left;" checked="checked"/> 
+        &nbsp; No aplica nueva OP, debido a que no cumple el plazo inicial del soporte. Volverá a visualizarse el siguiente año.
+</label>
+
+<div id="chkVisualizar">
+    <label>
+        <input type="checkbox" value="" style="float:left;" id="chkVisualizarOP" />
+        &nbsp; Volverá a visualizarse el siguiente año.
+    </label>
+</div>
+
+<div class="form-group-sm" id="OPRenovacion">
+    <div class="col-md-5">
+        <span style=""><b>OP de Renovación</b></span>
+    </div>
+    <div class="col-md-7">
+        <select id="cbOPRenovacion" class="form-control input-sm select2" type="text" style="width:100%"></select>
+    </div>
+</div>
+<div class="form-group"></div>
+<div class="form-row">
+    <div class="col-md-6">
+        <br />
+    </div>
+    <div class="col-md-3" style="text-align:right">
+        <span id="btnRenovar" class='btn btn-primary btn-primary' onclick="renovarOP();">RENOVAR</span>
+    </div>
+    <div class="col-md-3" style="text-align:right">
+        <span id="btnCancelar" class='btn btn-primary btn-primary'>CANCELAR</span>
+    </div>
+</div>
+
+<div id="mensajeE"></div>
+
+
+<script>
+    $(document).ready(function () {
+        $('#chkVisualizar').hide();
+        $('#OPRenovacion').hide();
+
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+
+        $('#chkNoAplicaOP').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                //$("#hdnTkAutomatico").val(1);
+                $('#chkVisualizar').hide("hide");
+                $('#OPRenovacion').hide("hide");
+            } else {
+                ////$("#hdnTkAutomatico").val(0);
+                $('#chkVisualizar').show("show");
+                $('#OPRenovacion').show("show");
+            }
+        });
+
+        $("#cbOPRenovacion").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumResultsForSearch: 1,
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/OrderForm/ListarOPPorRenovar",
+                dataType: 'json',
+                //type: "POST",
+                //params: {
+                //    contentType: 'application/json; charset=utf-8'
+                //},
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+
+        $("#btnCancelar").click(function () {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+    });
+
+    function renovarOP() {
+        if ($("#chkNoAplicaOP").is(':checked')) { // primer combo checkeado, Actualizar los 365 dias
+            $.ajax({
+                url: "/OrderForm/actualizacionOP/",
+                data: "IdDocuSale=" + @ViewBag.Id +
+                      "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == 'OK') {
+                        setTimeout(function() {
+                            cargarListaProyectos().fadeOut(1000);
+                        },1000);
+                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                        toastr.success("Se ha actualizado la OP","");
+                        //mostrarMensaje("Se ha actualizado la OP");
+                    }
+                    else
+                    {
+                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                        toastr.error("No se ha actualizado la OP", "");
+                        //mostrarMensaje("No se ha actualizado la OP");
+                    }
+                }
+            });
+        } else {
+            if ($("#chkVisualizarOP").is(':checked')) { //Renovacion parcial
+                $.ajax({
+                    url: "/OrderForm/renovacionParcial/",
+                    data: "IdDocuSale=" + @ViewBag.Id +
+                          "&IdOPRenovacion=" + $("#cbOPRenovacion").val() +
+                          "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == 'OK') {
+                            setTimeout(function() {
+                            cargarListaProyectos().fadeOut(1000);
+                            }, 1000);
+
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            toastr.success("Se ha renovado la OP", "");
+                            //mostrarMensaje("Se ha renovado la OP");
+                        }
+                        else {
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            toastr.error("No se ha renovado la OP", "");
+                            //mostrarMensaje("No se ha renovado la OP");
+                        }
+                    }
+                });
+            }
+            else //Renovacion total
+            {
+                $.ajax({
+                    url: "/OrderForm/renovacionTotal/",
+                    data: "IdDocuSale=" + @ViewBag.Id +
+                          "&IdOPRenovacion=" + $("#cbOPRenovacion").val() + 
+                          "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == 'OK') {
+                            setTimeout(function() {
+                                cargarListaProyectos().fadeOut(1000);
+                            }, 1000);
+
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            toastr.success("Se ha renovado la OP", "");
+                            //mostrarMensaje("Se ha renovado la OP");
+                        }
+                        else {
+
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            toastr.error("No se ha renovado la OP", "");
+                            //mostrarMensaje("No se ha renovado la OP");
+                        }
+                    }
+                });
+            }
+        }
+    }
+
+    function mostrarMensaje(mensaje,opcion) {
+        $("#mensajes").empty()
+        $("#mensajes").append("<div class='modal fade' id='MensajeError' tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>" +
+                                    "<div class='modal-dialog' id='tamModalMsjError'>" +
+                                        "<div class='modal-content'>" +
+                                             "<div class='modal-header'>" +
+                                                "<button type='button' class='close' data-dismiss='modal' onclick='cerrar();'><span aria-hidden='true'>&times;</span><span class='sr-only'>Close</span></button>" +
+                                                "<h4 class='modal-title' id='myModalLabel'>Alerta</h4>" +
+                                             "</div>" +
+                                             "<div class='modal-body'>" +
+                                                 "<div class='editor-label'>" +
+                                                    mensaje +
+                                                 "</div>" +
+                                             "</div>" +
+                                             "<div class='modal-footer'>" +
+                                                "<button id='btnCerrarMensajeError' type='button' class='k-button' data-dismiss='modal'>Cerrar</button>" +
+                                             "</div>" +
+                                        "</div>" +
+                                    "</div>" +
+                               "</div>");
+        if (opcion == 2 || opcion == 3)
+        {
+            $("#btnCerrarMensajeError").click(function () {
+                $('#divRenovacionOP').load('/OrderForm/RenovacionOP/' + @ViewBag.Id);
+            });
+        }
+        
+    }
+</script>

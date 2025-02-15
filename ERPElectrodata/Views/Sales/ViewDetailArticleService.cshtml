@@ -1,0 +1,206 @@
+﻿@{
+    Layout = null;
+}
+<style type="text/css">
+    .MarcoContent {
+        /*margin-left:8.8%;*/
+        width: 90.8%;
+        height: 100%;
+        float: left;
+        /*margin: 0 auto;*/
+    }
+    .HeaderDetailOP {
+        -moz-border-radius: 4px 4px 0 0;
+        -webkit-border-radius: 4px 4px 0 0;
+        border-radius: 4px 4px 0 0;
+        width: 100%;
+        height: 20px;
+        background-color: black;
+        border: 1px solid black;
+    }
+    .ContentDetailOP {
+        display:inline-block;
+        width: 100%;
+        height: 100%;
+        /*background-color: white;*/
+        border-left: 1px solid #b0b0b0;
+        border-right: 1px solid #b0b0b0;
+        border-bottom: 1px solid #b0b0b0;
+        -moz-border-radius: 0 0 4px 4px;
+        -webkit-border-radius: 0 0 4px 4px;
+        border-radius: 0 0 4px 4px;
+    }
+    .RowHeaderDetailOP {
+        float: left;
+        height: 100%;
+        text-align: center;
+        border-right: 1px solid black;
+        background-color: black;
+        color: white;
+    }
+    .RowEndHeaderDetailOP {
+        float: left;
+        height: 100%;
+        text-align: center;
+        background-color: black;
+        color: white;
+    }
+    .RowContentDetailOP {
+        float: left;
+        padding-bottom: 5px;
+        text-align: center;
+        border-right: 1px solid #b0b0b0;
+        display: inline-block;
+        height: 100%;
+        min-height: 58px;
+    }
+    .RowEndContentDetailOP {
+        float: left;
+        padding-bottom: 5px;
+        padding-left: 1%;
+        text-align: justify;
+        height: 100%;
+        position: relative;
+        min-height: 58px;
+    }
+</style>
+
+<div style="width:100%; display:inline-block;">
+    <div style="width:8.8%;height:100%;float:left;" id="divSpace">&nbsp;</div>
+    <div class="MarcoContent" id="divDetailsContent">
+        <div class="HeaderDetailOP">
+            <div class="RowHeaderDetailOP" style="width:5%;">Item</div>
+            <div class="RowHeaderDetailOP" style="width:20%;">@ResourceLanguaje.Resource.Code</div>
+            <div class="RowHeaderDetailOP" style="width:5%;">@ResourceLanguaje.Resource.QuantityCut</div>
+            <div class="RowEndHeaderDetailOP" style="width:69%;">@ResourceLanguaje.Resource.ProductService</div>
+        </div>
+        <div class="ContentDetailOP" id="divContentDetailOP_@ViewBag.ID_DOCU_SALE">
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var data;
+    $(document).ready(function () {
+        $.ajax({
+            url: "/Sales/ListDetailsOP/@ViewBag.ID_DOCU_SALE",
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showContentDetail();
+            },
+            error: function (source) {
+                alert("ERROR");
+            }
+        });
+        if ('@ViewBag.Procedencia' == 'detail') {
+            $("#divSpace").css("width", "2%");
+            $("#divDetailsContent").css("width", "96%");
+        }
+    });
+
+    function showContentDetail() {
+        var col = '#ffffff';
+        $.each(data['Data'], function (index, value) {
+            ide = (data['Data'][index]['ID_DETA_DOCU_SALE']);
+
+            $("#divContentDetailOP_@ViewBag.ID_DOCU_SALE").append(
+                '<div id="divNro_' + ide + '" onmouseover="onmouseoverDetail(\'' + ide + '\')" onmouseout="onmouseoutDetail(\'' + ide + '\')" class="RowContentDetailOP" style="width: 5%;">' + String(index + 1) + '</div>' +
+                '<div id="divCode_' + ide + '" onmouseover="onmouseoverDetail(\'' + ide + '\')" onmouseout="onmouseoutDetail(\'' + ide + '\')" class="RowContentDetailOP" style="width: 20%;">' + (data['Data'][index]['CODE']) + '</div>' +
+                '<div id="divQty_' + ide + '" onmouseover="onmouseoverDetail(\'' + ide + '\')" onmouseout="onmouseoutDetail(\'' + ide + '\')" class="RowContentDetailOP" style="width: 5%;">' + (data['Data'][index]['QUANTITY']) + '</div>' +
+                '<div id="divDesc_' + ide + '" onmouseover="onmouseoverDetail(\'' + ide + '\')" onmouseout="onmouseoutDetail(\'' + ide + '\')" class="RowEndContentDetailOP" style="width: 68.6%;">' +
+                    '<div style="width:80%;">' + (data['Data'][index]['DESC_DETA']) + '</div>' +
+                '</div>');
+
+            if (data['Data'][index]['ID_STAT_DOCU_SALE'] == 3) {
+                $("#divDesc_" + ide).append(
+                    '<div style="z-index:1000; position:absolute; top:3px; right:3px; width:100px; height:30px; display:none;" id="divbtnSerie_' + (data['Data'][index]['ID_DETA_DOCU_SALE']) +
+                    '" onclick="ClicBtnSerie(' + (data['Data'][index]['ID_DETA_DOCU_SALE']) + ',' + (data['Data'][index]['ID_DOCU_SALE']) + '); return false;" >' +
+                        '<button id="btnSerie" class="k-button">Serie</button>' +
+                    '</div>' + 
+                    '<div style="z-index:999; position:absolute; top:33px; right:3px; width:100px; height:30px; display:none;" id="divbtnWarranty_' + (data['Data'][index]['ID_DETA_DOCU_SALE']) +
+                    '" onclick="ClicBtnWarranty(' + (data['Data'][index]['ID_DETA_DOCU_SALE']) + ',' + (data['Data'][index]['ID_DOCU_SALE']) + '); return false;" >' +
+                        '<button id="btnWarranty" class="k-button">@ResourceLanguaje.Resource.Warranty</button>' +
+                    '</div>');
+            }
+
+            var alt = $("#divDesc_" + ide).height();
+            $("#divNro_" + ide).height(alt);
+            $("#divCode_" + ide).height(alt);
+            $("#divQty_" + ide).height(alt);
+        });
+
+        $("#divNro_" + ide).css("border-radius", "0 0 0 4px");
+        $("#divNro_" + ide).css("-moz-border-radius", "0 0 0 4px");
+        $("#divNro_" + ide).css("-webkit-border-radius", "0 0 0 4px");
+        $("#divDesc_" + ide).css("border-radius", "0 0 4px 0");
+        $("#divDesc_" + ide).css("-moz-border-radius", "0 0 4px 0");
+        $("#divDesc_" + ide).css("-webkit-border-radius", "0 0 4px 0");
+    }
+
+    function ClicBtnWarranty(id,id1) {
+        var htmlForm = '<div id="divFormWarranty"></div>';
+        winFormPopUpModal2("@ResourceLanguaje.Resource.Warranty", htmlForm, 490, 175);
+        $("#divFormWarranty").load("/Sales/viewWarranty?var=" + Math.random() + "&id=" + id + "&id1=" + id1);
+        return false;
+    }
+
+    function ClicBtnSerie(id, id1) {
+        var htmlForm = '<div id="divFormSerie"></div>';
+        winFormPopUpModal2("Serie", htmlForm, 490, 175);
+        $("#divFormSerie").load("/Sales/viewSerie?var=" + Math.random() + "&id=" + id + "&id1=" + id1);
+        return false;
+    }
+
+    function onmouseoverDetail(ide) {
+        $("#divbtnWarranty_" + ide).css("display", "block");
+        $("#divbtnSerie_" + ide).css("display", "block");
+
+        $("#divNro_" + ide).css("background-image", "-moz-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+        $("#divNro_" + ide).css("background-image", "-ms-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+        $("#divNro_" + ide).css("background-image", "-webkit-gradient(linear, left top, left bottom, color-stop(50%, #f9f9f9), color-stop(100%, #f1f1f1))");
+        $("#divNro_" + ide).css("background-image", "-o-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+
+        $("#divCode_" + ide).css("background-image", "-moz-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+        $("#divCode_" + ide).css("background-image", "-ms-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+        $("#divCode_" + ide).css("background-image", "-webkit-gradient(linear, left top, left bottom, color-stop(50%, #f9f9f9), color-stop(100%, #f1f1f1))");
+        $("#divCode_" + ide).css("background-image", "-o-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+
+        $("#divQty_" + ide).css("background-image", "-moz-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+        $("#divQty_" + ide).css("background-image", "-ms-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+        $("#divQty_" + ide).css("background-image", "-webkit-gradient(linear, left top, left bottom, color-stop(50%, #f9f9f9), color-stop(100%, #f1f1f1))");
+        $("#divQty_" + ide).css("background-image", "-o-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+
+        $("#divDesc_" + ide).css("background-image", "-moz-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+        $("#divDesc_" + ide).css("background-image", "-ms-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+        $("#divDesc_" + ide).css("background-image", "-webkit-gradient(linear, left top, left bottom, color-stop(50%, #f9f9f9), color-stop(100%, #f1f1f1))");
+        $("#divDesc_" + ide).css("background-image", "-o-linear-gradient(top, #f9f9f9 50%, #f1f1f1 100%)");
+    }
+
+    function onmouseoutDetail(ide) {
+        $("#divbtnWarranty_" + ide).css("display", "none");
+        $("#divbtnSerie_" + ide).css("display", "none");
+
+        $("#divNro_" + ide).css("background", "-moz-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+        $("#divNro_" + ide).css("background-image", "-ms-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+        $("#divNro_" + ide).css("background-image", "-webkit-gradient(linear, left top, left bottom, color-stop(10%, #ffffff), color-stop(100%, #ffffff))");
+        $("#divNro_" + ide).css("background-image", "-o-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+
+        $("#divCode_" + ide).css("background", "-moz-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+        $("#divCode_" + ide).css("background-image", "-ms-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+        $("#divCode_" + ide).css("background-image", "-webkit-gradient(linear, left top, left bottom, color-stop(10%, #ffffff), color-stop(100%, #ffffff))");
+        $("#divCode_" + ide).css("background-image", "-o-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+
+        $("#divQty_" + ide).css("background", "-moz-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+        $("#divQty_" + ide).css("background-image", "-ms-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+        $("#divQty_" + ide).css("background-image", "-webkit-gradient(linear, left top, left bottom, color-stop(10%, #ffffff), color-stop(100%, #ffffff))");
+        $("#divQty_" + ide).css("background-image", "-o-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+
+        $("#divDesc_" + ide).css("background", "-moz-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+        $("#divDesc_" + ide).css("background-image", "-ms-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+        $("#divDesc_" + ide).css("background-image", "-webkit-gradient(linear, left top, left bottom, color-stop(10%, #ffffff), color-stop(100%, #ffffff))");
+        $("#divDesc_" + ide).css("background-image", "-o-linear-gradient(top, #ffffff 10%, #ffffff 100%)");
+    }
+</script>

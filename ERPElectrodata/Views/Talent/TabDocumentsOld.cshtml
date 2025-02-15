@@ -1,0 +1,218 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+<div style="width:100%; height:456px; display:inline-block;">
+    <div style="width:32.66%; float:left; margin: 10px 0 10px 0;">
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.DocumentsTalent</div>
+            </div>
+            <div class="inBodyForm" style="overflow-y: auto; height:415px;">
+                <div id="treeviewDocs" style="padding: 3px 0 0 7px;"></div>
+            </div>
+        </div>
+    </div>
+    <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+    <div style="width:32.66%; float:left; margin: 10px 0 10px 0;">
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.AchievementsTalent</div>
+            </div>
+            <div class="inBodyForm" style="overflow-y: auto; height:206px;">
+                <div id="treeviewAchi" style="padding: 3px 0 0 7px;"></div>
+            </div>
+        </div>
+        <div style="width:100%; height:15px;"></div>
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.IssuesTalent</div>
+            </div>
+            <div class="inBodyForm" style="overflow-y: auto; height:167px;">
+                <div id="ListIssue"></div>                             
+            </div>
+        </div>
+    </div>
+    <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+    <div style="width:32.66%; float:left; margin: 10px 0 10px 0;">
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.AttachTalent</div>
+            </div>
+            <div class="inBodyForm" style="height:415px;">
+                <div id="cargarDocs"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--PESTAÑA DOCUMENTACION-->
+<script id="treeviewDocs-template" type="text/kendo-ui-template">
+    # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 2) { #
+        <a href="" style="text-decoration:none;" onclick="AuthorizationDownload('#: item.NAM_FILE #','#: item.ID_TYPE_DOCU #','#: item.ID_PARA #'); return false;" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #@Environment.NewLine@ResourceLanguaje.Resource.StartDateContractTalent: #: item.STAR_DATE #@Environment.NewLine@ResourceLanguaje.Resource.EndDateContractTalent: #: item.END_DATE #" target="_blank">
+        <img src="/Content/Images/pdf.gif" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a>
+    # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 8) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a>
+    # } else if (item.ATTACH == true && item.CONT == 1) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/#: item.ICONO #" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a>    
+    # } else if (item.ATTACH == true) { #
+        <a href="" style="text-decoration:none;" onclick="AuthorizationDownload('#: item.NAM_FILE #','#: item.ID_TYPE_DOCU #','#: item.ID_PARA #'); return false;" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank">
+        <img src="/Content/Images/pdf.gif" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a>
+    # } #
+</script>
+<!--PESTAÑA LOGROS-->
+<script id="treeviewAchi-template" type="text/kendo-ui-template">
+    # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    # } else if (item.ATTACH == true) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+            <img src="/Content/Images/pdf.gif" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span><a id='D|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+        </a>
+    # } #
+</script>
+
+<script type="text/javascript">
+
+    $(document).on("click", ".delete-link", function (e) {
+        e.preventDefault();
+        var ctrl = $(this);
+        var id = $(this).attr("id");
+        var elem = id.split('|');
+
+        winPopUpModal("@ResourceLanguaje.Resource.Delete", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+   "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Are you sure to delete the document?</div>" +
+   "<div style='float:right; padding:21px 4px 0 0;'>" +
+   "<button id='btnYes' class='k-button' style='font-size:.9em;'>Si</button>&nbsp;&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+   , 350, 130);
+
+        var undo = $("#btnYes")
+            .bind("click", function () {
+                cl = elem[1];
+                if (elem[1].length > 3) {
+                    if (elem[1].substring(0, 3) == 'ISO') {
+                        var resp = elem[1].split('*');
+                        cl = resp[1];
+                    }
+                }
+
+                $.ajax({
+                    url: "/Talent/DeleteAttachDocs/" + cl,
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        if (dato == 'OK') {
+                            var treeview = $("#treeviewAchi").data("kendoTreeView");
+                            treeview.remove(ctrl.closest(".k-item"));
+                            closeWinModalPopUp();
+                        }
+                        else { closeWinModalPopUp(); alert('ERROR'); }
+                    },
+                    error: function (dato) {
+                        alert('ERROR');
+                    }
+                });
+
+            });
+
+        var undo = $("#btnNO")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+    });
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        homogeneousDocs = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Talent/TreeDocs/@ViewBag.ID_PERS_ENTI",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE"
+                }
+            }
+        });
+
+        $("#treeviewDocs").kendoTreeView({
+            template: kendo.template($("#treeviewDocs-template").html()),
+            dataSource: homogeneousDocs,
+            dataTextField: "NAME_PARA"
+        });
+
+        homogeneousAchi = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE"
+                }
+            }
+        });
+
+        $("#treeviewAchi").kendoTreeView({
+            template: kendo.template($("#treeviewAchi-template").html()),
+            dataSource: homogeneousAchi,
+            dataTextField: "NAME_PARA"
+        });
+
+        $.ajax({
+            url: "/Talent/ListIssuesUser/@ViewBag.ID_PERS_ENTI",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                loadDataIssue();
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+
+        $("#cargarDocs").empty();
+        $("#cargarDocs").load("/Talent/AttachDocs?id=@ViewBag.ID_PERS_ENTI&id1=@ViewBag.ID_PERS_STAT&var=" + Math.random());
+    });
+
+    function AuthorizationDownload(arc, id_type, iddocu) {
+        NameArc = "/Adjuntos/Talent/Documents/" + arc;
+        if (id_type == 3) {
+            window.open(NameArc, "_blank");
+        }
+        else {
+            var htmlForm = '<div id="FormAuthorization"></div>';
+            winFormPopUpModal("@ResourceLanguaje.Resource.ValidationsOfCredentials", htmlForm, 260, 205);
+            $("#FormAuthorization").load("/Account/ViewAuthorization?var=" + Math.random() + "&id=@ViewBag.ID_PERS_ENTI&id1=" + iddocu + "&fd=Documents&acc=edit");
+        }
+        return false;
+    }
+
+    function loadDataIssue() {
+        var strHtml1 = '';
+        $.each(data['data'], function (index, value) {
+            strHtml1 = strHtml1 +
+                '<div class ="divFondoUno"><div style="float:left; width:90%; padding: 0 0 0 10px;">' +
+                '<img src="/Content/Images/pdf.gif" style="width:14px; height:14px;" />' +
+                '<a href="'+(data['data'][index]['Ruta']) + (data['data'][index]['NAM_ATTA']) + '_' + (data['data'][index]['ID_PERS_DOCU']) + (data['data'][index]['EXT_ATTA']) + '" target="_blank" title="@ResourceLanguaje.Resource.Download ' + (data['data'][index]['NAM_ATTA']) + '" style="cursor:pointer;color:#444444;font-size: .9em;text-transform: none;text-decoration:none; margin-left:5px;">' + (data['data'][index]['NAM_ATTA']) + '</a></div>' +
+                    '</div></div><br />';
+        });
+        $("#ListIssue").append(strHtml1);
+    }
+</script>

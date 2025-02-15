@@ -1,0 +1,159 @@
+﻿@{
+    Layout = null;
+}
+<style>
+    .k-autocomplete.k-state-default, .k-picker-wrap.k-state-default, .k-numeric-wrap.k-state-default, .k-dropdown-wrap.k-state-default {
+        width: 105px;
+    }
+</style>
+<input type="hidden" name="HD_DETAIL_ACTIVITY"  id="HD_DETAIL_ACTIVITY" value="" />
+
+<div class="form-row mb-3">
+    <div class="col-md-12" style="width:100%">
+            <div id="gridDetails"></div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col-md-9">
+        <br />
+    </div>
+    <div class="col-md-3">
+        <button type="button" class="btn btn-primary btn-block" id="Guardar">
+            <i class="fa fa-save"></i> Guardar
+        </button>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/ChangeRequest/ListDetailActivity?id=" + @ViewBag.ID_CHANGE_REQUEST_TOREJECT + "&var" + Math.random(),
+                    dataType: "jsonp"
+                },
+                create: {
+                    url: "/ChangeRequest/CreateDetailActivity?id=" + @ViewBag.ID_CHANGE_REQUEST_TOREJECT + "&var" + Math.random(),
+                    dataType: "jsonp"
+                },
+                update: {                    
+                    url: "/ChangeRequest/UpdateDetailActivity?id=" + @ViewBag.ID_CHANGE_REQUEST_TOREJECT + "&var" + Math.random(),
+                    dataType: "jsonp"                      
+                },
+                destroy: {
+                    url: "/ChangeRequest/DeleteDetailActivity?id=" + @ViewBag.ID_CHANGE_REQUEST_TOREJECT + "&var" + Math.random(),
+                    dataType: "jsonp"
+                },
+                parameterMap: function (options, operation) {                    
+                    if (operation !== "read" && options.models) {
+                        setTimeout(function () {
+                            $('#gridDetails').data('kendoGrid').dataSource.read();
+                        }, 800);
+                        return { models: kendo.stringify(options.models) };
+                    }
+                }
+            },
+            error: function (e) {
+                 alert("Status: " + e.status + "; Error message: " + e.errorThrown);
+            },
+            pageSize: 5,
+            batch: true,
+            schema: {
+                 model: {
+                     id: "ID",
+                     fields: {
+                        ID_TYPE_TASK: { type: "string" },
+                        ID_PERS_ENTI: { type: "string" },
+                        Actividad: { validation: { required: true } },
+                        Responsable: {type: "string", validation: { required: true } },
+                        DETAIL: { validation: { required: true },type: "string" },
+                        DATE_INIC: {  validation: { required: true },type: "date" },
+                        DATE_END: {  validation: { required: true },type: "date" }
+                    }
+                }
+            }
+        });
+        $("#gridDetails").kendoGrid({
+            dataSource: dataSource,
+            pageable: true,
+            toolbar: ["create"],
+            columns: [
+            { field: "ID_TYPE_TASK", title: "ID_TYPE_TASK",hidden:true},
+            { field: "ID_PERS_ENTI", title: "ID_PERS_ENTI",hidden:true},
+            { field: "Actividad", title: "Actividad", editor: taskDropDownEditor , validation: { required: true }},
+            { field: "Responsable", title: "Responsable", editor: ResponsableDropDownEditor, validation: { required: true } },
+            { field: "DETAIL", title: "Descripción", validation: { required: true } },
+            { field: "DATE_INIC", title: "Fecha Inicio", format: "{0:MM/dd/yyyy}", parseFormats: ["MM/dd/yyyy"], editor: dateTimeEditor },
+            { field: "DATE_END", title: "Fecha Fin", format: "{0:MM/dd/yyyy}", parseFormats: ["MM/dd/yyyy"], editor: dateTimeEditor },
+            { command: ["edit", "destroy"], title: "Opciones" }],
+                    editable: "inline"
+        });
+        $('#Guardar').click(function (e) {
+            swal({ title: "Procesando información, por favor espere.", text: "Gestión de Cambios", showConfirmButton: false, imageUrl: "/images/spinner.gif" });
+            
+                $.ajax({
+                    url: "/ChangeRequest/UpdateActivityToApproved?id=" +  @ViewBag.ID_CHANGE_REQUEST_TOREJECT + "&var" + Math.random(),
+                    cache: false,
+                    type: "GET",
+                    dataType: "text",
+                    success: function (resp) {
+                        swal.close();
+                        if (resp == 'OK') {
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            toastr.success("Se ha actualizado los detalles del Cambio.", "Sistema Integrado de Gestión");
+                        }                            
+                        else {
+                            toastr.error("Error al actualizar actividades.", "Sistema Integrado de Gestión");
+                        }
+                        CargarGrilla();
+                    },
+                    error: function (source) {
+                        alert("Error Carga Json");
+                    }
+                });
+            });
+                function dateTimeEditor(container, options) {
+                    $('<input data-text-field="' + options.field + '" data-value-field="' + options.field + '" data-bind="value:' + options.field + '" data-format="' + options.format + '"/>')
+                   .appendTo(container)
+                   .kendoDateTimePicker({
+                       value: new Date()
+                   });
+                }
+                function taskDropDownEditor(container, options) {
+                    $('<input required name="' + options.field + '"/>')
+                       .appendTo(container)
+                       .kendoComboBox({
+                           autoBind: false,
+                           dataTextField: "detail",
+                           dataValueField: "id",
+                           dataSource: {
+                               serverFiltering: true,
+                               schema: {
+                                   data: "Data"
+                               },
+                               transport: {
+                                   read: "/ChangeRequest/ListTaskType?var=" + Math.random()
+                               }
+                           }
+                       });
+                }
+                function ResponsableDropDownEditor(container, options) {
+                    $('<input required name="' + options.field + '"/>')
+                        .appendTo(container)
+                        .kendoComboBox({
+                            autoBind: false,
+                            dataTextField: "UserUpper",
+                            dataValueField: "ID_PERS_ENTI",
+                            dataSource: {
+                                serverFiltering: true,
+                                schema: {
+                                    data: "Data",
+                                    count: "Count"
+                                },
+                                transport: {
+                                    read: "/ChangeRequest/ListStaff?var=" + Math.random()
+                                }
+                            }
+                        });
+                }
+            });
+</script>

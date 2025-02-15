@@ -1,0 +1,100 @@
+﻿@{
+    Layout = null;
+}
+
+<div style="width: 100%; float:left;">
+    <div class="titleForm">
+        <div class="title">
+            <img src="~/Content/Images/MesaAyuda.png" />
+            Reporte de Incidentes Abiertos Por Tiempo Transcurrido desde su creación (días)
+            <div style="width:100px; float:right; padding-right:5px">
+                @using (Html.BeginForm("ExportarListaTiempo", "Supervision", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+                {
+                    <input type="hidden" name="TipoTicket" id="TipoTicket" value="1">
+                    <button type="button" class="btn btn-block btn-warning" onclick="ExportarListaTiempo();">Exportar</button>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm" style="height:100%; background-color:white">
+            <div class="bg-primary" style="width:100%">
+                <div class="bg-primary" style="float:left; width:100%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:14%"><strong>TIEMPO(Dias)</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:10%"><strong>CATEGORIA</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:24%"><strong>COMENTARIO</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:24%"><strong>CAUSAS</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:23%"><strong>ESTADO ACTUAL</strong></div>
+            </div>
+            <div style="float:left; width:100%"><hr /></div>
+            <div id="divIncidenteTiempo" class="contentView"></div>
+            <div id="pagerIncidenteTiempo" class="contentViewPager" style="width:99%"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaTiempo">
+    <a href="\\DetailsTicket/Index/${ID_TICK}" target="_blank">
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:14%">${TIEMPO_TRANSCURRIDO} días<br />${CODIGO}<br />${ASIGNADO}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:10%">${CLASE}<br />${SUBCLASE}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:24%">#= COMENTARIO #</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:24%">#= CAUSA #</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:23%">#= ESTADO #</div>
+        <div style="float:left; width:100%"><hr /></div>
+    </a>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //Lista Prioridad
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Supervision/ObtenerTiempoIncidente",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        idTipo: 1,
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 5,
+            schema: {
+                data: "ListaTiempo",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerIncidenteTiempo").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divIncidenteTiempo").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaTiempo").html())
+        });
+
+    });
+
+    function ExportarListaTiempo() {
+        $("#formExportar").submit();
+    }
+</script>

@@ -1,0 +1,324 @@
+﻿@{
+    ViewBag.Title = "PeriodoyEvaluados";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    #SmallModalTitle {
+        font-size: 18px;
+    }
+</style>
+<br />
+<div class="x_title">
+    <div style="width:85%;padding-left:10%">
+        <br />
+        <center><h2>LISTADO DE PERIODOS</h2></center>
+        <div class="clearfix"></div>
+    </div>
+</div>
+<div class="box">
+    
+    <div class="tab-content">
+        <div class="tab-pane active" id="tab_1">
+            
+            <div class="box">
+                <div style="padding: 0px 0px 0px 15px;">
+                    <br />
+                    <button class="btn btn-warning" onclick="AgregarPeriodoEvaluados();"><i class="glyphicon glyphicon-floppy-saved"></i> Agregar Periodo </button>
+                    @*<button type="button" class="btn btn-warning" onclick="lim();">PRUEBA</button>*@
+                </div>
+                <br />
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <table id="tablaPeriodo" class="table table-bordered table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Periodo</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Periodo</th>
+                                <th>Descripción</th>
+                                <th>Estado</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Editar Periodo-->
+<div class="modal fade" id="ModalPeriodo" tabindex="-1" role="dialog" aria-labelledby="ModalPeriodoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title col-md-10" id="ModalPeriodoLabel">Editar Periodo</h3>
+                <button type="button" class="close col-md-2" data-dismiss="modal" aria-label="Close" style="width:10%">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="divEditarPeriodo" style="width:100%;">
+                    <div id="divEditarPeriodo"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        MostrarPeriodo();
+    });
+
+    function MostrarPeriodo() {
+        $('#tablaPeriodo').dataTable().fnDestroy();
+
+        $('#tablaPeriodo').DataTable({
+            //"order": [[4, "asc"]],
+            //dom: 'Bfrtip',
+            ajax: "/EvaluacionPersonal/ListadoPeriodos/",
+            ordering: false,
+            columns: [
+                { data: "Periodo" },
+                { data: "Descripcion" },
+                { data: "Estado" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.IdEstadoPeriodo == 1) {
+                            $('#CerrarPeriodo' + data.Id).hide();
+                        } else if (data.IdEstadoPeriodo == 2) {
+                            /*$('#EditarPeriodo' + data.Id).hide();*/
+                            $('#IniciarPeriodo' + data.Id).hide();
+                            $('#EliminarPeriodo' + data.Id).hide();
+                            $/*('#CerrarPeriodo' + data.Id).hide();*/
+                        } else {
+                           /* $('#EditarPeriodo' + data.Id).hide();*/
+                            /*$('#IniciarPeriodo' + data.Id).hide();*/
+                            $('#CerrarPeriodo' + data.Id).hide();
+                            $('#EliminarPeriodo' + data.Id).hide();
+                        }
+
+                        return '<div class="row">' +
+                            '<div class="col-md-1"></div>' +
+                            '<div id="EditarPeriodo' + data.Id + '" style="text-align: center;" class="col-md-3">' +
+                            '<span id="EditarPeriodo" title="Editar" class="fa fa-edit" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 15px;" onclick="EditarPeriodo(' + data.Id + ')"></span>' +
+                            '</div>' +
+                            '<div id="IniciarPeriodo' + data.Id + '" style="text-align: center;" class="col-md-3">' +
+                            '<span id="IniciarPeriodo" title="Iniciar" class="fa fa-play" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 15px;" onclick="IniciarPeriodo(' + data.Id + ')"></span>' +
+                            '</div>' +
+                            '<div id="EliminarPeriodo' + data.Id + '" style="text-align: center;" class="col-md-3">' +
+                            '<span id="EliminarPeriodo" title="Eliminar" class="fa fa-trash" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 15px;" onclick="EliminarEvaluacion(' + data.Id + ')"></span>' +
+                            '</div>' +
+                            '<div id="CerrarPeriodo' + data.Id + '" style="text-align: center;" class="col-md-3">' +
+                            '<span id="CerrarPeriodo" title="Cerrar Evaluación" class="fa fa-power-off" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 15px;" onclick="CerrarEvaluacion(' + data.Id + ')"></span>' +
+                            '</div>' +
+                            '</div>';
+                    }
+
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+
+    function EditarPeriodo(id) {
+        $("#divCuerpo").empty();
+        $("#divCuerpo").load("/EvaluacionPersonal/EditarPeriodoyEvaluados/" + id);
+        //$("#lblTitulo").text("Nuevo Solicitante");
+
+        //$(".modal-dialog").removeClass("modal-sm");
+        //$(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").addClass("modal-md");
+
+        //$('#modal-content').empty();
+        //$('#modal-content').load("/EvaluacionPersonal/EditarPeriodo/" + id);
+    }
+
+    function IniciarPeriodo(id) {
+        //$("#divCuerpo").empty();
+        //$("#divCuerpo").load("/EvaluacionPersonal/EditarPeriodoyEvaluados/" + id);
+        //$("#lblTitulo").text("Nuevo Solicitante");
+
+        //$(".modal-dialog").removeClass("modal-sm");
+        //$(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").addClass("modal-md");
+
+        //$('#modal-content').empty();
+        //$('#modal-content').load("/EvaluacionPersonal/EditarPeriodo/" + id);
+
+        swal({
+            title: "¿Desea iniciar la Evaluación?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+
+            function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        url: "/EvaluacionPersonal/InicioPeriodoEvaluacion/",
+                        data: {
+                            FormId: id,
+                        },
+                        cache: false,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data == "OK") {
+                                /*setTimeout(function () {*/
+                                MensajePeriodo("OK", "La evaluación ha iniciado.")
+                                /*    }, 600);*/
+                            }
+                        },
+                        error: function (source) {
+                            Mensaje("ERROR", 0)
+                        }
+                    });
+                } else {
+                    swal.close()
+                }
+            });
+    }
+
+    function AgregarPeriodoEvaluados() {
+        $("#divCuerpo").empty();
+        $("#divCuerpo").load("/EvaluacionPersonal/RegistrarPeriodoyEvaluados?var=" + Math.random());
+    }
+
+    function EliminarEvaluacion(id) {
+        swal({
+            title: "¿Desea eliminar la Evaluación?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+
+            function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        url: "/EvaluacionPersonal/EliminarEvaluacion/",
+                        data: {
+                            FormId: id,
+                        },
+                        cache: false,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data == "OK") {
+                                /*setTimeout(function () {*/
+                                MensajePeriodo("OK", "La evaluación se ha eliminado.")
+                                /*    }, 600);*/
+                            }
+                        },
+                        error: function (source) {
+                            Mensaje("ERROR", 0)
+                        }
+                    });
+                } else {
+                    swal.close()
+                }
+            });
+    }
+
+    function CerrarEvaluacion(id) {
+        swal({
+            title: "¿Desea cerrar la Evaluación?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Si",
+            cancelButtonText: "No",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+
+            function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        url: "/EvaluacionPersonal/CerrarEvaluacion/",
+                        data: {
+                            FormId: id,
+                        },
+                        cache: false,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            if (data == "OK") {
+                                /*setTimeout(function () {*/
+                                MensajePeriodo("OK", "La evaluación ha concluido.")
+                                /*    }, 600);*/
+                            }
+                        },
+                        error: function (source) {
+                            Mensaje("ERROR", 0)
+                        }
+                    });
+                } else {
+                    swal.close()
+                }
+            });
+    }
+
+    function MensajePeriodo(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success(msnErr);
+            MostrarPeriodo();
+            swal.close()
+        }
+        else {
+            toastr.error('No se Actualizaron los Datos.\n\n Contacte al Administrador.');
+        }
+
+    }
+
+</script>

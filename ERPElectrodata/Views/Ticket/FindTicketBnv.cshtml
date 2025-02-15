@@ -1,0 +1,1149 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+<style>
+    .k-floating-label-container {
+        width: 100%;
+    }
+
+    .select2-container--default.select2-container--focus .select2-selection--multiple {
+        border: solid #cccccd 1px !important;
+        outline: 0;
+    }
+</style>
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<link href="~/Content/FindTicket.css" rel="stylesheet" />
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+<script type="text/javascript" src="~/Scripts/jq-paginator.js"></script>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Busqueda avanzada
+                <div class="page-title-subheading">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            @using (Html.BeginForm("ExportFindTicketBNV", "Ticket", FormMethod.Post, new { id = "FrmFindTicket" }))
+            {
+                @Html.ValidationSummary(true)
+                <div class="card-body">
+                    <input type="hidden" name="HD_Estados" id="HD_Estados" value="" />
+                    <input type="hidden" name="Estados" id="Estados" />
+                    <div class="card-title">Buscar Ticket</div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                @*<label id="txtCodigoTicket" for="txtCodigoTicket" class="right">Código Ticket </label>*@
+                                @*@Html.TextBoxFor(model => model.COD_TICK, new { @class = "width100", @placeholder = "Código del Ticket" })
+                                    @Html.ValidationMessageFor(model => model.COD_TICK)*@
+                                <input id="COD_TICK" name="COD_TICK" style="width: 100%; border-color: #cccccd; padding-top:2px;padding-bottom:8px;padding-left:3px; margin:0px;height:30px" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtEstado" for="txtEstado" class="">Estado </label>
+                                <select id="ID_STAT_END" class="select2" multiple="multiple" type="text" style="width:100%" ></select>
+                                @*<input id="ID_STAT_END" name="ID_STAT_END" />*@
+                                @*<select multiple="multiple" class="multiselect-dropdown form-control" id="IdArea" style="width:100%;"></select>*@
+                                @*<input id="combobox" style="width: 100%" />*@
+                            </div>
+                        </div>
+                        <div class="col-md-3" style="display:none;">
+                            <div class="form-group">
+                                <label id="txtCompaniaS" for="txtCompaniaS" class="">Ficticio</label>
+                                @*@Html.Editor("FICTICIO")*@
+                                <input id="FICTICIO" name="FICTICIO" style="display:none;" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtCompaniaS" for="txtCompaniaS" class="">Compañia Solicitante </label>
+                                @Html.EditorFor(model => model.ID_COMP, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ID_COMP)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtCompaniaF" for="txtCompaniaF" class="">Compañía Final </label>
+                                @Html.EditorFor(model => model.ID_COMP_END, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ID_COMP_END)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtSolicitante" for="txtSolicitante" class="">Solicitante </label>
+                                @Html.EditorFor(model => model.ID_PERS_ENTI)
+                                @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtUsuarioF" for="txtUsuarioF" class="">Usuario Final </label>
+                                @Html.EditorFor(model => model.ID_PERS_ENTI_END)
+                                @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_END)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtAreaResponsable" for="txtAreaResponsable" class="">Área Responsable </label>
+                                @Html.EditorFor(model => model.ID_QUEU)
+                                @Html.ValidationMessageFor(model => model.ID_QUEU)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtAsignadoa" for="txtAsignadoa" class="">Asignado a </label>
+                                @Html.EditorFor(model => model.ID_PERS_ENTI_ASSI)
+                                @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_ASSI)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtTipoTicket" for="txtTipoTicket" class="">Tipo Ticket </label>
+                                @Html.EditorFor(model => model.ID_TYPE_TICK)
+                                @Html.ValidationMessageFor(model => model.ID_TYPE_TICK)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtPrioridad" for="txtPrioridad" class="">Prioridad </label>
+                                @Html.EditorFor(model => model.ID_PRIO)
+                                @Html.ValidationMessageFor(model => model.ID_PRIO)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtUnidad" for="txtUnidad" class="">Unidad de Negocio </label>
+                                @Html.EditorFor(model => model.ID_CATE)
+                                @Html.ValidationMessageFor(model => model.ID_CATE)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtMacro" for="txtMacro" class="">Macroservicio </label>
+                                @Html.Editor("ID_SUB_CATE")
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtServicio" for="txtServicio" class="">Servicio </label>
+                                @Html.Editor("ID_CLAS")
+                                @Html.ValidationMessageFor(model => model.ID_CATE)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtInciReque" for="txtInciReque" class="">Incidente/Requerimiento </label>
+                                @Html.Editor("ID_SUB_CLAS")
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtMedio" for="txtMedio" class="">Medio de Comunicación </label>
+                                @Html.EditorFor(model => model.ID_SOUR)
+                                @Html.ValidationMessageFor(model => model.ID_SOUR)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                @*<label id="txtComentario" for="txtComentario" class="">Comentario </label>*@
+                                @*@Html.TextBoxFor(model => model.SUM_TICK, new { @class = "form-control", @placeholder = "Comentario" })
+                                    @Html.ValidationMessageFor(model => model.SUM_TICK)*@
+                                <input id="SUM_TICK" name="SUM_TICK" style="width: 100%; height: 30px; padding-top: 2px; padding-bottom: 8px; padding-left: 3px" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtFinicio" for="txtFinicio" class="">Fecha Inicio </label>
+                                @Html.TextBox("START_DATE")
+                                @Html.ValidationMessageFor(model => model.MODIFIED_TICK)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtFfin" for="txtFfin" class="">Fecha Fin </label>
+                                @Html.TextBox("END_DATE")
+                                @Html.ValidationMessageFor(model => model.DELETE_TICK)
+                            </div>
+                        </div>
+                        <div class="col-md-3 d-flex align-items-end">
+                            <div class="form-group">
+                                <label id="chServicio" for="chServicio" class="">Servicio </label>
+                                @Html.CheckBox("SERVICE", false)
+                                @Html.ValidationMessageFor(model => model.SERVICE)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="txtCreadopor" for="txtCreadopor" class="">Creador por </label>
+                                @Html.EditorFor(model => model.UserId)
+                                @Html.ValidationMessageFor(model => model.UserId)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label id="chServicio" for="chServicio" class="">Fecha Programada </label>
+                                @Html.TextBox("FechaProgramada")
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="" for="" class="">&nbsp; </label>
+                                <button id="find" class="mb-2 mr-2 btn-pill btn btn-primary btn-block"><span>Buscar</span></button>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="" for="" class="">&nbsp; </label>
+                                <button id="export" class="mb-2 mr-2 btn-pill btn btn-success btn-block" onclick="Exportar();"><span>Exportar</span></button>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                </div>
+            }
+        </div>
+    </div>
+    @*<div class="col-md-3">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title">Tickets Por Estado</div>
+
+                    <div id="pie"></div>
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title">Tickets Por Estado</div>
+
+                    <div id="line"></div>
+
+
+                </div>
+            </div>
+        </div>*@
+</div>
+
+
+<div id="gridTickets" class="contentView">
+
+</div>
+<div style="clear:both;"></div>
+<div id="pagerTickets" class="contentViewPager">
+</div>
+
+@*<div id="listViewFindTicket"></div>*@
+
+<div id="listaGeneral">
+
+</div>
+<div class="mt-3">
+    <div id="cargaPagination" style="width:604px" hidden>
+        @Html.Partial("_CargaTickets")
+    </div>
+    
+    <ul class="pagination" id="paginationTicketsBnv"></ul>
+</div>
+<br />
+
+@*Pantalla de Carga*@
+<div id="loading" class="loadingScreen">
+    <img src="~/Images/spinner.gif" alt="loading" />
+</div>
+
+@*Carga Tickets animacion*@
+@*Pantalla de Carga*@
+<div id="loadingInicial" class="loader centered">
+    <div class="loadingio-spinner-spinner-xcf4ffee9sa">
+        <div class="ldio-bochyw1nkil">
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+    </div>
+</div>
+<div id="loadingTicket" class="loader centered">
+    <div class="loadingio-spinner-spinner-xcf4ffee9sa">
+        <div class="ldio-bochyw1nkil">
+            <div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function activarDesactivarModal(estado) {
+        if (estado === true) {
+            document.getElementById("loadingTicket").style.display = "flex"
+        } else {
+            document.getElementById("loadingTicket").style.display = "none"
+        }
+    }
+</script>
+
+@*Fin carga tickets animacion*@
+
+
+<script type="text/javascript">
+    var datosFormulario = ""
+    var estadoEstatico = -1
+    var mostrarCargaPaginado=true
+    //Cargas del formulario
+
+    //Carga
+    function loadListCompanyByAccount() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/AccountEntity/ListCompanyByAccount",
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+
+        })
+    }
+    //Carga
+    function loadListByAcco() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/AccountQueue/ListByAcco",
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+
+        })
+    }
+
+    //Carga de Asignado
+    function loadAssigned() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/AccountEntity/AssigneForFind",
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+
+        })
+    }
+
+    //Carga de Estado
+    function cargarEstado() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/StatusTicket/ListarEstado",
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+        })
+    }
+
+    //Carga de Tipo de ticket
+    function cargarTipoTicket() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/TypeTicket/List?var=" + Math.random(),
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+        })
+    }
+
+    //Carga de prioridad
+    function cargarPrioridad() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/Priority/List",
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+        })
+    }
+
+    //Carga de Unidad de Negocio
+    function cargarUnidadNegocio() {
+        return new Promise(resolve => {
+            resolve(null)
+        })
+    }
+
+    //Carga de Medio de comunicacion
+    function cargarSource() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/SourceTicket/List",
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+        })
+    }
+
+    //Carga de creado por
+    function cargarCreadoPor() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/Ticket/PersonCreateTicket?var=" + Math.random(),
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+        })
+    }
+
+    //----Fin de cargas del formulario-----
+
+    //Cargas Tickets
+    function loadListTickets(pagina) {
+        activarDesactivarModal(true)
+        if (datosFormulario == "") {
+            datosFormulario = $('#FrmFindTicket').serialize()
+            estadoEstatico = new String($("#ID_STAT_END").val());
+        }
+        if (estadoEstatico == null || estadoEstatico == "null") {
+            estadoEstatico = 0;
+        }
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/Ticket/FindResultTicketBnv/0?" + datosFormulario + "&IdEstados=" + estadoEstatico + "&pagina=" + pagina,
+                type: 'GET',
+                success: function (result) {
+                    console.log(result)
+                    //do the necessary updations
+                    resolve(result)
+                    $("#listaGeneral").html(result);
+                    activarDesactivarModal(false)
+                    if (result.length <= 10) {
+                        mostrarCargaPaginado = false
+                        document.getElementById("cargaPagination").style.display = "none"
+                    } else {
+                        mostrarCargaPaginado = true
+                    }
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+        })
+    }
+
+    //Carga Cantidad Paginas
+    function cargarCantidadPaginas() {
+        document.getElementById("paginationTicketsBnv").style.display = "none"
+        if (mostrarCargaPaginado == true) {
+            document.getElementById("cargaPagination").style.display = "block"
+        }
+
+        if (datosFormulario == "") {
+            datosFormulario = $('#FrmFindTicket').serialize()
+            estadoEstatico = new String($("#ID_STAT_END").val());
+        }
+        if (estadoEstatico == null || estadoEstatico == "null") {
+            estadoEstatico = 0;
+        }
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/Ticket/CantidadFindResultTicketBnv/0?" + datosFormulario + "&IdEstados=" + estadoEstatico,
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                    if (result != 0) {
+                        $.jqPaginator('#paginationTicketsBnv', {
+                            totalPages: parseInt(result),
+                            visiblePages: 10,
+                            currentPage: 1,
+                            onPageChange: function (num, type) {
+                                if (type == "change") {
+                                    loadListTickets(num)
+                                }
+
+                            }
+                        });
+                        document.getElementById("paginationTicketsBnv").style.display = "flex"
+                    }
+                    document.getElementById("cargaPagination").style.display = "none"
+
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+        })
+    }
+
+
+
+    function actualizarContenido() {
+        $("#pie").empty()
+
+        $("#pie").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><br /><br /><br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 30%; width: 30%; text-align: center;'></div>");
+        $("#line").empty()
+
+        $("#line").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><br /><br /><br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 30%; width: 30%; text-align: center;'></div>");
+        Promise.all([
+            //loadListGraphics(),
+            loadListTickets()
+
+        ]).then((results) => {
+            const listaTickets = results[0]
+            //Graficos(listaTicketsGrafico)
+            //ListarTicketPorEstado(listaTickets)
+            cargarCantidadPaginas()
+        })
+    }
+
+    function cargarContenidoFormulario(results) {
+        const listCompanyByAccount = results[0]
+        const listByAcco = results[1]
+        const listAssigned = results[2]
+        const listaEstados = results[3]
+        const listaTipoTicket = results[4]
+        const listaPrioridad = results[5]
+        const listaUN = results[6]
+        const listaSource = results[7]
+        const listaCreadoPor = results[8]
+        $("#ID_STAT_END").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: true,
+            allowClear: true,
+            data: listaEstados
+        });
+        $("#ID_COMP").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            suggest: true,
+            dataSource: {
+                data: listCompanyByAccount.Data,
+                serverPaging: false,
+                serverFiltering: false
+            }
+        }).data("kendoComboBox");
+        var ID_COMP_END = $("#ID_COMP_END").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                data: listCompanyByAccount.Data,
+                serverPaging: false,
+                serverFiltering: false
+            }
+        }).data("kendoComboBox");
+        var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            dataTextField: "DES_QUEU",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+                '<span><strong>${data.QUEU}</strong></span><br />' +
+                '<span style="font-size:.9em; top:15px;">${data.DES_QUEU}</span></div>',
+            dataValueField: "ID_QUEU",
+            dataSource: {
+                data: listByAcco.Data,
+                serverPaging: false,
+                serverFiltering: false
+            }
+        }).data("kendoComboBox");
+
+
+        var UserId = $("#UserId").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "USUARIO",
+            filter: "contains",
+            //template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+            //                          '<div style="float:left;">${data.ASSI}</div>' +
+            //                          '<div style="float:right; ">(WL ${data.WorkLoad})</div>' +
+            //                      '</div>',
+            dataValueField: "UserId",
+            dataSource: {
+                data: listaCreadoPor.Data
+            }
+        }).data("kendoComboBox");
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_COMP",
+            filter: "contains",
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            template: '<div style="display: inline-block">' +
+                '${CLIE}</div>',
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByCIA?_=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        var ID_PERS_ENTI_END = $("#ID_PERS_ENTI_END").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_COMP",
+            filter: "contains",
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByCIA?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_TYPE_TICK = $("#ID_TYPE_TICK").kendoComboBox({
+            autoBind: false,
+            index: 0,
+            dataTextField: "NAM_TYPE_TICK",
+            dataValueField: "ID_TYPE_TICK",
+            suggest: true,
+            dataSource: {
+                data: listaTipoTicket.Data
+            }
+        }).data("kendoComboBox");
+
+        //var ID_CATE = $("#ID_CATE").kendoComboBox({
+        //    autoBind: false,
+        //    cascadeFrom: "ID_TYPE_TICK",
+        //    filter: "contains",
+        //    dataTextField: "NAM_CATE",
+        //    dataValueField: "ID_CATE",
+        //    suggest: true,
+        //    //template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+        //    //                          '<div style="float:left;">${data.ASSI}</div>' +
+        //    //                          '<div style="float:right; ">(WL ${data.WorkLoad})</div>' +
+        //    //                      '</div>',
+
+        //    dataSource: {
+        //        serverFiltering: true,
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/Administrator/ListCategoryBnv?var=" + Math.random()
+        //        }
+        //    }
+        //}).data("kendoComboBox");
+        var ID_CATE = $("#ID_CATE").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            cascadeFrom: "ID_TYPE_TICK",
+            //cascadeFrom: "ID_ACCOUNT_CAT",
+            dataValueField: "ID_CATE",
+            placeholder: "Seleccionar ... ",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategoryBnv?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_SUB_CATE = $("#ID_SUB_CATE").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_CATE2",
+            filter: "contains",
+            cascadeFrom: "ID_CATE",
+            dataValueField: "ID_CATE2",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        var ID_CLAS = $("#ID_CLAS").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_CATE3",
+            filter: "contains",
+            cascadeFrom: "ID_SUB_CATE",
+            dataValueField: "ID_CATE3",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory3?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        var ID_SUB_CLAS = $("#ID_SUB_CLAS").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_CATE4",
+            filter: "contains",
+            cascadeFrom: "ID_CLAS",
+            dataValueField: "ID_CATE4",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory4?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_PRIO = $("#ID_PRIO").kendoComboBox({
+            autoBind: false,
+            //index: 1,
+            //cascadeFrom: "ID_PERS_ENTI_END",
+            //placeholder: "Select Priority...",
+            dataTextField: "NAM_PRIO",
+            dataValueField: "ID_PRIO",
+            dataSource: {
+                data: listaPrioridad.Data
+            }
+        }).data("kendoComboBox");
+
+        var ID_SOUR = $("#ID_SOUR").kendoComboBox({
+            index: 1,
+            autoBind: false,
+            dataTextField: "NAM_SOUR",
+            dataValueField: "ID_SOUR",
+            suggest: true,
+            dataSource: {
+                data: listaSource.Data
+            }
+        }).data("kendoComboBox");
+
+        var ID_PERS_ENTI_ASSI = $("#ID_PERS_ENTI_ASSI").kendoComboBox({
+            autoBind: false,
+            //index: 1,
+            //cascadeFrom: "ID_QUEU",
+            filter: "contains",
+            dataTextField: "ASSI",
+            //template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+            //    '<div style="float:left;letter-spacing:-1px;">${data.ASSI}</div>' +
+            //    '<div style="float:right; ">(WL ${data.WorkLoad})</div>' +
+            //    '</div>',
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                //type: "odata",
+                data: listAssigned.Data,
+                serverFiltering: false,
+                //schema: {
+                //    data: "Data",
+                //    total: "Count"
+                //}
+                //transport: {
+                //    read: "/AccountEntity/AssigneForFind?var=" + Math.random()
+                //}
+            }
+        }).data("kendoComboBox");
+
+        var START_DATE = $("#START_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        var END_DATE = $("#END_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaProgramada = $("#FechaProgramada").kendoDateTimePicker().data("kendoDateTimePicker");
+    }
+
+    async function cargarContenido() {
+        //Carga de formulario
+        $("#pie").empty()
+
+        $("#pie").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><br /><br /><br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 30%; width: 30%; text-align: center;'></div>");
+        $("#line").empty()
+
+        $("#line").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><br /><br /><br /><h4>Cargando...</h4><br /><img src='../../Images/spinner.gif' style='height: 30%; width: 30%; text-align: center;'></div>");
+
+        //$("#listViewFindTicket").empty()
+        //$("#listViewFindTicket").append("<div id='Mensaje' style='text-align: center;'>" +
+        //    "<br /><br /><br /><br /><br /><br /><h4>Cargando Tickets ...</h4><br /><img src='../../Images/spinner.gif' style='height: 40px; width: 40px; text-align: center;'></div>");
+
+        await Promise.all([
+            loadListCompanyByAccount(),
+            loadListByAcco(),
+            loadAssigned(),
+            cargarEstado(),
+            cargarTipoTicket(),
+            cargarPrioridad(),
+            cargarUnidadNegocio(),
+            cargarSource(),
+            cargarCreadoPor()
+        ])
+            .then((results) => {
+                document.getElementById("loading").style.display = "none"
+                cargarContenidoFormulario(results)
+            })
+        //await Promise.all([
+        //    loadListTickets().then(result => {
+        //        //ListarTicketPorEstado(result)
+        //    })
+        //])
+        //    .then(result => {
+        //        cargarCantidadPaginas()
+        //    })
+    }
+
+    $(document).ready(function () {
+        cargarContenido()
+    });
+
+    function cambioPaginaMisTicketsActivos(pagina) {
+        document.getElementById("listaGeneral").style.display = 'none'
+        document.getElementById("listaCarga").style.display = 'block'
+
+        $.post("/Home/ActualizarActivos", { seccion: 1, pagina: pagina }, function (response) {
+            $("#listaGeneral").html(response);
+            document.getElementById("listaCarga").style.display = 'none'
+            document.getElementById("listaGeneral").style.display = 'block'
+        });
+
+    }
+    function cambioIdiomaTexto() {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaTexto?IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+    function traducir(idIdioma, llave) {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Idioma/traducir?llave=" + llave + "&IdIdioma=" + idIdioma,
+                type: "GET",
+                dataType: "text",
+                cache: false,
+                succes: function (data) {
+                    return (data);
+                }
+            })
+        }
+    }
+
+    var DivHeight = $("#divFindTicket").height();
+    $("#divIntervalDate").height(DivHeight);
+    $("#divByStatus").height(DivHeight);
+    //$("#pie").height(DivHeight - 2);
+    //$("#line").height(DivHeight - 2);
+</script>
+
+
+
+<script type="text/x-kendo-tmpl" id="template">
+    <a href="\/\#${URL}${ID_INCI}" class="text-decoration-none" target="_blank">
+        <div class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-4">
+                    <div class="small">
+                        ${NAM_TYPE_TICK} ${COD_INCI}
+                    </div>
+
+                    # if (VIS_COMP) { #
+                    <div class="small"><b>${REQU} </b></div>
+                    # } else { #
+                    <div class="small"><b>${REQU}</b></div>
+                    # } #
+                    <div class="small">Creado: ${CREATEBY} ${CREATE_INCI}</div>
+                    <div class="small">Actualizado: ${MODIFIED_INCI}</div>
+                </div>
+                <div class="col-6">
+                    <div class="small">Asignado a: ${ASSI}</div>
+                    <div class="small">${NAM_CATE} > ${NAM_SUBC} > </div>
+                </div>
+                <div class="d-none d-md-block col-2">
+                    <div class="row no-gutters align-items-center">
+
+                        <div class="media col-12 align-items-center">
+
+                            <div class="media-body flex-truncate ml-2">
+
+                                # if(NAM_PRIO.indexOf("p1") > -1) {#
+                                <div class="badge badge-danger"> ${NAM_STAT} | ${NAM_PRIO} </div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("p2") > -1) {#
+                                <div class="badge badge-warning"> ${NAM_STAT} | ${NAM_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("p3") > -1) {#
+                                <div class="badge badge-success"> ${NAM_STAT} | ${NAM_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("p4") > -1) {#
+                                <div class="badge badge-info"> ${NAM_STAT} | ${NAM_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("p5") > -1) {#
+                                <div class="badge badge-dark"> ${NAM_STAT} | ${NAM_PRIO}</div>
+                                # } #
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+
+</script>
+
+<script type="text/javascript">
+
+    $("#COD_TICK").kendoTextBox({
+        placeholder: "",
+        label: {
+            content: "Código del Ticket",
+            /*        floating: true*/
+        }
+    });
+    $("#SUM_TICK").kendoTextBox({
+        placeholder: "",
+        label: {
+            content: "Comentario",
+            /*        floating: true*/
+        }
+    });
+
+    $("#find").click(function (event) {
+        event.preventDefault();
+        datosFormulario = $('#FrmFindTicket').serialize()
+        estadoEstatico = new String($("#ID_STAT_END").val());
+        actualizarContenido();
+    });
+
+    //cambioIdiomaxLlave('Asignadoa|Creadopor|Creado|UltimaAct');
+    //function ListarTicketPorEstado(Data) {
+    //    toastr.warning('Límite: 500 registros.<br/>Para mejorar su búsqueda agregar parámetros adicionales.');
+    //    var IdEstados = new String($("#ID_STAT_END").val());
+
+    //    if (IdEstados == null || IdEstados == "null") {
+    //        IdEstados = 0;
+    //    }
+
+    //    //$("#listViewFindTicket").empty();
+    //    //$("#listViewFindTicket").kendoListView({
+    //    //    dataSource: {
+    //    //        data:Data,
+    //    //        schema: {
+    //    //            data: "Data",
+    //    //            total: "Count"
+    //    //        },
+    //    //        pageSize: 10
+    //    //    },
+    //    //    template: kendo.template($("#template").html()),
+    //    //    pageable: true
+    //    //});
+    //}
+    //ListarTicketPorEstado();
+    function Exportar() {
+        var IdEstados = new String($("#ID_STAT_END").val());
+
+        if (IdEstados == null || IdEstados == "null") {
+            IdEstados = 0;
+        }
+        $("#HD_Estados").val(IdEstados);
+
+        var estados = $("#ID_STAT_END option:selected").map(function () {
+            return $(this).text();
+        }).get().join(',');
+        $("#Estados").val(estados);
+    }
+
+    function cambioIdiomaPorPalabras(palabras) {
+        idIdioma = $("#IdIdioma").val();
+        var palabra;
+        palabra = palabras.split("|");
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaTexto?IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    var newValTexto = [];
+                    for (var c = 0; c < valTextos.length; c++) {
+                        for (var k = 0; k < palabra.length; k++) {
+                            if (valTextos[c].split('|')[1] == palabra[k]) {
+                                newValTexto.push(valTextos[c]);
+                            }
+                        }
+                    }
+                    for (var i = 0; i < newValTexto.length; i++) {
+                        var valores = newValTexto[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+    function cambioIdiomaxLlave(llaves) {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaxLlave?llaves=" + llaves,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+
+                    //alert(source);
+                    //alert(JSON.stringify(source));
+
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+</script>

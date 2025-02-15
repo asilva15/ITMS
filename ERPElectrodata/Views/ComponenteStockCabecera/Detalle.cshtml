@@ -1,0 +1,211 @@
+﻿@{
+    ViewBag.Title = "Detalle de Componente Stock";
+    //Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        <div class="title" id="divTitle"></div>
+        <div class="btn-actions-pane-right">
+            <button id="btnEditar" class="btn btn-primary btn-hover-shine" data-toggle="modal" data-target="#miModal"><i class="fa fa-pen"></i> Editar</button>
+        </div>
+    </div>
+    <div class="card-body">
+        <div id="divDato"></div>
+    </div>
+</div>
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Componentes
+        <div class="btn-actions-pane-right">
+            @using (Html.BeginForm("ExportarStockDetalleComponentes", "ComponenteStockCabecera", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+            {
+                <button type="button" class="btn btn-primary btn-hover-shine" onclick="ExportarDetalleComponentes();" id="exportar"><i class="fa fa-file-excel"></i> Exportar</button>
+
+            }
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <table class="table table-bordered table-striped" style="width:100%" id="TablaComponentes">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <!--<th>Tipo de Activo</th>-->
+                        <th>Componente</th>
+                        <th>Subtipo de Componente</th>
+                        <th>Nombre</th>
+                        <th>Locación</th>
+                        <th>Estado</th>
+                        <th>Serie activo</th>
+                        <th>Condición</th>
+                        <th>Opción</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@*@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}*@
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        ObtenerStockComponenteDetalle();
+        ObtenerDetalleStockCabecera();
+
+        $("#btnEditar").click(function () {
+            $("#lblTitulo").text("Editar stock de Componentes");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load("/ComponenteStockCabecera/Editar//@ViewBag.Id?var=" + Math.random());
+        });
+    });
+
+    function ActualizarEstado(id) {
+        $("#lblTitulo").text("Actualizar Estado");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-sm");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/ComponenteStockCabecera/Condicion/" + id + "?var=" + Math.random());
+    }
+
+    function ObtenerDetalleStockCabecera() {
+        $.ajax({
+            url: "/ComponenteStockCabecera/ObtenerDetalleStockCabecera/@ViewBag.Id",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                mostrarDetalle();
+            },
+            error: function (source) {
+                toastr.error("Error Carga Json Programa","");
+            }
+        });
+    }
+
+    function mostrarDetalle() {
+        $("#divDato").empty();
+        $("#divTitle").empty();
+        $.each(data1['Data'], function (index, value) {
+            $("#divTitle").append((data1['Data'][index]['Nombre']));
+            $("#divDato").append(
+                '<div class="form-row">' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>SOLPED</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['Solped']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Fecha de Adquisición</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['FechaAdquisicion']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Fecha de Creación</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['FechaCrea']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Usuario de Creación</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['UsuarioCrea']) + '</div>' +
+                    '</div>' +
+                '</div>' + //Fin Bloque 1
+                '<div class="form-row">' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Cantidad en Uso</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['CantidadEnUso']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Cantidad disponible</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['CantidadDisponible']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Fecha de Modificación</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['FechaModifica']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Usuario de Modificación</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['UsuarioModifica']) + '</div>' +
+                    '</div>' +
+                '</div>' + //Fin Bloque 2
+                '<div class="form-row">' +
+                    '<div class="col-md-12">' +
+                        '<div class="titulo"><b>Descripción</b></div>' +
+                        '<div class="descripcion">' + (data1['Data'][index]['Descripcion']) + '</div>' +
+                    '</div>' +
+                '</div>'
+            );
+
+        });
+    }
+
+    function ObtenerStockComponenteDetalle() {
+
+        $('#TablaComponentes').dataTable().fnDestroy();
+
+        $('#TablaComponentes').DataTable({
+            dom: 'Bfrtip',
+            responsive: true,
+            ajax: {
+                "url": "/ComponenteStockCabecera/ObtenerStockComponenteDetalle/@ViewBag.Id",
+            },
+            columns: [
+                { data: "ORDEN" },
+                { data: "Componente" },
+                { data: "SubTipoComponente" },
+                { data: "NombreStockCabecera" },
+                { data: "Locacion" },
+                { data: "Estado" },
+                { data: "SerieActivo" },
+                { data: "Condicion" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style="text-align:center"><span  id="' + data.IdCompStockDet + '" title="Actualizar Estado" class="fa fa-retweet" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; "  data-toggle="modal" data-target="#miModal" onclick="ActualizarEstado(' + data.IdCompStockDet + ')"></span></div>';
+                    }
+                }
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+        });
+
+    }
+
+    function ExportarDetalleComponentes() {
+        $("#formExportar").submit();
+    }
+</script>

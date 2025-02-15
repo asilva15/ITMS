@@ -1,0 +1,700 @@
+﻿@{
+    ViewBag.Title = "ImportarDatosEncuesta";
+}
+
+
+<style>
+    #DatosBusqueda {
+        display: none;
+    }
+
+    #PreVisualizacion {
+        display: none;
+    }
+
+    .custom-button {
+        text-transform: none;
+    }
+
+    .custom-btn {
+        width: 122px;
+    }
+</style>
+
+<div class="card mb-3">
+    <div class="card-header-tab card-header" id="divTitle">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+            <i class="header-icon lnr-laptop-phone mr-3 text-muted opacity-6" id="iconTitle"> </i>Importe de Datos
+        </div>
+
+    </div>
+    <br />
+    <div id="filters" class="form-inline mb-3 ml-auto ml-lg-5">
+
+        <div class="container">
+
+            <div class="row justify-content-start">
+                <div class="col-md-4 d-flex">
+                    <div class="mr-3">
+                        <label for="fechaComboBox" class="d-block">Año:</label>
+                        <input id="fechaComboBox" class="form-control" style="width: 100px;" />
+
+                        <div class="ml-2 form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" id="chkReenvio" style="margin-left: 0;">
+                            <label class="form-check-label" for="chkReenvio">Reenvío</label>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="sedeComboBox" class="d-block">Sede:</label>
+                        <input id="sedeComboBox" class="form-control" />
+                    </div>
+                </div>
+
+
+
+
+
+                <div class="col-md-4">
+                    <br />
+                    <button type="button" id="btnFiltrar" class="btn btn-primary btn-lg">Filtrar</button>
+                    <button type="button" id="btnEnviarEncuesta" class="btn btn-light btn-lg" disabled>
+                        <i class="fas fa-paper-plane mr-2"></i> Enviar Encuesta
+                    </button>
+
+                </div>
+            </div>
+
+
+            <div class="row justify-content-end">
+                <div class="col-md-12 d-flex justify-content-end">
+                    <form id="uploadForm" enctype="multipart/form-data" class="mr-2">
+                        <input type="file" id="fileInput" name="file" style="display:none;" />
+                        <button type="button" id="btnImportar" class="btn btn-light Active btn-lg custom-btn"><i class="fas fa-file-import mr-2"></i> Importar</button>
+                    </form>
+
+                    <button type="button" id="btnGuardar" class="btn btn-success btn-lg custom-btn" disabled>Guardar Datos</button>
+                </div>
+
+                <div class="col-md-3 d-flex justify-content-end mt-2">
+                    <button type="button" id="btnDescargar" class="btn btn-primary btn-lg btn-block"><i class="fas fa-download mr-2"></i>Descargar Resultados</button>
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+</div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.8/lottie.min.js"></script>
+
+<script src="ruta/a/jquery-3.7.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.11.0/js/dataTables.bootstrap4.min.js"></script>
+
+
+
+<div class="card mb-3" id="DatosBusqueda">
+
+    <div class="card-header-tab card-header" id="divTitle">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal" id="Titulo">
+            <i class="header-icon lnr-laptop-phone mr-3 text-muted opacity-6" id="iconTitle"> </i>Busqueda de Datos
+        </div>
+
+    </div>
+    <br />
+
+    <div class="card-body">
+        <div class="table-responsive">
+            <table id="dataTableBusqueda" class="align-middle mb-0 table table-borderless table-striped table-hover"></table>
+        </div>
+    </div>
+</div>
+
+
+<div class="card mb-3" id="PreVisualizacion">
+
+    <div class="card-header-tab card-header" id="divTitle">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal" id="Titulo">
+            <i class="header-icon lnr-laptop-phone mr-3 text-muted opacity-6" id="iconTitle"> </i>Pre-Visualización de Datos
+        </div>
+
+    </div>
+    <br />
+
+    <div class="card-body">
+
+        <div id="loaderDatosBusqueda" class="loader-container">
+            <div class="loader"></div>
+        </div>
+
+        <div class="table-responsive">
+            <table id="dataTablePreVisualizacion" class="table table-striped table-bordered"></table>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+<script>
+    $(document).ready(function () {
+
+
+       $.ajax({
+    url: '@Url.Action("ObtenerAnios", "Ticket")',
+    type: 'GET',
+    dataType: 'json',
+    success: function (data) {
+        $("#fechaComboBox").kendoComboBox({
+            dataSource: data,
+            filter: "contains",
+            dataTextField: "text",
+            dataValueField: "value"
+        });
+    },
+    error: function (error) {
+        console.error(error);
+    }
+});
+
+
+      $("#btnEnviarEncuesta").click(function () {
+    var dataTable = $('#dataTableBusqueda').DataTable();
+    var emailColumnData = dataTable.column('4').data().toArray();
+
+    if (emailColumnData.length > 0) {
+        var emailAddresses = emailColumnData.join(',');
+
+        Swal.fire({
+            title: 'Enviando correos electrónicos',
+            text: 'Por favor, espere...',
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                Swal.showLoading();
+
+                $.ajax({
+                    url: '@Url.Action("EnviarCorreoElectronico", "Ticket")',
+                    type: 'POST',
+                    data: { emailAddresses: emailAddresses },
+                    success: function (result) {
+                        Swal.close();
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Correos electrónicos enviados correctamente.',
+                        });
+                        console.log(result);
+                    },
+                    error: function (xhr, status, error) {
+                        Swal.close();
+                        console.error(xhr.responseText);
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al enviar correos electrónicos',
+                            text: xhr.responseText,
+                        });
+                    }
+                });
+            }
+        });
+    } else {
+        Swal.fire({
+            icon: 'warning',
+            title: 'No hay direcciones de correo electrónico para enviar.',
+        });
+    }
+});
+
+
+
+        $("#btnDescargar").click(function () {
+            var selectedYear = $("#fechaComboBox").val();
+
+            if (selectedYear) {
+                $.ajax({
+                    url: '/Ticket/DescargarDatosEncuesta',
+                    type: 'POST',
+                    data: { anio: selectedYear },
+                    success: function (data) {
+                        var link = document.createElement('a');
+                        link.href = URL.createObjectURL(new Blob([data]));
+                        link.download = `DatosEncuesta_${selectedYear}.xls`;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Por favor, seleccione un año antes de descargar.',
+                });
+            }
+        });
+
+
+        $("#btnImportar").click(function () {
+
+            $('#btnEnviarEncuesta').prop('disabled', true);
+            $('#PreVisualizacion').hide();
+            if ($.fn.DataTable.isDataTable('#dataTablePreVisualizacion')) {
+                $('#dataTablePreVisualizacion').DataTable().destroy();
+            }
+
+            $("#fileInput").val('');
+            $("#fileInput").off("change").on("change", handleFileChange);
+
+
+            $("#fileInput").click();
+        });
+
+
+        function handleFileChange() {
+
+            var fileInput = document.getElementById('fileInput');
+
+            var file = fileInput.files[0];
+
+
+            if (file) {
+
+                var timestamp = new Date().getTime();
+
+                var newFileName = 'Importe_' + timestamp + '.xlsx';
+
+                fileInput.name = newFileName;
+
+                var formData = new FormData();
+
+                formData.append('file', file);
+
+
+                $.ajax({
+                    url: '@Url.Action("PrevisualizarDatos", "Ticket")',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+                        $('#DatosBusqueda').hide();
+                        $('#PreVisualizacion').show();
+                        $('#btnGuardar').prop("disabled", false);
+
+
+                        var dataTable = $('#dataTablePreVisualizacion').DataTable({
+                            "language": {
+                                "decimal": "",
+                                "emptyTable": "No hay datos disponibles en la tabla",
+                                "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                                "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                                "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                                "infoPostFix": "",
+                                "thousands": ",",
+                                "lengthMenu": "Mostrar _MENU_ entradas",
+                                "loadingRecords": "Cargando...",
+                                "processing": "Procesando...",
+                                "search": "Buscar:",
+                                "zeroRecords": "No se encontraron registros coincidentes",
+                                "paginate": {
+                                    "first": "Primero",
+                                    "last": "Último",
+                                    "next": "Siguiente",
+                                    "previous": "Anterior"
+                                },
+                                "aria": {
+                                    "sortAscending": ": activar para ordenar la columna en orden ascendente",
+                                    "sortDescending": ": activar para ordenar la columna en orden descendente"
+                                }
+                            },
+                            "columns": [
+                                { data: 'NombreCompleto', title: 'Nombre Completo' },
+                                { data: 'LocalSede', title: 'Local/Sede' },
+                                { data: 'Email', title: 'Correo Electrónico' },
+                                { data: 'Unidad', title: 'Unidad' },
+                                { data: 'Departamento', title: 'Departamento' },
+                                { data: 'FechaRegistro', title: 'Año', visible: false }
+                            ]
+                        });
+
+
+                        dataTable.clear().rows.add(result.previsualizacionDatos).draw();
+
+                        var fechas = dataTable.column('6').data().toArray();
+                        var uniqueFechas = Array.from(new Set(fechas));
+
+                        var dataSource = uniqueFechas.map(function (fecha) {
+                            return { text: fecha, value: fecha };
+
+                        });
+
+                        $("#fechaComboBox").kendoComboBox({
+                            dataSource: dataSource,
+                            filter: "contains",
+                            dataTextField: "text",
+                            dataValueField: "value"
+
+                        });
+
+
+                        $('#PreVisualizacion').show();
+
+
+
+                    },
+
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+
+                    }
+                });
+
+            }
+
+        }
+
+
+        $("#btnGuardar").click(function () {
+            var fileInput = document.getElementById('fileInput');
+            if (fileInput.files.length > 0) {
+                var formData = new FormData();
+                formData.append('file', fileInput.files[0]);
+
+                Swal.fire({
+                    title: "Guardando datos...",
+                    html: "Por favor, espere...<br><span id='progressText'>0%</span>",
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        const progressBar = document.createElement('progress');
+                        progressBar.setAttribute('max', '100');
+                        Swal.getContent().appendChild(progressBar);
+
+                        const progressText = document.getElementById('progressText');
+
+                        const interval = setInterval(() => {
+                            progressBar.value += 10;
+                            const currentPercentage = progressBar.value + '%';
+                            progressText.textContent = currentPercentage;
+
+                            if (progressBar.value >= 100) {
+                                clearInterval(interval);
+                                Swal.close();
+                            }
+                        }, 1000);
+                    }
+                });
+
+
+                $.ajax({
+                    url: '/Ticket/ImportarDatos',
+                    type: 'POST',
+                    data: formData,
+                    contentType: false,
+                    processData: false,
+                    success: function (result) {
+
+                        actualizarOpcionesDesplegable(result.aniosActualizados);
+                        actualizarSedeDespegable(result.sede);
+
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Datos guardados correctamente',
+                            showConfirmButton: false,
+                            timer: 1500
+                        }).then(() => {
+                            $('#PreVisualizacion').hide();
+                            var dataTable = $('#dataTablePreVisualizacion').DataTable();
+                                dataTable.clear().draw();
+                                $("#fileInput").val('');
+                        });
+
+                        $('#btnGuardar').prop("disabled", true);
+                        $('#PreVisualizacion').hide();
+
+                    },
+                    error: function (xhr, status, error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error al guardar datos',
+                            text: xhr.responseText
+                        });
+                    }
+                });
+
+
+
+            } else {
+                alert('Por favor, seleccione un archivo antes de guardar.');
+            }
+        });
+
+        $.ajax({
+            url: '/Ticket/ObtenerAnios',
+            type: 'GET',
+            dataType: 'json',
+            success: function (result) {
+                var selectElement = $('#fechaComboBox');
+                selectElement.empty();
+
+                selectElement.append($('<option>', {
+                    value: '0',
+                    text: 'Todos los años'
+                }));
+
+                $.each(result.anios, function (index, year) {
+                    selectElement.append($('<option>', {
+                        value: year,
+                        text: year
+                    }));
+                });
+
+
+                var fechas = result.anios;
+                var uniqueFechas = Array.from(new Set(fechas));
+
+                var dataSource = uniqueFechas.map(function (fecha) {
+                    return { text: fecha, value: fecha };
+                });
+
+                $("#fechaComboBox").kendoComboBox({
+                    dataSource: dataSource,
+                    filter: "contains",
+                    dataTextField: "text",
+                    dataValueField: "value"
+                });
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+
+        //Sede
+
+        $.ajax({
+            url: '/Ticket/ObtenerLocalesSede',
+            type: 'GET',
+            dataType: 'json',
+            success: function (result) {
+                var selectElement = $('#sedeComboBox');
+                selectElement.empty();
+
+                selectElement.append($('<option>', {
+                    value: '0',
+                    text: 'Todos las Sedes'
+                }));
+
+                $.each(result.anios, function (index, year) {
+                    selectElement.append($('<option>', {
+                        value: year,
+                        text: year
+                    }));
+                });
+
+
+                var fechas = result.sede;
+                var uniqueFechas = Array.from(new Set(fechas));
+
+                var dataSource = uniqueFechas.map(function (fecha) {
+                    return { text: fecha, value: fecha };
+                });
+
+                $("#sedeComboBox").kendoComboBox({
+                    dataSource: dataSource,
+                    filter: "contains",
+                    dataTextField: "text",
+                    dataValueField: "value"
+                });
+            },
+            error: function (error) {
+                console.error(error);
+            }
+        });
+
+
+
+        $("#btnFiltrar").click(function () {
+
+            $('#btnGuardar').prop('disabled', true);
+            $('#PreVisualizacion').hide();
+
+            var selectedYear = $("#fechaComboBox").val();
+
+            var selectedSede = $("#sedeComboBox").val() ?? "0";
+
+            if (selectedSede === "") {
+                selectedSede = "0";
+            }
+
+            var reenvio = $('#chkReenvio').prop('checked') ? 1 : 0;
+
+
+            if ($.fn.DataTable.isDataTable('#dataTableBusqueda')) {
+                $('#dataTableBusqueda').DataTable().destroy();
+            }
+
+
+            if (selectedYear) {
+                $('#DatosBusqueda').show();
+                $.ajax({
+                    url: '/Ticket/ListarImporteEncuesta?anio=' + selectedYear + '&reenvio=' + reenvio + '&localSede=' + selectedSede,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (result) {
+
+                        $('#btnEnviarEncuesta').prop('disabled', false);
+
+                        var dataTable = $('#dataTableBusqueda').DataTable({
+                            "language": {
+                                "decimal": "",
+                                "emptyTable": "No hay datos disponibles en la tabla",
+                                "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                                "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                                "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                                "infoPostFix": "",
+                                "thousands": ",",
+                                "lengthMenu": "Mostrar _MENU_ entradas",
+                                "loadingRecords": "Cargando...",
+                                "processing": "Procesando...",
+                                "search": "Buscar:",
+                                "zeroRecords": "No se encontraron registros coincidentes",
+                                "paginate": {
+                                    "first": "Primero",
+                                    "last": "Último",
+                                    "next": "Siguiente",
+                                    "previous": "Anterior"
+                                },
+                                "aria": {
+                                    "sortAscending": ": activar para ordenar la columna en orden ascendente",
+                                    "sortDescending": ": activar para ordenar la columna en orden descendente"
+                                }
+                            },
+                            "columns": [
+                                { data: 'NombreCompleto', title: 'Nombre Completo' },
+                                { data: 'Unidad', title: 'Unidad' },
+                                { data: 'Departamento', title: 'Departamento' },
+                                { data: 'LocalSede', title: 'Local/Sede' },
+                                { data: 'Email', title: 'Correo Electrónico' },
+                                {
+                                    title: 'Año',
+                                    data: 'FechaRegistro',
+                                    className: 'text-center',
+                                    width: '60px',
+                                },
+                                {
+                                    title: '',
+                                    data: null,
+                                    className: 'text-center',
+                                    render: function (data, type, row) {
+                                        return '<button class="btn btn-outline-primary btn-sm btnReenviar btn-oval py-0 d-inline-flex align-items-center" data-email="' + row.Email + '">Reenviar</button>';
+                                    }
+                                }
+                            ],
+                            "data": result.dataPorAnio
+                        });
+                    },
+                    error: function (error) {
+
+                        console.error(error);
+                    }
+                });
+
+
+            }
+        });
+
+
+        function actualizarOpcionesDesplegable(aniosActualizados) {
+            var elementoSelect = $('#fechaComboBox');
+
+            if (elementoSelect.data("kendoComboBox")) {
+                elementoSelect.data("kendoComboBox").destroy();
+            }
+
+            aniosActualizados = aniosActualizados || [];
+
+            elementoSelect.kendoComboBox({
+                dataSource: aniosActualizados.map(function (year) {
+                    return { text: year, value: year };
+                }),
+                filter: "contains",
+                dataTextField: "text",
+                dataValueField: "value"
+            });
+        }
+
+        function actualizarSedeDespegable(sede) {
+            var elementoSelect = $('#sedeComboBox');
+
+            if (elementoSelect.data("kendoComboBox")) {
+                elementoSelect.data("kendoComboBox").destroy();
+            }
+
+            sede = sede || [];
+
+            elementoSelect.kendoComboBox({
+                dataSource: sede.map(function (sedes) {
+                    return { text: sedes, value: sedes };
+                }),
+                filter: "contains",
+                dataTextField: "text",
+                dataValueField: "value"
+            });
+        }
+
+
+
+
+    });
+
+    $('#dataTableBusqueda').on('click', '.btnReenviar', function () {
+        var emailAddress = $(this).data('email');
+
+        Swal.fire({
+            title: "Reenviando correo...",
+            html: "Por favor, espere...",
+            allowOutsideClick: false,
+            showConfirmButton: false,
+            didOpen: () => {
+                const progressBar = document.createElement('progress');
+                progressBar.setAttribute('max', '100');
+                Swal.getContent().appendChild(progressBar);
+            }
+        });
+
+        $.post('/Ticket/ReenviarCorreo', { email: emailAddress }, function (response) {
+            Swal.close();
+
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Correo reenviado correctamente',
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al reenviar el correo electrónico',
+                    text: response.message,
+                });
+            }
+        });
+
+
+
+    });
+
+</script>

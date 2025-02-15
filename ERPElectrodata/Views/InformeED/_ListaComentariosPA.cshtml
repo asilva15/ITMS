@@ -1,0 +1,50 @@
+﻿@model List<ERPElectrodata.Models.ListaComentarioInforme_Result>
+<div>
+    @foreach (var ticket in Model)
+    {
+        <div class="comentario" style="margin-bottom: 15px">
+            <div class="info">
+                <div style="display:flex">
+                    <div>
+                        <span class="tipo-correccion" style="color:black;font-weight:bold">@ticket.Nombre : </span>
+                    </div>
+                    <div id="listaTickets-@ticket.Id" style="margin-left:3px">
+
+                    </div>
+                </div>
+            </div>
+            <div class="burbuja" style="background-color: #DFF2FF">
+                <div class="comentario-texto" >
+                    @ticket.Comentario
+                </div>
+            </div>
+            <div class="info">@ticket.Creador - @ticket.FechaCreacion</div>
+        </div>
+    }
+</div>
+<script>
+    $(document).ready(function () {
+        var listaInformes = JSON.parse(@Html.Raw(ViewBag.Comentarios));
+        listaInformes.forEach(ticket => {
+            if (ticket.IdTick !== "") {
+                var listadoTickets = ticket.IdTick.split(",").map(numero => parseInt(numero));
+                console.log(listadoTickets)
+                var listado = document.getElementById(`listaTickets-${ticket.Id}`)
+                listadoTickets.forEach((tick, i, j) => {
+                    var aElement = document.createElement('a')
+                    //Esto cambiara en el merge con el actual ITMS
+                    aElement.href = `/DetailsTicket/Index/${tick}`
+                    aElement.target = '_blank'
+                    if (i == j.length - 1) {
+                        aElement.textContent = `${tick}`;
+                    } else {
+                        aElement.textContent = `${tick} - `;
+                    }
+                    listado.appendChild(aElement)
+                    console.log(i)
+                    console.log(j)
+                })
+            }
+        })
+    });
+</script>

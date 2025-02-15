@@ -1,0 +1,165 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+<input type="hidden" name="IdDocumentoVentaMarca" id="IdDocumentoVentaMarca" value="@ViewBag.IdDocumentoVentaMarca" />
+<input type="hidden" name="IdDocumentoVenta" id="IdDocumentoVenta" value="@ViewBag.IdDocumentoVenta" />
+<fieldset>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="editor-label">
+                Experiencia <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="EditIdSolucion" type="text" name="EditIdSolucion">
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="editor-label">
+                Marca <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="EditIdMarca" type="text" name="EditIdMarca">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="editor-label">
+                Tipo de Cambio <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="EditTipoCambio" type="text" name="EditTipoCambio" value="@ViewBag.TipoCambio">
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="editor-label">
+                Monto Dolares <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="EditMontoDol" type="text" name="EditMontoDol" value="@ViewBag.MontoDolares">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="editor-label">
+                Monto Soles <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="EditMontoSol" type="text" name="EditMontoSol" value="@ViewBag.MontoSoles">
+            </div>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-12">
+            <div class="editor-label">
+                Descripción
+            </div>
+            <div>
+                <textarea id="EditDescripcion" name="EditDescripcion"  class="form-control">@ViewBag.Descripcion</textarea>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6"></div>
+        <div class="col-md-3">
+            <button id="cancelMarca" class="btn btn-light btn-block">Cancelar</button>
+        </div>
+        <div class="col-md-3">
+            <button id="EditarSoporte" class="btn btn-primary btn-block">Crear</button>
+        </div>
+    </div>
+</fieldset>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#EditIdMarca").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            }
+        });
+        var EditIdMarca = $("#EditIdMarca").data("kendoComboBox");
+        EditIdMarca.value(@ViewBag.IdMarca);
+
+        $("#EditIdSolucion").kendoComboBox({
+            autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SolucionTI/ListarTipoSolucionTI?var=" + Math.random()
+                }
+            }
+        });
+        var IdSolucionTI = $("#EditIdSolucion").data("kendoComboBox");
+        IdSolucionTI.value(@ViewBag.IdSolucionTI);
+
+        $("#EditTipoCambio").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#EditMontoDol").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#EditMontoSol").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#EditarSoporte").click(function () {
+
+            var params = {
+                IdDocVentaMarca: $("#IdDocumentoVentaMarca").val(),
+                IdDocVenta: $("#IdDocumentoVenta").val(),
+                IdSolucionTI: $("#EditIdSolucion").val(),
+                Marca: $("#EditIdMarca").val(),
+                TipoCambio: $("#EditTipoCambio").val(),
+                MontoDol: $("#EditMontoDol").val(),
+                MontoSol: $("#EditMontoSol").val(),
+                Descripcion: $("#EditDescripcion").val()
+            };
+
+            $.ajax({
+                url: "/DocumentoVenta/Guardar",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == 'OK') {
+                        uploadDone(resp,1);
+                    }
+                    else
+                    {
+                        uploadDone(resp, 2);
+                    }
+                }
+            });
+        });
+
+        $("#cancelMarca").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+    });
+
+</script>

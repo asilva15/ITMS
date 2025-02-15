@@ -1,0 +1,181 @@
+﻿@{
+//Layout = null;
+}
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+            FILTROS
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="slick-slider-sm mx-auto">
+            <div class="row m-0 p-0">
+                <div class="col-lg-2">
+                    <div class="editor-label">
+                        Nombre o Apellido
+                    </div>
+                    <div class="k-textbox" style="width:100%;">
+                        <input id="txtLibre" />
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="editor-label">
+                        Gerencia
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdGerencia" />
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="editor-label">
+                        Area
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdArea" />
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="editor-label">
+                        Profesion
+                    </div>
+                    <div class="editor-field">
+                        <input id="cboProfesion" />
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="editor-label">
+                        Grado Instruccion
+                    </div>
+                    <div class="editor-field">
+                        <input id="cboGradoInstruccion" />
+                    </div>
+                </div>
+                <div class="col-lg-2">
+                    <div class="editor-label">
+                        N° de Colegiatura
+                    </div>
+                    <div class="k-textbox">
+                        <input type="text" id="NRO_COLEGIATURA" name="NRO_COLEGIATURA" />
+                    </div>
+                </div>
+            </div>
+            <div class="row m-0 pt-3">
+
+                <div class="col-lg-12 p-0">
+                    <button id="btnBuscar" class="btn btn-primary float-right m-0" onclick="Buscar(); return false;">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+            Reporte de nivel de colaboradores
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="slick-slider-sm mx-auto">
+            <div id="rs-priority-wrapper" style="display: none;" class="inBodyForm">
+                <iframe id="rptRRHHNivel" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //var FechaInicio = $("#FechaInicio").kendoDateTimePicker().data("kendoDateTimePicker");
+        //var FechaFin = $("#FechaFin").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#btnBuscar").click(function () {
+            $("#rs-priority-wrapper").show();
+            window.frames["rptRRHHNivel"].src = "/Reporting/Talent/ReporteNivel.aspx?var=" + Math.random()
+                + "&texto=" + $("#txtLibre").val() + "&gradoInstr=" + $("#cboGradoInstruccion").val() + "&Prof=" + $("#cboProfesion").val() + "&Ger=" + $("#IdGerencia").val() + "&Area=" + $("#IdArea").val();
+        });
+
+        var IdProfesion = $("#cboProfesion").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Profesion/Listar?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#cboGradoInstruccion").kendoComboBox({
+            dataTextField: "NAM_DEGR_INST",
+            dataValueField: "ID_DEGR_INST",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DegreeInstruction/ListDegreeInstruction?var=" + Math.random()
+                }
+            }
+        });
+
+        var IdGerencia = $("#IdGerencia").kendoComboBox({
+            placeholder: "",
+            dataTextField: "NAM_CHAR",
+            dataValueField: "ID_CHAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ObtenerListadoGerencias?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdArea").kendoComboBox({
+            cascadeFrom: "IdGerencia",
+            placeholder: "",
+            dataTextField: "title",
+            dataValueField: "ID_CHAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ObtenerListadoAreasxGerencia?var=" + Math.random()
+                }
+            }
+        });
+    });
+</script>

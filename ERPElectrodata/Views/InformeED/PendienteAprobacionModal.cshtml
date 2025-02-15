@@ -1,0 +1,309 @@
+﻿@{
+    Layout = null;
+}
+
+<style>
+    #listEstadosPAM::-webkit-scrollbar {
+        width: 12px; /* width of the entire scrollbar */
+    }
+
+    #listEstadosPAM::-webkit-scrollbar-thumb {
+        background-color: #9B9B9B; /* color of the scroll thumb */
+        border-radius: 20px; /* roundness of the scroll thumb */
+        border: 3px solid white; /* creates padding around scroll thumb */
+    }
+</style>
+
+@using (Html.BeginForm("Index", "InformeED", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEDitarInformePAM", name = "FrmEDitarInformePAM", target = "upload_targetPAM" }))
+{
+    <input id="IdInformePAM" name="IdInforme" value="@ViewBag.IdDetaInforme" type="hidden" />
+    <input id="IdEstadoPAM" name="IdEstado" value="@ViewBag.IdEstado" type="hidden" />
+    <input id="NumDocuSalePAM" name="NumDocuSale" value="@ViewBag.NumDocuSale" type="hidden" />
+    <input id="IdPlantillaPAM" name="IdPlantilla" type="hidden" />
+    <div class="container row">
+        <div class="col-md-3" style="border-right: solid; border-right-width: 0.5px; border-right-color: #A2A2A2;">
+            <p>Línea de Tiempo de Estado</p>
+
+            <div class="x_content estados" id="estados">
+                <ul id="listEstadosPAM" class="todo-list-wrapper list-group list-group-flush" style="list-style: none; overflow-x:hidden; overflow-y: scroll; max-height:400px;"></ul>
+
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Estado</label>
+                    <input id="txtEstadoInformePAM" name="txtEstadoInforme" class="form-control" type="text" style="width:100%" value="Pendiente de Elaboración" disabled>
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Responsable</label>
+                    <input id="txtResponsablePAM" name="txtResponsable" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Tipo Informe</label>
+                    <input id="txtTipoInformePAM" name="txtTipoInforme" class="form-control" type="text" style="width:100%" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Marca</label>
+                    <input id="txtMarcaPAM" name="txtMarca" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label"><b>Ticket</b></label>
+                    <div>
+                        <span id="lblCodigoTicketPAM"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Fecha Máxima de Envío</label>
+                    <input id="dtFechaMaximaEnvioPAM" name="dtFechaMaximaEnvio" type="text" class="form-control" style="width:100%" disabled>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Plantilla Elegida</label>
+                    <div class="form-group row">
+
+                        <input id="PlantillaOPPAM" name="PlantillaOP" type="text" class="form-control" style="width:100%" disabled>
+
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Adicionales del informe</label>
+                    <input id="IdAdicionalesPAM" name="IdAdicionales" type="text" style="width:100%" disabled>
+                </div>
+            </div>
+            <div class="form-group row">
+           
+            </div>
+            <br />
+            <br />
+            <div class="form-group row">
+
+                <div class="col-md-12">
+                    <button type="button" class="btn btn-hover-shine btn-primary" style="float: right;" data-dismiss="modal"> Cerrar</button>
+                </div>
+            </div>
+        </div>
+        <button data-dismiss="modal" id="btnCerrarModalPAM" hidden>Cerrar</button>
+    </div>
+    <iframe id="upload_targetPAM" name="upload_targetPAM" src="" class="d-none"></iframe>
+}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var IDIN = @ViewBag.IdDetaInforme;
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "MaquinaEstados",
+            type: "Get",
+            data: { IDI: IDIN },
+            datatype: "json",
+            cache: false,
+
+            success: function (data) {
+                if (data) {
+                    tejerMaquinaEstado(data["Maquina"]);
+                }
+            },
+            error: function () {
+            }
+        });
+
+        $.ajax({
+            url: "/InformeED/ObtenerDatosInforme/" + @ViewBag.IdDetaInforme,
+        type: "GET",
+            dataType: "json",
+                success: function (source) {
+                    $.each(source['Data'], function (index, value) {
+
+                        $("#txtEstadoInformePAM").val(source['Data'][index]['EstadoInforme']);
+                        $("#txtResponsablePAM").val(source['Data'][index]['ResponsableInforme']);
+                        $("#txtTipoInformePAM").val(source['Data'][index]['TipoInforme']);
+                        $("#dtFechaMaximaEnvioPAM").val(kendo.toString(new Date(source['Data'][index]['FechaMaximaEnvio']), "dd/MM/yyyy"));
+                        $("#txtMarcaPAM").val(source['Data'][index]['Marca']);
+                        $("#dtFechaMaximaEnvioPAM").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDatePicker");
+                        $("#EstadoPAModal").text(source['Data'][index]['EstadoInforme']);
+                        if ((source['Data'][index]['IdTicket']) != 0) {
+                            $("#lblCodigoTicketPAM").append('<a href=\"/DetailsTicket/Index/' + source['Data'][index]['IdTicket'] + '" target="_blank">' + source['Data'][index]['CodigoTicket'] + '</a>');
+                        } else {
+                            $("#lblCodigoTicketPAM").append("-");
+                        }
+
+                    });
+
+                }
+        });
+
+        var DocuSale = $("#NumDocuSalePAM").val();
+
+        var PlantillaOPPAM = $("#PlantillaOPPAM").kendoComboBox({
+            autoBind: true,
+            index: 1,
+            dataTextField: "CodigoPlantilla",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ComboPlantilla?DocuSale=" + DocuSale
+                }
+            }
+
+        }).data("kendoComboBox");
+
+        $("#IdAdicionalesPAM").kendoMultiSelect({
+            dataTextField: "NombreFormato",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/InformeED/ComboFormatoAdicional",
+                        data: { NumDocuSale: 0 },
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: function (response) {
+                        return response; // Ajusta esto según la estructura de tus datos
+                    }
+                }
+            }
+        });
+
+        $("#FrmEDitarInformePAM").submit(function (event) {
+            var selectedItems = $("#IdAdicionalesPAM").data("kendoMultiSelect").value();
+            var input = $("<input>").attr("type", "hidden").attr("name", "SelectedAdicionales").val(selectedItems);
+            $(this).append(input);
+        });
+        actualizarListaPlantillasPAM();
+        actualizarAdicionalesPAM();
+    });
+    function actualizarListaPlantillasPAM() {
+        var DocuSale = $("#NumDocuSalePAM").val();
+        var listaPlantillas = $("#PlantillaOPPAM").data("kendoComboBox")
+        $.ajax({
+            url: "/InformeED/ComboPlantilla?DocuSale="+DocuSale,
+            type: 'GET',
+            success: function (data) {
+                console.log(data)
+                listaPlantillas.dataSource.data(data.Data)
+                listaPlantillas.value(data.Data[0].Id)
+            }
+        });
+    }
+
+    function actualizarAdicionalesPAM() {
+        var DocuSale = $("#NumDocuSalePAM").val();
+        var listaAdicionales = $("#IdAdicionalesPAM").data("kendoMultiSelect")
+        var lista = []
+        $.ajax({
+            url: "/InformeED/ObtenerAdicionales?DocuSale=" + DocuSale,
+            type: 'GET',
+            success: function (data) {
+
+                if (data.length > 0) {
+
+                    $.each(data, function (index, item) {
+                        console.log(item.Id)
+                        lista.push(item.Id);
+                    });
+
+                }
+                listaAdicionales.value(lista);
+            }
+        });
+    }
+
+    function MensajeConfirmacionPAM(resp, descripcion) {
+        if (resp == "OK") {
+            toastr.success("", "El registro ha sido guardado.");
+            const boton = document.getElementById('btnCerrarModalPAM');
+            boton.click();
+            ListadoInformes(1)
+            ObtenerInformesxEstado()
+        }
+        else if (resp == "ERROR") {
+            toastr.error("", "Debe completar todos los datos antes de guardar.");
+        } else {
+            toastr.error("Por favor contacte al administrador.", "Mensaje");
+        }
+    }
+
+    function tejerMaquinaEstado(Maquina) {
+
+        console.log(Maquina);
+
+        if (parseInt(Maquina.length) > 0) {
+
+            $.each(Maquina, function (index, value) {
+
+                console.log(Maquina[index].Fecha);
+
+                if (Maquina[index].Hora == "" || Maquina[index].Hora == null || Maquina[index].Hora == undefined) {
+
+                    $(".estados ul").append('<li><div class= "vertical-timeline vertical-timeline--animate vertical-timeline--one-column" >'
+                       +'<div class="vertical-timeline-item vertical-timeline-element">'
+                        + '<div>'
+                        + '      <span class="vertical-timeline-element-icon bounce-in">'
+                        + '          <i class="badge badge-dot badge-dot-xl badge-danger"> </i>'
+                        + '      </span>'
+                        + '      <div class="vertical-timeline-element-content bounce-in">'
+                        /*+ '          <h4 class="timeline-title">Con Plantilla</h4>'*/
+                        + '<p style="font-size:10px;">' + Maquina[index].NombreEstado + '</p>'
+                        + '          <span class="vertical-timeline-element-date" style="font-size:10px;"></span>'
+                        + '      </div>'
+                        + '  </div>'
+                        + ' </div>'
+                        +'</div >'
+                        + '</li >'
+                        );
+                    
+                }
+                else {
+                    $(".estados ul").append('<li><div class= "vertical-timeline vertical-timeline--animate vertical-timeline--one-column" >'
+                        + '<div class= "vertical-timeline-item vertical-timeline-element" > '
+                        + '<div>'
+                        + '      <span class="vertical-timeline-element-icon bounce-in">'
+                        + '          <i class="badge badge-dot badge-dot-xl badge-success"> </i>'
+                        + '      </span>'
+                        + '      <div class="vertical-timeline-element-content bounce-in">'
+                        + '          <h4 class="timeline-title" style="font-size:12px;">' + Maquina[index].NombreEstado +'</h4>'
+                        + '          <p style="font-size:10px;">Hecho por: ' + Maquina[index].HechoPor +'</p>'
+                        + '          <span class="vertical-timeline-element-date" style="font-size:10px;">' + Maquina[index].Fecha + '<br />' + Maquina[index].Hora
+                        + '</span>'
+                        + '      </div>'
+                        + '  </div>'
+                        + '</div>'
+                        + '</div >'
+                        + '</li >'
+                    );
+                    
+                }
+
+            });
+
+        } else {
+            $(".estados ul").append('<div class="smallField"> No se encontraron registros');
+        }
+
+
+    }
+
+</script>

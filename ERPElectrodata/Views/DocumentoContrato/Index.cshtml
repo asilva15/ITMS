@@ -1,0 +1,268 @@
+﻿@{
+    ViewBag.Title = "Index";
+    //Layout = null;
+}
+
+<style type="text/css">
+    .card-body1 .row {
+        overflow: visible !important;
+        white-space: normal !important;
+        vertical-align: middle !important;
+        font-weight: bold !important;
+        padding-left: 6px;
+        color: white;
+        background-color: #3f6ad8;
+        height: 6vh;
+    }
+
+    #Buscar {
+        padding: .75rem !important;
+    }
+</style>
+
+<div class="card mb-3">
+    <div class="card-header-tab card-header">Registro de Contratos</div>
+    <div class="card-body">
+        <div class="form-row mb-2">
+            
+            <div class="col-md-1">
+                &nbsp;Concepto Contrato
+            </div>
+            <div class="col-md-2">
+                <input id="ConceptoContrato"  name="ConceptoContrato">
+            </div>
+            <div class="col-md-1">
+                &nbsp;Numero de OP
+            </div>
+            <div class="col-md-2">
+                <input id="NumeroOP" name="NumeroOP">
+            </div>
+            <div class="col-md-1">
+                &nbsp;Estado de Firma
+            </div>
+            <div class="col-md-2">
+                <input id="EstadoFirmaContrato" name="EstadoFirmaContrato">
+            </div>
+        </div>
+        <div class="form-row mb-2">
+            <div class="col-md-1">
+                Cliente
+            </div>
+            <div class="col-md-2">
+                <input id="IdCliente" name="IdCliente" />
+            </div>
+            <div class="col-md-1">
+                Cliente Final
+            </div>
+            <div class="col-md-2">
+                <input id="IdClienteFinal">
+            </div>
+            <div class="col-md-1" style="font-size:13px">
+                Fecha Inicio Contrato
+            </div>
+            <div class="col-md-2">
+                <input id="FechaIniContrato">
+            </div>
+            <div class="col-md-1" style="font-size:13px">
+                Fecha  Fin Contrato
+            </div>
+            <div class="col-md-2">
+                <input id="FechaFinContrato">
+            </div>
+        </div>
+        <div class="form-row mb-2">
+            <div class="col-md-10">
+                <br />
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary btn-block" id="Buscar"><i class="fa fa-search"></i> Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card mb-3">
+    <div class="card-body1">
+        <div class="row no-gutters align-items-center">
+            <div class="col-md-2"><strong>CONCEPTO</strong></div>
+            <div class="col-md-2"><strong>OP</strong></div>
+            <div class="col-md-2"><strong>ESTADO</strong></div>
+            <div class="col-md-3"><strong>CLIENTE</strong></div>
+            <div class="col-md-3"><strong>CLIENTE FINAL</strong></div>
+        </div>
+    </div>
+    <div id="listView" class="contentView"></div>
+
+    <div id="pager" class="contentViewPager"></div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <a href="\\DocumentoContrato/Detalle/${IdDocumentoContrato}?dv=" target="_blank" class="text-decoration-none" style="width:100%">
+        <div class="card-body py-3 btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-2">${ConceptoContrato}</div>
+                <div class="col-md-2">${NumeroOP}</div>
+                <div class="col-md-2">${EstadoFirmaContrato}</div>
+                <div class="col-md-3">${CLIENTE}</div>
+                <div class="col-md-3">${CLIENTEFINAL}</div>
+
+            </div>
+        </div>
+        <hr class="m-0" />
+    </a>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#ConceptoContrato").kendoComboBox({
+            autoBind: false,
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarConceptoContrato?var=" + Math.random()
+                }
+            }
+        });
+        var ConceptoContrato = $("#ConceptoContrato").data("kendoComboBox");
+
+        var NumeroOP = $("#NumeroOP").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NUM_DOCU_SALE",
+            dataValueField: "ID_DOCU_SALE",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DocumentoContrato/ListarNumeroOP?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        NumeroOP.list.width(350);
+
+        var EstadoFirmaContrato = $("#EstadoFirmaContrato").kendoComboBox({
+            autoBind: false,
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarEstadoFirmaContrato?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        EstadoFirmaContrato.list.width(350);
+
+        var IdCliente = $("#IdCliente").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        IdCliente.list.width(350);
+        
+        var IdClienteFinal = $("#IdClienteFinal").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        IdClienteFinal.list.width(350);
+                
+        var FechaIniContrato = $("#FechaIniContrato").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        var FechaFinContrato = $("#FechaFinContrato").kendoDateTimePicker().data("kendoDateTimePicker");
+        
+        $("#Buscar").click(function () {
+
+            $("#pager").empty();
+            $("#listView").empty();
+
+            if ($("#listView").data("kendoListView")) {
+                $("#pager").data("kendoPager").destroy();
+                $("#listView").data("kendoListView").destroy();
+            }
+
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/DocumentoContrato/Listar/0?var" + Math.random(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random(),
+                            ConceptoContrato: $("#ConceptoContrato").val() == '' ? 0 : $("#ConceptoContrato").val(),
+                            NumeroOP: $("#NumeroOP").val() == '' ? 0 : $("#NumeroOP").val(),
+                            EstadoFirmaContrato: $("#EstadoFirmaContrato").val() == '' ? 0 : $("#EstadoFirmaContrato").val(),
+                            IdCliente: $("#IdCliente").val() == '' ? 0 : $("#IdCliente").val(),
+                            IdClienteFinal: $("#IdClienteFinal").val() == '' ? 0 : $("#IdClienteFinal").val(),                            
+                            FechaIniContrato: $("#FechaIniContrato").val(),
+                            FechaFinContrato: $("#FechaFinContrato").val()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 15,
+                schema: {
+                    data: "Grid",
+                    total: "Cantidad"
+                }
+            });
+            
+            $("#pager").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [15, 30, 60],
+                refresh: true
+            });
+            
+            $("#listView").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#template").html())
+            });
+
+        });
+        
+        $("#Buscar").click();
+    });
+</script>

@@ -1,0 +1,665 @@
+﻿@{
+    Layout = null;
+}
+
+<div id="FormFilterActivity" style="background-color: rgba(241,241,241,0.5)">
+    <div class="bodyForm">
+
+        <div class="inBodyForm">
+            <div id="allPerformance" style="width:100%;">
+                <div style="padding-left: 10px;">
+                    <div style="width: 100%; height: 55px; margin: 10px 10px 7px 0px; padding: 0px 0px 0px 0px; font-size: 0.95em;" id="divFiltro">
+                        <form id="ParamByPerson">
+                            <div style="float: left; margin: 0px 10px 0px 10px; ">Clientes:<br />  <input type="text" id="ID_CLIE" name="ID_CLIE" /></div>
+                            <div style="float: left; margin: 0px 10px 0px 10px;">Desde :<br /><input type="text" id="SIN_DATE" name="SIN_DATE" /></div>
+                            <div style="float: left; margin: 0px 10px 0px 10px; ">Hasta :<br />  <input type="text" id="TO_DATE" name="TO_DATE" /></div>
+                            <div style="float: left;"><button id="btnBuscar" class="k-button" style="margin: 15px;" onclick="fnBuscar(); return false;">Buscar</button></div>
+                        </form>
+                        <div style="clear:both;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="afterMain">
+    <div>
+        <div style="width: 50%; float:left;">
+            <div class="titleForm"><div class="title">Reporte Todos</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="ListEnginer" style="width:95%;height: 350px; float: left;"></div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 49%; height: 300px;float:right;">
+            <div class="titleForm"><div class="title">Implementacion</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="ListEnginerImplementacion" style="width:98%;height: 345px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="clear: both; height: 10px;"></div>
+    <div>
+        <div style="width: 50%; float:left;">
+            <div class="titleForm"><div class="title">Soporte Externo</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="ListEnginerSExterno" style="width:95%;height: 350px; float: left;"></div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 49%; height: 300px;float:right;">
+            <div class="titleForm"><div class="title">Soporte Interno</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="ListEnginerSInterno" style="width:98%;height: 345px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="clear: both; height: 10px;"></div>
+    <div>
+        <div style="width: 50%; float:left;">
+            <div class="titleForm"><div class="title">Comercial</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="ListEnginerComercial" style="width:95%;height: 350px; float: left;"></div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 49%; height: 300px;float:right;">
+            <div class="titleForm"><div class="title">Capacitaciones</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="ListEnginerCapac" style="width:98%;height: 345px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="clear: both; height: 10px;"></div>
+    <div>
+        <div style="width: 50%; float:left;">
+            <div class="titleForm"><div class="title">Otros</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="ListEnginerOtros" style="width:95%;height: 350px; float: left;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function fnBuscar() {
+        
+        if ($("#ID_CLIE").val() == "") {
+            var id_enti = 0;
+        }
+        else {
+            var id_enti = parseInt($("#ID_CLIE").val());
+        }
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            idclient: id_enti
+        };
+        $.ajax({
+            url: "/Activity/ListTypeActivityAll",
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+                //TODOS
+                var userAll = new Array();
+                var hoursAll = new Array();
+                $.each(json['ListEnginer'], function (index, value) {
+                    
+                    userAll[index] = value['USUARIO'];
+                    hoursAll[index] = value['HORAS'];
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginer',
+                        marginTop: 20
+                    },
+                    colors: ["#516882"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userAll,
+                        title: {
+                            text: null
+                        },
+                        gridLineWidth: 1,
+                        lineWidth: 1,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        valueSuffix: ' Hrs',
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursAll
+                    }]
+                });
+                //Implementacion
+                var userImplementacion = new Array();
+                var hoursImplementacion = new Array();
+                $.each(json['ListEnginerImplementacion'], function (index, value) {
+                    
+                    userImplementacion[index] = value['USUARIO'];
+                    hoursImplementacion[index] = value['HORAS'];
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerImplementacion',
+                        marginTop: 20
+                    },
+                    colors: ["#516882"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userImplementacion,
+                        title: {
+                            text: null
+                        },
+                        gridLineWidth: 1,
+                        lineWidth: 1,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        valueSuffix: ' Hrs',
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursImplementacion
+                    }]
+                });
+                //Soporte Externo
+                var userSExterno = new Array();
+                var hoursSExterno = new Array();
+                $.each(json['ListEnginerSExterno'], function (index, value) {
+                    
+                    userSExterno[index] = value['USUARIO'];
+                    hoursSExterno[index] = value['HORAS'];
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerSExterno',
+                        marginTop: 20
+                    },
+                    colors: ["#516882"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userSExterno,
+                        title: {
+                            text: null
+                        },
+                        gridLineWidth: 1,
+                        lineWidth: 1,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        valueSuffix: ' Hrs',
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursSExterno
+                    }]
+                });
+                //Soporte Interno
+                var userSInterno = new Array();
+                var hoursSInterno = new Array();
+                $.each(json['ListEnginerSInterno'], function (index, value) {
+                    
+                    userSInterno[index] = value['USUARIO'];
+                    hoursSInterno[index] = value['HORAS'];
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerSInterno',
+                        marginTop: 20
+                    },
+                    colors: ["#516882"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userSInterno,
+                        title: {
+                            text: null
+                        },
+                        gridLineWidth: 1,
+                        lineWidth: 1,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        valueSuffix: ' Hrs',
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursSInterno
+                    }]
+                });
+                //Comercial
+                var userComercial = new Array();
+                var hoursComercial = new Array();
+                $.each(json['ListEnginerComercial'], function (index, value) {
+                    
+                    userComercial[index] = value['USUARIO'];
+                    hoursComercial[index] = value['HORAS'];
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerComercial',
+                        marginTop: 20
+                    },
+                    colors: ["#516882"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userComercial,
+                        title: {
+                            text: null
+                        },
+                        gridLineWidth: 1,
+                        lineWidth: 1,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        valueSuffix: ' Hrs',
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursComercial
+                    }]
+                });
+                //Capacitacion
+                var userCapacitacion = new Array();
+                var hoursCapacitacion = new Array();
+                $.each(json['ListEnginerCapac'], function (index, value) {
+                    
+                    userCapacitacion[index] = value['USUARIO'];
+                    hoursCapacitacion[index] = value['HORAS'];
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerCapac',
+                        marginTop: 20
+                    },
+                    colors: ["#516882"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userCapacitacion,
+                        title: {
+                            text: null
+                        },
+                        gridLineWidth: 1,
+                        lineWidth: 1,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        valueSuffix: ' Hrs',
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursCapacitacion
+                    }]
+                });
+                //Otros
+                var userOtros = new Array();
+                var hoursOtros = new Array();
+                $.each(json['ListEnginerOtros'], function (index, value) {
+                    
+                    userOtros[index] = value['USUARIO'];
+                    hoursOtros[index] = value['HORAS'];
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerOtros',
+                        marginTop: 20
+                    },
+                    colors: ["#516882"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userOtros,
+                        title: {
+                            text: null
+                        },
+                        gridLineWidth: 1,
+                        lineWidth: 1,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        valueSuffix: ' Hrs',
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: true
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursOtros
+                    }]
+                });
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {     
+        var today = new Date();
+        var k_enddatetimepicker = $("#TO_DATE").kendoDatePicker({
+            value: today
+        }).data("kendoDatePicker");
+        var k_startdatetimepicker = $("#SIN_DATE").kendoDatePicker({
+            value:today
+        }).data("kendoDatePicker");
+        var ID_CLIE = $("#ID_CLIE").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+    });
+    fnBuscar();
+</script>
+

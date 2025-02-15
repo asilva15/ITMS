@@ -1,0 +1,1387 @@
+﻿@model ERPElectrodata.Models.VACATION
+
+@{ //Layout = null;
+}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">
+<script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.25/sorting/datetime-moment.js"></script>
+
+<style>
+    .fc-time {
+        display: none;
+    }
+
+    .fc-title {
+        font-weight: bold;
+    }
+
+    /*aprobar desaprobar estilos*/
+    .checkAprobado {
+        -webkit-appearance: none; /*hides the default checkbox*/
+        height: 20px;
+        width: 20px;
+        transition: 0.10s;
+        text-align: center;
+        font-weight: 600;
+        color: white !important;
+        border-radius: 3px;
+        border: 1px solid black;
+    }
+
+        .checkAprobado:checked {
+            background-color: #0E9700;
+            color: white !important;
+        }
+
+            .checkAprobado:checked:before {
+                content: "✔";
+                color: white !important;
+            }
+
+        .checkAprobado:hover {
+            cursor: pointer;
+            opacity: 0.8;
+        }
+
+    .checkDesaprobado {
+        -webkit-appearance: none; /*hides the default checkbox*/
+        height: 20px;
+        width: 20px;
+        transition: 0.10s;
+        text-align: center;
+        font-weight: 600;
+        color: white !important;
+        border-radius: 3px;
+        border: 1px solid black;
+    }
+
+        .checkDesaprobado:checked {
+            background-color: #FE0006;
+        }
+
+            .checkDesaprobado:checked:before {
+                content: "✖";
+            }
+
+        .checkDesaprobado:hover {
+            cursor: pointer;
+            opacity: 0.8;
+        }
+    .lock-word {
+        z-index: 10;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -180px;
+        margin-left: -470px;
+    }
+
+    .fadeInDown {
+        -webkit-animation-name: fadeInDown;
+        animation-name: fadeInDown;
+    }
+
+    .animated {
+        -webkit-animation-duration: 1s;
+        animation-duration: 1s;
+        -webkit-animation-fill-mode: both;
+        animation-fill-mode: both;
+        z-index: 100;
+    }
+
+    img.circle-border {
+        border: 6px solid #808080;
+        border-radius: 50%;
+    }
+
+    .lock-word span {
+        font-size: 100px;
+        font-weight: 600;
+        color: #e9e9e9;
+        display: inline-block;
+    }
+
+    .lock-word .first-word {
+        margin-right: 160px;
+    }
+
+    .middle-box {
+        height: 400px;
+        width: 400px;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -250px;
+        margin-left: -200px;
+        z-index: 100;
+    }
+
+    .lockscreen.middle-box {
+        width: 200px;
+        margin-left: -100px;
+        margin-top: -190px;
+    }
+</style>
+@if (@ViewBag.ID_ACCO == 4)
+{
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-car icon-gradient bg-mean-fruit"></i>
+                </div>
+                <div>
+                    Vacaciones
+                    <div class="page-title-subheading">En este módulo encontrarás todos los detalles de las solicitudes.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title" id="titleForm">Registrar Solicitud de Vacaciones</div>
+                    @using (Html.BeginForm("CrearSolicitud", "Vacaciones", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmSolicitudVacaciones", target = "upload_target" }))
+                    {
+                        @Html.ValidationSummary(true)
+                        <fieldset>
+                            <input type="hidden" id="Jornada" name="Jornada" value="0" />
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblMotivoVacante" for="IdMotivoVacante" class="">Fecha de Inicio <span style="color:red">*</span> </label>
+                                        @Html.EditorFor(model => model.DAT_STAR)
+                                        @Html.ValidationMessageFor(model => model.DAT_STAR)
+                                    </div>
+                                </div>
+                                <div class="col-md-3" id="divCantidadVacante">
+                                    <div class="position-relative form-group">
+                                        <label id="lblCantidad" for="CantidadVacante" class="">Fecha Fin <span style="color:red">*</span></label>
+                                        @Html.EditorFor(model => model.DAT_END)
+                                        @Html.ValidationMessageFor(model => model.DAT_END)
+                                    </div>
+                                </div>
+                                <div class="col-md-3" id="divGerencia">
+                                    <div class="position-relative form-group">
+                                        <label id="lblNroDias" for="IdNroDias" class="">Número de Días</label>
+                                        <input id="nroDias" type="number" class="form-control" value=0 readonly />
+                                    </div>
+                                </div>
+                                <div class="col-md-3" id="divArea">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaRetorno" for="IdFechaRetorno" class="">Fecha Retorno</label>
+                                        <input id="fechRetorno" name="fechRetorno" type="text" class="form-control" readonly />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <label id="lblJustificacion" for="Justificacion" class="">Comentario </label>
+                                        @Html.EditorFor(model => model.SUMMARY)
+                                        @Html.ValidationMessageFor(model => model.SUMMARY)
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <div class="custom-checkbox custom-control">
+                                            <input type="checkbox" id="cbxJornada" name="cbxJornada" />
+                                            <label style="font-weight: bold; font-size: larger;" for="cbxJornada">Jornada atípica</label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <input class="form-control" id="txtJornada" name="txtJornada" style="display:none" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <br />
+                                </div>
+                                <div class="col-md-3">
+                                    @*<button id="submit" class="btn btn-info btn-lg btn-block"><i class="fa fa-save"></i> Solicitar</button>*@
+                                    <button id="submit" class="btn btn-info btn-lg btn-block" type="submit"><i class="fa fa-save"></i> Solicitar</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <iframe id="upload_target" name="upload_target" src="" style="display:none;"></iframe>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title" id="titleForm">Observaciones</div>
+                    <fieldset>
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="vertical-time-simple vertical-without-time vertical-timeline vertical-timeline--one-column">
+                                    <div class="vertical-timeline-item dot-danger vertical-timeline-element">
+                                        <div>
+                                            <span class="vertical-timeline-element-icon bounce-in"></span>
+                                            <div class="vertical-timeline-element-content bounce-in">
+                                                <h4 class="timeline-title">En caso se solicite  de 4 días a más, se debe considerar <b>Sábado</b> y <b>Domingo.</b></h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="vertical-timeline-item dot-danger vertical-timeline-element">
+                                        <div>
+                                            <span class="vertical-timeline-element-icon bounce-in"></span>
+                                            <div class="vertical-timeline-element-content bounce-in">
+                                                <h4 class="timeline-title">Solo si tu jornada laboral es <b>ATÍPICA</b>, los días a solicitar deberán alinearse a la misma.</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="vertical-timeline-item dot-danger vertical-timeline-element">
+                                        <div>
+                                            <span class="vertical-timeline-element-icon bounce-in"></span>
+                                            <div class="vertical-timeline-element-content bounce-in">
+                                                <h4 class="timeline-title">Su solicitud de vacaciones será aprobada por su jefe directo.</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="vertical-timeline-item dot-danger vertical-timeline-element">
+                                        <div>
+                                            <span class="vertical-timeline-element-icon bounce-in"></span>
+                                            <div class="vertical-timeline-element-content bounce-in">
+                                                <h4 class="timeline-title">Recuerda que si trabajas solo de lunes a viernes, tu jornada es <b>TÍPICA</b>.</h4>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @*<div class="position-relative form-group">
+                                        En caso se solicite  de 5 días a más, se debe considerar Sábado y Domingo.<br />
+                                        Sólo si tu jornada laboral es atípica, los días a solicitar deberán alinearse a la misma.
+                                    </div>*@
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <div class="card-title">Filtrar</div>
+                        <form class="">
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblEstado" for="lblEstado" class="">Usuario</label>
+                                        @Html.Editor("IdUsuario")
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblEstado" for="lblEstado" class="">Estado</label>
+                                        @Html.TextBoxFor(model => model.ID_VACA_STAT)
+                                        @Html.ValidationMessageFor(model => model.ID_VACA_STAT)
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblEstado" for="lblEstado" class="">Área</label>
+                                        @Html.Editor("IdArea")
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaInicio" for="FechaInicioTrabajo" class="">Fecha Inicio</label>
+                                        @Html.TextBox("FechaIngresoInicio")
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaInicio" for="FechaInicioTrabajo" class="">Fecha Fin</label>
+                                        @Html.TextBox("FechaIngresoFin")
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblEstado" for="lblEstado" class="">Jefe Aprobador</label>
+                                        @Html.Editor("IdJefeAprobador")
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <br />
+                                    <button id="Buscar" type="button" class="mt-2 btn btn-primary" onclick="listarVacaciones()">Buscar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title" id="titleForm">Registro de Vacaciones</div>
+                    <fieldset>
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <table id="tbVacaciones" class="table table-bordered table-striped table-responsive-lg">
+                                        <thead>
+                                            <tr>
+                                                @*<th>Id</th>*@
+                                                <th>Código</th>
+                                                <th>Inicio</th>
+                                                <th>Fin</th>
+                                                <th>Registro</th>
+                                                <th>Nro Dias</th>
+                                                <th>IdEstado</th>
+                                                <th>Estado</th>
+                                                <th>Archivo</th>
+                                                <th>Creado Por</th>
+                                                @*<th>Fecha Registro</th>*@
+                                                <th>Área</th>
+                                                <th>Jornada</th>
+                                                <th>Jefe Aprobador</th>
+                                                <th>Aprobar</th>
+                                                <th>Declarar</th>
+                                                <th>Cancelar</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                        <tfoot>
+                                            <tr>
+                                                @*<th>Id</th>*@
+                                                <th>Código</th>
+                                                <th>Inicio</th>
+                                                <th>Fin</th>
+                                                <th>Registro</th>
+                                                <th>Nro Dias</th>
+                                                <th>IdEstado</th>
+                                                <th>Estado</th>
+                                                <th>Archivo</th>
+                                                <th>Creado Por</th>
+                                                @*<th>Fecha Registro</th>*@
+                                                <th>Área</th>
+                                                <th>Jornada</th>
+                                                <th>Jefe Aprobador</th>
+                                                <th>Aprobar</th>
+                                                <th>Declarar</th>
+                                                <th>Cancelar</th>
+                                            </tr>
+                                        </tfoot>
+                                    </table>
+                                </div>
+
+                            </div>
+                            <div class="w-100 m-3 d-flex justify-content-between">
+                                <div style="flex-grow:1"></div>
+                                <button class="btn btn-info btn-lg" onclick="confirmarAprobaciones()">Confirmar</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title" id="titleForm">Vacaciones Programadas</div>
+                    <fieldset>
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <div id="calendar">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="contentEliminarCandidatoModal" hidden>
+
+    </div>
+
+
+
+}
+else
+{
+        <div style="background-color:beige;">
+            <div class="lock-word animated fadeInDown">
+                <span class="first-word">PAGINA</span><span>BLOQUEADA</span>
+            </div>
+            <div class="middle-box text-center lockscreen animated fadeInDown">
+                <div>
+                    <div class="m-b-md">
+                        <img alt="image" class="img-circle circle-border" width="150" height="150" src="~/Content/Fotos/@ViewBag.Foto">
+                    </div>
+                    <h3>@ViewBag.Nombre</h3>
+                    <p>Para acceder a esta parte del Sistema, contacte al Administrador. Sistemas&#64;electrodata.com.pe</p>
+                    <br />
+                    <p>Copyright &copy; 2017<br />Derechos Reservados ED</p>
+                </div>
+            </div>
+        </div>
+}
+
+
+<script type="text/javascript">
+    var selectedCheckboxes = [];
+    $(document).ready(function () {
+
+
+        $('input[type=checkbox]').click(function () {
+            $("#txtJornada").removeAttr("style");
+            if ($(this).is(":checked")) {
+                $("#txtJornada").css("display", "true");
+                $("#Jornada").val(1);
+                $('#DAT_STAR').data("kendoDatePicker").value(null);
+                $('#DAT_END').data("kendoDatePicker").value(null);
+                //$('#DAT_STAR').val("");
+                //$('#DAT_END').val("");
+                $('#nroDias').val("0");
+                $('#fechRetorno').val("");
+            } else if ($(this).is(":not(:checked)")) {
+                $("#txtJornada").css("display", "none");
+                $("#Jornada").val(0);
+                $('#DAT_STAR').data("kendoDatePicker").value(null);
+                $('#DAT_END').data("kendoDatePicker").value(null);
+                //$('#DAT_STAR').val("");
+                //$('#DAT_END').val("");
+                $('#nroDias').val("0");
+                $('#fechRetorno').val("");
+            }
+        });
+        var FechaIngresoInicio = $("#FechaIngresoInicio").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDateTimePicker");
+        var FechaIngresoFin = $("#FechaIngresoFin").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDateTimePicker");
+
+        //$("#IdUsuario").kendoComboBox({
+        //    dataTextField: "Evaluado",
+        //    dataValueField: "IdPersEnti",
+        //    filter: "contains",
+        //    autoBind: true,
+        //    delay: 500,
+        //    minLength: 0,
+        //    suggest: true,
+        //    dataSource: {
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/EvaluacionPersonal/ListarPersonal?var=" + Math.random()
+        //        }
+        //    },
+        //});
+        $("#IdUsuario").kendoComboBox({
+            dataTextField: "FIR_NAME",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Assistance/Equipo?var=" + Math.random()
+                }
+            },
+        });
+        $("#IdArea").kendoComboBox({
+            dataTextField: "Area",
+            dataValueField: "IDArea",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: {
+                        url: "/Vacaciones/ListarAreaVacacion",
+                        data: function () {
+                            return {
+                                IdUsuario: $("#IdUsuario").val() == '' ? 0 : $("#IdUsuario").val(),
+                                ID_VACA_STAT: $("#ID_VACA_STAT").val() == '' ? 0 : $("#ID_VACA_STAT").val(),
+                                FechaIngresoInicio: $("#FechaIngresoInicio").val() == '' ? '' : $("#FechaIngresoInicio").val(),
+                                FechaIngresoFin: $("#FechaIngresoFin").val() == '' ? '' : $("#FechaIngresoFin").val(),
+                                IdJefeAprobador: $("#IdJefeAprobador").val() == '' ? 0 : $("#IdJefeAprobador").val(),
+                                IdArea: $("#IdArea").val() == '' ? 0 : $("#IdArea").val()
+                            };
+                        }
+                    },
+                    dataType: "json"
+                }
+            }
+        });
+
+        $("#IdJefeAprobador").kendoComboBox({
+            dataTextField: "FIR_NAME",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Vacaciones/ListarJefeAprobador?var=" + Math.random()
+                }
+            },
+        });
+        $("#ID_VACA_STAT").kendoComboBox({
+            placeholder: "",
+            dataTextField: "NAM_VACA_STAT",
+            dataValueField: "ID_VACA_STAT",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Vacaciones/ListarEstados?var=" + Math.random()
+                }
+            }
+        });
+        var FechaInicio;
+        var FechaIni = $("#DAT_STAR").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            //min: new Date(),
+            change: function () {
+                //FechaInicio = this.value();
+                calcularFechaRetorno();
+            }
+        });
+
+        Date.prototype.addDays = function (days) {
+            const date = new Date(this.valueOf());
+            date.setDate(date.getDate() + days);
+            return date;
+        };
+
+        var FechaFin = $("#DAT_END").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            //min: new Date(),
+            change: function () {
+                calcularFechaRetorno();
+            }
+            //change: function () {
+            //    var dif = this.value().getTime() - FechaInicio.getTime();
+            //    //alert(dif);
+            //    var dias = Math.floor(dif / (1000 * 60 * 60 * 24)) + 1;
+            //    var dtIni = new Date(FechaInicio.getTime());
+            //    var dtFin = new Date(this.value().getTime());
+            //    if ($('input[type=checkbox]').is(":checked")) {
+            //    if (dtIni.getUTCDay() == 1 && dtFin.getUTCDay() == 5) {
+            //        //dias = dias + 2;
+            //        dtFin = dtFin.addDays(1);
+            //    } else if (dtIni.getUTCDay() == 1 && dtFin.getUTCDay() == 6) {
+            //            //dias = dias + 2;
+            //            dtFin = dtFin.addDays(1);
+            //    } else if (dias >= 4 && dtIni.getUTCDay() == 1) {
+            //       // dias = dias + 2;
+            //        dtFin = dtFin.addDays(1);
+            //    } else if (dias >= 4 && dtFin.getUTCDay() == 5) {
+
+            //        //dias = dias + 2;
+            //        dtFin = dtFin.addDays(1);
+            //    } else if (dias >= 4 && dtFin.getUTCDay() == 6) {
+            //        //dias = dias + 1;
+            //        dtFin = dtFin.addDays(1);
+            //    } else if (dias < 4 && dtFin.getUTCDay() == 6) {
+            //       // dias = dias - 1;
+            //        dtFin = dtFin.addDays(1);
+            //    } else if (dias < 4 && dtFin.getUTCDay() == 0) {
+            //        //dias = dias - 2;
+            //        dtFin = dtFin.addDays(1);
+            //        //Fecha fin Viernes
+            //    } else if (dtFin.getUTCDay() == 5) {
+            //        dtFin = dtFin.addDays(1);
+            //    } else if (dtFin.getUTCDay() == 6) {
+            //        dtFin = dtFin.addDays(1);
+            //    } else {
+            //        dtFin = dtFin.addDays(1);
+            //    }
+            //    document.getElementById("nroDias").value = dias;
+            //    document.getElementById("fechRetorno").value = padLeft(dtFin.getDate()) + "/" + padLeft(dtFin.getMonth() + 1) + "/" + dtFin.getFullYear();
+
+            //        /*alert(FechaFin.val().getDate());*/
+
+            //        var fechaFinValue = FechaFin.val();
+
+            //        // Convierte la cadena de texto a un objeto de fecha
+            //        var fechaFinDate = new Date(fechaFinValue);
+
+            //        // Verifica si la conversión fue exitosa antes de acceder a getDate()
+            //        if (!isNaN(fechaFinDate.getTime())) {
+            //            //alert(fechaFinDate.getDate());
+            //        } else {
+            //            console.error("Error al convertir FechaFin.val() a un objeto de fecha válido.");
+            //        }
+
+
+            //    } else if ($('input[type=checkbox]').is(":not(:checked)")) {
+            //        if (dtIni.getUTCDay() == 4 && dias == 5) {
+            //            dias = dias - 2;
+            //            dtFin = dtFin.addDays(1);
+            //        } else if (dtIni.getUTCDay() == 5 && dias == 4) {
+            //            dias = dias - 2;
+            //            dtFin = dtFin.addDays(1);
+            //        } else if (dtIni.getUTCDay() == 5 && dias == 5) {
+            //            dias = dias - 2;
+            //            dtFin = dtFin.addDays(1);
+            //        } else if (dtIni.getUTCDay() == 3 && dias == 5) {
+            //            dias = dias - 2;
+            //            dtFin = dtFin.addDays(1);
+            //        } else if (dtIni.getUTCDay() == 3 && dtFin.getUTCDay() == 6 && dias <= 5) {
+            //            dias = dias - 1;
+            //            dtFin = dtFin.addDays(1);
+            //        } else if (dtIni.getUTCDay() == 1 && dtFin.getUTCDay() == 5) {
+            //            dias = dias + 2;
+            //            dtFin = dtFin.addDays(3);
+            //        } else if (dtIni.getUTCDay() == 1 && dtFin.getUTCDay() == 6) {
+            //            dias = dias + 1;
+            //            dtFin = dtFin.addDays(2);
+            //        } else if (dias == 4 && dtIni.getUTCDay() == 1) {
+            //            dias = dias + 2;
+            //            dtFin = dtFin.addDays(1);
+            //        } else if (dias >= 4 && dtFin.getUTCDay() == 5) {
+            //            dias = dias + 2;
+            //            dtFin = dtFin.addDays(3);
+            //        } else if (dias >= 4 && dtFin.getUTCDay() == 6) {
+            //            dias = dias + 1;
+            //            dtFin = dtFin.addDays(2);
+            //        } else if (dias < 4 && dtFin.getUTCDay() == 6) {
+            //            dias = dias - 1;
+            //            dtFin = dtFin.addDays(2);
+            //        } else if (dias < 4 && dtFin.getUTCDay() == 0) {
+            //            dias = dias - 2;
+            //            dtFin = dtFin.addDays(1);
+            //            //Fecha fin Viernes
+            //        } else if (dtFin.getUTCDay() == 5) {
+            //            dtFin = dtFin.addDays(3);
+            //        } else if (dtFin.getUTCDay() == 6) {
+            //            dtFin = dtFin.addDays(2);
+            //        } else {
+            //            dtFin = dtFin.addDays(1);
+            //        }
+            //        document.getElementById("nroDias").value = dias;
+            //        document.getElementById("fechRetorno").value = padLeft(dtFin.getDate()) + "/" + padLeft(dtFin.getMonth() + 1) + "/" + dtFin.getFullYear();
+            //        /*alert(FechaFin.val().getDate());*/
+
+            //        var fechaFinValue = FechaFin.val();
+
+            //        // Convierte la cadena de texto a un objeto de fecha
+            //        var fechaFinDate = new Date(fechaFinValue);
+
+            //        // Verifica si la conversión fue exitosa antes de acceder a getDate()
+            //        if (!isNaN(fechaFinDate.getTime())) {
+            //            //alert(fechaFinDate.getDate());
+            //        } else {
+            //            console.error("Error al convertir FechaFin.val() a un objeto de fecha válido.");
+            //        }
+            //}
+            //}
+        });
+
+
+
+        $("#SUMMARY").addClass("form-control");
+
+        /*$("#archivos").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            select: onSelectAttaCess,
+            multiple: false,
+        });*/
+        listarVacaciones();
+        VerCalendario();
+
+        //$("#submit").click(function () {
+
+        //    toastr.info("Guardando...", "Espere por favor");
+        //});
+
+    });
+
+    //1.-----
+    //    <button id="submit" class="btn btn-info btn-lg btn-block" type="submit"><i class="fa fa-save"></i> Solicitar</button>
+    //2.--------------
+
+    const button = document.querySelector('#submit');
+    const form = document.querySelector('#FrmSolicitudVacaciones');
+
+    form.addEventListener("submit", (event) => {
+
+
+        button.disabled = true;
+
+    });
+
+    $('#tbVacaciones').on('change', 'input[type="checkbox"]', function () {
+        var checkbox = $(this);
+        var isChecked = checkbox.prop('checked');
+        var value = checkbox.val(); // Asume que los checkboxes tienen un valor
+
+        if (isChecked) {
+            selectedCheckboxes.push(value);
+        } else {
+            var index = selectedCheckboxes.indexOf(value);
+            if (index !== -1) {
+                selectedCheckboxes.splice(index, 1);
+            }
+        }
+    });
+
+
+    function padLeft(n) {
+        return ("00" + n).slice(-2);
+    }
+
+    function calcularFechaRetorno() {
+        var fechaInicio = $("#DAT_STAR").data("kendoDatePicker").value();
+        var fechaFin = $("#DAT_END").data("kendoDatePicker").value();
+        var jornadaAtipica = $('input[type=checkbox]').is(":checked");
+
+        // si la jornada no es atipica, no puede seleccionar sabado o domingo
+        if (!jornadaAtipica) {
+            if (fechaInicio && (fechaInicio.getUTCDay() === 6 || fechaInicio.getUTCDay() === 0)) {
+                $("#DAT_STAR").data("kendoDatePicker").value(null);
+                toastr.warning("Solo si tu jornada de trabajo es <b>ATÍPICA</b>, sí se puede considerar sábado y domingo (en caso aplique).");
+                return;
+            }
+            if (fechaFin && fechaFin.getUTCDay() === 6) {
+                $('#DAT_END').data("kendoDatePicker").value(null);
+                toastr.warning("Solo si tu jornada de trabajo es <b>ATÍPICA</b>, sí se puede considerar sábado y domingo (en caso aplique).");
+                return;
+            }
+            if (fechaInicio && fechaFin) {
+                var diaActual = new Date(fechaInicio);
+                var diasHabiles = 0;
+                while (diaActual <= fechaFin) {
+                    var diaSemana = diaActual.getUTCDay();
+                    if (diaSemana !== 6 && diaSemana !== 0) {
+                        diasHabiles++;
+                    }
+                    diaActual.setDate(diaActual.getDate() + 1);
+                }
+                if (diasHabiles < 4 && fechaFin.getUTCDay() === 0) {
+                    $('#DAT_END').data("kendoDatePicker").value(null);
+                    toastr.warning("Solo si tu jornada de trabajo es <b>ATÍPICA</b>, sí se puede considerar sábado y domingo (en caso aplique).");
+                    return;
+                }
+            }
+        }
+
+        // si no se han seleccionado ambos fechas
+        if (!fechaInicio || !fechaFin) {
+            return;
+        }
+
+        // diferencia de dias
+        var dif = fechaFin.getTime() - fechaInicio.getTime();
+        var dias = Math.floor(dif / (1000 * 60 * 60 * 24)) + 1;
+
+        if (jornadaAtipica) {
+            // cuando es jornada atipica, incluir sabados y domingos
+            fechaFin = fechaFin.addDays(1);
+        } else {
+            // cuando es jornada regular, excluir sabados y domingos
+            if (fechaInicio.getUTCDay() == 4 && dias == 5) {
+                dias = dias - 2;
+                fechaFin = fechaFin.addDays(1);
+            } else if (fechaInicio.getUTCDay() == 5 && dias == 4) {
+                dias = dias - 2;
+                fechaFin = fechaFin.addDays(1);
+            } else if (fechaInicio.getUTCDay() == 5 && dias == 5) {
+                dias = dias - 2;
+                fechaFin = fechaFin.addDays(1);
+            } else if (fechaInicio.getUTCDay() == 3 && dias == 5) {
+                dias = dias - 2;
+                fechaFin = fechaFin.addDays(1);
+            } else if (fechaInicio.getUTCDay() == 3 && fechaFin.getUTCDay() == 6 && dias <= 5) {
+                dias = dias - 1;
+                fechaFin = fechaFin.addDays(1);
+            } else if (fechaInicio.getUTCDay() == 1 && fechaFin.getUTCDay() == 5) {
+                dias = dias + 2;
+                fechaFin = fechaFin.addDays(3);
+            } else if (fechaInicio.getUTCDay() == 1 && fechaFin.getUTCDay() == 6) {
+                dias = dias + 1;
+                fechaFin = fechaFin.addDays(2);
+            } else if (dias == 4 && fechaInicio.getUTCDay() == 1) {
+                dias = dias + 2;
+                fechaFin = fechaFin.addDays(1);
+            } else if (dias >= 4 && fechaFin.getUTCDay() == 5) {
+                dias = dias + 2;
+                fechaFin = fechaFin.addDays(3);
+            } else if (dias >= 4 && fechaFin.getUTCDay() == 6) {
+                dias = dias + 1;
+                fechaFin = fechaFin.addDays(2);
+            } else if (dias < 4 && fechaFin.getUTCDay() == 6) {
+                dias = dias - 1;
+                fechaFin = fechaFin.addDays(2);
+            } else if (dias < 4 && fechaFin.getUTCDay() == 0) {
+                dias = dias - 2;
+                fechaFin = fechaFin.addDays(1);
+            } else if (fechaFin.getUTCDay() == 5) {
+                fechaFin = fechaFin.addDays(3);
+            } else if (fechaFin.getUTCDay() == 6) {
+                fechaFin = fechaFin.addDays(2);
+            } else {
+                fechaFin = fechaFin.addDays(1);
+            }
+        }
+
+        document.getElementById("nroDias").value = dias;
+        document.getElementById("fechRetorno").value = padLeft(fechaFin.getDate()) + "/" + padLeft(fechaFin.getMonth() + 1) + "/" + fechaFin.getFullYear();
+    }
+
+    var namPersValue = '@Session["NAM_PERS"].ToString().ToUpper()';
+
+    function listarVacaciones() {
+        selectedCheckboxes = []
+        $('#tbVacaciones').dataTable().fnDestroy();
+
+       /* $.fn.dataTable.moment('DD/MM/YYYY');*/
+
+        var table = $('#tbVacaciones').dataTable({
+
+            /*"order": [[1, "desc"], [0, "desc"]],*/
+            "order": [],
+            responsive: true,
+            dom: 'lBfrtip',
+            "bPaginate": true,
+            "searching": true,
+            ajax: {
+                "url": "/Vacaciones/ListarMisVacaciones",
+                "data": function (d) {
+                    d.IdUsuario = $("#IdUsuario").val() == '' ? 0 : $("#IdUsuario").val(),
+                    d.ID_VACA_STAT = $("#ID_VACA_STAT").val() == '' ? 0 : $("#ID_VACA_STAT").val(),
+                    d.FechaIngresoInicio = $("#FechaIngresoInicio").val() == '' ? '' : $("#FechaIngresoInicio").val(),
+                        d.FechaIngresoFin = $("#FechaIngresoFin").val() == '' ? '' : $("#FechaIngresoFin").val(),
+                        d.IdJefeAprobador = $("#IdJefeAprobador").val() == '' ? 0 : $("#IdJefeAprobador").val(),
+                        d.IdArea = $("#IdArea").val() == '' ? 0 : $("#IdArea").val()
+                }
+            },
+            columns: [
+                //{ data: "Id" },
+                { data: "Codigo" },
+                { data: "Inicio" },
+                { data: "Fin" },
+                { data: "Registro" },
+                { data: "NroDias" },
+                { data: "IdEstado" },
+                //{ data: "Estado" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style="text-align:center"><div class="badge" style="color:white;background-color:' + data.ColorPrioridad + '">' + data.Estado + '</div></div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var cadena = "";
+                        if (data.IdEstado == 2 || data.IdEstado == 6) {
+                            cadena = '<div onclick="verFormato(' + data.Id + ')" style="cursor:pointer; color:blue">Ver Formato</div>';
+                        }
+                        return cadena;
+                    }
+                },
+                { data: "CreadoPor" },
+                /*{ data: "FechaRegistro" },*/
+                { data: "Area" },
+                { data: "Jornada" },
+                { data: "JefeAprobador" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var cadena = "";
+                        if (data.Aprobar == 1 && data.Estado == "SOLICITADO") {
+
+                            cadena = '<div style="display:flex; justify-content: center;">' +
+                                '<input style="margin-right: 10px" type="checkbox" id="aprobar_' + data.Id + '" name="opcion' + data.Id + '"  class="checkAprobado" onclick="validarActivado(this)" value="aprobar_' + data.Id + '" >'+
+                                '<input type="checkbox" name="opcion' + data.Id + '" id="desaprobar_' + data.Id + '"  class="checkDesaprobado" onclick="validarActivado(this)" value="desaprobar_' + data.Id + '" >' +
+                                     '</div>'
+                        } else {
+                            cadena = '<div style="text-align: center">-</div>';
+                        }
+                        return cadena;
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var cadena = "";
+                        if (@Session["RRHH"].ToString()== 1 && data.Estado == "APROBADO") {
+                            cadena = '<div style="text-align:center">' +
+                                '<button type="button" id="btnDeclararSolicitud' + data.Id + '" title="Declarar Solicitud" class="border-0 btn-transition btn btn-outline-success" onclick="DeclararSolicitudVacaion(' + data.Id + ')"><i class="fa fa-check"></i></button>' +
+
+                                '</div>';
+
+                        } else {
+                            cadena = '<div style="text-align: center">-</div>';
+                        }
+                        return cadena;
+                    }
+                },
+
+                  {
+                    data: null,
+                    render: function (data, type, row) {
+                        var cadena = "-";
+
+
+                        if (@Session["SUPERVISOR_RRHH"].ToString()==1) {
+
+                            if (data.Estado == "SOLICITADO" || data.Estado == "APROBADO") {
+                            cadena = '<div style="text-align:center">' +
+                                '<button id="btnEliminarCandidato' + data.Id + '" title="Cancelar Solicitud" class="border-0 btn-transition btn btn-outline-danger" onclick="CancelarSolicitudVacaion(' + data.Id + ')" data-toggle="modal" data-target="#miModal" ><i class="fa fa-times"></i></button>' +
+                                '</div>';
+
+                            }
+
+                        }else
+
+                         if (namPersValue== data.CreadoPor) {
+
+                            if (data.Estado == "SOLICITADO") {
+                                var cadena = '<div style="text-align:center">' +
+                                    '<button type="button" id="btnEliminarCandidato' + data.Id + '" title="Cancelar Solicitud" class="border-0 btn-transition btn btn-outline-danger" onclick="CancelarSolicitud(' + data.Id + ')"><i class="fa fa-times"></i></button>' +
+                                    '</div>';
+
+
+                            }
+                         } else {
+                             cadena = '<div style="text-align: center">-</div>';
+                         }
+
+                        return cadena;
+                    }
+                }
+
+
+            ],
+            buttons: [
+                'copy', 'csv', 'excel', 'pdf', 'print'
+            ],
+            "columnDefs": [
+                { "targets": 5, "visible": false }
+            ],
+        });
+
+    }
+
+    function CancelarSolicitud(id) {
+        // Utiliza SweetAlert2 para mostrar la alerta
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción cancelará la solicitud. ¿Quieres continuar?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Sí, cancelar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Si el usuario confirma, realiza la solicitud AJAX
+                $.ajax({
+                    type: 'POST',
+                    url: '/Vacaciones/CancelarSolicitudVaciones',
+                    data: { id: id },
+                    success: function (result) {
+                        if (result.success) {
+                            // Muestra una alerta de éxito si es necesario
+                            Swal.fire('Cancelado', result.message, 'success');
+                            listarVacaciones();
+                        } else {
+                            // Muestra una alerta de error si es necesario
+                            Swal.fire('Error', result.message, 'error');
+                        }
+
+                    },
+                    error: function () {
+                        // Muestra una alerta de error en caso de una falla en la solicitud AJAX
+                        Swal.fire('Error', 'Hubo un problema al realizar la solicitud', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    function verFormato(id) {
+        window.open("https://itms.electrodata.com.pe/Reporting/Vacaciones/Formato.aspx?id=" + id, '_blank');
+    }
+
+    function VerCalendario() {
+
+        $('#calendar').empty();
+
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            buttonText: {
+                today: 'hoy',
+                month: 'mes',
+                week: 'semana',
+                day: 'día'
+            },
+            //dayClick: function () {
+            //    alert('a day has been clicked!');
+            //},
+            //Random default events
+            events: function (start, end, timezone, callback) {
+                $.ajax({
+                    url: '/Vacaciones/ListarCalendarioVacaciones',
+                    type: "POST",
+                    datatype: 'json',
+                    //data: {
+                    //    start: start.format(),
+                    //    end: end.format()
+                    //},
+                    success: function (data) {
+                        var events = [];
+
+                        $.each(data['data'], function (index, value) {
+
+                            events.push({
+                                id: (data['data'][index]['Id']),
+                                title: (data['data'][index]['CreadoPor']),
+                                start: (data['data'][index]['Inicio']),
+                                end: (data['data'][index]['Fin']),
+                                backgroundColor: (data['data'][index]['ColorPrioridad']),
+                                borderColor: (data['data'][index]['ColorPrioridad']),
+                                allDay: false,
+                                //url: "javascript:VerDetalleTicket(" + (data['data'][index]['Id']) + ")",
+                            });
+                        });
+                        callback(events);
+                    },
+                    error: function (err) {
+
+                    }
+                });
+            },
+            eventMouseover: function (data, event, view) {
+                debugger
+                tooltip = '<div class="tooltiptopicevent" style="width:auto;height:auto;background:#E4ECFF;position:absolute;z-index:10001;padding:10px 10px 10px 10px ;  line-height: 200%;">' +  data.title + '</div>';
+
+
+                $("body").append(tooltip);
+                $(this).mouseover(function (e) {
+                    $(this).css('z-index', 10000);
+                    $('.tooltiptopicevent').fadeIn('500');
+                    $('.tooltiptopicevent').fadeTo('10', 1.9);
+                }).mousemove(function (e) {
+                    $('.tooltiptopicevent').css('top', e.pageY + 10);
+                    $('.tooltiptopicevent').css('left', e.pageX + 20);
+                });
+
+
+            },
+            eventMouseout: function (data, event, view) {
+                $(this).css('z-index', 8);
+
+                $('.tooltiptopicevent').remove();
+
+            },
+            editable: false,
+            droppable: true, // this allows things to be dropped onto the calendar !!!
+            eventLimit: true,
+        });
+    }
+
+    function CancelarSolicitudVacaion(id) {
+        $("#lblTitulo").text("Cancelar Solicitud de Vacaciones");
+
+        $("#btnEliminarCandidato" + id).attr("data-style", "expand-right");
+        $("#btnEliminarCandidato" + id).attr("data-toggle", "modal");
+        $("#btnEliminarCandidato" + id).attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").addClass("modal-xs");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/Vacaciones/CancelarSolicitud/' + id);
+    }
+
+    function AprobarSolicitudVacaion(id) {
+        $("#lblTitulo").text("Aprobar Solicitud de Vacaciones");
+
+        $("#btnAprobrarSolicitud" + id).attr("data-style", "expand-right");
+        $("#btnAprobrarSolicitud" + id).attr("data-toggle", "modal");
+        $("#btnAprobrarSolicitud" + id).attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        ////$(".modal-dialog").addClass("modal-xs");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/Vacaciones/AprobarSolicitud/' + id);
+    }
+
+    function DeclararSolicitudVacaion(id) {
+        $("#lblTitulo").text("Declarar Solicitud de Vacaciones");
+
+        $("#btnDeclararSolicitud" + id).attr("data-style", "expand-right");
+        $("#btnDeclararSolicitud" + id).attr("data-toggle", "modal");
+        $("#btnDeclararSolicitud" + id).attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/Vacaciones/DeclararSolicitud/' + id);
+    }
+
+    function uploadDone(msg, code) {
+
+        if (msg == "OK") {
+            var title = 'Información Guardada';
+
+            swal.fire({
+                title: title,
+                icon: 'success',
+                text: code,
+                confirmButtonText: 'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!',
+            }).then((result) => {
+
+                $('#DAT_STAR').val('');
+                $('#DAT_END').val('');
+                $('#nroDias').val('0');
+                $('#fechRetorno').val('');
+                $('#SUMMARY').val('');
+                $('#cbxJornada').prop('checked', false); // Desactivar el checkbox
+                $('#txtJornada').hide(); // Ocultar el input de texto
+
+                if ($('#cbxJornada').is(':checked')) {
+                    $('#cbxJornada').prop('checked', false);
+                    $('#txtJornada').val('');
+                    $('#txtJornada').hide();
+                }
+
+                const button = document.getElementById('Buscar');
+                button.click();
+
+
+                const buttonsubmit = document.getElementById('submit');
+                buttonsubmit.disabled = false;
+                toastr.success("Solicitud de vacaciones ingresada correctamente.", "Guardado");
+            });
+
+        }
+        //En caso exista disconformidad se muestra mensaje
+        else {
+            var title = 'Advertencia';
+
+            swal.fire({
+                title: title,
+                icon: 'info',
+                text: code,
+                confirmButtonText: 'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!',
+            }).then((result) => {
+
+                const buttonsubmit = document.getElementById('submit');
+                buttonsubmit.disabled = false;
+
+            });
+
+            
+
+        }
+    }
+
+    function validarActivado(checkbox) {
+
+        const checkboxId = checkbox.id
+        const filaId = checkboxId.split("_")[1]; // Obtener el número único
+        const checkboxesEnFila = document.querySelectorAll(`input[id*="_${filaId}"]`);
+        // Desactivar todos los checkboxes en la misma fila
+        checkboxesEnFila.forEach((cb) => {
+            if (cb.id !== checkboxId) {
+                cb.checked = false;
+                selectedCheckboxes = selectedCheckboxes.filter(function (elemento) {
+                    return !elemento.startsWith(cb.id);
+                });
+            }
+        });
+    }
+    function aplicarAprobaciones() {
+        $.ajax({
+            url: '/Vacaciones/AprobarMultiplesSolicitudesVacaciones?listaId=' + selectedCheckboxes,
+            type: "POST",
+            datatype: 'json',
+            success: function (data) {
+                console.log(data)
+                if (data == "OK") {
+                    var title = 'Información Guardada';
+                    //swal.fire({
+                    //    title: title,
+                    //    icon: 'success',
+                    //    //text: code,
+                    //    focusConfirm: false,
+                    //    confirmButtonText: 'Continue',
+
+                    //}, function () {
+                    //    const button = document.getElementById('Buscar');
+                    //    button.click()
+                    //})
+                    swal.fire({
+                        title: title,
+                        icon: 'success',
+                        confirmButtonText: 'Continue',
+                    }).then((result) => {
+                        const button = document.getElementById('Buscar');
+                        button.click();
+                    });
+
+                }
+                else {
+                    var title = 'Advertencia';
+                    swal.fire({
+                        title: title,
+                        icon: 'error',
+                        //text: code,
+                        focusConfirm: false,
+                        confirmButtonText:
+                            'Continue',
+                        confirmButtonAriaLabel: 'Ocurrio un error al guardar la información'
+
+                    })
+                }
+            },
+            error: function (err) {
+                swal.fire({
+                    title: title,
+                    icon: 'error',
+                    //text: code,
+                    focusConfirm: false,
+                    confirmButtonText:
+                        'Continue',
+                    confirmButtonAriaLabel: 'Ocurrio un error al guardar la información'
+
+                })
+            }
+        });
+    }
+    function confirmarAprobaciones() {
+        console.log(selectedCheckboxes);
+        //Validamos si hay cambios para modificar
+        if (selectedCheckboxes.length === 0) {
+            swal.fire({
+                title: "No se selecciono solicitudes pendientes para aprobar o desaprobar",
+                type: 'info',
+                //text: code,
+                focusConfirm: false,
+                confirmButtonText: 'Continue',
+            })
+        } else {
+            //Validamos si tiene solo 1 caso
+            if (selectedCheckboxes.length === 1) {
+                //Valimos si el unico caso es desaprobado para cargarle un modal
+                if (selectedCheckboxes[0].startsWith('desaprobar_')) {
+                    var idSolicitud = selectedCheckboxes[0].split('_')
+                    console.log(idSolicitud[1])
+                    var contentEliminarCandidatoModal = document.getElementById("contentEliminarCandidatoModal");
+                    var nuevoBotonModal = document.createElement("button");
+                    nuevoBotonModal.id = "btnEliminarCandidatoModal"
+                    nuevoBotonModal.addEventListener("click", function () {
+                        CancelarSolicitud(idSolicitud[1]);
+                    });
+                    contentEliminarCandidatoModal.appendChild(nuevoBotonModal);
+                    nuevoBotonModal.click()
+                    contentEliminarCandidatoModal.removeChild(nuevoBotonModal);
+                }
+                else {
+                    Swal.fire({
+                        title: 'Solicitud de aprobación',
+                        text: '¿Está seguro que desea aprobar o desaprobar esta solicitud?',
+                        icon: "info",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        cancelButtonText: "No",
+                        confirmButtonText: "Sí",
+                        allowOutsideClick: false
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            aplicarAprobaciones();
+                        }
+                    });
+                }
+            } else {
+                Swal.fire({
+                    title: 'Solicitud de aprobación',
+                    text: '¿Está seguro que desea aprobar o desaprobar estas solicitudes?',
+                    icon: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    cancelButtonText: "No",
+                    confirmButtonText: "Sí",
+                    allowOutsideClick: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        aplicarAprobaciones();
+
+            
+                    }
+                });
+            }
+        }
+    }
+
+</script>

@@ -1,0 +1,621 @@
+﻿@model ERPElectrodata.Models.PERSON_DOCUMENTS
+
+@{
+//Layout = null;
+}
+
+<style>
+    #exportar {
+        margin-top: -50px;
+        float: right;
+    }
+
+    .colorTab {
+        color: #2651be;
+        font-size: 1.3em;
+    }
+
+    .tActivo {
+        display: block;
+    }
+
+    .tInactivo {
+        display: none;
+    }
+</style>
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<div id="divContent">
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="font-icon-wrapper font-icon-lg">
+                    <i class="fa fa-users icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <div class="titleModule"><b>Talento - Logros</b></div>
+                    <div class="page-title-subheading">
+                        Certificaciones de los colaboradores
+                    </div>
+                </div>
+                <div class="derecha">
+                </div>
+            </div>
+        </div>
+    </div>
+    <br />
+    <br />
+    <div class="row">
+        <div class="col-sm-12 col-lg-10"></div>
+        <div class="col-sm-12 col-lg-2">
+            @using (Html.BeginForm("ExportarListaDocumentos", "Talent", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+            {
+                <button type="button" class="btn btn-primary btn-warning" onclick="ExportarDocumentos();" id="exportar">Exportar</button>
+                <input id="FechaIniVencimiento1" name="FechaIniVencimiento1" hidden>
+                <input id="FechaFinVencimiento1" name="FechaFinVencimiento1" hidden>
+            }
+        </div>
+    </div>
+    <div class="col-sm-12 col-lg-12" style="width:100%;">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">
+                <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                    Buscar archivos
+                </div>
+            </div>
+            <div class="p-0 card-body">
+                <div class="p-1 slick-slider-sm">
+                    <div style="width:100%;">
+                        @using (Html.BeginForm("FindAchie", "Talent", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmFindAchievements", name = "FrmFindAchievements", target = "ut_FindAchie" }))
+                        {
+                            <div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Tipo Documento
+                                        </div>
+                                        <div class="editor-field" style="width:100%;">
+                                            @Html.EditorFor(model => model.ID_TYPE_DOCU)
+                                            @Html.ValidationMessageFor(model => model.ID_TYPE_DOCU)
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Marca
+                                        </div>
+                                        <div class="editor-field">
+                                            @Html.EditorFor(model => model.IdMarca)
+                                            @Html.ValidationMessageFor(model => model.IdMarca)
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Institucion
+                                        </div>
+                                        <div class="editor-field">
+                                            @Html.EditorFor(model => model.IdInstitucion)
+                                            @Html.ValidationMessageFor(model => model.IdInstitucion)
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Propietario
+                                        </div>
+                                        <div class="editor-field" style="width:100%;">
+                                            @Html.EditorFor(model => model.ID_PERS_ENTI)
+                                            @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Grado de instrucción
+                                        </div>
+                                        <div class="editor-field" style="width:100%;">
+                                            <div id="ID_DEGR_INST"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Nombre del Documento
+                                        </div>
+                                        <div class="k-textbox" style="width:100%;">
+                                            @Html.EditorFor(model => model.NAM_ATTA)
+                                            @Html.ValidationMessageFor(model => model.NAM_ATTA)
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Fecha de vencimiento inicio
+                                        </div>
+                                        <div class="editor-field" style="width:100%;">
+                                            <input id="FechaIniVencimiento" name="FechaIniVencimiento" onblur="document.getElementById('FechaIniVencimiento1').value = this.value">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-3">
+                                        <div class="editor-label">
+                                            Fecha de vencimiento fin
+                                        </div>
+                                        <div class="editor-field" style="width:100%;">
+                                            <input id="FechaFinVencimiento" name="FechaFinVencimiento" onblur="document.getElementById('FechaFinVencimiento1').value = this.value">
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-12 col-lg-2">
+                                    </div>
+                                    <div class="col-sm-12 col-lg-1">
+                                        <div class="editor-label">
+                                            &nbsp;
+                                        </div>
+                                        <div style="padding:0;width:100%;">
+                                            <button id="submit" class="mb-2 mr-2 btn btn-primary" onclick="FindAchie(); return false;" style="width:100%;">@ResourceLanguaje.Resource.BtnFindTalent</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12">
+    <div class="mb-3 card">
+        <div class="tabs-lg-alternate card-header">
+            <ul class="nav nav-justified">
+                <li class="nav-item" id="divAgrupada">
+                    <a data-toggle="tab" class="tabAgrupada tab nav-link active">
+                        <div class="tab-subheading colorTab">
+                            <span class="pr-2 opactiy-6">
+                                <i class="fa fa-object-group"></i>
+                            </span>
+                            Vista agrupada
+                        </div>
+                    </a>
+                </li>
+                <li class="nav-item" id="divDesplegada">
+                    <a data-toggle="tab" class="tabDesplegada nav-link">
+                        <div class="tab-subheading colorTab">
+                            <span class="pr-2 opactiy-6">
+                                <i class="fa fa-list"></i>
+                            </span>
+                            Vista desplegada
+                        </div>
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="tab-content">
+            <div class="tab-pane tabAgrupada active tActivo" id="dAgrupada" role="tabpanel">
+                <div class="card-body">
+                    <div id="resultFind" style="margin:10px 0 0 0; padding-bottom:1%; ">
+                    </div>
+                    <div id="pagerFind" style="margin:10px 0 0 0">
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane tabDesplegada tInactivo" id="dDesplegada" role="tabpanel">
+                <div class="card-body">
+                    <table id="tbDocumentos" class="align-middle mb-0 table table-borderless table-striped table-hover" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th class="text-center">Usuario</th>
+                                <th class="text-center">Tipo de documento</th>
+                                <th class="text-center">Profesión</th>
+                                <th class="text-center">Documento</th>
+                                <th class="text-center">Institución</th>
+                                <th class="text-center">Vigencia</th>
+                                <th class="text-center">Fecha Inicio</th>
+                                <th class="text-center">Fecha Fin</th>
+                                <th class="text-center">Marca</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="clear:both;"></div>
+
+
+<script type="text/x-kendo-tmpl" id="tpt-Achievements">
+    # if (sw1 != 0) { Agrupar(ID_PERS_ENTI); } #
+    # if (sw1 == 0) { #
+
+
+    <div style="margin-top: 1%;"></div>
+    <div style="width:100%; Display:inline-block;">
+        <div style="width:98%; margin:0 auto;">
+            <div class="marcoAchie1" style="background-color:rgb(244, 240, 240);padding:.6em;"><b style="color:gray;font-size:.9em">${USUARIO} - ${Profesion}</b></div>
+            <div class="marcoAchie2" style="padding:.8em;">
+                <div class="marcoAchie2Sangria">
+                    ${NAM_DOCU}:
+                    @{
+                        try
+                        {
+                            if (@ViewBag.Perfil == "V")
+                            {
+
+                                <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                            }
+                            else if (@ViewBag.Perfil == "D")
+                            {
+                                <a href="${ARCHIVO}" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent ${NAM_ATTA}" target="_blank">
+                                    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                    <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                                </a>
+                            }
+                        }
+                        catch { }
+                    }
+                    <a href="${ARCHIVO}" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent ${NAM_ATTA}" target="_blank">
+                    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                        <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                    </a>
+                    # if (Institucion != ""){ # - Institucion: ${Institucion} # } #
+                    # if (Marca != "") { # - Marca: ${Marca}  # } #
+                    # if (FechaFin != "") { # Vigencia Inicio: ${FechaInicio} Vigencia Fin: ${FechaFin} # } #
+                </div>
+                # swFirst(ID_PERS_ENTI); #
+                # } else if (sw1 == sw2) { #
+                <div class="marcoAchie2Sangria">
+                    ${NAM_DOCU}:
+                    @{
+                        try
+                        {
+                            if (@ViewBag.Perfil == "V")
+                            {
+
+                                <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                            }
+                            else if (@ViewBag.Perfil == "D")
+                            {
+                                <a href="${ARCHIVO}" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent ${NAM_ATTA}" target="_blank">
+                                    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                    <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                                </a>
+                            }
+                        }
+                        catch { }
+                    }
+                    # if (Institucion != ""){ # - Institucion: ${Institucion} # } #
+                    # if (Marca != "") { # - Marca: ${Marca}  # } #
+                    # if (FechaFin != "") { # Vigencia Inicio: ${FechaInicio} Vigencia Fin: ${FechaFin} # } #
+                </div>
+                # } else { #
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 1%;"></div>
+    <div style="width:100%; Display:inline-block;">
+        <div style="width:98%; margin:0 auto;">
+            <div class="marcoAchie1" style="background-color:rgb(244, 240, 240);padding:.6em;"><b style="color:gray;font-size:.9em">${USUARIO} - ${Profesion}</b></div>
+            <div class="marcoAchie2" style="padding:.8em;">
+                <div class="marcoAchie2Sangria">
+                    ${NAM_DOCU}:
+                    @{
+                        try
+                        {
+                            if (@ViewBag.Perfil == "V")
+                            {
+
+                                <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                            }
+                            else if (@ViewBag.Perfil == "D")
+                            {
+                                <a href="${ARCHIVO}" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent ${NAM_ATTA}" target="_blank">
+                                    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                    <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                                </a>
+                            }
+                        }
+                        catch { }
+                    }
+                    # if (Institucion != ""){ # - Institucion: ${Institucion} # } #
+                    # if (Marca != "") { # - Marca: ${Marca}  # } #
+                    # if (FechaFin != "") { # Vigencia Inicio: ${FechaInicio} Vigencia Fin: ${FechaFin} # } #
+                </div>
+                # swFirst(ID_PERS_ENTI); #
+                # } #
+
+</script>
+
+<script type="text/javascript">
+    var sw1 = 0;
+    var sw2 = 0;
+    $(document).ready(function () {
+        /* TABS */
+        $("#divAgrupada").click(function () {
+            $(".tabAgrupada").addClass("active");
+            $(".tabDesplegada").removeClass("active");
+            $("#dAgrupada").removeClass("tInactivo");
+            $("#dAgrupada").addClass("tActivo");
+        });
+        $("#divDesplegada").click(function () {
+            $(".tabDesplegada").addClass("active");
+            $(".tabAgrupada").removeClass("active");
+            $("#dDesplegada").removeClass("tInactivo");
+            $("#dDesplegada").addClass("tActivo");
+        });
+        $("#ID_TYPE_DOCU").kendoComboBox({
+            dataTextField: "NAM_DOCU",
+            dataValueField: "ID_TYPE_DOCU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeDocument/ListTypeDocumentsAchievements?var=" + Math.random()
+                }
+            }
+        });
+        var ID_TYPE_DOCU = $("#ID_TYPE_DOCU").data("kendoComboBox");
+
+        var IdPersona = $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/PersonaPorCompania?var=" + Math.random()
+                }
+            }
+        });
+
+        var IdGradoInstruccion = $("#ID_DEGR_INST").kendoComboBox({
+            dataTextField: "NAM_DEGR_INST",
+            dataValueField: "ID_DEGR_INST",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DegreeInstruction/ListDegreeInstruction?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdMarca").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            }
+        });
+
+        var IdMarca = $("#IdMarca").data("kendoComboBox");
+        $("#IdInstitucion").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "IdInstitucion",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Institucion/List?var=" + Math.random()
+                }
+            }
+        });
+        var IdInstitucion = $("#IdInstitucion").data("kendoComboBox");
+
+        var FechaIniVencimiento = $("#FechaIniVencimiento").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaFinVencimiento = $("#FechaFinVencimiento").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        FindAchie();
+    });
+
+    function FindAchie() {
+        ListaDesplegadaArchivos();
+        sw1 = 0;
+        sw2 = 0;
+        var dataSource = null;
+        var pager = null;
+
+        $("#pagerFind").empty();
+        $("#resultFind").empty();
+
+        if ($("#resultFind").data("kendoListView")) {
+            $("#pagerFind").data("kendoPager").destroy();
+            $("#resultFind").data("kendoListView").destroy();
+        }
+
+        dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Talent/FindAchieResult?var=" + Math.random() + "&" + $('#FrmFindAchievements').serialize() + "&ID_DEGR_INST=" + $("#ID_DEGR_INST").val(),
+                    type: "GET",
+                    dataType: "json"
+                }
+
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#resultFind").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#tpt-Achievements").html())
+        });
+
+        pager = $("#pagerFind").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 60],
+            refresh: true
+        });
+
+        return false;
+    }
+
+    function swFirst(id) {
+        sw1 = id;
+    }
+
+    function Agrupar(id) {
+        sw2 = id;
+    }
+
+    function ExportarDocumentos() {
+        $("#formExportar").submit();
+    }
+
+    function ListaDesplegadaArchivos() {
+        $('#tbDocumentos').dataTable().fnDestroy();
+
+        $('#tbDocumentos').dataTable({
+            "order": [[0, "asc"]],
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: "/Talent/FindAchieResultD?" + $('#FrmFindAchievements').serialize() + " &ID_DEGR_INST=" + $("#ID_DEGR_INST").val(),
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.USUARIO
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.NAM_DOCU
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.Profesion
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href="'+data.ARCHIVO+'" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent '+data.NAM_ATTA+'" target="_blank">'+
+                                    '<img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />&nbsp;'+
+                                    '<span style="text-transform:capitalize;">'+data.NAM_ATTA+'</span>'+
+                                '</a>'
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.Institucion
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.Vigencia
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.FechaInicio
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.FechaFin
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.Marca
+                    }
+                },
+            ],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ],
+            "pageLength": 15,
+            "columnDefs": [
+                { "width": "10%", "targets": 0 },
+                { "width": "10%", "targets": 1 },
+                { "width": "20%", "targets": 2 },
+                { "width": "20%", "targets": 3 },
+                { "width": "10%", "targets": 4 },
+                { "width": "10%", "targets": 5 },
+                { "width": "5%", "targets": 6 },
+                { "width": "5%", "targets": 7 },
+                { "width": "10%", "targets": 8 },
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ Registros por página",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+
+        });
+
+    }
+</script>

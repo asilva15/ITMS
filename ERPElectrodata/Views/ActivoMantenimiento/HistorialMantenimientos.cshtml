@@ -1,0 +1,314 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="row no-gutters align-items-center">
+    <table class="table table-hover table-striped" id="tbMantenimientosActivos" style="width:100%">
+        <thead>
+            <tr>
+                <th style="font-size:11px">Fecha Mantenimiento</th>
+                <th style="font-size:11px">Comentario</th>
+                <th style="font-size:11px">Próx. Mantenimiento</th>
+                <th style="font-size:11px">Usuario</th>
+                <th style="font-size:11px">Archivo</th>
+            </tr>
+        </thead>
+        <tbody id="TablaMantenimientos"></tbody>
+    </table>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        CargarHistorialMantenimientos();
+
+        $("#closebtnmodalF").click(function () {
+            //if (@ViewBag.Crea == 1){
+                location = "http://" + location.host + "/Asset/Detalle/@ViewBag.ID_ASSE";
+            //}
+        });
+
+    });
+
+    function CargarHistorialMantenimientos() {
+        $.ajax({
+            url: "/ActivoMantenimiento/HistorialMantenimientosListar/@ViewBag.ID_ASSE",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                $('#tbMantenimientosActivos').dataTable().fnDestroy();
+                $("#TablaMantenimientos").empty();
+
+                $.each(data['Data'], function (index, value) {
+                    var str = "";
+                    if((data['Data'][index]['PM']) == 'NO')
+                    {
+                        str = '<tr id="FilaMantenimiento' + (data['Data'][index]['IdActivoMant']) + '" style="background:#FFDFF8;">' +
+                            '<td>' +
+                                '<span id="SC' + (data['Data'][index]['IdActivoMant']) + '" aria-hidden="true" style="color: #3E4752; font-size: 11px; ">' + (data['Data'][index]['FechaMantenimiento']) + '</span>' +
+                                '<div id="divC' + (data['Data'][index]['IdActivoMant']) + '" style="display:none"><input id="C' + (data['Data'][index]['IdActivoMant']) + '" type="text"> </div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<span id="SC' + (data['Data'][index]['IdActivoMant']) + '" aria-hidden="true" style="color: #3E4752; font-size: 11px;">' + (data['Data'][index]['Comentario']) + '</span>' +
+                                '<div id="divC' + (data['Data'][index]['IdActivoMant']) + '" style="display:none"><input id="C' + (data['Data'][index]['IdActivoMant']) + '" type="text"> </div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<span id="SC' + (data['Data'][index]['IdActivoMant']) + '" aria-hidden="true" style="color: #3E4752; font-size: 11px; ">' + (data['Data'][index]['ProximoMantenimiento']) + '</span>' +
+                                '<div id="divC' + (data['Data'][index]['IdActivoMant']) + '" style="display:none"><input id="C' + (data['Data'][index]['IdActivoMant']) + '" type="text"> </div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<span id="SC' + (data['Data'][index]['IdActivoMant']) + '" aria-hidden="true" style="color: #3E4752; font-size: 11px;">' + (data['Data'][index]['Usuario']) + '</span>' +
+                                '<div id="divC' + (data['Data'][index]['IdActivoMant']) + '" style="display:none"><input id="C' + (data['Data'][index]['IdActivoMant']) + '" type="text"> </div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<a href="/Adjuntos/Asset/' + (data['Data'][index]['NombreArchivo']) + '_' + (data['Data'][index]['IdArchivo']) + (data['Data'][index]['ExtensionArchivo']) + '" style="text-decoration:none;" title="Mantenimiento '+(data['Data'][index]['NombreArchivo']) +'" target="_blank">' +
+                                '<span style="text-transform:capitalize;font-size:10px;">' + (data['Data'][index]['NombreArchivo']) + (data['Data'][index]['ExtensionArchivo'])+ '</span>' +
+                                '</a>' +
+                            '</td>' +
+                        '</tr>';
+                    }
+                    else
+                    {
+                        str = '<tr id="FilaMantenimiento' + (data['Data'][index]['IdActivoMant']) + '">' +
+                            '<td>' +
+                                '<span id="SC' + (data['Data'][index]['IdActivoMant']) + '" aria-hidden="true" style="color: #3E4752; font-size: 11px; ">' + (data['Data'][index]['FechaMantenimiento']) + '</span>' +
+                                '<div id="divC' + (data['Data'][index]['IdActivoMant']) + '" style="display:none"><input id="C' + (data['Data'][index]['IdActivoMant']) + '" type="text"> </div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<span id="SC' + (data['Data'][index]['IdActivoMant']) + '" aria-hidden="true" style="color: #3E4752; font-size: 11px;">' + (data['Data'][index]['Comentario']) + '</span>' +
+                                '<div id="divC' + (data['Data'][index]['IdActivoMant']) + '" style="display:none"><input id="C' + (data['Data'][index]['IdActivoMant']) + '" type="text"> </div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<span id="SC' + (data['Data'][index]['IdActivoMant']) + '" aria-hidden="true" style="color: #3E4752; font-size: 11px; ">' + (data['Data'][index]['ProximoMantenimiento']) + '</span>' +
+                                '<div id="divC' + (data['Data'][index]['IdActivoMant']) + '" style="display:none"><input id="C' + (data['Data'][index]['IdActivoMant']) + '" type="text"> </div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<span id="SC' + (data['Data'][index]['IdActivoMant']) + '" aria-hidden="true" style="color: #3E4752; font-size: 11px;">' + (data['Data'][index]['Usuario']) + '</span>' +
+                                '<div id="divC' + (data['Data'][index]['IdActivoMant']) + '" style="display:none"><input id="C' + (data['Data'][index]['IdActivoMant']) + '" type="text"> </div>' +
+                            '</td>' +
+                            '<td>' +
+                                '<a href="/Adjuntos/Asset/' + (data['Data'][index]['NombreArchivo']) + '_' + (data['Data'][index]['IdArchivo']) + (data['Data'][index]['ExtensionArchivo']) + '" style="text-decoration:none;" title="Mantenimiento '+(data['Data'][index]['NombreArchivo']) +'" target="_blank">' +
+                                '<span style="text-transform:capitalize;font-size:10px;">' + (data['Data'][index]['NombreArchivo']) + (data['Data'][index]['ExtensionArchivo']) + '</span>' +
+                                '</a>' +
+                            '</td>' +
+                        '</tr>';
+                    }
+                    $("#TablaMantenimientos").append(
+                        str
+                        );
+
+                });
+
+                $("#tbMantenimientosActivos").DataTable({
+                    responsive: true,
+                    "bLengthChange": false,
+                    //"bPaginate": false,
+                    //"bInfo": false,
+                    //"searching": false,
+                    "pageLength": 15,
+                    "language": {
+                        "lengthMenu": "Mostrar _MENU_ Registros por página",
+                        "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                        "infoEmpty": "No hay registros disponibles",
+                        "infoFiltered": "(filtrada de _MAX_ registros)",
+                        "loadingRecords": "Cargando...",
+                        "processing": "Procesando...",
+                        "search": "Buscar:",
+                        "zeroRecords": "No se encontraron registros coincidentes",
+                        "paginate": {
+                            "next": "Siguiente",
+                            "previous": "Anterior"
+                        },
+                    },
+                });
+            },
+            error: function (source) {
+                toastr.error("Error Carga Json");
+            }
+        });
+    }
+
+    var x = 0;
+
+    function EditarComponente(id) {
+        $("#ST" + id).addClass("divHide");
+        $("#SC" + id).addClass("divHide");
+        $("#Editar" + id).addClass("divHide");
+        $("#Eliminar" + id).addClass("divHide");
+
+        $("#divT" + id).removeClass("divHide");
+        $("#divC" + id).removeClass("divHide");
+        $("#Guardar" + id).removeClass("divHide");
+        $("#Cancelar" + id).removeClass("divHide");
+
+    }
+
+    function CancelarEditar(id) {
+        $("#divT" + id).addClass("divHide");
+        $("#divC" + id).addClass("divHide");
+        $("#Guardar" + id).addClass("divHide");
+        $("#Cancelar" + id).addClass("divHide");
+
+        $("#ST" + id).removeClass("divHide");
+        $("#SC" + id).removeClass("divHide");
+        $("#Editar" + id).removeClass("divHide");
+        $("#Eliminar" + id).removeClass("divHide");
+    }
+
+    function ActualizarComponente(id) {
+
+        //var ta = $("#T" + id).val(); 
+        var cp = $("#C" + id).val();
+
+        $.ajax({
+            url: "/Componente/EditarComponente/",
+            data: "cp=" + cp + "&id=" + id + "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    CargarComponentes();
+                    x = 0;
+                }
+            }
+        });
+    }
+
+    //function EliminarComponente(id) {
+    //    $.ajax({
+    //        url: "/Componente/EliminarComponente/",
+    //        data: "id=" + id + "&var=" + Math.random(),
+    //        type: "GET",
+    //        cache: false,
+    //        dataType: "text",
+    //        success: function (resp) {
+    //            if (resp == "OK") {
+    //                CargarComponentes();
+    //                x = 0;
+    //            }
+    //        }
+    //    });
+    //}
+
+    function ActualizarEstado(id) {
+        var title = 'Actualizar Estado';
+        var contHtml = '<div id="ActualizaCondicion"></div>';
+        var ancho = 350;
+        var alto = 150;
+        winPopUpModal(title, contHtml, ancho, alto);
+        $("#ActualizaCondicion").load("/Asset/RecepcionCondicion/"+id+"?var=" + Math.random());
+    }
+
+    function AgregarComponente() {
+
+        $("#TablaNuevoComponente").removeClass("divHide");
+
+        //var cmbTipoActivo = $("#cmbTipoActivo").kendoComboBox({
+        //    autoBind: true,
+        //    dataTextField: "NombreTipoActivo",
+        //    dataValueField: "IdTipoActivo",
+        //    filter: "contains",
+        //    delay: 500,
+        //    minLength: 0,
+        //    suggest: true,
+        //    dataSource: {
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/Componente/ListarTipoActivo?var=" + Math.random()
+        //        }
+        //    }
+        //}).data("kendoComboBox");
+
+        var cmbComponente = $("#cmbComponente").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: 6,
+            filter: "contains",
+            dataTextField: "NombreComponente",
+            dataValueField: "IdComponente",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Componente/ListarComponentes/@ViewBag.IdCuentaTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cmbSubTipoComponente = $("#cmbSubTipoComponente").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "cmbComponente",
+            filter: "contains",
+            dataTextField: "NomSubtComp",
+            dataValueField: "IdStock",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Componente/ListarSubTipoComponentes?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+    }
+
+    function CancelarNuevoComponente() {
+        $("#TablaNuevoComponente").addClass("divHide");
+    }
+
+    function GuardarNuevoComponente() {
+
+        var ta = @ViewBag.ID_ASSE;
+        var cp = $("#cmbComponente").val();
+        var IdStock = $("#cmbSubTipoComponente").val();
+        var comentario = $("#txtComentario").val();
+
+        $.ajax({
+            url: "/Componente/GuardarNuevoComponente/",
+            data: "ta=" + ta + "&cp=" + cp + "&IdStock=" + IdStock +  "&comen=" + comentario + "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    $("#TablaNuevoComponente").addClass("divHide");
+                    CargarComponentes();
+                    x = 0;
+                } else {
+                    winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                           "<div style='padding:10px 0px 10px 0px;'>Genere nuevos registros de stock, para poder agregar.</div>" +
+                           "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                           "<button id='continuee' class='k-button'>Continue</button>" +
+                           "</div></div>"
+                   , 400, 140);
+
+                    var undo = $("#continuee")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                    });
+                }
+            }
+        });
+    }
+
+</script>

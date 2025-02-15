@@ -1,0 +1,436 @@
+﻿@{
+    ViewBag.Title = "EditarSoporteInforme";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<div class="form-row">
+    <div class="col-md-12">
+        <div class="mb-2 card">
+            @*<div class="card-header">Listado de Soporte Electrodata e Informes</div>*@
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1">
+                        <table id="tbSoporteInforme" class="table table-bordered table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Soporte / Informe</th>
+                                    <th>Fabricante</th>
+                                    <th>Nro</th>
+                                    <th>Sla/ Tipo Informe</th>
+                                    <th>Tiempo</th>
+                                    <th>Fecha Fin</th>
+                                    <th>Editar</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="form-row" id="divContenido" style="display:none">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header"><span id="lblTituloSoporte"></span></div>
+            <div class="card-body" id="divDescripcion" style="overflow-y: scroll;max-height:500px">
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Fechas</div>
+            <div class="card-body" id="divFechas" style="overflow-y: scroll;max-height:500px">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        ListadoSoporteInforme();
+    });
+
+    function ListadoSoporteInforme() {
+        $('#tbSoporteInforme').dataTable().fnDestroy();
+
+        $('#tbSoporteInforme').DataTable({
+            "order": [[0, "desc"]],
+            responsive: true,
+            ajax: "/InformeED/ListadoSoporteInforme/" + @ViewBag.ID_DOCU_SALE,
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var contenido = "";
+                        if (data.Tipo == "1") {
+                            contenido = 'Soporte ED';
+                        } else {
+                            contenido = 'Informe';
+                        }
+                        return contenido;
+                    }
+                },
+                { data: "Marca" },
+                { data: "NroSoportes" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var contenido = "";
+                        if (data.Tipo == "1") {
+                            contenido = data.Sla;
+                        } else {
+                            contenido = data.TipoInforme;
+                        }
+                        return contenido;
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var rpta = "";
+                        if (data.Tipo == "1") {
+                            rpta = data.Tiempo + " " + data.Frecuencia;
+                        } else {
+                            rpta = data.Frecuencia;
+                        }
+                        return rpta;
+                    }
+                },
+                { data: "FechaFin" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var contenido = "";
+                        if (data.Tipo == "1") {
+                            contenido = '<div style=" text-align: center;">' +
+                                '<button id="btnEditarSoporteED" placeholder="Editar Soporte" class="btn btn-light btn-hover-shine" onclick="EditarSoporteED(' + data.IdSoporte + ')" ><i class="fa fa-pen"></i></button>' +
+                                '</div>';
+                        } else {
+                            contenido = '<div style=" text-align: center;">' +
+                                '<button id="btnEditarInforme" placeholder="Editar Informe" class="btn btn-light btn-hover-shine" onclick="EditarInformeED(' + data.IdSoporte + ')" ><i class="fa fa-pen"></i></button>' +
+                                '</div>';
+                        }
+                        return contenido;
+                    }
+                },
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+
+        });
+
+    }
+
+    function EditarSoporteED(id) {
+        $("#divContenido").removeAttr("style");
+        $("#lblTituloSoporte").text("Datos del Soporte");
+        $("#divDescripcion").empty();
+
+         $.ajax({
+             url: "/SoporteED/ObtenerDatosSoporteED/"+ id,
+            type: "GET",
+            dataType: "json",
+             success: function (source) {
+                 var contenido = "";
+                 $.each(source['Data'], function (index, value) {
+                     contenido =
+                         '<div class="row">'+
+                            '<div class="col-md-12">'+
+                                '<strong>Fabricante</strong>'+
+                                '<div>'+source['Data'][index]['Marca']+'</div>'+
+                            '</div>'+
+                        '</div>'+
+                         '<div class="row">'+
+                            '<div class="col-md-6">'+
+                                '<strong>Sla</strong>'+
+                                '<div>'+source['Data'][index]['Sla']+'</div>'+
+                            '</div>'+
+                            '<div class="col-md-6">'+
+                                '<strong>Nro Soportes</strong>'+
+                                '<div>'+source['Data'][index]['MantPrev']+'</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="row">'+
+                            '<div class="col-md-12">'+
+                                '<strong>Observación</strong>'+
+                                '<div>'+source['Data'][index]['Observaciones']+'</div>'+
+                            '</div>'+
+                         '</div>';
+                 });
+
+                 $("#divDescripcion").append(contenido);
+            },
+            error: function (source) {
+                toastr.error("Error al cargar la información.");
+            }
+        });
+
+        $.ajax({
+            url: "/SoporteED/ObtenerSoporteEDDetalle/" + id,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                var IdMant;
+                var cont = 1;
+                $("#divFechas").empty();
+                $.each(source['data'], function (index, value) {
+                    var ticket = "";
+                    if ((source['data'][index]['Ticket'])!=0) {
+                        ticket = ' <a href=\"/DetailsTicket/Index/' + source['data'][index]['Ticket'] + '" target="_blank">(' + source['data'][index]['CodigoTicket'] +')</a>';
+                    }
+
+                    IdMant = (source['data'][index]['IdMant']);
+                    $("#divFechas").append(
+                        '<div class="form-row">Soporte ' + cont +'&nbsp;'+ ticket + '</div>'+
+                        '<div class="form-row">' +
+                            '<div class="col-md-10">'+
+                                '<input type="text" class="form-control pull-right" id="dtSoporte' + IdMant + '" name="dtSoporte' + IdMant + '" value="' + (source['data'][index]['FechaMantenimiento']) + '"/>' +
+                            '</div>' +
+                            '<div class="col-md-2">' +
+                                '<div style="color: #1e2b75;cursor:pointer" class="mt-2" onclick="ActualizarFechaSoporte('+ IdMant +','+(source['data'][index]['Ticket'])+')" id="btnFechaSoporte"><i class="fa fa-save"></i></div>' +
+                            '</div>' +
+                        '</div>');
+
+                    $("#dtSoporte" + IdMant).kendoDatePicker({ format: "dd/MM/yyyy" });
+                    cont = cont + 1;
+                });
+
+                if (cont == 1) {
+                    $("#divFechas").append("No aplica mantenimientos. ");
+                }
+            },
+        });
+    }
+
+    function EditarInformeED(id) {
+        $("#divContenido").removeAttr("style");
+        $("#lblTituloSoporte").text("Datos del Informe");
+        $("#divDescripcion").empty();
+
+         $.ajax({
+             url: "/InformeED/ObtenerDatosInformeED/"+ id,
+            type: "GET",
+            dataType: "json",
+             success: function (source) {
+                 var contenido = "";
+                 $.each(source['Data'], function (index, value) {
+                     contenido =
+                        '<div class="row">'+
+                            '<div class="col-md-12">'+
+                                '<strong>Fabricante</strong>'+
+                                '<div>'+source['Data'][index]['Marca']+'</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="row">'+
+                            '<div class="col-md-6">'+
+                                '<strong>Tipo Informe</strong>'+
+                                '<div>'+source['Data'][index]['TipoInforme']+'</div>'+
+                            '</div>'+
+                            '<div class="col-md-6">'+
+                                '<strong>Nro Informes</strong>'+
+                                '<div>'+source['Data'][index]['NroInformes']+'</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="row">'+
+                            '<div class="col-md-12">'+
+                                '<strong>Observación</strong>'+
+                                '<div>'+source['Data'][index]['Observaciones']+'</div>'+
+                            '</div>'+
+                         '</div>';
+                 });
+
+                 $("#divDescripcion").append(contenido);
+            },
+            error: function (source) {
+                toastr.error("Error al cargar la información.");
+            }
+        });
+
+
+        $.ajax({
+            url: "/SoporteED/ObtenerInformeEDDetalle/" + id,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                var IdMant;
+                var cont = 1;
+                $("#divFechas").empty();
+                $.each(source['data'], function (index, value) {
+                    var ticket = "";
+                    if ((source['data'][index]['Ticket']) != 0) {
+                        ticket = ' <a href=\"/DetailsTicket/Index/' + source['data'][index]['Ticket'] + '" target="_blank">(' + source['data'][index]['CodigoTicket'] + ')</a>';
+                    }
+
+                    IdMant = (source['data'][index]['IdMant']);
+                    $("#divFechas").append(
+                        '<div class="form-row">Informe ' + cont + '&nbsp;' + ticket + '</div>' +
+                        '<div class="form-row">' +
+                            '<div class="col-md-10">'+
+                                '<input type="text" class="form-control pull-right" id="dtInforme' + IdMant + '" name="dtInforme' + IdMant + '" value="' + (source['data'][index]['FechaFin']) + '"/>' +
+                            '</div>' +
+                            '<div class="col-md-2">' +
+                                '<div style="color: #1e2b75;cursor:pointer" class="mt-2" onclick="ActualizarFechaInforme('+ IdMant +','+(source['data'][index]['Ticket'])+')" id="btnFechaInforme"><i class="fa fa-save"></i></div>' +
+                            '</div>' +
+                        '</div>');
+
+                    $("#dtInforme" + IdMant).kendoDatePicker({ format: "dd/MM/yyyy" });
+                    cont = cont + 1;
+                });
+
+                if (cont == 1) {
+                    $("#divFechas").append("No aplica mantenimientos. ");
+                }
+            },
+        });
+    }
+
+    function ActualizarFechaSoporte(id, id1) {
+        if ($("#dtSoporte" + id).val() == null || $("#dtSoporte" + id).val() == '') {
+            toastr.warning("Seleccione una fecha.", "¡Alerta!");
+        } else {
+            if (id1 == 0) {
+                $.ajax({
+                    url: "/SoporteED/ActualizarFechaSoporte/",
+                    data: "IdSoporteDetalle=" + id +
+                        "&IdTicket=" + id1 +
+                        "&Fecha=" + $("#dtSoporte" + id).val() +
+                        "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == "OK") {
+                            toastr.success("La Fecha fue actualizada.","");
+                        } else {
+                            toastr.warning("Verifique los datos porfavor.", "¡Alerta!");
+                        }
+                    }
+                });
+            } else {
+                swal({
+                    title: 'El Mantenimiento tiene un ticket generado. ¿Desea modificar la fecha?',
+                    text: 'Si selecciona "Sí", sólo se agregará un comentario en el ticket indicando el cambio de fecha.',
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    cancelButtonText: "No",
+                    confirmButtonText: "Sí",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function (dismiss) {
+                    if (dismiss) {
+
+                        swal({ title: "Procesando información, por favor espere...", text: "Actualizando la fecha de mantenimiento.", showConfirmButton: false, type: "info" });
+
+                        $.ajax({
+                            url: "/SoporteED/ActualizarFechaSoporte/",
+                            data: "IdSoporteDetalle=" + id +
+                                "&IdTicket=" + id1 +
+                                "&Fecha=" + $("#dtSoporte" + id).val() +
+                                "&var=" + Math.random(),
+                            type: "GET",
+                            cache: false,
+                            dataType: "text",
+                            success: function (resp) {
+                                swal.close();
+                                if (resp == "OK") {
+                                    toastr.success("Se agregó un comentario en el ticket indicando la nueva fecha.", "");
+                                } else {
+                                    toastr.warning("Verifique los datos porfavor.", "¡Alerta!");
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+
+    function ActualizarFechaInforme(id, id1) {
+        if ($("#dtInforme" + id).val() == null || $("#dtInforme" + id).val() == '') {
+            toastr.warning("Seleccione una fecha.", "¡Alerta!");
+        } else {
+            if (id1 == 0) {
+                $.ajax({
+                    url: "/InformeED/ActualizarFechaInforme/",
+                    data: "IdInformeDetalle=" + id +
+                        "&IdTicket=" + id1 +
+                        "&Fecha=" + $("#dtInforme" + id).val() +
+                        "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == "OK") {
+                            toastr.success("La Fecha fue actualizada.", "");
+                        } else {
+                            toastr.warning("Verifique los datos porfavor.", "¡Alerta!");
+                        }
+                    }
+                });
+            } else {
+                swal({
+                    title: 'El Informe tiene un ticket generado. ¿Desea modificar la fecha?',
+                    text: 'Si selecciona "Sí", sólo se agregará un comentario en el ticket indicando el cambio de fecha.',
+                    type: "info",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    cancelButtonText: "No",
+                    confirmButtonText: "Sí",
+                    closeOnConfirm: false,
+                    showLoaderOnConfirm: true
+                }, function (dismiss) {
+                    if (dismiss) {
+
+                        swal({ title: "Procesando información, por favor espere...", text: "Actualizando la fecha de informe.", showConfirmButton: false, type: "info" });
+
+                        $.ajax({
+                            url: "/InformeED/ActualizarFechaInforme/",
+                            data: "IdInformeDetalle=" + id +
+                                "&IdTicket=" + id1 +
+                                "&Fecha=" + $("#dtInforme" + id).val() +
+                                "&var=" + Math.random(),
+                            type: "GET",
+                            cache: false,
+                            dataType: "text",
+                            success: function (resp) {
+                                swal.close();
+                                if (resp == "OK") {
+                                    toastr.success("Se agregó un comentario en el ticket indicando la nueva fecha.", "");
+                                } else {
+                                    toastr.warning("Verifique los datos porfavor.", "¡Alerta!");
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    }
+</script>

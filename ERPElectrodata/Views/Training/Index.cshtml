@@ -1,0 +1,362 @@
+﻿@model ERPElectrodata.Models.PERSON_TRAINING
+
+@{
+    Layout = null;
+}
+
+@* INDEX TRAINING  *@
+
+<nav class="navSubMenu">
+    <ul>
+        <li ><a href="#" onclick="NewTraining()">@ResourceLanguaje.Resource.NewTraining</a></li>
+        <li onclick="FindTraining()"><a href="#">@ResourceLanguaje.Resource.FindTraining</a></li>
+    </ul>
+</nav>
+
+<div id="divSubContent">
+    <div id="ticketsByStatus">
+        <div id="homInc1" class="ticketByStatusP4" onclick="Click(this)">
+            <div class="tabStatus1" >
+                <div id="boxActive" class="boxQty">@ViewBag.TProcessing</div>
+                <div id="letrashomInc1" class="letras">
+                    <div>@ResourceLanguaje.Resource.Processing</div>
+                    <div style="clear:both;"></div>
+                </div>
+                <div id="StatusSelecthomInc1" class="tab-active-marks2"></div>
+            </div>
+        </div>
+        <div id="homInc2" class="ticketByStatusP4" onclick="Click(this)">
+            <div class="tabStatus2" >
+                <div id="boxSCHEDULED" class="boxQty">@ViewBag.TByApproving</div>
+                <div id="letrashomInc2" class="letras">
+                    <div>@ResourceLanguaje.Resource.ByApproving</div>
+                    <div style="clear:both;"></div>
+                </div>
+                <div id="StatusSelecthomInc2"></div>
+            </div>
+        </div>
+        <div id="homInc3" class="ticketByStatusP4" onclick="Click(this)">
+            <div class="tabStatus3" >
+                <div id="boxRESOLVED" class="boxQty">@ViewBag.TApprovals</div>
+                <div id="letrashomInc3" class="letras">
+                    <div>@ResourceLanguaje.Resource.Approvals</div>
+                    <div style="clear:both;"></div>
+                </div>
+                <div id="StatusSelecthomInc3"></div>
+            </div>
+        </div>
+        <div id="homInc4" class="ticketByStatusP4" onclick="Click(this)">
+            <div class="tabStatus4" >
+                <div id="boxCLOSED" class="boxQty">@ViewBag.TResults</div>
+                <div id="letrashomInc4" class="letras letrasActive">
+                    <div>@ResourceLanguaje.Resource.Results</div>
+                    <div style="clear:both;"></div>
+                </div>
+                <div id="StatusSelecthomInc4"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gridTraining" class="contentView">
+    </div>
+
+    <div id="pagerTraining" class="contentViewPager">
+    </div>
+@*    <br /><br />
+    <div id="gridTrai"></div>*@
+</div>
+
+<script type="text/x-kendo-tmpl" id="tpt-Training">
+    <div style="margin-top: 1%;"></div>
+    <div class="TrainingHome">
+        <div class = "incidentHomeListBlock1 hasLayout">
+            <div class = "TrainingHomeListHeader">
+                <div class="TrainingHeaderContent">
+                    <div class="condition">
+                        ${NAM_TRAI}
+                    </div>
+                    <div class="incidentHomeRequesterIcon" title="Request">
+                        ${Request}
+                    </div>
+                    <div class="incidentHomeCreate" title="Record date">
+                        @ResourceLanguaje.Resource.Requester: ${DAT_REQU}
+                    </div>
+                </div>
+            </div>
+            <div style="float:right;margin:5px 5px 0 0;">
+                # if (ID_STAT == 0) { #
+                    <div style="margin:0 0 5px 0;" onclick="ReqApproval(${ID_PERS_TRAI}); return false;"><button id="BtnReqAppr" class="k-button" >@ResourceLanguaje.Resource.RequestApproval</button></div>
+                # } else if (ID_STAT == 1 && VIS_BT_APPR_SUP == true) { #
+                    <div style="margin:0 0 5px 0;" onclick="ReqApprovalSup(${ID_PERS_TRAI}); return false;"><button id="BtnAppSup" class="k-button" >@ResourceLanguaje.Resource.Approve</button></div>
+                    <div style="margin:0 0 5px 0;" onclick="ReqRejectSup(${ID_PERS_TRAI}); return false;"><button id="BtnRejSup" class="k-button" >@ResourceLanguaje.Resource.Reject</button></div>
+                # } else if (ID_STAT == 1 && VIS_BT_APPR_OPE == true) { #
+                    <div style="margin:0 0 5px 0;" onclick="ReqApprovalOpe(${ID_PERS_TRAI}); return false;"><button id="BtnAppOper" class="k-button" >@ResourceLanguaje.Resource.Approve</button></div>
+                    <div style="margin:0 0 5px 0;" onclick="ReqRejectOpe(${ID_PERS_TRAI}); return false;"><button id="BtnRejOper" class="k-button" >@ResourceLanguaje.Resource.Reject</button></div>
+                # } #
+            </div>
+            <div class = "Training">
+                <div class = "TrainingContent">
+                    <div style="float:left;width:50%;">
+                        <div style="clear:both; width:100%; float:left;">
+                            <div class="titleSummary">@ResourceLanguaje.Resource.Name ${NAM_TRAI} :</div><div class="textSummary">  ${NAM_REVIEW}</div>
+                        </div>
+                        <div style="clear:both;width:100%; float:left;">
+                            <div class="titleSummary">@ResourceLanguaje.Resource.Manufacturer :</div><div class="textSummary"> ${NAM_MANU}</div>
+                        </div>
+                        <div style="clear:both;width:100%; float:left;">
+                            <div class="titleSummary">@ResourceLanguaje.Resource.Cost :</div><div class="textSummary"> ${MONEY} ${AMOUNT}</div>
+                        </div>
+                        <div style="clear:both;width:100%; float:left;">
+                            <div class="titleSummary">@ResourceLanguaje.Resource.Date ${NAM_TRAI} :</div><div class="textSummary"> ${DAT_REVIEW}</div>
+                        </div>
+                        <div style="clear:both;width:100%; float:left;">            
+                            <div class="titleSummary">@ResourceLanguaje.Resource.Attach :</div>
+                            <div class="textSummary">
+                                # if (NAM_FILE != '-') { #                                    
+                                    <a href="/Adjuntos/Talent/Training/${NAM_FILE}" TARGET='_BLANK' style="text-decoration:none;" title="@ResourceLanguaje.Resource.Download">${NAM_ATTA}</a>
+                                # } else { # - # } #
+                            </div>
+                        </div>
+                    </div>
+                    <div style="float:left;width:50%;">
+                        <div class="titleSummary">@ResourceLanguaje.Resource.Summary </div>
+                        <div class="TrainingSumary">#= SUM_TRAI #</div>
+                    </div>
+                </div>
+            </div> 
+            <div class="contraya">
+                <div class="raya"></div>
+            </div>
+            <div class="incidentHomeRes">    
+                <div style="background-repeat: no-repeat; display:block; float:left; width:11%; padding:3px 0px 3px 5px;text-transform:capitalize;">${CODE_TRAI}</div>
+                <div style="background-repeat: no-repeat; display:block; float:left; width:20%; padding:3px 0px 3px 5px;text-transform:capitalize;">Supervisor: ${Supervisor}</div>
+                <div style="background-repeat: no-repeat; display:block; float:left; width:20%; padding:3px 0px 3px 5px;text-transform:capitalize;">@ResourceLanguaje.Resource.Approved : ${DAT_APPR_SUPE}</div> 
+                # if ((ID_STAT == 1 && VIS_APPR_OPE == true) || ID_STAT > 1) { #
+                    <div style="background-repeat: no-repeat; display:block; float:left; width:26%; padding:3px 0px 3px 5px;text-transform:capitalize;">${CARG_OPER}: ${GGOperaciones}</div>
+                    <div style="background-repeat: no-repeat; display:block; float:left; width:19%; padding:3px 0px 3px 5px;text-transform:capitalize;">@ResourceLanguaje.Resource.Approved : ${DAT_APPR_OPER}</div>
+                # } #
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var DS_Training = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Training/ListByStatus?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerTraining").kendoPager({
+            dataSource: DS_Training,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridTraining").kendoListView({
+            dataSource: DS_Training,
+            template: kendo.template($("#tpt-Training").html())
+        });
+
+        //$("#gridTrai").kendoGrid({
+        //    dataSource: DS_Training,
+        //    groupable: false,
+        //    sortable: true,
+        //    selectable: "multiple",
+        //    resizable: true,
+        //    reorderable: true,
+        //    filterable: true,
+        //    columnMenu: true,
+        //    pageable: {
+        //        refresh: true,
+        //        pageSizes: [15, 30, 65]
+        //    },
+        //    columns: [{
+        //        field: "Request",
+        //        width: 150,
+        //        title: "Request"
+        //    }, {
+        //        field: "NAM_REVIEW",
+        //        width: 250,
+        //        title: "Name Review"
+        //    }, {
+        //        width: 100,
+        //        field: "DAT_REVIEW",
+        //        title: "Date Review"
+        //    }, {
+        //        field: "Supervisor",
+        //        width: 200,
+        //    //}, {
+        //    //    field: "BirthDate",
+        //    //    title: "Birth Date",
+        //        //template: '#= kendo.toString(BirthDate,"dd MMMM yyyy") #'
+        //    }, {
+        //        width: 200,
+        //        field: "GGOperaciones"
+        //    }
+        //    ]
+        //});
+    });
+
+    function Click(parm) {
+
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 0;
+        if (parm.id == "homInc2") {
+            bandera = 1;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 2;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 2;
+        }
+        var listView = $("#gridTraining").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+    }
+
+    function NewTraining() {
+        $("#divSubContent").empty();
+        $("#divSubContent").load("/Training/ViewNewTraining?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+    }
+    function FindTraining() {
+        $("#divSubContent").empty();
+        $("#divSubContent").load("/Training/ViewFindTraining?var=" + Math.random());
+    }
+    function ReqApproval(id) {
+        winPopUpModal("@ResourceLanguaje.Resource.RequestApproval", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>@ResourceLanguaje.Resource.TrainingMsn</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#btnYes")
+            .bind("click", function () {
+                $.ajax({
+                    url: "/Training/RequestApproval/" + id,
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        if (dato == 'OK') {
+                            closeWinModalPopUp();
+                            Training();
+                        }
+                        else { closeWinModalPopUp(); alert('ERROR'); }
+                    },
+                    error: function (dato) {
+                        alert('ERROR');
+                    }
+                });
+            });
+
+        var undo = $("#btnNO")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+    }
+
+    function ReqApprovalSup(id) {
+        winPopUpModal("@ResourceLanguaje.Resource.Approval", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>@ResourceLanguaje.Resource.TrainingMsn02</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='btnYes02' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO02' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#btnYes02")
+            .bind("click", function () {
+                $.ajax({
+                    url: "/Training/ApprovalSupervisor/" + id,
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        if (dato == 'OK') {
+                            closeWinModalPopUp();
+                            Training();
+                        }
+                        else { closeWinModalPopUp(); alert('ERROR'); }
+                    },
+                    error: function (dato) {
+                        alert('ERROR');
+                    }
+                });
+            });
+
+        var undo = $("#btnNO02")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+    }
+    
+    function ReqApprovalOpe(id) {
+        winPopUpModal("@ResourceLanguaje.Resource.Approval", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>@ResourceLanguaje.Resource.TrainingMsn02</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='btnYes02' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO02' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#btnYes02")
+            .bind("click", function () {
+                $.ajax({
+                    url: "/Training/ApprovalManagement/" + id,
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        if (dato == 'OK') {
+                            closeWinModalPopUp();
+                            Training();
+                        }
+                        else { closeWinModalPopUp(); alert('ERROR'); }
+                    },
+                    error: function (dato) {
+                        alert('ERROR');
+                    }
+                });
+            });
+
+        var undo = $("#btnNO02")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+    }
+
+    function ReqRejectSup(id) {
+        var htmlForm = '<div id="FormReportAsset"></div>';
+        winFormPopUpModal("@ResourceLanguaje.Resource.Reject", htmlForm, 500, 380);
+        $("#FormReportAsset").load("/Training/RejectRequest?id=" + id + "&var=" + Math.random());
+    }
+
+    function ReqRejectOpe(id) {
+        alert('ok');
+    }
+</script>

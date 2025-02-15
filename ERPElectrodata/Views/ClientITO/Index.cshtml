@@ -1,0 +1,376 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutClient.cshtml";
+}
+
+<div id="divContent">
+    <h1>@ResourceLanguaje.Resource.IncidentRequest</h1>
+    <div id="ticketsByStatus">
+        <div class="ticketByStatusP4_1">
+            <div id="homInc1" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus1" style="position:relative;">
+                    <div id="boxActive" class="boxQty">@ViewBag.PActive</div>
+                    <div id="letrashomInc1" class="letras letrasActive">
+                        <div>@ResourceLanguaje.Resource.Active<br /><div id="boxTActive">@ResourceLanguaje.Resource.TotalAccount @ViewBag.TAActive</div></div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc1" class="tab-active-marks2"></div>
+                    <div class="divAjax-Loading" id="loadinghomInc1" style="top:0px; right:0px; position:absolute;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ticketByStatusP4_1">
+            <div id="homInc2" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus2" style="position:relative;">
+                    <div id="boxSCHEDULED" class="boxQty">@ViewBag.PScheduled</div>
+                    <div id="letrashomInc2" class="letras">
+                        <div>@ResourceLanguaje.Resource.Scheduled<br /><div id="boxTSCHEDULED">@ResourceLanguaje.Resource.TotalAccount @ViewBag.TAScheduled</div></div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc2"></div>
+                    <div class="divAjax-Loading" id="loadinghomInc2" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ticketByStatusP4_1">
+            <div id="homInc3" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus3" style="position:relative;">
+                    <div id="boxRESOLVED" class="boxQty">@ViewBag.PResolved</div>
+                    <div id="letrashomInc3" class="letras">
+                        <div>@ResourceLanguaje.Resource.Resolved<br /><div id="boxTRESOLVED">@ResourceLanguaje.Resource.TotalAccount @ViewBag.TAResolved</div></div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc3"></div>
+                    <div class="divAjax-Loading" id="loadinghomInc3" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="ticketByStatusP4_1">
+            <div id="homInc4" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus4" style="position:relative;">
+                    <div id="boxCLOSED" class="boxQty">@ViewBag.PClosed</div>
+                    <div id="letrashomInc4" class="letras">
+                        <div>@ResourceLanguaje.Resource.Closed<br /><div id="boxTCLOSED">@ResourceLanguaje.Resource.TotalAccount @ViewBag.TAClosed</div></div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc4"></div>
+                    <div class="divAjax-Loading" id="loadinghomInc4" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <input type="hidden" id="TimeServer" name="TimeServer" value="@ViewBag.TimeServer" />
+
+    <div id="gridTickets" class="contentView">
+
+    </div>
+
+    <div id="pagerTickets" class="contentViewPager">
+
+    </div>
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="incidentHomeList">
+        <div class="incidentHomeListBlock1 hasLayout">
+            <div class="incidentHomeListHeader" style="position:relative;">
+                <div class="FondoNegro">
+                    <div id="${ID_INCI}" onclick="child(this)" class="${PARENT}">
+                    </div>
+                    <div class="status">
+                        Assigned To: ${ASSI}
+                    </div>
+                    # if (VIS_COMP) { #
+                    <div class="incidentHomeRequesterIcon" title="${CIA_TOOL}">
+                        ${REQU} (${CIA})
+                    </div>
+                    # } else { #
+                    <div class="incidentHomeRequesterIcon">
+                        ${REQU}
+                    </div>
+                    # } #
+                    <div class="incidentHomeCreate" title="Creation date @ResourceLanguaje.Resource.DateFormat">
+                        @ResourceLanguaje.Resource.Created: ${CREATE_INCI}
+                    </div>
+                    <div class="incidentHomeModified" title="Modification date @ResourceLanguaje.Resource.DateFormat">
+                        Last Update: ${MODIFIED_INCI}
+                    </div>
+                    @*<div class="incidentHomeExpTime" title="Expiration Time">
+                            Expiration Time: ${EXP_TIME}
+                        </div>*@
+                    # if (COUNTSON > 0) { #
+                    <div id="btnExpandir${ID_INCI}" class="btnExpand" onclick="jsViewSon(${ID_INCI})" title="View tickets son"></div>
+                    <div class="divAjax-Loading" style="display:none; float:right;" id="divLoading${ID_INCI}"></div>
+                    # } #
+                </div>
+                <div class="${ICO_PRIO}">
+                    ${NAM_STAT} <div style="float:right"> ${NAM_PRIO} ${HOU_PRIO}</div>
+                </div>
+                # if(EXP_TIME == 'Stopped') {#
+                # if(ID_STAT_END != 4 && ID_STAT_END != 6) { #
+                @*<div style="position:absolute; top:55px; right:0px; width:130px; height:80px;" title="Expiration Time">
+                        <div style="font-family: Sans-Serif; font-size: 2em; width: 100%; text-align: center; color: \\#ffbb00; ">@ResourceLanguaje.Resource.Stopped</div>
+                    </div>*@
+                @*<div style="position: absolute; display: inline-block; top: 25px; right: 0px; width: 100px; height: 60px;padding: 3px 10px 3px 10px; " title="Date Scheduled">
+                    <div style="float: left; font-family: Sans-Serif; font-size: 1.3em; width: 100%; padding-top: 2px; text-align: center; color: \\#FFBB00; min-height: 40px; -webkit-border-top-left-radius: 4px; -webkit-border-top-right-radius: 4px; -moz-border-radius-topleft: 4px; -moz-border-radius-topright: 4px; border-top-left-radius: 4px; border-top-right-radius: 4px; ">
+                        <div style="font-size:.85em;">${DATE_SCHE} | ${HOUR_SCHE}</div>
+                    </div>
+                    
+                </div>*@
+                # } #
+                # } else { #
+                @*<div id="divContentTimeRemaining${Seque}" style="position: absolute; display: block; top: 25px; right: 0px; width: 100px; height: 60px; padding: 3px 10px 3px 10px;" title="Expiration Time">
+                    <div id="divTimeRemaining${Seque}" style="float: left; font-size: 1.3em; width: 100%; padding-top: 1px; text-align: center; min-height: 40px;font-weight:500"></div>
+                    
+                </div>
+                <input type="hidden" id="reloj${Seque}" name="reloj${Seque}" value="${DATE_MAX}" />
+                <input type="hidden" id="prio${Seque}" name="prio${Seque}" value="${NAM_PRIO}" />*@
+                # } #
+            </div>
+        </div>
+        <div class="incidentHomeSumary">
+            <a href="${URL}${ID_INCI}" target='_BLANK'>#= SUM_INCI #</a>
+        </div>
+        <div class="contraya">
+            <div class="raya"></div>
+        </div>
+        <div class="incidentHomeRes">
+            <div class="ticket">
+                ${NAM_TYPE_TICK} \\#
+                ${COD_INCI}
+            </div>
+            <div class="cateTicket">
+                ${NAM_CATE} > ${NAM_SUBC} > ${NAM_CLAS} > ${NAM_SUBCLAS}
+                # if(NUM_OP != '') { #
+                <a href="/DocumentSaleActivity/Index/${ID_DOCU_SALE}" target="_blank" title="View OP">
+                    ${COD_TYPE_DOCU_SALE} ${NUM_OP}
+                </a>
+                # } else { #
+                > Via ${NAM_SOUR}
+                # } #
+            </div>
+            <div class="createBy">@ResourceLanguaje.Resource.CreatedBy: ${CREATEBY}</div>
+            <div class="assignedTo"></div>
+        </div>
+    </div>
+    <div style="width:100%; height:100%; position:relative; float:left;" id="divSON${ID_INCI}">
+
+    </div>
+
+
+    <div id="btn${ID_INCI}">
+
+    </div>
+    <div style="clear:both">
+    </div>
+
+
+</script>
+
+<script type="text/javascript">
+    var con = 0;
+    function jsViewSon(id){
+
+        $("#divLoading"+ id).css("display","block");
+        var className = $('#btnExpandir' + id).attr('class');
+        if(className=='btnExpand'){
+            $("#divSON" + id).show('blind', function(){
+                var txt = $("#divSON" + id).html();
+                if(txt.length == 6 || txt.length == 0){
+                    $("#divSON" + id).empty();
+                    $("#divSON" + id).load("/Ticket/viewListTicketSon?id=" + id +"&var=" + Math.random(),function(){
+
+                    });
+                }
+                else{ $("#divLoading"+ id).css("display","none"); }
+
+                $("#btnExpandir" + id).removeClass("btnExpand").addClass("btnContract");
+            });
+        }
+        else{
+            $("#divSON" + id).hide('blind', function(){
+                //expandiendo los ticket despues de cerrar el detalle de la OP
+                $("#divLoading"+ id).css("display","none");
+                $("#btnExpandir" + id).removeClass("btnContract").addClass("btnExpand");
+            });
+        }
+    }
+    $(document).ready(function () {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/ClientITO/ListByStatus/0?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerTickets").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridTickets").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html()),
+        });
+
+        dataSource.fetch(function() {
+            TiempoFalta(dataSource.view().length);
+            $("#loadinghomInc1").css("display", "none");
+        });
+    });
+
+    function TiempoFalta(tt){
+        now = new Date($("#TimeServer").val());
+        for(i=1;i<=tt;i++){
+
+            prio = $("#prio" + i).val();
+
+            if(prio == 'planning'){
+                $("#divTimeRemaining" + i).html('<div style="width:100%; min-height:8px; float:left;"></div>---- | ----');
+                //$("#divContentTimeRemaining" + i).css("background-color","#333333");
+                //$("#divContentTimeRemaining" + i).css("border","1px solid #333333");
+                $("#divTimeRemaining" + i).css("color","#333333");
+            }
+            else{
+                dTick = $("#reloj" + i).val();
+                TimeRemaining(now,dTick,i);
+            }
+        }
+        now.setSeconds(now.getSeconds() + 1);
+
+        $("#TimeServer").val(now);
+        newtime = window.setTimeout("TiempoFalta(" + tt + ");", 1000);
+    }
+
+    function TimeRemaining(now,dTick,idx){
+
+        y2k = new Date(dTick);
+
+        diffDays = (y2k - now) / 1000 / 60 / 60 / 24;
+
+        if(diffDays < 0){
+            days = (now - y2k) / 1000 / 60 / 60 / 24;
+            daysRound = Math.floor(days);
+            hours = (now - y2k) / 1000 / 60 / 60 - (24 * daysRound);
+            hoursRound = Math.floor(hours);
+            minutes = (now - y2k) / 1000 /60 - (24 * 60 * daysRound) - (60 * hoursRound);
+            minutesRound = Math.floor(minutes);
+            seconds = (now - y2k) / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
+            secondsRound = Math.round(seconds);
+        }
+        else{
+            daysRound = Math.floor(diffDays);
+            hours = (y2k - now) / 1000 / 60 / 60 - (24 * daysRound);
+            hoursRound = Math.floor(hours);
+            minutes = (y2k - now) / 1000 /60 - (24 * 60 * daysRound) - (60 * hoursRound);
+            minutesRound = Math.floor(minutes);
+            seconds = (y2k - now) / 1000 - (24 * 60 * 60 * daysRound) - (60 * 60 * hoursRound) - (60 * minutesRound);
+            secondsRound = Math.round(seconds);
+        }
+
+
+        //sec = (secondsRound < 10) ? "0" + secondsRound : secondsRound;
+        min = (minutesRound == 0 && hoursRound == 0 ? "" : ((minutesRound < 10) ? "0" + minutesRound: minutesRound) + "" );
+        hr = (hoursRound == 0 && daysRound == 0 ? "" : ((hoursRound < 10) ? "0" + hoursRound: hoursRound) + ":" );
+        dy = (daysRound == 0 ? "0 days | " : (daysRound == 1 || daysRound == -1)  ? daysRound + " day | " : daysRound + " days | ");
+
+        if(diffDays < 0 ){
+            //$("#divContentTimeRemaining" + idx).css("background-color","#ee1111");
+            //$("#divContentTimeRemaining" + idx).css("border","1px solid #ee1111");
+            $("#divTimeRemaining" + idx).css("color","#ee1111");
+            dy = (dy=="" ? "<div style='width:100%; min-height:8px; float:left;'></div>- " : "- " + dy);
+        }
+        else{
+            dy = (dy=="" ? "<div style='width:100%; min-height:8px; float:left;'></div>" : dy);
+
+            //$("#divContentTimeRemaining" + idx).css("background-color","#516882");
+            //$("#divContentTimeRemaining" + idx).css("border","1px solid #516882");
+            $("#divTimeRemaining" + idx).css("color","#516882");
+        }
+
+        $("#divTimeRemaining" + idx).html(dy + hr +  min);
+    }
+
+    function Click(parm) {
+        //$("#loading" + parm.id).css("display", "block");
+
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 0;
+        if (parm.id == "homInc2") {
+            bandera = 5;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 4;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 6;
+        }
+        var listView = $("#gridTickets").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+        //$("#cueroHomInc").load("Incident/PendienteByIdUserView/0");
+    }
+    function UpdateBarStatus() {
+
+        $.ajax({
+            url: '/ClientITO/UpdateBarStatus?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+                var active = 0, activeT = 0;
+                $.each(jsonx['Data'], function (index, value) {
+
+                    if (value['ID_STAT'] == 1) {
+                        active = active + value['Tickets'];
+                        activeT = activeT + value['Total'];
+                    }
+                    else if (value['ID_STAT'] == 3) {
+                        active = active + value['Tickets'];
+                        activeT = activeT + value['Total'];
+                    }
+                    else {
+                        $("#box" + value['NAM_STAT']).html(value['Tickets']);
+                        $("#boxT" + value['NAM_STAT']).html("@ResourceLanguaje.Resource.TotalAccount " + value['Total']);
+                    }
+                });
+
+                $("#boxActive").html(active);
+                $("#boxTActive").html("@ResourceLanguaje.Resource.TotalAccount " +activeT);
+
+                var listViewd = $("#gridTickets").data("kendoListView");
+                listViewd.dataSource.page(listViewd.dataSource.page());
+            }
+
+        });
+        myVar = setTimeout("UpdateBarStatus();", 240000);
+    }
+    UpdateBarStatus();
+
+</script>

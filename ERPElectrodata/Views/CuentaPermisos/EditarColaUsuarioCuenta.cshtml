@@ -1,0 +1,500 @@
+﻿@{
+    Layout = null;
+}
+@*<link href="~/Content/fonts/font-awesome.css" rel="stylesheet" />*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    .divHide {
+        display: none;
+    }
+
+    #lapiz-icon {
+        fill: #1E3050
+    }
+</style>
+<div class="row">
+    <div class="col-lg-5">
+        <div class="mb-3 card" id="" style="width:100%;">
+            <div class="card-header-tab card-header">
+                <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                    Editar Cola de  Asignación
+                    <div class="divAjax-Loading" id="divPB" style="position: absolute; right: 0px; top: 0px; display: none;"></div>
+                </div>
+            </div>
+            <div class="p-0 card-body">
+                <div class="p-1 slick-slider-sm">
+                    <div class="inBodyForm" id="">
+                        @using (Html.BeginForm("ActualizarCuenta", "CuentaPermisos", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormUpdateQueue", name = "FormUpdateQueue", target = "upload_targetUpdateQueue" }))
+                        {
+                            @*<input name="ID_ACCO" value="@ViewBag.ID_ACCO" hidden />*@
+                            <div class="col-lg-11">
+                                <div class="row">
+                                    <div class="col-lg-10">
+                                        <div class="editor-label">
+                                            Usuario
+                                        </div>
+                                        <div class="editor-field">
+                                            <input id="ID_PERS_ENTI" name="ID_PERS_ENTI" class="dropdownKendo" />
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-5">
+                                        <div class="editor-label">
+                                            Cuenta
+                                        </div>
+                                        <div class="editor-field">
+                                            <input id="ID_ACCO" name="ID_ACCO" style="width:95%;" />
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-5">
+                                        <div class="editor-label">
+                                            Cola de Cuenta
+                                        </div>
+                                        <div class="editor-field">
+                                            <input id="ID_QUEU" name="ID_QUEU" style="width:95%;" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 mt-2 mb-2">
+                                <button id="submit" class="k-button">@ResourceLanguaje.Resource.BtnSaveTalent</button>
+                            </div>
+                        }
+                        <iframe id="upload_targetUpdateQueue" name="upload_targetUpdateQueue" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6" style="width:95%;">
+        <div class="mb-3 card" id="" style="width:100%;">
+            <div class="card-header-tab card-header">
+                <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                    Restricciones por Cuenta
+                    <div class="divAjax-Loading" id="divPB" style="position: absolute; right: 0px; top: 0px; display: none;"></div>
+                </div>
+            </div>
+            <div class="p-0 card-body">
+                <div class="p-1 slick-slider-sm">
+                    <div class="inBodyForm" id="">
+                        <div class="clearfix" style="padding-bottom:15px;"><button id="AgregarCuenta" type="button" class="btn btn-primary btn-sm" style="float:right;" onclick="AgregarCuenta()">Agregar Cuenta</button></div>
+                        <div class="table-responsive">
+                            <table id="TBAddNewAccoEnti" class="table divHide">
+                                <thead>
+                                    <tr>
+                                        <th>Cuenta</th>
+                                        <th>Requiere</th>
+                                        <th>Asignación</th>
+                                        <th>Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="editor-field">
+                                                <input id="IDACCO" name="IDACCO" />
+                                            </div>
+                                        </td>
+                                        <td style=" text-align: center;"><input id="Req" type="checkbox" style="width:15px;"></td>
+                                        <td style=" text-align: center;"><input id="Ass" type="checkbox" style="width:15px;"></td>
+
+                                        <td style=" text-align: center;">
+                                            <span title="Save" class="fa fa-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 20px; " onclick="GuardarNuevaCuenta()"></span>
+                                            <span>&nbsp;&nbsp;</span>
+                                            <span title="Hide" class="fa fa-chevron-up" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 20px; " onclick="OcultarNuevaCuenta()"></span>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Nombre de Cuenta</th>
+                                        <th>Requiere</th>
+                                        <th>Asignación</th>
+                                        <th>Cuenta por defecto</th>
+                                        <th style="border-left: 1px solid #e2e2e2; ">Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="TablaCuentas"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoDropDownList({
+            autoBind: true,
+            dataTextField: "ASSI",
+            dataValueField: "ID_PERS_ENTI",
+            //optionLabel: {
+            //    ASSI: "Seleccionar",
+            //    ID_PERS_ENTI: null
+            //},
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;font-size: 13px;">' +
+                '<div style="float:right; width: 100%;">${data.ASSI}</div>' +
+                '</div>',
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+
+                    read: "/CuentaPermisos/UsuarioPorCuenta?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                var value = $("#ID_PERS_ENTI").data("kendoDropDownList").value();
+                $.ajax({
+                    url: "/CuentaPermisos/CuentaColaUsuario/",
+                    data: "&idpersenti=" + value + "&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "json",
+                    success: function (data) {
+                        $("#ID_ACCO").data("kendoDropDownList").value(data.Data[0].ID_ACCO_PERT);
+                        $("#ID_QUEU").data("kendoDropDownList").value(data.Data[0].ID_QUEU);
+                        /*$("#ID_ACCO").data("kendoDropDownList").value(data.Data[0].ID_ACCO_PERT);*/
+                        CargarTablaCuentasPermisos(value);
+                    }
+                });
+            }
+        });
+
+        var ID_ACCO = $("#ID_ACCO").kendoDropDownList({
+            autoBind: false,
+            cascadeFrom: "ID_PERS_ENTI",
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CuentaPermisos/ListaCuentaPorUsuario?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                var value = $("#ID_PERS_ENTI").data("kendoDropDownList").value();
+                $.ajax({
+                    url: "/CuentaPermisos/CuentaColaUsuario/",
+                    data: "&idpersenti=" + value + "&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "json",
+                    success: function (data) {
+                        $("#ID_QUEU").data("kendoDropDownList").value(data.Data[0].ID_QUEU);
+                        CargarTablaCuentasPermisos(value);
+                    }
+                });
+            }
+        });
+
+        var ID_QUEU = $("#ID_QUEU").kendoDropDownList({
+            autoBind: false,
+            cascadeFrom: "ID_ACCO",
+            dataTextField: "DES_QUEU",
+            dataValueField: "ID_QUEU",
+            template: '<span">#= DES_QUEU # (#= NAM_QUEU #)</span>',
+            delay: 500,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CuentaPermisos/ListaGrupoPorCuenta?var=" + Math.random()
+                }
+            }
+        });
+
+
+    });
+
+
+
+    function PopUpQueue(msg) {
+        if (msg == 'OK') {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Saved Information");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>La información se ha actualizado Correctamente.</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.ContinueTalent</button>" +
+                                       "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        }
+        else {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Saved Information");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>No se puede Actualizar la información.</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.ContinueTalent</button>" +
+                                       "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        }
+    }
+
+    function CargarTablaCuentasPermisos(value) {
+
+        if (value == "") {
+            $("#TablaCuentas").empty();
+        } else {
+
+
+            $.ajax({
+                url: "/CuentaPermisos/ListaCuentasEditar?id="+ value,
+                data: "var=" + Math.random(),
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+
+                    $("#TablaCuentas").empty();
+
+                    $.each(data['Data'], function (index, value) {
+                        $("#TablaCuentas").append(
+                            '<tr id="FilaAccoEnti' + (data['Data'][index]['ID_ACCO_ENTI']) + '"' + ((data['Data'][index]['DEF_ACCO']) == true ? 'class="danger"' : '') + '>' +
+                            '<td>' + (data['Data'][index]['NAM_ACCO']) + '</td>' +
+                            '<td style="text-align:center;">' +
+                            '<span id="VisRequ' + (data['Data'][index]['ID_ACCO_ENTI']) + '"  class="fa fa-' + ((data['Data'][index]['VIS_REQU']) == true ? 'check' : 'times" style="color: #BA141A;"') + '" aria-hidden="true" style="color: #3E4752; font-size: 14px;text-align:center;"></span>' +
+                            '<input id="CBVisRequ' + (data['Data'][index]['ID_ACCO_ENTI']) + '" class="divHide" type="checkbox" style="width:15px;" ' + ((data['Data'][index]['VIS_REQU']) == true ? 'checked' : '') + ' />' +
+                            '</td>' +
+                            '<td style=" text-align: center;">' +
+                            '<span id="VisAssi' + (data['Data'][index]['ID_ACCO_ENTI']) + '" class="fa fa-' + ((data['Data'][index]['VIS_ASSI']) == true ? 'check' : 'times" style="color: #BA141A;"') + '" aria-hidden="true" style="color: #3E4752; font-size: 14px; "></span>' +
+                            '<input id="CBVisAssi' + (data['Data'][index]['ID_ACCO_ENTI']) + '" class="divHide" type="checkbox" style="width:15px;" ' + ((data['Data'][index]['VIS_ASSI']) == true ? 'checked' : '') + ' />' +
+                            '</td>' +
+                            '<td style="text-align:center;">' +
+                            '<span id="VisAssi" class="fa fa-' + ((data['Data'][index]['DEF_ACCO']) == true ? 'check' : 'times" style="color: #BA141A;"') + '" aria-hidden="true" style="color: #3E4752; font-size: 14px;text-align:center;"></span>' +
+                            '<input id="DEF_ACCO" class="divHide" type="checkbox" style="width:15px;" ' + ((data['Data'][index]['DEF_ACCO']) == true ? 'checked' : '') + ' />' +
+                            '</td>' +
+                            '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                            '<span id="Edit' + (data['Data'][index]['ID_ACCO_ENTI']) + '" title="Edit" class="fas fa-pencil" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:20px; " onclick="EditarAccesosCuenta(' + (data['Data'][index]['ID_ACCO_ENTI']) + ')">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 512 512"><path id="lapiz-icon" d="M497.9 142.1l-46.1 46.1c-4.7 4.7-12.3 4.7-17 0l-111-111c-4.7-4.7-4.7-12.3 0-17l46.1-46.1c18.7-18.7 49.1-18.7 67.9 0l60.1 60.1c18.8 18.7 18.8 49.1 0 67.9zM284.2 99.8L21.6 362.4.4 483.9c-2.9 16.4 11.4 30.6 27.8 27.8l121.5-21.3 262.6-262.6c4.7-4.7 4.7-12.3 0-17l-111-111c-4.8-4.7-12.4-4.7-17.1 0zM124.1 339.9c-5.5-5.5-5.5-14.3 0-19.8l154-154c5.5-5.5 14.3-5.5 19.8 0s5.5 14.3 0 19.8l-154 154c-5.5 5.5-14.3 5.5-19.8 0zM88 424h48v36.3l-64.5 11.3-31.1-31.1L51.7 376H88v48z"/></svg>' +
+                            '</span>' +
+                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                            '<span id="Remove' + (data['Data'][index]['ID_ACCO_ENTI']) + '" title="Remove" class="fa fa-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 20px;" onclick="EliminarCuenta(' + (data['Data'][index]['ID_ACCO_ENTI']) + ',' + (data['Data'][index]['DEF_ACCO']) + ')">' +
+                            '<svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 384 512"><style>svg{fill:#c91313}</style><path d="M342.6 150.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192 210.7 86.6 105.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L146.7 256 41.4 361.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192 301.3 297.4 406.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.3 256 342.6 150.6z"/></svg>' +
+                            '</span>' +
+                            '<span id="Save' + (data['Data'][index]['ID_ACCO_ENTI']) + '" title="Save" class="fa fa-save divHide" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 20px; " onclick="GuardarAccesosCuenta(' + (data['Data'][index]['ID_ACCO_ENTI']) + ')"></span>' +
+                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                            '<span id="Default' + (data['Data'][index]['ID_ACCO_ENTI']) + '" title="Default" class="fa fa-check divHide" aria-hidden="true" style="color: #679700; cursor: pointer; font-size: 20px; " onclick="DefaultAccountEntity(' + (data['Data'][index]['ID_ACCO_ENTI']) + ')"></span>' +
+                            '</td>' +
+                            '</tr>'
+
+                        );
+                    });
+                },
+                error: function (source) {
+                    alert("Error Carga Json");
+                }
+            });
+        }
+    }
+
+    function EditarAccesosCuenta(id) {
+        $("#VisRequ" + id).addClass("divHide");
+        $("#VisAssi" + id).addClass("divHide");
+
+        $("#Edit" + id).addClass("divHide");
+        $("#Remove" + id).addClass("divHide");
+
+        $("#CBVisRequ" + id).removeClass("divHide");
+        $("#CBVisAssi" + id).removeClass("divHide");
+
+        $("#Save" + id).removeClass("divHide");
+        $("#Default" + id).removeClass("divHide");
+
+        if (x != 0) {
+            $("#VisRequ" + x).removeClass("divHide");
+            $("#VisAssi" + x).removeClass("divHide");
+
+            $("#Edit" + x).removeClass("divHide");
+            $("#Remove" + x).removeClass("divHide");
+
+            $("#CBVisRequ" + x).addClass("divHide");
+            $("#CBVisAssi" + x).addClass("divHide");
+
+            $("#Save" + x).addClass("divHide");
+            $("#Default" + x).addClass("divHide");
+        }
+        x = id;
+    }
+
+    function GuardarAccesosCuenta(id) {
+        var vr = $("#CBVisRequ" + id).prop('checked');
+        var va = $("#CBVisAssi" + id).prop('checked');
+
+        $.ajax({
+            url: "/CuentaPermisos/GuardarRestriccionesCuenta/",
+            data: "vr=" + vr + "&va=" + va + "&idaccoenti=" + id + "&var=" + Math.random(),
+            type: "POST",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+
+                if (resp == "OK") {
+                    var id_pers_enti = $("#ID_PERS_ENTI").data("kendoDropDownList").value();
+                    CargarTablaCuentasPermisos(id_pers_enti);
+                    x = 0;
+                }
+            }
+        });
+    }
+
+    function DefaultAccountEntity(id) {
+        $.ajax({
+            url: "/CuentaPermisos/CuentaPorDefecto/",
+            data: "&idaccoenti=" + id + "&idpersenti=" + $("#ID_PERS_ENTI").data("kendoDropDownList").value() + "&var=" + Math.random(),
+            type: "POST",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+
+                if (resp == "OK") {
+                    var id_pers_enti = $("#ID_PERS_ENTI").data("kendoDropDownList").value();
+                    CargarTablaCuentasPermisos(id_pers_enti);
+                    x = 0;
+                }
+            }
+        });
+    }
+
+    function EliminarCuenta(id, defacco) {
+        //alert(defacco);
+        if (defacco == false || defacco == null) {
+            $.ajax({
+                url: "/CuentaPermisos/EliminarCuenta/",
+                data: "idaccoenti=" + id + "&var=" + Math.random(),
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        //  $("#FilaAccoEnti" + id).remove();
+                        var id_pers_enti = $("#ID_PERS_ENTI").data("kendoDropDownList").value();
+                        CargarTablaCuentasPermisos(id_pers_enti);
+                        var ID_ACCO = $("#ID_ACCO").data("kendoDropDownList");
+                        ID_ACCO.dataSource.read();
+                        x = 0;
+                    }
+                }
+            });
+        }
+        else {
+
+            toastr.error("Tiene asignada la cuenta por defecto", "");
+        }
+    }
+
+    function AgregarCuenta() {
+
+        $("#TBAddNewAccoEnti").removeClass("divHide");
+
+        $("#Req").removeAttr('checked');
+        $("#Ass").removeAttr('checked');
+        $("#IDACCO").val('');
+
+        var IDACCO = $("#IDACCO").kendoDropDownList({
+            autoBind: true,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            clearButton: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CuentaPermisos/ListaCuentasSupervisor?var=" + Math.random()
+                }
+            }
+        });
+    }
+
+    function OcultarNuevaCuenta() {
+
+        $("#Req").removeAttr('checked');
+        $("#Ass").removeAttr('checked');
+        $("#IDACCO").val('');
+
+        $("#TBAddNewAccoEnti").addClass("divHide");
+    }
+
+    function GuardarNuevaCuenta() {
+        var vr = $("#Req").prop('checked');
+        var va = $("#Ass").prop('checked');
+        var idacco = $("#IDACCO").val();
+
+        $.ajax({
+            url: "/CuentaPermisos/GuardarNuevaCuenta/",
+            data: "vr=" + vr + "&va=" + va + "&idpersenti=" + $("#ID_PERS_ENTI").data("kendoDropDownList").value() + "&idacco=" + idacco + "&var=" + Math.random(),
+            type: "POST",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+
+                if (resp == "OK") {
+                    mensaje(resp, "Se actualizaron los permisos de la cuenta.");
+                    $("#TBAddNewAccoEnti").addClass("divHide");
+                    var id_pers_enti = $("#ID_PERS_ENTI").data("kendoDropDownList").value();
+                    CargarTablaCuentasPermisos(id_pers_enti);
+                    var ID_ACCO = $("#ID_ACCO").data("kendoDropDownList");
+                    ID_ACCO.dataSource.read();
+                    x = 0;
+                } else {
+                    mensaje(resp, "Complete los campos por favor.");
+                }
+            }
+        });
+    }
+
+    function mensaje(tipo, msg) {
+        if (tipo == 'ERROR') {
+            toastr.error(msg, "");
+        } else {
+            toastr.success(msg, "");
+            var id_pers_enti = $("#ID_PERS_ENTI").data("kendoDropDownList").value();
+            CargarTablaCuentasPermisos(id_pers_enti);
+        }
+    }
+</script>

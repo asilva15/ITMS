@@ -1,0 +1,532 @@
+﻿@model  ERPElectrodata.Models.Candidato
+
+@{
+    Layout = null;
+}
+
+<style>
+    /*b {
+        color: #F83C50;
+    }*/
+
+    #Estudios1 {
+        width: 236px;
+        height: 52px;
+        resize: none;
+        border-radius: .25rem;
+    }
+
+    #Observacion1 {
+        width: 236px;
+        height: 52px;
+        resize: none;
+        border-radius: .25rem;
+    }
+    #ComentarioJefe {
+        width: 236px;
+        height: 52px;
+        resize: none;
+        border-radius: .25rem;
+    }
+    .k-maskedtextbox {
+        width: 100%;
+    }
+    [data-title]:hover:after {
+        opacity: 1;
+        transition: all 0.1s ease 0.5s;
+        visibility: visible;
+    }
+
+    [data-title]:after {
+        content: attr(data-title);
+        background-color: red;
+        color: #111;
+        font-size: 150%;
+        position: absolute;
+        padding: 1px 5px 2px 5px;
+        bottom: -1.6em;
+        left: 100%;
+        white-space: nowrap;
+        box-shadow: 1px 1px 3px #222222;
+        opacity: 0;
+        border: 1px solid #111111;
+        z-index: 99999;
+        visibility: hidden;
+    }
+
+    [data-title] {
+        position: relative;
+    }
+
+    .pseudo-tooltip-wrapper {
+        /*This causes the wrapping element to be the same size as what it contains.*/
+        display: inline-block;
+    }
+</style>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+@*<script type="text/javascript" src="js/jquery.js"></script>*@
+
+@*<div class="box">*@
+
+
+@using (Html.BeginForm("EditarCandidato", "SeleccionPersonal", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEditarCandidato", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+
+
+    <input type="hidden" id="Id" name="Id" value="@ViewBag.Id" />
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form class="">
+                        <div class="form-row">
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblNombres1" for="Nombres1" class="">Nombres <span style="color:red">*</span></label>
+                                    <input id="Nombres1" type="text" name="Nombres" required="required" value="@ViewBag.Nombres" disabled>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblApellidos1" for="Apellidos1" class="">Apellidos <span style="color:red">*</span></label>
+                                    <input id="Apellidos1" type="text" name="Apellidos" required="required" value="@ViewBag.Apellidos" disabled>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblProfesion1" for="ID_PROFESION1" class="">Profesion <span style="color:red">*</span></label>
+                                    @Html.TextBox("ID_PROFESION1", (int)@ViewBag.Profesion, new { disabled = "true" })
+                                    @Html.ValidationMessageFor(model => model.IdProfesion)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblPretencionSalarial1" for="PretencionSalarial1" class="">Pretencion Salarial <span style="color:red">*</span></label>
+                                    <input id="PretencionSalarial1" type="text" name="PretencionSalarial" required="required" value="@ViewBag.PretencionSalarial" disabled>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblCurriculumVitae" for="CurriculumVitae" class="">Cargar Curriculum Vitae </label>
+                                    <input type="file" name="files" id="files" class="btn-shadow btn btn-info btn-sm" value="Hola"/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="position-relative form-group">
+                                <label id="lblCalificacionGTH" for="CalificacionGTH" class=""><strong><ins>Calificación de GTH :</ins></strong></label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblResponsabilidadPuntualidad1" for="ResponsabilidadPuntualidad1" class="">Responsabilidad y Puntualidad</label>
+                                    @Html.TextBox("ResponsabilidadPuntualidad1", (int)@ViewBag.pPuntualidad, new { disabled = "true", @onchange = "sumarCalificacion1()" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblPresentacion1" for="Presentacion1" class="">Presentacion</label>
+                                    @Html.TextBox("Presentacion1", (int)@ViewBag.pPresentacion, new { disabled = "true", @onchange = "sumarCalificacion1()" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblPersonalidad1" for="Personalidad1" class="">Personalidad</label>
+                                    @Html.TextBox("Personalidad1", (int)@ViewBag.pPersonalidad, new { disabled = "true", @onchange = "sumarCalificacion1()" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblHabilidadExpresion1" for="HabilidadExpresion1" class="">Habilidad de Expresion</label>
+                                    @Html.TextBox("HabilidadExpresion1", (int)@ViewBag.pHabilidad, new { disabled = "true", @onchange = "sumarCalificacion1()" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblReferencias1" for="Referencias1" class="">Referencias</label>
+                                    @Html.TextBox("Referencias1", (int)@ViewBag.pReferencia, new { disabled = "true", @onchange = "sumarCalificacion1()" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group" style="text-align:center; padding-top:15px;">
+                                    <label id="lblPuntajeGTH" for="PuntajeGTH" class="">Puntaje de GTH : </label>
+                                    <label id="sumaa" for="sumaa" class=""><strong>@ViewBag.SumGTH</strong></label>
+                                    <br />
+
+                                    <label id="lblPromedioGTH" for="PromedioGTH" class="">Promedio de GTH : </label>
+                                    <label id="promedioo" for="promedioo" class=""><strong>@ViewBag.PuntajeGTH</strong></label>
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-row">
+                            <div class="position-relative form-group">
+                                <label id="lblCalificacionJefe" for="CalificacionJefe" class=""><strong><ins>Calificación de Jefe Inmediato :</ins></strong></label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblExperienciaLaboral" for="ExperienciaLaboral" class="">ExperienciaLaboral</label>
+                                    @Html.TextBox("ExperienciaLaboral", (int)@ViewBag.pExperiencia, new { disabled = "true", @onchange = "sumarCalificacion1()" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblConocimientos" for="Conocimientos" class="">Conocimientos</label>
+                                    @Html.TextBox("Conocimientos", (int)@ViewBag.pConocimiento, new { disabled = "true", @onchange = "sumarCalificacion1()" })
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblHabilidadesPotencia" for="HabilidadesPotencial" class="">Habilidad y Potencial</label>
+                                    @Html.TextBox("HabilidadesPotencial", (int)@ViewBag.pHabilidades, new { disabled = "true", @onchange = "sumarCalificacion1()" })
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-lg-4">
+                                
+                                <div class="position-relative form-group">
+                                    <label id="lblObservacion1" for="Observacion1" class="">Motivo de Rechazo/Aceptación <span style="color:red">*</span></label>
+                                    <span class="pseudo-tooltip-wrapper" data-title="Ingresar el Motivo de Rechazo o Aceptación">
+                                        <textarea id="Observacion1" type="text" name="Observacion" required="required" value="@ViewBag.Observacion" disabled data-title="Ingresar el Motivo de Rechazo o Aceptación">@ViewBag.Observacion</textarea>
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group" style="text-align:center; padding-top:15px;">
+                                    <label id="lblPuntajeJefe" for="PuntajeJefe" class="">Puntaje de Jefe : </label>
+                                    <label id="sumaJefe" for="sumaJefe" class=""><strong>@ViewBag.SumJefe</strong></label>
+                                    <br />
+
+                                    <label id="lblPromedioJefe" for="PromedioJefe" class="">Promedio de Jefe : </label>
+                                    <label id="promedioJefe" for="promedioJefe" class=""><strong>@ViewBag.PuntajeJefe</strong></label>
+
+
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group" style="text-align:center; padding-top:15px;">
+                                    <label id="lblPuntajeGlobal" for="PuntajeGlobal" class="">Puntaje Global : </label>
+                                    <label id="sumaGlobal" for="sumaGlobal" class=""><strong>@ViewBag.SumTotal</strong></label>
+                                    <br />
+
+                                    <label id="lblPromedioGlobal" for="PromedioGlobal" class="badge badge-info mr-2">Promedio Global : </label>
+                                    <label id="promedioGlobal" for="promedioGlobal" class="badge badge-info mr-2"><strong>@ViewBag.PuntajeTotal</strong></label>
+
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblEstudios1" for="Estudios1" class="">Estudios <span style="color:red">*</span></label>
+                                    <textarea id="Estudios1" type="text" name="Estudios" required="required" value="@ViewBag.Estudios" disabled>@ViewBag.Estudios</textarea>
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblComentarioJefe" for="ComentarioJefe" class="">Otros Comentarios</label>
+                                    @Html.TextAreaFor(model => model.ComentarioJefe, new { disabled = "true" })
+                                    @Html.ValidationMessageFor(model => model.ComentarioJefe)
+                                </div>
+                            </div>
+                            <div class="col-lg-4" style="text-align:center; padding-top:35px;">
+                                <div class="position-relative form-group">
+                                    <button type="submit" id="btnEditarCandidato" class="btn-shadow btn btn-success btn-sm">Editar Candidato</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </form>
+                    @*<div class="divFondoUno">
+
+                            <div style="display:inline-block; float:right; padding:2px 0px 0px 0px;">
+                                <div style=" float:right; padding:0px 0px 0px 0px; ">
+                                    <button id="submit" class="k-button">Crear Candidato</button>
+                                </div>
+                            </div>
+                        </div>*@
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+}
+
+
+
+
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" style="display:none"></iframe>
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+
+        validar1();
+
+        $("#Nombres1").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        $("#Apellidos1").kendoMaskedTextBox({
+            mask: ""
+        });
+        //validar();
+        var IdProfesion = $("#ID_PROFESION1").kendoComboBox({
+            autoBind: false,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data1: { IdProfesion: $("#ID_PROFESION").val() == 0 ? '' : $("#ID_PROFESION").val() },
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Profesion/ListarProfesiones"
+                }
+            }
+        }).data("kendoComboBox");
+
+        IdProfesion.value(@ViewBag.Profesion);
+
+        $("#PretencionSalarial1").kendoNumericTextBox({
+            format: "S/ #.#",
+            decimals: 0,
+            min: 0
+        });
+
+
+
+        $("#ResponsabilidadPuntualidad1").kendoComboBox({
+            dataSource: [
+            { Name: "[Seleccione]", Id: 0 },
+            { Name: "No adecuado", Id: 1 },
+            { Name: "Adecuado", Id: 2 },
+            { Name: "Con potencial", Id: 3 }
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+        });
+
+        $("#Presentacion1").kendoComboBox({
+            dataSource: [
+            { Name: "[Seleccione]", Id: 0 },
+            { Name: "No adecuado", Id: 1 },
+            { Name: "Adecuado", Id: 2 },
+            { Name: "Con potencial", Id: 3 }
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+        });
+
+
+
+        $("#Personalidad1").kendoComboBox({
+            dataSource: [
+            { Name: "[Seleccione]", Id: 0 },
+            { Name: "No adecuado", Id: 1 },
+            { Name: "Adecuado", Id: 2 },
+            { Name: "Con potencial", Id: 3 }
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+        });
+
+
+        $("#HabilidadExpresion1").kendoComboBox({
+            dataSource: [
+            { Name: "[Seleccione]", Id: 0 },
+            { Name: "No adecuado", Id: 1 },
+            { Name: "Adecuado", Id: 2 },
+            { Name: "Con potencial", Id: 3 }
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+        });
+
+
+        $("#Referencias1").kendoComboBox({
+            dataSource: [
+            { Name: "[Seleccione]", Id: 0 },
+            { Name: "No adecuado", Id: 1 },
+            { Name: "Adecuado", Id: 2 },
+            { Name: "Con potencial", Id: 3 }
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+        });
+
+        $("#ExperienciaLaboral").kendoComboBox({
+            dataSource: [
+            { Name: "[Seleccione]", Id: 0 },
+            { Name: "No adecuado", Id: 1 },
+            { Name: "Adecuado", Id: 2 },
+            { Name: "Con potencial", Id: 3 }
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+        });
+
+
+        $("#Conocimientos").kendoComboBox({
+            dataSource: [
+            { Name: "[Seleccione]", Id: 0 },
+            { Name: "No adecuado", Id: 1 },
+            { Name: "Adecuado", Id: 2 },
+            { Name: "Con potencial", Id: 3 }
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+        });
+
+
+        $("#HabilidadesPotencial").kendoComboBox({
+            dataSource: [
+            { Name: "[Seleccione]", Id: 0 },
+            { Name: "No adecuado", Id: 1 },
+            { Name: "Adecuado", Id: 2 },
+            { Name: "Con potencial", Id: 3 }
+            ],
+            dataTextField: "Name",
+            dataValueField: "Id"
+        });
+
+    });
+    function validar1() {
+        var Permiso = '@ViewBag.ACCESO';
+        var Solicitante = '@ViewBag.Solicitante1';
+
+        if (Permiso == 3 && Solicitante == 1) {
+            document.getElementById('ResponsabilidadPuntualidad1').disabled = false;
+            document.getElementById('Presentacion1').disabled = false;
+            document.getElementById('Personalidad1').disabled = false;
+            document.getElementById('HabilidadExpresion1').disabled = false;
+            document.getElementById('Referencias1').disabled = false;
+            document.getElementById('Nombres1').disabled = false;
+            document.getElementById('Apellidos1').disabled = false;
+            document.getElementById('ID_PROFESION1').disabled = false;
+            document.getElementById('PretencionSalarial1').disabled = false;
+            document.getElementById('Estudios1').disabled = false;
+            document.getElementById('Observacion1').disabled = false;
+            document.getElementById('ExperienciaLaboral').disabled = false;
+            document.getElementById('Conocimientos').disabled = false;
+            document.getElementById('HabilidadesPotencial').disabled = false;
+            document.getElementById('ComentarioJefe').disabled = false;
+        }
+        if (Permiso == 1) {
+            document.getElementById('ResponsabilidadPuntualidad1').disabled = false;
+            document.getElementById('Presentacion1').disabled = false;
+            document.getElementById('Personalidad1').disabled = false;
+            document.getElementById('HabilidadExpresion1').disabled = false;
+            document.getElementById('Referencias1').disabled = false;
+            document.getElementById('Nombres1').disabled = false;
+            document.getElementById('Apellidos1').disabled = false;
+            document.getElementById('ID_PROFESION1').disabled = false;
+            document.getElementById('PretencionSalarial1').disabled = false;
+            document.getElementById('Estudios1').disabled = false;
+            document.getElementById('Observacion1').disabled = false;
+            document.getElementById('ExperienciaLaboral').disabled = false;
+            document.getElementById('Conocimientos').disabled = false;
+            document.getElementById('HabilidadesPotencial').disabled = false;
+            document.getElementById('ComentarioJefe').disabled = false;
+        }
+        if (Permiso == 2) {
+
+            document.getElementById('Nombres1').disabled = false;
+            document.getElementById('Apellidos1').disabled = false;
+            document.getElementById('ID_PROFESION1').disabled = false;
+            document.getElementById('PretencionSalarial1').disabled = false;
+            document.getElementById('Estudios1').disabled = false;
+            document.getElementById('Observacion1').disabled = false;
+            document.getElementById('ExperienciaLaboral').disabled = false;
+            document.getElementById('Conocimientos').disabled = false;
+            document.getElementById('HabilidadesPotencial').disabled = false;
+            document.getElementById('Observacion1').disabled = false;
+        }
+        if (Permiso == 3) {
+            document.getElementById('ResponsabilidadPuntualidad1').disabled = false;
+            document.getElementById('Presentacion1').disabled = false;
+            document.getElementById('Personalidad1').disabled = false;
+            document.getElementById('HabilidadExpresion1').disabled = false;
+            document.getElementById('Referencias1').disabled = false;
+            document.getElementById('Nombres1').disabled = false;
+            document.getElementById('Apellidos1').disabled = false;
+            document.getElementById('ID_PROFESION1').disabled = false;
+            document.getElementById('PretencionSalarial1').disabled = false;
+            document.getElementById('Estudios1').disabled = false;
+            document.getElementById('ComentarioJefe').disabled = false;
+
+        }
+    }
+
+    function sumarCalificacion1() {
+        var responsabilidad = parseInt(document.getElementById("ResponsabilidadPuntualidad1").value);
+        var presentacion = parseInt(document.getElementById("Presentacion1").value);
+        var personalidad = parseInt(document.getElementById("Personalidad1").value);
+        var habilidad = parseInt(document.getElementById("HabilidadExpresion1").value);
+        var referencias = parseInt(document.getElementById("Referencias1").value);
+
+        var suma = responsabilidad + presentacion + personalidad + habilidad + referencias;
+        var sumapromedio = suma / 5.0;
+        document.getElementById("sumaa").innerHTML = "<strong>" + suma + "</strong>";
+        document.getElementById("promedioo").innerHTML = "<strong>" + roundToTwo(sumapromedio) + "</strong>";
+
+        var experiencia = parseInt(document.getElementById("ExperienciaLaboral").value);
+        var conocimientos = parseInt(document.getElementById("Conocimientos").value);
+        var habilidades = parseInt(document.getElementById("HabilidadesPotencial").value);
+
+        var sumajefe = experiencia + conocimientos + habilidades;
+        var sumapromedioJefe = sumajefe / 3.0;
+        document.getElementById("sumaJefe").innerHTML = "<strong>" + sumajefe + "</strong>";
+        document.getElementById("promedioJefe").innerHTML = "<strong>" + roundToTwo(sumapromedioJefe) + "</strong>";
+
+        document.getElementById("sumaGlobal").innerHTML = "<strong>" + (suma + sumajefe) / 2.0 + "</strong>";
+        document.getElementById("promedioGlobal").innerHTML = "<strong>" + roundToTwo((roundToTwo(sumapromedioJefe) + roundToTwo(sumapromedio)) / 2.0) + "</strong>";
+    }
+    function roundToTwo(num) {
+        return +(Math.round(num + "e+2") + "e-2");
+    }
+
+    function uploadDone(msg, code) {
+        if (msg == "OK") {
+            
+            toastr.success("El Candidato se actualizo con exito.", "Información Actualizada");
+
+            //$(".modal-backdrop").remove();
+            //$("#miModal").removeClass("show");//'#modal-content
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            $('#tbCandidatosAgregados').DataTable().ajax.reload();
+            
+        }
+
+        else {
+            toastr.success("Error.", "Error Actualizada");
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            //$(".modal-backdrop").remove();
+            //$("#miModal").removeClass("show")
+        }
+
+    }
+</script>

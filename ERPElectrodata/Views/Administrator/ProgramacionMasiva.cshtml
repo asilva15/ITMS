@@ -1,0 +1,229 @@
+﻿@{
+//Layout = null;
+}
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<div class="tab-content">
+    <div class="row">
+        <div class="col-lg-7">
+            <div class="main-card mb-3 card">
+                <div class="card-header">Programación Masiva</div>
+                <div class="card-body">
+                    <div style="width:100%;">
+                        <div class="row col-sm-12">
+                            <div class="col-sm-4">
+                                <div class="editor-field">
+                                    <input id="fechaPrograma" name="fechaPrograma" />
+                                </div>
+                            </div> <br />
+                            <div class="col-sm-4">
+                                <button type="button" class="btn btn-primary btn-sm" style="float:right;" onclick="Programar()">Programar</button>
+                            </div><br />
+                        </div>
+                        <br />
+                        <table id="TBProgramaMasiva" class="table divHide">
+                            <thead>
+                                <tr>
+                                    <th>Cuenta</th>
+                                    <th>Programa</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="editor-field">
+                                            <input id="IDACCO" name="IDACCO" />
+                                        </div>
+                                    </td>
+                                    <td style=" text-align: center;"><input id="Prog" type="checkbox" style="width:15px;"></td>
+                                    <td style=" text-align: center;">
+                                        <span title="Save" class="fa fa-pencil" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px; " onclick="SaveNewAccountEntity()"></span>
+                                        <span>&nbsp;&nbsp;</span>
+                                        <span title="Hide" class="fa fa-chevron-up" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px; " onclick="HideNewAccountEntity()"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Nombre de Cuenta</th>
+                                    <th>Programa</th>
+                                    <th style="border-left: 1px solid #e2e2e2; ">Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="TableAccountEntity"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@*<div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+    <div style="width:50%;min-width:5px;float:left;">
+        <div class="titleForm">
+            <div class="title">Programación Masiva</div>
+        </div>
+        <div class="inBodyForm" style="height:600px; padding:10px 20px 10px 20px;" id="">
+            <div style="width:100%;">
+                <div class="editor-field" style="float:left">
+                    <input id="fechaPrograma" name="fechaPrograma" />
+                </div>
+                <div class="clearfix" style="padding-bottom:15px;"><button type="button" class="btn btn-primary btn-sm" style="float:right;" onclick="Programar()">Programar</button></div>
+                <div style="">
+
+                    <table id="TBProgramaMasiva" class="table divHide">
+                        <thead>
+                            <tr>
+                                <th>Cuenta</th>
+                                <th>Programa</th>
+                                <th>Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>
+                                    <div class="editor-field">
+                                        <input id="IDACCO" name="IDACCO" />
+                                    </div>
+                                </td>
+                                <td style=" text-align: center;"><input id="Prog" type="checkbox" style="width:15px;"></td>
+                                <td style=" text-align: center;">
+                                    <span title="Save" class="glyphicon glyphicon-floppy-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px; " onclick="SaveNewAccountEntity()"></span>
+                                    <span>&nbsp;&nbsp;</span>
+                                    <span title="Hide" class="glyphicon glyphicon-chevron-up" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px; " onclick="HideNewAccountEntity()"></span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                </div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nombre de Cuenta</th>
+                            <th>Programa</th>
+                            <th style="border-left: 1px solid #e2e2e2; ">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TableAccountEntity"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>*@
+<div id="divpopupmodal"></div>
+<script type="text/javascript">
+
+    $("#fechaPrograma").kendoDateTimePicker();
+    var FEC_INI_TICK_EDIT = $("#fechaPrograma").data("kendoDateTimePicker");
+
+    LoadTableAccountEntity();
+
+    function LoadTableAccountEntity() {
+        $.ajax({
+            url: "/Account/ListAccount",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                $("#TableAccountEntity").empty();
+
+                $.each(data['Data'], function (index, value) {
+
+                    $("#TableAccountEntity").append(
+                        '<tr id="FilaAccoEnti' + (data['Data'][index]['ID_ACCO']) + '">' +
+                        '<td>' + (data['Data'][index]['NAM_ACCO']) + '</td>' +
+                        '<td style=" text-align: center;">' +
+                        '<span id="VisRequ' + (data['Data'][index]['ID_ACCO']) + '"  class="fa fa-' + ((data['Data'][index]['ENVIO']) == true ? 'check' : 'window-close') + '" aria-hidden="true" style="color: #3E4752; font-size: 18px;"></span>' +
+                        '<input id="CBVisRequ' + (data['Data'][index]['ID_ACCO']) + '" class="divHide" type="checkbox" style="width:15px;" ' + ((data['Data'][index]['ENVIO']) == true ? 'checked' : '') + ' value="' + (data['Data'][index]['ID_ACCO']) + '" />' +
+                        '</td>' +
+                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                        '<span  id="Edit' + (data['Data'][index]['ID_ACCO']) + '" title="Edit" class="fa fa-pencil-alt" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="EdtitAccountEntity(' + (data['Data'][index]['ID_ACCO']) + ')"></span>' +
+                        '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                        '<span id="Save' + (data['Data'][index]['ID_ACCO']) + '" title="Save" class="fa fa-save divHide" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px; " onclick="SaveAccountEntity(' + (data['Data'][index]['ID_ACCO']) + ')"></span>' +
+                        '</td>' +
+                        '</tr>'
+                    );
+                });
+            },
+            error: function (source) {
+                alert("Error Carga Json");
+            }
+        });
+    }
+
+    function EdtitAccountEntity(id) {
+        $("#VisRequ" + id).addClass("divHide");
+        $("#Edit" + id).addClass("divHide");
+
+        $("#CBVisRequ" + id).removeClass("divHide");
+        $("#Save" + id).removeClass("divHide");
+    }
+
+    function SaveAccountEntity(id) {
+        var chk = $("#CBVisRequ" + id).prop('checked');
+
+        if (chk == true) {
+            $("#VisRequ" + id).removeClass("fa fa-window-close");
+            $("#VisRequ" + id).addClass("fa fa-check");
+        } else {
+            $("#VisRequ" + id).removeClass("fa fa-check");
+            $("#VisRequ" + id).addClass("fa fa-window-close");
+        }
+
+        $("#VisRequ" + id).removeClass("divHide");
+        $("#Edit" + id).removeClass("divHide");
+
+        $("#CBVisRequ" + id).addClass("divHide");
+        $("#Save" + id).addClass("divHide");
+
+    }
+
+    function Programar() {
+        var cuentas = "";
+        $("input:checkbox:checked").each(function () {
+            cuentas = cuentas + $(this).val() + ",";
+        });
+
+        var fechaProg = $("#fechaPrograma").val();
+
+        var ajax_data = {
+            "cuentas": cuentas.substring(0, cuentas.length - 1),
+            "programa": fechaProg
+        };
+        if (cuentas != "") {
+            if (fechaProg != "") {
+                $.ajax({
+                    url: "/Administrator/Programar",
+                    data: ajax_data,
+                    cache: false,
+                    type: "POST",
+                    dataType: "text",
+                    success: function (data) {
+                        if (data == "OK") {
+                            toastr.success("Programación Existosa.");
+                            setTimeout(window.open("/Administrator/ProgramacionMasiva", "_self"), 3000);
+                        } else {
+                            toastr.error("Ha ocurrido un error, contacte con el administrador.");
+                        }
+                    },
+                    error: function (source) {
+                        alert("Error en el ajax");
+                    }
+                });
+            } else {
+                toastr.warning("Escoger una fecha de programación.");
+            }
+        } else {
+            toastr.warning("Seleccionar una cuenta como mínimo.");
+        }
+    }
+
+</script>

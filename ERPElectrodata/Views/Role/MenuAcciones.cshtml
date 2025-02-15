@@ -1,0 +1,156 @@
+﻿@{  
+    ViewBag.Title = "MenuAcciones";
+    Layout = null;
+}
+
+<div class="main-card mb-0 card">
+    @*<div class="card-header">ACCIONES - <b id="accionSeleccionada">DETALLE DE PROYECTOS</b></div>*@
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-6">
+                <div class="position-relative form-group">
+                    <label id="lblNuevaAccion" for="nombreNuevaAccion">Nueva Acción</label>
+                    <input id="nombreNuevaAccion" type="text" />
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="position-relative form-group">
+                    <label><br /></label>
+                    <button id="btnCrearAccion" type="button" onclick="CrearAccion()" class="btn btn-warning btn-block">Guardar</button>
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <ul id="listaAcciones" class="todo-list-wrapper list-group list-group-flush">
+            </ul>
+            <table id="accionTable" class="row-border">
+                <tbody>
+                    <tr>
+                        <th></th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+
+        //Dando estilo iCheck a checkbox
+        $('#chbEstadoAccion').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+        $("#nombreNuevaAccion").kendoComboBox({
+            placeholder: "Seleccione una acción",
+            dataTextField: "Accion",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Role/ListaComboAcciones?var=" + Math.random()
+                }
+            }
+        });
+        CargarAcciones();
+
+    });
+
+    function CargarAcciones() {
+        var bgs = ["bg-warning", "bg-primary", "bg-danger", "bg-success"];
+        var cont = 0;
+        var nombreMenu = $("#menunam").val();
+        $('#listaAcciones').empty();
+        $.ajax({
+            type: "GET",
+            url: "/Role/ListaAcciones?idPerfilMenu=" + "@ViewBag.idPerfilMenu",
+            cache: false,
+            success: function (data) {
+                $.each(data, function (index, value) {
+                    var color = "badge-success";
+                    var estado = "Activo"
+                    if (value.Estado == 0) { color = "badge-danger"; estado = "Inactivo" };
+                    if (cont == 3) { cont = 0 } else { cont++ };
+                    $('#listaAcciones').append('<li class="list-group-item">' +
+                                    '<div class="todo-indicator ' + bgs[cont] + '"></div>' +
+                                    '<div class="widget-content p-0">' +
+                                        '<div class="widget-content-wrapper">' +
+                                            '<div class="widget-content-left mr-2"></div>' +
+                                            '<div class="widget-content-left">' +
+                                                '<div class="widget-heading">' + value.Accion + '    <span class="badge badge-pill ' + color + '">' + estado + '</span></div>' +
+                                                '<div class="widget-subheading">' + nombreMenu + '</div>' +
+                                            '</div>' +
+                                            '<div class="mr-4"></div>' +
+
+                                            '<div style="visibility:hidden" class="widget-content-left">' +
+                                                'ssssssss' +
+                                            '</div>' +
+                                            '<div class="widget-content-left">' +
+                                                '<button type="button" class="btn btn-link" onclick="EliminarAccion(' + value.Id + ')">' +
+                                                    '<i style="color:red" class="fa fa-trash-alt fa-lg" aria-hidden="true"></i>' +
+                                                '</button>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>' +
+                                '</li>');
+                });
+
+            },
+            error: function (data) {
+                toastr.danger("", "Error")
+            }
+        });
+    };
+
+    function CrearAccion() {
+        if ($("#nombreNuevaAccion").val() == "") {
+            toastr.warning("Debe seleccionar una Accion", "Advertencia");
+        } else {
+            $.ajax({
+                type: "POST",
+                url: "/Role/CrearAccion?idPerfilMenu=" + @ViewBag.idPerfilMenu +
+                    "&idAccion=" + $("#nombreNuevaAccion").val() + "&Estado=true",
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("La acción seleccionada ya se encuentra registrada.", "Advertencia");
+                    } else {
+                        toastr.success("Registro Creado", "Éxito!");
+                        $("#nombreNuevaAccion").val("");
+                        CargarAcciones();
+                    }
+                }
+            });
+        }
+    }
+
+    function EliminarAccion(idAccion) {
+        $.ajax({
+            type: "POST",
+            url: "/Role/EliminarAccion?id=" + idAccion,
+            cache: false,
+            success: function (data) {
+                if (data == "ERROR") {
+                    toastr.error("Error");
+                } else {
+                    toastr.success("Registro Eliminado", "Exito!");
+                    CargarAcciones();
+                }
+            }
+        });
+    }
+
+</script>

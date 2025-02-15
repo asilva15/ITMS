@@ -1,0 +1,112 @@
+﻿@model ERPElectrodata.Models.PERSON_ENTITY
+
+@{
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+
+        var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+            dataTextField: "QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+                '<span><strong>${data.QUEU} |</strong>  ${data.DES_QUEU}</span>' +
+                '</div>',
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AllRequesterByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#btnBuscar").click(function (event) {
+
+            event.preventDefault();
+
+            var ID_QUEU = $("#ID_QUEU").data("kendoComboBox");
+
+            //var txtusuario = "";
+            //txtusuario = $("#txtusuario").val();
+            window.frames["RSGrupos"].src = "/Reporting/Ticket/ReporteGrupos.aspx?usuario=" + ID_PERS_ENTI.value() + "&grupo=" + ID_QUEU.value();
+
+        });
+
+    });
+
+
+</script>
+
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte de Grupos
+    </div>
+    <div class="card-body">
+        <form id="Parametros">
+
+            <div class="form-row" style="margin-block-end: 10px; align-content: center; margin-inline: 10px; gap: 30px;">
+
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Usuario
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_PERS_ENTI)
+                        @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Grupo
+                    </div>
+                    <div class="editor-field">
+                        @Html.Editor("ID_QUEU")
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button id="btnBuscar" class="btn btn-primary btn-block" style="margin-left:0"><i class="fa fa-search"></i> Buscar</button>
+
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="bodyForm">
+    <div class="inBodyForm">
+        <iframe id="RSGrupos" style="height:573px; width:100%; border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+

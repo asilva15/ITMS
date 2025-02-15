@@ -1,0 +1,291 @@
+﻿@model ERPElectrodata.Models.ACTIVITY_LOG
+
+@{
+    ViewBag.Title = "CrearSolicitud";
+    //Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+    /*.modal-backdrop {
+        display: none;
+    }*/
+</style>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Registro de Actividades
+                <div class="page-title-subheading">
+                    En este módulo puedes registrar las actividades que no se encuentren enlazadas a un ticket.
+                </div>
+            </div>
+        </div>
+        
+    </div>
+</div>
+<div class="tab-content">
+    @using (Html.BeginForm("CreateNewActivity", "Activity", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmNewActivity", target = "upload_target" }))
+    {
+        @Html.ValidationSummary(true)
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <div class="card-title">Registrar Actividad</div>
+                        <form class="">
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblID_TYPE_ACT" for="ID_TYPE_ACT" class="">Tipo de Actividad <span style="color:red">*</span> </label>
+                                        @Html.EditorFor(model => model.ID_TYPE_ACT)
+                                        @Html.ValidationMessageFor(model => model.ID_TYPE_ACT)
+                                    </div>
+                                </div>
+
+                                <div class="col-md-3" id="divFechaInicio">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaInicio" for="DATE_INIC" class="">Fecha Inicio<span style="color:red">*</span></label>
+                                        @Html.EditorFor(model => model.DATE_INIC)
+                                        @Html.ValidationMessageFor(model => model.DATE_INIC)
+                                    </div>
+                                </div>
+                                <div class="col-md-3" id="divFechaFin">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaFin" for="DATE_END" class="">Fecha Fin<span style="color:red">*</span></label>
+                                        @Html.EditorFor(model => model.DATE_END)
+                                        @Html.ValidationMessageFor(model => model.DATE_END)
+                                        <input id="TIEMPO_ACT" name="TIEMPO_ACT" style="display:none" />
+                                    </div>
+                                </div>
+                               
+                            </div>
+                            <div class="position-relative form-group">
+                                <label id="lblRequisitos" for="Requisitos" class="">Requisitos Mínimos<span style="color:red">*</span></label>
+                                @*<textarea name="Requisitos" id="Requisitos" rows="4"></textarea>*@
+                                @Html.TextAreaFor(model => model.COMENTARIO)
+                                @Html.ValidationMessageFor(model => model.COMENTARIO)
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-9"></div>
+                                <div class="col-md-3">
+                                    <button id="btnCrear" type="button" onclick="SaveNewActivity()" class="btn btn-primary btn-block">Registrar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="body-block-example-1 d-none">
+    <div class="loader bg-transparent no-shadow p-0">
+        <div class="ball-grid-pulse">
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+        </div>
+    </div>
+</div>
+
+<button id="modalbtn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#miModal" style="display:none"></button>
+
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        //$(".block-page-btn-example-1").click(function () {
+        //    t.blockUI({
+        //        message: $(".body-block-example-1")
+        //    })
+        //});
+
+        $("#COMENTARIO").kendoEditor({
+            resizable: {
+                content: true,
+                toolbar: true,
+            },
+            encoded: false,
+            placeholder: "Introduce un breve detalle de la actividad.(Máximo 500 caracteres).",
+            tools: [
+                "formatting",
+                "bold",
+                "italic",
+                "underline",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent", "createLink", "unlink"
+            ]
+        });
+
+        //$("#Justificacion").kendoMaskedTextBox({
+        //    mask: ""
+        //});
+        var hoy = new Date();
+        $("#DATE_INIC").kendoDateTimePicker({
+            value: hoy,
+            format: "dd/MM/yyyy hh:mm tt"
+        });
+        $("#DATE_END").kendoDateTimePicker({
+            value: hoy,
+            format: "dd/MM/yyyy hh:mm tt"
+        });
+
+        var ID_TYPE_ACT = $("#ID_TYPE_ACT").kendoComboBox({
+            autoBind: true,
+            placeholder: "SELECCIONAR TIPO",
+            dataTextField: "DES_ACT",
+            dataValueField: "ID_TYPE_ACT",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListTypeActivity_Create?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            location.reload(true);
+        });
+    });
+
+
+
+</script>
+
+<script type="text/javascript">
+
+    function SaveNewActivity() {
+        var datein = $('#DATE_INIC').val();
+        var datefn = $('#DATE_END').val();
+        var datein2 = diaMes_mesDia(datein);
+        var datefn2 = diaMes_mesDia(datefn);
+        var DateInicial = new Date(Date.parse(datein2));
+        var DateFinal = new Date(Date.parse(datefn2));
+        var DifDate = (DateFinal - DateInicial) / 60000;
+
+        $('#TIEMPO_ACT').attr('value', DifDate * 60);
+
+        if (DATE_INIC.value == "" || DATE_END.value == "") {
+            toastr.warning('','Debe Ingresar las fechas');
+        }
+        else if (Date.parse(DATE_INIC.value) > Date.parse(DATE_END.value) || Date.parse(DATE_INIC.value) == Date.parse(DATE_END.value)) {
+            toastr.warning('','La fecha de Inicio no puede ser <br/>mayor o igual a la fecha de Fin.');
+        }
+        else if (ID_TYPE_ACT.value == "") {
+            toastr.warning('','Debe Ingresar el tipo de Actividad.');
+        }
+        else if (COMENTARIO.value == "") {
+            toastr.warning('','Debe Ingresar un Comentario de la Actividad.');
+        }
+        else {
+            $("#modalbtn").click();
+            $("miModal").empty();
+            $("#miModal").html('<div class="modal-dialog" role="document">' +
+                                    '<div class="modal-content">' +
+                                        '<div class="modal-header">' +
+                                            '<h5 class="modal-title" id="exampleModalLabel"><span id="lblTitulo" name="lblTitulo"></span></h5>' +
+                                            '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                                '<span aria-hidden="true">&times;</span>' +
+                                            '</button>' +
+                                        '</div>' +
+                                        '<div class="modal-body">' +
+                                        '</div>' +
+                                        '<div class="modal-footer">' +
+                                            '<button type="button" class="btn btn-secondary col-m2 float-right" data-dismiss="modal">Cancelar</button>' +
+                                            '<div class="col-m-1"></div>' +
+                                            '<button type="button" class="btn btn-primary col-m2 float-right" data-dismiss="modal">Continuar</button>' +
+                                        '</div>' +
+                                    '</div>' +
+                                '</div>'
+            );
+            if (DifDate > 480) {
+                $("#lblTitulo").html("ADVERTENCIA");
+                $("#miModal .modal-body").html('¿Desea Crear la actividad con duración <b style="color:red">mayor a 8 horas?.</b>');
+                
+                $("#miModal .btn-primary").bind("click", function () {
+                    $("#FrmNewActivity").submit();
+                    $("#bkg").fadeOut("300");
+                });
+                
+            }
+            else if (DifDate < 60) {
+                $("#lblTitulo").html('ADVERTENCIA');
+                $("#miModal .modal-body").html("¿Desea Crear la actividad con duración <b style='color:red'>menor a 1 hora?   .</b>");
+
+                $("#miModal .btn-primary").bind("click", function () {
+                    $("#FrmNewActivity").submit();
+                    $("#bkg").fadeOut("300");
+                });
+
+            }
+            else {
+                $("#lblTitulo").html('Mensaje encontrados');
+                $("#miModal .modal-body").html("¿Desea Crear la Actividad?");
+
+                $("#miModal .btn-primary").bind("click", function () {
+                    $("#FrmNewActivity").submit();
+                    $("#bkg").fadeOut("300");
+                });
+            }
+
+        }
+    }
+
+    function MostrarMensaje(msg, descripcion) {
+
+        if (msg == "OK") {
+            toastr.success(descripcion, "");
+            setTimeout(function () {
+                window.location.href = "@Url.Content("~/Activity/DetailsActivity")"
+            }, 1500);
+        }
+        else if (msg == "ERROR") {
+            toastr.warning(descripcion, "Mensaje");
+        }
+        else {
+            toastr.danger(descripcion, "Error");
+        }
+    }
+
+    function MostrarMensajeSession(msg) {
+        toastr.danger(msg);
+    }
+
+    function diaMes_mesDia(fecha) {
+        var cadenafecha = "" + fecha;
+        splitfecha = cadenafecha.split(" ");
+        var date = splitfecha[0].split("/");
+        return date[1] + "/" + date[0] + "/" + date[2] + " " + splitfecha[1] + " " + splitfecha[2];
+    }
+
+</script>

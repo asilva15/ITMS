@@ -1,0 +1,279 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+<div style="width:100%;min-width:5px;float:left;">
+    @*<div class="titleForm">
+        <div class="title">Lista de Objetivos y Funciones</div>
+    </div>*@
+    <div class="inBodyForm" style="height:700px; padding:10px 20px 10px 20px;" id="">
+        <div style="width:100%;">
+            <form>
+                <div class="form-group row">
+                    @*<div class="col-sm-1">
+                        <br /><label for="cbPeriodo">Periodo</label>
+                    </div>*@
+                    <div class="col-sm-3">
+                        <br /><label for="cbPeriodo">Periodo</label><br />
+                        @*<select id="cbPeriodo" name="cbPeriodo" class="form-control select2" style="width:80%"></select>*@
+                        <input id="cbPeriodo" name="cbPeriodo" style="font-size:12px;"  class="dropdownKendo"/>
+                    </div>
+                    @*<div class="col-sm-1">
+                        <br />  <label for="cbCargo">Cargo</label><br />
+                    </div>*@
+                    <div class="col-sm-3">
+                        <br />  <label for="cbCargo">Cargo</label><br />
+                        <input id="cbCargo" name="cbCargo" style="font-size:12px;"  class="dropdownKendo" />
+                        @*<select id="cbCargo" name="cbCargo" class="form-control select2" style="width:80%"></select>*@
+                    </div>
+                    @*<div class="col-sm-1">
+                        <br />  <label for="cbEvaluado">Evaluado</label><br />
+                    </div>*@
+                    <div class="col-sm-3">
+                        <br />  <label for="cbEvaluado">Evaluado</label><br />
+                        <input id="cbEvaluado" name="cbEvaluado" style="font-size:12px;"  class="dropdownKendo" />
+                        @*<select id="cbEvaluado" name="cbEvaluado" class="form-control select2" style="width:80%"></select>*@
+                    </div>
+                    <div class="col-sm-3">
+                        <br /><br />
+                        <button id="btnReporteC" type="button" class="btn btn-primary btn-sm" style="float:left;" onclick="ListadoComparativo()">Buscar</button>
+                    </div>
+                </div>
+            </form>
+            <br /><br /><br />
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab_2">
+                    <div class="box">
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <table id="tablaComparativo" class="table table-bordered table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Evaluado</th>
+                                        <th>Jefe</th>
+                                        <th>Resultado Evaluado</th>
+                                        <th>Desempeño Evaluado</th>
+                                        <th>Resultado Jefe</th>
+                                        <th>Variacion</th>
+                                        <th>Desempeño Jefe</th>
+                                        
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Evaluado</th>
+                                        <th>Jefe</th>
+                                        <th>Resultado Evaluado</th>
+                                        <th>Desempeño Evaluado</th>
+                                        <th>Resultado Jefe</th>
+                                        <th>Variacion</th>
+                                        <th>Desempeño Jefe</th>
+                                        
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#cbPeriodo").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                var comboBox = $("#cbPeriodo").data("kendoDropDownList");
+                comboBox.select(0);
+                comboBox.trigger("change");
+            },
+            change: function (e) {
+                var cargoCombo = $("#cbCargo").data("kendoDropDownList");
+                cargoCombo.enable(true);
+                cargoCombo.dataSource.read();
+                cargoCombo.value("");
+            }
+        });
+
+        $("#cbCargo").kendoDropDownList({
+           /* cascadeFrom: "cbPeriodo",*/
+            dataTextField: "text",
+            dataValueField: "id",
+            optionLabel: {
+                text: "Seleccionar",
+                id: null
+            },
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: {
+                        url: function () {
+                            var periodoId = $("#cbPeriodo").val();
+                            console.log("Fetching cargos for periodoId: " + periodoId); // Log the periodoId
+                            return "/EvaluacionPersonal/ListarCargosEvaluadosxPeriodo?periodoId=" + periodoId + "&var=" + Math.random();
+                        },
+                        dataType: "json"
+                    }
+                }
+               /* , serverFiltering: true*/
+            },
+            enable: false,
+            change: function (e) {
+                var evaluadoCombo = $("#cbEvaluado").data("kendoDropDownList");
+                evaluadoCombo.enable(true);
+                evaluadoCombo.dataSource.read();
+                evaluadoCombo.value("");    
+            }
+        });
+
+        $("#cbEvaluado").kendoDropDownList({
+            /*cascadeFrom: "cbCargo",*/
+            dataTextField: "text",
+            dataValueField: "id",
+            optionLabel: {
+                text: "Seleccionar",
+                id: null
+            },
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+
+            dataSource: {
+
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                //transport: {
+                //    read: "/EvaluacionPersonal/ListarDesempeno?var=" + Math.random()
+                //}
+                transport: {
+                    read: {
+                        url: function () {
+                            var periodoId = $("#cbPeriodo").val();
+                            var cargoNombre = $("#cbCargo").val();
+                            return "/EvaluacionPersonal/EvaluadoxCargoyPeriodo?periodoId=" + periodoId + "&Cargo=" + cargoNombre + "&var=" + Math.random();
+                        },
+                        dataType: "json"
+                    }
+                }
+            },
+            enable: false
+        });
+
+    });
+
+
+    //Funciones
+    function ListadoComparativo() {
+        if ($("#cbPeriodo").val() == null || $("#cbPeriodo").val() == 0) {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "Seleccione el Periodo." + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continuee' class='k-button'>Continuar</button>" +
+                                       "</div>");
+            var undo = $("#continuee")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        } else {
+            CargarListadoComparativo()
+        }
+    }
+
+    function CargarListadoComparativo() {
+        var cargo = $("#cbCargo").val();
+
+        $('#tablaComparativo').dataTable().fnDestroy();
+        $('#tablaComparativo').DataTable({
+            ordering: false,
+            dom: 'Bfrtip',
+            ajax: {
+                url: "/EvaluacionPersonal/ListarRptComparativo",
+                data: {
+                    periodo: $("#cbPeriodo").val(),
+                    cargo: cargo,  // Usa el valor codificado aquí
+                    evaluado: $("#cbEvaluado").val()
+                }
+            },
+            columns: [
+                { data: "Evaluado" },
+                { data: "Jefe" },
+                { data: "PromedioEvaluado" },
+                { data: "DesempenoEvaluado" },
+                { data: "PromedioJefe" },
+                { data: "Semaforo" },
+                { data: "DesempenoJefe" }
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+
+    }
+</script>

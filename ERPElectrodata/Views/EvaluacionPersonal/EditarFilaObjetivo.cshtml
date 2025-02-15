@@ -1,0 +1,203 @@
+﻿@{
+    Layout = null;
+}
+
+<style>
+
+    .form-container {
+        padding: 10px;
+    }
+
+        .form-container input, .form-container textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container label {
+            font-weight: bold;
+        }
+
+
+        .form-container .buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+</style>
+
+<div class="form-container">
+
+    <label for="objetivo">Objetivo <b>(*)</b></label>
+    <input type="text" id="objetivoEditar" placeholder="Escribir aquí" value="@ViewBag.Objetivo">
+    <br /><br />
+    <label for="descripcion">Descripción <b>(*)</b></label>
+    <textarea id="descripcionEditar" placeholder="Escribir una descripción aquí">@ViewBag.Descripcion</textarea>
+    <br /><br />
+    <div class="form-group row">
+        <div class="col-md-6">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label for="formula">Fórmula</label>
+                    <br /><br />
+                    <label style="font-weight:100;padding-left:30px;">Fórmula Invertida</label>
+                </div>
+                <div class="col-md-3">
+                    <input type="checkbox" id="formulaInvertedEditar" style="margin-top:45px">
+                </div>
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <label for="peso">Ponderado/Peso <b>(*)</b></label>
+            <input type="number" id="pesoEditar" placeholder="Escribir aquí" step="1"  onkeydown="validaNumericosEditar(event)" >
+            <small>* Recuerde la suma debe ser 100</small>
+        </div>
+    </div>
+    <br />
+    <div class="form-group row">
+        <div class="col-md-6">
+            <label for="unidad">Unidad de Medida <b>(*)</b></label>
+            <br />
+            <input style="font-size:13px;padding-top:7px" type="text" id="unidadEditar" placeholder="Escribir aquí" value="@ViewBag.Unidad">
+        </div>
+        <div class="col-md-6">
+            <label for="meta">Meta <b>(*)</b></label>
+            <input type="number" id="metaEditar" placeholder="Escribir aquí" step="1"  onkeydown="validaNumericosEditar(event)" >
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-12" style="text-align:center;">
+            <small>* Una vez validado por el jefe los campos son no editables</small>
+        </div>
+    </div>
+    <br />
+    <div class="buttons">
+        <button id="btnMEditarObjetivo">Editar</button>
+        <button data-dismiss="modal" id="cerrarEditar">Cerrar</button>
+        <button id="closeModalEditarObjetivo" data-dismiss="modal" hidden></button>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        @*$('#objetivoEditar').val('@ViewBag.Objetivo');*@
+        @*$('#descripcionEditar').val('@ViewBag.Descripcion');*@
+        var formulaInvertida = '@ViewBag.FormulaInvertida' === 'True';
+        $('#formulaInvertedEditar').prop('checked', formulaInvertida);
+        $('#pesoEditar').val(@ViewBag.Peso);
+        @*$('#unidadEditar').val('@ViewBag.Unidad');*@
+        /*$("#unidadEditar").data("kendoComboBox").text();*/
+        $('#metaEditar').val(@ViewBag.Meta);
+
+        $("#btnMEditarObjetivo").kendoButton();
+        $("#cerrarEditar").kendoButton();
+
+        $("#btnMEditarObjetivo").click(function () {
+            var numero = @ViewBag.Numero;
+            var fila = $("#datatable tbody tr").filter(function() {
+            return $(this).find('td:first').text() == numero;
+            });
+
+            var objetivo = $('#objetivoEditar').val();
+            var descripcion = $('#descripcionEditar').val();
+            var formulaInvertida = $('#formulaInvertedEditar').prop('checked');
+            var peso = $('#pesoEditar').val();
+            /* var unidad = $('#unidadEditar').val();*/
+            var unidad = $("#unidadEditar").data("kendoComboBox").text();
+            var meta = $('#metaEditar').val();
+
+            if (!objetivo) {
+                toastr.warning('El campo "Objetivo" es obligatorio. Por favor, completarlo.', 'Advertencia');
+                return;
+            } else if (!descripcion) {
+                toastr.warning('El campo "Descripcion" es obligatorio. Por favor, completarlo.', 'Advertencia');
+                return;
+            } else if (!peso) {
+                toastr.warning('El campo "Ponderado" es obligatorio. Por favor, completarlo.', 'Advertencia');
+                return;
+            } else if (!unidad) {
+                toastr.warning('El desplegable "Unidad de Medida" es obligatorio. Por favor, seleccione una opción.', 'Advertencia');
+                return;
+            } else if (!meta) {
+                toastr.warning('El campo "Meta" es obligatorio. Por favor, completarlo.', 'Advertencia');
+                return;
+            }
+
+            
+            fila.find('td:eq(1)').text(objetivo);
+            fila.find('td:eq(2)').text(descripcion);
+            fila.find('td:eq(3) input').prop('checked', formulaInvertida);
+            fila.find('td:eq(4)').text(peso);
+            fila.find('td:eq(5)').text(unidad);
+            fila.find('td:eq(6)').text(meta);
+            if ("@ViewBag.Revision" == "DESAPROBADO") {
+                fila.find('td:eq(7)').html('<button class="btn btn-secundary" data-toggle="modal" data-target="#miModal" onclick="EditarFilaObjetivo(this,event)"><p style="color: blue;"><b style="font-size:12px;font-family:calibri;">CORREGIDO ✏️</b></p> </button>');
+
+            }
+
+            var sumaPonderado = 0;
+            var table = document.getElementById('datatable');
+
+            for (var i = 1, row; row = table.rows[i]; i++) {
+                var revision = row.cells[7].textContent;
+                var peso = parseFloat(row.cells[4].textContent) || 0;
+                console.log(revision);
+                if (revision === 'DESAPROBADO ✏️ ') {
+                    sumaPonderado += 0;
+                } else {
+                    sumaPonderado += peso;
+                }
+            }
+
+            $("#ponderado").text(sumaPonderado + '%');
+
+            var btn = document.getElementById('closeModalEditarObjetivo');
+            btn.click();
+        });
+
+        $("#cerrarEditar").click(function () {
+            var btn = document.getElementById('closeModalEditarObjetivo');
+            btn.click();
+        });
+
+
+        var unidad = $("#unidadEditar").kendoComboBox({
+            autoBind: true,
+            dataTextField: "Nombre",
+            dataValueField: "IdUnidadMedida",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/EvaluacionPersonal/ComboUnidadMedida",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: function (response) {
+                        return response;
+                    }
+                }
+            }
+        }).data("kendoComboBox");
+
+    });
+
+    function validaNumericosEditar(event) {
+        if (!/[0-9]/.test(event.key) && event.key !== "Backspace" && event.key !== "Tab") {
+            event.preventDefault(); // Prevenir la entrada si no es un número ni Tab ni Backspace
+        }
+    }
+
+    //function llenarFormAgregarObjetivo() {
+    //    console.log(obj, des, form, pes, uni, me);
+
+    //}
+
+</script>

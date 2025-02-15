@@ -1,0 +1,188 @@
+﻿@model ERPElectrodata.Models.Soporte
+
+@{
+    Layout = null;
+}
+
+<input type="hidden" name="Soporte" id="IdSoporte" value="@ViewBag.Id" />
+<fieldset>
+    <legend>TICKET</legend>
+    <div class="divFondoUno">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Compañía
+            </div>
+            <div class="editor-field">
+                <input id="IdCompania" type="text" name="IdCompania">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Código Producto
+            </div>
+            <div class="k-textbox">
+                <input id="CodigoProd" type="text" name="CodigoProd" value="@ViewBag.Codigo">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Producto
+            </div>
+            <div class="k-textbox">
+                <input id="ProductoDesc" type="text" name="ProductoDesc" value="@ViewBag.Descripcion">
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Serie
+            </div>
+            <div class="k-textbox">
+                <input id="SerieProd" type="text" name="SerieProd" value="@ViewBag.Serie">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Fecha Fin Garantía
+            </div>
+            <div class="editor-field">
+                <input id="FechaFinProd" type="text" name="FechaFinProd" value="@ViewBag.FechaFin">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Cantidad de Preventivos
+            </div>
+            <div class="">
+                <input id="PreventivoProd" type="text" name="PreventivoProd" value="@ViewBag.Preventivos">
+            </div>
+        </div>
+    </div>
+    <div class="divFondoUno">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Bolsa de Horas
+            </div>
+            <div class="">
+                <input id="HorasProd" type="text" name="HorasProd" value="@ViewBag.BolsaHoras">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                OP
+            </div>
+            <div class="k-textbox">
+                <input id="Op" type="text" name="Op" value="@ViewBag.Op">
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Observaciones
+            </div>
+            <div class="" style="height:75px; width:300px">
+                <textarea id="ObservacionesProd" name="ObservacionesProd" style="height:75px; width:460px">@ViewBag.Observacion</textarea>
+            </div>
+        </div>
+    </div>
+    <div style="display:inline-block; float:right; padding: 20px 20px 15px 5px;">
+        <div style=" float: left; padding: 0 15px 0 0;">
+            <button id="submitNewSoporte" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+        </div>
+        <button id="cancelNewSoporte" class="k-button">@ResourceLanguaje.Resource.BtnCancel</button>
+    </div>
+</fieldset>
+
+<script id="tmp-CIA" type="text/x-kendo-template">
+    <div style="width: 100%; font-size: 1em;">
+        <span style="width:100%; font-size:1em;">#= COM_NAME #</span>
+        <div style="width:100%; font-size:0.9em; margin-top:-5px;">RUC: #= NUM_TYPE_DI #</div>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var ID_COMP = $("#IdCompania").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            template: kendo.template($("#tmp-CIA").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        ID_COMP.list.width(350);
+        ID_COMP.value(@ViewBag.Compania);
+
+        var FechaFinProd = $("#FechaFinProd").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#submitNewSoporte").click(function () {
+
+            var params = {
+                IdSoporte: $("#IdSoporte").val(),
+                IdCompania: $("#IdCompania").val(),
+                CodigoProd: $("#CodigoProd").val(),
+                ProductoDesc: $("#ProductoDesc").val(),
+                SerieProd: $("#SerieProd").val(),
+                FechaFinProd: $("#FechaFinProd").val(),
+                PreventivoProd: $("#PreventivoProd").val(),
+                HorasProd: $("#HorasProd").val(),
+                ObservacionesProd: $("#ObservacionesProd").val(),
+                Op: $("#Op").val()
+            };
+
+            $.ajax({
+                url: "/Soporte/Save",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == '"OK"') {
+                        closeWinFormModalPopUp();
+                        LoadTableSoporte();
+                    }
+                }
+            });
+        });
+
+        $("#cancelNewSoporte").click(function (event) {
+            event.preventDefault();
+            closeWinFormModalPopUp();
+        });
+
+        $("#PreventivoProd").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#HorasProd").kendoNumericTextBox({
+            min: 0
+        });
+
+    });
+
+</script>

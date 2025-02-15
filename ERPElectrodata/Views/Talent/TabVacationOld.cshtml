@@ -1,0 +1,106 @@
+﻿@{
+    Layout = null;
+}
+
+<div style="width:100%; height:456px; display:inline-block;" id="divVacations">
+    <div style="clear:both;"></div>
+    <div id="gridFindVaca" class="contentView">
+    </div>
+    <div id="pagerFindVaca" class="contentViewPager">
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="tpt-Vacation">
+    <div style="display: inline-block; width: 100%; # if(ID_VACA_STAT == 5){ # opacity: 0.5; # } #">
+        <div style="border: 1px solid \\#516882; margin: 0px 0px 7px 0px; width: 50%; float: left;">
+            <div style="font-size: .9em; width: 99.2%; background-color: \\#516882; height: 20px; color: white; padding: 2px 0px 0px 1%; display: inline-block;">
+                <div style="float:left; width:auto;color:white; text-align:right; text-transform:capitalize;">
+                    @ResourceLanguaje.Resource.CodeTalent: ${COD_VACA}
+                </div>
+                <div style="float:left; width:auto;color:white; margin:0px 0px 0px 1%; text-align:right; text-transform:capitalize;">
+                    @ResourceLanguaje.Resource.StatusTalent: ${NAM_VACA_STAT}
+                </div>
+                @*<div title="Delete" class="botonDelete" onclick="deleteVacation(${ID_VACA})">x</div>*@
+                <div style="float:right; width:48%;color:white; margin:0px 2% 0px 0px; text-align:right;">
+                    @ResourceLanguaje.Resource.CreatedDateTalent: ${DAT_REGI}
+                </div>
+            </div>
+            <div class="incidentHomeListHeader">
+                <div style="min-width: 80px; margin:3px 0 0 0; height: auto; width: auto; text-align:right; float:left;">
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.SinceTalent:</b></div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.ToTalent:</b></div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.DateReturnTalent:</b></div>
+                </div>
+                <div style="min-width: 150px; margin: 3px 0 0 0; height: auto; width: auto; text-align: left; float: left;">
+                    <div class="smallTitle">&nbsp;${DAT_STAR}</div>
+                    <div class="smallTitle">&nbsp;${DAT_END}</div>
+                    <div class="smallTitle">&nbsp;${DAT_RETU}</div>
+                </div>
+                <div style="width: 50px; margin: 4px 4px 0 0; height: 50px; background-color: \\#00a8e6; float: right; color: White; text-align: center;">
+                    <div style="width:100%; text-align:center; font-size:2.2em; font-family:'Segoe UI';"><b>${NUM_DAYS}</b></div>
+                    <div style="width:100%; text-align:center; font-size:.95em; margin-top:-3px;">@ResourceLanguaje.Resource.DaysTalent</div>
+                </div>
+                <div style="min-width: 100px; margin: 3px 0 0 0; height: 50px; width: auto; float: right; border-right: 1px dotted \\#ddd; display: inline-block;">
+                    <div style="float:left; width:33.33%; height:100%; position:relative;">
+                        <div class="botonDownload" title="Download File"></div>
+                    </div>
+                    <div style="float:left; width:33.33%; height:100%; position:relative;">
+                        <div class="botonUpload" title="Updolad File"></div>
+                    </div>
+                    <div style="float:left; width:33.33%; height:100%; position:relative;">
+                        <a href="/DetailsVacation/Index/${ID_VACA}" target="_blank"><div class="botonSummary" title="Ver Detalles"></div></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="margin: 0px 0px 7px 0px; width:49.5%; float:left;">
+            <div style="margin-left: 10px; position: relative; border: 1px solid \\#ccc; -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; ">
+                <div class="messageArrow"></div>
+                <div style="height:55px; padding: 3px 0px 6px 0px; margin: 8px 8px 8px 8px; overflow: auto; text-align: justify; font-family:Tahoma; font-size:1em;">
+                    #= SUMMARY#
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Vacation/ListByID_PERS_ENTI?id=@ViewBag.ID_PERS_ENTI" + "&var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 1 },
+            serverPaging: true,
+            pageSize: 5,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerFindVaca").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 15, 30],
+            refresh: true
+        });
+
+        $("#gridFindVaca").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#tpt-Vacation").html())
+        });
+    });
+</script>
+
+

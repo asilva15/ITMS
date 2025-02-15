@@ -1,0 +1,105 @@
+﻿@model ERPElectrodata.Models.PERSON_ENTITY
+
+@{
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#txtrol").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            dataTextField: "Rol",
+            dataValueField: "Id",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Seguridad/ListarPerfilesxCuenta"
+                }
+            }
+        }).data("kendoComboBox");
+
+         var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AllRequesterByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#btnBuscar").click(function (event) {
+
+            event.preventDefault();
+
+            var txtrol = $("#txtrol").data("kendoComboBox");
+
+            var txtusuario = "";
+            txtusuario = $("#txtusuario").val();
+
+
+            window.frames["RSRoles"].src = "/Reporting/Ticket/ReporteRoles.aspx?usuario=" + ID_PERS_ENTI.value() + "&rol=" + txtrol.value();
+
+        });
+
+    });
+
+
+</script>
+
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte de Roles
+    </div>
+    <div class="card-body">
+        <form id="Parametros">
+
+            <div class="form-row" style="margin-block-end: 10px; align-content: center; margin-inline: 10px; gap: 30px;">
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Usuario
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_PERS_ENTI)
+                        @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Rol
+                    </div>
+                    <div class="editor-field">
+                        @Html.Editor("txtrol")
+                    </div>
+                </div>
+
+                <div class="col-md-2">
+                    <br />
+                    <button id="btnBuscar" class="btn btn-primary btn-block" style="margin-left:0"><i class="fa fa-search"></i> Buscar</button>
+
+                </div>
+
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="bodyForm">
+    <div class="inBodyForm">
+        <iframe id="RSRoles" style="height:573px; width:100%; border: 0px #eee solid;"></iframe>
+    </div>
+</div>

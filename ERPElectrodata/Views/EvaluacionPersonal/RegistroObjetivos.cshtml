@@ -1,0 +1,205 @@
+﻿@{
+    ViewBag.Title = "RegistroObjetivos";
+    Layout = null;
+}
+
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="box">
+    <form>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-sm-1">
+                    <br /><label for="cbPeriodo">Periodo</label>
+                </div>
+                <div class="col-sm-2">
+                    <select id="cbPeriodo" name="cbPeriodo" class="form-control select2" style="width:80%" ></select>
+                </div>
+                <div class="col-sm-1">
+                    <br /> <label for="cbCargo">Cargo</label><br />
+                </div>
+                <div class="col-sm-3">
+                    <select id="cbCargo" name="cbCargo" class="form-control select2" style="width:80%" ></select>
+                </div>
+                <div class="col-sm-1">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-warning" onclick="ListarObjetivos()">Buscar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+    <div class="tab-content">
+        <div class="tab-pane active" id="tab_1">
+            <div class="box">
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <table id="tablaObjetivos" class="table table-bordered table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Cargo</th>
+                                <th>Nombre Evaluacion</th>
+                                <th>Objetivo</th>
+                                <th>Descripcion</th>
+                                <th>Indicador</th>
+                                <th>Peso</th>
+                                <th>Editar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Cargo</th>
+                                <th>Nombre Evaluacion</th>
+                                <th>Objetivo</th>
+                                <th>Descripcion</th>
+                                <th>Indicador</th>
+                                <th>Peso</th>
+                                <th>Editar</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#cbPeriodo").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+        $("#cbPeriodo").on('change', function (e) {
+            $("#cbCargo").empty();
+            var idPeriodo = $("#cbPeriodo").find(':selected').val()
+
+            $("#cbCargo").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/EvaluacionPersonal/ListarDesempenoCargo/" + idPeriodo,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+
+                    },
+                },
+            });
+        });
+        //Asignación inicial
+        var $newOption = $("<option></option>").val("@ViewBag.IdPeriodo").text("@ViewBag.Periodo");
+        $("#cbPeriodo").append($newOption).trigger('change');
+
+        setTimeout(function () { MostrarObjetivos() }, 1000);
+    });
+
+    function ListarObjetivos() {
+        if ($("#cbPeriodo").val() == null || $("#cbPeriodo").val() == 0) {
+            toastr.warning('Seleccione el periodo');
+        } else {
+            MostrarObjetivos()
+        }
+    }
+
+    function MostrarObjetivos() {
+        $('#tablaObjetivos').dataTable().fnDestroy();
+
+        $('#tablaObjetivos').DataTable({
+            "order": [[4, "asc"]],
+            //dom: 'Bfrtip',
+            ajax: "/EvaluacionPersonal/EvaListarPeriodoObjetivos/" + $("#cbPeriodo").val() + '/' + $("#cbCargo").val(),
+            columns: [
+                { data: "Cargo" },
+                { data: "NombreEvaluacion" },
+                { data: "Objetivo" },
+                { data: "Descripcion" },
+                { data: "Indicador" },
+                { data: "Peso" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style=" text-align: center;"></div>' +
+                        '<span id="EditarObjetivo" title="Editar" class="fa fa-edit" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px;" data-toggle="modal" data-target="#miModal" onclick="EditarObjetivo(' + data.IdObjetivo + ')" ></span>' +
+                        '</div>';
+                    }
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+
+        });
+
+    }
+
+    function EditarObjetivo(id) {
+        $("#lblTitulo").text("Editar Objetivo");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-md");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/EvaluacionPersonal/EditarObjetivos/" + id);
+    }
+</script>

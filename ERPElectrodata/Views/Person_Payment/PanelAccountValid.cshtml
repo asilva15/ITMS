@@ -1,0 +1,58 @@
+﻿@model ERPElectrodata.Models.PERSON_PAYMENT
+
+@{
+    Layout = null;
+}
+<div class="col-lg-11">
+    <div class="editor-label" style="font-weight:bold; margin-bottom:2px;">
+        @ResourceLanguaje.Resource.TypeAccount
+    </div>
+    <div class="editor-field" style="width:90%;">
+        @Html.EditorFor(model => model.ID_TYPE_PAYM)
+        @Html.ValidationMessageFor(model => model.ID_TYPE_PAYM)
+    </div>
+    <div id="divDetailsAccountValid" style="width:100%;"></div>
+</div>
+
+
+<script type="text/javascript"> 
+    $(document).ready(function () {
+
+        $("#ID_TYPE_PAYM").kendoComboBox({
+            dataTextField: "NAM_TYPE_PAYM",
+            dataValueField: "ID_TYPE_PAYM",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            index: 0,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Person_Payment/ListTypePayment?var=" + Math.random()
+                }
+            }
+        });
+        var ID_TYPE_PAYM = $("#ID_TYPE_PAYM").data("kendoComboBox");
+
+        ID_TYPE_PAYM.bind("change", function (e) {
+            var id1 = ID_TYPE_PAYM.dataItem().ID_TYPE_PAYM;
+            var nam = ID_TYPE_PAYM.dataItem().NAM_TYPE_PAYM;
+
+            $("#divDetailsAccountValid").empty();
+            $("#divDetailsAccountValid").load("/PERSON_PAYMENT/PanelDetailsAccountValid?id=@ViewBag.ID_PERS_ENTI&id1=" + id1 + "&var=" + Math.random());
+
+            $("#divAccountOld").empty();
+            $("#divAccountOld").load("/PERSON_PAYMENT/PanelAccountsOld?id=@ViewBag.ID_PERS_ENTI&id1=" + id1 + "&var=" + Math.random());
+
+            $("#titleOldBankAccounts").html('@ResourceLanguaje.Resource.OldBankAccounts - ' + String(nam).toLowerCase());
+        });
+
+        $("#divDetailsAccountValid").empty();
+        $("#divDetailsAccountValid").load("/PERSON_PAYMENT/PanelDetailsAccountValid?id=@ViewBag.ID_PERS_ENTI&id1=1&var=" + Math.random());
+    });
+</script>

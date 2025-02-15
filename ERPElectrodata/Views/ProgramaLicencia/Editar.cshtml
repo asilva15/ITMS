@@ -1,0 +1,267 @@
+﻿@model ERPElectrodata.Models.ProgramaLicencia
+
+@{
+    ViewBag.Title = "Editar";
+    Layout = null;
+}
+
+@using (Html.BeginForm("Editar", "ProgramaLicencia", FormMethod.Post, new { enctype = "multipart/form-data", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+    <fieldset>
+        @Html.HiddenFor(model => model.Id)
+        @Html.HiddenFor(model => model.Activo)
+        @Html.HiddenFor(model => model.Vencido)
+        @Html.HiddenFor(model => model.Habilitado)
+        @Html.HiddenFor(model => model.UsuarioCrea)
+        @Html.HiddenFor(model => model.FechaCrea)
+        @Html.HiddenFor(model => model.TipoLicencia)
+        @Html.HiddenFor(model => model.UsuarioModifica)
+
+        <div class="form-row">
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Programan <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.IdPrograma)
+                    @Html.ValidationMessageFor(model => model.IdPrograma)
+                </div>
+            </div>
+            <input type="hidden" value="1" id="idModPadre" name="modPadre" />
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Periodo de caducidad <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.IdTipoLicencia)
+                    @Html.ValidationMessageFor(model => model.IdTipoLicencia)
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Solped <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.EditorFor(model => model.Solped)
+                    @Html.ValidationMessageFor(model => model.Solped)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Proveedor <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-label">
+                    @Html.EditorFor(model => model.IdProveedor)
+                    @Html.ValidationMessageFor(model => model.IdProveedor)
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Fecha de Adquisición
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.FechaCompra)
+                    @Html.ValidationMessageFor(model => model.FechaCompra)
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Versión <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.EditorFor(model => model.VersionLic)
+                    @Html.ValidationMessageFor(model => model.VersionLic)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Código de Activación
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.EditorFor(model => model.CodigoActivacion)
+                    @Html.ValidationMessageFor(model => model.CodigoActivacion)
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Código Adicional
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.EditorFor(model => model.CodigoAdicional)
+                    @Html.ValidationMessageFor(model => model.CodigoAdicional)
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Modo de Instalación <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.IdModoInstalacion)
+                    @Html.ValidationMessageFor(model => model.IdModoInstalacion)
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-12">
+                <div class="editor-label">
+                    Comentario
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.Observacion)
+                    @Html.ValidationMessageFor(model => model.Observacion)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6"></div>
+            <div class="col-md-3">
+                <button id="reset" type="button" class="btn btn-light btn-block" onclick="cancel(); return false;">Cancelar</button>
+            </div>
+            <div class="col-md-3">
+                <button id="submit" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var FechaCompra = $("#FechaCompra").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#IdProveedor").kendoComboBox({
+            dataTextField: "NombreProveedor",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Proveedor/Listar?var=" + Math.random()
+                }
+            }
+        });
+        var IdProveedor = $("#IdProveedor").data("kendoComboBox");
+
+        $("#Observacion").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#IdPrograma").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Programa/ListarProgramas?var=" + Math.random()
+                }
+            }
+        });
+
+        var IdPrograma = $("#IdPrograma").data("kendoComboBox");
+
+        $("#IdTipoLicencia").kendoComboBox({
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarTipoLicencia?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdModoInstalacion").kendoComboBox({
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarModoInstalacion?var=" + Math.random()
+                }
+            }
+        });
+        console.log("Valor de modPadre: " + $("#idModPadre").val());
+
+        $("#reset").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+    });
+</script>
+
+<script type="text/javascript">
+
+    function uploadDone(msg, code) {
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se actualizaron los datos.", "Información Guardada");
+            ObtenerDatosRegistro();
+            ObtenerDatosLicencia();
+        }
+        else {
+            toastr.warning("Por favor complete la información requerida.", "Mensaje");
+        }
+    }
+</script>

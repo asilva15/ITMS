@@ -1,0 +1,225 @@
+﻿@{
+    ViewBag.Title = "EstadoTarea";
+    Layout = null;
+}
+ 
+<input id="IdTareaEstadoBNV" value="@ViewBag.IdTarea" hidden />
+<input id="EstadoTareaBNV" value="@ViewBag.Estado" hidden />
+<div class="main-card card">
+    @if (ViewBag.Estado == "Programado")
+    {
+        <div class="card-header">
+            Programar Tarea
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-6">
+                    Fecha Programada
+                    <input id="FechaProgramarTarea" name="FechaProgramarTarea" />
+                </div>
+            </div>
+            <br />
+            <div class="form-row">
+                <div class="col-md-12">
+                    Comentario
+                    @Html.TextArea("txtComentarioTarea", new { style = "width: 100%", rows = "2", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4 mt-3" style="text-align: center;">
+                    <button onclick="ProgramarTareaBNV();" type="button" class="btn btn-primary"> <i class="fa fa-save"></i> Guardar</button>
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card-header">
+            Tarea @ViewBag.Estado
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-12">
+                    Comentario
+                    @Html.TextArea("txtComentarioTarea", new { style = "width: 100%", rows = "2", @class = "form-control" })
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-4"></div>
+                <div class="col-md-4 mt-3" style="text-align: center;">
+                    <button onclick="GuardarEstadoTareaBNV();" type="button" class="btn btn-primary"> <i class="fa fa-save"></i> Guardar</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#txtComentarioTarea").kendoEditor({
+            encoded: false,
+            tools: [
+                {
+                    name: "bold"
+                },
+                {
+                    name: "italic"
+                },
+                {
+                    name: "underline"
+                },
+                {
+                    name: "justifyLeft"
+                },
+                {
+                    name: "justifyCenter"
+                },
+                {
+                    name: "justifyRight"
+                },
+                {
+                    name: "justifyFull"
+                },
+                {
+                    name: "insertUnorderedList"
+                },
+                {
+                    name: "insertOrderedList"
+                },
+                {
+                    name: "indent"
+                },
+                {
+                    name: "outdent"
+                },
+                {
+                    name: "createLink"
+                },
+                {
+                    name: "unlink"
+                }
+            ],
+            paste: function (e) {
+                //if ((/^<img src="data:image/).test(e.html)) {
+                //    toastr.warning("No está permitido imágenes.");
+                //    e.html = "";
+                //}
+                if (/<img\s+[^>]*>/i.test(e.html)) {
+                    toastr.warning("No se permiten imágenes en este campo.");
+                    e.html = "";
+                } else if ((/^<img src="data:image/).test(e.html)) {
+                    toastr.warning("No se permiten imágenes en este campo.");
+                    e.html = "";
+                }
+            }
+        });
+
+        $("#FechaProgramarTarea").kendoDateTimePicker({
+            format: "dd/MM/yyyy hh:mm tt",
+            min: new Date()
+        }).data("kendoDateTimePicker");
+
+    });
+
+    function GuardarEstadoTareaBNV() {
+        var comt = $("#txtComentarioTarea").data("kendoEditor");
+        var comentario = comt.value().trim();
+        var estado = $("#EstadoTareaBNV").val();
+        var idTarea = $("#IdTareaEstadoBNV").val();
+
+        if (comentario.replace(/<p>|<\/p>|&nbsp;/g, '') == "") {
+            toastr.warning("Ingrese un comentario.", "Mensaje");
+        } else {
+            swal({
+                title: `¿Deseas guardar esta actividad?`,
+                text: `Se guardará el estado de la actividad`,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Guardar",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: false,
+                closeOnCancel: false
+            }, function (dismiss) {
+                if (dismiss) {
+                    $.ajax({
+                        url: '/Tarea/ActualizarEstadoTareaDetalleBNV',
+                        data: JSON.stringify({
+                            id: idTarea,
+                            estado,
+                            comentario
+                        }),
+                        type: "POST",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.message == 'OK' || result.message == 'REFRESH') {
+                                $("[data-dismiss=modal]").trigger({ type: "click" });
+                            }
+
+                            MensajeConfirmacionTareasBNV(result.message);
+                        }
+                    });
+
+                }
+                else {
+                    swal("Cancelado", "Ha cancelado la operación", "error");
+                }
+
+            });
+        }
+    }
+
+    function ProgramarTareaBNV() {
+        var comt = $("#txtComentarioTarea").data("kendoEditor");
+        var comentario = comt.value().trim();
+        var dateTimePicker = $("#FechaProgramarTarea").data("kendoDateTimePicker");
+        var fecha = dateTimePicker.value();
+        var fechaISO = fecha ? fecha.toISOString() : "";
+        var estado = $("#EstadoTareaBNV").val();
+        var idTarea = $("#IdTareaEstadoBNV").val();
+
+        if (comentario.replace(/<p>|<\/p>|&nbsp;/g, '') == "" || !fecha) {
+            toastr.warning("Ingrese un comentario y la fecha.", "Mensaje");
+        } else {
+            swal({
+                title: `¿Deseas guardar esta actividad?`,
+                text: `Se guardará el estado de la actividad`,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Guardar",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: false,
+                closeOnCancel: false
+            }, function (dismiss) {
+                if (dismiss) {
+                    $.ajax({
+                        url: '/Tarea/ActualizarEstadoTareaDetalleBNV',
+                        data: JSON.stringify({
+                            id: idTarea,
+                            estado,
+                            comentario,
+                            fecha: fechaISO
+                        }),
+                        type: "POST",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.message == 'OK' || result.message == 'REFRESH') {
+                                $("[data-dismiss=modal]").trigger({ type: "click" });
+                            }
+
+                            MensajeConfirmacionTareasBNV(result.message);
+                        }
+                    });
+
+                }
+                else {
+                    swal("Cancelado", "Ha cancelado la operación", "error");
+                }
+
+            });
+        }
+    }
+
+</script>

@@ -1,0 +1,108 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+@{
+    Layout = null;
+}
+<style>
+    #DES_RAZON_SOCIAL, #DES_RUC {
+        width: 220px;
+        height: 26px;
+    }
+</style>
+
+<fieldset>
+    <div class="divFondoUno">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Razon Social
+            </div>
+            <div class="editor-field">
+                <input id="DES_RAZON_SOCIAL" type="text" name="DES_RAZON_SOCIAL">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                RUC <b style="color:red">(Opcional)</b>
+            </div>
+            <div class="editor-field">
+                <input id="DES_RUC" type="text" name="DES_RUC">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+    </div>
+    <div style="display:inline-block; float:right; padding: 20px 20px 15px 5px;">
+        <div style=" float: left; padding: 0 15px 0 0;">
+            <button id="submitNewClient" class="k-button">Crear</button>
+        </div>
+        <button id="cancelNewClient" class="k-button">Cancelar</button>
+    </div>
+</fieldset>
+<script type="text/javascript">
+    $("#submitNewClient").click(function () {
+        var razon_soc = $("#DES_RAZON_SOCIAL").val();
+        if (razon_soc == '') {
+            validar('Se debe ingresar la Razon Social.');
+         }
+        else {
+            var params = {
+                DES_RAZON_SOCIAL: $("#DES_RAZON_SOCIAL").val(),
+                DES_RUC: $("#DES_RUC").val(),
+            };
+
+            $.ajax({
+                url: "/Activity/CreateClient",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    
+                    if (resp == "OK") {
+                        closeWinFormModalPopUp();
+                            $("#ID_CLIE").kendoComboBox({
+                            autoBind: false,
+                            placeholder: "SELECCIONAR CLIENTE",
+                            dataTextField: "COM_NAME",
+                            dataValueField: "ID_ENTI",
+                            filter: "contains",
+                            delay: 500,
+                            minLength: 0,
+                            suggest: true,
+                            dataSource: {
+                                schema: {
+                                    data: "Data",
+                                    total: "Count"
+                                },
+                                transport: {
+                                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                                }
+                            }                            
+                        }).data("kendoComboBox");
+                     }
+                }
+            });
+        }
+    });
+
+    $("#cancelNewClient").click(function (event) {
+        event.preventDefault();
+        closeWinFormModalPopUp();
+    });
+    function validar(msg) {
+         var title = 'Error al Guardar';
+        var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                          "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                          "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                          "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                          "</div></div>";
+
+        winPopUpModal(title, body, 300, 130);
+
+        $("#btnContinuee").click(function () {
+             $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+    }
+</script>

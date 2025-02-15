@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "Client";
+    Layout = "~/Views/Shared/_LayoutUsuarioExterno.cshtml";
+}
+
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<body>
+    <div class="content-header">
+
+    </div>
+    <div class="content">
+        <div class="row">
+            <div class="col-lg-12 col-xs-12">
+                <div class="box">
+                    <!-- /.box-header -->
+                    <div class="box-body">
+                        <table id="tabla" class="table table-bordered table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Cliente</th>
+                                    <th>Asignado</th>
+                                    <th>T.Trans</th>
+                                    <th>T.Falta</th>
+                                    <th>Prioridad</th>
+                                    <th>Categoria</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Cliente</th>
+                                    <th>Asignado</th>
+                                    <th>T.Trans</th>
+                                    <th>T.Falta</th>
+                                    <th>Prioridad</th>
+                                    <th>Categoria</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    T.Trans: Tiempo Transcurrido en <b>Dìas</b>; T.Falta: Tiempo faltante en <b>Horas</b> para llegar al SLA
+                    <!-- /.box-body -->
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="result"></div>
+</body>
+<script>
+    $(document).ready(function () {
+        $('#tabla').DataTable({
+            "order": [[0, "asc"]],
+            dom: 'Bfrtip',
+            ajax: "/Home/ListaTicketsUsuarioExt",
+            columns: [
+			    {
+			        data: null,
+			        render: function (data, type, row) {
+			            return '<a onclick="ticketDetalle('+data.IdTicket+');" cursor:"pointer">' + data.CODIGO + '</a>';
+			        }
+			    },
+			    { data: "EMPRESA" },
+			    {
+			        data: "ASIGNADO"
+			    },
+			    { data: "TIEMPO_TRANSCURRIDO" },
+			    {
+			        data: null,
+			        render: function (data, type, row) {
+			            return '<span class="label label-' + data.Etiqueta + '">' + data.TIEMPO_RESTANTE + '</span>';
+			        }
+			    },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<span class="label label-' + data.Label + '">' + data.Prioridad + '</span>';
+                    }
+                },
+                { data: "Categoria" }
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    });
+    function ticketDetalle(IdTicket) {
+        @*window.location.href = '@Url.Action("DetailTicket", "Home", new { IdTicket },null)'; *@
+        var url = "/Home/DetailTicket/" + IdTicket;
+        window.open(url, '_blank');
+    }
+</script>

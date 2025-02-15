@@ -1,0 +1,146 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+<style>
+    .delete-link {
+        width: 12px;
+        height: 12px;
+        background: transparent url("/Content/Images/close.png") no-repeat 50% 50%;
+        overflow: hidden;
+        display: inline-block;
+        font-size: 0;
+        line-height: 0;
+        vertical-align: top;
+        margin: 2px 0 0 3px;
+        -webkit-border-radius: 5px;
+        -mox-border-radius: 5px;
+        border-radius: 5px;
+    }
+</style>
+<div id="treeviewInvoice" style="padding: 3px 0 0 7px;"></div>
+
+@* TreeView Payment Ballots *@
+<script id="treeviewInvoice-template" type="text/kendo-ui-template">
+    # if (item.SIGNED === undefined) { #
+    <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    # } else if (item.SIGNED == true) { #
+
+    <a href="" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" class="btnAbrirModal" style="text-decoration:none;" onclick="Authorization('#: item.NAM_FILE #','#: item.ID_FILE #'); return false;">
+        <img src="/Content/Images/Check.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;" > #: item.NAME_PARA # </span>
+    </a>
+
+
+    # if (parseInt(@Session["ADMINISTRADOR"]) == 1 || parseInt(@Session["RRHH"])==1) { #
+    <a id='I|#: item.ID_FILE #' class='delete-link' title='Remove' onclick="Eliminar('#: item.ID_FILE #');" style="cursor:pointer;"></a>
+    # } #
+    # } else if (item.SIGNED == false && @ViewBag.OPT_DELETE == 0 && @ViewBag.ANIO_MES < item.ANIO_MES ) { #
+    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+    <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    # } else if (item.SIGNED == false && @ViewBag.OPT_DELETE == 0 ) { #
+    <a href="" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;" class="btnAbrirModal"  onclick="Authorization('#: item.NAM_FILE #','#: item.ID_FILE #'); return false;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    </a>
+    # } else if (item.SIGNED == false && @ViewBag.OPT_DELETE == 1 ) { #
+    <a href="" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;" class="btnAbrirModal"  onclick="Authorization('#: item.NAM_FILE #','#: item.ID_FILE #'); return false;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    </a>
+    # if (parseInt(@Session["ADMINISTRADOR"]) == 1 || parseInt(@Session["RRHH"])==1) { #
+    <a id='I|#: item.ID_FILE #' title='Remove' onclick="Eliminar('#: item.ID_FILE #');"></a>
+    # } #
+    # } #
+
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        homogeneousInvoice = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Talent/TreeInvoice/@ViewBag.ID_PERS_ENTI",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE"
+                }
+            }
+        });
+
+        $("#treeviewInvoice").kendoTreeView({
+            template: kendo.template($("#treeviewInvoice-template").html()),
+            dataSource: homogeneousInvoice,
+            dataTextField: "NAME_PARA",
+        });
+    });
+
+    function Authorization(arc, iddocu) {
+         $(".btnAbrirModal").attr("data-style", "expand-right");
+        $(".btnAbrirModal").attr("data-toggle", "modal");
+        $(".btnAbrirModal").attr("data-target", "#miModal");
+        $("#lblTitulo").text("@ResourceLanguaje.Resource.ValidationsOfCredentials");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").addClass("modal-sm");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Account/ViewAuthorization?id=" + @ViewBag.ID_PERS_ENTI + "&id1=" + iddocu + "&fd=Invoice&var=" + Math.random());
+        @*var htmlForm = '<div id="FormAuthorization"></div>';
+        winFormPopUpModal("@ResourceLanguaje.Resource.ValidationsOfCredentials", htmlForm, 260, 205);
+        $("#FormAuthorization").load("/Account/ViewAuthorization?id=@ViewBag.ID_PERS_ENTI&id1=" + iddocu + "&fd=Invoice&var=" + Math.random());
+        return false;*@
+    }
+
+    function mensaje(msg, code, cdg) {
+        if (msg == "OK") {
+            if (code == "Training") {
+                toastr.success("@ResourceLanguaje.Resource.TrainingMsn04","Information Saved");
+            }
+            else if (code == "OpenPDF") {
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+                window.open("/Talent/ViewDownload/" + cdg, "_blank");
+            }
+            else {
+                toastr.success("La información se ha guardado correctamente", "Information Saved");
+                setTimeout(function () { location.reload(true); }, 1500);
+            }
+        }
+        else {
+
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+            }
+            else if (code == '1') {
+                titleAsset = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+            }
+            else if (code == '2') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongDates';
+                messageAsset = '@ResourceLanguaje.Resource.WrongDatesMsn';
+            }
+            else if (code == '3') {
+                titleAsset = '@ResourceLanguaje.Resource.Attach';
+                messageAsset = '@ResourceLanguaje.Resource.AttachMsn';
+            }
+            else if (code == '5') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongCredentials';
+                messageAsset = '@ResourceLanguaje.Resource.WrongCredentialsMsn1';
+            }
+            else if (code == '6') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongCredentials';
+                messageAsset = '@ResourceLanguaje.Resource.WrongCredentialsMsn2';
+            }
+            toastr.warning(messageAsset,titleAsset)
+            
+        }
+    }
+</script>

@@ -1,0 +1,106 @@
+﻿@{
+    ViewBag.Title = "ReportePorTicket";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+ 
+<div class="main-card card">
+    <div class="card-header">
+        Reporte de Tareas
+    </div>
+
+    <div class="card-body">
+        <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%;" id="tbTareas">
+            <thead style="background: linear-gradient(to top, #1e3c72 0%, #1e3c72 1%, #2a5298 100%) !important; color: white; ">
+                <tr>
+                    <th class="text-center"> Código Tarea </th>
+                    <th class="text-center"> Título de Tarea </th>
+                    <th class="text-center"> Descripción de Tarea </th>
+                    <th class="text-center"> Grupo Responsable </th>
+                    <th class="text-center"> Estado </th>
+                    <th class="text-center"> Asignado </th>
+                    <th class="text-center"> Fecha de Creación </th>
+                    <th class="text-center"> Fecha de Inicio </th>
+                    <th class="text-center"> Fecha de Realización </th>
+                    <th class="text-center"> Fecha Programado </th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        ListarTareasPorTicketBNV();
+    });
+
+    function ListarTareasPorTicketBNV() {
+        $('#tbTareas').dataTable().fnDestroy();
+        $('#tbTareas').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: "/Tarea/ListarTareasPorTicketBNV?idTicket=@ViewBag.IdTick",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "CodigoTarea"
+                },
+                {
+                    data: "Titulo"
+                },
+                {
+                    data: "Descripcion"
+                },
+                {
+                    data: "AreaResponsable"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.Estado == 1) {
+                            return '<div style="text-align:center"><div class="badge badge-success">Procede</div></div>';
+                        } else if (data.Estado == 2) {
+                            return '<div style="text-align:center"><div class="badge badge-danger">No Procede</div></div>';
+                        } else if (data.Estado == 5) {
+                            return '<div style="text-align:center"><div class="badge badge-secondary">Sin Asignar</div></div>';
+                        } else if (data.Estado == 6) {
+                            return '<div style="text-align:center"><div class="badge badge-info">En Proceso</div></div>';
+                        } else if (data.Estado == 7) {
+                            return '<div style="text-align:center"><div class="badge badge-warning">Programado</div></div>';
+                        } else {
+                            return '<div style="text-align:center"><div class="badge badge-warning">Pendiente</div></div>';
+                        }
+                    }
+                },
+                {
+                    data: "Usuario"
+                },
+                {
+                    data: "FechaCreacion"
+                },
+                {
+                    data: "FechaInicio"
+                },
+                {
+                    data: "FechaRealizacion"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.Estado == 7 ? data.FechaProgramado : null;
+                    }
+                }
+            ]
+        });
+    }
+
+</script>

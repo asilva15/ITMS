@@ -1,0 +1,219 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+</head>
+<body>
+
+    <div style="width:100%; margin-top:10px;">
+        <div style="margin-bottom:15px;">
+            <input type="text" name="ID_ROOM" id="ID_ROOM"/> 
+        </div>
+        <div class="titleForm"><div class="title">Chart</div></div>
+        <div class="bodyForm">
+            <div class="inBodyFormxx">
+                <div id="divSchedule"></div>    
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+
+<script type="text/javascript">
+
+    function AddEvent(e) {
+
+        var start = escape(String(e.event.start));
+        var end = escape(String(e.event.end));
+
+        $("#divContent").empty();
+        $("#divContent").load('/Scheduler/CreateRoom/1?_=' + Math.random() + '&start=' + start+'&end='+end);
+    }
+
+    function Schedulerx(e)
+    {
+
+        if ($("#divSchedule").data("kendoScheduler")) {
+            $("#divSchedule").empty();
+            $("#divSchedule").data("kendoScheduler").destroy();
+            //$("#gridTickets").data("kendoListView").destroy();
+        }
+
+        $("#divSchedule").kendoScheduler({
+            date: new Date("@ViewBag.Date"),
+            //startTime: new Date("@ViewBag.DateTime"),
+            timezone: "America/Lima",
+            height: 620,
+            selectable: true,
+            editable: {
+                destroy: false,
+                resize: false
+                //,update: false
+            },
+            views: [
+                "day",
+                { type: "workWeek", selected: true },
+                "week",
+                "month",
+                "agenda"
+            ],
+            add: function (e) {
+
+                e.preventDefault();
+                //lala("add");
+                AddEvent(e);
+                //e.preventDefault = lala();
+                //e.event = false;
+                //e.sender = false;
+                ////e._defaultPrevented = false;
+                //console.log(e);
+                //console.log("Add", e.start);
+            },
+            edit: function (e) {
+                //lala("edit");
+                console.log(e);
+                e.preventDefault();
+                
+            },
+            navigate: function(e) {
+                //e.preventDefault();
+                console.log(e.date);
+                e.sender.dataSource
+                e.sender.dataSource.filter([{ field: "year", operator: "eq", value: e.date.getFullYear() }, { field: "month", operator: "eq", value: e.date.getMonth() + 1 }]);
+                //e.sender.dataSource.filter({ field: "month", operator: "eq", value: e.date.getMonth() + 1 });
+            },
+            //move: function (e) {
+            //    //lala("edit");
+            //},
+            //moveEnd: function (e) {
+            //    console.log("MoveEnd", e.slot.start);
+            //},
+            //dataBinding: function (e) {
+            //    console.log("dataBinding");
+            //},
+            //change: function (e) {
+            //    var start = e.start;
+            //    var end = e.end;
+
+            //    console.log(kendo.format("Selection between {0:g} and {1:g}", start, end));
+            //},
+            //dataBound: function (e) {
+            //    console.log("dataBound");
+            //},
+            //save: function (e) {
+            //    console.log("Saving", e.event.title);
+            //},
+            //remove: function (e) {
+            //    e.preventDefault();
+            //    console.log("Removing", e.event.title);
+            //},
+            //timezone: "Etc/UTC",
+            dataSource: {
+                batch: true,
+                transport: {
+                    read: {
+                        url: "/RoomScheduler/ListByIdRoom/" + e.value(),
+                        type: "GET",
+                        dataType: "json"
+                    },
+                    update: {
+                        url: "/Scheduler/UpdateRoom",
+                        dataType: "jsonp"
+                    }
+                    //,create: {
+                    //    url: "http://demos.kendoui.com/service/tasks/create",
+                    //    dataType: "jsonp"
+                    //},
+                    //destroy: {
+                    //    url: "http://demos.kendoui.com/service/tasks/destroy",
+                    //    dataType: "jsonp"
+                    //}
+                    //,parameterMap: function (options, operation) {
+                    //    if (operation !== "read" && options.models) {
+                    //        return { models: kendo.stringify(options.models) };
+                    //    }
+                    //}
+                },serverFiltering: true
+                //, schema: {
+                //    model: {
+                //        id: "taskId"
+                //        //,fields: {
+                //        //    taskId: { from: "taskId", type: "number" },
+                //        //    start: { type: "date", from: "start" },
+                //        //}
+                //    }
+                //}
+                //,
+                
+                //,
+                //filter: {
+                //    logic: "or",
+                //    filters: [
+                //        { field: "ownerId", operator: "eq", value: 1 }
+                //    ]
+                //}
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $("#ID_ROOM").kendoComboBox({
+            index: 0,
+            dataTextField: "NAM_ROOM",
+            dataValueField: "ID_ROOM",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            change: function (e) {
+                //console.log(e.sender);
+                Schedulerx(e.sender);
+            },
+            dataBound: function (e) {
+            //    console.log(e);
+                Schedulerx(e.sender);
+            },
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Room/ListRoom?_=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+
+
+        //$("#people :checkbox").change(function (e) {
+        //    var checked = $.map($("#people :checked"), function (checkbox) {
+        //        return parseInt($(checkbox).val());
+        //    });
+
+        //    var filter = {
+        //        logic: "or",
+        //        filters: $.map(checked, function (value) {
+        //            return {
+        //                operator: "eq",
+        //                field: "ownerId",
+        //                value: value
+        //            };
+        //        })
+        //    };
+
+        //    var scheduler = $("#scheduler").data("kendoScheduler");
+
+        //    scheduler.dataSource.filter(filter);
+        //});
+    });
+</script>

@@ -1,0 +1,183 @@
+﻿@{
+    ViewBag.Title = "PlantillaEditar";
+    Layout = null;
+}
+
+<div class="container"  >  
+    <input id="IdInforme" name="IdInforme" value="@ViewBag.IdDetaInforme" type="hidden" />
+    <input id="DocuSale" name="DocuSale" value="@ViewBag.NumDocuSale" type="hidden" />
+    <input id="IdP" name="IdP" value="@ViewBag.IdPlantilla" type="hidden" />
+       
+    <div class="form-row">     
+        <div class="col-md-12">
+            <div class="position-relative form-group">
+                <label for="TituloInforme" class="">Titulo </label>
+                <input style="font-size: 12px;" type="text" id="TituloInforme" name="TituloInforme" class="form-control" required>
+            </div>
+        </div>
+    </div>
+    <div class="x_content secciones" id="secciones">
+        <ul id="sortable-list" class="todo-list-wrapper list-group list-group-flush"></ul>
+    </div>
+    <br />
+    <button id="save-button" class="btn btn-primary">Guardar</button>
+    <button id="closeModalPlantilla" data-dismiss="modal" hidden />
+</div>
+
+<iframe id="FormEditarSubTipoComponente" name="FormEditarSubTipoComponente" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+<script>
+
+    $(document).ready(function () {
+
+        $("#sortable-list").kendoSortable();
+        $("#sortable-sublist").kendoSortable();
+
+        var idPlant = $("#IdP").val();
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "DatosEditarPlantilla",
+            type: "Get",
+            data: { IDP: idPlant },
+            datatype: "json",
+            cache: false,
+
+            success: function (data) {
+                $("#TituloInforme").val(data["Data"][0].TituloInforme);
+
+                if (data) {
+                    tejerSecciones(data["Data"]);
+                }
+            },
+            error: function () {
+            }
+        });
+
+
+        $("#save-button").click(function () {
+            var order = [];
+            var currentIndex = 1;
+            var docuSale = $("#DocuSale").val();
+            var tituloPlantilla = $("#TituloPlantilla").val();
+            var tituloInforme = $("#TituloInforme").val();
+
+            // Obtener el orden de sortable-list
+            $("#sortable-list > li").each(function () {
+                var isChecked = $(this).find("input[type=checkbox]").is(":checked");
+                if (isChecked) {
+                    var item = {};
+                    item.OrdenInicial = $(this).attr("id");
+                    item.Checked = isChecked;
+                    item.Text = $(this).find("input[type=text]").val();
+                    item.Order = currentIndex.toString();
+                    currentIndex++;
+                    order.push(item);
+                }
+            });
+
+            var subItemList = [];
+            currentIndex = 1;
+
+            $("#sortable-list > li").each(function () {
+                var isCheckedParent = $(this).find("input[type=checkbox]").is(":checked");
+                if (isCheckedParent) {
+                    var parentOrder = $(this).attr("id");
+                    var currentSubIndex = 1;
+
+                    $(this).find("#sortable-sublist > li").each(function () {
+                        var isCheckedSub = $(this).find("input[type=checkbox]").is(":checked");
+                        if (isCheckedSub) {
+                            var subItem = {};
+                            subItem.OrdenInicial = $(this).attr("id");
+                            subItem.Checked = isCheckedSub;
+                            subItem.Text = $(this).find("input[type=text]").val();
+                            subItem.Textarea = $(this).find("textarea").val();
+                            subItem.Order = order.find((item) => item.OrdenInicial === parentOrder).Order + "." + currentSubIndex.toString();
+                            currentSubIndex++;
+
+                            subItemList.push(subItem);
+                        }
+                    });
+                }
+            });
+
+            var dataToSend = {
+                orderData: order,
+                sublist: subItemList,
+                docuSale: docuSale,
+                tituloPlantilla: tituloPlantilla,
+                tituloInforme: tituloInforme
+            };
+
+
+            $.ajax({
+                url: '/InformeED/GuardarPlantilla?IDP=' + idPlant,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(dataToSend),
+                success: function (response) {
+                    swal({
+                        type: 'success',
+                        title: 'Éxito',
+                        text: 'El registro ha sido guardado correctamente.',
+                    });
+
+                    var btn = document.getElementById('closeModalPlantilla')
+                    btn.click();
+                    
+                    actualizarListaPlantillas();
+                    actualizarListaPlantillasPE();
+                    
+
+                },
+                error: function (xhr, status, error) {
+                    // Manejar el error si ocurre
+                    console.error(error);
+                }
+            });
+        });
+
+    });
+
+    function tejerSecciones(Data) {
+        if (parseInt(Data.length) > 0) {
+            var mainUl = $(".secciones ul");
+
+            $.each(Data, function (index, value) {
+                var categoriaId = Data[index].Categoria;
+                var categoriaNombre = Data[index].Nombre;
+                var checkSeccion = Data[index].CheckSeccion;
+
+                if (categoriaId.includes("_")) {
+                    var parentCategoriaId = categoriaId.split("_")[0];
+                    var sublistUl = $("#" + parentCategoriaId + "_sublist");
+
+                    if (!sublistUl.length) {
+                        sublistUl = $('<ul id="sortable-sublist" class="list-group">');
+                        $("#" + parentCategoriaId).append(sublistUl);
+                    }
+
+                    sublistUl.append('<li class="list-group-item" id="' + categoriaId + '"  name="' + categoriaId + '">'
+                        + '<div class="form-check">'
+                        + '<input type="checkbox" id="CheckCategoria' + categoriaId + '" name="CheckCategoria' + categoriaId + '" class="form-check-input" ' + checkSeccion + ' > '
+                        + '<input type="text" id="Categoria' + categoriaId + '" name="Categoria' + categoriaId + '" style="font-size: 12px;" class="form-control" value="' + categoriaNombre + '">'
+                        + '</div>'
+                        + '</li>');
+                } else {
+                    mainUl.append('<li class="list-group-item" id="' + categoriaId + '" name="' + categoriaId + '">'
+                        + '<div class="form-check">'
+                        + '<input type="checkbox" id="CheckCategoria' + categoriaId + '" name="CheckCategoria' + categoriaId + '" class="form-check-input" ' + checkSeccion + ' > '
+                        + '<input type="text" id="Categoria' + categoriaId + '" name="Categoria' + categoriaId + '" style="font-size: 12px;" class="form-control" value="' + categoriaNombre + '">'
+                        + '</div>'
+                        + '</li>');
+                }
+            });
+        } else {
+            $(".secciones ul").append('<div class="smallField"> No se encontraron secciones registradas');
+        }
+    }
+
+
+
+</script>

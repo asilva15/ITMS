@@ -1,0 +1,335 @@
+﻿@{
+    Layout = null;
+}
+
+<div id="divUMinera">
+    <div class="row">
+        <div class="col-md-12">
+            Unidad Minera <b style="color:red">(*)</b>
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-12">
+            @Html.Editor("UMinera")
+        </div>
+    </div>
+    <div class="row">
+        <div id="clicNuevaLocacion" class="col-md-12">
+            Locación
+        </div>
+    </div>
+    <div class="form-group row">
+        <div class="col-md-12">
+            @Html.Editor("Locacion")
+        </div>
+    </div>
+
+    <div id="divNuevaLocacion" style="display: none;">
+        <hr />
+        <div class="row">
+            <div class="col-md-10" style="margin-bottom: 10px;">
+                <h5 class="modal-title">Crear Locación</h5>
+            </div>
+            <div class="col-md-2">
+                <button id="closeNuevaLocacion" type="button" class="close" onclick="$('#divNuevaLocacion').hide(); $('#NuevaLocacion').val('')">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        </div>
+        <div class="row">
+            <div id="clicNuevaSede" class="col-md-12">
+                Sede <b style="color:red">(*)</b>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-12">
+                @Html.Editor("Sede")
+            </div>
+        </div>
+
+        <div id="divNuevaSede" style="display: none;">
+            <div class="row">
+                <div class="col-md-10">
+                    Nombre Sede <b style="color:red">(*)</b>
+                </div>
+                <div class="col-md-2">
+                    <button id="closeNuevaSede" type="button" class="close" onclick="$('#divNuevaSede').hide(); $('#NuevaSede').val('')">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-9">
+                    <input id="NuevaSede" type="text" name="NuevaSede" class="k-textbox" />
+                </div>
+                <div class="col-md-3">
+                    <button class="btn-shadow btn btn-primary" type="button" id="btnNuevaSede">
+                        <i class="pe-7s-diskette" style="font-weight:900;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                Nombre Locación <b style="color:red">(*)</b>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-9">
+                <input id="NuevaLocacion" type="text" name="NuevaLocacion" class="k-textbox" />
+            </div>
+            <div class="col-md-3">
+                <button class="btn-shadow btn btn-primary" type="button" id="btnNuevaLocacion">
+                    <i class="pe-7s-diskette" style="font-weight:900;"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <button id="btnActualiza" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Actualizar</button>
+        </div>
+    </div>
+</div>
+@*<div id="divMensaje" style="display:none" class="row">
+    <div class="col-md-12">
+        El activo se encuentra asignado.<br /> No se puede actualizar la unidad minera del activo.
+    </div>
+</div>*@
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        @*if ('@ViewBag.Grupo' == 'INFRAESTRUCTURA' && @ViewBag.IdEstadoAct == 1) {
+            $("#divUMinera").removeAttr("style");
+            $("#divUMinera").attr("style", "display:none");
+
+            $("#divMensaje").removeAttr("style");
+            $("#divMensaje").attr("style", "display:true");
+        }*@
+
+        if ('@ViewBag.Grupo' == 'MICROINFORMATICO' && '@Session["SUPERVISOR_ACTIVOS_BNV_MICROINFORMATICO"]' == '1') {
+            AgregarSupervisor();
+        } else if ('@ViewBag.Grupo' == 'INFRAESTRUCTURA' && '@Session["SUPERVISOR_ACTIVOS_BNV_INFRAESTRUCTURA"]' == '1') {
+            AgregarSupervisor();
+        } else if ('@ViewBag.Grupo' == 'MOVIL' && '@Session["SUPERVISOR_ACTIVOS_BNV_MOVIL"]' == '1') {
+            AgregarSupervisor();
+        }
+
+        var UMinera = $("#UMinera").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    serverFiltering: false,
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarAllUMineraBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        UMinera.value('@ViewBag.IdUMinera');
+
+        var Locacion = $("#Locacion").kendoComboBox({
+            dataTextField: "NAM_LOCA",
+            dataValueField: "ID_LOCA",
+            cascadeFrom: 'UMinera',
+            template: '<div><div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                '<div>${ data.NAM_LOCA }</div></div>',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarLocacionBNV?idGrupo=@ViewBag.IdGrupo&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        if ('@ViewBag.IdLoca' != 0) Locacion.value('@ViewBag.IdLoca');
+
+        var Sede = $("#Sede").kendoComboBox({
+            dataTextField: "NAM_SITE",
+            dataValueField: "ID_SITE",
+            cascadeFrom: 'UMinera',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarSedesBNV?idGrupo=@ViewBag.IdGrupo&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        if ('@ViewBag.IdSede' != 0) Sede.value('@ViewBag.IdSede');
+
+        $('#btnActualiza').click(function(){
+
+            if (UMinera.value() == ""){
+                toastr.warning("Seleccione una unidad minera para modificar.", "Mensaje");
+            }
+            else{
+                $.ajax({
+                    url: "/Asset/ActualizarUMinera/",
+                    data: "id=" + @ViewBag.ID_ASSE + "&uMinera=" + UMinera.value() + "&Locacion=" + Locacion.value() + "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        uploadDone(resp);
+                    }
+                });
+            }
+        })
+
+        function uploadDone(msg) {
+            if (msg == "Ok") {
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+                toastr.success("Se actualizó la unidad minera", "Información Guardada");
+                location.reload();
+            }
+            else {
+                var mensaje = 'No se Actualizaron los Datos.';
+                toastr.error(mensaje, "Mensaje");
+            }
+        }
+
+        function AgregarSupervisor() {
+            $('#clicNuevaLocacion').attr({
+                'onclick': '$("#divNuevaLocacion").show()',
+                'style': 'cursor:pointer;color:royalblue',
+                'title': 'Clic aquí para registrar un locación'
+            });
+
+            $('#clicNuevaSede').attr({
+                'onclick': '$("#divNuevaSede").show()',
+                'style': 'cursor:pointer;color:royalblue',
+                'title': 'Clic aquí para registrar una sede'
+            });
+        }
+
+        $('#btnNuevaLocacion').click(function () {
+            var nomLoca = $('#NuevaLocacion').val().trim();
+
+            if (UMinera.value() == "") {
+                toastr.warning("Seleccione una unidad minera.", "Mensaje");
+            }
+            else if (Sede.value() == "") {
+                toastr.warning("Seleccione una sede.", "Mensaje");
+            }
+            else if (nomLoca == '') {
+                toastr.warning("Ingrese un nombre para la locación.", "Mensaje");
+            }
+            else {
+                swal({
+                    title: `¿Deseas crear esta locación?`,
+                    text: `Se creará la locación para la sede ${Sede.text()}`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: "/Asset/GuardarLocacionBNV/",
+                            data: "idGrupo=@ViewBag.IdGrupo&idUMinera=" + UMinera.value() + "&idSede=" + Sede.value() + "&NomLoca=" + nomLoca + "&var=" + Math.random(),
+                            type: "POST",
+                            cache: false,
+                            dataType: "text",
+                            success: function (resp) {
+                                if (resp == 'ERROR') {
+                                    toastr.error("Error al crear la locación.", "Mensaje");
+                                } else {
+                                    toastr.success("Se registró correctamente la nueva locación.", "Información Guardada");
+                                    Locacion.dataSource.read();
+                                    Locacion.value(resp);
+                                    $('#closeNuevaLocacion').trigger({ type: "click" });
+                                    swal.close();
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Cancelado", "Ha cancelado la creación de la sede", "error");
+                    }
+                });
+            }
+        });
+
+        $('#btnNuevaSede').click(function () {
+            var nomSede = $('#NuevaSede').val().trim();
+
+            if (UMinera.value() == "") {
+                toastr.warning("Seleccione una unidad minera.", "Mensaje");
+            }
+            else if (nomSede == '') {
+                toastr.warning("Ingrese un nombre para la sede.", "Mensaje");
+            }
+            else {
+                swal({
+                    title: `¿Deseas crear esta sede?`,
+                    text: `Se creará la sede para la unidad minera ${UMinera.text() }`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: "/Asset/GuardarSedeBNV/",
+                            data: "idGrupo=@ViewBag.IdGrupo&idUMinera=" + UMinera.value() + "&NomSede=" + nomSede + "&var=" + Math.random(),
+                            type: "POST",
+                            cache: false,
+                            dataType: "text",
+                            success: function (resp) {
+                                if (resp == 'ERROR') {
+                                    toastr.error("Error al crear la sede.", "Mensaje");
+                                } else {
+                                    toastr.success("Se registró correctamente la nueva sede.", "Información Guardada");
+                                    Sede.dataSource.read();
+                                    Sede.value(resp);
+                                    $('#closeNuevaSede').trigger({ type: "click" });
+                                    swal.close();
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Cancelado", "Ha cancelado la creación de la sede", "error");
+                    }
+                });
+            }
+        });
+
+    });
+
+</script>

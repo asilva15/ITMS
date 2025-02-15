@@ -1,0 +1,114 @@
+﻿@model ERPElectrodata.Models.CHANGE_APPROVED
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<style>
+    .divCont2 {
+        width: 500px !important;
+    }
+</style>
+<div style="width:100%; display:inline-block;">
+    @using (Html.BeginForm("AutorizarCambio", "ChangeRequest", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormDetailtoPlan", name = "FormDetailtoPlan", target = "ut_DetailtoPlan" }))
+    {
+        <input type="hidden" id="HF_ID_CHANGE_APPROV" name="HF_ID_CHANGE_APPROV" value="@ViewBag.ID_CHANGE_APPROV" />
+        <input type="hidden" id="HD_File" name="HD_File" value="0" />
+        <div class="divFondoUno">
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    Resultado del cambio:
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.justificationChange, new { style = "width: 545px; height:55px;" })
+                </div>
+            </div>
+            <div class="divSpace2"></div>
+        </div>
+        <div class="divFondoUno">
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    ¿Cuándo se termino de realizar el cambio?
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.changeDate)
+                    @Html.ValidationMessageFor(model => model.changeDate)
+                </div>
+            </div>
+            <div class="divSpace2"></div>
+        </div>
+        <div class="divFondoUno">
+            <div style="width: 96%; float:left; margin-left: 2%;" id="divFiles">
+                <input name="filesInvoice" id="filesInvoice" type="file" />
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="btnAutorizar" class="k-button">Guardar</button>
+        </div>
+    }
+
+    <iframe id="ut_DetailtoPlan" name="ut_DetailtoPlan" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var DOC_DATE = $("#changeDate").kendoDatePicker().data("kendoDatePicker");
+        var onSelectInvo = function (e) {
+            $.each(e.files, function (index, value) {
+                $("#HD_File").val(1);
+                arc = value.name;
+                $("#divFiles").css("width", "93.5%");
+                $("#divFiles").css("margin-left", "3.8%");
+            });
+        };
+
+        $("#filesInvoice").kendoUpload({
+            localization: {
+                select: "Adjuntar Informe"
+            },
+            select: onSelectInvo,
+            remove: function (e) {
+                $("#HD_File").val(0);
+                arc = null;
+                $("#divFiles").css("width", "96%");
+                $("#divFiles").css("margin-left", "2%");
+            }
+        });
+    });
+    $("#btnAutorizar").click(function () {
+         
+        $('#myModalLoading').modal('show');
+        if ($("#HD_File").val() == 0) {
+            winPopUpModal("@ResourceLanguaje.Resource.InformationMissing", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>No se ha cargado el plan de acción</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+        else {            
+            var undo = $("#btnYes")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                    winPopUpModalLoad("@ResourceLanguaje.Resource.Saving", "@ResourceLanguaje.Resource.PleaseWait", 300, 130);
+                    $('#FormAttachInvoice').submit();
+                });
+
+            var undo = $("#btnNO")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+
+        }
+      });
+
+</script>
+

@@ -1,0 +1,351 @@
+﻿@model ERPElectrodata.Models.ProgramaLicencia
+
+@{
+    ViewBag.Title = "CrearLicencia";
+    Layout = null;
+}
+
+<style>
+    #textFecha {
+        cursor: help;
+    }
+
+    #Validacion,
+    #textFecha {
+        display: inline;
+    }
+    .fondo-suave {
+        background-color: #f0f0f0;
+        padding: 3px;
+        border-radius: 5px;
+        font-size: 11px;
+    }
+
+</style>
+
+@using (Html.BeginForm("CrearLicencia", "ProgramaLicencia", FormMethod.Post, new { enctype = "multipart/form-data", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+<fieldset>
+    @Html.HiddenFor(model => model.Id)
+    @Html.HiddenFor(model => model.Activo)
+    @Html.HiddenFor(model => model.Vencido)
+    @Html.HiddenFor(model => model.Habilitado)
+    @Html.HiddenFor(model => model.UsuarioCrea)
+    @Html.HiddenFor(model => model.FechaCrea)
+    @Html.HiddenFor(model => model.UsuarioModifica)
+    @Html.HiddenFor(model => model.IdPrograma)
+    @Html.HiddenFor(model => model.IdProveedor)
+    @Html.HiddenFor(model => model.VersionLic)
+
+    <div class="form-row">
+
+        <div class="col-md-4">
+            <div class="editor-label">
+                Cantidad <b style="color:red">(*)</b>
+            </div>
+            <div class="editor-field">
+                <input id="Cantidad" name="Cantidad" />
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="editor-label">
+                Periodo de caducidad <b style="color:red">(*)</b>
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(model => model.IdTipoLicencia)
+                @Html.ValidationMessageFor(model => model.IdTipoLicencia)
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="editor-label">
+                Tipo de Licencia <b style="color:red">(*)</b>
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(model => model.TipoLicencia)
+                @Html.ValidationMessageFor(model => model.TipoLicencia)
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+
+
+        <div class="col-md-4">
+
+            <div class="editor-label">
+                Solped / CC / OP
+            </div>
+            <div class="editor-field">
+                @Html.TextBoxFor(model => model.Solped)
+                @Html.ValidationMessageFor(model => model.Solped)
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="editor-label">
+                Código de Activación
+            </div>
+            <div class="k-textbox" style="width:100%">
+                @Html.EditorFor(model => model.CodigoActivacion)
+                @Html.ValidationMessageFor(model => model.CodigoActivacion)
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="editor-label">
+                Código Adicional
+            </div>
+            <div class="k-textbox" style="width:100%">
+                @Html.EditorFor(model => model.CodigoAdicional)
+                @Html.ValidationMessageFor(model => model.CodigoAdicional)
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+
+
+        <div class="col-md-4">
+            <div class="editor-label">
+                Fecha de Adquisición <b style="color:red">(*)</b>
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(model => model.FechaCompra)
+                @Html.ValidationMessageFor(model => model.FechaCompra)
+            </div>
+
+            <input type="checkbox" id="Validacion" name="Validacion" />
+            <p id="textFecha" title="Establece la fecha de expiración desde la fecha de adquisición de acuerdo al periodo de caducidad">Fijar Expiración</p>
+
+        </div>
+        <div class="col-md-4">
+            <div class="editor-label">
+                Fecha de Activacion
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(model => model.FechaActivacion)
+                @Html.ValidationMessageFor(model => model.FechaActivacion)
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="editor-label">
+                Costo
+            </div>
+            <div class="k-textbox" style="width:100%">
+                @Html.EditorFor(model => model.Costo)
+                @Html.ValidationMessageFor(model => model.Costo)
+
+                <label>
+                    @Html.RadioButtonFor(model => model.TipoMoneda, "S", new { @checked = "checked" }) S/.
+                </label>
+
+                <label>
+                    @Html.RadioButtonFor(model => model.TipoMoneda, "D") $
+                </label>
+                @Html.ValidationMessageFor(model => model.TipoMoneda)
+
+            </div>
+            <p class="fondo-suave">NO INCLUYE IGV</p>
+            
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <div class="col-md-12">
+            <div class="editor-label">
+                Comentario
+            </div>
+            <div class="editor-field">
+                @Html.TextAreaFor(model => model.Observacion)
+                @Html.ValidationMessageFor(model => model.Observacion)
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6"></div>
+        <div class="col-md-3">
+            <button id="reset" type="button" class="btn btn-light btn-block" onclick="cancel(); return false;">Cancelar</button>
+        </div>
+        <div class="col-md-3">
+            <button id="submit" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+        </div>
+    </div>
+</fieldset>
+}
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#Validacion").change(function () {
+            actualizarFechaActivacion();
+        });
+
+        $("#TipoLicencia").change(function () {
+            actualizarFechaActivacion();
+        });
+
+        function actualizarFechaActivacion() {
+            var checkboxMarcado = $("#Validacion").prop("checked");
+            var tipoLicencia = $("#TipoLicencia").val();
+
+            if (checkboxMarcado && (tipoLicencia === "" || tipoLicencia === "Volumen")) {
+                $("#FechaActivacion").data("kendoDateTimePicker").enable(false);
+                $("#FechaActivacion").data("kendoDateTimePicker").value(null);
+            } else {
+                $("#FechaActivacion").data("kendoDateTimePicker").enable(true);
+            }
+        }
+
+        $("#Solped").kendoComboBox({
+            dataValueField: "Solped",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Programa/ListarOP"
+                }
+            }
+        });
+
+        $("#Cantidad").kendoNumericTextBox({
+            min: 0,
+            decimals: 0,
+            format: '#'
+        });
+
+        $("#TipoLicencia").kendoComboBox({
+            dataSource: ["Volumen", "Unitario"],
+            change: function (e) {
+                console.log("Seleccionado: " + this.value());
+                if (this.value() === "Unitario") {
+                    $("#FechaActivacion").data("kendoDateTimePicker").enable(false);
+                    $("#Validacion").prop("disabled", true);
+                    $("#textFecha").css("color", "grey");
+                    $("#FechaActivacion").data("kendoDateTimePicker").value(null);
+                    $("#Validacion").prop("checked", false);
+                } else {
+                    $("#FechaActivacion").data("kendoDateTimePicker").enable(true);
+                    $("#Validacion").prop("disabled", false);
+                    $("#textFecha").css("color", "");
+                }
+            },
+
+            dataBound: function (e) {
+                $(this.ul[0]).find("li").each(function (index) {
+                    var text = $(this).text();
+                    var tooltipText = obtenerTextoTooltip(text); 
+                    $(this).attr({
+                        "title": tooltipText,
+                        "style": "cursor: help;" 
+                    });
+                });
+            }
+
+        });
+
+        function obtenerTextoTooltip(valor) {
+            if (valor === "Volumen") {
+                return "La fecha de Activación es igual para todas las licencias registradas";
+            } else if (valor === "Unitario") {
+                return "Opción para activar la licencia posterior al registro";
+            }
+            return "Información por defecto";
+        }
+
+        var FechaCompra = $("#FechaCompra").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaActivacion = $("#FechaActivacion").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#Observacion").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        var IdPrograma = $("#IdPrograma").data("kendoComboBox");
+
+        $("#IdTipoLicencia").kendoComboBox({
+            dataTextField: "NombrePeriodo",
+            dataValueField: "IdPeriodo",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ProgramaLicencia/ListarTipoLicencia?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdModoInstalacion").kendoComboBox({
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarModoInstalacion?var=" + Math.random()
+                }
+            }
+        });
+        console.log("Valor de modPadre: " + $("#idModPadre").val());
+
+        $("#reset").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+    });
+</script>
+
+<script type="text/javascript">
+
+    function uploadDone(msg, code) {
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se actualizaron los datos.", "Información Guardada");
+            ObtenerDatosLicencia();
+        }
+        else {
+            toastr.warning("Por favor complete la información requerida.", "Mensaje");
+        }
+    }
+</script>

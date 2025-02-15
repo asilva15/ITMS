@@ -1,0 +1,132 @@
+﻿@model ERPElectrodata.Models.ObtenerPeriodoLicencia_Result
+
+@{
+    Layout = null;
+}
+@using (Html.BeginForm("NuevoPeriodoLicencia", "ProgramaLicencia", FormMethod.Post, new { enctype = "multipart/form-data", name = "FrmProveedor", id = "FrmProveedor", target = "utProveedor" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <div class="form-row">
+            <div class="col-md-8">
+                <div class="editor-label">
+                    Nombre <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.NombrePeriodo)
+                    @Html.ValidationMessageFor(model => model.NombrePeriodo)
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="editor-label">
+                    Cantidad de días <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    @Html.TextBoxFor(model => model.DiasPeriodo)
+                    @Html.ValidationMessageFor(model => model.DiasPeriodo)
+                </div>
+            </div>
+            @*<div class="col-md-4">
+                    <div class="editor-label">
+                        Dirección
+                    </div>
+                    <div class="k-textbox" style="width:100%">
+                        @Html.TextBoxFor(model => model.Direccion)
+                        @Html.ValidationMessageFor(model => model.Direccion)
+                    </div>
+                </div>*@
+        </div>
+        <div class="form-group row">
+            <div class="col-md-12">
+                <div class="editor-label">
+                    Descripción
+                </div>
+                <div class="editor-field">
+                    @Html.TextArea("Descripcion")
+                </div>
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="col-md-6"></div>
+            <div class="col-md-3">
+                <button id="cancelProveedor" type="button" class="btn btn-light btn-block" onclick="cancelar();">Cancelar</button>
+            </div>
+            <div class="col-md-3">
+                <button id="submitProveedor" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="utProveedor" name="utProveedor" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#cancelProveedor").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#Descripcion").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#DiasPeriodo").kendoNumericTextBox({
+            min: 0,
+            decimals: 0,
+            format: '#'
+        });
+
+    });
+
+
+
+</script>
+
+<script type="text/javascript">
+
+    function uploadDoneProveedor(msg, code) {
+
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se registró el periodo.", "Información Guardada");
+
+            $("#IdProveedor").data("kendoComboBox").dataSource.read();
+            var IdProveedor = $("#IdTipoLicencia").data("kendoComboBox");
+            IdProveedor.value(code);
+         }
+         else {
+
+             var messageAsset = '';
+            if (code == '0') {
+                 messageAsset = 'Complete datos obligatorios.';
+            } else if (code == '1') {
+                messageAsset = 'El Proveedor ya se encuentra registrado.';
+            } else {
+                messageAsset = 'Contacte al administrador';
+            }
+
+            toastr.warning(messageAsset, "Mensaje");
+        }
+}
+</script>

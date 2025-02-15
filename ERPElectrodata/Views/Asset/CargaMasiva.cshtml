@@ -1,0 +1,511 @@
+﻿@model ERPElectrodata.Models.ASSET
+
+@{
+    ViewBag.Title = "Create";
+    Layout = null;
+}
+<style>
+    b{
+        color:#F83C50;
+    }
+</style>
+<div class="afterMain">
+    <div style="float:left;">
+        <div class="titleForm">
+            <div class="title">Carga Masiva</div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="padding-bottom:10px;">
+                @*@using (Html.BeginForm("Import", "Asset", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAsset", target = "upload_target" }))
+                {
+                    @Html.Raw(ViewBag.Error)
+                    <span>Excel File</span><input type="file" name="excelfile"/>
+                    <br />
+                    <input type="submit" value="Import"/>
+                }*@
+
+                @using (Html.BeginForm("UploadExcel", "Asset", FormMethod.Post, new { enctype = "multipart/form-data", onsubmit = "return myFunction()" }))
+                {
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                            <div class="control-label col-md-2">Download Format:</div>
+                            <div class="col-md-10">
+                                <a href="/User/DownloadExcel/"><img src="~/excel.ico" width="25" height="25" title="Download Excel format" alt="excel" /></a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+
+                            <div class="control-label col-md-2">Excel:</div>
+                            <div class="col-md-10">
+                                <input type="file" id="FileUpload" name="FileUpload" class="" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-offset-2 col-md-10">
+                                <input type="submit" value="Upload" id="btnSubmit" class="btn btn-primary" />
+
+                            </div>
+                        </div>
+                    </div>
+                } 
+
+                <!---->
+                @*<div>
+                    <form method="post" enctype="multipart/form-data">
+                        <div>
+                            <input name="file" type="file" required/>
+                            <button type="submit">Cargar</button>
+                        </div>
+                    </form>
+                </div>*@
+                <!---->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#ID_TYPE_ASSE").kendoComboBox({
+            index: 0,
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_TYPE_ASSE = $("#ID_TYPE_ASSE").data("kendoComboBox");
+
+        if (parseInt(@Session["ID_ACCO"]) == 19) {
+            var DAT_STAR_LEAS = $("#DAT_STAR_LEAS").kendoDateTimePicker().data("kendoDateTimePicker");
+            var DAT_END_LEAS = $("#DAT_END_LEAS").kendoDateTimePicker().data("kendoDateTimePicker");
+            var fechaFinGarantia = $("#fechaFinGarantia").kendoDateTimePicker().data("kendoDateTimePicker");
+        }
+
+        $("#IdContrato").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Contrato/Listar"
+                }
+            }
+        });
+        var IdContrato = $("#IdContrato").data("kendoComboBox");
+
+        $("#ID_MANU").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_MANU = $("#ID_MANU").data("kendoComboBox");
+
+        $("#ID_COMM_MODE").kendoComboBox({
+
+            dataTextField: "NAM_COMM_MODE",
+            dataValueField: "ID_COMM_MODE",
+            cascadeFrom: 'ID_MANU',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CommercialModel/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_COME_MODE = $("#ID_COMM_MODE").data("kendoComboBox");
+
+        $("#ID_MANU_MODE").kendoComboBox({
+
+            dataTextField: "NAM_MANU_MODE",
+            dataValueField: "ID_MANU_MODE",
+            cascadeFrom: 'ID_MANU',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ManufacturerModel/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_MANU_MODE = $("#ID_MANU_MODE").data("kendoComboBox");
+
+        $("#ID_COND").kendoComboBox({
+            //index: 0,
+            dataTextField: "TEXT",
+            dataValueField: "ID_COND",
+            template: '<div style="font-weight:bold;">${ data.NAM_STAT_ASSE }</div>' +
+                        '<div>${ data.NAM_COND }</div>',
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Condition/ListStatCondAsset?var=" + Math.random()
+                }
+            }
+        });
+        var ID_COND = $("#ID_COND").data("kendoComboBox");
+
+        var FEC_TICK = $("#ACQ_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#ID_LOCA").kendoComboBox({
+            dataTextField: "NAM_LOCA",
+            dataValueField: "ID_LOCA",
+            template: '<div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                        '<div>${ data.NAM_LOCA }</div>',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Location/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_LOCA = $("#ID_LOCA").data("kendoComboBox");
+
+        $("#ID_BUY_MODE").kendoComboBox({
+            dataTextField: "NAM_BUY_MODE",
+            dataValueField: "ID_BUY_MODE",
+            filter: "contains",
+            autoBind: true,
+            index: 1,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/BuyMode/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_BUY_MODE = $("#ID_BUY_MODE").data("kendoComboBox");
+
+        $("#ID_COST_CENT").kendoComboBox({
+            dataTextField: "COD_COST_CENT",
+            dataValueField: "ID_COST_CENT",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CostCenter/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_COST_CENT = $("#ID_COST_CENT").data("kendoComboBox");
+
+        $("#COST").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#LOTE").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#ValorActivo").kendoNumericTextBox({
+            min: 0,
+            max: 5,
+            decimals: 0
+        });
+
+        $("#RiesgoIntrinseco").kendoNumericTextBox({
+            min: 0,
+            max: 11,
+            decimals: 0
+        });
+
+        $("#SUM_ASSE").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            }
+        });
+
+        $("#submit").click(function () {
+            winPopUpModalLoad("Saving Your Asset", "Please Wait", 300, 130);
+        });
+
+    });
+</script>
+
+<script type="text/javascript">
+    function NewManufacturer() {
+        var htmlForm = '<div id="FormNewManufacturer"></div>';
+        winFormPopUpModal("Nueva Marca", htmlForm, 650, 440);
+        $("#FormNewManufacturer").load("/Manufacturer/Create?var=" + Math.random());
+    }
+
+    function NewCommercialModel() {
+        var ID_MANU = $("#ID_MANU").data("kendoComboBox");
+        if (ID_MANU.dataItem() === undefined) {
+            winPopUpModal("@ResourceLanguaje.Resource.Warning", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>@ResourceLanguaje.Resource.AssetMessage4</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+        else {
+            ID_MN = ID_MANU.dataItem().ID_MANU;
+            var htmlForm = '<div id="FormNewCommercialModel"></div>';
+            winFormPopUpModal("Nuevo Modelo Comercial", htmlForm, 650, 440);
+            $("#FormNewCommercialModel").load("/CommercialModel/Create/" + ID_MANU.dataItem().ID_MANU + "?var=" + Math.random());
+        }
+    }
+
+    function NewManufacturerModel() {
+        var ID_MANU = $("#ID_MANU").data("kendoComboBox");
+        if (ID_MANU.dataItem() === undefined) {
+            winPopUpModal("@ResourceLanguaje.Resource.Warning", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>@ResourceLanguaje.Resource.AssetMessage4</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+        else {
+            ID_MN = ID_MANU.dataItem().ID_MANU;
+            var htmlForm = '<div id="FormNewManufacturerModel"></div>';
+            winFormPopUpModal("Nuevo Modelo de Fábrica", htmlForm, 650, 440);
+            $("#FormNewManufacturerModel").load("/ManufacturerModel/Create/" + ID_MANU.dataItem().ID_MANU + "?var=" + Math.random());
+        }
+    }
+
+    function NewCostCenter() {
+        var htmlForm = '<div id="FormNewCostCenter"></div>';
+        winFormPopUpModal("Nuevo Centro de Costo", htmlForm, 245, 135);
+        $("#FormNewCostCenter").load("/CostCenter/Create?var=" + Math.random());
+    }
+
+    function NuevoContrato() {
+        var htmlForm = '<div id="FormNuevoContrato"></div>';
+        winFormPopUpModal("Nuevo Contrato", htmlForm, 650, 440);
+        $("#FormNuevoContrato").load("/Contrato/Nuevo?var=" + Math.random());
+    }
+
+</script>
+
+<script type="text/javascript">
+    function cancel() {
+        winPopUpModal("Operation Cancelled", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;'>The operation to perform was cancelled</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='continuer' class='k-button'>Continue</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#continuer").bind("click", function () {
+            //location.reload(true);
+            //$("#contentAsset").load("/Asset/COnfiguration?var=" + Math.random());
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+
+            location = "http://" + location.host + "/Asset";
+        });
+
+        $("#closebtnmodal").click(function () {
+            //location.reload(true);
+        });
+
+        return false;
+    }
+
+    function uploadDone(msg, code, idActivo) {
+
+        if (msg == "OK") {
+            closeWinModalPopUpLoad();
+
+            winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0px 10px 0px;'>Información del Nuevo Activo ha sido guardado correctamente.</div>"
+           + "<div style='padding:10px 0px 10px 0px;'>Código de Ticket: " + code + "</div>"
+           + "La notificación se ha enviado correctamente a: <br>Usuario Final, Staff, Service Desk y Coordinador TI.<br>" +
+           "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='nuevocomponente' class='k-button'>Agregar HW</button>&nbsp;&nbsp;" +
+           "<button id='continues' class='k-button'>Continuar</button>" +
+           "</div></div>"
+             , 400, 220);
+
+            var comp = $("#nuevocomponente").bind("click", function () {
+
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+
+                var title = 'Agregar/Actualizar HW';
+                var contHtml = '<div id="ActualizaHW"></div>';
+                var ancho = 900;
+                var alto = 600;
+                winFormPopUpModal(title, contHtml, ancho, alto);
+                $("#ActualizaHW").load("/Asset/Componentes/" + idActivo + "?crea=1&var=" + Math.random());
+
+            });
+
+            var undo = $("#continues").bind("click", function () {
+
+                location = "http://" + location.host + "/Asset/Detalle/" + idActivo;
+
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+
+            });
+
+            $("#closebtnmodal").click(function () {
+                location = "http://" + location.host + "/Asset";
+            });
+        }
+        else {
+
+            closeWinModalPopUpLoad();
+
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleAsset = 'Alerta';
+                messageAsset = 'Por favor completar la información';
+            }
+            else if (code == '1') {
+                titleAsset = 'Alerta';
+                messageAsset = 'Contacte al administrador';
+            }
+            else if (code == '2') {
+                titleAsset = 'Sesión expirada';
+                messageAsset = 'Por favor vuelva a ingresar al sistema.';
+            }
+            else if (code == '3') {
+                titleAsset = 'Duplicidad de Activos';
+                messageAsset = 'El código de activo o la serie ingresada ya existen. Por favor validar';
+            }
+
+            winPopUpModal(titleAsset, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + messageAsset + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continuar</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+
+</script>

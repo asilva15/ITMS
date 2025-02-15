@@ -1,0 +1,116 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Ver Comentarios</title>
+</head>
+<body>
+    <div>
+        <div id="divComent"></div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        ListarComentarios();
+
+    });
+
+        function ListarComentarios() {
+            $.ajax({
+                url: "/OrderForm/ObtenerComentarios/@ViewBag.ID_DOCU_SALE",
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    dataComent = source;
+                    obtenerComentarios();
+
+                },
+                error: function (source) {
+                    alert("Error Carga Json Comentario");
+                }
+            });
+        }
+
+    function obtenerComentarios() {
+        $("#divComent").empty();
+        $.each(dataComent['Data'], function (index, value) {
+
+            $("#divComent").append(
+                '<div class="chat-wrapper">' +
+                    '<div class="chat-box-wrapper" >' +
+                        '<div>' +
+                            '<div class="avatar-icon-wrapper mr-1">' +
+                                '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                    '<img src="/Content/Fotos/' + (dataComent['Data'][index]['IdFoto']) + '.jpg" />' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="chat-box">' +
+                                '<div class="form" id="clipboard' + (dataComent['Data'][index]['IdComentario']) +'">' +
+                                    (dataComent['Data'][index]['Comentario']) +
+                                '</div>' +
+                            '</div>' +
+                            '<small class="opacity-6">' +
+                                (dataComent['Data'][index]['Usuario']) + '  ' +
+                                '<i class="fa fa-calendar-alt mr-1"></i>' +
+                                (dataComent['Data'][index]['FechaComentario']) +
+                                '<span id="divOpcionComentario'+(dataComent['Data'][index]['IdComentario'])+'" class="ClassComentario"></br><span id="btnEditar" style="cursor:pointer; font-size:12px" class="btn-link" data-toggle="modal" data-target="#miModal" onclick="EditarComentario(' + (dataComent['Data'][index]['IdComentario']) + ')">Editar </span>' +
+                                '| <span id="btnEliminar" style="cursor:pointer; font-size:12px" class="btn-link" data-toggle="modal" data-target="#miModal" onclick="EliminarComentario(' + (dataComent['Data'][index]['IdComentario']) + ')">Eliminar</span>' +
+                                '</span>'+
+                            '</small>' +
+                         '</div>' +
+                    '</div>' +
+                 '</div>'
+            );
+
+            if (parseInt(dataComent['Data'][index]['IdTipoComentario']) != parseInt(@Session["ID_PERS_ENTI"]) && parseInt(@Session["ADMINISTRADOR"]) == 0) {
+                $("#divOpcionComentario" + (dataComent['Data'][index]['IdComentario'])).hide();
+            }
+            
+        });
+
+        if (@ViewBag.PerfilPMO== "0" || @ViewBag.Estado!= "2") {
+            $(".ClassComentario").hide();
+        }
+    }
+
+
+    function EditarComentario(id) {
+        $("#lblTitulo").text("Editar Comentario");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/EditarObservaciones/'+ id);
+    }
+
+    function EliminarComentario(id) {
+        $("#lblTitulo").text("Eliminar Comentario");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-sm");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/EliminarObservaciones/' + id);
+    }
+
+    function CopiarComentario(id) {
+        var $temp = $("<textarea>")
+        $("body").append($temp);
+        var text = $("#clipboard" + id).text();
+        $temp.val(text).select();
+        document.execCommand("copy");
+        $temp.remove();
+    }
+</script>

@@ -1,0 +1,995 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+<style>
+    table.k-editor {
+        height: auto !important;
+    }
+
+    .editCombo {
+        position: absolute;
+        background-image: url(/Content/Images/Edit.png);
+        background-repeat: no-repeat;
+        width: 16px;
+        height: 16px;
+        top: 29px;
+        right: 60px;
+        cursor: pointer;
+        z-index: 999;
+    }
+
+    .btn-error {
+        color: #fff;
+        background-color: #d92550;
+        border-color: #d92550;
+    }
+
+    .custom-combobox .k-input-button.k-icon-button {
+        font-size: 20px;
+    }
+</style>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+
+<input type="hidden" id="Id" name="Id" value="@ViewBag.Id" />
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Edición de Plantillas de Tickets
+                <div class="page-title-subheading">
+                    Vista de edición de plantillas de tickets.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-md-10">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Datos de plantilla
+            </div>
+            <div class="card-body">
+                <form class="">
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <div class="position-relative form-group">
+                                <label for="txtNombre">Nombre<span style="color:red">(*)</span></label>
+                                <input id="txtNombre" type="text" class="form-control" placeholder="Ingrese un nombre para la plantilla">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Datos de Ticket
+            </div>
+            <div class="card-body">
+                <input type="hidden" name="ID_CIA" id="ID_CIA" value="0" />
+                <input type="hidden" name="ID_CAT_N1" id="ID_CAT_N1" value="0" />
+                <input type="hidden" name="ID_CAT_N2" id="ID_CAT_N2" value="0" />
+                <input type="hidden" name="ID_CAT" id="ID_CAT" value="0" />
+
+                <fieldset>
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                Título de la Solicitud <span style="color:red">(*)</span>
+                                @Html.TextBoxFor(model => model.TITLE_TICK, new { @class = "form-control", @placeholder = "Título de la Solicitud" })
+                                @Html.ValidationMessageFor(model => model.TITLE_TICK)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+
+
+                        <div class="col-md-4" hidden>
+                            <div class="form-group">
+                                Activo
+                                @Html.EditorFor(model => model.ID_ASSE, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ID_ASSE)
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                Categoría 1 <span style="color:red">(*)</span>
+                                @Html.Editor("ID_CATE_N1")
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                Categoría 2 <span style="color:red">(*)</span>
+                                @Html.Editor("ID_CATE_N2")
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group d-flex flex-column">
+                                <span>Categoría <span style="color:red">(*)</span></span>
+                                <div class="d-flex">
+                                    <textarea id="nuevaCategoria" class="form-control w-100 d-inline" disabled="disabled" style="height:38px; overflow:auto; min-height:38px"></textarea>
+
+                                    @Html.TextBoxFor(model => model.ID_CATE, new { style = "display:none" })
+                                    <button class="btn-shadow btn btn-primary mr-1" type="button" style="height:38px" data-toggle="modal" data-target="#modalCategorias" onclick="AgregarCategoriaTicket();" id="AgregarCategoria">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                Tipo Ticket <span style="color:red">(*)</span>
+                                @Html.EditorFor(model => model.ID_TYPE_TICK, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ID_TYPE_TICK)
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                Prioridad <span style="color:red">(*)</span>
+                                @Html.EditorFor(model => model.ID_PRIO, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ID_PRIO)
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                Estado <span style="color:red">(*)</span>
+                                @Html.TextBoxFor(model => model.ID_STAT)
+                                @Html.ValidationMessageFor(model => model.ID_STAT)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+
+                        <div class="col-md-4" id="divFecIniTick" hidden>
+                            <div class="form-group">
+                                Fecha Programada
+                                @Html.TextBoxFor(model => model.FEC_INI_TICK, new { @class = "text-box single-line", @placeholder = "Fecha Programada" })
+                                @Html.ValidationMessageFor(model => model.FEC_INI_TICK)
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                Área Responsable <span style="color:red">(*)</span>
+                                @Html.EditorFor(model => model.ID_QUEU, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ID_QUEU)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                Control Remoto
+                                @Html.CheckBox("REM_CTRL_TICK", false)
+                                @Html.ValidationMessageFor(model => model.REM_CTRL_TICK)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                Es Ticket Padre
+                                @Html.CheckBox("IS_PARENT", false)
+                                @Html.ValidationMessageFor(model => model.IS_PARENT)
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                Ticket Padre
+                                @Html.EditorFor(model => model.ID_TICK_PARENT, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ID_TICK_PARENT)
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                @Html.TextAreaFor(model => model.SUM_TICK, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.SUM_TICK)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row" hidden>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.TextAreaFor(model => model.Adicional1, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Adicional1)
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                @Html.TextAreaFor(model => model.Adicional2, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Adicional2)
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+
+            <div class="d-block text-right card-footer">
+                <button class="btn-shadow btn btn-primary" id="btnGuardar" type="button">Guardar</button>
+                <button class="btn-shadow btn btn-danger" id="btnEliminar" type="button">Eliminar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<input id="usuarioVipMarcado" value="false" type="hidden" />
+<iframe id="upload_target" name="upload_target" src="" class="d-none"></iframe>
+
+<script type="text/javascript">
+    var idpriory = 0;
+    var swt = 0;
+
+    $('#btnGuardar').click(function () {
+        var mensaje = '';
+        let idPlantilla = $("#Id").val();
+        let nombrePlantilla = $("#txtNombre").val();
+        let tituloTicket = $("#TITLE_TICK").val();
+        let categoria1 = $("#ID_CATE_N1").val();
+        let categoria2 = $("#ID_CATE_N2").val();
+        let categoria = $("#ID_CATE").val();
+        let tipoTicket = $("#ID_TYPE_TICK").val();
+        let prioridad = $("#ID_PRIO").val();
+        let estado = $("#ID_STAT").val();
+        let fechaInicio = $("#FEC_INI_TICK").val();
+        let areaResponsable = $("#ID_QUEU").val();
+        let controlRemoto = $("#REM_CTRL_TICK").is(":checked");
+        let esTicketPadre = $("#IS_PARENT").is(":checked");
+        let ticketPadre = $("#ID_TICK_PARENT").val();
+        let comentario = $("#SUM_TICK").val();
+        let adicional1 = $("#adicional1").val();
+        let adicional2 = $("#adicional2").val();
+
+        //Validaciones
+        if (nombrePlantilla == '') mensaje += '-Ingrese un nombre para la Plantilla. \n';
+        if (tituloTicket == '') mensaje += '-Ingrese un Título para el Ticket. \n';
+        if (categoria == '') mensaje += '-Seleccione una categoría. \n';
+        if (tipoTicket == '') mensaje += '-Seleccione un tipo de Ticket. \n';
+        if (prioridad == '') mensaje += '-Seleccione una prioridad. \n';
+        if (estado == '') mensaje += '-Seleccione un estado. \n';
+        //if (usuarioAsignado == '') mensaje += '-Seleccione un usuario asignado. \n';
+
+        //Proceso
+        if (mensaje != "") {
+            toastr.warning(mensaje, "Advertencia");
+            return false;
+        } else {
+            swal({
+                title: "Generando...",
+                text: "Espere por favor",
+                imageUrl: "Images/spinner.gif",
+                showConfirmButton: false,
+                allowOutsideClick: false
+            });
+
+            let jsonPlantilla = {
+                plantilla: {
+                    "Id": idPlantilla,
+                    "Nombre": nombrePlantilla,
+                    "TITLE_TICK": tituloTicket,
+                    "ID_TYPE_TICK": tipoTicket,
+                    "ID_PRIO": prioridad,
+                    "ID_STAT": estado,
+                    "FEC_INI_TICK": fechaInicio,
+                    "ID_QUEU": areaResponsable,
+                    "ID_CATE_N1": categoria1,
+                    "ID_CATE_N2": categoria2,
+                    "ID_CATE": categoria,
+                    "REM_CTRL_TICK": controlRemoto,
+                    "IS_PARENT": esTicketPadre,
+                    "ID_TICK_PARENT": ticketPadre,
+                    "SUM_TICK": comentario,
+                    "Adicional1": adicional1,
+                    "Adicional2": adicional2
+                }
+            };
+
+            $.ajax({
+                type: "POST",
+                url: '/Plantilla/EditarPlantilla',
+                data: JSON.stringify(jsonPlantilla),
+                contentType: "application/json; charset=utf-8",
+                //dataType: 'jsonp',
+                success: function ({ code }) {
+                    if (code == "OK") {
+                        swal({
+                            title: "Plantilla editada con éxito",
+                            type: 'success',
+                            text: 'La plantilla fue editada con éxito. Será redirigido al listado de plantillas',
+                            focusConfirm: false,
+                            confirmButtonText:
+                                'Continuar',
+                            confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                        }, function () {
+                            location = "http://" + location.host + `/Plantilla/Principal`;
+                        });
+                    } else if (code == "ERROR") {
+                        swal({
+                            title: "Error al editar la plantilla",
+                            type: 'error',
+                            text: 'Ha ocurrido un error, contacte al administrador'
+                        });
+                    }
+
+                },
+            });
+        }
+    });
+
+    $('#btnEliminar').click(function () {
+        let idPlantilla = $("#Id").val();
+        swal({
+            title: "Confirmación",
+            type: "warning",
+            text: "¿Está seguro que desea eliminar la plantilla?",
+            confirmButtonText: 'Continuar',
+            cancelButtonText: 'Cancelar',
+            showCancelButton: true,
+            allowOutsideClick: true
+        }, function (input) {
+            $.ajax({
+                type: "POST",
+                url: '/Plantilla/EliminarPlantilla/' + idPlantilla,
+                /*data: { Id: idPlantilla },*/
+                //contentType: "application/json; charset=utf-8",
+                success: function ({ code }) {
+                    if (code == "OK") {
+                        setTimeout(function () {
+                            swal({
+                                title: "Plantilla eliminada con éxito",
+                                type: 'success',
+                                text: 'La plantilla fue eliminada con éxito. Será redirigido al listado de plantillas',
+                                confirmButtonText: 'Continuar'
+                            }, function (input2) {
+                                console.log("ok");
+                                location = "http://" + location.host + `/Plantilla/Principal`;
+                            });
+                        }, 1000);
+                    } else {
+                        swal.close();
+                        toastr.error("Error", "Hubo un problema, comuníquese con mesa de servicio");
+                    }
+
+                },
+            });
+        });
+    });
+
+    function MensajeError(msj, flag) {
+        swal({
+            title: 'Mensaje',
+            type: 'info',
+            text: msj,
+            focusConfirm: false,
+            confirmButtonText:
+                'Continue',
+            confirmButtonAriaLabel: 'Thumbs up, great!'
+
+        })
+    }
+
+    //Función ejecutada despues de enviar datos al servidor y recibir respuesta.
+    function uploadDoneMinsur(msg, code, id) {
+        //Cierre de la ventana de espera.
+        //closeWinModalPopUpLoad();
+        //Todo conforme se procede a mostrar mensaje de satisfacción.
+        if (msg == "OK") {
+            var title = 'Información Guardada / Notificación Enviada';
+            swal({
+                title: title,
+                type: 'success',
+                text: 'Ticket information was succesfully saved. Code : ' + code,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                //var newurl = location.host + "/Home";
+                /*location = "http://" + location.host + "/Home";*/
+
+                location = "http://" + location.host + `/DetailsTicket/Index/${id}`;
+            })
+
+        }
+        //En caso exista disconformidad se muestra mensaje
+        else {
+            var title = 'Falta Información';
+
+            swal({
+                title: title,
+                type: 'info',
+                text: 'You should choose or complete the required information.',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+        }
+    }
+
+    function perdioSesion() {
+        swal({
+            title: 'Algo salio mal',
+            type: 'error',
+            text: 'Se perdió la conexión',
+            focusConfirm: false,
+            confirmButtonText: 'Continuar',
+        }, function () {
+
+            location = "http://" + location.host + '/Home/Principal';
+        })
+    }
+
+    $(document).ready(function () {
+        var solicitanteSeteado = false;
+
+        var ID_PRIO = $("#ID_PRIO").kendoComboBox({
+            autoBind: false,
+            //index: 1,
+            //cascadeFrom: "ID_PERS_ENTI_END",
+            //placeholder: "Select Priority...",
+            dataTextField: "NAM_PRIO",
+            dataValueField: "ID_PRIO",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Priority/List"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var FEC_INI_TICK = $("#FEC_INI_TICK").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        var ID_TYPE_TICK = $("#ID_TYPE_TICK").kendoComboBox({
+            autoBind: true,
+            //index: 0,
+            dataTextField: "NAM_TYPE_TICK",
+            dataValueField: "ID_TYPE_TICK",
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeTicket/List?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+
+        $("#SUM_TICK").val("Impacto en el Servicio: <br><br> Detalle:")
+
+                jQuery('#IDPLAN').on('change', function () {
+
+            $.ajax({
+                url: '/Plantilla/ObtenerDescripcionPlantilla/',
+                data: { IdGrupo: $("#IDGRUPO").val(), IdPlan: $("#IDPLAN").val() },
+                type: 'GET',
+                dataType: 'text',
+                success: function (data) {
+
+
+                    $("#SUM_TICK").data('kendoEditor').value(data);
+                    //alert(data);
+                    //jQuery("#SUM_TICK").data('kendoEditor').value(data);
+
+                },
+                error: function (data) {
+                },
+            });
+        });
+
+        $("#SUM_TICK").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: OnPaste
+        });
+
+        $("#Adicional1").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: OnPaste
+        });
+
+        $("#Adicional2").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: OnPaste
+        });
+
+        var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+            dataTextField: "QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            //template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+            //            '<span><strong>${data.QUEU}</strong></span><br />' +
+            //            '<span style="position:absolute; top:15px;">${data.DES_QUEU}</span></div>',
+            template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                '<span><strong>${data.QUEU}</strong></span>' +
+                '<span>${data.DES_QUEU}</span></div>',
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                },
+                sort: { field: "QUEU", dir: "asc" }
+            }
+        }).data("kendoComboBox");
+
+        ID_QUEU.bind("change", function (e) {
+            ID_STAT.value(1);
+            if (ID_STAT.dataItem().ID_STAT == 5) {
+                $("#divFecIniTick").removeAttr("hidden");
+            }
+            else {
+                $("#divFecIniTick").attr("hidden", true);
+                $("#FEC_INI_TICK").val('');
+            }
+        });
+
+
+        var ID_STAT = $("#ID_STAT").kendoComboBox({
+            autoBind: true,
+            index:0,
+            //cascadeFrom: "ID_QUEU",
+            //placeholder: "Select Status...",
+            dataTextField: "NAM_STAT",
+            dataValueField: "ID_STAT",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/StatusTicket/List"
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_STAT.bind("change", function (e) {
+
+            if (ID_STAT.dataItem().ID_STAT == 5) {
+                //$("#divFecIniTick").removeClass('divHide');
+
+                $("#divFecIniTick").removeAttr("hidden");
+            }
+            else {
+                //$("#divFecIniTick").addClass('divHide');
+                $("#divFecIniTick").attr("hidden", true);
+                $("#FEC_INI_TICK").val('');
+                    //FEC_INI_TICK.value("");
+            }
+        });
+
+        var ID_CATE_N1 = $("#ID_CATE_N1").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            //cascadeFrom: "ID_ACCOUNT_CAT",
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N1.bind("change", function (e) {
+            if (ID_CATE_N1.dataItem()) {
+                $('#ID_CAT_N1').attr('value', ID_CATE_N1.dataItem().ID_CATE);
+                $('#ID_CATE').val(null)
+                $('#nuevaCategoria').val('')
+                document.getElementById('AgregarCategoria').disabled = true
+            }
+            else {
+                $('#ID_CAT_N1').attr('value', 0);
+            }
+            if ($('#ID_CAT_N1').val() == 0) {
+                $('#ID_CATE').val(null)
+                $('#nuevaCategoria').val('')
+                document.getElementById('AgregarCategoria').disabled = true
+            }
+        });
+
+        var ID_CATE_N2 = $("#ID_CATE_N2").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N1",
+            dataTextField: "NAM_CATE2",
+            dataValueField: "ID_CATE2",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N2.bind("change", function (e) {
+            if (ID_CATE_N2.dataItem()) {
+                $('#ID_CAT_N2').attr('value', ID_CATE_N2.dataItem().ID_CATE2);
+                $('#ID_CATE').val(null)
+                $('#nuevaCategoria').val('')
+            }
+            else {
+                $('#ID_CAT_N2').attr('value', 0);
+            }
+            if ($('#ID_CAT_N2').val() != 0) {
+
+                document.getElementById('AgregarCategoria').disabled = false
+            }
+            else {
+                document.getElementById('AgregarCategoria').disabled = true
+                $('#ID_CATE').val(null)
+                $('#nuevaCategoria').val('')
+            }
+        });
+
+        var ID_TICK_PARENT = $("#ID_TICK_PARENT").kendoComboBox({
+            autoBind: false,
+            //cascadeFrom: "ID_CATE",
+            //enable: false,
+            dataTextField: "COD_TICK",
+            dataValueField: "ID_TICK",
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/TicketParent?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#REM_CTRL_TICK").on("change", function () {
+            var isChecked = $(this).is(":checked");
+            $("#REM_CTRL_TICK").val(isChecked);
+        });
+
+        $('#IS_PARENT').click(function () {
+            var $this = $(this);
+            // $this will contain a reference to the checkbox
+            if ($this.is(':checked')) {
+                ID_TICK_PARENT.value("");
+                ID_TICK_PARENT.enable(false);
+                //alert('SI');
+            } else {
+                // the checkbox was unchecked
+                ID_TICK_PARENT.enable(true);
+            }
+        });
+
+        $("#IS_PARENT").on("change", function () {
+            // Actualizar el valor basado en el estado del checkbox
+            var isChecked = $(this).is(":checked");
+            $("#IS_PARENT").val(isChecked);
+        });
+
+        var ID_ASSE = $("#ID_ASSE").kendoComboBox({
+            autoBind: false,
+            dataTextField: "Codigo",
+            dataValueField: "IdActivo",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            //template: kendo.template($("#PlantillaActivo").html()),
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DeliveryReception/FiltrarActivoRecepcion?IdPersEnti=0"
+                }
+            }
+        }).data("kendoComboBox");
+        ID_ASSE.list.width(350);
+
+        var IDGRUPO = $("#IDGRUPO").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NOMBRE",
+            dataValueField: "IDGRUPO",
+            //placeholder: "Seleccione un grupo",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Grupo/ListarCboGrupoCuentaEstado?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IDPLAN = $("#IDPLAN").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IDGRUPO",
+            /*placeholder: "",*/
+            dataTextField: "NOMBRE",
+            dataValueField: "ID_PLAN",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Plantilla/ListarPlantillaGrupo?ID_TIPOPLAN=1"
+
+                }
+            }
+        }).data("kendoComboBox");
+
+        if (@Session["ADMINISTRADOR"] == 1 || @Session["SERVICEDESK"] == 1 || @Session["ADMINISTRADOR_SISTEMA"] == 1) {
+            $("#divRequest").css("display", "none");
+            $("#divRequestNew").css("display", "inline-block");
+        }
+
+        $.ajax({
+            url: '/Plantilla/ObtenerPlantilla/',
+            data: { IdPlantilla: $("#Id").val() },
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                let plantilla = data;
+                $("#txtNombre").val(plantilla.Nombre);
+                $("#TITLE_TICK").val(plantilla.TITLE_TICK);
+                $("#ID_CATE_N1").data("kendoComboBox").value(plantilla.ID_CATE_N1);
+                $("#ID_CATE_N2").data("kendoComboBox").value(plantilla.ID_CATE_N2);
+
+                $.ajax({
+                    url: '/Plantilla/ObtenerCategorias/?idCat=' + plantilla.ID_CATE,
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#nuevaCategoria").val(data);
+                    }
+                });
+
+                $("#ID_CATE").val(plantilla.ID_CATE);
+                $("#ID_TYPE_TICK").data("kendoComboBox").value(plantilla.ID_TYPE_TICK);
+                $("#ID_PRIO").data("kendoComboBox").value(plantilla.ID_PRIO);
+
+                $("#ID_STAT").data("kendoComboBox").value(plantilla.ID_STAT);
+                if (plantilla.ID_STAT == 5) {
+                    $("#divFecIniTick").removeAttr("hidden");
+                    if (plantilla.FEC_INI_TICK != null) $("#FEC_INI_TICK").data("kendoDateTimePicker").value(new Date(parseInt(plantilla.FEC_INI_TICK.substr(6))));
+                    //$("#FEC_INI_TICK").kendoDateTimePicker({ value: plantilla.FEC_INI_TICK }).data("kendoDateTimePicker");
+                }
+
+                $("#ID_QUEU").data("kendoComboBox").value(plantilla.ID_QUEU);
+
+                if (plantilla.REM_CTRL_TICK == true) {
+                    $("#REM_CTRL_TICK").prop("checked", true);
+                    //$("#REM_CTRL_TICK").val(true);
+                }
+
+                if (plantilla.IS_PARENT == true) {
+                    $("#IS_PARENT").prop("checked", true);
+                    $("#ID_TICK_PARENT").data("kendoComboBox").enable(false);
+                } else {
+                    $("#ID_TICK_PARENT").data("kendoComboBox").value(plantilla.ID_TICK_PARENT);
+                }
+
+                $("#SUM_TICK").data("kendoEditor").value(plantilla.SUM_TICK);
+            },
+            error: function (data) {
+            },
+        });
+
+    });
+
+    function OnPaste(e) {
+        //var texto = e.html
+        //if ((/^<img src="/).test(e.html)) {
+        //    toastr.warning("No se permiten imágenes en este campo.");
+        //    e.html = "";
+        //}
+        //if (texto.includes('<img data-imagetype=')) {
+        //    toastr.warning("No se permiten imágenes en este campo.");
+        //    e.html = "";
+        //}
+        if (/<img\s+[^>]*>/i.test(e.html)) {
+            toastr.warning("No se permiten imágenes en este campo.");
+            e.html = "";
+        } else if ((/^<img src="data:image/).test(e.html)) {
+            toastr.warning("No se permiten imágenes en este campo.");
+            e.html = "";
+        }
+    }
+
+    function AgregarCategoriaTicket() {
+
+        var ID_CATE_N2 = $("#ID_CATE_N2").data("kendoComboBox");
+
+        $("#lblTituloCategoria").text("Seleccione una Categoria");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-contentCategoria').empty();
+        $('#modal-contentCategoria').load('/Ticket/AgregarCategoriasTicket?id=' + ID_CATE_N2.value() +"&idAcco=@Session["ID_ACCO"]");
+    }
+
+    function a_entero(valor) {
+        //intento convertir a entero.
+        //si era un entero no le afecta, si no lo era lo intenta convertir
+        valor = parseInt(valor);
+        //comprobamos si es un valor entero
+        if (isNaN(valor)) {
+            //no es entero 0
+            return 0;
+        } else {
+            //es un valor entero
+            return valor;
+        }
+    }
+
+</script>
+
+<script type="text/javascript">
+    var vector = {}, ctime;
+    vector.s = 0;
+    vector.m = 0;
+    vector.h = 0;
+
+    function show5(vector) {
+        var hours = vector.h;
+        var minutes = vector.m;
+        var seconds = vector.s;
+
+        vector.s = vector.s + 1;
+        if (vector.s == 60) {
+            vector.s = 0;
+            vector.m = vector.m + 1;
+        }
+
+        if (vector.m == 60) {
+            vector.m = 0;
+            vector.h = vector.h + 1;
+        }
+        //change color
+        myclock = "Resolución de primera llamada: <span style='color:" + (vector.h >= 1 ? 'red' : (vector.m > 20 ? 'red' : 'black')) + "'>"
+            + (hours <= 9 ? '0' : '') + hours + ":"
+            + (minutes <= 9 ? '0' : '') + minutes + ":"
+            + (seconds <= 9 ? '0' : '') + seconds + "</span>";
+        if (document.layers) {
+            document.layers.liveclock.document.write(myclock)
+            document.layers.liveclock.document.close()
+        }
+        else if (document.all)
+            liveclock.innerHTML = myclock
+        else if (document.getElementById)
+            document.getElementById("liveclock").innerHTML = myclock;
+        ctime = setTimeout("show5(vector);", 1000);
+    }
+
+    if (ctime) {
+        clearTimeout(ctime);
+    }
+    show5(vector);
+</script>
+
+<script type="text/ecmascript">
+    var DivHeight = $("#divNewTicket").height();
+    var divDetailsTicket = $("#divDetailsTicket").height();
+    var divDetailsUser = $("#divDetailsUser").height();
+    var divTitleDetailsTicket = $("#divTitleDetailsTicket").height();
+    $("#divAssetByUser").height(DivHeight - divDetailsTicket - 20 - divTitleDetailsTicket * 2 - divDetailsUser - 2);
+    $("#gridAssetByUser").height(DivHeight - divDetailsTicket - 20 - divTitleDetailsTicket * 2 - divDetailsUser -2- 55);
+</script>

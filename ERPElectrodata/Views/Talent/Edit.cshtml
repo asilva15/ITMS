@@ -1,0 +1,393 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    ViewBag.Title = "Edit";
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+@* EDIT PROFILE *@
+
+@*<nav>
+    <ul>
+        <li onclick="Profile()"><a href="#">@ResourceLanguaje.Resource.MyProfileTalent</a></li>  
+        <li onclick="Training()" id="liTraining"><a href="#" id="aTraining">@ResourceLanguaje.Resource.TrainingTalent</a></li>
+    </ul>
+</nav>*@
+<style>
+    .k-icon{
+        padding:18px
+    }
+</style>
+<div id="divContent">
+    <div id="tabstrip" style="margin-top:17px;">
+        <ul>
+            <li class="k-state-active">
+                @ResourceLanguaje.Resource.ProfileTalent
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.DocumentsTalent
+            </li>
+            @*<li>
+                @ResourceLanguaje.Resource.PaymentBallots
+            </li>*@
+            <li>
+                @ResourceLanguaje.Resource.BeneficiariesTalent
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.BankAccountsTalent
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.PensionEPS
+            </li>
+            <li>
+                Cuentas y Permisos
+            </li>
+        </ul>
+    </div>
+</div>
+<br />
+<script type="text/javascript">
+    var NameArc = '';
+
+    $(document).ready(function () {
+
+        $("#tabstrip").kendoTabStrip({
+            animation: { open: { effects: "fadeIn" } },
+            contentUrls: [
+                        '/Talent/TabEditProfile?id=@ViewBag.ID_PERS_ENTI&id1=@ViewBag.FOTO',
+                        '/Talent/TabEditDocuments?id=@ViewBag.ID_PERS_ENTI&id1=@ViewBag.ID_PERS_STAT',
+                        //'/Talent/TabEditPaymentBallots/@ViewBag.ID_PERS_ENTI',
+                        '/Talent/TabEditBeneficiaries/@ViewBag.ID_PERS_ENTI',
+                        '/Talent/TabEditAccounts/@ViewBag.ID_PERS_ENTI',
+                        '/Talent/TabEditPension/@ViewBag.ID_PERS_ENTI',
+                        '/Talent/TabEditQueue/@ViewBag.ID_PERS_ENTI',
+            ]
+        });
+
+    });
+
+    function Profile() {
+        location.reload(true);
+    }
+    function Training() {
+        SeleccionarTraining();
+        $("#divContent").empty();
+        $("#divContent").load("/Training/Index?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+    }
+
+    function SeleccionarTraining() {
+        $("#aTraining").css("color", "Black");
+        $("#aTraining").css("font-weight", "bold");
+        $("#liTraining").css("background-color", "#eaeaea");
+        $("#liTraining").css("margin-right", "-5px");
+    }
+    function DeseleccionarTraining() {
+        $("#aTraining").css("color", "White");
+        $("#aTraining").css("font-weight", "initial");
+        $("#liTraining").css("background-color", "#333333");
+        $("#liTraining").css("margin-right", "-4px");
+    }
+    //function NewProfile(parm) {
+    //    $("#divContent").empty();
+    //    $("#divContent").load("/Talent/Create?var=" + Math.random());
+    //}
+    //function FindProfile(parm) {
+    //    $("#divContent").empty();
+    //    $("#divContent").load("/Talent/Find?var=" + Math.random());
+    //}
+    //function ReportTalent(parm) {
+    //    $("#divContent").empty();
+    //    $("#divContent").load("/Talent/Reports?var=" + Math.random());
+    //}
+
+    function IsNumeric(expression) {
+        return (String(expression).search(/^\d+$/) != -1);
+    }
+
+    $(document).on("click", ".delete-link", function (e) {
+        e.preventDefault();        
+        var ctrl = $(this);
+        var id = $(this).attr("id");
+        var elem = id.split('|');
+
+        winPopUpModal("@ResourceLanguaje.Resource.Delete", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Are you sure to delete the attachment?</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+       , 350, 130);
+        
+        var undo = $("#btnYes")
+            .bind("click", function () {
+                $.ajax({
+                    url: (elem[0] == "I" ? "/Talent/DeleteAttachInvoice/" : "/Talent/DeleteAttachDocs/") + elem[1],
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        if (dato == 'OK') {
+                            if (elem[0] == "I") {
+                                var treeview = $("#treeviewInvoice").data("kendoTreeView");
+                                treeview.remove(ctrl.closest(".k-item"));
+                            }
+                            else if (elem[0] == "D") {
+                                var treeview = $("#treeviewDocs").data("kendoTreeView");
+                                treeview.remove(ctrl.closest(".k-item"));
+                            }
+                            else if (elem[0] == "A") {
+                                var treeview = $("#treeviewAchi").data("kendoTreeView");
+                                treeview.remove(ctrl.closest(".k-item"));
+                            }
+                            else if (elem[0] == "S") {
+                                $('#S' + String(elem[1])).remove();
+                            }
+                            closeWinModalPopUp();
+                        }
+                        else { closeWinModalPopUp(); alert('ERROR'); }
+                    },
+                    error: function (dato) {
+                        alert('ERROR');
+                    }
+                });
+            });
+
+        var undo = $("#btnNO")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+
+        $("#closebtnmodal").click(function () {
+            closeWinModalPopUp();
+        });
+
+    });
+
+</script>
+
+ <script type="text/javascript">
+
+     function cancel() {
+         @*winPopUpModal("Operation Cancelled", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+        "<div style='padding:10px 0px 10px 0px;'>The operation to perform was cancelled</div>" +
+        "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+        "<button id='continuer' class='k-button'>Continue</button></div></div>"
+        , 350, 130);
+
+         var undo = $("#continuer")
+             .bind("click", function () {
+                 var newurl = location.href.replace("Edit/@ViewBag.ID_PERS_ENTI", "Index");
+                 location.replace(newurl);
+             });
+
+         $("#closebtnmodal").click(function () {
+             location.reload(true);
+         });*@
+         location.reload(true);
+         return false;
+     }
+
+     function uploadDone(msg, code, cdg) {
+         if (msg == "OK") {
+             if (code == "OpenPDF") {
+                 closeWinFormModalPopUp();
+                 window.open("/Talent/ViewDownload/" + cdg, "_blank");
+             }
+             else if (code == "Training") {
+                 closeWinModalPopUpLoad();
+                 winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                + "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.TrainingMsn04</div>"
+                + "<div>Code: " + cdg + "</div>" +
+                "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                "<button id='continues' class='k-button'>Continue</button>" +
+                "</div></div>"
+                  , 400, 160);
+
+                 Training();
+                 var undo = $("#continues")
+                 .bind("click", function () {
+                     closeWinModalPopUp();
+                 });
+
+                 $("#closebtnmodal").click(function () {
+                     closeWinModalPopUp();
+                 });
+             }
+             else if (code == "Reject") {
+                 closeWinModalPopUpLoad();
+                 winPopUpModal("@ResourceLanguaje.Resource.Rejected", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                + "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.TrainingMsn05</div>"
+                + "<div>Code: " + cdg + "</div>" +
+                "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                "<button id='continues' class='k-button'>Continue</button>" +
+                "</div></div>"
+                  , 400, 160);
+
+                 Training();
+                 var undo = $("#continues")
+                 .bind("click", function () {
+                     closeWinModalPopUp();
+                 });
+
+                 $("#closebtnmodal").click(function () {
+                     closeWinModalPopUp();
+                 });
+             }
+             else {
+                     closeWinModalPopUpLoad();
+                     winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                    + "<div style='padding:10px 0px 10px 0px;'>Profile information was succesfully saved</div>"
+                    + "<div style='padding:10px 0px 10px 0px;'></div>" +
+                    "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                    "<button id='continues' class='k-button'>Continue</button>" +
+                    "</div></div>"
+                      , 400, 160);
+
+                     var elem = code.split('|');
+                     if (elem[0] == "AttachDocs") {
+
+                         $("#divContDocuments").empty();
+                         $("#divContDocuments").load("/Talent/ListDocuments?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+                         $(".k-upload-files").remove();
+                         document.FormAttachDocs.reset();
+
+                     }
+                     else if (elem[0] == "AttachAchie") {
+
+                         $("#divContAchievements").empty();
+                         $("#divContAchievements").load("/Talent/ListAchievements?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+                         $(".k-upload-files").remove();
+                         document.FormAttachDocs.reset();
+                     }
+                     else if (elem[0] == "AttachIssue") {
+                         $.ajax({
+                             url: "/Talent/ListIssuesUser/@ViewBag.ID_PERS_ENTI",
+                             data: "var=" + Math.random(),
+                             cache: false,
+                             type: "GET",
+                             dataType: "json",
+                             success: function (source) {
+                                 data = source;
+                                 showInfoIssues();
+                             },
+                             error: function (source) {
+                                 //alert("Error Carga Json");
+                             }
+                         });
+
+                         $(".k-upload-files").remove();
+                         document.FormAttachDocs.reset();
+                     }
+                     else if (elem[0] == "AttachInvoice") {
+
+                         $("#divContInvoice").empty();
+                         $("#divContInvoice").load("/Talent/ListInvoice?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+                         $(".k-upload-files").remove();
+                         document.FormAttachInvoice.reset();
+                     }
+                     else if (elem[0] == "NewBankAccount") {
+                         var ID_TYPE_PAYM = $("#ID_TYPE_PAYM").data("kendoComboBox");
+
+                         $("#divDetailsAccountValid").empty();
+                         $("#divDetailsAccountValid").load("/PERSON_PAYMENT/PanelDetailsAccountValid?id=@ViewBag.ID_PERS_ENTI&id1=" + String(ID_TYPE_PAYM.value()) + "&var=" + Math.random());
+
+                         $("#divAccountOld").empty();
+                         $("#divAccountOld").load("/PERSON_PAYMENT/PanelAccountsOld?id=@ViewBag.ID_PERS_ENTI&id1=" + String(ID_TYPE_PAYM.value()) + "&var=" + Math.random());
+
+                         document.FormPersonAccount.reset();
+                     }
+                     else if (elem[0] == "NewPension") {
+
+                         $("#divPension").empty();
+                         $("#divPension").load("/Pension/PanelPensionOld?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+                         document.FormPersonPension.reset();
+                     }
+                     else if (elem[0] == "NewEPSalud") {
+
+                         $("#divEPSalud").empty();
+                         $("#divEPSalud").load("/EPSalud/PanelEPSalud?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+                         document.FormEPSalud.reset();
+                     }
+
+                    var undo = $("#continues")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                    });
+
+                    $("#closebtnmodal").click(function () {
+                        closeWinModalPopUp();
+                    });
+                }
+         }
+         else if (msg == "OK BENE") {
+             closeWinModalPopUpLoad();
+             winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+            + "<div style='padding:10px 0px 10px 0px;'>Beneficiary information was succesfully saved</div>"
+            + "<div style='padding:10px 0px 10px 0px;'></div>" +
+            "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+            "<button id='continues' class='k-button'>Continue</button>" +
+            "</div></div>"
+              , 400, 160);
+
+             var undo = $("#continues")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+
+             $("#closebtnmodal").click(function () {
+                 closeWinModalPopUp();
+             });
+
+             $(".k-upload-files").remove();             
+             document.FormNewBeneficiary.reset();
+
+             $("#divBeneficiaries").empty();
+             $("#divBeneficiaries").load("/Talent/ListBeneficiaries?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+         }
+         else {
+             closeWinModalPopUpLoad();
+
+             var titleAsset = '';
+             var messageAsset = '';
+             if (code == '0') {
+                 titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                 messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+             }
+             else if (code == '1') {
+                 titleAsset = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+             }
+             else if (code == '2') {
+                 titleAsset = '@ResourceLanguaje.Resource.WrongDates';
+                 messageAsset = '@ResourceLanguaje.Resource.WrongDatesMsn';
+             }
+             else if (code == '3') {
+                 titleAsset = '@ResourceLanguaje.Resource.Attach';
+                 messageAsset = '@ResourceLanguaje.Resource.AttachMsn';
+             }
+             else if (code == '5') {
+                 titleAsset = '@ResourceLanguaje.Resource.WrongCredentials';
+                 messageAsset = '@ResourceLanguaje.Resource.WrongCredentialsMsn1';
+             }
+             else if (code == '6') {
+                 titleAsset = '@ResourceLanguaje.Resource.WrongCredentials';
+                 messageAsset = '@ResourceLanguaje.Resource.WrongCredentialsMsn2';
+             }
+            winPopUpModal(titleAsset, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + messageAsset + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+ </script>

@@ -1,0 +1,196 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+
+@*<nav>
+    <ul>
+    <li ><a href="#" onclick="NewTicketChange(this)">@ResourceLanguaje.Resource.NewChange</a></li>
+    <li onclick="FindTicketChange(this)"><a href="#">@ResourceLanguaje.Resource.FindChange</a></li>
+    <li><a href="#">@ResourceLanguaje.Resource.ChangeReport</a></li>
+    </ul>
+</nav>*@
+
+<div id="divContent">
+    <h1>@ResourceLanguaje.Resource.Change</h1>
+    <div id="ticketsByStatus">
+        <div class="ticketByStatusP4_1">
+            <div id="homInc1" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus1">
+                    <div id="boxActive" class="boxQty">@ViewBag.Unaprovals</div>
+                    <div id="letrashomInc1" class="letras letrasActive">
+                        <div>@ResourceLanguaje.Resource.Pending @ResourceLanguaje.Resource.Approvals<br />@ResourceLanguaje.Resource.TotalAccount: @ViewBag.TUnaprovals</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc1" class="tab-active-marks2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticketByStatusP4_1">
+            <div id="homInc2" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus2">
+                    <div id="boxSCHEDULED" class="boxQty">@ViewBag.Aprovals</div>
+                    <div id="letrashomInc2" class="letras">
+                        <div>@ResourceLanguaje.Resource.Approvals<br />@ResourceLanguaje.Resource.TotalAccount: @ViewBag.TAprovals</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticketByStatusP4_1">
+            <div id="homInc3" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus3">
+                    <div id="boxRESOLVED" class="boxQty">@ViewBag.Rejected</div>
+                    <div id="letrashomInc3" class="letras">
+                        <div>@ResourceLanguaje.Resource.Rejected<br />@ResourceLanguaje.Resource.TotalAccount: @ViewBag.TRejected</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticketByStatusP4_1">
+            <div id="homInc4" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus4">
+                    <div id="boxCLOSED" class="boxQty">@ViewBag.Executed</div>
+                    <div id="letrashomInc4" class="letras">
+                        <div>@ResourceLanguaje.Resource.Executed<br />@ResourceLanguaje.Resource.TotalAccount: @ViewBag.TExecuted</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc4"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="gridTickets" class="contentView">
+    </div>
+
+    <div id="pagerTickets" class="contentViewPager">
+    </div>
+
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="incidentHomeList">
+        <div class = "incidentHomeListBlock1 hasLayout">
+            <div class = "incidentHomeListHeader">  
+            <div class="FondoNegro">
+                <div id ="${ID_CHAN}" onclick="child(this)" class="${PARENT}">
+                </div>
+                <div class="status">
+                    ${NAM_STAT}
+                </div>
+                <div class="incidentHomeRequesterIcon" title="Affected End User">
+                    ${REQU}
+                </div>
+                <div class="incidentHomeCreate" title="Creation date @ResourceLanguaje.Resource.DateFormat">
+                    Create: ${CREATE_CHAN}
+                </div>
+                <div class="incidentHomeModified" title="Modification date @ResourceLanguaje.Resource.DateFormat">
+                    Modified: ${MODIFIED_CHAN}
+                </div>
+                <div class="incidentHomeModified" title="Modification date @ResourceLanguaje.Resource.DateScheduled">
+                    Scheduled: ${SCHEDULED_CHAN}
+                </div>
+            </div>
+                <div class="${ICO_PRIO}">
+                    ${NAM_PRIO}
+                </div>
+            </div>
+        </div>
+        <div class = "incidentHomeSumary">
+            <a href="/DetailsChange/Index/${ID_CHAN}" TARGET='_BLANK' style="height:100%">#= SUM_CHAN #</a>
+        </div>
+        <div class="contraya">
+            <div class="raya"></div>
+        </div>
+        <div class="incidentHomeRes">
+            <div class="ticket">${NAM_TYPE_TICK} \\#
+            ${COD_CHAN}</div>
+            <div class="cateTicket" >${NAM_CLAS} - ${NAM_SUBC}</div> 
+            <div class="viaTicket">Via ${NAM_SOUR}</div>
+            <div class="createBy">Create By: ${CREATEBY}</div>
+            <div class="assignedTo">Assigned To: ${ASSI}</div>
+        </div>
+    </div>
+
+    <div  id="btn${ID_CHAN}">
+
+    </div>
+    <div style="clear:both">
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Change/ListTicketByStatus/7?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#gridTickets").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html())
+        });
+
+        $("#pagerTickets").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+    });
+
+    function Click(parm) {
+
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 8;
+        if (parm.id == "homInc1") {
+            bandera = 7;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 9;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 10;
+        }
+        var listView = $("#gridTickets").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+    }
+
+
+</script>

@@ -1,0 +1,266 @@
+﻿@model ERPElectrodata.Models.PROJECT
+
+@{
+    ViewBag.Title = "Create";
+    Layout = null;
+}
+
+@using (Html.BeginForm("Create", "Project", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormCreateProject", target = "upload_targetProject" }))
+{
+     @Html.ValidationSummary(true)
+
+    <input type="hidden" name="KEY_ATTA_PROJ" value="@ViewBag.KeyUploadFile" />
+  
+                    <fieldset>
+                        <legend>PROJECT</legend>
+
+                        <div class="divFondoUno">
+
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Project Name
+                                </div>
+                                <div class="k-textbox">
+                                    @Html.EditorFor(model => model.NAM_PROJ)
+                                    @Html.ValidationMessageFor(model => model.NAM_PROJ)
+                                </div>
+                            </div> 
+                        </div>
+
+                        <div class="divFondoDos">                          
+
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Start Date
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.DATE_STAR)
+                                    @Html.ValidationMessageFor(model => model.DATE_STAR)
+                                </div>
+                            </div>
+
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Closure Date
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.DATE_END)
+                                    @Html.ValidationMessageFor(model => model.DATE_END)
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="divSpace3"></div>
+                        <div class="divCont3" style="width:95%;">
+                            <div class="editor-label">
+                                Description
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextAreaFor(model => model.DES_PROJ)
+                                @Html.ValidationMessageFor(model => model.DES_PROJ)
+                            </div>
+                        </div>
+
+                        <div class="divFondoUno" style="margin:10px 0px 0px 0px;">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="k-button" data-toggle="modal" data-target="#myModalAttach">
+                                    Attach
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="divFondoUno" style="margin:0px 0px 10px 0px;">
+                            <div class="divSpace3"></div>
+                            <div id="divmensajecreate" style="float: left; width: 50%; display: inline-block; "></div>
+
+                            <div style="display:inline-block; float:right; padding:5px 15px 0px 5px;">
+                                <div style=" float:left; padding:0px 15px 0px 0px; ">
+
+                                    <input type="submit" class="k-button" value="@ResourceLanguaje.Resource.BtnSave"/>
+                                </div>
+                                <input onclick="FuncCancelCreateProj()" type="button" id="reset" class="k-button" value="Cancel" />
+                            </div>
+                        </div>     
+
+</fieldset>
+
+}
+  
+<iframe id="upload_targetProject" name="upload_targetProject" src="" class="frameHidden"></iframe>
+
+@*----------------------------POPUP ADJUNTOS-------------------------------*@
+
+<div class="modal fade" id="myModalAttach" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" style="width:500px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" onclick="FuncCloseModalPoup()"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Attach Files</h4>
+            </div>
+            <div class="modal-body">
+                <div class="editor-label">
+                    Type Document
+                </div>
+                <div class="editor-field" style="font-size:0.9em">
+                    @Html.TextBox("ArrayFile")
+                </div>
+                <br />
+                <input name="files" id="files" type="file" />
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="k-button" onclick="FuncCloseModalPoup()">Done</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*----------------------------POPUP GUARDANDO-------------------------------*@
+
+<div id="popupsaving" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="mySmallModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Saving</h4>
+            </div>
+            <div class="modal-body">
+               <div id="divsavingatta">Saving...</div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="k-button" data-dismiss="modal" onclick="ClosePopupProject()">Ok</button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#DES_PROJ").kendoEditor({
+        tools: [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "foreColor",
+            "backColor",
+            "justifyLeft",
+            "justifyCenter",
+            "justifyRight",
+            "justifyFull",
+            "insertUnorderedList",
+            "insertOrderedList",
+            "indent",
+            "outdent",
+            "createLink",
+            "unlink",
+            "subscript",
+            "superscript"
+        ], encoded: false
+        });
+
+        var DATE_STAR = $("#DATE_STAR").kendoDateTimePicker().data("kendoDateTimePicker");
+        DATE_STAR.value(new Date('@ViewBag.DATE'));
+
+        var DATE_END = $("#DATE_END").kendoDateTimePicker().data("kendoDateTimePicker");
+    @*DATE_END.value(new Date("@ViewBag.DATE"));*@
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach"
+            },
+            upload: function (e) {
+                e.data = {
+                    ID_TYPE_ATTA_PROJ: ArrayFile.dataItem().ID_TYPE_ATTA_PROJ,
+                    KEY_ATTA_PROJ: '@ViewBag.KeyUploadFile'
+                };
+            },
+            remove: function (e) {
+                e.data = {
+                    KEY_ATTA_PROJ: '@ViewBag.KeyUploadFile'
+                };
+            },
+            async: {
+                saveUrl: "/AttachProject/SaveAttachProject",
+                removeUrl: "/AttachProject/RemoveAttachProject"
+            }
+        });
+
+        var ArrayFile = $("#ArrayFile").kendoComboBox({
+            dataTextField: "NAM_ATTA_PROJ",
+            dataValueField: "ID_TYPE_ATTA_PROJ",
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Project/ListTypeAttaProj/?var=" + Math.random(),
+                }
+            }
+        }).data("kendoComboBox");
+    })
+
+    function uploadDone(conf,msg) {
+
+        closeWinModalPopUpLoad();
+      
+        if (conf == 'OK') {
+            var title = '@ResourceLanguaje.Resource.InformationSaved ';
+            var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                            "<div style='padding:10px 0px 10px 0px;'>"+msg+"</div>" +
+                            "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                            "<button id='btnContinues' class='k-button'>Continue</button>" +
+                            "</div></div>";
+
+            winPopUpModal(title, body, 300, 130);
+
+            $("#closebtnmodal").click(function () {
+                location.reload(true);               
+            });
+
+            $("#btnContinues").click(function () {
+                location.reload(true);               
+            });
+        }
+        else {
+            var title = '@ResourceLanguaje.Resource.InformationMissing';
+            var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                          "<div style='padding:10px 0px 10px 0px;'>"+msg+"</div>" +
+                          "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                          "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                          "</div></div>";
+
+            winPopUpModal(title, body, 300, 130);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+
+    function FuncCloseModalPoup() {
+        $("#myModalAttach").modal('hide');
+    }
+
+    function ClosePopupProject()
+    {
+        setTimeout(function () {
+            LoadProject();
+        },500);
+    }
+ </script>

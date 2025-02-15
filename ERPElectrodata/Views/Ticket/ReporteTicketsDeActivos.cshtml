@@ -1,0 +1,393 @@
+﻿
+@*@model ERPElectrodata.Models.TicketDeActivoPorCuenta_Result*@
+@{
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+
+    //Layout = null;
+}
+
+
+<style>
+
+    .dataTables_length select {
+        width: auto;
+        padding: .375rem .75rem; 
+        line-height: 1.5;
+        border-radius: .2rem;
+        display: inline-block; 
+        margin-bottom: 10px; 
+
+    }
+
+        .dataTables_length select:focus {
+            outline: none;
+        }
+
+    /*Estilos de Alerta*/
+
+    #toastContainer {
+        position: fixed;
+        top: 60px; 
+        right: 10px;
+        max-width: 300px;
+        z-index: 1000;
+    }
+
+    .toast {
+        background-color: #e0a800; /* Color de fondo  */
+        color: #000;
+        padding: 20px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        display: block;
+        opacity: 0.8;
+        transition: opacity 0.5s ease-in-out;
+    }
+
+    .hide-toast {
+        opacity: 0 !important;
+    }
+
+
+
+    /*Ubicacion de los div Datatable*/
+    #dataTable_length, #dataTable_filter {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 15px;
+    }
+
+    #dataTable_filter {
+        float: right;
+        margin-right: 10px;
+    }
+
+  
+
+    /*----------------------------*/
+
+    /*Paginacion*/
+
+    .dataTables_paginate {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .paginate_button {
+        display: inline-block;
+        padding: 5px 10px;
+        margin: 0 2px;
+        cursor: pointer;
+        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background-color: #fff;
+    }
+
+        .paginate_button.current {
+            background-color: #66819f;
+            color: #fff;
+        }
+
+        .paginate_button.disabled {
+            pointer-events: none;
+            color: #aaa;
+        }
+
+        .paginate_button a {
+            text-decoration: none !important;
+        }
+
+
+    .dataTables_paginate a {
+        text-decoration: none !important;
+    }
+
+        .dataTables_paginate a:hover {
+            text-decoration: none !important;
+        }
+
+
+    .ellipsis {
+        margin: 0 5px;
+    }
+
+    /*----------------------------*/
+
+    /*Transicion de paginas */
+    .dataTables_paginate {
+        overflow: hidden;
+    }
+
+        .dataTables_paginate a {
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+            .dataTables_paginate a:hover {
+                background-color: #eee;
+                color: #333;
+            }
+
+    /*----------------------------*/
+
+
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.8/lottie.min.js"></script>
+
+
+<!-- ============================================================
+=LIBRERIAS PARA USO DE DATATABLES JS
+===============================================================-->
+<script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte de Tickets de Activos
+    </div>
+    <div class="card-body">
+
+        <div class="form-row">
+            <div class="col-md-3">
+                <div class="md-form md-outline input-with-post-icon">
+                    <label for="selectEstado">Estado</label>
+                    <input id="selectEstado" class="form-control" placeholder="Seleccionar o escribir" />
+                </div>
+            </div>
+            <!--  <div class="col-md-3">
+                <div class="md-form md-outline input-with-post-icon datepicker">
+                    <label for="FInicio">Desde</label>
+                    <input placeholder="Select Fecha" type="date" id="FInicio" class="form-control">
+                </div>
+
+            </div>
+
+            <div class="col-md-3">
+                <div class="md-form md-outline input-with-post-icon datepicker">
+                    <label for="FFin">Hasta</label>
+                    <input placeholder="Select Fecha" type="date" id="FFin" class="form-control">
+                </div>
+
+            </div>
+               -->
+            <div class="col-md-3">
+                <div class="md-form md-outline input-with-post-icon datepicker">
+                    <label style="color:white;">-</label>
+                    <button id="btnBuscar" class="btn btn-primary btn-block"><i class="fa fa-search"></i> REPORTE</button>
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="md-form md-outline input-with-post-icon datepicker">
+                    <label style="color:white;">-</label><br />
+                    <button id="btnDescargarExcel" style="background-color: #3a7f0c; color:white; " class="btn" disabled> <i class="fas fa-file-excel"></i> Exportar</button>
+
+                </div>
+            </div>
+
+
+
+        </div>
+    </div>
+</div>
+
+
+
+<div class="card mb-3">
+
+    <hr />
+    <div class="card-body">
+        <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap4">
+            <div class="row">
+                <div class="col-sm-12">
+                    <table style="width: 100%;" id="tablaTicket" class="table table-hover table-striped table-bordered dataTable dtr-inline" role="grid" aria-describedby="example_info">
+                    </table>
+                </div>
+            </div><div class="row"><div class="col-sm-12 col-md-5"></div><div class="col-sm-12 col-md-7"></div></div>
+        </div>
+    </div>
+</div>
+
+
+<div id="toastContainer"></div>
+
+
+<script type="text/javascript">
+
+
+    function showToast(message) {
+        var toastContainer = document.getElementById('toastContainer');
+
+        
+        var toast = document.createElement('div');
+        toast.className = 'toast';
+
+        var icon = document.createElement('i');
+        icon.className = 'fas fa-info-circle fa-lg text-white'; 
+        icon.style.marginRight = '3px'; 
+        toast.appendChild(icon);
+        var text = document.createElement('span');
+        text.innerHTML = message; 
+        text.style.marginLeft = '12px'; 
+        toast.appendChild(icon);
+        toast.appendChild(text);
+        toastContainer.appendChild(toast);
+        toast.style.display = 'flex'; 
+        toast.style.alignItems = 'center'; 
+        setTimeout(function () {
+            toast.classList.add('hide-toast');
+            setTimeout(function () {
+                toastContainer.removeChild(toast);
+            }, 500);
+        }, 5000);
+    }
+
+
+
+    $(document).ready(function () {
+
+        $.ajax({
+            url: "/Ticket/ListaEstadoTicketActivo",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                if (data && data.Data && data.Data.length > 0) {
+                    var comboBox = $('#selectEstado').kendoComboBox({
+                        placeholder: "Seleccionar o escribir",
+                        dataTextField: "ESTADO",
+                        dataValueField: "ID_STAT_END",
+                        filter: "contains",
+                        suggest: true,
+                        dataSource: {
+                            data: data.Data,
+                            sort: { field: "ESTADO", dir: "asc" }
+                        }
+                    }).data("kendoComboBox");
+
+                }
+            },
+            error: function (error) {
+                console.error("Error al obtener datos:", error);
+            }
+        });
+
+
+        function generarEnlaceAdjunto(data, type, row) {
+           
+            if (type !== "display" || !data.trim()) {
+                return data; 
+            }
+
+            const elementos = data.split(';');
+
+            if (elementos.length >= 3) {
+                const valor1 = elementos[0].trim();
+                const valor2 = elementos[1].trim();
+                const valor3 = elementos[2].trim();
+                const url = `https://itms.electrodata.com.pe/Adjuntos/Delivery/${valor3}/${valor1}_${valor2}.pdf`;
+                const enlace = `<a target="_blank" href="${url}">${valor1.toUpperCase()}</a>`;
+                return enlace;
+            } else {
+                return data;
+            }
+        }
+
+
+        $('#btnBuscar').click(function () {
+            if ($.fn.DataTable.isDataTable("#tablaTicket")) {
+                $("#tablaTicket").DataTable().destroy();
+            }
+
+            var estadoFiltro = $("#selectEstado").val();
+
+            if (!estadoFiltro) {
+                showToast("Aviso: <br> Parar lograr una busqueda debe seleccionar un estado");
+                return;
+            }
+
+            var tabla = $('#tablaTicket').DataTable({
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros por página"
+                },
+                "dom": '<"row"<"col-md-6"l><"col-md-6"B>>rtip',
+                "serverSide": true,
+                "processing": true,
+                "ajax": {
+                    "url": "/Ticket/ListarTicketPorCuenta",
+                    "type": "POST",
+                    "data": function (d) {
+                        d.estado = estadoFiltro;
+                    },
+                    "dataType": "json",
+                    "dataSrc": "data" 
+                },
+                "columns": [
+                    { "data": "Ticket", "title": "Nro Ticket", "width": "auto" },
+                    { "data": "UsuarioFinal", "title": "Usuario Final" },
+                    { "data": "Area", "title": "Área" },
+                    { "data": "FechaInicio", "title": "F. Inicio" },
+                    { "data": "Sede", "title": "Sede" },
+                    { "data": "Locacion", "title": "Locación" },
+                    { "data": "Estado", "title": "Estado" },
+                    { "data": "ENTREGA_RECEPCION", "title": "ENTREGA/RECEPCION" },
+                    {
+                        "data": "ADJUNTODETICKET",
+                        "title": "ADJUNTOS",
+                        "render": generarEnlaceAdjunto
+                    }
+                    ],
+                "paging": true,
+                "lengthChange": true,
+                "drawCallback": function (settings) {
+                    var pageInfo = tabla.page.info();
+                    var totalPages = Math.ceil(pageInfo.recordsTotal / pageInfo.length);
+
+                    // Modificar el mensaje en el pie de página
+                    $("#tablaTicket_info").html("Mostrando de " + (pageInfo.start + 1) + " a " + (pageInfo.start + pageInfo.length) + " de " + pageInfo.recordsTotal + " (total de " + totalPages + " páginas)");
+                }
+            });
+
+            $('#btnDescargarExcel').prop('disabled', false);
+        });
+
+
+        $(document).ready(function () {
+            $('#btnDescargarExcel').click(function () {
+                var estadoFiltro = $("#selectEstado").val();
+                $.ajax({
+                    url: '/Ticket/DescargarExcelTicket',
+                    type: 'GET',
+                    data: { estado: estadoFiltro },
+                    success: function (data) {
+                    },
+                    error: function (error) {
+                        console.log('Error al descargar el archivo Excel: ' + error.responseText);
+                    }
+                });
+            });
+        });
+
+$('#btnDescargarExcel').click(function () {
+    var estadoFiltro = $("#selectEstado").val();
+    var url = '@Url.Action("DescargarExcelTicket", "Ticket")' + '?estado=' + estadoFiltro;
+    window.location.href = url;
+});
+
+
+
+
+
+
+    });
+
+
+
+
+
+</script>
+

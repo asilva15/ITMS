@@ -1,0 +1,168 @@
+﻿@{
+    ViewBag.Title = "Lista Categorías con Tareas";
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<style>
+    .divCabecera {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-tasks icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Lista de Categorías con Tareas
+                <div class="page-title-subheading">
+                    Listado de categorías que cuentan con tareas asociadas.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    <div class="card-header divCabecera">
+        Categorías con tareas
+        <button class="btn-shadow btn btn-primary mr-4" type="button" style="height: 38px;" data-toggle="modal" data-target="#miModal" onclick="AgregarCategoriaTarea();">
+            +
+        </button>
+    </div>
+
+    <div class="card-body">
+        <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%; text-align: center;" id="tbCategorias">
+            <thead>
+                <tr>
+                    <th class="text-center">Nombre</th>
+                    <th class="text-center">Resuelve Ticket</th>
+                    <th class="text-center">Estado</th>
+                    <th class="text-center">Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var idAcco = parseInt(@Session["ID_ACCO"]);
+
+        if (idAcco == 60) {
+            ListarCategoriasConTareasBNV();
+        } else {
+            ListarCategoriasConTareas();
+        }
+    });
+
+    function ListarCategoriasConTareas() {
+        $('#tbCategorias').dataTable().fnDestroy();
+        $('#tbCategorias').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: "/Tarea/ListarCategoriasConTareas",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "NomCategoria"
+                },
+                {
+                    data: "ResuelveTicket",
+                    render: function (data, type, row) {
+                        return data ? "Sí" : "No";
+                    }
+                },
+                {
+                    data: "Estado",
+                    render: function (data, type, row) {
+                        let color = data ? 'success' : 'danger';
+                        let text = data ? 'Activo' : 'Inactivo';
+                        let label = `<div class="badge badge-${color}">${text}</div>`;
+                        return label;
+                    }
+                },
+                {
+                    data: "Id",
+                    render: function (data, type, row) {
+                        let boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                <a target="_blank" href="/Tarea/Detalle/${data}" class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3">
+                                    <i class="fa fa-edit" aria-hidden="true"></i> Editar
+                                </a>
+                             </div>`;
+                        return boton;
+                    }
+                },
+            ]
+        });
+    }
+
+    function ListarCategoriasConTareasBNV() {
+        $('#tbCategorias').dataTable().fnDestroy();
+        $('#tbCategorias').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: "/Tarea/ListarCategoriasConTareasBNV",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "NomCategoria"
+                },
+                {
+                    data: "ResuelveTicket",
+                    render: function (data, type, row) {
+                        return data ? "Sí" : "No";
+                    }
+                },
+                {
+                    data: "Estado",
+                    render: function (data, type, row) {
+                        let color = data ? 'success' : 'danger';
+                        let text = data ? 'Activo' : 'Inactivo';
+                        let label = `<div class="badge badge-${color}">${text}</div>`;
+                        return label;
+                    }
+                },
+                {
+                    data: "Id",
+                    render: function (data, type, row) {
+                        let boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                <a target="_blank" href="/Tarea/Detalle/${data}" class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3">
+                                    <i class="fa fa-edit" aria-hidden="true"></i> Editar
+                                </a>
+                             </div>`;
+                        return boton;
+                    }
+                },
+            ]
+        });
+    }
+
+    function AgregarCategoriaTarea() {
+        $("#lblTitulo").text("Nueva Categoría con Tareas");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Tarea/Create");
+    }
+
+</script>

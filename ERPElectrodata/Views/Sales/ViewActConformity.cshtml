@@ -1,0 +1,88 @@
+﻿@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("AttachActConformity", "Sales", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormActConformity", name = "FormActConformity", target = "ut_ActConformity" }))
+{
+    <input type="hidden" name="ID_DOCU_SALE_HF" id="ID_DOCU_SALE_HF" value="@ViewBag.ID_DOCU_SALE" />
+    <input type="hidden" name="procAC_HF" id="procAC_HF" value="@ViewBag.Proc" />
+    <div class="divFondoUno">
+        <div class="divSpace2"></div>
+        <div class="divCont2">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.Date
+            </div>
+            <div class="editor-field">
+                <input type="text" name="DATE_ATTA" id="DATE_ATTA" value=" " />
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos">
+        <div style="width:100%; float:left;">
+            <div style="width: 98%; margin:0 auto;" id="divAttaAct">
+                <input name="files" id="files" type="file" />
+            </div>
+        </div>
+    </div>
+    <div class="divFondoUno">
+        <div style="display:inline-block; float:right; padding:7px 12px 5px 0px;">
+            <div style=" float:left; padding:0px 10px 0px 0px; ">
+                <button id="submitActConf" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+            </div>
+            <button id="cancelActConf" class="k-button">Cancel</button>
+        </div>
+    </div>
+}
+<iframe id="ut_ActConformity" name="ut_ActConformity" src="" style="width:0px;height:0px;border-width:0px;display:none; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+
+    $("#submitActConf").click(function () {
+        winPopUpModalLoad("@ResourceLanguaje.Resource.SaleMsn06", "@ResourceLanguaje.Resource.PleaseWait", 300, 130);
+    });
+
+    $("#cancelActConf").click(function (event) {
+        event.preventDefault();
+        closeWinFormModalPopUp2();
+    });
+
+    $(document).ready(function () {
+
+        var onSelect = function (e) {
+            $.each(e.files, function (index, value) {
+                if (value.extension.toLowerCase() != ".pdf") {
+                    e.preventDefault();
+
+                    winPopUpModal("@ResourceLanguaje.Resource.WrongFileExtension", "<div style='border-bottom:1px dotted #dadada;padding:0 3px 20px 3px;'>" +
+                    "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.AssetMessage8</div>" +
+                    "<div style='float:right; padding:30px 0 0 0; '>" +
+                    "<button id='continuee' class='k-button'>Continue</button>" +
+                    "</div></div>", 400, 140);
+
+                    var undo = $("#continuee")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                    });
+                }
+                else {
+                    $("#divAttaAct").css("width", "93.5%");
+                }
+            });
+        };
+
+        function onRemove(e) {
+            $("#divAttaAct").css("width", "98%");
+        }
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "Attach"
+            },
+            select: onSelect,
+            multiple: false,
+            remove: onRemove,
+        });
+
+        var DATE_ATTA = $("#DATE_ATTA").kendoDatePicker().data("kendoDatePicker");
+    });
+</script>

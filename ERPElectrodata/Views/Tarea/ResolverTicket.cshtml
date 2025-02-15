@@ -1,0 +1,140 @@
+﻿@{
+    ViewBag.Title = "ResolverTicket";
+    Layout = null;
+}
+
+<input id="IdTicketAResolver" value="@ViewBag.IdTicket" hidden />
+<input id="IdTareaDetalleAResolver" value="@ViewBag.IdTareaDetalle" hidden />
+<input id="IdEstadoAResolver" value="@ViewBag.IdEstado" hidden />
+<div class="main-card card">
+    <div class="card-header">
+        Comentario
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-12">
+                @Html.TextArea("txtComentarioTarea", new { style = "width: 100%", rows = "2", @class = "form-control" })
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4 mt-3" style="text-align: center;">
+                <button onclick="GuardarComentarioTicketResuelto();" type="button" class="btn btn-primary"> <i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#txtComentarioTarea").kendoEditor({
+            encoded: false,
+            tools: [
+                {
+                    name: "bold"
+                },
+                {
+                    name: "italic"
+                },
+                {
+                    name: "underline"
+                },
+                {
+                    name: "justifyLeft"
+                },
+                {
+                    name: "justifyCenter"
+                },
+                {
+                    name: "justifyRight"
+                },
+                {
+                    name: "justifyFull"
+                },
+                {
+                    name: "insertUnorderedList"
+                },
+                {
+                    name: "insertOrderedList"
+                },
+                {
+                    name: "indent"
+                },
+                {
+                    name: "outdent"
+                },
+                {
+                    name: "createLink"
+                },
+                {
+                    name: "unlink"
+                }
+            ],
+            paste: function (e) {
+                //if ((/^<img src="data:image/).test(e.html)) {
+                //    toastr.warning("No está permitido imágenes.");
+                //    e.html = "";
+                //}
+                if (/<img\s+[^>]*>/i.test(e.html)) {
+                    toastr.warning("No se permiten imágenes en este campo.");
+                    e.html = "";
+                } else if ((/^<img src="data:image/).test(e.html)) {
+                    toastr.warning("No se permiten imágenes en este campo.");
+                    e.html = "";
+                }
+            }
+        });
+
+    });
+
+    function GuardarComentarioTicketResuelto() {
+        var comt = $("#txtComentarioTarea").data("kendoEditor");
+        var comentario = comt.value().trim();
+        var idTicket = $("#IdTicketAResolver").val();
+        var idTareaDetalle = $("#IdTareaDetalleAResolver").val();
+        var idEstado = $("#IdEstadoAResolver").val();
+
+        if (comentario.replace(/<p>|<\/p>|&nbsp;/g, '') == "") {
+            toastr.warning("Ingrese un comentario.", "Mensaje");
+        } else {
+            swal({
+                title: `¿Deseas guardar esta actividad?`,
+                text: `Se guardará el comentario de la actividad`,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Guardar",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: false,
+                closeOnCancel: false
+            }, function (dismiss) {
+                if (dismiss) {
+                    $.ajax({
+                        url: '/Tarea/GuardarComentarioTicketResuelto',
+                        data: JSON.stringify({
+                            idTick: idTicket,
+                            idTareaDetalle,
+                            idEstado,
+                            comentario
+                        }),
+                        type: "POST",
+                        contentType: "application/json",
+                        success: function (result) {
+                            if (result.message == 'REFRESH') {
+                                $("[data-dismiss=modal]").trigger({ type: "click" });
+                            }
+
+                            MensajeConfirmacionTareasMinsur(result.message);
+                        }
+                    });
+
+                }
+                else {
+                    swal("Cancelado", "Ha cancelado la operación", "error");
+                }
+
+            });
+        }
+    }
+
+</script>

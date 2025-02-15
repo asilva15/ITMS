@@ -1,0 +1,184 @@
+﻿@{
+    ViewBag.Title = "Enviar correo resuelto";
+    Layout = null;
+}
+
+<style>
+    .modal-form-container h2 {
+        color: #333;
+        text-align: center;
+    }
+
+    .modal-form-container label {
+        font-size: 0.9em;
+        color: #333;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .modal-form-container input[type="email"],
+    .modal-form-container input[type="text"],
+    .modal-form-container textarea,
+    .modal-form-container input[type="file"] {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 15px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 0.95em;
+    }
+
+        .modal-form-container input[type="email"]:focus,
+        .modal-form-container input[type="text"]:focus,
+        .modal-form-container textarea:focus {
+            border-color: #007BFF;
+            outline: none;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.2);
+        }
+
+    .modal-form-container textarea {
+        resize: vertical;
+    }
+
+    .modal-form-container small {
+        font-size: 0.8em;
+        color: #666;
+    }
+
+    .modal-form-container button {
+        width: 100%;
+        padding: 10px;
+        background-color: #007BFF;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        font-size: 1em;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+        .modal-form-container button:hover {
+            background-color: #0056b3;
+        }
+</style>
+
+<div class="modal-form-container" hidden>
+    <form id="correoForm" enctype="multipart/form-data">
+        <input type="hidden" value="@ViewBag.IdTicket" name="IdTick" id="IdTick" readonly="readonly" />
+        <label for="correos">Para:</label>
+        <input type="email" id="correos" name="correos" placeholder="correo@ejemplo.com" required multiple value="@ViewBag.Para">
+
+        <label for="cc">Con Copia (CC):</label>
+        <input type="email" id="cc" name="cc" placeholder="correo@ejemplo.com" multiple value="@ViewBag.Cc">
+
+        <label for="asunto">Asunto:</label>
+        <input type="text" id="asunto" name="asunto" placeholder="Asunto del correo" required value="@ViewBag.Asunto">
+
+        <label for="cuerpo">Cuerpo del mensaje:</label>
+        <textarea id="cuerpo" name="cuerpo" rows="6" placeholder="Escribe tu mensaje aquí..." required></textarea>
+        <small id="cuerpoAyuda" style="color: #666;">El texto no debe exceder los 2 MB (aproximadamente 2,000,000 caracteres).</small>
+
+
+        <label for="adjuntos">Adjuntar archivos:</label>
+        <input type="file" id="adjuntosCorreo" name="files">
+        <br />
+        <button type="submit">Enviar</button>
+    </form>
+    @*<div id="resultado" style="margin-top: 10px; color: green;"></div>*@
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        const maxFileSize = 4 * 1024 * 1024; // 4 MB en bytes
+        const maxFiles = 3; // Límite de archivos permitidos
+        let archivosSubidos = []; // Lista para almacenar archivos seleccionados
+
+        // Configuración de Kendo Upload sin saveUrl ni removeUrl
+        $("#adjuntosCorreo").kendoUpload({
+            localization: {
+                select: "Adjuntar Documentos"
+            },
+            multiple: true, // Permite seleccionar múltiples archivos
+            select: function (e) {
+                // Validar archivos seleccionados
+                const totalFiles = archivosSubidos.length + e.files.length;
+
+                if (totalFiles > maxFiles) {
+                    e.preventDefault();
+                    toastr.warning(`Solo se pueden adjuntar un máximo de ${maxFiles} archivos.`);
+                    return;
+                }
+
+                // Verificar el tamaño de cada archivo
+                $.each(e.files, function (index, file) {
+                    if (file.size > maxFileSize) {
+                        e.preventDefault();
+                        toastr.error(`El archivo "${file.name}" supera el tamaño máximo de 4 MB y no será subido.`);
+                    } else {
+                        archivosSubidos.push(file.rawFile); // Agregar archivos válidos
+                    }
+                });
+            },
+            remove: function (e) {
+                // Eliminar archivos de la lista local
+                archivosSubidos = archivosSubidos.filter(
+                    file => file.name !== e.files[0].name
+                );
+            }
+        });
+
+        $('#correoForm').submit(function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(this);
+
+            // Obtener y procesar el contenido del textarea como HTML
+            const cuerpoHtml = $('#cuerpo').val().replace(/\n/g, '<br>'); // Reemplazar saltos de línea con <br>
+            formData.set('cuerpo', cuerpoHtml); // Actualizar el valor del textarea con el contenido procesado
+
+            // Añadir cada archivo subido al FormData con nombres únicos
+            $.each(archivosSubidos, function (index, file) {
+                formData.append(`archivosSubidos[${index}]`, file);
+            });
+
+            const sendingToast = toastr.info("Enviando correo, por favor espere...", {
+                timeOut: 0,
+                extendedTimeOut: 0,
+                tapToDismiss: false,
+                closeButton: false
+            });
+
+            $.ajax({
+                url: '/DetailsTicket/EnviarCorreoResueltoAsync',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function (response) {
+                    toastr.clear(sendingToast);
+
+                    if (response === "OK") {
+                        toastr.success("Se envió correo correctamente");
+                        location.reload(true);
+                    } else {
+                        toastr.warning("Error: " + response);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.clear(sendingToast);
+                    toastr.error("Ocurrió un error al enviar el correo. " + error);
+                    console.log(xhr, status, error);
+                }
+            });
+        });
+
+    });
+
+
+
+</script>
+
+
+

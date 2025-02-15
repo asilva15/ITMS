@@ -1,0 +1,217 @@
+﻿@model ERPElectrodata.Models.LOCATION
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("CrearLocacionBNVAct", "Location", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmLocacion", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <input type="hidden" id="idGrupoAct" name="idGrupoAct" value="@ViewBag.IdGrupo" />
+        <input type="hidden" id="ID_UMINERA" value="0" name="ID_UMINERA" />
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    Unidad Minera <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    <input type="text" name="ID_UMin" id="ID_UMin" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="editor-label" onclick="$('#divNuevaSede').show()" style="cursor:pointer;color:royalblue" title="Clic aquí para registrar una sede">
+                    Sede <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    @Html.TextBoxFor(model => model.ID_SITE)
+                    @Html.ValidationMessageFor(model => model.ID_SITE)
+                </div>
+            </div>
+        </div>
+        <div id="divNuevaSede" style="display: none;">
+            <div class="row">
+                <div class="col-md-10">
+                    Nueva Sede <b style="color:red">(*)</b>
+                </div>
+                <div class="col-md-2">
+                    <button id="closeNuevaSede" type="button" class="close" onclick="$('#divNuevaSede').hide(); $('#NuevaSede').val('')">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-9">
+                    <input id="NuevaSede" type="text" name="NuevaSede" class="k-textbox" style="width:100%" />
+                </div>
+                <div class="col-md-3">
+                    <button class="btn-shadow btn btn-primary" type="button" id="btnNuevaSede">
+                        <i class="pe-7s-diskette" style="font-weight:900;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Locación <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.NAM_LOCA)
+                    @Html.ValidationMessageFor(model => model.NAM_LOCA)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-lg-4">
+                <br />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="cancelNewLocacion" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="submitNewLocacion" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitNewLocacion").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewLocacion").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        var ID_UMin = $("#ID_UMin").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarAllUMineraBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        if ("@ViewBag.UMinera" != '0') {
+            ID_UMin.value("@ViewBag.UMinera");
+            $("#ID_UMINERA").val("@ViewBag.UMinera");
+        }
+        ID_UMin.enable(false);
+
+        var ID_SITE = $("#ID_SITE").kendoComboBox({
+            dataTextField: "NAM_SITE",
+            dataValueField: "ID_SITE",
+            cascadeFrom: 'ID_UMin',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarSedesBNV?idGrupo=@ViewBag.IdGrupo&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $('#btnNuevaSede').click(function () {
+            var nomSede = $('#NuevaSede').val().trim();
+
+            if (nomSede == '') {
+                toastr.warning("Ingrese un nombre para la sede.", "Mensaje");
+            }
+            else {
+                swal({
+                    title: `¿Deseas crear esta sede?`,
+                    text: `Se creará la sede para la unidad minera ${ ID_UMin.text() }`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: "/Asset/GuardarSedeBNV/",
+                            data: "idGrupo=@ViewBag.IdGrupo&idUMinera=" + ID_UMin.value() + "&NomSede=" + nomSede + "&var=" + Math.random(),
+                            type: "POST",
+                            cache: false,
+                            dataType: "text",
+                            success: function (resp) {
+                                if (resp == 'ERROR') {
+                                    toastr.error("Error al crear la sede.", "Mensaje");
+                                } else {
+                                    toastr.success("Se registró correctamente la nueva sede.", "Información Guardada");
+                                    ID_SITE.dataSource.read();
+                                    ID_SITE.value(resp);
+                                    $('#closeNuevaSede').trigger({ type: "click" });
+                                    swal.close();
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Cancelado", "Ha cancelado la creación de la sede", "error");
+                    }
+                });
+            }
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+     function uploadDoneLocacion(msg, code, nombre) {
+
+         if (msg == "OK") {
+             $("[data-dismiss=modal]").trigger({ type: "click" });
+             toastr.success("Se registró correctamente la locación.", "Información Guardada");
+
+             if ("@ViewBag.Mantenimiento" == "1") {
+                 ListarTabla();
+             } else {
+                 $("#Locacion").data("kendoComboBox").dataSource.read();
+                 var Locacion2 = $("#Locacion").data("kendoComboBox");
+                 Locacion2.value(code);
+             }
+
+         }
+         else {
+             var messageAsset = '';
+             if (code == '0') {
+                 messageAsset = 'Complete los datos obligatorios.';
+             }
+             else if (code == '1') {
+                 messageAsset = 'Contacte al administrador.';
+             }
+             else {
+                 messageAsset = 'La locación ya existe.';
+             }
+             toastr.warning(messageAsset, "Mensaje");
+     }
+ }
+</script>

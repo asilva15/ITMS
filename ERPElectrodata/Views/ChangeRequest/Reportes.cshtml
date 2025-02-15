@@ -1,0 +1,748 @@
+﻿@{
+//Layout = null;
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="mb-3 card">
+            <div class="card-header">Filtros</div>
+            <div class="card-body">
+                <form id="ParamByPerson">
+                    <div class="row">
+                        <div class="col-md-3">
+                            Usuario
+                            <input type="text" id="idRequested" name="idRequested" />
+                        </div>
+                        <div class="col-md-3">
+                            Desde <b style="color:red">(*)</b>
+                            <input type="text" id="SIN_DATE" name="SIN_DATE" />
+                        </div>
+                        <div class="col-md-3">
+                            Hasta <b style="color:red">(*)</b>
+                            <input type="text" id="TO_DATE" name="TO_DATE" />
+                        </div>
+                        <div class="col-md-2">
+                            <br />
+                            <button id="btnBuscar" class="btn btn-light btn-block" onclick="fnBuscar(); return false;"><i class="fa fa-search"></i> Buscar</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Clasificación del Cambio</div>
+            <div class="card-body">
+                <div id="ChangeType"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Impacto</div>
+            <div class="card-body">
+                <div id="Impacto"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Prioridad del Cambio</div>
+            <div class="card-body">
+                <div id="ChangePrioridad"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Autorización del Cambio</div>
+            <div class="card-body">
+                <div id="ChangeAutorizacion"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Cambio Menor</div>
+            <div class="card-body">
+                <div id="ChangeMenor"></div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-3">
+            <div class="card-header">Cambio Mayor</div>
+            <div class="card-body">
+                <div id="ChangeMayor"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function fnBuscar() {
+
+        $("#ChangeType").empty();
+        $("#Impacto").empty();
+        $("#ChangePrioridad").empty();
+        $("#ChangeAutorizacion").empty();
+        $("#ChangeMenor").empty();
+        $("#ChangeMayor").empty();
+
+        fnChangeType();
+        fnChangeMenor();
+        fnChangeMayor();
+        fnImpacto();
+        fnPrioridad();
+        fnAutorizacion();
+    }
+    function fnChangeType() {
+
+        var idRequested = $("#idRequested").val();
+        if (idRequested == "")
+            idRequested = 0
+        else
+            idRequested = parseInt(idRequested);
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            idRequested: idRequested
+        };
+        $.ajax({
+            url: '/ChangeRequest/ClasificacionCambio?var=' + Math.random(),
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                ////TODOS
+                var Nombre = new Array();
+                var Color = new Array();
+                var Count = new Array();
+                var acumulado;
+                $.each(json['Data'], function (index, value) {
+                    Nombre[index] = value['nombre'];
+                    Count[index] = value['Count'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['Count'];
+                });
+
+                var colors = Color,
+                    colorPie = "#6A819B",
+                    categories = ["All"],
+                    name = 'Status',
+                    data = [{
+                        y: acumulado,
+                        color: colorPie,
+                        drilldown: {
+                            name: 'Status',
+                            categories: Nombre,
+                            data: Count,
+                            color: colors[0]
+                        }
+                    }];
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                    });
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'ChangeType',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Porcentaje: <b>{point.percentage:.2f}%</b><br>Cantidad: <b>{point.y}</b>',
+                        percentageDecimals: 2,
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '80%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Cantidad</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+
+            }
+        });
+    }
+    function fnChangeMenor() {
+        var idRequested = $("#idRequested").val();
+        if (idRequested == "")
+            idRequested = 0
+        else
+            idRequested = parseInt(idRequested);
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            idRequested: idRequested
+        };
+        $.ajax({
+            url: '/ChangeRequest/CambioMenor?var=' + Math.random(),
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                ////TODOS
+                var Nombre = new Array();
+                var Color = new Array();
+                var Count = new Array();
+                var acumulado;
+                $.each(json['Data'], function (index, value) {
+                    Nombre[index] = value['nombre'];
+                    Count[index] = value['Count'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['Count'];
+                });
+
+                var colors = Color,
+                    colorPie = "#6A819B",
+                    categories = ["All"],
+                    name = 'Status',
+                    data = [{
+                        y: acumulado,
+                        color: colorPie,
+                        drilldown: {
+                            name: 'Status',
+                            categories: Nombre,
+                            data: Count,
+                            color: colors[0]
+                        }
+                    }];
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                    });
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'ChangeMenor',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Porcentaje: <b>{point.percentage:.2f}%</b><br>Cantidad: <b>{point.y}</b>',
+                        percentageDecimals: 2,
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '80%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Cantidad</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+
+            }
+        });
+    }
+    function fnChangeMayor() {
+        var idRequested = $("#idRequested").val();
+        if (idRequested == "")
+            idRequested = 0
+        else
+            idRequested = parseInt(idRequested);
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            idRequested: idRequested
+        };
+        $.ajax({
+            url: '/ChangeRequest/CambioMayor?var=' + Math.random(),
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                ////TODOS
+                var Nombre = new Array();
+                var Color = new Array();
+                var Count = new Array();
+                var acumulado;
+                $.each(json['Data'], function (index, value) {
+                    Nombre[index] = value['nombre'];
+                    Count[index] = value['Count'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['Count'];
+                });
+
+                var colors = Color,
+                    colorPie = "#6A819B",
+                    categories = ["All"],
+                    name = 'Status',
+                    data = [{
+                        y: acumulado,
+                        color: colorPie,
+                        drilldown: {
+                            name: 'Status',
+                            categories: Nombre,
+                            data: Count,
+                            color: colors[0]
+                        }
+                    }];
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                    });
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'ChangeMayor',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Porcentaje: <b>{point.percentage:.2f}%</b><br>Cantidad: <b>{point.y}</b>',
+                        percentageDecimals: 2,
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '80%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Cantidad</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+
+            }
+        });
+    }
+    function fnImpacto() {
+        var idRequested = $("#idRequested").val();
+        if (idRequested == "")
+            idRequested = 0
+        else
+            idRequested = parseInt(idRequested);
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            idRequested: idRequested
+        };
+        $.ajax({
+            url: '/ChangeRequest/Impacto?var=' + Math.random(),
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var Nombre = new Array();
+                var Color = new Array();
+                var Count = new Array();
+                var acumulado;
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                $.each(json['Data'], function (index, value) {
+                    Nombre[index] = value['nombre'];
+                    Count[index] = value['Count'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['Count'];
+                });
+                $('#Impacto').highcharts({
+                    chart: {
+                        type: 'bar'
+                    },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: Nombre,
+                        gridLineWidth: 1,
+                        title: {
+                            align: 'high',
+                            text: 'Caracteristicas',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: '',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' ',
+                        valueDecimals: 0,
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal',
+                        },
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            showInLegend: true
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Recuento',
+                        color: "rgba(178,25,178,1)",
+                        data: Count
+                    }]
+                });
+            }
+        });
+    }
+    function fnPrioridad() {
+        var idRequested = $("#idRequested").val();
+        if (idRequested == "")
+            idRequested = 0
+        else
+            idRequested = parseInt(idRequested);
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            idRequested: idRequested
+        };
+        $.ajax({
+            url: '/ChangeRequest/Prioridad?var=' + Math.random(),
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                ////TODOS
+                var Nombre = new Array();
+                var Color = new Array();
+                var Count = new Array();
+                var acumulado;
+                $.each(json['Data'], function (index, value) {
+                    Nombre[index] = value['nombre'];
+                    Count[index] = value['Count'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['Count'];
+                });
+
+                var colors = Color,
+                    colorPie = "#6A819B",
+                    categories = ["All"],
+                    name = 'Status',
+                    data = [{
+                        y: acumulado,
+                        color: colorPie,
+                        drilldown: {
+                            name: 'Status',
+                            categories: Nombre,
+                            data: Count,
+                            color: colors[0]
+                        }
+                    }];
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                    });
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'ChangePrioridad',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Porcentaje: <b>{point.percentage:.2f}%</b><br>Cantidad: <b>{point.y}</b>',
+                        percentageDecimals: 2,
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '80%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Cantidad</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+
+            }
+        });
+    }
+    function fnAutorizacion() {
+        var idRequested = $("#idRequested").val();
+        if (idRequested == "")
+            idRequested = 0
+        else
+            idRequested = parseInt(idRequested);
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            idRequested: idRequested
+        };
+        $.ajax({
+            url: '/ChangeRequest/Autorización?var=' + Math.random(),
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                ////TODOS
+                var Nombre = new Array();
+                var Color = new Array();
+                var Count = new Array();
+                var acumulado;
+                $.each(json['Data'], function (index, value) {
+                    Nombre[index] = value['nombre'];
+                    Count[index] = value['Count'];
+                    Color[index] = value['color'];
+                    acumulado = acumulado + value['Count'];
+                });
+
+                var colors = Color,
+                    colorPie = "#6A819B",
+                    categories = ["All"],
+                    name = 'Status',
+                    data = [{
+                        y: acumulado,
+                        color: colorPie,
+                        drilldown: {
+                            name: 'Status',
+                            categories: Nombre,
+                            data: Count,
+                            color: colors[0]
+                        }
+                    }];
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                    });
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'ChangeAutorizacion',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Porcentaje: <b>{point.percentage:.2f}%</b><br>Cantidad: <b>{point.y}</b>',
+                        percentageDecimals: 2,
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '80%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Cantidad</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        function addDays(theDate, days) {
+            return new Date(theDate.getTime() + days * 24 * 60 * 60 * 1000);
+        }
+        var yesterday = addDays(new Date(), -1);
+
+        var k_enddatetimepicker = $("#TO_DATE").kendoDatePicker({
+            value: new Date()
+        }).data("kendoDatePicker");
+
+        var k_startdatetimepicker = $("#SIN_DATE").kendoDatePicker({
+            value: yesterday
+        }).data("kendoDatePicker");
+
+        $("#idRequested").kendoComboBox({
+            dataTextField: "NOMBRE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            delay: 1000,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/RequestExpense/ListByRequest?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        fnBuscar();
+    });
+</script>

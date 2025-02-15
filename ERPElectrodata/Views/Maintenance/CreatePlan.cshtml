@@ -1,0 +1,153 @@
+﻿@model ERPElectrodata.Models.PlanActivo
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("CreatePlan", "Maintenance", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmPlan", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <input type="hidden" id="idGrupoAct" name="idGrupoAct" value="@ViewBag.IdGrupo" />
+        <input type="hidden" id="IdOperador_HF" value="0" name="IdOperador_HF" />
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    Operador <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    <input type="text" name="IdOperadorMod" id="IdOperadorMod" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    Plan <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.Nombre)
+                    @Html.ValidationMessageFor(model => model.Nombre)
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Descripción
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.Descripcion)
+                    @Html.ValidationMessageFor(model => model.Descripcion)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-lg-4">
+                <br />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="cancelNewPlan" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="submitNewPlan" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitNewPlan").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewPlan").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#IdOperadorMod").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarAllOperadorBNV?var=" + Math.random()
+                }
+            }
+        });
+        var IdOperadorMod = $("#IdOperadorMod").data("kendoComboBox");
+        if ("@ViewBag.IdOperador" != '0') {
+            IdOperadorMod.value("@ViewBag.IdOperador");
+            $("#IdOperador_HF").val("@ViewBag.IdOperador");
+        }
+        IdOperadorMod.enable(false);
+
+        $("#Descripcion").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+     function uploadDonePlan(msg, code, nombre) {
+
+         if (msg == "OK") {
+             $("[data-dismiss=modal]").trigger({ type: "click" });
+             toastr.success("Se registró correctamente el plan.", "Información Guardada");
+
+             if ("@ViewBag.Mantenimiento" == "1") {
+                 $("#cbPlan").data("kendoComboBox").dataSource.read();
+                 ListarTabla();
+             } else {
+                 $("#IdPlan").data("kendoComboBox").dataSource.read();
+                 var IdPlan = $("#IdPlan").data("kendoComboBox");
+                 IdPlan.value(code);
+             }
+
+         }
+         else {
+             var messageAsset = '';
+             if (code == '0') {
+                 messageAsset = 'Complete los datos obligatorios.';
+             }
+             else if (code == '1') {
+                 messageAsset = 'Contacte al administrador.';
+             }
+             else {
+                 messageAsset = 'El plan ya existe.';
+             }
+             toastr.warning(messageAsset, "Mensaje");
+     }
+ }
+</script>

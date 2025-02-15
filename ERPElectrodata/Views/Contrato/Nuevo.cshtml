@@ -1,0 +1,121 @@
+﻿@model ERPElectrodata.Models.Contrato
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("Nuevo", "Contrato", FormMethod.Post, new { enctype = "multipart/form-data", name = "FrmContrato", id = "FrmContrato", target = "utContrato" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <input type="hidden"  id="idGrupoAct" name="idGrupoAct" value="@ViewBag.IdGrupo" />
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    Contrato <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.Nombre)
+                    @Html.ValidationMessageFor(model => model.Nombre)
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Descripción
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.Descripcion)
+                    @Html.ValidationMessageFor(model => model.Descripcion)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-lg-4">
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="cancelContrato" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="submitContrato" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="utContrato" name="utContrato" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitContrato").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelContrato").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#Descripcion").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+     function uploadDoneContrato(msg, code) {
+
+         if (msg == "OK") {
+             $("[data-dismiss=modal]").trigger({ type: "click" });
+             toastr.success("Se registró correctamente el contrato.", "Información Guardada");
+
+             if ("@ViewBag.Mantenimiento" == "1") {
+                $("#cbContrato").data("kendoComboBox").dataSource.read();
+                ListarTabla();
+             } else {
+                $("#IdContrato").data("kendoComboBox").dataSource.read();
+                var IdContrato = $("#IdContrato").data("kendoComboBox");
+                IdContrato.value(code);
+             }
+
+         }
+         else {
+
+             var messageAsset = '';
+             if (code == '0') {
+                 messageAsset = 'Complete los datos obligatorios.';
+             }
+             else if (code == '1') {
+                 messageAsset = 'Contacte al administrador.';
+             }
+             else {
+                 messageAsset = 'El contrato ya existe.';
+             }
+
+             toastr.warning(messageAsset, "Mensaje");
+        }
+}
+</script>

@@ -1,0 +1,489 @@
+﻿
+@{
+    ViewBag.Title = "ResumenGestionCambio";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    .card-container {
+        display: flex;
+    }
+
+    .card-header {
+        margin-right: 10px;
+    }
+</style>
+
+
+
+
+
+
+
+
+
+<input id="SwApproval" name="SwApproval" value="@ViewBag.SwApproval" type="hidden" />
+<div style="width: 100%;font-size:0.9em" id="divContent">
+    <div style="width: 100%;" id="divPrincipal" class="card mb-3">
+        <div class="card-container">
+
+            <center><div class="card-header"><h5><strong>Código: # @ViewBag.IdGestionCambio</strong></h5> </div></center>
+            @*<div class="card-header">Detalle de la solicitud</div>*@
+        </div>
+
+        @*Detalle de Cada Solicitud*@
+        <div id="divDetails" class="card-body">
+            <div class="row">
+                @*Boton Regresar a listado de Solicitudes*@
+                <div style="text-align:center;" class="col-md-1">
+                    <div style="font-size:28px;cursor:pointer;" onclick="ListadoGestionCambios()" title="Ver todas las solicitudes"><i class="fa fa-bars"></i></div>
+                </div>
+                <div class="col-md-1" id="divDetailImage">
+                </div>
+                <div class="col-md-7" style="color:black;" id="divDetailRequest"></div>
+
+                @*Detalle Status Solicitud*@
+                <div class="col-md-2" id="divDetailDetail" style="text-align:right"></div>
+                <div class="col-md-1" id="divDetailStatus"></div>
+            </div>
+
+            <div class="row" style="margin-top:7px;border-top: 1px solid #c3c3c3">
+                <div class="col-md-12" style="font-size:1em;">
+                    @*Detalle Ticket*@
+                    <div id="divDetalleTicket"></div>
+                    @*Detalle Solicitud*@
+                    <div id="divDetailBody"></div>
+                    @*Detalle Ejecución*@
+                    <div id="divDetPlanAccion"></div>
+                    @*Comentario de Actividades*@
+                    <div id="divComments">
+                        <div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Comentarios</span></div>
+                        <div class='form-row'>
+                            <table id="tbComentario" class="table table-bordered table-striped table-responsive-lg" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Comentario</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="divAdjuntos">
+                        <div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Adjuntos</span></div>
+                        <div class='form-row'>
+
+
+                            @using (Html.BeginForm("GuardarArchivo", "ChangeRequest", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmDetailDelivery", target = "upload_target" }))
+                            {
+
+                                <input id="idGestion" name="idGestion" value="@ViewBag.IdGestionCambio" type="hidden" />
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                        @if (@ViewBag.idApproved != 9)
+                                        {
+                                            if (@ViewBag.idApproved != 5)
+                                            {
+                                                <input name="files" id="file" type="file" />
+
+                                                <button id="btnCrear" type="submit" onclick="GuardarAdjunto();" class="btn btn-primary btn-block">Guardar</button>
+                                            }
+
+                                        }
+                                    </div>
+
+                                </div>
+                            }
+
+
+                            <table id="tbAdjuntos" class="table table-bordered table-striped table-responsive-lg" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Usuario</th>
+                                        <th>Archivo</th>
+                                        <th>Fecha</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<iframe id="upload_target" name="upload_target" src="" style="display:none;"></iframe>
+<script type="text/javascript">
+    var approved = @ViewBag.Approved;
+    var idSession = @ViewBag.IdSession;
+    $(document).ready(function () {
+        ResumenCambio(@ViewBag.IdGestionCambio);
+        var onSelect = function (e) {
+            var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").data("kendoComboBox");
+            $.each(e.files, function (index, value) {
+                //if (value.extension.toLowerCase() != ".pdf") {
+                //    e.preventDefault();
+                //    toastr.error("Seleccione un archivo pdf.", "Alerta");
+                //}
+            });
+        };
+        $("#file").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            select: onSelect
+        });
+    });
+
+
+
+
+    function ResumenCambio(id)
+    //(id,idreq,user,dlong,jefe,time,color,letra,changetype,TypeApproved,ChangeTypeDetail,otherChange,urgentDetail,isImpactCheck,otherImpact,priority,detpriority,question1,detailChange,question3,question4,question5,question6,question7,modifiedDate,registro,idApprovedRq,activeJustified,justificationChange,changeDate,activeToplan,jefeActiveToPlan,dateActiveToplan,idchangeApproved,archivo,extensionArchivo,idChangeArchivo)
+    {
+        $('#tbComentario').dataTable().fnDestroy();
+        $('#tbComentario').DataTable({
+            /*"order": [[0, "asc"]],*/
+            "order": [[2, "desc"]],
+            dom: 'Bfrtip',
+            ajax: "/ChangeRequest/GestionCommentBNV/"+id,
+            columns: [
+                { data: "Usuario" },
+                { data: "Comentario" },
+                { data: "Fecha" }
+            ],
+            "bPaginate": false,
+            "searching": false,
+            "info": false,
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    text: 'PDF',//<i class="fa fa-file-pdf-o"></i>
+                    titleAttr: 'PDF',
+                    className: 'btn btn-outline-light'
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: 'Excel',//<i class="fa fa-file-excel-o"></i>
+                    titleAttr: 'Excel',
+                    className: 'btn btn-outline-light'
+                },
+                {
+                    extend: 'copyHtml5',
+                    text: 'Copy',//<i class="fa fa-files-o"></i>'
+                    titleAttr: 'Copy',
+                    className: 'btn btn-outline-light'
+                },
+            ]
+        });
+        ListarAdjuntos(id);
+        $.ajax({
+            url: "/ChangeRequest/GestionCambiosDetalle/" + id,
+            //data: parametros,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $.each(data['Data'], function (index, value) {
+                    //alert((data['Data'][index]['SwApproval']) + ' ' + (data['Data'][index]['idApproved']) + ' ' );
+                    var opciones = "";
+                    //if ((data['Data'][index]['idApproved']) == 7 || (data['Data'][index]['idApproved']) == 2 ) {
+                    //opciones = '<span title="Rechazar" class="fa fa-trash" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="RejectRequest(' + (data['Data'][index]['idchangeApproved']) + ')"></span>';
+                    //}
+                    $("#divDetailImage").empty();
+                    $("#divDetailImage").append("<img src='/Content/Fotos/" + (data['Data'][index]['IdPersEnti']) + ".jpg' width='60' height='60' />");
+
+                    $("#divDetailRequest").empty();
+                    $("#divDetailRequest").append(/*"<div style='width:8px;height:60px; background-color:" + (data['Data'][index]['Color']) + "; float:left'></div>" +*/
+                        "<div style='width:100%; float:left;'><span style='text-transform:capitalize;'>De: " + (data['Data'][index]['Usuario']) + "</span><span style='color:#808080;'> (Solicitante)</span></div>" +
+                        "<div style='width:100%; float:left;'><span style='text-transform:capitalize;'>Fecha: " + (data['Data'][index]['FechaCreacion']) + "</span> " + (data['Data'][index]['HoraCreacion']) + "</div>" +
+                        "<div style='width:100%; float:left;'><span style='text-transform:capitalize;'>Para: " + (data['Data'][index]['Jefe']) + "</span><span style='color:#808080;'> (Aprueba)</span></div>");
+
+                    $("#divDetailDetail").empty();
+                    $("#divDetailDetail").append("<div style='width:100%; font-size:12px;'>Tipo de Cambio: " + (data['Data'][index]['ChangeType']) + "</div>" +
+                        "<div style='width:100%; font-size:.85em; color:#808080;'>" + (data['Data'][index]['TipoAprobacion']) + "</div>" +
+                        "<div>" + opciones + "</div>");
+                    $("#divDetailStatus").empty();
+                    $("#divDetailStatus").append("<div style='width: 50px; background-color: " + (data['Data'][index]['Color']) + "; color: white; font-size: 2.2em; text-align: center; padding-top: 3px;'>" + (data['Data'][index]['Letra']) + "</div>");
+
+                    $("#divDetailBody").empty();
+                    $("#divDetalleTicket").empty();
+                    if ((data['Data'][index]['IdTicket']) != 0) {
+                        $("#divDetalleTicket").append(
+                            "<div class='mt-3' style='background-color:gray;color:white'><span class='ml-1'>Ticket - Gestión de Cambio</span></div>" +
+                            "<div class='row'>" +
+                            "<div class='col-md-3'><div class='smallTitle'><b>Ticket</b></div><a href='' onclick='IrDetalleTicket(" + (data['Data'][index]['IdTicket']) + ");return false;'>" + (data['Data'][index]['CodTicket']) + "</a></div>" +
+                            "<div class='col-md-3'><div class='smallTitle'><b>Fecha de Creación de Ticket</b></div><div class='smallField'>" + (data['Data'][index]['FechaTicket']) + " </div></div>" +
+                            "</div>"
+                        );
+                    }
+                    $("#divDetailBody").append(
+
+
+                        "<div>" +
+
+                         "<div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Gestión del Cambio</span></div>" +
+                        "<div class='form-row'>" +
+
+                        "<div class='col-md-6'><b>Asunto</b><div>" + (data['Data'][index]['DetalleCambio']) + "</div></div>" +
+                        "</div>" +
+
+                        "<div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Clasificación del Cambio</span></div>" +
+                        "<div class='form-row'>" +
+                        "<div class='col-md-2'><b>Tipo de Cambio</b><div>" + (data['Data'][index]['ChangeType']) + "</div></div>" +
+                        "<div class='col-md-4'><b>Cambio " + (data['Data'][index]['ChangeType']) + "</b><div class='smallField'>" + (data['Data'][index]['ChangeTypeDetail']) + " </div></div>" +
+                        ((data['Data'][index]['ChangeTypeDetail']) == "Otro" ?
+                            "<div class='col-md-3'><b>Otro</b><div>" + (data['Data'][index]['otherChange']) + "</div></div>"
+                            : "") +
+                        
+                        ((data['Data'][index]['otherImpact']) != "" ?
+                            "<div class='col-md-3'><b>Otros</b><div>" + (data['Data'][index]['otherImpact']) + "</div></div>"
+                            : "") +
+                        "</div>" +
+                        "<div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Prioridad del Cambio</span></div>" +
+                        "<div class='form-row'>" +
+                        "<div class='col-md-2'><b>Prioridad </b><div>" + (data['Data'][index]['prioridad']) + "</div></div>" +
+                        "<div class='col-md-10'><b>Detalle de Prioridad " + (data['Data'][index]['prioridad']) + "</b><div>" + (data['Data'][index]['detallePrioridad']) + "</div></div>" +
+                        "</div>" +
+                        //"<div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Asunto del Cambio</span></div>" +
+                        //"<div class='form-row'>" +
+
+                        //"<div class='col-md-6'><b>Asunto</b><div>" + (data['Data'][index]['DetalleCambio']) + "</div></div>" +
+                        //"</div>" +
+                        "<div class='form-row'>" +
+
+                        "</div>" +
+                        "<div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Detalle del Cambio</span></div>" +
+                        "<div class='form-row'>" +
+                        "<div id='divDetailChange' class='col-md-12'></div>" +
+                        "</div>" +
+
+                        "<div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Status</span></div>" +
+                        "<div class='form-row'>" +
+                        "<div class='col-md-2'><b>Status Inicial</b><div>Nueva Solicitud</div></div>" +
+                        "<div class='col-md-3'><b>Registro Inicial</b><div><span style='text-transform:capitalize;'>" + (data['Data'][index]['FechaCreacion']) + "</span> " + (data['Data'][index]['HoraCreacion']) + "</div></div>" +
+                        "<div class='col-md-3'><b>Aprobador</b><div>" + (data['Data'][index]['Jefe']) + "</div></div>" +
+                        "<div class='col-md-2'><b>Status Actual</b><div>" + (data['Data'][index]['TipoAprobacion']) + "</div></div>" +
+                        "<div class='col-md-2'><b>Registro Actual</b><div>" + (data['Data'][index]['RegistroActual']) + "</div></div>" +
+                        "</div></div > "
+                    );
+
+                    if ((data['Data'][index]['activeToplan']) == "2") {
+                        $("#divDetPlanAccion").empty();
+                        $("#divDetPlanAccion").append(
+                            "<div class='form-row mt-3' style='background-color:gray;color:white'><span class='ml-1'>Detalle de plan de acción</div>" +
+                            "<div class='form-row'>" +
+                            "<div class='col-md-3'><b>Estado de plan de acción</b><div>" + (data['Data'][index]['TipoAprobacion']) + "</div></div>" +
+                            "<div class='col-md-3'><b>Fecha de status </b><div>" + (data['Data'][index]['dateActiveToplan']) + "</div></div>" +
+                            "</div></div><br />");
+                    }
+                    else {
+                        $("#divDetPlanAccion").empty();
+                    }
+                    LoadDetailChange(id);
+                    loadImpactCheck((data['Data'][index]['isImpactCheck']));
+
+                });
+            },
+            error: function (xhr, status, error) {
+                console.log("Error en la llamada Ajax:", error);
+                // Puedes mostrar una alerta o hacer algo más para notificar al usuario del error
+            }
+        });
+    }
+
+    function ListarAdjuntos(id) {
+
+        $('#tbAdjuntos').dataTable().fnDestroy();
+        $('#tbAdjuntos').DataTable({
+
+
+            "order": [[0, "asc"]],
+            dom: 'Bfrtip',
+            ajax: "/ChangeRequest/GestionAttaBNV/" + id,
+            columns: [
+                { data: "Usuario" },
+                //{ data: "Nombre" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href="/Adjuntos/ChangeRequest/' + data.Nombre + '" target ="_blank">' + data.Nombre + '</a>';
+                    }
+                },
+                { data: "Fecha" },
+
+
+            ],
+
+            "bPaginate": false,
+            "searching": false,
+            "info": false,
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    text: 'PDF',//<i class="fa fa-file-pdf-o"></i>
+                    titleAttr: 'PDF',
+                    className: 'btn btn-outline-light'
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: 'Excel',//<i class="fa fa-file-excel-o"></i>
+                    titleAttr: 'Excel',
+                    className: 'btn btn-outline-light'
+                },
+                {
+                    extend: 'copyHtml5',
+                    text: 'Copy',//<i class="fa fa-files-o"></i>'
+                    titleAttr: 'Copy',
+                    className: 'btn btn-outline-light'
+                },
+            ]
+        });
+    }
+
+    function LoadDetailChange(id) {
+        $("#divDetailChange").empty();
+        //$("#divDetailChange").load("/ChangeRequest/viewDetailChangeBNV?id=" + id + "&var=" + Math.random());
+                $("#divDetailChange").load("/ChangeRequest/viewDetailChangeMINSUR?id=" + id + "&var=" + Math.random());
+
+    }
+    function loadImpactCheck(id) {
+        $.ajax({
+            url: "/ChangeRequest/DetailImpact?id=" + id + "&var" + Math.random(),
+            type: "GET",
+            cache: false,
+            success: function (resp) {
+                $("#ImpactCheck").append("<span>" + resp.Data + '</span>');
+            }
+        });
+    }
+    function ListadoGestionCambios() {
+        location = "http://" + location.host + "/ChangeRequest/";
+    }
+    function IrDetalleTicket(id){
+        window.open("http://" + location.host + "/DetailsTicket/Index/"+id)
+    }
+    function RejectRequest(id) {
+        swal("Solicitud de Cambio", {
+            icon: "warning",
+
+            buttons: {
+
+                defeat: {
+                    text: "Anular Solicitud de Cambio",
+                    value: "catch",
+                },
+                /*defeat: "Cancelar Solicitud",*/
+                cancel: "Volver"
+
+            },
+        })
+            .then((value) => {
+                switch (value) {
+
+                    case "catch":
+
+                        swal({
+                            text: 'Ingrese comentario de anulación de Cambio!',
+                            content: "input",
+                            button: {
+                                text: "Aceptar",
+                                closeModal: false,
+                            },
+                        })
+                            .then(name => {
+                                var aux;
+                                aux = name;
+                                if (!name) throw null;
+                                RegistrarComentario(id, aux);
+                                $.ajax({
+                            url: "/ChangeRequest/RejectApproved/" + id,
+                            data: $("#FormRejectRequest").serialize() + "&var=" + Math.random(),
+                            type: "POST",
+                            success: function (resp) {
+                                swal.close();
+                                if (resp == 'OK') {
+                                    toastr.success("Se ha Anulado la Solicitud de Cambio.", "Sistema Integrado de Gestión");
+                                }
+                                else if (resp == 'Advertencia') {
+                                    toastr.warning("Sólo se puede Aprobar las Solicitudes Validadas.", "Sistema Integrado de Gestión");
+                                }
+                                else {
+                                    toastr.warning("Se rechazo la solicitud pero hubo error al enviar correos, por favor contactar con el Administrador.",
+                                        "Sistema Integrado de Gestión");
+                                }
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 1500);
+                            }
+                        });
+                                //return RegistrarActividad(id);
+                            })
+                        break;
+
+
+                    @*case "catch":
+                        swal("Procesando información, por favor espere!", "Gestión de Cambios", "/images/spinner.gif");
+                        $.ajax({
+                            url: "/ChangeRequest/RejectApprovedBNV/" + @ViewBag.IdGestionCambio,
+                            data: $("#FormRejectRequest").serialize() + "&var=" + Math.random(),
+                            type: "POST",
+                            success: function (resp) {
+                                swal.close();
+                                if (resp == 'OK') {
+                                    toastr.success("Se ha rechazado la Solicitud de Cambio.", "Sistema Integrado de Gestión");
+                                }
+                                else if (resp == 'Advertencia') {
+                                    toastr.warning("Sólo se puede Aprobar las Solicitudes Validadas.", "Sistema Integrado de Gestión");
+                                }
+                                else {
+                                    toastr.warning("Se rechazo la solicitud pero hubo error al enviar correos, por favor contactar con el Administrador.",
+                                        "Sistema Integrado de Gestión");
+                                }
+                                setTimeout(function () {
+                                    location.reload();
+                                }, 1500);
+                            }
+                        });
+                        break;*@
+
+                    //default:
+                    //    swal("Cancelado");
+                }
+            });
+    }
+    function uploadDone() {
+        //location.reload();
+        ListarAdjuntos(@ViewBag.IdGestionCambio);
+        $('.k-upload-files').remove();
+    }
+
+</script>
+
+

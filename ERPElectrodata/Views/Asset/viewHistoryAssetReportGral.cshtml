@@ -1,0 +1,113 @@
+﻿@model ERPElectrodata.Models.ASSET
+
+@{
+    Layout = null;
+}
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Trazabilidad General
+    </div>
+    <div class="card-body">
+        <form id="Parametros">
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Desde
+                    </div>
+                    <div class="editor-field">
+                        <input id="FechaInicio" name="FechaInicio" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Hasta
+                    </div>
+                    <div class="editor-field">
+                        <input id="FechaFin" name="FechaFin" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Usuario Modificador
+                    </div>
+                    <div class="editor-field">
+                        <input id="ID_PERS_ENTI_CREA" class="form-control" name="ID_PERS_ENTI_CREA" />
+                    </div>
+                </div>
+                @*<div class="col-md-4">
+                    <div class="editor-label">
+                        Activo
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_ASSE)
+                        @Html.ValidationMessageFor(model => model.ID_ASSE)
+                    </div>
+                    <div style="background-color:white; background: url('/Content/Images/origen.jpg') no-repeat;height:10px; width:23px; z-index:2; position:absolute;"></div>
+                    <div style="border-radius: 2px 2px 2px 2px; border: 1px solid #aaaaaa; margin-top: 6px; padding: 3px 3px 3px 3px; color: #38607d; z-index:1; text-align:justify">
+                        Recuerde que la búsqueda se realizará después de ingresar el cuarto caracter.
+                    </div>
+                </div>*@
+                <div class="col-md-2">
+                    <br />
+                    <button id="btnBuscar" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="bodyForm" style="margin-top:10px;">
+    <div class="inBodyForm">
+        <iframe id="RSActivoTrazaGral" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var FechaInicio = $("#FechaInicio").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaFin = $("#FechaFin").kendoDateTimePicker().data("kendoDateTimePicker");
+
+       
+        $.ajax({
+            url: "/AccountEntity/ActListarUsuarioCreador",
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                if (data && data.Data && data.Data.length > 0) {
+                    $('#ID_PERS_ENTI_CREA').kendoComboBox({
+                        dataTextField: "CLIE",
+                        dataValueField: "ID_PERS_ENTI",
+                        filter: "contains",
+                        suggest: true,
+                        dataSource: {
+                            schema: {
+                                data: "Data",
+                                total: "Count"
+                            },
+                            transport: {
+                                read: "/AccountEntity/ActListarUsuarioCreador?var=" + Math.random()
+                            }
+                        }
+                    }).data("kendoComboBox");
+                }
+
+                $("#btnBuscar").prop("disabled", false);
+            },
+            error: function (error) {
+                console.error("Error al obtener datos:", error);
+            }
+        });
+
+        // Agrega el evento click al botón de búsqueda
+        $("#btnBuscar").click(function (event) {
+            event.preventDefault();
+            window.frames["RSActivoTrazaGral"].src = "/Reporting/Activo/ActivoTrazaGral.aspx?var=" + Math.random()
+                + "&ID_PERS_ENTI_CREA=" + $("#ID_PERS_ENTI_CREA").val() +
+                "&FechaInicio=" + $("#FechaInicio").val() + "&FechaFin=" + $("#FechaFin").val();
+        });
+
+
+    });
+
+</script>

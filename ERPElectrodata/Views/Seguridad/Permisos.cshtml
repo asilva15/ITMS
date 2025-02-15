@@ -1,0 +1,312 @@
+﻿@{
+    ViewBag.Title = "Permisos";
+    Layout = null;
+}
+<div class="titleForm">
+    <div class="title">
+        Permisos
+    </div>
+</div>
+<div style="width:100%; height:542px; display:inline-block;">
+    <div style="float:left; width:100%;">
+        <div style="width:100%;">
+            <div style="width:30%; padding-top:10px; padding-left:10px; float:left;">
+                    <div>
+                        Usuario<br />
+                        <input type="text" id="ID_ENTI" name="ID_ENTI" />
+                    </div>
+            </div>
+            <div style="width:59%; padding:10px; float:left;">
+                    <div id="PerfilProfesional">
+                        <div class="row">
+                            <div class="col-sm-3" style="font-weight:bold;">
+                                Gerencia
+                            </div>
+                            <div class="col-sm-1" style="font-weight:bold;">
+                                :
+                            </div>
+                            <div class="col-sm-8" id="NameUE">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3" style="font-weight:bold;">
+                                Area
+                            </div>
+                            <div class="col-sm-1" style="font-weight:bold;">
+                                :
+                            </div>
+                            <div class="col-sm-8" id="NameArea">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-3" style="font-weight:bold;">
+                                Cargo
+                            </div>
+                            <div class="col-sm-1" style="font-weight:bold;">
+                                :
+                            </div>
+                            <div class="col-sm-8" id="NameCargo">
+
+                            </div>
+                        </div>
+                    </div>
+            </div>
+            <hr />
+            <div style="width:100%;float:left;">
+                <div>
+                    <div class="clearfix" style="padding-bottom:0px;">
+                        <button type="button" class="btn btn-primary btn-sm" style="float:right;" onclick="FnAddNewRoleByPerson()">Adicionar</button>
+                    </div>
+                    <div id="TablaAddNewRole" class="divHide" style="padding-top:15px;">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Seleccione Perfil</th>
+                                    <th style="border-left: 1px solid #e2e2e2; width: 70px;">Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="editor-field">
+                                            <input type="text" id="ID_ROLE" name="ID_ROLE" />
+                                        </div>
+                                    </td>
+                                    <td style="text-align: center; border-left: 1px solid #e2e2e2; width:70px;" align="center">
+                                        <span title="Save" class="fa fa-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px; " onclick="FncSaveRoles()"></span>
+                                        <span>&nbsp;&nbsp;</span>
+                                        <span title="Hide" class="fa fa-chevron-up" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px; " onclick="HideAddNewRole()"></span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <hr />
+                <div>
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Perfil</th>
+                                <th style="border-left: 1px solid #e2e2e2; width: 70px;">Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="TablaListRoles"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $.get("/Assistance/Equipo", function (json) {
+
+            var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+                index: 1,
+                dataTextField: "FIR_NAME",
+                dataValueField: "ID_PERS_ENTI",
+                template: '<div style="clear:both; display:flex; flex-flow:row">'+
+                            '<div>' +
+                                '<img height="40"  src=\"/Content/Fotos/${data.ID_FOTO}.jpg\" alt=\"#:data.ID_ENTI#\" />' +
+                            '</div>' +
+                            '<div>' +
+                                '<div>' +
+                                    '<div>' +
+                                        '&nbsp;${data.FIR_NAME}' +
+                                    '</div >' +
+                                '</div >'+
+                            '</div >'+
+                           '</div > ',
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['Data'],
+                change: function () {
+                    var value = this.value();
+                    LoadRolesByPerson(value);
+                },
+                dataBound: function (e) {
+                    var value = this.value();
+                    LoadRolesByPerson(value);
+                }
+            }).data("kendoComboBox");
+
+        });
+    });
+
+    function LoadRolesByPerson(id) {
+        //$("#TablaListRoles").append('Lista de Roles Para la Persona con ID: '+ id);
+        $.ajax({
+            url: "/Seguridad/ListarUsuarioPerfil/" + id,
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                HideAddNewRole();
+
+                $("#NameUE").empty();
+                $("#NameArea").empty();
+                $("#NameCargo").empty();
+
+                $("#NameUE").text((data['Orga']).NAME_UE);
+                $("#NameArea").text((data['Orga']).NAME_AREA);
+                $("#NameCargo").text((data['Orga']).JOB_TITLE);
+
+                $("#TablaListRoles").empty();
+                $.each(data['Data'], function (index, value) {
+                    $("#TablaListRoles").append('<tr>' +
+                        '<td>' + (data['Data'][index]['NombrePerfil']) + '</td>' +
+                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; width:70px;">' +
+                        '<span id="Remove' + (data['Data'][index]['IdUsuarioPerfil']) + '" title="Remove" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="RemoveRoles(' + (data['Data'][index]['IdUsuarioPerfil']) + ')"></span>' +
+                        '</td>' +
+                        '</tr>');
+                });
+            },
+            error: function (source) {
+                alert("Error Loading Json.");
+            }
+        });
+    }
+
+    function RemoveRoles(Id) {
+        swal({
+            title: '¿Desea eliminar el perfil?',
+            text: 'Si selecciona "Sí", se eliminará el perfil.',
+            type: "info",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            cancelButtonText: "No",
+            confirmButtonText: "Sí",
+            closeOnConfirm: false,
+            showLoaderOnConfirm: true
+        }, function (dismiss) {
+            if (dismiss) {
+                var idpersenti = $("#ID_ENTI").val();
+
+                $.ajax({
+                    url: "/Seguridad/EliminarUsuarioPerfil/",
+                    data: "Id=" + Id + "&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == "OK") {
+
+                            var idpersenti = $("#ID_ENTI").val();
+                            LoadRolesByPerson(idpersenti);
+                            swal.close();
+
+                        }
+                    }
+                });
+            }
+        });       
+
+    }
+    function FnAddNewRoleByPerson() {
+        $("#TablaAddNewRole").removeClass("divHide");
+
+        var ID_ROLE = $("#ID_ROLE").kendoComboBox({
+            autoBind: true,
+            dataTextField: "ROLE_NAME",
+            dataValueField: "ROLE_ID",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Seguridad/ListarPerfil?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+    }
+
+    function HideAddNewRole() {
+        $("#ID_ROLE").val("");
+        $("#TablaAddNewRole").addClass("divHide");
+
+    }
+
+    function FncSaveRoles() {
+
+        var idrole = $("#ID_ROLE").val();
+        var idpersenti = $("#ID_ENTI").val();
+
+        if (idrole != "") {
+            $.ajax({
+                url: "/Seguridad/GuardarUsuarioPerfil/",
+                data: "&idrole=" + idrole + "&idpersenti=" + idpersenti + "&var=" + Math.random(),
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+
+                    if (resp == "OK") {
+                        $("#TablaAddNewRole").addClass("divHide");
+                        LoadRolesByPerson(idpersenti);
+                    }
+                    else if (resp == "EXISTE") {
+                        $('#SmallModalContent').modal('show');
+                        $("#SmallModalTitle").empty();
+                        $("#SmallModalTitle").text("Warning");
+                        $("#SmallModalBody").empty();
+                        $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>The selected user already has this role</div>");
+                        $("#SmallModalFooter").empty();
+                        $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                          "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                   "</div>");
+                        var undo = $("#continues")
+                        .bind("click", function () {
+                            $('#SmallModalContent').modal('hide');
+                        });
+                    } else {
+                        $('#SmallModalContent').modal('show');
+                        $("#SmallModalTitle").empty();
+                        $("#SmallModalTitle").text("Warning");
+                        $("#SmallModalBody").empty();
+                        $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>There was an error in the transaction</div>");
+                        $("#SmallModalFooter").empty();
+                        $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                          "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                   "</div>");
+                        var undo = $("#continues")
+                        .bind("click", function () {
+                            $('#SmallModalContent').modal('hide');
+                        });
+                    }
+                }
+            });
+        }
+        else {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Warning");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>You should select a role</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                       "</div>");
+            var undo = $("#continues").bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        }
+
+
+    }
+
+</script>

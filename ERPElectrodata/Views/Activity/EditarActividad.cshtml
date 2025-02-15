@@ -1,0 +1,257 @@
+﻿@model ERPElectrodata.Models.ACTIVITY_LOG
+@{
+    ViewBag.Title = "EditarSolicitud";
+    Layout = null;
+}
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+    table.k-editor {
+        height: auto !important;
+    }
+    .k-iframe{
+        border:0px !important;
+    }
+    /*.modal-backdrop {
+        display: none;
+    }*/
+</style>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title">Editar Actividad</div>
+                    @using (Html.BeginForm("EditarActividad", "Activity", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormActivity", target = "upload_target" }))
+                    {
+                        <form class="">
+                            <div class="form-row">
+                                <div class="col-md-5">
+                                    <div class="position-relative form-group">
+                                        <label id="lblID_CLIE" for="edID_CLIE" class="">Cliente</label>
+                                        <input id="edID_CLIE" name="edIDE_CLIE">
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <div class="position-relative form-group">
+                                        <label id="lblMotivoVacante" for="IdMotivoVacante" class="">Tipo de Actividad <span style="color:red">*</span> </label>
+                                        @Html.EditorFor(model => model.ID_TYPE_ACT)
+                                        @Html.ValidationMessageFor(model => model.ID_TYPE_ACT)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-5" id="divFechaInicio">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaInicio" for="DATE_INIC" class="">Fecha Inicio<span style="color:red">*</span></label>
+                                        @Html.EditorFor(model => model.DATE_INIC)
+                                        @Html.ValidationMessageFor(model => model.DATE_INIC)
+                                    </div>
+                                </div>
+                                <div class="col-md-5" id="divFechaFin">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaFin" for="DATE_END" class="">Fecha Fin<span style="color:red">*</span></label>
+                                        @Html.EditorFor(model => model.DATE_END)
+                                        @Html.ValidationMessageFor(model => model.DATE_END)
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="position-relative form-group">
+                                <label id="lblRequisitos" for="Requisitos" class="">Requisitos Mínimos<span style="color:red">*</span></label>
+                                @*<textarea name="Requisitos" id="Requisitos" rows="4"></textarea>*@
+                                @Html.TextAreaFor(model => model.COMENTARIO)
+                                @Html.ValidationMessageFor(model => model.COMENTARIO)
+                                @*<textarea id="editorComentario"></textarea>*@
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6"></div>
+                                <div class="col-md-3">
+                                    <button id="btnCrear" type="button" onclick="GuardarActividad()" class="btn btn-primary btn-block">Guardar</button>
+                                </div>
+                                <div class="col-md-3">
+                                    <button id="btnCancelar" type="button" class="btn btn-secondary btn-block" data-dismiss="modal">Cancelar</button>
+                                </div>
+                                <input name="idAct" value="@ViewBag.IdActividad" style="display:none" />
+                                <input name="Comment" value="@ViewBag.Coment" id="Comment" type="hidden" />
+                                <button id="cerrarModal" type="button" data-dismiss="modal" style="display:none"></button>
+                            </div>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+        <iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;display:none; visibility:hidden;"></iframe>
+    </div>
+</div>
+
+<div class="body-block-example-1 d-none">
+    <div class="loader bg-transparent no-shadow p-0">
+        <div class="ball-grid-pulse">
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        
+        /*=============================Carga de Datos=================================*/
+        $("#edID_CLIE").kendoComboBox({
+            autoBind: true,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+
+            }
+        });
+
+        $("#COMENTARIO").kendoEditor({
+            resizable: {
+                content: true,
+                toolbar: true,
+            },
+            placeholder: "Introduce un breve detalle de la actividad.(Máximo 500 caracteres).",
+            tools: [
+                        "formatting",
+                        "bold",
+                        "italic",
+                        "underline",
+                        "justifyLeft",
+                        "justifyCenter",
+                        "justifyRight",
+                        "justifyFull",
+                        "insertUnorderedList",
+                        "insertOrderedList",
+                        "indent",
+                "outdent","createLink", "unlink"
+            ],
+            encoded: false,
+        });
+      
+
+        var hoy = new Date();
+        $("#DATE_INIC").kendoDateTimePicker({
+            value: hoy,
+            format: "dd/MM/yyyy hh:mm tt"
+        });
+        var frmFEnd = $("#DATE_END").kendoDateTimePicker({
+            value: hoy,
+            format: "dd/MM/yyyy hh:mm tt"
+        });
+
+        $("#ID_TYPE_ACT").kendoComboBox({
+            autoBind: true,
+            placeholder: "SELECCIONAR TIPO",
+            dataTextField: "DES_ACT",
+            dataValueField: "ID_TYPE_ACT",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListTypeActivity?var=" + Math.random()
+                }
+            }
+        });
+        /*===============================================================================*/
+
+        /*============================Llenado de valores=================================*/
+        $("#edID_CLIE").data("kendoComboBox").value(@ViewBag.IdCliente);
+        $("#ID_TYPE_ACT").data("kendoComboBox").value(@ViewBag.IdTipoActividad);
+        $("#DATE_INIC").data("kendoDateTimePicker").value(new Date("@ViewBag.FIni"));
+        $("#DATE_END").data("kendoDateTimePicker").value(new Date("@ViewBag.FEnd"));
+        $("#COMENTARIO").data("kendoEditor").value($("#Comment").val());
+        /*===============================================================================*/
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            location.reload(true);
+        });
+
+    });
+
+
+
+</script>
+
+<script type="text/javascript">
+
+    function GuardarActividad() {
+        var frmCliente = $("#edID_CLIE");
+        var frmTActividad = $("#ID_TYPE_ACT");
+        var frmFIni = $("#DATE_INIC");
+        var frmFEnd = $("#DATE_END");
+        var frmComentario = $("#COMENTARIO");
+
+        if (frmCliente.val() == "") {
+            toastr.warning('', 'Debe ingresar el cliente');
+        } else if (frmTActividad.val() == "") {
+            toastr.warning('', 'Debe Ingresar el tipo de Actividad.');
+        }
+        else if (frmFIni.val() == "" || frmFEnd.val() == "") {
+            toastr.warning('','Debe ingresar las fechas');
+        }
+        else if (Date.parse(DATE_INIC.value) > Date.parse(DATE_END.value) || Date.parse(DATE_INIC.value) == Date.parse(DATE_END.value)) {
+            toastr.warning('','La fecha de Inicio no puede ser <br/>mayor o igual a la fecha de Fin.');
+        }
+        else if (frmComentario.val() == "") {
+            toastr.warning('','Debe Ingresar un Comentario de la Actividad.');
+        }
+        else {
+            $("#cerrarModal").click();
+            $("#FormActivity").submit();
+        }
+    }
+
+    function MostrarMensaje(msg, descripcion) {
+
+        if (msg == "OK") {
+            toastr.success(descripcion, "");
+            setTimeout(function () {
+                @*window.location.href = "@Url.Content("~/Activity/DetailsActivity")"*@
+                ListarActividades()
+            }, 1500);
+        }
+        else if (msg == "ERROR") {
+            toastr.warning(descripcion, "Mensaje");
+        }
+        else {
+            toastr.danger(descripcion, "Error");
+        }
+    }
+
+    function MostrarMensajeSession(msg) {
+        toastr.danger(msg);
+    }
+
+</script>

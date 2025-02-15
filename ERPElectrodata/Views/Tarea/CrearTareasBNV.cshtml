@@ -1,0 +1,475 @@
+﻿@{
+    ViewBag.Title = "Gestionar Tareas";
+    Layout = null;
+}
+ 
+<style>
+    .sortable-placeholder {
+        border: 1px dashed #ccc;
+        background: #f9f9f9;
+        min-height: 38px;
+        margin-bottom: 5px;
+    }
+</style>
+
+<div>
+    <ul id="listaTareas" class="todo-list-wrapper list-group list-group-flush" style="overflow-x: hidden; overflow-y: scroll; max-height: 470px;">
+    </ul>
+
+    <div class="row">
+        <div class="col-md-12">
+            <button onclick="GuardarTareas();" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#listaTareas").sortable({
+            placeholder: "sortable-placeholder",
+            update: function (event, ui) {
+
+            }
+        });
+        $("#listaTareas").disableSelection();
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "/Tarea/ListarTareasPorCategoriaBNV/@ViewBag.Id",
+            type: "GET",
+            datatype: "JSON",
+            cache: false,
+            success: function (data) {
+                if (data) ListarTareasCreadas(data["Data"]);
+            },
+            error: function () {
+            }
+        });
+
+    });
+
+    function ListarTareasCreadas(tarea) {
+        if (parseInt(tarea.length) > 0) {
+            $.each(tarea, function (index, value) {
+                let isChecked = value.Estado ? 'checked' : '';
+
+                let newLi = `
+                <li class="list-group-item">
+                    <div class="todo-indicator bg-secondary"></div>
+                    <input name="IdTarea" type="hidden" value="${value.IdConfigTarea}" />
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Título <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="TituloTarea" style="width:100%;" value="${value.Titulo}" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>
+                                Descripción <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="DescripcionTarea" style="width:100%;" value="${value.Descripcion}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Grupo <span style="color:red">(*)</span>
+                            <input id="IdQueu_${index}" name="IdQueu" value="${value.IdQueu}" />
+                        </div>
+                        <div class="col-md-6">
+                            Usuario Asignado <span style="color:red">(*)</span>
+                            <input id="IdAsignado_${index}" name="IdAsignado" value="${value.IdAsignado}" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Tarea Precedente
+                            <input id="TareaPadre_${index}" name="TareaPadre" />
+                        </div>
+                        <div class="col-md-6">
+                            Estado <br />
+                            <input type="checkbox" name="EstadoTarea" ${isChecked} />
+                        </div>
+                    </div>
+                </li>`;
+                $("#listaTareas").append(newLi);
+
+                let comboTareaPadre = $("#TareaPadre_" + index).kendoComboBox({
+                    dataTextField: "Titulo",
+                    dataValueField: "IdConfigTarea",
+                    filter: "contains",
+                    autoBind: true,
+                    delay: 500,
+                    minLength: 0,
+                    optionLabel: "",
+                    suggest: true,
+                    dataSource: {
+                        schema: {
+                            data: function (response) {
+                                // Filtrar la tarea actual
+                                return response.Data.filter(item => item.IdConfigTarea !== value.IdConfigTarea);
+                            },
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/Tarea/ListarTareasPorCategoriaBNV/@ViewBag.Id?var=" + Math.random()
+                        },
+                        sort: { field: "Orden", dir: "asc" }
+                    }
+                }).data("kendoComboBox");
+
+                if (value.IdConfigTareaPadre != null) {
+                    comboTareaPadre.value(value.IdConfigTareaPadre);
+                }
+
+                $("#IdQueu_" + index).kendoComboBox({
+                    dataTextField: "DES_QUEU",
+                    dataValueField: "ID_QUEU",
+                    filter: "contains",
+                    autoBind: true,
+                    suggest: true,
+                    dataSource: {
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                        }
+                    }
+                }).data("kendoComboBox");
+
+                $("#IdAsignado_" + index).kendoComboBox({
+                    dataTextField: "ASSI",
+                    dataValueField: "ID_PERS_ENTI",
+                    cascadeFrom: "IdQueu_" + index,
+                    filter: "contains",
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    dataSource: {
+                        serverFiltering: true,
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+                        }
+                    }
+                }).data("kendoComboBox");
+
+            });
+
+
+        } else {
+            let newLi = `
+                <li class="list-group-item" data-index="0">
+                    <div class="todo-indicator bg-secondary"></div>
+                    <input name="IdTarea" type="hidden" />
+                    <div class="form-row">
+                        <div class="col-10">
+                        </div>
+                        <div class="col-2">
+                            <button type="button" class="close" onclick="EliminarLiTarea(this);">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Título <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="TituloTarea" style="width:100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>
+                                Descripción <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="DescripcionTarea" style="width:100%;" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Grupo <span style="color:red">(*)</span>
+                            <input id="IdQueu_0" name="IdQueu" />
+                        </div>
+                        <div class="col-md-6">
+                            Usuario Asignado <span style="color:red">(*)</span>
+                            <input id="IdAsignado_0" name="IdAsignado" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Tarea Precedente
+                            <input id="TareaPadre_0" name="TareaPadre" /></div>
+                        </div>
+                        <div class="col-md-6">
+                            Estado <br />
+                            <input type="checkbox" name="EstadoTarea" checked />
+                        </div>
+                    </div>
+                </li>`;
+            $("#listaTareas").append(newLi);
+
+            $("#TareaPadre_0").kendoComboBox({
+                dataTextField: "Titulo",
+                dataValueField: "IdConfigTarea",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Tarea/ListarTareasPorCategoriaBNV/@ViewBag.Id?var=" + Math.random()
+                    },
+                    sort: { field: "Orden", dir: "asc" }
+                }
+            }).data("kendoComboBox");
+
+            $("#IdQueu_0").kendoComboBox({
+                dataTextField: "DES_QUEU",
+                dataValueField: "ID_QUEU",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#IdAsignado_0").kendoComboBox({
+                dataTextField: "ASSI",
+                dataValueField: "ID_PERS_ENTI",
+                cascadeFrom: "IdQueu_0",
+                filter: "contains",
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+        }
+    }
+
+    function AgregarLiTarea() {
+        let count = $("#listaTareas li").length;
+        let newLi = `
+                <li class="list-group-item" data-index="${count}">
+                    <div class="todo-indicator bg-secondary"></div>
+                    <input name="IdTarea" type="hidden" />
+                    <div class="form-row">
+                        <div class="col-10">
+                        </div>
+                        <div class="col-2">
+                            <button type="button" class="close" onclick="EliminarLiTarea(this);">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Título <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="TituloTarea" style="width:100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>
+                                Descripción <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="DescripcionTarea" style="width:100%;" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Grupo <span style="color:red">(*)</span>
+                            <input id="IdQueu_${count}" name="IdQueu" />
+                        </div>
+                        <div class="col-md-6">
+                            Usuario Asignado <span style="color:red">(*)</span>
+                            <input id="IdAsignado_${count}" name="IdAsignado" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Tarea Precedente
+                            <input id="TareaPadre_${count}" name="TareaPadre" />
+                        </div>
+                        <div class="col-md-6">
+                            Estado <br />
+                            <input type="checkbox" name="EstadoTarea" checked />
+                        </div>
+                    </div>
+                </li>`;
+        $("#listaTareas").append(newLi);
+
+        $("#TareaPadre_" + count).kendoComboBox({
+            dataTextField: "Titulo",
+            dataValueField: "IdConfigTarea",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Tarea/ListarTareasPorCategoriaBNV/@ViewBag.Id?var=" + Math.random()
+                },
+                sort: { field: "Orden", dir: "asc" }
+            }
+        }).data("kendoComboBox");
+
+        $("#IdQueu_" + count).kendoComboBox({
+            dataTextField: "DES_QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#IdAsignado_" + count).kendoComboBox({
+            dataTextField: "ASSI",
+            dataValueField: "ID_PERS_ENTI",
+            cascadeFrom: "IdQueu_" + count,
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+    }
+
+    function EliminarLiTarea(element) {
+        $(element).closest('li').remove();
+    }
+
+    function GuardarTareas() {
+        let tareas = [];
+        let valido = true;
+        $("#listaTareas li").each(function (index, li) {
+            let tarea = {
+                Id: $(this).find("input[name='IdTarea']").val(),
+                Titulo: $(this).find("input[name='TituloTarea']").val().trim(),
+                Descripcion: $(this).find("input[name='DescripcionTarea']").val().trim(),
+                IdQueu: $(this).find("input[name='IdQueu']").val(),
+                IdAsignado: $(this).find("input[name='IdAsignado']").val(),
+                IdTareaPadre: $(this).find("input[name='TareaPadre']").val(),
+                Estado: $(this).find("input[name='EstadoTarea']").prop("checked")
+            };
+
+            if (tarea.Titulo == "" || tarea.Descripcion == "" || tarea.IdQueu == "" || tarea.IdAsignado == "") {
+                toastr.warning(`Complete los datos obligatorios de la tarea ${index + 1}.`);
+                valido = false;
+                return false;
+
+            } else {
+                tareas.push(tarea);
+            }
+        });
+
+        if (valido) {
+
+            if (tareas.length > 0) {
+                swal({
+                    title: `¿Desea crear las tareas?`,
+                    text: `Se crearán las tareas ingresadas`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: '/Tarea/CrearTareasBNV/@ViewBag.Id',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(tareas),
+                            success: function (result) {
+                                if (result.message == 'OK') {
+                                    toastr.success("Información guardada correctamente.");
+                                    swal.close();
+                                    ListarTareasBNV();
+                                    $("[data-dismiss=modal]").trigger({ type: "click" });
+
+                                } else if (result.message == 'ERROR') {
+                                    swal({
+                                        title: 'Warning',
+                                        type: 'info',
+                                        text: 'ERROR EN LA CREACIÓN',
+                                        confirmButtonColor: "#DD6B55",
+                                        focusConfirm: false,
+                                        confirmButtonText: 'Continue',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!'
+                                    })
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(xhr.responseText);
+                            }
+                        });
+                    } else {
+                        swal("Cancelado", "Ha cancelado la creación", "error");
+                    }
+                });
+
+            } else {
+                toastr.warning("No hay tareas a crear.");
+            }
+        }
+    }
+
+</script>

@@ -1,0 +1,158 @@
+﻿@{
+    Layout = null;
+}
+<style>
+    .k-in {
+        padding: 0px !important;
+        font-size: 14px !important;
+    }
+</style>
+<div id="treeviewProcedure" style="padding: 3px 0 0 7px;"></div>
+<style>
+    .k-treeview .k-i-expand, .k-treeview .k-i-collapse {
+        margin-left: 0px !important
+    }
+</style>
+<script type="text/javascript">
+    var cateId3 = 0
+    var cateNombre3 = ''
+    var cateId4 = 0
+    var cateNombre4 = ''
+    var cateId5 = 0
+    var cateNombre5 = ''
+    var cateId6 = 0
+    var cateNombre6 = ''
+    $(document).ready(function () {
+        $("#treeviewProcedure").empty();
+        homogeneous = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: ("/Ticket/ListarCategorias/?idCateN2=@ViewBag.ID_CATEN2&idAcco=@Session["ID_ACCO"]"),
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE",
+                }
+            }
+        });
+
+        $("#treeviewProcedure").kendoTreeView({
+            dataSource: homogeneous,
+            dataTextField: "NAME_PARA",
+            select: function (e) {
+                var data = $('#treeviewProcedure').data('kendoTreeView').dataItem(e.node);
+
+                if (data.HAS_VALUE) {
+                    e.preventDefault();
+                } else {
+                    var treeview = $("#treeviewProcedure").data("kendoTreeView");
+                    var getitem = treeview.dataSource.get(data.ID_PARA);
+                    treeview.findByUid(getitem.uid);
+                    var selectitem = treeview.findByUid(getitem.uid);
+                    treeview.select(selectitem);
+
+                    //Tiene 6 niveles
+                    if (data.NIV_CATE == 6) {
+                        //nodo 6
+                        cateId6 = data.ID_PARA
+                        cateNombre6 = data.NAME_PARA
+                        //nodo 5
+                        cateId5 = data.ID_CATE_PARE
+                        cateNombre5 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId5).uid))
+                        //nodo 4
+                        cateId4 = treeview.dataSource.get(cateId5).ID_CATE_PARE
+                        cateNombre4 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId4).uid))
+                        //nodo 3
+                        cateId3 = treeview.dataSource.get(cateId4).ID_CATE_PARE
+                        cateNombre3 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId3).uid))
+                    }
+                    else
+                        if (data.NIV_CATE == 5) {
+                            //nodo 6
+                            cateId6 = 0
+                            cateNombre6 = ''
+                            //nodo 5
+                            cateId5 = data.ID_PARA
+                            cateNombre5 = data.NAME_PARA
+                            //nodo 4
+                            cateId4 = data.ID_CATE_PARE
+                            cateNombre4 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId4).uid))
+                            //nodo 3
+                            cateId3 = treeview.dataSource.get(cateId4).ID_CATE_PARE
+                            cateNombre3 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId3).uid))
+                        }
+                        else
+                            if (data.NIV_CATE == 4) {
+                                //nodo 6
+                                cateId6 = 0
+                                cateNombre6 = ''
+                                //nodo 5
+                                cateId5 = 0
+                                cateNombre5 = ''
+                                //nodo 4
+                                cateId4 = data.ID_PARA
+                                cateNombre4 = data.NAME_PARA
+                                //nodo 3
+                                cateId3 = data.ID_CATE_PARE
+                                cateNombre3 = treeview.text(treeview.findByUid(treeview.dataSource.get(cateId3).uid))
+                            }
+                            else
+                                if (data.NIV_CATE == 3) {
+                                    //nodo 6
+                                    cateId6 = 0
+                                    cateNombre6 = ''
+                                    //nodo 5
+                                    cateId5 = 0
+                                    cateNombre5 = ''
+                                    //nodo 4
+                                    cateId4 = 0
+                                    cateNombre4 = ''
+                                    //nodo 3
+                                    cateId3 = data.ID_PARA
+                                    cateNombre3 = data.NAME_PARA
+                                }
+                }
+            }
+        });
+        $("#guardarCategoriaModal").click(function () {
+            //Asignar Categoria 3
+            if (cateId3 != 0) {
+                $("#ID_CATEG3").val(cateId3)
+            } else {
+                $("#ID_CATEG3").val(0)
+            }
+            //Asignar Categoria 4
+            if (cateId4 != 0) {
+                $("#ID_CATEG4").val(cateId4)
+            } else {
+                $("#ID_CATEG4").val(0)
+            }
+            //Asignar Categoria 5
+            if (cateId5 != 0) {
+                $("#ID_CATEG5").val(cateId5)
+            } else {
+                $("#ID_CATEG5").val(0)
+            }
+            //Asignar Categoria 6
+            if (cateId6 != 0) {
+                $("#ID_CATEG6").val(cateId6)
+            } else {
+                $("#ID_CATEG6").val(0)
+            }
+            //Mostrar en seleccionar categorias
+            $("#nuevaCategoria").val(`${cateNombre3} ${cateId4 != 0 ? "-" : ""} ${cateNombre4} ${cateId5 != 0 ? "-" : ""} ${cateNombre5} ${cateId6 != 0 ? "-" : ""} ${cateNombre6}`)
+        })
+        $("#treeviewProcedure").on("dblclick", function (e) {
+            var tree = $("#treeviewProcedure").data("kendoTreeView");
+            var item = tree.dataItem($(e.target).closest("li"));
+            $("#guardarCategoriaModal").click()
+        })
+    });
+</script>
+
+
+
+

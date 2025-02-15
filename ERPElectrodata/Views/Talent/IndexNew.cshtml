@@ -1,0 +1,515 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    ViewBag.Title = @ResourceLanguaje.Resource.Talent;
+    Layout = null;
+}
+
+@*<nav style="position:relative;">
+        <ul>
+            <li><a href="/Talent/Profile/@ViewBag.ID_PERS_ENTI" target='_blank'>@ResourceLanguaje.Resource.MyProfile</a></li>
+            @if (ViewBag.Supervisor == 1)
+            {
+                <li onclick="NewProfile(this)"><a href="#">@ResourceLanguaje.Resource.NewProfile</a></li>
+            }
+            <li onclick="FindProfile(this)" id="liFind"><a href="#" id="aFind">@ResourceLanguaje.Resource.FindProfile</a></li>
+            <li onclick="FindAchievements()" id="liAchie"><a href="#" id="aAchie">@ResourceLanguaje.Resource.Achievements</a></li>
+            <li onclick="Assistance(this)" id="liAssistance"><a href="#" id="aAssistance">@ResourceLanguaje.Resource.Attendance</a></li>
+            <li onclick="Scheduler(this)" id="liSche"><a href="#" id="aSche">@ResourceLanguaje.Resource.Calendar</a></li>
+            <li onclick="Evaluation(this)" id="liEvaluation"><a href="#" id="aEvaluation">@ResourceLanguaje.Resource.Evaluation</a></li>
+            <li onclick="Chart()" id="liChart"><a href="#">@ResourceLanguaje.Resource.Organization</a></li>
+            @if (ViewBag.AccessLoadBallots == 1)
+            {
+                <li onclick="PaymentBallots(this)" id="liPayment"><a href="#" id="aPayment">@ResourceLanguaje.Resource.PaymentBallots</a></li>
+            }
+            <li onclick="ReportTalent(this)" id="liReport"><a href="#" id="aReport">@ResourceLanguaje.Resource.Report</a></li>
+            @if (ViewBag.AccessVacation == 1)
+            {
+                <li onclick="Vacation(this)" id="liVacation"><a href="#" id="aVacation">@ResourceLanguaje.Resource.Vacation</a></li>
+            }
+        </ul>
+    </nav>*@
+
+<div id="divContent">
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="font-icon-wrapper font-icon-lg">
+                    <i class="fa fa-users icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <div class="titleModule"><b>TALENTO HUMANO</b></div>
+                    <div class="page-title-subheading">
+                        Lista de Colaboradores por Estados.
+                    </div>
+                </div>
+                <div class="derecha">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="ticketsByStatus">
+
+        <div class="ticketByStatusP4_1">
+            <div id="homInc1" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus1">
+                    <div id="boxActive" class="boxQty">@ViewBag.TCesado</div>
+                    <div id="letrashomInc1" class="letras">
+                        <div>@ResourceLanguaje.Resource.CeasedStaffTalent</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc1"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticketByStatusP4_1">
+            <div id="homInc2" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus2">
+                    <div id="boxSCHEDULED" class="boxQty">@ViewBag.TDisponible</div>
+                    <div id="letrashomInc2" class="letras">
+                        <div>@ResourceLanguaje.Resource.AvailableStaffTalent</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc2"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticketByStatusP4_1">
+            <div id="homInc3" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus3">
+                    <div id="boxRESOLVED" class="boxQty">@ViewBag.TPracticante</div>
+                    <div id="letrashomInc3" class="letras">
+                        <div>@ResourceLanguaje.Resource.TemporalStaffTalent</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc3"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ticketByStatusP4_1">
+            <div id="homInc4" class="ticketByStatusP4" onclick="Click(this)">
+                <div class="tabStatus4">
+                    <div id="boxCLOSED" class="boxQty">@ViewBag.TPlanilla</div>
+                    <div id="letrashomInc4" class="letras letrasActive">
+                        <div>@ResourceLanguaje.Resource.EmployeesTalent</div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <div id="StatusSelecthomInc4" class="tab-active-marks2"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="gridUsers" class="contentView"> </div>
+
+    <div id="pagerUsers" class="contentViewPager"></div>
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+
+    <div class="incidentHomeList" @*onmouseover="mouseOver(this)" onmouseout="mouseOut(this)"*@>
+        <div class="incidentHomeListHeader" style="padding-bottom:1px;">
+            <a href="\\#/Talent/Profile/${ID_PERS_ENTI}" target='_blank' style="width:100%; height:100%; font-weight: 400;">
+                <div class="BordeInternoFoto" style="float:left; margin: 5px 0 0 6px;">
+                    <img src="/Content/Fotos/${FOTO}.jpg" class="ClassFoto" />
+                </div>
+                <div class="BordeInternoFotoList">
+                    <div class="smallField"><b>${usuario}</b></div>
+                    <div class="smallTitle" style="text-transform:capitalize;">${CAR_PERS}</div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.EmailTalent:</b></div>
+                    <div class="smallTitle" style="text-transform:none;">${EMA_ELEC}</div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.CellPhoneTalent:</b> ${CEL_PERS}</div>
+                </div>
+                <div class="BordeInternoFotoList">
+                    <div class="smallField"><b>${USB}</b></div>
+                    <div class="smallTitle" style="text-transform:capitalize;">${NOM_AREA}</div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.LocationTalent:</b></div>
+                    <div class="smallTitle" style="text-transform:capitalize;">${SITIO}</div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.PhoneExtensionTalent:</b> ${TEL_PERS}</div>
+                </div>
+                <div class="BordeInternoFotoList" style="border-right:none;">
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.ConditionContractTalent:</b></div>
+                    <div class="smallTitle" style="text-transform:capitalize;">${CONDITION}</div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.StartDateContractTalent:</b> <span class="smallTitle">${STAR_CONT}</span></div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.EndDateContractTalent:</b> <span class="smallTitle">${END_CONT}</span></div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.TerminationDateTalent:</b> <span class="smallTitle">${CESS_DATE}</span></div>
+                </div>
+
+                # if (@ViewBag.Editar == 1) { #
+                <div style="float:right;margin:5px 5px 0 0;">
+                    # if (@ViewBag.Supervisor == 1) { #
+                    <div style="margin:0 0 5px 0;" onclick="Edit(${ID_PERS_ENTI}); return false;"><button id="BtnEdit" class="k-button">@ResourceLanguaje.Resource.BtnEdit</button></div>
+                    <div style="margin:0 0 5px 0;" onclick="ChangeStatus(${ID_PERS_ENTI},${ID_PERS_STAT},${ID_CIA}); return false;"><button id="BtnChange" class="k-button">@ResourceLanguaje.Resource.ChangeTalent @ResourceLanguaje.Resource.StatusTalent</button></div>
+                    # if(ID_PERS_STAT == 1 || ID_PERS_STAT == 2) { #
+                    <div style="margin:0 0 5px 0;" onclick="Contract(${ID_PERS_ENTI}); return false;"><button id="BtnContract" class="k-button">@ResourceLanguaje.Resource.ContractTalent</button></div>
+                    # } #
+                    # } #
+                </div>
+                # } #
+            </a>
+        </div>
+    </div>
+</script>
+<!-- MODAL ESTADO -->
+<div class="modal fade" id="modalEstado" role="dialog" aria-labelledby="modalEstadoLabel" aria-hidden="true">
+    <div class="modal-dialog" id="tamEstado">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Estado</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divEstado"></div>
+                <!-- CONTENIDO -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- MODAL CARGO -->
+<div class="modal fade" id="modalCargo" role="dialog" aria-labelledby="modalCargoLabel" aria-hidden="true">
+    <div class="modal-dialog" id="tamCargo">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Cargo</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divCargo"></div>
+                <!-- CONTENIDO -->
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+
+    //function onmouseoutMenu(){
+    //    $("#divMenuFloat1").css("display","none");
+    //}
+    //function onmouseoverMenu(){
+    //    $("#divMenuFloat1").css("display","block");
+    //}
+
+    $(document).ready(function () {
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Talent/ListByStatus/@ViewBag.Supervisor?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 1 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerUsers").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridUsers").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html())
+        });
+    });
+
+    function Click(parm) {
+
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 3;
+        if (parm.id == "homInc2") {
+            bandera = 4;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 2;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 1;
+        }
+        var listView = $("#gridUsers").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+    }
+
+    //function mouseOver(e) {
+    //    e.style.background = "#fcfcfc";
+    //}
+
+    //function mouseOut(e) {
+    //    e.style.background = "#ffffff";
+    //}
+
+    function Edit(id) {
+        window.open("/#/Talent/Edit/" + id + "/@ViewBag.Supervisor");
+        return false;
+    }
+
+    function Contract(id) {
+        window.open("/#/Talent/Contract/" + id);
+        return false;
+    }
+
+    function ChangeStatus(idpers, idstat, identi) {
+        //var alt = 0;
+        //if (idstat == 1 || idstat == 2) { alt = 300; }//Estado Actual: EMPLOYEES or TEMPORAL STAFF
+        //if (idstat == 3) { alt = 138; }//Estado Actual: CEASED STAFF
+        //if (idstat == 4) { alt = 355; }//Estado Actual: AVAILABLE STAFF
+        $('#modalEstado').modal('show');
+        @*var htmlForm = '<div id="FormChangeStatus"></div>';
+        winFormPopUpModal2("@ResourceLanguaje.Resource.ChangeTalent @ResourceLanguaje.Resource.StatusTalent", htmlForm, 473, alt);*@
+        $("#divEstado").load("/Talent/ChangeStatus?var=" + Math.random() + "&id=" + idpers + "&id1=" + idstat + "&id2=" + identi);
+        //return false;
+    }
+</script>
+
+<script type="text/javascript">
+    var fl1 = 0;
+    var fl2 = 0;
+    var fl3 = 0;
+    function MyProfile(parm) {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/#/Talent/MyProfile?var=" + Math.random());
+    }
+
+    function NewProfile(parm) {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/Create?var=" + Math.random());
+    }
+
+    function FindProfile(parm) {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/Find?id=@ViewBag.Supervisor&var=" + Math.random());
+    }
+
+    function FindAchievements() {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/ViewFindAchievements?var=" + Math.random());
+    }
+
+    @*function Training() {
+        UnselectMenu();
+        SelectMenu('Training','Achie');
+
+        $("#divContent").empty();
+        $("#divContent").load("/Training/Index?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+    }*@
+
+    function Chart(){
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/ViewChart?var=" + Math.random());
+    }
+
+    function Assistance(e) {
+        UnselectMenu();
+        SelectMenu('Assistance','Achie');
+
+        document.getElementById("divContent").innerHTML = "";
+        $("#divContent").load("/Assistance/Index");
+    }
+
+    function ReportTalent(parm) {
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/Reports?var=" + Math.random());
+    }
+
+    function Scheduler(parm){
+        UnselectMenu();
+
+        $("#divContent").empty();
+        $("#divContent").load("/Room/Index?var=" + Math.random());
+    }
+
+    function Evaluation(parm){
+        UnselectMenu();
+        SelectMenu('Evaluation','Sche');
+
+        $("#divContent").empty();
+        $("#divContent").load("/Evaluation/Index?var=" + Math.random());
+    }
+
+    function Vacation(parm){
+        UnselectMenu();
+        SelectMenu('Vacation','Report');
+        $("#divContent").empty();
+        $("#divContent").load("/Vacation/Index?var=" + Math.random());
+    }
+
+    function PaymentBallots(){
+        UnselectMenu();
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/LoadPaymentBallots?var=" + Math.random());
+    }
+
+    function SelectMenu(id,liant) {
+        $("#a" + id).css("color", "Black");
+        $("#a" + id).css("font-weight", "bold");
+        $("#li" + id).css("background-color", "#eaeaea");
+        $("#li" + liant).css("margin-right", "-4px");
+        fl3=1;
+    }
+
+    function UnselectMenu(){
+
+        $("#aEvaluation").css("color", "White");
+        $("#aEvaluation").css("font-weight", "initial");
+        $("#liEvaluation").css("background-color", "#333333");
+        $("#liSche").css("margin-right", "-2px");
+
+        $("#aAssistance").css("color", "White");
+        $("#aAssistance").css("font-weight", "initial");
+        $("#liAssistance").css("background-color", "#333333");
+        $("#liAchie").css("margin-right", "-2px");
+
+        if ('@ViewBag.AccessVacation' == '1')
+        {
+            $("#aVacation").css("color", "White");
+            $("#aVacation").css("font-weight", "initial");
+            $("#liVacation").css("background-color", "#333333");
+            $("#liReport").css("margin-right", "-2px");
+        }
+    }
+
+</script>
+
+<script type="text/javascript">
+
+    function cancel() {
+        closeWinFormModalPopUp();
+        return false;
+    }
+
+    function uploadDone(msg, code, cdg) {
+        $("#modalEstado").modal("toggle");
+        if (msg == "OK") {
+            if (code == "Training") {
+                closeWinModalPopUpLoad();
+                winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+               + "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.TrainingMsn04</div>"
+               + "<div>Code: " + cdg + "</div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continues' class='k-button'>Continue</button>" +
+               "</div></div>"
+                 , 400, 160);
+
+                Training();
+                var undo = $("#continues")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+
+                $("#closebtnmodal").click(function () {
+                    closeWinModalPopUp();
+                });
+            }
+            else if (code == "OpenPDF") {
+                closeWinFormModalPopUp();
+                window.open("/Talent/ViewDownload/" + cdg, "_blank");
+            }
+            else {
+                closeWinModalPopUpLoad();
+                winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+               + "<div style='padding:10px 0px 10px 0px;'>La información se ha guardado correctamente</div>"
+               + "<div style='padding:10px 0px 10px 0px;'></div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continues' class='k-button'>Continue</button>" +
+               "</div></div>"
+                 , 400, 160);
+
+                var undo = $("#continues")
+               .bind("click", function () {
+                   closeWinModalPopUp();
+                   location.reload(true);
+               });
+
+                $("#closebtnmodal").click(function () {
+                    closeWinModalPopUp();
+                    location.reload(true);
+                });
+            }
+        }
+        else {
+            closeWinModalPopUpLoad();
+
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+            }
+            else if (code == '1') {
+                titleAsset = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+            }
+            else if (code == '2') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongDates';
+                messageAsset = '@ResourceLanguaje.Resource.WrongDatesMsn';
+            }
+            else if (code == '3') {
+                titleAsset = '@ResourceLanguaje.Resource.Attach';
+                messageAsset = '@ResourceLanguaje.Resource.AttachMsn';
+            }
+            else if (code == '4') {
+
+                titleAsset = '@ResourceLanguaje.Resource.TituloActivosAsignados';
+                messageAsset = '@ResourceLanguaje.Resource.MsjActivosAsignados';
+            }
+            else if (code == '5') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongCredentials';
+                messageAsset = '@ResourceLanguaje.Resource.WrongCredentialsMsn1';
+            }
+            else if (code == '6') {
+                titleAsset = '@ResourceLanguaje.Resource.WrongCredentials';
+                messageAsset = '@ResourceLanguaje.Resource.WrongCredentialsMsn2';
+            }
+
+            winPopUpModal(titleAsset, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + messageAsset + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+</script>

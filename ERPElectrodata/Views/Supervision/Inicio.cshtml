@@ -1,0 +1,230 @@
+﻿@{
+    Layout = null;
+}
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+<div id="divContent" class="afterMain">
+    <h1>INCIDENTES PRIORITARIOS </h1>
+    <div style="width: 100%; float:left;">
+        <div class="titleForm">
+            <div class="title">
+                <img src="~/Content/Images/MesaAyuda.png" />
+                Reporte por Prioridad Top 20 - Incidentes Abiertos
+                <div style="width:100px; float:right; padding-right:5px">
+                    @using (Html.BeginForm("ExportarListaPrioridad", "Supervision", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+                    {
+                        <button type="button" class="btn btn-block btn-warning" onclick="ExportarListaPrioridad();">Exportar</button>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:100%; background-color:white">
+                <div style="float:left; width:1%">&nbsp;</div>
+                <div style="float:left; width:10%"><strong>PRIORIDAD</strong></div>
+                <div style="float:left; width:11%"><strong>CODIGO</strong></div>
+                <div style="float:left; width:11%"><strong>ASIGNADO A</strong></div>
+                <div style="float:left; width:30%"><strong>COMENTARIO</strong></div>
+                <div style="float:left; width:1%">&nbsp;</div>
+                <div style="float:left; width:30%"><strong>CAUSAS</strong></div>
+                <div style="float:left; width:1%">&nbsp;</div>
+                <div style="float:left; width:100%"><hr /></div>
+                <div id="divIncidentePrioridad" class="contentView"></div>
+                <div id="pagerIncidentePrioridad" class="contentViewPager" style="width:99%"></div>
+            </div>
+        </div>
+    </div>
+    <div style="width: 100%; float:left; height:10px;"></div>
+    <div style="width: 49%; float:left;">
+        <div class="titleForm">
+            <div class="title">
+                <img src="~/Content/Images/AlertaRoja.png" />
+                Usuario con Mayores Incidencias (Últimos 3 meses)
+            </div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:100%; background-color:white">
+                <div style="float:left; width:1%">&nbsp;</div>
+                <div style="float:left; width:35%"><strong>USUARIO</strong></div>
+                <div style="float:left; width:24%"><strong>INCIDENTE</strong></div>
+                <div style="float:left; width:24%"><strong>REQUERIMIENTO</strong></div>
+                <div style="float:left; width:14%"><strong>TOTAL</strong></div>
+                <div style="float:left; width:1%">&nbsp;</div>
+                <div style="float:left; width:100%"><hr /></div>
+                <div id="divUsuarioIncidente" class="contentView"></div>
+                <div id="pagerUsuarioIncidente" class="contentViewPager" style="width:99%"></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="width: 49%; float:right;">
+        <div class="titleForm">
+            <div class="title">
+                <img src="~/Content/Images/AlertaAmarilla.png" />
+                Usuario con Mayores Requerimientos (Últimos 3 meses)
+            </div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:100%; background-color:white">
+                <div style="float:left; width:1%">&nbsp;</div>
+                <div style="float:left; width:35%"><strong>USUARIO</strong></div>
+                <div style="float:left; width:24%"><strong>REQUERIMIENTO</strong></div>
+                <div style="float:left; width:24%"><strong>INCIDENTE</strong></div>
+                <div style="float:left; width:14%"><strong>TOTAL</strong></div>
+                <div style="float:left; width:1%">&nbsp;</div>
+                <div style="float:left; width:100%"><hr /></div>
+                <div id="divUsuarioRequerimiento" class="contentView"></div>
+                <div id="pagerUsuarioRequerimiento" class="contentViewPager" style="width:99%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaPrioridad">
+    <a href="\\DetailsTicket/Index/${ID_TICK}" target="_blank">
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:10%">${PRIORIDAD}</div>
+        <div style="float:left; width:11%">${CODIGO}</div>
+        <div style="float:left; width:11%">${ASIGNADO}</div>
+        <div style="float:left; width:30%">#= COMENTARIO #</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:30%">#= CAUSA #</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:100%"><hr /></div>
+    </a>
+</script>
+
+<script type="text/x-kendo-tmpl" id="plantillaIncidente">
+    <a href="\\DocumentoVenta/Detalle/${IDPERSENTI}" target="_blank">
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:35%">${NOMBRE} ${APELLIDO}</div>
+        <div style="float:left; width:24%">${TIPO1}</div>
+        <div style="float:left; width:24%">${TIPO2}</div>
+        <div style="float:left; width:15%">${TOTAL}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:100%"><hr /></div>
+    </a>
+</script>
+
+<script type="text/x-kendo-tmpl" id="plantillaRequerimiento">
+    <a href="\\DocumentoVenta/Detalle/${IDPERSENTI}" target="_blank">
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:35%">${NOMBRE} ${APELLIDO}</div>
+        <div style="float:left; width:24%">${TIPO1}</div>
+        <div style="float:left; width:24%">${TIPO2}</div>
+        <div style="float:left; width:15%">${TOTAL}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:100%"><hr /></div>
+    </a>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //Lista Prioridad
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Supervision/ObtenerIncidentePrioridad",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 5,
+            schema: {
+                data: "ListaPrioridad",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerIncidentePrioridad").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divIncidentePrioridad").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaPrioridad").html())
+        });
+
+        //Usuario Incidente
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Supervision/ObtenerUsuarioIncidente",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 5,
+            schema: {
+                data: "UsuarioIncidente",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerUsuarioIncidente").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divUsuarioIncidente").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaIncidente").html())
+        });
+
+        //Usuario Requerimiento
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Supervision/ObtenerUsuarioRequerimiento",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 5,
+            schema: {
+                data: "UsuarioRequerimiento",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerUsuarioRequerimiento").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divUsuarioRequerimiento").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaRequerimiento").html())
+        });
+
+    });
+
+    function ExportarListaPrioridad() {
+        $("#formExportar").submit();
+    }
+</script>

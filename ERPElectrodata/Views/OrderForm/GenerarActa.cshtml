@@ -1,0 +1,952 @@
+﻿@model ERPElectrodata.Models.ActaConstitucion
+@{
+    ViewBag.Title = "GenerarActa";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+<style>
+    table.k-editor {
+        height: auto !important;
+    }
+</style>
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+
+@using (Html.BeginForm("RegistrarActa", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmRegistrarActa", target = "upload_target" }))
+{
+    <input type="hidden" id="IdDocuSale" name="IdDocuSale" value="@ViewBag.IdDocuSale" />
+    <input type="hidden" id="FlagActa" name="FlagActa" value="@ViewBag.FlagActa" />
+    <input type="hidden" id="IdElectrodata" name="IdElectrodata" />
+    <input type="hidden" id="IdCliente" name="IdCliente" />
+
+    <input type="hidden" id="Finalizado" name="Finalizado" value="0" />
+    <input type="hidden" id="ContadorRiesgo" name="ContadorRiesgo" value="1" />
+    <input type="hidden" id="ContadorHito" name="ContadorHito" value="1" />
+    <input type="hidden" id="ContadorInteresado" name="ContadorInteresado" value="1" />
+    <input type="hidden" id="ContadorFacturacion" name="ContadorFacturacion" value="1" />
+
+    <div class="mb-3 card">
+        <div class="card-header">
+            Registro Acta de constitución
+            <div class="btn-actions-pane-right">
+                <a id="btnReporteActa" class="btn btn-hover-shine btn-sm btn-light" href="" target=" _blank" onclick="GenerarReporte();"><i class="fa fa-file-pdf"></i> Ver Acta</a>
+                <button class="btn btn-hover-shine btn-sm btn-primary" id="btnGuardar1" type="submit"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="txtOP">OP</label>
+                        <input id="txtOP" name="txtOP" class="form-control" type="text" style="font-size:12.5px" readonly/>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="position-relative form-group">
+                        <label for="txtNombre">Nombre del proyecto</label>
+                        <input id="txtNombre" name="txtNombre" class="form-control" type="text" style="font-size:12.5px" data-toggle="tooltip" data-placement="top" title="Colocar un nombre que permita facil identificación del proyecto." />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label for="dtFechaActa">
+                            Fecha del Acta
+                        </label>
+                        <input type="text" class="form-control" id="dtFechaActa" name="dtFechaActa" data-toggle="tooltip" data-placement="top" title="Colocar la fecha en que se elabora el acta de constitución." />
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-6">
+                    <div class="position-relative form-group">
+                        <label for="txtAlcance">Alcance del proyecto</label>
+                        <textarea id="txtAlcance" name="txtAlcance" class="form-control" style="font-size:12.5px" rows="6" data-toggle="tooltip" data-placement="top" title="Colocar a manera de relato resumido el alcance del proyecto, incluyendo principales equipos, servicios y soporte.">@ViewBag.Alcance</textarea>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="position-relative form-group">
+                        <label for="txtRequisito">Requisitos del proyecto</label>
+                        <textarea id="txtRequisito" name="txtRequisito" class="form-control" style="font-size:12.5px" rows="6" data-toggle="tooltip" data-placement="top" title="Colocar de manera detallada los equipos principales - no incluir componentes secundarios - servicios, soporte, tiempos de implementación, tiempos de soporte, y cualquier información que sea requisito formal para la conformidad del proyecto.">@ViewBag.Requisito</textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="txtObjetivo">Objetivos</label>
+                        <textarea id="txtObjetivo" name="txtObjetivo" class="form-control" style="font-size:12.5px" rows="3" data-toggle="tooltip" data-placement="top" title="Colocar de manera resumida el objetivo por el cual se implementa el proyecto, normalmente esta información esta en las bases o RFP."></textarea>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="txtFinalidad">Finalidad </label>
+                        <textarea id="txtFinalidad" name="txtFinalidad" class="form-control" style="font-size:12.5px" rows="3" data-toggle="tooltip" data-placement="top" title="Colocar de manera resumida la finalidad por el cual se implementa el proyecto, normalmente esta información esta en las bases o RFP."></textarea>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="txtJustificacion">Justificación </label>
+                        <textarea id="txtJustificacion" name="txtJustificacion" class="form-control" style="font-size:12.5px" rows="3" data-toggle="tooltip" data-placement="top" title="Colocar de manera resumida la justificación por el cual se implementa el proyecto, normalmente esta información esta en las bases o RFP."></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="txtExclusion">Exclusiones</label>
+                        <textarea id="txtExclusion" name="txtExclusion" class="form-control" style="font-size:12.5px" rows="3" data-toggle="tooltip" data-placement="top" title="Aclarar que servicios o materiales que pueden ser interpretados como parte del proyecto, pero no son parte del alcance de Electrodata."></textarea>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="txtRestriccion">Restricciones</label>
+                        <textarea id="txtRestriccion" name="txtRestriccion" class="form-control" style="font-size:12.5px" rows="3" data-toggle="tooltip" data-placement="top" title="Limitar los servicios y materiales - sobretodo aquellos que parecen ilimitados - y que son parte del proyecto."></textarea>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <label for="txtSupuesto">Supuestos del proyecto</label>
+                        <textarea id="txtSupuesto" name="txtSupuesto" class="form-control" style="font-size:12.5px" rows="3" data-toggle="tooltip" data-placement="top" title="Detallar todas las facilidades y responsabilidades que se asumen como parte del cliente."></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="card-title">
+                Principales riesgos del proyecto
+                <button type="button" class="btn btn-gradient-light btn-sm pull-right" onclick="AgregarRiesgo();">
+                    <i class="fa fa-plus"></i> Agregar riesgo
+                </button>
+            </div>
+            <div class="form-row">
+                <table id="tbRiesgo" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Riesgo </th>
+                            <th>Responsable</th>
+                            <th>Impacto</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <textarea id="txtRiesgo1" name="txtRiesgo1" class="form-control" style="font-size:12.5px" rows="2"></textarea>
+                            </td>
+                            <td>
+                                <div class="custom-radio custom-control">
+                                    <input type="radio" id="cbEdata1" name="cbResponsable1" class="custom-control-input">
+                                    <label class="custom-control-label" for="cbEdata1">
+                                        Electrodata
+                                    </label>
+                                </div>
+                                <div class="custom-radio custom-control">
+                                    <input type="radio" id="cbCliente1" name="cbResponsable1" class="custom-control-input">
+                                    <label class="custom-control-label" for="cbCliente1">
+                                        Cliente
+                                    </label>
+                                </div>
+                                <div class="custom-radio custom-control">
+                                    <input type="radio" id="cbOtro1" name="cbResponsable1" class="custom-control-input" value="0">
+                                    <label class="custom-control-label" for="cbOtro1">
+                                        Otro
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <textarea id="txtImpacto1" name="txtImpacto1" class="form-control" style="font-size:12.5px" rows="2"></textarea>
+                            </td>
+                            <td style='text-align:center'>
+                                <button id='EliminarRiesgo' type='button' class='btn btn-danger btn-sm'><strong>X</strong></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-title">
+                Cronograma de hitos del proyecto
+                <button type="button" class="btn btn-gradient-light btn-sm pull-right" onclick="AgregarHito();">
+                    <i class="fa fa-plus"></i> Agregar hito
+                </button>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-2">
+                    <label for="dtFechaInicio" class="mr-sm-2">Fecha de Inicio</label>
+                </div>
+                <div class="col-md-2">
+                    <input type="text" class="form-control" id="dtFechaInicio" name="dtFechaInicio" />
+                </div>
+            </div>
+            <div class="form-row">
+                <table id="tbHitos" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width:20%">Actividades</th>
+                            <th style="width:15%">Fecha</th>
+                            <th style="width:10%">Peso</th>
+                            <th>Hito</th>
+                            <th>Entregables</th>
+                            <th>Observaciones</th>
+                            <th style="width:7%">Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <textarea id="txtActividad1" name="txtActividad1" class="form-control" style="font-size:12.5px" rows="2"></textarea>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" id="dtFecha1" name="dtFecha1" />
+                            </td>
+                            <td>
+                                <input id="txtPeso1" name="txtPeso1" class="form-control" type="number" style="font-size:14px" />
+                            </td>
+                            <td>
+                                <div class="custom-checkbox custom-control">
+                                    <input type="checkbox" id="chkHito1" name="chkHito1" class="custom-control-input" value="1">
+                                    <label class="custom-control-label" for="chkHito1"></label>
+                                </div>
+                            </td>
+                            <td>
+                                <textarea id="txtEntregable1" name="txtEntregable1" class="form-control" style="font-size:12.5px" rows="2"></textarea>
+                            </td>
+                            <td>
+                                <textarea id="txtObservacion1" name="txtObservacion1" class="form-control" style="font-size:12.5px" rows="2"></textarea>
+                            </td>
+                            <td style='text-align:center'>
+                                <button id='EliminarHito' type='button' class='btn btn-danger btn-sm'><strong>X</strong></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-title">
+                Facturación del proyecto
+                <button type="button" class="btn btn-gradient-light btn-sm pull-right" onclick="AgregarFacturacion(1);">
+                    <i class="fa fa-plus"></i> Agregar Facturación
+                </button>
+            </div>
+            <div class="form-row">
+                <table id="tbFacturacion" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width:30%">Item </th>
+                            <th style="width:8%">Símbolo</th>
+                            <th style="width:15%">Monto</th>
+                            <th style="width:33%">Requisito</th>
+                            <th style="width:7%">Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <textarea id="txtItem1" name="txtItem1" class="form-control" style="font-size:12.5px" rows="2"></textarea>
+                            </td>
+                            <td>
+                                <select class="form-control select2" style="width: 100%;" id="cbSimbolo1" name="cbSimbolo1"></select>
+                            </td>
+                            <td>
+                                <input id="txtMonto1" name="txtMonto1" class="form-control" type="text" pattern="^[0-9]+(.[0-9]+)?$" style="font-size:14px" />    
+                            <td>
+                                <textarea id="txtRequisito1" name="txtRequisito1" class="form-control" style="font-size:12.5px" rows="2"></textarea>
+                            </td>
+                            <td style='text-align:center'>
+                                <button id='EliminarFacturacion' type='button' class='btn btn-danger btn-sm'><strong>X</strong></button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-row">
+                <div class="col-md-3 ">
+                    <div class="card-title">Project Manager del proyecto</div>
+                    <div class="form-row">
+                        <div class="col-md-5">
+                            <div class="position-relative form-group">
+                                <label for="cbPM">Project Manager Electrodata</label>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="position-relative form-group">
+                                <select id="cbPM" name="cbPM" class="form-control select2" type="text" style="width:100%"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-5">
+                            <div class="position-relative form-group">
+                                <label for="cbPMCliente">Project Manager Cliente</label>
+                            </div>
+                        </div>
+                        <div class="col-md-7">
+                            <div class="position-relative form-group">
+                                <select id="cbPMCliente" name="cbPMCliente" class="form-control select2" type="text" style="width:100%"></select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1"></div>
+                <div class="col-md-3">
+                    <div class="card-title">
+                        Interesados (Contactos del cliente)
+                    </div>
+                    <div class="scroll-area-xs ">
+                        <div class="scrollbar-container ps ps--active-y">
+                            <ul class="todo-list-wrapper list-group list-group-flush" id="divListaContactos">
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-1"></div>
+                <div class="col-md-4">
+                    <div class="card-title">
+                        Interesados(Personal de Electrodata)
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-9">
+                            <div class="scroll-area-xs">
+                                <div class="scrollbar-container ps ps--active-y">
+                                    <ul class="todo-list-wrapper list-group list-group-flush" id="divInteresado">
+                                        <li class="list-group-item" id="divInteresado1">
+                                            <div class="todo-indicator bg-primary"></div>
+                                            <div class="widget-content p-0">
+                                                <div class="row">
+                                                    <div class="col-md-10">
+                                                        <select id="cbInteresado1" name="cbInteresado1" class="form-control select2" type="text" style="width:100%"></select>
+                                                    </div>
+                                                    <div class="col-md-2 widget-content-right widget-content-actions">
+                                                        <button type="button" class="border-0 btn-transition btn btn-sm btn-outline-danger" id="EliminarInteresado1" onclick="EliminarInteresado(this);">
+                                                            <i class="fa fa-trash-alt"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </ul>
+
+                                    @*<div id="divInteresado"></div>*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <button type="button" class="btn btn-gradient-light btn-sm pull-left" onclick="AgregarInteresado();">
+                                <i class="fa fa-plus"></i> Agregar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row"><br /></div>
+            <div class="form-row">
+                <div class="col-md-8">
+                    &nbsp;
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="ladda-button mb-2 mr-2 btn btn-primary btn-block" data-style="expand-right" id="btnGuardar2">
+                        <span class="ladda-label">
+                            <i class="fa fa-save"></i> Guardar
+                        </span>
+                        <span class="ladda-spinner">
+                        </span><div class="ladda-progress" style="width: 0px;"></div>
+                    </button>
+                </div>
+                <div class="col-md-2">
+                    <button type="button" class="ladda-button mb-2 mr-2 btn btn-danger btn-block" id="btnFinalizar"
+                            data-toggle="modal" data-target="#miModal" onclick="FinalizarRegistro();">
+                        <span class="ladda-label">
+                            <i class="fa fa-save"></i> Finalizar
+                        </span>
+                        <span class="ladda-spinner">
+                        </span><div class="ladda-progress" style="width: 0px;"></div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página. -->
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+
+<script type="text/javascript">
+    var contRiesgo = 2;
+    var contHito = 2;
+    var contFacturacion = 2;
+    var contInteresado = 2;
+    $(document).ready(function () {
+        $("#dtFechaActa").kendoDatePicker().data("kendoDateTimePicker");
+        $("#dtFechaInicio").kendoDatePicker().data("kendoDateTimePicker");
+        $("#dtFecha1").kendoDatePicker().data("kendoDateTimePicker");
+
+        $("#cbPM").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarProjectManager",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page,
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+
+        $("#cbPMCliente").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Contacto/ListarComboContactosOP/"+@ViewBag.IdDocuSale,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page,
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+
+        $("#tbRiesgo").on("click", "#EliminarRiesgo", function (event) {
+            $(this).closest("tr").remove();
+        });
+        $("#tbHitos").on("click", "#EliminarHito", function (event) {
+            $(this).closest("tr").remove();
+        });
+        $("#tbFacturacion").on("click", "#EliminarFacturacion", function (event) {
+            $(this).closest("tr").remove();
+        });
+        //Interesados
+        ObtenerComboSimbolo(1,1);
+        ObtenerComboInteresado(1);
+        ObtenerDatosActa();
+        ObtenerDatosContactos();
+        ObtenerDatosActaRiesgo();
+        ObtenerDatosActaHito();
+        ObtenerDatosActaFacturacion();
+        setTimeout(function () {
+            ObtenerDatosActaInteresados();
+
+        }, 2200);
+
+        $("#txtAlcance").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent"
+            ], encoded: false
+        });
+
+        $("#txtRequisito").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent"
+            ], encoded: false
+        });
+    })
+
+    function AgregarInteresado() {
+            var cols =
+                '<li class="list-group-item" id="divInteresado' + contInteresado +'">'+
+                    '<div class="todo-indicator bg-primary" ></div >'+
+                    '<div class="widget-content p-0">'+
+                        '<div class="row">'+
+                            '<div class="col-md-10">'+
+                                '<select id="cbInteresado' + contInteresado +'" name="cbInteresado' + contInteresado +'" class="form-control select2" type="text" style="width:100%"></select>'+
+                            '</div>'+
+                            '<div class="col-md-2 widget-content-right widget-content-actions">'+
+                                '<button type="button" class="border-0 btn-transition btn btn-sm btn-outline-danger" id="EliminarInteresado' + contInteresado +'" onclick="EliminarInteresado(this);">'+
+                                    '<i class="fa fa-trash-alt"></i>'+
+                                '</button>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                  '</li >';
+
+            $("#divInteresado").append(cols);
+            $("#ContadorInteresado").val(contInteresado);
+            ObtenerComboInteresado(contInteresado);
+            contInteresado++;
+    }
+    function AgregarRiesgo() {
+         var IdElectrodata = $("#IdElectrodata").val();
+            var IdCliente = $("#IdCliente").val();
+            var newRow = $("<tr>");
+            var cols =
+                '<td>' +
+                    '<textarea id="txtRiesgo' + contRiesgo + '" name="txtRiesgo' + contRiesgo + '" class="form-control" style="font-size:12.5px" rows="2"></textarea>' +
+                '</td>' +
+                '<td>' +
+                    '<div class="custom-radio custom-control">' +
+                        '<input type="radio" id="cbEdata' + contRiesgo + '" name="cbResponsable' + contRiesgo + '" class="custom-control-input" value="'+IdElectrodata+'">' +
+                        '<label class="custom-control-label" for="cbEdata' + contRiesgo + '">' +
+                        'Electrodata' +
+                        '</label>' +
+                    '</div>' +
+                    '<div class="custom-radio custom-control">' +
+                        '<input type="radio" id="cbCliente' + contRiesgo + '" name="cbResponsable' + contRiesgo + '" class="custom-control-input" value="' + IdCliente +'">' +
+                        '<label class="custom-control-label" for="cbCliente' + contRiesgo + '">' +
+                        'Cliente' +
+                        '</label>' +
+                    '</div>' +
+                    '<div class="custom-radio custom-control">' +
+                        '<input type="radio" id="cbOtro' + contRiesgo + '" name="cbResponsable' + contRiesgo + '" class="custom-control-input" value="0">' +
+                        '<label class="custom-control-label" for="cbOtro' + contRiesgo + '">' +
+                        'Otro' +
+                        '</label>' +
+                    '</div>' +
+                '</td>' +
+                '<td>' +
+                    '<textarea id="txtImpacto' + contRiesgo + '" name="txtImpacto' + contRiesgo + '" class="form-control" style="font-size:12.5px" rows="2"></textarea>' +
+                '</td>' +
+                '<td style="text-align:center">' +
+                    '<button id="EliminarRiesgo" type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>' +
+                '</td>';
+
+            newRow.append(cols);
+            $("#tbRiesgo").append(newRow);
+            $("#ContadorRiesgo").val(contRiesgo);
+            contRiesgo++;
+    }
+
+    function AgregarHito() {
+        var newRow = $("<tr>");
+            var cols =
+                '<td>' +
+                    '<textarea id="txtActividad' + contHito + '" name="txtActividad' + contHito + '" class="form-control" style="font-size:12.5px" rows="2"></textarea>' +
+                '</td>'+
+                '<td>'+
+                    '<input type="text" class="form-control" id="dtFecha'+contHito+'" name="dtFecha'+contHito+'" />'+
+                '</td>'+
+                '<td>'+
+                    '<input id="txtPeso'+contHito+'" name="txtPeso'+contHito+'" class="form-control" type="number" style="font-size:14px" />'+
+                '</td>'+
+                '<td>'+
+                    '<div class="custom-checkbox custom-control">'+
+                        '<input type="checkbox" id="chkHito'+contHito+'" name="chkHito'+contHito+'" class="custom-control-input" value="1">'+
+                            '<label class="custom-control-label" for="chkHito'+contHito+'"></label>'+
+                    '</div>'+
+                '</td>'+
+                '<td>'+
+                        '<textarea id="txtEntregable'+contHito+'" name="txtEntregable'+contHito+'" class="form-control" style="font-size:12.5px" rows="2"></textarea>'+
+                '</td>' +
+                '<td>' +
+                        '<textarea id="txtObservacion' + contHito + '" name="txtObservacion' + contHito + '" class="form-control" style="font-size:12.5px" rows="2"></textarea>' +
+                '</td>' +
+                '<td style="text-align:center">' +
+                    '<button id="EliminarHito" type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>' +
+                '</td>';
+
+            newRow.append(cols);
+            $("#tbHitos").append(newRow);
+            $("#dtFecha" + contHito).kendoDatePicker().data("kendoDateTimePicker");
+
+            $("#ContadorHito").val(contHito);
+
+            contHito++;
+    }
+
+    function AgregarFacturacion(flag) {
+            var newRow = $("<tr>");
+            var cols =
+                    '<td>'+
+                        '<textarea id="txtItem'+contFacturacion+'" name="txtItem'+contFacturacion+'" class="form-control" style="font-size:12.5px" rows="2"></textarea>'+
+                    '</td>' +
+                    '<td>'+
+                        '<select class="form-control select2" style="width: 100%;" id="cbSimbolo' + contFacturacion + '" name="cbSimbolo' + contFacturacion +'"></select>'+
+                    '</td>'+
+                    '<td>'+
+                        '<input id="txtMonto' + contFacturacion + '" name="txtMonto' + contFacturacion +'" class="form-control" type="text" pattern="^[0-9]+(.[0-9]+)?$" style="font-size:14px" />'+
+                    '</td>'+
+                    '<td>'+
+                        '<textarea id="txtRequisito'+contFacturacion+'" name="txtRequisito'+contFacturacion+'" class="form-control" style="font-size:12.5px" rows="2"></textarea>'+
+                    '</td>'+
+                    '<td style="text-align:center">'+
+                        '<button id="EliminarFacturacion" type="button" class="btn btn-danger btn-sm"><strong>X</strong></button>'+
+                    '</td>';
+
+            newRow.append(cols);
+            $("#tbFacturacion").append(newRow);
+            $("#ContadorFacturacion").val(contFacturacion);
+            ObtenerComboSimbolo(contFacturacion, flag);
+            contFacturacion++;
+    }
+    function EliminarInteresado(val) {
+        var id = $(val).attr('id');
+        var nletras = id.length;
+        var number = id.substr(18, nletras - 18);
+        $("#divInteresado" + number).remove();
+    }
+    function ObtenerComboInteresado(id) {
+        $("#cbInteresado"+ id).select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarPersonalEdata/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page,
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+    }
+
+    function ObtenerComboSimbolo(id, flag) {
+        $("#cbSimbolo" + id).select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/OrderForm/ListarSimboloFacturacion/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page,
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+        if (flag == 1) {
+            if (id == 1) {
+                setTimeout(function () {
+                    var $cbSimbolo = $("<option></option>").val(1284).text("USD");
+                    $("#cbSimbolo" + id).append($cbSimbolo).trigger('change');
+                }, 3000);
+            } else {
+                var $cbSimbolo = $("<option></option>").val(1284).text("USD");
+                $("#cbSimbolo" + id).append($cbSimbolo).trigger('change');
+            }
+        }
+    }
+    function ObtenerDatosActa() {
+        $.ajax({
+            url: "/OrderForm/ObtenerDatosActa/@ViewBag.IdDocuSale",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(data['Data'], function (index, value) {
+
+                    $("#IdElectrodata").val(data['Data'][index]['IdElectrodata']);
+                    $("#IdCliente").val(data['Data'][index]['IdCliente']);
+                    $("#cbEdata1").val(data['Data'][index]['IdElectrodata']);
+                    $("#cbCliente1").val(data['Data'][index]['IdCliente']);
+
+                    $("#txtOP").val(data['Data'][index]['OP']);
+                    $("#txtNombre").val(data['Data'][index]['Titulo']);
+                    $("#dtFechaActa").val(data['Data'][index]['FechaActa']);
+                    $("#txtObjetivo").val(data['Data'][index]['Objetivo']);
+                    $("#txtFinalidad").val(data['Data'][index]['Finalidad'])
+                    $("#txtJustificacion").val(data['Data'][index]['Justificacion']);
+                    $("#txtExclusion").val(data['Data'][index]['Exclusion']);
+                    $("#txtRestriccion").val(data['Data'][index]['Restriccion']);
+                    $("#txtSupuesto").val(data['Data'][index]['Supuesto']);
+                    //Interesados
+                    if (data['Data'][index]['IdPM'] != 0) {
+                        var $cbPM = $("<option></option>").val(data['Data'][index]['IdPM']).text(data['Data'][index]['PM']);
+                        $("#cbPM").append($cbPM).trigger('change');
+                    }
+                    if (data['Data'][index]['IdPMCliente'] != 0) {
+                    var $cbPMCliente = $("<option></option>").val(data['Data'][index]['IdPMCliente']).text(data['Data'][index]['PMCliente']);
+                        $("#cbPMCliente").append($cbPMCliente).trigger('change');
+                    }
+                    if (data['Data'][index]['Finalizado'] == 1) {
+                        $("#btnGuardar1").hide();
+                        $("#btnGuardar2").hide();
+                        $("#btnFinalizar").hide();
+                    }
+                });
+            },
+            error: function (source) {
+                toastr.error("Error al cargar los datos del acta.", "Error");
+            }
+        });
+    }
+
+    function ObtenerDatosActaRiesgo() {
+        $.ajax({
+            url: "/OrderForm/ObtenerDatosActaRiesgo/@ViewBag.IdDocuSale",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                var contRiesgo = 1;
+                $.each(data['Data'], function (index, value) {
+                    if (contRiesgo != 1) {
+                        AgregarRiesgo();
+                    }
+                    $("#txtRiesgo" + contRiesgo).val(data['Data'][index]['Riesgo']);
+                    $("#txtImpacto" + contRiesgo).val(data['Data'][index]['Impacto']);
+                    if (data['Data'][index]['IdResponsable'] == "0") {
+                        $("#cbOtro" + contRiesgo).attr("checked", true);
+                    } else if (data['Data'][index]['IdResponsable'] == $("#IdElectrodata").val()) {
+                        $("#cbEdata" + contRiesgo).attr("checked", true);
+                    } else if (data['Data'][index]['IdResponsable'] == $("#IdCliente").val()) {
+                        $("#cbCliente" + contRiesgo).attr("checked", true);
+                    }
+                    contRiesgo++;
+                });
+            },
+            error: function (source) {
+                toastr.error("Error al cargar los riesgos.", "Error");
+            }
+        });
+    }
+
+    function ObtenerDatosActaHito() {
+        $.ajax({
+            url: "/OrderForm/ObtenerDatosActaHito/@ViewBag.IdDocuSale",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                var contHito = 1;
+                $.each(data['Data'], function (index, value) {
+                    if (contHito != 1) {
+                        AgregarHito();
+                    }
+                    $("#dtFechaInicio").val(data['Data'][index]['FechaInicio']);
+                    $("#txtActividad" + contHito).val(data['Data'][index]['Actividad']);
+                    $("#dtFecha" + contHito).val(data['Data'][index]['FechaFin']);
+                    $("#txtPeso" + contHito).val(data['Data'][index]['Peso']);
+                    $("#txtObservacion" + contHito).val(data['Data'][index]['Observaciones']);
+                    $("#txtEntregable" + contHito).val(data['Data'][index]['Entregables']);
+                    if (data['Data'][index]['AplicaHito'] == "1") {
+                        $("#chkHito" + contHito).attr("checked", true);
+                    }
+
+                    contHito++;
+                });
+            },
+            error: function (source) {
+                toastr.error("Error al cargar los hitos.", "Error");
+            }
+        });
+    }
+
+    function ObtenerDatosActaFacturacion() {
+        $.ajax({
+            url: "/OrderForm/ObtenerDatosActaFacturacion/@ViewBag.IdDocuSale",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                var contFacturacion = 1;
+                $.each(data['Data'], function (index, value) {
+                    if (contFacturacion != 1) {
+                        AgregarFacturacion(2);
+                    }
+                    $("#txtItem" + contFacturacion).val(data['Data'][index]['Item']);
+                    $("#txtMonto" + contFacturacion).val(data['Data'][index]['Monto']);
+                    $("#txtRequisito" + contFacturacion).val(data['Data'][index]['Requisito']);
+                    var $cbSimbolo = $("<option></option>").val(data['Data'][index]['IdSimbolo']).text(data['Data'][index]['Simbolo']);
+                    $("#cbSimbolo" + contFacturacion).append($cbSimbolo).trigger('change');
+                    contFacturacion++;
+                });
+            },
+            error: function (source) {
+                toastr.error("Error al cargar los riesgos.", "Error");
+            }
+        });
+    }
+    function ObtenerDatosContactos() {
+        $.ajax({
+            url: "/Contacto/ListarContactosOP/@ViewBag.IdDocuSale",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(data['Data'], function (index, value) {
+                    $("#divListaContactos").append(
+                        '<li class="list-group-item">'+
+                            '<div class= "todo-indicator bg-dark" ></div >'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left mr-2">'+
+                                        '<div class="custom-checkbox custom-control">'+
+                                            '<input type="checkbox" id="chkContacto'+ data['Data'][index]['id'] +'" name="chkContacto'+ data['Data'][index]['id'] +'"class="custom-control-input">'+
+                                              '<label class="custom-control-label" for="chkContacto'+ data['Data'][index]['id'] +'">&nbsp;</label>'+
+                                         '</div>'+
+                                     '</div>'+
+                                     '<div class="widget-content-left">'+
+                                          '<div class="widget-heading">' +
+                                                data['Data'][index]['text'] +
+                                          '</div>'+
+                                     '</div>'+
+                                '</div>'+
+                            '</div>'+
+                         '</li>'
+                    );
+                });
+            },
+            error: function (source) {
+                toastr.error("Error al cargar la lista de contactos.", "Error");
+            }
+        });
+    }
+
+    function ObtenerDatosActaInteresados() {
+        $.ajax({
+            url: "/OrderForm/ObtenerDatosActaInteresados/@ViewBag.IdDocuSale",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                var contInteresado = 1;
+                $.each(data['Data'], function (index, value) {
+                    //Interesados
+                    if (data['Data'][index]['TipoInteresado'] == 1) {
+                        if (contInteresado != 1) {
+                            AgregarInteresado();
+                        }
+                        var $cbInteresado = $("<option></option>").val(data['Data'][index]['IdInteresado']).text(data['Data'][index]['Interesado']);
+                        $("#cbInteresado" + contInteresado).append($cbInteresado).trigger('change');
+                        contInteresado++;
+                    } else {
+                        $("#chkContacto" + data['Data'][index]['IdInteresado']).attr("checked", true);
+                    }
+                });
+            },
+            error: function (source) {
+                toastr.error("Error al cargar los interesados.", "Error");
+            }
+        });
+    }
+
+    function FinalizarRegistro() {
+        $("#lblTitulo").text("Mensaje");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-sm");
+
+        $('#modal-content').empty();
+        $('#modal-content').append(
+            '<div class="form-row">'+
+                '<div class="col-md-12" >'+
+                    '<div class="position-relative form-group">'+
+                        '<label for="lblEliminar"><strong>¿Está seguro de guardar el Acta de Constitución como última versión?</strong> Nota: Luego no podrá realizar cambios.</label>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+            '<div class="form-row">'+
+                '<div class="col-md-12">'+
+                    '<div class="position-relative form-group" style="text-align:center">'+
+                        '<button type="button" class="btn-shadow btn btn-light btn-sm" onclick="NoGuardar()"> NO </button>&nbsp;&nbsp;'+
+                        '<button type="submit" class="btn-shadow btn btn-danger btn-sm" onclick="FinalizarActa()"> Sí, guardar. </button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>');
+    }
+
+    function FinalizarActa() {
+        $("[data-dismiss=modal]").trigger({ type: "click" });
+        $("#Finalizado").val("1");
+        toastr.info("Espere un momento por favor...", "Guardando acta");
+        setTimeout(function () {
+            $("#btnGuardar1").click();
+        }, 700);
+    }
+    function NoGuardar() {
+        $("[data-dismiss=modal]").trigger({ type: "click" });
+    }
+
+    function GenerarReporte() {
+        document.getElementById('btnReporteActa').href = "/Reporting/OrderForm/ReporteActa.aspx?" + $("#IdDocuSale").serialize();
+    }
+    function MensajeActa(msg, descripcion) {
+        $("#Finalizado").val("0");
+        if (msg == "OK") {
+            toastr.success("El Registro ha sido guardado. ", "Mensaje");
+            setTimeout(function () { location.reload(); }, 1500);
+        } else if (msg == "Riesgo") {
+            toastr.warning("Por favor registrar correctamente los riesgos.", "Mensaje");
+        } else if (msg == "Facturacion") {
+            toastr.warning("Por favor registrar la facturación del proyecto.", "Mensaje");
+        } else if (msg == "Hitos") {
+            toastr.warning("Por favor registrar la información de los hitos.", "Mensaje");
+        } else if (msg == "HitosPeso") {
+            toastr.warning("Por favor validar que el peso máximo sea 100.", "Mensaje");
+        } else if (msg == "HitosFecha") {
+            toastr.warning(descripcion, "Mensaje");
+        } else if (msg == "Validacion") {
+            toastr.warning(descripcion, "Mensaje");
+        } else if (msg == "ERROR") {
+            debugger
+            toastr.error(descripcion, "Mensaje");
+        }
+
+    }
+</script>

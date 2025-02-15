@@ -1,0 +1,193 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+<div style="padding:10px 20px 10px 20px;">
+    <form id="Parametro">
+        <div class="form-group row">
+            <div class="col-sm-3">
+                <br /><label for="cbPeriodo">Periodo</label>
+                <input id="cbPeriodo" name="cbPeriodo" style="font-size:12px;" class="dropdownKendo" />
+                <input id="cbEvaluado" name="cbEvaluado" style="font-size:12px;" class="dropdownKendo" value="@ViewBag.IdUsuario" hidden />
+            </div>
+            @*<div class="col-sm-1">
+                <br />  <label for="cbEvaluado">Evaluado</label><br />
+            </div>*@
+            <div class="col-sm-3">
+                <br /><br /><br />
+                <input id="btnReporteEvaluacion" type="button" class="btn btn-primary btn-sm" style="float:left;" onclick="VerReporte()" value="Buscar" />
+            </div>
+            
+            @*<div class="col-sm-1">
+                <input id="btnReporteEvaluacion" type="button" class="btn btn-primary btn-sm" style="float:left;" onclick="VerReporte()" value="Buscar" />
+            </div>*@
+        </div>
+    </form>
+</div>
+
+<div class="bodyForm" style="margin-top:10px;">
+    <div class="inBodyForm">
+        <iframe id="RSFormato" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport() {
+        window.frames["RSFormato"].src = "/Reporting/EvaluacionPersonal/FormatoSeguimiento.aspx?var=" + Math.random() + "&" + $("#Parametro").serialize();
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#cbPeriodo").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                var comboBox = $("#cbPeriodo").data("kendoDropDownList");
+                comboBox.select(0);
+                comboBox.trigger("change");
+            }
+        });
+
+    /*    $("#cbEvaluado").kendoDropDownList({*/
+            //autoBind: false,
+            ///* cascadeFrom: "cbPeriodo",*/
+            //dataTextField: "text",
+            //dataValueField: "id",
+            //optionLabel: {
+            //    text: "Seleccionar",
+            //    id: null
+            //},
+            //filter: "contains",
+            //delay: 500,
+            //minLength: 0,
+            //suggest: true,
+
+            //dataSource: {
+
+            //    //serverFiltering: true,
+            //    schema: {
+            //        data: "Data",
+            //        total: "Count"
+            //    },
+            //    //transport: {
+            //    //    read: "/EvaluacionPersonal/ListarDesempeno?var=" + Math.random()
+            //    //}
+            //    transport: {
+            //        read: {
+            //            url: function () {
+            //                var periodoId = $("#cbPeriodo").val();
+            //                return "/EvaluacionPersonal/EvaListarHistoricoEvaluado?periodoId=" + periodoId + "&var=" + Math.random();
+            //            },
+            //            dataType: "json"
+            //        }
+            //    }
+            //}
+       /* });*/
+
+        @*$("#cbPeriodo").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+        $("#cbPeriodo").on('change', function (e) {
+            $("#cbEvaluado").empty();
+            var idPeriodo = $("#cbPeriodo").find(':selected').val()
+
+            $("#cbEvaluado").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Evaluado...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/EvaluacionPersonal/EvaListarHistoricoEvaluado/" + idPeriodo,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+
+                    },
+                },
+            });
+        });
+
+
+        //Asignación inicial
+        var $newOption = $("<option></option>").val("@ViewBag.IdPeriodo").text("@ViewBag.Periodo");
+        $("#cbPeriodo").append($newOption).trigger('change');*@
+
+
+    });
+
+    function VerReporte() {
+        if ($("#cbEvaluado").val() == null || $("#cbEvaluado").val() == 0) {
+            $("#SmallModalContent").modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "Seleccione al Usuario evaluado." + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continuee' class='k-button'>Continuar</button>" +
+                                       "</div>");
+            var undo = $("#continuee")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        } else {
+            GenerateReport();
+        }
+    }
+
+</script>

@@ -1,0 +1,121 @@
+﻿@model ERPElectrodata.Models.OperadorActivo
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("CreateOperador", "Maintenance", FormMethod.Post, new { enctype = "multipart/form-data", name = "FrmOperador", id = "FrmOperador", target = "utOpera" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <input type="hidden" id="idGrupoAct" name="idGrupoAct" value="@ViewBag.IdGrupo" />
+        <div class="form-group row">
+            <div class="col-sm-6 col-lg-6">
+                <div class="editor-label">
+                    Operador <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.Nombre)
+                    @Html.ValidationMessageFor(model => model.Nombre)
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Descripción
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.Descripcion)
+                    @Html.ValidationMessageFor(model => model.Descripcion)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-lg-4">
+                <br />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="cancelNewOperador" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="submitNewOperador" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="utOpera" name="utOpera" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitNewOperador").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewOperador").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#Descripcion").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    function uploadDoneOperador(msg, code) {
+
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se registró correctamente el operador.", "Información Guardada");
+
+            if ("@ViewBag.Mantenimiento" == "1") {
+                $("#cbOperador").data("kendoComboBox").dataSource.read();
+                ListarTabla();
+            } else {
+                $("#IdOperador").data("kendoComboBox").dataSource.read();
+                var IdOperadorrr = $("#IdOperador").data("kendoComboBox");
+                IdOperadorrr.value(code);
+            }
+
+        }
+        else {
+            var messageAsset = '';
+            if (code == '0') {
+                messageAsset = 'Complete los datos obligatorios.';
+            }
+            else if (code == '1') {
+                messageAsset = 'Contacte al administrador.';
+            }
+            else {
+                messageAsset = 'El operador ya existe.';
+            }
+
+            toastr.warning(messageAsset, "Mensaje");
+        }
+    }
+</script>

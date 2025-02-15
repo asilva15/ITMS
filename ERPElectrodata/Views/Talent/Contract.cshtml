@@ -1,0 +1,202 @@
+﻿@model ERPElectrodata.Models.PERSON_CONTRACT
+
+@{
+    ViewBag.Title = "Contract";
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+@*<nav>
+    <ul>
+        <li><a href="/Talent/Profile/@ViewBag.ID_PERS_ENTI">@ResourceLanguaje.Resource.ProfileTalent</a></li>
+        <li><a href="/Talent/Create">@ResourceLanguaje.Resource.NewProfileTalent</a></li>
+        <li><a href="/Talent/Find">@ResourceLanguaje.Resource.FindProfileTalent</a></li>
+        <li><a href="/Talent/Reports">@ResourceLanguaje.Resource.ReportTalent</a></li>
+    </ul>
+</nav>*@
+<div class="row">
+    <input type="hidden" id="ID_PERS_ENTI" name="ID_PERS_ENTI" value="@ViewBag.ID_PERS_ENTI" />
+    <input type="hidden" id="ID_PERS_CONT" name="ID_PERS_CONT" value="@ViewBag.ID_PERS_CONT" />
+    <div class="col-lg-6">
+        <div class="mb-3 card" id="" style="width:100%;">
+            <div class="card-header-tab card-header">
+                <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                    @ResourceLanguaje.Resource.ContractsTalent
+                    <div class="divAjax-Loading" id="divPB" style="position: absolute; right: 0px; top: 0px; display: none;"></div>
+                </div>
+            </div>
+            <div class="p-0 card-body">
+                <div class="p-1 slick-slider-sm">
+                    <div class="">
+
+                        <div class="inBodyForm" style="overflow-y: auto; height:360px;" id="divPanelIzq">
+                            <div id="treeviewContract" style="padding: 3px 0 0 7px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="mb-3 card" id="" style="width:100%;">
+            <div class="card-header-tab card-header">
+                <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                    @ResourceLanguaje.Resource.ContractTalent
+                    <div class="divAjax-Loading" id="divPB" style="position: absolute; right: 0px; top: 0px; display: none;"></div>
+                </div>
+            </div>
+            <div class="p-0 card-body">
+                <div class="p-1 slick-slider-sm">
+                    <div class="">
+                        <div class="col-lg-12" style="text-align:center">
+                            <img src="/Content/Fotos/@ViewBag.FOTO" />
+                        </div>
+                        @*<div style="float:left; width:49.7%; padding: 10px 0 0 0;">
+                                <div class="MarcoFoto">
+                                    <div class="BordeInternoFoto">
+                                    </div>
+                                </div>
+                            </div>*@
+                        <div id="divDetailsUser"></div>
+                        <div id="divDetailsContract">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#treeviewContract").empty();
+        $("#treeviewContract").load("/Person_Contract/TreeViewContract?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+        $.ajax({
+            url: "/Person_Contract/DataUserByIdPE/@ViewBag.ID_PERS_ENTI",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showInfoUser();
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+    });
+
+    function showInfoUser() {
+        $("#divLoad").css("display", "block");
+        $.each(data['data'], function (index, value) {
+            $("#divDetailsUser").append(
+                '<div class="m-4"><div class="row">' +
+                    '<div class="col-sm-4">'+
+                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.EmployeeTalent</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['User']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-sm-4">'+
+                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.CompanyTalent</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['Company']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-sm-4">'+
+                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.ElectrodataEmailTalent</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['EMA_ELEC']) + '</div>' +
+                    '</div>' +
+                '</div></div>');
+        });
+
+        //Cargando ultimo contrato o contrato seleccionado
+        $("#divDetailsContract").empty();
+        $("#divDetailsContract").load("/Person_Contract/ViewContract?id=@ViewBag.ID_PERS_CONT&id1=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+    }
+    
+    function FindProfile(parm) {
+        $("#afterMain").empty();
+        $("#afterMain").load("/Talent/Find?var=" + Math.random());
+    }
+    function ReportTalent(parm) {
+        $("#afterMain").empty();
+        $("#afterMain").load("/Talent/Reports?var=" + Math.random());
+    }
+    function ManttoContract(sw, idcia) {
+        $("#divLoad").css("display", "block");
+        cond = 'NewCont';
+        if (sw == 1) { cond = 'NewAdde'; }
+
+        var id = $("#ID_PERS_CONT").val();
+
+        $("#divPanelIzq").height(380);
+        $("#divPanelDer").height(380);
+        $("#divDetailsContract").empty();
+        $("#divDetailsContract").load("/Person_Contract/FormNewContract?id=@ViewBag.ID_PERS_ENTI&id1=" + id + "&id2=" + cond + "&id3=" + idcia + "&var=" + Math.random());
+    }
+</script>
+
+<script type="text/javascript">
+    
+     function mensaje(msg, code) {
+         if (msg == "OK") {
+             toastr.success("Información del contacto se ha guardado con éxito.", "Information Saved");
+             var elem = code.split('|');
+             if (elem[0] == "NewCont") {
+                 var undo = $("#continues")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                    //location.reload(true);
+                });
+
+                 $("#closebtnmodal").click(function () {
+                     closeWinModalPopUp();
+                     //location.reload(true);
+                 });
+             }
+             else if (elem[0] == "Addendum") {
+                 closeWinFormModalPopUp();
+
+                 var undo = $("#continues")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+
+                 $("#closebtnmodal").click(function () {
+                     closeWinModalPopUp();
+                 });
+             }
+             $("#treeviewContract").empty();
+             $("#treeviewContract").load("/Person_Contract/TreeViewContract?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+             $("#divDetailsContract").empty();
+             $("#divDetailsContract").load("/Person_Contract/ViewContract?id=" + elem[1] + "&id1=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+             $("#ID_PERS_CONT").val(elem[1]);
+             $("#divPanelIzq").height(360);
+             $("#divPanelDer").height(360);
+         }
+         else {
+             var titleAsset = '';
+             var messageAsset = '';
+             if (code == '0') {
+                 titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                 messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+             }
+             else if (code == '1') {
+                 titleAsset = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+             }
+             else if (code == '2') {
+                 titleAsset = '@ResourceLanguaje.Resource.WrongDates';
+                 messageAsset = '@ResourceLanguaje.Resource.WrongDatesMsn';
+             }
+             else if (code == '3') {
+                 titleAsset = '@ResourceLanguaje.Resource.Attach';
+                 messageAsset = '@ResourceLanguaje.Resource.AttachMsn';
+             }
+             toastr.warning(messageAsset, titleAsset);
+        }
+    }
+</script>

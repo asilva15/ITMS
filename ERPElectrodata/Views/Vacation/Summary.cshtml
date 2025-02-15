@@ -1,0 +1,144 @@
+﻿@{
+    Layout = null;
+    
+}
+<div class="row">    
+    <div class="col-xs-12">&nbsp;</div>    
+</div>
+
+<div class="row">
+    <div class="col-xs-1"></div>
+    <div class="col-xs-4 col-sm-3">
+        Start Work Period:<br />
+    </div>
+    <div class="col-xs-6" style="font-weight:bold;">
+        @ViewBag.STAR_DATE<br />
+    </div>
+    <div class="col-xs-2"></div>
+</div>
+
+<div class="row">
+    <div class="col-xs-1"></div>
+    <div class="col-xs-4 col-sm-3">
+        Time At Company: <br />
+    </div>
+    <div class="col-xs-5" style="font-weight:bold;">
+        @ViewBag.TIMEATCOMPANY<br />
+    </div>
+    <div class="col-xs-1"></div>
+</div>
+<div class="row">
+    <div class="col-sm-12">&nbsp;</div>
+</div>
+
+<div class="row">
+    <div class="col-sm-1"></div>
+    <div id="iddatavacation" class="col-sm-10">
+    </div>
+    <div class="col-sm-1"></div>
+</div>
+
+<div class="row">
+    <div class="col-sm-1"></div>
+    <div id="iddatavacation" class="col-sm-10"></div>
+    <div class="col-sm-1"></div>
+</div>
+
+<div class="row" >
+    <div class="col-sm-12">&nbsp;</div>
+</div>
+
+<script type="text/javascript">
+
+$(document).ready(function () {
+   
+       $.ajax({
+           url: "/Vacation/SummaryData/",
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    success: function (resp) {
+                        jsonx = resp;
+                        ShowVacationYear();
+                            },
+                     error: function (resp) {
+                            alert('ERROR');
+                    }
+      });
+});
+
+function ShowVacationYear()
+{
+
+    $("#iddatavacation").append(
+                                   '<div class="row" style="font-weight:bold;">' +
+                                        '<div class="col-xs-1">&nbsp;</div>' +
+                                        //'<div class="col-sm-1" style="background-color:rgba(241, 241, 241, 0.5);padding-top:5px;padding-bottom:5px;">&nbsp;</div>' +
+                                        '<div class="col-xs-3" style="background-color:rgba(241, 241, 241, 0.5);padding-top:5px;padding-bottom:5px;">Year</div>' +
+                                        '<div class="col-xs-4" style="text-align:center;background-color:rgba(241, 241, 241, 0.5);padding-top:5px;padding-bottom:5px;">Total Vacation</div>' +
+                                        '<div class="col-xs-1" style="text-align:right;background-color:rgba(241, 241, 241, 0.5);padding-top:5px;padding-bottom:5px;">Used</div>' +
+                                        '<div class="col-xs-2" style="text-align:right;background-color:rgba(241, 241, 241, 0.5);padding-top:5px;padding-bottom:5px;">Pending</div>' +
+                                        //'<div class="col-sm-1" style="background-color:rgba(241, 241, 241, 0.5);padding-top:5px;padding-bottom:5px;">&nbsp;</div>' +
+                                        '<div class="col-xs-1">&nbsp;</div>' +
+                                 '</div>' 
+                             
+                                );
+   
+    
+    var totalvacation = 0;
+    var totalpending = 0;
+    var totalused = 0;
+    var int = 0;
+    $.each(jsonx['Data'], function (index, value) {      
+        int = int + 1;
+        $("#iddatavacation").append(
+                                         '<div class="row" style="padding-top:5px;">' +
+                                            '<div class="col-xs-1">&nbsp;</div>' +
+                                            //'<div class="col-sm-1">&nbsp;</div>' +
+                                            '<div class="col-xs-3">' + (int == 1 ? 'SWP - ' : '') + value["ID_ACCO_YEAR"] + '</div>' +
+                                            '<div class="col-xs-4" style="text-align:center;">' + value["TOTAL_TODAY"].toFixed(2) + '</div>' +
+                                            '<div class="col-xs-1" style="text-align:right;">' + value["USED"].toFixed(0) + '</div>' +
+                                            '<div class="col-xs-2" style="text-align:right;">' + value["PENDING"].toFixed(0) + '</div>' +
+                                            //'<div class="col-sm-1">&nbsp;</div>' +
+                                            '<div class="col-xs-1">&nbsp;</div>' +
+                                         '</div>'
+                                    );
+
+        totalvacation = totalvacation + (value["TOTAL_TODAY"]);
+        totalpending = totalpending + (value["PENDING"]);
+        totalused = totalused + (value["USED"]);
+
+    });
+
+    $("#iddatavacation").append('<div class="row" >' +
+        '<div class="col-xs-1"></div>' +
+        '<div class="col-xs-10" style="border-top:1px solid rgb(241, 241, 241);margin:4px 0px 4px 0px;"></div>' +
+        '<div class="col-xs-1"></div>' +
+        '</div>');
+
+    var totalcolor = totalpending.toFixed(0);
+    var color;
+    if (totalcolor > 30) {
+        color = "#CB3F37";
+    } else if (totalcolor <= 30 && totalcolor >20) {
+        color = "#F2BA0C";
+    }
+    else if (totalcolor <= 20 && totalcolor > 10) {
+        color = "#679700";
+    }
+    else if (totalcolor <= 10 && totalcolor > 0) {
+        color = "#022A41";
+    }
+
+    $("#iddatavacation").append('<div class="row" style="font-weight:bold;">' +
+                                           '<div class="col-xs-1"></div>' +
+                                           '<div class="col-xs-3">Total</div>' +
+                                           '<div class="col-xs-4" style="text-align:center;">' + totalvacation.toFixed(2) + '</div>' +
+                                           '<div class="col-xs-1" style="text-align:right;">' + totalused.toFixed(0) + '</div>' +
+                                           '<div class="col-xs-2" style="text-align:right;background-color:' + color + ';color:white;">' + totalpending.toFixed(0) + '</div>' +
+                                           '<div class="col-xs-1"></div>' +
+                                        '</div>' 
+                                  );
+}
+
+ </script>

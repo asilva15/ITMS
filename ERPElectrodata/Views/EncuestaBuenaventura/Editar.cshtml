@@ -1,0 +1,159 @@
+﻿@{
+    ViewBag.Title = "Editar";
+    Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<fieldset>
+    <div class="form-group">
+        <label for="categoriasText">Categorias:</label>
+        <input type="text" class="form-control" id="categoriasText" placeholder="Seleccione o escriba una categoría" />
+    </div>
+    <div class="form-group">
+        <div id="contenedorRespuestas"></div>
+        <input type="hidden" id="hiddenIdPregunta" value="@ViewBag.IdPregunta" />
+    </div>
+</fieldset>
+
+
+<script>
+
+    $(document).ready(function () {
+        $('#categoriasText').kendoAutoComplete({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: '/EncuestaBuenaventura/ObtenerCategorias',
+                        dataType: 'json'
+                    }
+                },
+                schema: {
+                    data: 'data'
+                }
+            },
+            dataTextField: 'NombreCategoria',
+            placeholder: 'Seleccione una categoría...',
+            filter: 'contains',
+            minLength: 1
+        });
+    });
+
+    listarDatos();
+
+    function listarDatos() {
+        var idPregunta = $('#hiddenIdPregunta').val();
+
+        $.ajax({
+            url: '/EncuestaBuenaventura/ObtenerDetallePregunta',
+            data: { IdPregunta: idPregunta },
+            type: 'GET',
+            success: function (response) {
+                var data = response.data;
+
+                $('#contenedorRespuestas').empty();
+
+                if (data && Array.isArray(data) && data.length > 0) {
+                    // Crear un div para la pregunta
+                    var preguntaDiv = $('<div>').addClass('pregunta-div');
+
+                    // Agregar el texto de la pregunta a un textbox
+                    var preguntaTextbox = $('<input>').attr({
+                        type: 'text',
+                        class: 'form-control',
+                        value: data[0].Pregunta,
+                        readonly: false
+                    });
+
+                    var categoriasText = $('#categoriasText');
+                    debugger;
+                    console.log(data[0]);
+                    categoriasText.val(data[0].NombreCategoria);
+
+                    preguntaDiv.append($('<label>').text('Texto de la pregunta:'));
+                    preguntaDiv.append(preguntaTextbox);
+
+                    // Crear un contenedor para las respuestas
+                    var respuestasContainer = $('<div>');
+
+                    // Iterar sobre las respuestas de la pregunta actual
+                    data.forEach(function (respuesta) {
+                        // Crear un textbox para cada respuesta
+                        var respuestaTextbox = $('<input>').attr({
+                            type: 'text',
+                            class: 'form-control',
+                            value: respuesta.Respuesta,
+                            readonly: false,
+                            'data-idrespuesta': respuesta.IdRespuesta
+                        });
+
+                        // Agregar el textbox al contenedor de respuestas
+                        respuestasContainer.append($('<label>').text('Respuesta:'));
+                        respuestasContainer.append(respuestaTextbox);
+                    });
+
+                    // Agregar el contenedor de respuestas al div de la pregunta
+                    preguntaDiv.append(respuestasContainer);
+
+                    // Agregar botones de "Guardar Cambios" y "Cancelar" al final
+                    preguntaDiv.append($('<br>')); // Salto de línea para separar respuestas y botones
+
+                    var guardarCambiosBtn = $('<button>').text('Guardar Cambios').addClass('btn btn-primary');
+                    var cancelarBtn = $('<button>').text('Cancelar').addClass('btn btn-secondary').css('margin-left', '10px');
+
+                    cancelarBtn.attr('data-dismiss', 'modal');
+
+                    guardarCambiosBtn.on('click', function () {
+                        var idPregunta = data[0].IdPregunta;
+                        var preguntaValor = preguntaTextbox.val();
+                        var respuestasValores = respuestasContainer.find('input').map(function () {
+                            return { IdRespuesta: $(this).data('idrespuesta'), Respuesta: $(this).val() };
+                        }).get();
+                        var nombreCategoria = categoriasText.val();
+                        guardarCambios(idPregunta, preguntaValor, respuestasValores, nombreCategoria);
+                    });
+
+                    preguntaDiv.append(guardarCambiosBtn);
+                    preguntaDiv.append(cancelarBtn);
+
+                    // Agregar el div de la pregunta al contenedor de respuestas
+                    $('#contenedorRespuestas').append(preguntaDiv);
+                }
+            }
+        });
+    }
+
+    // Función para guardar los cambios
+    function guardarCambios(idPregunta, pregunta, respuestas, categoria) {
+        // Aquí puedes realizar la lógica para enviar los cambios al servidor
+        // Puedes enviar los valores al servidor a través de otra solicitud AJAX o según tu arquitectura
+
+        console.log('IdPregunta:', idPregunta);
+        console.log('Pregunta:', pregunta);
+        console.log('Respuestas:', respuestas);
+
+         $.ajax({
+             url: '/EncuestaBuenaventura/GuardarCambios',
+             data: { idPregunta: idPregunta, pregunta: pregunta, respuestas: JSON.stringify(respuestas), categoria: categoria },
+             type: 'POST',
+             success: function (response) {
+                 debugger;
+                 swal({
+                     title: 'Pregunta Agregada',
+                     type: 'success',
+                     confirmButtonText: 'Continuar',
+                 }, function () {
+                     location = "http://" + location.host + "/EncuestaBuenaventura";
+                 })
+             },
+             error: function (error) {
+                 console.log('Error:', error);
+                 toastr.error('Error al enviar los datos');
+             }
+         });
+    }
+
+
+
+</script>

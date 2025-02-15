@@ -1,0 +1,582 @@
+﻿@model ERPElectrodata.Models.SolicitudPersonal
+@{
+    ViewBag.Title = "ListarSolicitudPersonal";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.min.js"></script>
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/jquery-datatables-checkboxes-1.2.11/dataTables.checkboxes.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/jquery-datatables-checkboxes-1.2.11/dataTables.checkboxes.js"></script>
+<script src="~/Content/themes/plugin/DataTables/jquery-datatables-checkboxes-1.2.11/dataTables.checkboxes.min.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.26.0/moment.min.js"></script>
+<script src="https://cdn.datatables.net/plug-ins/1.10.25/sorting/datetime-moment.js"></script>
+
+<style>
+    table.dataTable tbody tr.selected {
+        color: #ffffff;
+        background-color: #eeeeee; /* Not working */
+    }
+</style>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Lista de Solicitudes de Personal
+                <div class="page-title-subheading">
+                    Visualización de todas las solicitudes de personal por estado.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title">Filtrar</div>
+                    <form class="">
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="cbGerencia" for="cbGerencia" class="">Gerencia</label>
+                                    <input id="IdGerencia">
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="cbArea" for="cbArea" class="">Área</label>
+                                    @Html.TextBoxFor(model => model.IdArea)
+                                    @Html.ValidationMessageFor(model => model.IdArea)
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="cbSolicitante" for="cbSolicitante" class="">Solicitante</label>
+                                    @Html.TextBoxFor(model => model.UsuarioCrea)
+                                    @Html.ValidationMessageFor(model => model.UsuarioCrea)
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblEstado" for="lblEstado" class="">Estado</label>
+                                    @Html.TextBoxFor(model => model.IdEstadoSolicitud)
+                                    @Html.ValidationMessageFor(model => model.IdEstadoSolicitud)
+
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblFechaInicio" for="FechaInicioTrabajo" class="">Fecha Ingreso Inicio</label>
+                                    @Html.TextBox("FechaIngresoInicio")
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblFechaInicio" for="FechaInicioTrabajo" class="">Fecha Ingreso Fin</label>
+                                    @Html.TextBox("FechaIngresoFin")
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <br />
+                                <button id="Buscar" type="button" class="mt-2 btn btn-primary" onclick="ListarSolicitudes()">Buscar</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card element-block-example">
+                <div class="card-body">
+                    <div class="card-title">Solicitudes</div>
+                    <form class="">
+
+                        <div class="form-row">
+                            @*<div class="col-md-6 float-left">
+                                    <button id="btnSeleccionarTodo" class="btn btn-primary">Seleccionar Todo</button>
+                                    <button id="btnDeseleccionarTodo" class="btn btn-primary">Deseleccionar Todo</button>
+                                </div>*@
+                            <div class="col-md-12 float-right" id="divAprobar">
+                                <button type="button" class="btn btn-danger float-right ml-1 block-element-btn-example-1" onclick="AprobarSolicitud();return false;">Aprobar</button>
+                                <button type="button" id="btnRechazar" class="btn btn-primary float-right" onclick="RechazarSolicitud(); return false;">Rechazar</button>
+                            </div>
+                        </div>
+                        <table style="width: 100%;" id="tbListadoSolicitudes" name="tbListadoSolicitudes" class="table table-hover table-striped table-bordered">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" name="select-all" id="select-all" /></th>
+                                    <th>Solicitante</th>
+                                    <th>Cantidad</th>
+                                    <th>Creación</th>
+                                    <th>Motivo</th>
+                                    <th>Cargo</th>
+                                    <th>Área</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th>Estado</th>
+                                    <th>¿Adjunto?</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot>
+                                <tr>
+                                    <th></th>
+                                    <th>Solicitante</th>
+                                    <th>Cantidad</th>
+                                    <th>Creación</th>
+                                    <th>Motivo</th>
+                                    <th>Cargo</th>
+                                    <th>Área</th>
+                                    <th>Fecha Ingreso</th>
+                                    <th>Estado</th>
+                                    <th>¿Adjunto?</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<iframe id="upload_target" name="upload_target" src="" class="frameHidden"></iframe>*@
+<!-- RECHAZAR SOLICITUD -->
+@*<div class="modal fade" id="modalRechazarSolicitud" role="dialog" aria-labelledby="modalRechazarSolicitudLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Rechazar Solicitud</h4>
+                </div>
+                <div class="modal-body">
+                    <div id="divSolicitudesRechazadas"></div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $(".block-element-btn-example-1").click(function() {
+            $(".element-block-example").block({
+                message: t('<div class="loader mx-auto">\n                            <div class="ball-grid-pulse">\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                            </div>\n                        </div>')
+            })
+        })
+
+        var FechaIngresoInicio = $("#FechaIngresoInicio").kendoDatePicker().data("kendoDateTimePicker");
+        var FechaIngresoFin = $("#FechaIngresoFin").kendoDatePicker().data("kendoDateTimePicker");
+
+        var IdGerencia = $("#IdGerencia").kendoComboBox({
+            placeholder: "",
+            dataTextField: "NAM_CHAR",
+            dataValueField: "ID_CHAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ObtenerListadoGerencias?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdArea").kendoComboBox({
+            cascadeFrom: "IdGerencia",
+            placeholder: "",
+            dataTextField: "title",
+            dataValueField: "ID_CHAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ObtenerListadoAreasxGerencia?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#UsuarioCrea").kendoComboBox({
+            placeholder: "",
+            dataTextField: "SOLICITANTE",
+            dataValueField: "UsuarioCrea",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ListarSolicitantePersonal?var=" + Math.random()
+                }
+            }
+        });
+
+
+        $("#IdEstadoSolicitud").kendoComboBox({
+            placeholder: "",
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ListarEstados?var=" + Math.random()
+                }
+            }
+        });
+
+        ListarSolicitudes();
+
+        //ocultar botones aprobar/rechazar
+        if(@ViewBag.FlagAprobador == "0"){
+            $("#divAprobar").hide();
+        }
+
+
+
+        // Listen for click on toggle checkbox
+        $('#select-all').click(function (event) {
+            if (this.checked) {
+                // Iterate each checkbox
+                $(':checkbox').each(function () {
+                    this.checked = true;
+                });
+            } else {
+                $(':checkbox').each(function () {
+                    this.checked = false;
+                });
+            }
+
+        });
+
+
+        $('#btnSeleccionarTodo').click(function (event) {
+            $(':checkbox').each(function () {
+                this.checked = true;
+            });
+            event.preventDefault();
+        });
+
+        $('#btnDeseleccionarTodo').click(function (event) {
+            $(':checkbox').each(function () {
+                this.checked = false;
+            });
+            event.preventDefault();
+        });
+
+
+
+
+
+
+    });
+
+    function IrResumenSolicitudPersonal(id) {
+        location = "http://" + location.host + "/DetalleSolicitudPersonalPendiente/";
+    }
+
+
+
+    function ListarSolicitudes() {
+
+        $('#tbListadoSolicitudes').dataTable().fnDestroy();
+        //$('#tbListadoSolicitudes').DataTable().clear().destroy();
+        //$('#tablaSolicitudes').DataTable().clear().destroy();
+
+        $.fn.dataTable.moment('DD/MM/YYYY');
+
+        var table = $('#tbListadoSolicitudes').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            'order': [0],
+            //'select': 'multi',
+            //"destroy": true,
+            ajax: {
+                "url": "/SeleccionSolicitudPersonal/ListadoSolicitudPersonal",
+                "data": function (d) {
+                    d.IdGerencia = $("#IdGerencia").val() == '' ? 0 : $("#IdGerencia").val(),
+                        d.IdArea = $("#IdArea").val() == '' ? 0 : $("#IdArea").val(),
+                        d.IdEstado = $("#IdEstadoSolicitud").val() == '' ? 0 : $("#IdEstadoSolicitud").val(),
+                        d.IdSolicitante = $("#UsuarioCrea").val() == '' ? 0 : $("#UsuarioCrea").val(),
+                        d.FechaIngresoInicio = $("#FechaIngresoInicio").val() == '' ? '' : $("#FechaIngresoInicio").val(),
+                        d.FechaIngresoFin = $("#FechaIngresoFin").val() == '' ? '' : $("#FechaIngresoFin").val()
+                }
+            },
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if ("@ViewBag.APROBADORADM" == "1") {
+                            if (data.ESTADO == "Aprobado por jefe" || data.ESTADO == "Pendiente") {
+                                return '<div class="columnCheck"><input type="checkbox" class="chkListado" id="' + data.Id + '" name="' + data.Id + '" /></div>';
+                            } else {
+                                return "";
+                            }
+                        }else {
+                            if (data.ESTADO == "Pendiente") {
+                                return '<div class="columnCheck"><input type="checkbox" class="chkListado" id="' + data.Id + '" name="' + data.Id + '" /></div>';
+                            } else {
+                                return "";
+                            }
+                        }
+
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black">' + data.SOLICITANTE + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black">' + data.CANTIDAD + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black">' + data.CREACION + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black">' + data.MOTIVOVACANTE + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black" >' + data.CARGO + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black">' + data.AREA + '</a>';
+                    }
+                },
+                //{ data: "INGRESO" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black">' + data.INGRESO + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black">' + data.ESTADO + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"\\SeleccionSolicitudPersonal/DetalleSolicitudPersonal/' + data.Id + '\" target="_blank" style="color:black">' + data.Adjunto + '</a>';
+                    }
+                },
+            ],
+            buttons: [
+                 'csv', 'excel', 'pdf', 'print'
+            ]
+            //buttons: [
+            //    {
+            //        extend: 'collection',
+            //        text: 'Exportar',
+            //        buttons: [
+            //            'excel',
+            //            'csv',
+            //            'pdf'
+            //        ]
+            //    }
+            //],
+            //'drawCallback': function () {
+            //    $('input[type="checkbox"]').iCheck({
+            //        checkboxClass: 'icheckbox_square-blue'
+            //    });
+            //},
+            //'columnDefs': [
+            //    {
+            //        'targets': 0,
+            //        'checkboxes': {
+            //            'selectRow': true,
+            //            'selectCallback': function (nodes, selected) {
+            //                $('input[type="checkbox"]', nodes).iCheck('update');
+            //            },
+            //            'selectAllCallback': function (nodes, selected, indeterminate) {
+            //                $('input[type="checkbox"]', nodes).iCheck('update');
+            //            }
+            //        }
+            //    }
+            //],
+            //"columnDefs": [
+            //    {
+            //        "targets": [0],
+            //        "visible": false,
+            //        "searchable": false
+            //    }
+            //]
+        });
+
+        // Handle iCheck change event for "select all" control
+        //$(table.table().container()).on('ifChanged', '.dt-checkboxes-select-all input[type="checkbox"]', function (event) {
+        //    var col = table.column($(this).closest('th'));
+        //    col.checkboxes.select(this.checked);
+        //});
+
+        // Handle iCheck change event for checkboxes in table body
+        //$(table.table().container()).on('ifChanged', '.dt-checkboxes', function (event) {
+        //    var cell = table.cell($(this).closest('td'));
+        //    cell.checkboxes.select(this.checked);
+        //});
+
+        //ocultar columna
+        if(@ViewBag.FlagAprobador == "0"){
+            table.columns([0]).visible(false);
+        }
+
+    }
+
+    function AprobarSolicitud() {
+        var ids = $('input[type=checkbox]:checked').map(function () {
+            if ($(this).hasClass("chkListado")) {
+                return $(this).attr('id');
+            }
+        }).get();
+
+        $.ajax({
+            url: "/SeleccionSolicitudPersonal/AprobarSolicitud/",
+            data: "IdSolicitud=" + ids +
+                "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    MostrarMensaje("OK", "Las solicitudes fueron aprobadas correctamente.")
+                } else if (resp == "VACIO") {
+                    MostrarMensaje("VACIO", "")
+                } else if (resp == "ERROR") {
+                    MostrarMensaje("ERROR", "")
+                }
+            }
+        });
+    }
+
+    function RechazarSolicitud() {
+
+        var ids = $('input[type=checkbox]:checked').map(function () {
+            if ($(this).hasClass("chkListado")) {
+                return $(this).attr('id');
+            }
+        }).get();
+
+        if (ids == "") {
+            MostrarMensaje("VACIO", "")
+        } else {
+            $("#lblTitulo").text("Rechazar Solicitud");
+
+            $("#btnRechazar").attr("data-style", "expand-right");
+            $("#btnRechazar").attr("data-toggle", "modal");
+            $("#btnRechazar").attr("data-target", "#miModal");
+
+            //$("#miModal").modal("show");
+            $('#modal-content').empty();
+            $('#modal-content').load('/SeleccionSolicitudPersonal/RechazarSolicitudPersonal/'+ ids );
+        }
+    }
+
+</script>
+
+
+<script type="text/javascript">
+
+    function MostrarMensaje(msg, descripcion) {
+
+        setTimeout(function () {
+            $(".modal-backdrop").remove();
+            $("#miModal").removeClass("show")
+        }, 180);
+
+        if (msg == "OK") {
+            toastr.success(descripcion, "");
+
+            var tabla = $('#tbListadoSolicitudes').DataTable();
+
+            tabla.ajax.reload();
+
+        }
+        else if (msg == "VACIO") {
+            toastr.warning("Por favor, seleccione una solicitud como mínimo", "Mensaje");
+        }
+        else {
+            toastr.danger("Contacte al administrador.", "Error");
+        }
+    }
+
+</script>

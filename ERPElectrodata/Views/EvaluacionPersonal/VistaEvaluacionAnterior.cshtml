@@ -1,0 +1,146 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Evaluacion</title>
+</head>
+<body>
+    <div>
+        <div style="width:100%;">
+            <div class="divSpace2"></div>
+            <div id="divEvaluacion" style="width:100%;">
+                @Html.Hidden("IdEvaluacion")
+                <div class="bodyForm">
+                    <div class="inBodyForm">
+                        <div style="overflow-y:auto; height:100%;">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            Evaluar: @Html.Editor("IdEvaluado")
+                                            <br /><br /><br />
+                                            Objetivo
+                                        </th>
+                                        <th>Descripción</th>
+                                        <th>Peso</th>
+                                        <th style="border-left: 1px solid #e2e2e2; text-align:center">
+                                            <img id="imgEvaluado" style="width:75px; height:75px" src="/Content/Fotos/0.jpg" /><br />
+                                            Autoevaluación
+                                        </th>
+                                        <th style="border-left: 1px solid #e2e2e2; text-align:center">
+                                            <img id="imgEvaluador" style="width:75px; height:75px" src="/Content/Fotos/0.jpg" /><br />
+                                            Evaluador
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="TablaCalificaciones"></tbody>
+                            </table>
+                        </div>
+                        <div id="divEvaFinal" class="divFondoDos" style="text-align:center"><h3>CALIFICACIÓN FINAL : <span id="spanNota"></span></h3></div>
+                    </div>
+                </div>
+                <iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+            </div>
+        </div>
+        <div style="clear:both; padding-bottom:10px;"></div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        CargarTablaEvaluaciones(@ViewBag.IdPersEnti);
+
+        $("#IdEvaluado").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "IdEvaluado",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/EvaluarPersonal?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                CargarTablaEvaluaciones($("#IdEvaluado").val())
+            }
+        });
+        var IdEvaluado = $("#IdEvaluado").data("kendoComboBox");
+        IdEvaluado.value(@ViewBag.IdPersEnti);
+
+    });
+
+    function CargarTablaEvaluaciones(idUsuario) {
+        $.ajax({
+            url: "/EvaluacionPersonal/ListarEvaluacionTerminado/" + idUsuario + "/2016",
+            //data: parametros,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                $("#TablaCalificaciones").empty();
+                $("#IdEvaluacion").val("");
+
+                $.each(data['Data'], function (index, value) {
+
+                    $("#TablaCalificaciones").append(
+                                                    '<tr id="IdEvaluacion' + (data['Data'][index]['Id']) + '">' +
+                                                        '<td style="width:30%">' + (data['Data'][index]['Nombre']) + '</td>' +
+                                                        '<td style="width:30%">' + (data['Data'][index]['Descripcion']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['Peso']) + '</td>' +
+                                                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                                            'Calificación : ' + (data['Data'][index]['IdResultadoEvaluado']) + '<br />'
+                                                            + (data['Data'][index]['ObsResultadoEvaluado']) +
+                                                        '</td>' +
+                                                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                                            'Calificación : ' + (data['Data'][index]['IdResultadoJefe']) + '<br />'
+                                                            + (data['Data'][index]['ObsResultadoJefe']) +
+                                                        '</td>' +
+                                                    '</tr>'
+                        );
+
+                    $('#imgEvaluado').attr("src", "/Content/Fotos/" + (data['Data'][index]['IdPersEnti']) + ".jpg");
+                    $('#imgEvaluador').attr("src", "/Content/Fotos/" + (data['Data'][index]['IdPersEntiPadre']) + ".jpg");
+
+                });
+
+                EvaluacionFinal(idUsuario);
+
+            },
+            error: function (source) {
+                alert("Error Carga Json");
+            }
+        });
+    }
+
+    function EvaluacionFinal(idUsuario) {
+        $.ajax({
+            url: "/EvaluacionPersonal/ObtenerCalificacionFinalTerminado/" + idUsuario,
+            cache: false,
+            type: "GET",
+            dataType: "text",
+            success: function (data) {
+                $("#spanNota").text(data);
+            },
+            error: function (source) {
+                alert("Error Carga Json");
+            }
+        });
+    }
+
+</script>

@@ -1,0 +1,150 @@
+﻿@{
+    ViewBag.Title = "ListaTicketPortal";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<style>
+    a.btn.btn-default.buttons-excel.buttons-html5.btn-outline-success {
+        margin-left: 3px;
+    }
+
+    a.btn.btn-default.buttons-copy.buttons-html5.btn-outline-secondary {
+        margin-left: 3px;
+    }
+</style>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Lista de Tickets del Portal Usuario
+                <div class="page-title-subheading">
+                    Visualización de todas las solicitudes creadas por medio del portal usuario sin asignar.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card element-block-example">
+                <div class="card-body">
+                    <div class="card-title">Solicitudes</div>
+                    <form class="">
+                        <div class="form-row">
+                        </div>
+                        <table style="width: 100%;" id="tbListadoSolicitudesPortal" name="tbListadoSolicitudesPortal" class="table table-hover table-striped table-bordered">
+                            <thead class="">
+                                <tr class="bg-info">
+                                    <th>Asignar</th>
+                                    <th>Código</th>
+                                    <th>Título</th>
+                                    <th>Asignado</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Creador Por</th>                                    
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot>
+                                <tr class="bg-info">
+                                    <th>Asignar</th>
+                                    <th>Código</th>
+                                    <th>Título</th>
+                                    <th>Asignado</th>
+                                    <th>Estado</th>
+                                    <th>Fecha Creación</th>
+                                    <th>Creador Por</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function(){
+        ListarSolicitudesPortal();
+    });
+
+    function ListarSolicitudesPortal() {
+        $('#tbListadoSolicitudesPortal').dataTable().fnDestroy();
+
+        var table = $('#tbListadoSolicitudesPortal').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            'order': [[1, "asc"]],
+            //'select': 'multi',
+            //"destroy": true,
+            ajax: "/Ticket/ListarTicketsPortal",
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div class="" style="text-align:center">' +
+                            '<button type="button" id="btnAsignarTicket' + data.IdTicket + '" title="Descripción : ' + data.Descripcion + '" class="btn btn-outline-success" onclick="asignarTicket(' + data.IdTicket + ')"><i class="fa fa-pencil-alt"></i></button>' +
+                               '</div>';
+                    }
+                },
+                { data: "IdTicket" },
+                { data: "Titulo" },
+                { data: "Asignado" },
+                { data: "Estado" },
+                { data: "FechaCreacion" },
+                { data: "CreadoPor" }                
+            ],
+            buttons: [
+                 {
+                     extend: 'pdfHtml5',
+                     text: 'PDF',//<i class="fa fa-file-pdf-o"></i>
+                     titleAttr: 'PDF',
+                     className: 'btn btn-outline-danger'
+                 },
+                 {
+                     extend: 'excelHtml5',
+                     text: 'Excel',//<i class="fa fa-file-excel-o"></i>
+                     titleAttr: 'Excel',
+                     className: 'btn btn-outline-success'
+                 },
+                  {
+                      extend: 'copyHtml5',
+                      text: 'Copy',//<i class="fa fa-files-o"></i>'
+                      titleAttr: 'Copy',
+                      className: 'btn btn-outline-secondary'
+                  },
+            ]            
+        });
+    }
+
+    function asignarTicket(id) {
+        $("#lblTitulo").text("Asignar Ticket");
+
+        $("#btnAsignarTicket" + id).attr("data-style", "expand-right");
+        $("#btnAsignarTicket" + id).attr("data-toggle", "modal");
+        $("#btnAsignarTicket" + id).attr("data-target", "#miModal");
+        
+        $(".modal-dialog").addClass("modal-xl");
+        
+        $('#modal-content').empty();
+        $('#modal-content').load('/Ticket/AsignarTicketPortal/' + id);
+    }
+
+</script>

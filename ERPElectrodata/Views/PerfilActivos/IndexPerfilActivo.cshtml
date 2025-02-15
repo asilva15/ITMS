@@ -1,0 +1,238 @@
+﻿@model ERPElectrodata.Models.SLA
+
+@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<style type="text/css">
+    b{
+        color:#F83C50;
+    }
+</style>
+
+<div class="panel panel-primary" style="width:100%;float:left;">
+    <div class="panel-heading" style="visibility:hidden">
+        <span>Mantenimiento de Perfil de Activos</span>
+    </div>
+
+    <div class="bodyForm">
+        <div class="">
+            <fieldset>
+                <legend>Mantenimiento de Perfil de Activos</legend>
+                <div class="form-group">
+                    <div class="form-row">
+                        <input id="btnNuevoPerfil" name="btnNuevoPerfil" class="btn btn-warning ml-4" type="button" value="Nuevo Perfil" data-toggle="modal" data-target="#miModal" />
+                    </div>
+                </div>                
+                <br />
+                <!-- TABLA DE MANTENIMIENTO PERFIL DE ACTIVOS -->
+                <div class="box-body">
+                    <table id="tablaPerfilActivos" class="table table-bordered table-striped" style="width:100%;margin:15px auto;">
+                        <thead>
+                            <tr>
+                                <th style="width:35%;">Cargo</th>
+                                <th>Tipo de Asignación</th>
+                                <th>Activo / Programa</th>
+                                <th style="width:8%;" class="opciones">Opciones</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Cargo</th>
+                                <th>Tipo de Asignación</th>
+                                <th>Activo / Programa</th>
+                                @*@if (Convert.ToInt32(Session["ADMINISTRADOR"].ToString()) == 0)
+                        {*@
+                                <th style="width:8%;" class="opciones">Opciones</th>
+
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </fieldset>
+                
+            </div>
+    </div>
+</div>
+
+<!-- NUEVO PERFIL-->
+@*<div class="modal fade" id="NuevoPerfil" role="dialog" aria-labelledby="modalNuevoPerfil" aria-hidden="true">
+        <div class="modal-dialog" role="document" id="tamNuevoPerfil">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel"><span id="lblTituloNPerfil" name="lblTitulo">Nuevo Perfil</span></h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="divNuevoPerfil"></div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<!-- FIN NUEVO PERFIL-->
+
+<!-- EDITAR PERFIL -->
+@*<div class="modal fade" id="modalEditar" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog" id="tamModalRenovacion">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Editar Perfil</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divEditarPerfil"></div>
+            </div>
+        </div>
+    </div>
+</div>*@
+<!-- EDITAR PERFIL -->
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#btnNuevoPerfil").click(function () {
+
+            $(".modal-dialog").removeClass("modal-xl");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-md");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-md");
+            $("#lblTitulo").text("Nuevo Perfil Activos");
+            $(".modal-title").addClass("ml-auto");
+            $("#modal-content").empty();
+            $("#modal-content").load('/PerfilActivos/NuevoPerfil');
+            
+        });
+        
+        ListarPerfilActivos();
+    });
+
+    function ListarPerfilActivos() {
+        $('#tablaPerfilActivos').dataTable().fnDestroy();
+        var tablaPerfil = $('#tablaPerfilActivos').DataTable({
+            "order": [[0, "asc"]],
+            dom: 'Bfrtip',
+            ajax: "/PerfilActivos/ListarPerfilActivos",
+            columns: [
+                { data: "NAM_CHAR" },
+                { data: "VAL_ACCO_PARA" },
+			    { data: "ActivoPrograma" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var opcion = "";
+                        opcion = '<button  id="' + data.Id + '" title="Editar" class="btn btn-outline-dark" data-toggle="modal" data-target="#miModal" onclick="abrirModalEditarPerfil(' + data.Id + ');"><i class="fas fa-pencil-alt"></i></button>' +
+                                   
+                                   '<button  id="' + data.Id + '" title="Eliminar" class="btn btn-outline-dark" data-toggle="modal" data-target="#miModal" onclick="eliminarPerfilActivo(' + data.Id + ');"><i class="fas fa-trash"></i></button>';
+                        return opcion;
+                    }
+
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+        if(@ViewBag.Administrador == 0){
+            var columna = tablaPerfil.column(3);
+            columna.visible(!columna.visible());
+        }
+    }
+
+    function abrirModalEditarPerfil(id) {
+        
+            $(".modal-dialog").removeClass("modal-xl");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-md");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-md");
+            $("#lblTitulo").text("Editar Perfil Activos");
+            $(".modal-title").addClass("ml-auto");
+            $("#modal-content").empty();
+            $("#modal-content").load('/PerfilActivos/EditarPerfil/' + id);
+    }
+
+    function eliminarPerfilActivo(id) {
+
+        mensajeConfirmacion('Mensaje', '¿Está seguro de eliminar este perfil? ', id, 'eliminar');
+    }
+
+    function mensajeConfirmacion(msg, msnErr, id) {
+
+        if (msg == 'OK') {
+            toastr.success(msnErr,"Acción Completada");
+            $("#btnCancelar").trigger({ type: "click" });
+            ListarPerfilActivos();
+        }
+        else if (msg == 'Mensaje') {
+            $(".modal-dialog").removeClass("modal-xl");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-md");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-sm");
+            $("#lblTitulo").text(msg);
+            $(".modal-title").addClass("ml-auto");
+            $("#modal-content").empty();
+            $("#modal-content").append("<div style='width:70%;margin:0 auto;'>" +
+                "<center><h5>¿Estas seguro(a) de eliminar el registro?</h5><center><br/>"+
+                "<button id='eliminar' style='float:left;' class='btn btn-primary btn-sm btn-primary'>Eliminar</button>" +
+                                              "&nbsp; &nbsp; &nbsp;" +
+                                              "<button id='btnCancelar' class='btn btn-primary btn-sm btn-secondary' data-style='expand-right' data-dismiss='modal'>Cancelar</button>" +
+                                       "</div>");
+
+            var eli = $("#eliminar").bind("click", function () {
+                $.ajax({
+                    url: "/PerfilActivos/EliminarPerfilActivo/",
+                    data: "IdPerfilActivo=" + id +
+                          "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == "OK") {
+                            mensajeConfirmacion(resp, 'Se ha eliminado el perfil de activos');
+                        } else
+                            if (resp == "ERROR") {
+                                mensajeConfirmacion(resp, 'Ha ocurrido un error al eliminar el perfil de activo.');
+                            }
+                    }
+                });
+            });
+        } else
+            if (msg == 'ERROR') {
+                toastr.success(msg,msnErr);
+                $("#btnCancelar").trigger({ type: "click" });
+                ListarPerfilActivos();
+            }
+    }
+
+    
+
+</script>

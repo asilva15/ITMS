@@ -1,0 +1,97 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+@{
+    Layout = null;
+}
+<style>
+    #Nom_Marca {
+        width: 280px;
+        height: 26px;
+    }
+    #Det_Marca {
+        width: 610px;
+        height: 150px;
+    }
+</style>
+
+<fieldset>
+    <div class="divFondoUno">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Marca
+            </div>
+            <div class="editor-field">
+                <input id="Nom_Marca" type="text" name="Nom_Marca">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+       
+    </div>
+    <div class="divFondoDos">
+        <div style="width: 95.5%; float:left; padding: 0px 0px 0 15px;">
+            <div class="editor-label">
+                Detalle <b style="color:red">(Opcional)</b>
+            </div>
+            <div class="editor-field">
+                <textarea id="Det_Marca" rows="4" cols="50" name="Det_Marca"></textarea>
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+    </div>
+    <div style="display: inline-block; float: right; padding: 20px 25px 15px 5px;">
+        <div style=" float: left; padding: 0 15px 0 0;">
+            <button id="submitNewMarca" class="k-button">Crear</button>
+        </div>
+        <button id="cancelNewMarca" class="k-button">Cancelar</button>
+    </div>
+</fieldset>
+<script type="text/javascript">
+    $("#submitNewMarca").click(function () {
+        var nom_marca = $("#Nom_Marca").val();
+        if (nom_marca == '') {
+            validar('Se debe ingresar el nombre de la Marca.');
+        }
+        else {
+            var params = {
+                Nom_Marca: $("#Nom_Marca").val(),
+                Det_Marca: $("#Det_Marca").val(),
+            };
+
+            $.ajax({
+                url: "/Activity/CreateMarca",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    
+                    if (resp == "OK") {
+                        fnMostrarMARCA();
+                        closeWinFormModalPopUp();
+                    }
+                }
+            });
+        }
+    });
+
+    $("#cancelNewMarca").click(function (event) {
+        event.preventDefault();
+        closeWinFormModalPopUp();
+    });
+    function validar(msg) {
+        var title = 'Error al Guardar';
+        var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                          "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                          "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                          "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                          "</div></div>";
+
+        winPopUpModal(title, body, 300, 130);
+
+        $("#btnContinuee").click(function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+    }
+</script>

@@ -1,0 +1,152 @@
+﻿@{
+    Layout = null;
+}
+<style>
+    n{
+        color:#133A6B;
+        font-weight: bold;
+    }
+    c{
+        color:#000000;
+        font-weight: bold;
+    }
+</style>
+
+    <div class="mb-3 card" style="width:100%;">
+        <div class="card-header"> Documentos Iniciales</div>
+        <div class="card-body">
+            <div id="divAdjuntosComercial"></div>
+        </div>
+    </div>
+    <div class="mb-3 card" style="width:100%;">
+        <div class="card-header">  Documentos Adjuntos </div>
+        <div class="card-body">
+            <div id="divAdjuntos"></div>
+        </div>
+    </div>
+
+    <div class="mb-3 card" style="width:100%;">
+        <div class="card-header"> Documentos Cronograma </div>
+        <div class="card-body">
+            <div id="divAdjuntosCronograma"></div>
+        </div>
+    </div>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $.ajax({
+            url: "/OrderForm/ObtenerArchivosComercial/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                mostrarArchivosComercial();
+            },
+            error: function (source) {
+                toastr.error("Error Carga Archivos Comercial","Error");
+            }
+        });
+
+        $.ajax({
+            url: "/OrderForm/ObtenerArchivosProyecto/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                mostrarArchivosProyecto();
+            },
+            error: function (source) {
+                toastr.error("Error Carga Archivos Proyectos", "Error");
+            }
+        });
+
+        $.ajax({
+            url: "/OrderForm/ObtenerArchivosCronograma/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                    mostrarArchivosCronograma(); 
+            },
+            error: function (source) {
+                toastr.error("Error Carga Archivos Cronograma", "Error");
+            }
+        });
+
+       
+    })
+
+    function mostrarArchivosComercial() {
+        var c=0;
+        $.each(data1['Data2'], function (index, value) {
+            $("#divAdjuntosComercial").append(
+                '<div class="form-group">'+
+                '<div class="form-row">' +
+                    '<div class="col-md-3" >' + (data1['Data2'][index]['TIPO']) + '</div>' +
+                    '<div class="col-md-3" >- <a href="' + (data1['Data2'][index]['LINK']) + '" target="_BLANK">' + (data1['Data2'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                    '<div class="col-md-2" >' + (data1['Data2'][index]['CREATE_ATTA']) + '</div>' +
+                    '<div class="col-md-2" >' + (data1['Data2'][index]['NOMBRE']) + '</div>' +
+                    '<div class="col-md-2" >' + (data1['Data2'][index]['FECHAACTA']) + '</div>' +
+                '</div>' +
+                '</div>'
+            );
+            c=c+1;
+        });
+        if (c == 0) {
+            $("#divAdjuntosComercial").append(
+                '<div  class="col-md-12" style="padding-left:14px">No se adjuntaron documentos.</div>'
+            );
+        }
+    }
+
+    function mostrarArchivosProyecto() {
+        $("#divAdjuntos").empty();
+        var c = 0;
+        $.each(data['Data'], function (index, value) {
+            $("#divAdjuntos").append(
+                '<div class="form-group">' +
+                '<div class="form-row">' +
+                    '<div class="col-md-3" >' + (data['Data'][index]['TIPO']) + '</div>' +
+                    '<div class="col-md-3" >- <a href="' + (data['Data'][index]['LINK']) + '" target="_BLANK">' + (data['Data'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                    '<div class="col-md-2" >' + (data['Data'][index]['CREATE_ATTA']) + '</div>' +
+                    '<div class="col-md-2" >' + (data['Data'][index]['NOMBRE']) + '</div>' +
+                    '<div class="col-md-2" >' + (data['Data'][index]['FECHAACTA']) + '</div>' +
+                '</div>' +
+                '</div>'
+            );
+            c = c + 1;
+        });
+        if (c == 0) {
+            $("#divAdjuntos").append(
+                '<div  class="col-md-12" style="padding-left:14px">No se adjuntaron documentos.</div>'
+            );
+        }
+    }
+    function mostrarArchivosCronograma() {
+        $("#divAdjuntosCronograma").empty();
+        var cont=0;
+        $.each(data['Data'], function (index, value) {
+            $("#divAdjuntosCronograma").append(
+                '<div class="form-group">' +
+                            '<div class="form-row">' +
+                                '<div class="col-md-3" >' + (data['Data'][index]['Documento']) + '</div>' +
+                                '<div class="col-md-3" >- <a href="' + (data['Data'][index]['Link']) + '" target="_BLANK">' + (data['Data'][index]['Archivo']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                                '<div class="col-md-2" >' + (data['Data'][index]['FechaCreacion']) + '</div>' +
+                                '<div class="col-md-2" >' + (data['Data'][index]['Nombre']) + '</div>' +
+                                '<div class="col-md-2" >' + (data['Data'][index]['FechaActa']) + '</div>' +
+                '</div>' +
+                '</div>'
+                        );
+            cont = cont + 1;
+        });
+        if (cont == 0) {
+            $("#divAdjuntosCronograma").append(
+                        '<div  class="col-md-12" style="padding-left:14px">No se adjuntaron documentos.</div>'
+            );
+       }
+        
+    }
+
+</script>

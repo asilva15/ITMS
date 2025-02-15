@@ -1,0 +1,203 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+<style>
+    .k-button.k-upload-selected {
+        display: none !important
+    }
+    .k-button.k-clear-selected {
+        display: none !important
+    }
+</style>
+
+<input type="hidden" name="IdDocumentoContratoFianza" id="IdDocumentoContratoFianza" value="@ViewBag.IdDocumentoContratoFianza" />
+<input type="hidden" name="IdDocumentoContrato" id="IdDocumentoContrato" value="@ViewBag.IdDocumentoContrato" />
+<fieldset>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="editor-label">
+                Tipo de Fianza <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="EditIdTipo" type="text" name="EditIdTipo">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="editor-label">
+                Importe Afianzado <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="EditImporte" type="text" name="EditImporte" value="@ViewBag.Importe">
+            </div>
+        </div>        
+    </div>
+        <div class="form-row">
+            <div class="col-md-6">
+                <div class="editor-label">
+                    Fecha Inicio <span style="color:red">(*)</span>
+                </div>
+                <div class="editor-field">
+                    <input id="EditFechaInicio" type="text" name="EditFechaInicio" value="@ViewBag.FechaInicio">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="editor-label">
+                    Fecha Fin <span style="color:red">(*)</span>
+                </div>
+                <div class="editor-field">
+                    <input id="EditFechaFin" type="text" name="EditFechaFin" value="@ViewBag.FechaFin">
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-md-12">
+                <div class="editor-label">
+                    Descripción
+                </div>
+                <div>
+                    <textarea id="EditDescripcion" name="EditDescripcion" class="form-control">@ViewBag.Descripcion</textarea>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-sm-12">
+                <input name="files" id="files" type="file" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6"></div>
+            <div class="col-md-3">
+                <button id="cancelFianza" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-md-3">
+                <button id="EditarFianza" class="btn btn-primary btn-block">Crear</button>
+            </div>
+        </div>
+</fieldset>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+        $("#EditIdTipo").kendoComboBox({
+            autoBind: false,
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DocumentoContrato/ListaTipoFianza?var=" + Math.random()
+                }
+            }
+        });
+        var TipoFianzaContrato = $("#EditIdTipo").data("kendoComboBox");
+        TipoFianzaContrato.value(@ViewBag.TipoFianzaContrato);
+
+        $("#EditImporte").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#EditFechaInicio").kendoDateTimePicker({
+
+        });
+
+        $("#EditFechaFin").kendoDateTimePicker({
+
+        });
+
+        var idFianza = 0;
+
+        $("#EditarFianza").click(function () {
+
+            var params = {
+                IdDocContratoFianza: $("#IdDocumentoContratoFianza").val(),
+                IdDocContrato: $("#IdDocumentoContrato").val(),
+                TipoFianzaContrato: $("#EditIdTipo").val(),
+                Importe: $("#EditImporte").val(),
+                FechaInicio: $("#EditFechaInicio").val(),
+                FechaFin: $("#EditFechaFin").val(),
+                Descripcion: $("#EditDescripcion").val()
+            };
+
+            $.ajax({
+                url: "/DocumentoContrato/GuardarFianza",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "JSON",
+                success: function (resp) {
+
+                    if (resp.Respuesta == "OK") {
+                        //Una vez registrada la fianza devolver el id de la fianza creada
+                        //Actualiza la url de subida
+                        idFianza = resp.IdFianza;
+                        uploadGeneral.options.async.saveUrl = `/DocumentoContrato/AdjuntarArchivoFianza/?idFianza=${idFianza}`;
+
+                        //Aqui indicamos que se dispare el upload
+                        uploadGeneral.upload();
+                        uploadDone(resp.Respuesta, 1);
+                    }
+                    else
+                    {
+                        uploadDone(resp.Respuesta, 2);
+                    }
+                }
+            });
+        });
+
+        $("#cancelFianza").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        //var onSelect = function (e) {
+        //    var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").data("kendoComboBox");
+        //    //if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 7) {
+        //    $.each(e.files, function (index, value) {
+        //        if (value.extension.toLowerCase() != ".pdf") {
+        //            e.preventDefault();
+
+        //            toastr.warning("Cargue el archivo de documento Adobe Acrobat en pdf", "Alerta");
+
+        //        }
+        //    });
+
+        //};
+
+        /*$("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            async: {
+                // Agregar  usando el metodo de controller
+                saveUrl: "",
+                // Eliminar usando el metodo de controller
+                removeUrl: "",
+                //Autocarga
+                autoUpload: false
+            },
+            //select: onSelect,
+            multiple: false,
+        });*/
+
+        let uploadGeneral = $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            async: {
+                saveUrl: `/DocumentoContrato/AdjuntarArchivoFianza/?idFianza=${idFianza}`,
+                removeUrl: "",
+                withCredentials: false,
+               autoUpload: false
+            },
+        }).data("kendoUpload");
+
+    });
+
+</script>

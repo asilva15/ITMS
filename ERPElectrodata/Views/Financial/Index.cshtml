@@ -1,0 +1,607 @@
+﻿@{
+    ViewBag.Title = @ResourceLanguaje.Resource.Financial;
+    Layout = null;
+}
+
+@*<nav>
+    <ul>
+        <li id="liTransaction"><a href="#" onclick="ClickNew(this)" id="aTransaction">New Transaction</a></li>
+        <li onclick="FindTrans(this)" id="liFindTrans"><a href="#" id="aFindTrans">Find Transaction</a></li>
+        <li onclick="DeliverySustain(this)" id="liDelivery"><a href="#" id="aDelivery">@ResourceLanguaje.Resource.AccountabilityAccount</a></li>        
+    </ul>
+</nav>*@
+
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDNVG8OtzyHnhz69RMhcWcJkk1WhcyoOHI&sensor=false"> </script>
+
+<div class="afterMain">
+    <div id="divContent">
+
+        <div style="">
+            <div style="width:49.5%;float:left;">
+                <div id="msgPopUpFinancial" class="titleForm"><div class="title">@ResourceLanguaje.Resource.GeographicalLocation - @Session["NAM_ACCO"]</div></div>
+                <div class="bodyForm">
+                    <div class="inBodyForm">
+                        <div style="width:100%;height:400px;">
+                            <div id="FinancialPrincipal" style="width:100%; height:400px; float:left;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="width:49.5%;float:right;">
+                <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.GeographicalLocation - IT Outsourcing</div></div>
+                <div class="bodyForm">
+                    <div class="inBodyForm">
+                        <div style="width:100%;height:400px;">
+                            <div id="FinancialPrincipalAll" style="width:100%; height:400px; float:right;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="height:10px;clear:both;"></div>
+
+        <div style="clear:both;">
+            <div style="float:left;width:60%;">
+                <div class="titleForm"><div class="title">Profit Rate</div></div>
+                <div class="bodyForm">
+                    <div class="inBodyForm">
+                        <div style="height:300px;">
+                            <div id="ProfitRate" style="height:295px;width:98%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="float:right;width:39%; height:300px;">
+                <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.OperationalSummmary</div></div>
+                <div class="bodyForm">
+                    <div class="inBodyForm">
+                        <div style="height:300px;background-color:#eaeaea;">
+                            <div style="float:left;text-align:justify;width:55%; margin:10px 0px 0px 10px; ">
+                                <div style="font-weight:bold;">@ResourceLanguaje.Resource.Staff:</div> <div style="padding-left:0px;">@ViewBag.STAFF</div> <br />
+                                <div style="font-weight:bold;">@ResourceLanguaje.Resource.Sites:</div><div style="text-transform:capitalize;padding-left:0px;">@ViewBag.SITES</div><br />
+                                <div style="font-weight:bold;">@ResourceLanguaje.Resource.ServiceOperativeLine:</div>
+                                <div style="text-transform:capitalize;padding-left:0px;">@ViewBag.SERVICE</div>
+                            </div>
+                            <div style="float:right; width:39%;text-align:center; background-color:#FFFFFF;height:230px;padding-top:70px;">
+                                <div style="font-size:5em;font-weight:bold;">@ViewBag.PROFIT %</div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div style="height:10px;clear:both;"></div>
+
+        <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.FinancialSummary (@ViewBag.NAM_ACCO) - @ViewBag.MONEY_NAME</div></div>
+        <div class="bodyForm">
+            <div class="inBodyForm">
+                <div style="height:300px; width:100%">
+                    <div id="ProfitMoney" style="height:295px;width:99%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="height:10px;clear:both;"></div>
+
+        <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.FinancialSummary (IT Outsourcing) - @ViewBag.MONEY_NAME</div></div>
+        <div class="bodyForm">
+            <div class="inBodyForm">
+                <div style="height:300px; width:100%">
+                    <div id="ProfitMoneyAll" style="height:295px;width:99%;"></div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script type="text/javascript">
+    var mapOptions = {
+        center: new google.maps.LatLng(@ViewBag.LAT_ACCO, @ViewBag.LON_ACCO),
+        zoom: 7,
+        clickable: true,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    var mapOptionsAll = {
+        center: new google.maps.LatLng(-12.039058247042083, -76.89334810000003),
+        zoom: 5,
+        clickable: true,
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    };
+
+    var map = new google.maps.Map(document.getElementById("FinancialPrincipal"),mapOptions);
+    var mapAll = new google.maps.Map(document.getElementById("FinancialPrincipalAll"),mapOptionsAll);
+
+    function initialize() {
+        var myLatlng = new google.maps.LatLng(@ViewBag.LAT_ACCO, @ViewBag.LON_ACCO);
+        var marker = new google.maps.Marker({
+            position: myLatlng,
+            title: ""
+        });
+        marker.setMap(map);
+        addInfoWindow(map,marker, "<iframe src='/Financial/PopUp' id='contentInfoWindow'></iframe>",@Session["ID_ACCO"]);
+    }
+
+    function initializeAll() {
+        
+        $.get("/Account/LocationAll",function(json){                        
+            $.each(json['Data'], function (index, value) {
+                //console.log(value["ID_ACCO"]);
+                var myLatlngAll = new google.maps.LatLng(value["COOR"][0], value["COOR"][1]);
+                var markerAll = new google.maps.Marker({
+                    position: myLatlngAll,
+                    title: ""
+                });
+                markerAll.setMap(mapAll);
+                addInfoWindow(mapAll,markerAll, "<iframe src='/Financial/PopUp' id='contentInfoWindowx'></iframe>",value["ID_ACCO"]);
+            });
+        });
+        
+    }
+
+    function addInfoWindow(map,marker, message,id) {
+        var info = message;
+        var infoWindow = new google.maps.InfoWindow({
+            content: message
+        });
+        google.maps.event.addListener(marker, 'click', function () {
+            load_content(map, this, infoWindow,id);
+        });
+    }
+    function load_content(map, marker, infowindow,id) {
+        $.ajax({
+            url: '/Financial/PopUp/'+id,
+            success: function (data) {
+                infowindow.setContent(data);
+                infowindow.open(map, marker);
+                google.maps.event.addListener(infowindow, 'domready', function () {
+                    pie();
+                });
+            }
+        });
+    }
+
+    function pie() {
+        //alert("aki");
+        chart = new Highcharts.Chart({
+            colors:["#516882","#7CBB00"],
+            chart: {
+                renderTo: 'pieProfit',
+                plotBackgroundColor: null,
+                plotBorderWidth: null,
+                plotShadow: false,
+                backgroundColor:'#F5F5F5'
+            },
+            title: {
+                text: null
+            },
+            exporting:{enabled:false},
+            credits:{enabled:false},
+            tooltip: {
+                pointFormat: '@ViewBag.Money<b>{point.y}</b>',
+                percentageDecimals: 1
+            },
+            plotOptions: {
+                pie: {
+                    allowPointSelect: true,
+                    cursor: 'pointer',
+                    dataLabels: {
+                        enabled: true,
+                        formatter: function() {
+                            return Highcharts.numberFormat(this.percentage,2) +' %';
+                        },
+                        inside:true,
+                        softConnector:false,
+                        distance:0    
+                    },
+                    showInLegend: true                
+                }
+            },
+            legend:{
+                align:'right',
+                layout:'vertical'
+            },
+            series: [{
+                type: 'pie',
+                size:'100%',
+                name: ' ',
+                data: [
+                    {
+                        name: '@ResourceLanguaje.Resource.Revenues',
+                        y: @ViewBag.Revenues,
+                        sliced: true,
+                        selected: true
+                    },
+                    ['@ResourceLanguaje.Resource.Expenses', @ViewBag.Expenses],
+                ]
+            }]
+            });
+
+            //console.log(chart);
+        }
+
+    initialize();
+    initializeAll();
+</script>
+
+<div id="popup" style="display: none;">
+    <div class="content-popup">
+        <div class="close"><a href="#" id="close">Close</a></div>
+        <div>Contenido POPUP</div>
+    </div>
+</div>
+
+<style>    
+#popup {
+    left: 0;
+    position: absolute;
+    top:0;
+    /*top: 0; top:100px; 
+     left:400px;*/
+    width: 100%;
+    z-index: 1001;
+}
+
+.content-popup {
+    margin:0px auto;
+    margin-top:50px;
+    padding:10px;
+    width:700px;
+    min-height:350px;
+    border-radius:4px;
+    background-color:#FFFFFF;
+    box-shadow: 0 2px 5px #666666;
+}
+
+.close {
+    position:relative;
+    left:480px;
+}
+
+.contentMap{
+        width: 400px;
+        height: 400px;
+        border: 1px solid #336699;
+    }
+</style>
+
+<script type="text/javascript">
+    function ProfitRate() {
+
+        $.ajax({
+            url: '/Financial/PROFIT_RATE_ALL?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+            
+                var CatProfitRate = new Array();
+                var ValProfitRate = new Array();
+                var iProfitRate = 0;
+
+                var CatProfitCuenta = new Array();
+                var ProfitCuenta = new Array();
+                var RevenuesCuenta = new Array();
+                var ExpensesCuenta = new Array();
+                var iProfitCuenta = 0;
+
+                var CatITO = new Array();
+                var RevenuesITO = new Array();
+                var ExpensesITO = new Array();
+                var ProfitITO = new Array();
+                //var acumulado;
+
+                $.each(json['area'], function (index, value) {
+                    
+                    if(value['PROFIT_RATE_CUENTA'] != null) 
+                    {
+                        CatProfitRate[iProfitRate] = value['NAM_SERIE'];
+                        ValProfitRate[iProfitRate]= value['PROFIT_RATE_CUENTA']
+                        ++iProfitRate;
+                    }
+
+                    if(value['PROFIT_CUENTA'] != null) 
+                    {
+                        CatProfitCuenta[iProfitCuenta] = value['NAM_SERIE'];
+                        ProfitCuenta[iProfitCuenta]= value['PROFIT_CUENTA'];
+                        RevenuesCuenta[iProfitCuenta] = value['REVENUES_CUENTA'];
+                        ExpensesCuenta[iProfitCuenta]= value['EXPENSES_CUENTA'];
+                        ++iProfitCuenta;
+                    }
+
+                    CatITO[index] = value['NAM_SERIE'];
+                    RevenuesITO[index] = value['REVENUES_ITO'];
+                    ExpensesITO[index] = value['EXPENSES_ITO'];
+                    ProfitITO[index] = value['PROFIT_ITO'];
+
+                });        
+                //Inicio 
+                chart = new Highcharts.Chart({
+                    chart: {
+                        marginTop:20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'ProfitRate',
+                        type: 'area',
+                        zoomType: 'xy'
+                    },
+                    colors: ['#7CBB00'/*'#516882','#7CBB00'*/],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    credits:{enabled:false},
+                    xAxis: {
+                        categories: CatProfitRate,
+                        lineWidth:1,
+                        gridLineWidth:1,
+                        labels: {
+                            formatter: function () {
+                                return this.value; // clean, unformatted number for year
+                            }
+                        }
+                    },
+                    yAxis: {
+                        lineWidth:1,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            formatter: function () {
+                                return this.value + ' %';
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        },{
+                            width: 2,
+                            dashStyle:'ShortDash',
+                            color: '#B21E1E',
+                            value: 40,
+                            label:{
+                                text:'40% (Minimal Profit)'
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' %',
+                        valueDecimals:2//,
+                        //pointFormat: '{series.name} produced <b>{point.y:,.0f}</b><br/>warheads in {point.x}'
+                    },
+                    plotOptions: {
+                        area: {
+                            fillOpacity:0.7,
+                            //pointStart: 1940,
+                            marker: {
+                                enabled: false,
+                                symbol: 'circle',
+                                radius: 2,
+                                states: {
+                                    hover: {
+                                        enabled: true
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    series: [
+                    /*{
+                        name: 'IT Outsourcing',
+                        data: ValorTotal
+                    }, */{
+                name: '@ViewBag.NAM_ACCO',
+                data: ValProfitRate
+            }]
+        });
+
+                //grafico 2
+                chart2 = new Highcharts.Chart({
+                    chart: {
+                        marginTop:20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'ProfitMoney',
+                        type: 'area',
+                        zoomType: 'xy'
+                    },
+                    colors: ['#516882','#7CBB00','#000000'],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    credits:{enabled:false},
+                    xAxis: {
+                        categories: CatProfitCuenta,
+                        lineWidth:1,
+                        gridLineWidth:1,
+                        labels: {
+                            formatter: function () {
+                                return this.value; // clean, unformatted number for year
+                            }
+                        }
+                    },
+                    yAxis: {
+                        lineWidth:1,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            formatter: function () {
+                                return '@ViewBag.SIM_MONE_ACCO '+this.value;
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valuePrefix: '@ViewBag.SIM_MONE_ACCO ',
+                        valueDecimals:2//,
+                        //pointFormat: '{series.name} produced <b>{point.y:,.0f}</b><br/>warheads in {point.x}'
+                    },
+                    plotOptions: {
+                        area: {
+                            fillOpacity:0.7,
+                            //pointStart: 1940,
+                            marker: {
+                                enabled: false,
+                                symbol: 'circle',
+                                radius: 2,
+                                states: {
+                                    hover: {
+                                        enabled: true
+                                    }
+                                }
+                            }
+                        },
+                        line:{
+                            showInLegend:false,
+                            lineWidth:0,
+                            marker:{
+                                enabled:false,
+                                states:{
+                                    hover:{
+                                        enabled:false
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    series: [{
+                        name: '@ResourceLanguaje.Resource.Revenues',
+                data: RevenuesCuenta
+            }, {
+                name: '@ResourceLanguaje.Resource.Expenses',
+                data: ExpensesCuenta },
+                {
+                    name:'Profit',
+                    data:ProfitCuenta,
+                    type: 'line'
+                }]
+        });
+
+                //Grafico 3 
+                chart2 = new Highcharts.Chart({
+                    chart: {
+                        marginTop:20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'ProfitMoneyAll',
+                        type: 'area',
+                        zoomType: 'xy'
+                    },
+                    colors: ['#516882','#7CBB00','#000000'],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    credits:{enabled:false},
+                    xAxis: {
+                        categories: CatITO,
+                        lineWidth:1,
+                        gridLineWidth:1,
+                        labels: {
+                            formatter: function () {
+                                return this.value; // clean, unformatted number for year
+                            }
+                        }
+                    },
+                    yAxis: {
+                        lineWidth:1,
+                        title: {
+                            text: null
+                        },
+                        labels: {
+                            formatter: function () {
+                                return '@ViewBag.SIM_MONE_ACCO '+this.value;
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valuePrefix: '@ViewBag.SIM_MONE_ACCO ',
+                        valueDecimals:2//,
+                        //pointFormat: '{series.name} produced <b>{point.y:,.0f}</b><br/>warheads in {point.x}'
+                    },
+                    plotOptions: {
+                        area: {
+                            fillOpacity:0.7,
+                            //pointStart: 1940,
+                            marker: {
+                                enabled: false,
+                                symbol: 'circle',
+                                radius: 2,
+                                states: {
+                                    hover: {
+                                        enabled: true
+                                    }
+                                }
+                            }
+                        },
+                        line:{
+                            showInLegend:false,
+                            lineWidth:0,
+                            marker:{
+                                enabled:false,
+                                states:{
+                                    hover:{
+                                        enabled:false
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    series: [{
+                        name: '@ResourceLanguaje.Resource.Revenues',
+                data: RevenuesITO
+            }, {
+                name: '@ResourceLanguaje.Resource.Expenses',
+                data: ExpensesITO },
+                {
+                    name:'Profit',
+                    data:ProfitITO,
+                    type: 'line'
+                }]
+        });
+
+                var myINF_CRR = setTimeout("ProfitRate();", 300000);
+                //Fin
+            }
+});
+
+}
+    ProfitRate();
+
+
+
+
+
+</script>

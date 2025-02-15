@@ -1,0 +1,79 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte por Tipo de Activo
+    </div>
+    <div class="card-body">
+        <form id="Parametros">
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Tipo de Activo
+                    </div>
+                    <div class="editor-field form-control" id="ID_TYPE_ASSE">
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button id="btnBuscar" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="bodyForm">
+    <div class="inBodyForm">
+        <iframe id="RSActivoxTipo" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var ID_TYPE_ASSE;
+
+        loadData();
+
+        $("#btnBuscar").click(function (event) {
+            event.preventDefault();
+
+            if (ID_TYPE_ASSE && (ID_TYPE_ASSE.value() !== "")) {
+                window.frames["RSActivoxTipo"].src = "/Reporting/Activo/ActivoxTipo.aspx?id=" + ID_TYPE_ASSE.value();
+            } else {
+                toastr.warning("Seleccione un tipo de activo.", "Mensaje");
+            }
+
+            return false;
+        });
+
+        function loadData() {
+            $.ajax({
+                url: "/TypeAsset/List?var=" + Math.random(),
+                type: "GET",
+                dataType: "json",
+                success: function (json) {
+                    json["Data"].push({ NAM_TYPE_ASSE: "ALL ASSET", ID_TYPE_ASSE: 0 });
+
+                    ID_TYPE_ASSE = $("#ID_TYPE_ASSE").kendoComboBox({
+                        index: 0,
+                        dataTextField: "NAM_TYPE_ASSE",
+                        dataValueField: "ID_TYPE_ASSE",
+                        filter: "contains",
+                        autoBind: true,
+                        suggest: true,
+                        dataSource: json["Data"]
+                    }).data("kendoComboBox");
+                },
+                error: function (error) {
+                    console.error("Error al obtener datos de tipo de activo:", error);
+                }
+            });
+        }
+
+    });
+
+</script>

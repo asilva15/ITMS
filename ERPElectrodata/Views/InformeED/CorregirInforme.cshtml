@@ -1,0 +1,375 @@
+﻿@{
+    ViewBag.Title = "CorregirInforme";
+    Layout = null;
+}
+
+
+<style>
+
+    .container::-webkit-scrollbar {
+        width: 12px; /* width of the entire scrollbar */
+    }
+
+    .container::-webkit-scrollbar-thumb {
+        background-color: #9B9B9B; /* color of the scroll thumb */
+        border-radius: 20px; /* roundness of the scroll thumb */
+        border: 3px solid white; /* creates padding around scroll thumb */
+    }
+
+    .form-container {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+        .form-container label,
+        .form-container input,
+        .form-container select,
+        .form-container textarea {
+            margin-bottom: 10px;
+        }
+
+        .form-container .submit-btn {
+            float: right;
+        }
+
+        .form-container .button-container {
+            text-align: right;
+        }
+
+            .form-container .button-container .btn {
+                margin-left: 10px;
+            }
+
+        .form-container .small-input {
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+
+        .form-container textarea {
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+
+    .comentarios-container {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+
+    .comentario {
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .comentario .info {
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #888;
+        }
+
+        .comentario .burbuja {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            margin-bottom: 5px;
+        }
+
+            .comentario .burbuja .tipo-correccion {
+                font-weight: bold;
+            }
+
+            .comentario .burbuja .codigo-ticket {
+                color: #888;
+            }
+
+    .botones-container {
+        text-align: right;
+        margin-top: 10px;
+    }
+
+        .botones-container .btn {
+            margin-left: 10px;
+        }
+
+    #nuevos-comentarios .comentario {
+        margin-bottom: 10px;
+    }
+</style>
+
+<div class="container row" style="height: 580px; ">
+    <div class="container col-md-8" style="border-right: solid; border-right-width: 0.5px; border-right-color: #A2A2A2; ">
+        <div style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+            <div id="cargando" class="text-center" style="display: none;">
+                <img src="../../Images/spinner.gif" alt="Cargando...">
+            </div>
+            <iframe id="idiframecorreccion" width="720" height="600" style="overflow-y: scroll; overflow-x: hidden;"></iframe>
+
+        </div>
+    </div>
+
+    <input id="IdInformePCModal" name="IdInformePCModal" value="@ViewBag.IDI" type="hidden" />
+    <div class="col-md-4">
+
+        <div class="btn-group btn-group-toggle" data-toggle="buttons">
+
+            <div class="mb-2 mr-2 dropright btn-group">
+                <a class="btn-wide btn btn-primary" onclick="InformeGeneralCI(0)">Informe General</a>
+                <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle-split dropdown-toggle btn btn-primary" onclick="DatosAdicionalesCI()"></button>
+                <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu">
+                    <div class="x_content seccionesAdicionalesCI" id="seccionesAdicionalesCI">
+                        <ul class="todo-list-wrapper list-group list-group-flush" style="list-style: none;"></ul>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <br /><br />
+
+        <div id="comentarios" class="comentarios-container">
+
+            <div id="listaComentarios">
+            </div>
+            <!-- Nuevos comentarios -->
+            <div id="nuevos-comentarios"></div>
+        </div>
+
+        <div class="botones-container">
+            <a style="color:#fff;" class="btn btn-primary" id="guardar-btn" onclick="GuardarCorreccion()">Corregido</a>
+            <button class="btn btn-secondary" data-dismiss="modal" id="cerrar-btn">Cerrar</button>
+        </div>
+    </div>
+
+
+</div>
+    <iframe id="upload_target" name="upload_target" src="" class="d-none"></iframe>
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        var $radioNoAprobar = $("#radio-no-aprobar");
+        var $radioAprobar = $("#radio-aprobar");
+        var $observacionesDiv = $("#observaciones");
+        var $comentariosDiv = $("#comentarios");
+        var $guardarBtn = $("#guardar-btn");
+        var $cerrarBtn = $("#cerrar-btn");
+        var codigosTickets = $("#codigo-ticket").kendoMultiSelect({
+            dataTextField: "Ticket",
+            dataValueField: "ID_TICKET",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/CargarListaTicketsInforme?IDI=" + $("#IdInformePCModal").val()
+                }
+            },
+            change: function (e) {
+                var value = this.value();
+                $('#codigos').val(value);
+            }
+        });
+
+        var TipoCorreccion = $("#tipo-correccion").kendoComboBox({
+            autoBind: true,
+            index: 1,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/CargarListaTipoCorreciones"
+                }
+            }
+
+        }).data("kendoComboBox");
+
+        //$("#FrmAprobarInforme").submit(function (event) {
+        //    limpiarDatos()
+        //});
+
+        cargarListaTicketInforme()
+        cargarListaComentarios()
+    });
+
+     function DatosAdicionalesCI() {
+        var docusale = @ViewBag.OP;
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "/InformeED/ListFormatoAdicional",
+            type: "Get",
+            data: { numdocusale: docusale },
+            datatype: "json",
+            cache: false,
+
+            success: function (data) {
+                if (data) {
+                    ListaAdicionalesCI(data["Adicionales"]);
+                }
+            },
+            error: function () {
+            }
+        });
+
+    }
+
+    function ListaAdicionalesCI(Adicionales) {
+
+        $(".seccionesAdicionalesCI ul").empty();
+
+        if (parseInt(Adicionales.length) > 0) {
+
+            $.each(Adicionales, function (index, value) {
+
+                if (Adicionales[index].Id == "" || Adicionales[index].Id == null || Adicionales[index].Id == undefined) {
+
+                    $(".seccionesAdicionalesCI ul").append('<li><button type="button" tabindex="0" class="dropdown-item" onclick ="InformeGeneralCI(' + Adicionales[index].Id +')">' + Adicionales[index].NombreFormato + '</button></li >');
+
+                }
+                else {
+                    $(".seccionesAdicionalesCI ul").append('<li><button type="button" tabindex="0" class="dropdown-item" onclick ="InformeGeneralCI(' + Adicionales[index].Id +')">' + Adicionales[index].NombreFormato + '</button></li >');
+
+                }
+
+            });
+
+        } else {
+            $(".seccionesAdicionalesCI ul").append('<div class="smallField"> No cuenta con adicionales');
+        }
+
+
+    }
+    function cargarListaTicketInforme() {
+        var IDI = $("#IdInformePCModal").val()
+
+        console.log(IDI)
+        $.ajax({
+            url: "/InformeED/CargarListaTicketsInforme?IDI=" + IDI,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                console.log(source.Data)
+            },
+        });
+    }
+
+    function cargarListaComentarios() {
+        $.get("/InformeED/CargarListaComentariosInforme", { idi: $("#IdInformePCModal").val() }, function (response) {
+            $("#listaComentarios").html(response);
+        });
+    }
+
+    function GuardarCorreccion() {
+        var IDI = $("#IdInformePCModal").val();
+        var estadoSeleccionado = $("input[name='estado']:checked").val();
+
+        console.log(IDI)
+        $.ajax({
+            url: "/InformeED/GuardarCorregirInforme?IDI=" + IDI + "&estado=" + estadoSeleccionado,
+            type: "POST",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                console.log(source)
+                toastr.success("", "El registro ha sido guardado.");
+                var cerrarbtn = document.getElementById("cerrar-btn")
+                cerrarbtn.click();
+                ListadoInformes(3)
+                ObtenerInformesxEstado()
+            },
+        });
+    }
+    function limpiarDatos() {
+        var textareaElement = document.getElementById('comentario');
+        textareaElement.value = '';
+        var codigosTicket = $("#codigo-ticket").data("kendoMultiSelect")
+        codigosTicket.value([]);
+        var correciones = $("#tipo-correccion").data("kendoComboBox")
+        correciones.value("")
+    }
+    function MensajeConfirmacion(resp, descripcion) {
+        console.log(resp)
+        if (resp == "OK") {
+            toastr.success("", "El registro ha sido guardado.");
+            limpiarDatos()
+            cargarListaComentarios()
+        }
+        else if (resp == "OK-CERRAR") {
+            toastr.success("", "El registro ha sido guardado.");
+            var cerrarbtn = document.getElementById("cerrar-btn")
+            cerrarbtn.click();
+            ListadoInformes(3)
+            ObtenerInformesxEstado()
+        } else {
+            toastr.error("Por favor contacte al administrador.", "Mensaje");
+        }
+    }
+
+    var ajaxRequest = null;
+
+        function InformeGeneralCI(opcion) {
+
+            if (ajaxRequest && ajaxRequest.readyState !== 4) {
+                ajaxRequest.abort();
+                ajaxRequest = null;
+            }
+
+            // Mostrar la animación de carga
+            $('#cargando').show();
+
+            // Ocultar el iframe
+            var iframe = document.getElementById('idiframecorreccion');
+            iframe.style.display = 'none';
+
+            // Obtener el valor de ViewBag.IdInformeED
+            var idInforme = @ViewBag.IDI;
+
+            // Realizar una solicitud AJAX para llamar al controlador
+            ajaxRequest = $.ajax({
+                url: '/InformeED/InformesVistaPrevia',
+                type: 'POST',
+                data: {
+                    IdInforme: idInforme,
+                    Opcion: opcion
+                }, // Enviar el valor de IdInforme como parámetro
+                success: function (data) {
+                    // Comprobar si la respuesta contiene datos PDF válidos
+                    if (data !== null && data !== "") {
+                        // Ocultar la animación de carga
+                        $('#cargando').hide();
+
+                        // Mostrar el PDF en el iframe
+                        iframe.src = 'data:application/pdf;base64,' + data;
+                        iframe.style.display = 'block';
+                    } else {
+                        // Ocultar la animación de carga y mostrar un mensaje de error
+                        $('#cargando').hide();
+                        alert('Error al generar el informe.');
+                    }
+                },
+                error: function () {
+                    // Ocultar la animación de carga y mostrar un mensaje de error
+                    $('#cargando').hide();
+                    alert('Error en la solicitud al servidor.');
+                }
+            });
+        }
+    </script>

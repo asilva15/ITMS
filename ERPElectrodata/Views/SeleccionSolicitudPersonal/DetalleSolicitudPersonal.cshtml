@@ -1,0 +1,1020 @@
+﻿@model ERPElectrodata.Models.SolicitudPersonal
+
+@{
+    ViewBag.Title = "DetalleSolicitudPersonal";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Detalle Solicitudes de Personal
+                <div class="page-title-subheading">
+                    Detalle de la Solicitud, se puede agregar, aprobar candidatos y referencias para su evaluación.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@using (Html.BeginForm("AprobarCandidatos", "SeleccionPersonal", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmAprobar", target = "upload_target" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    <div class="tab-content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <div class="card-title">
+                            Datos de la Solicitud :
+                            <div style="float:right" id="btnIrLista"><a href="@Url.Content("~/SeleccionSolicitudPersonal/ListarSolicitudPersonal")" type="text/plain" class="btn-shadow btn btn-success btn-sm">Ir a Mis Solicitudes</a></div>
+                        </div>
+                        <div class="">
+                            <div class="form-row" id="divDatosSolicitud" style="border: 1px solid #ced4da; border-radius: .25rem; ">
+
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content" style="height:auto;width:auto">
+        <div class="row DisableDiv" id="DisableDiv">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card element-block-example">
+                    <div class="card-body">
+                        <div class="clearfix" style="padding-bottom:10px;padding-right:17px;">
+                            <button type="button" id="btnAgregarCandidato" class="btn-shadow btn btn-info btn-sm" style="float:right;" onclick="AgregarCandidato(@ViewBag.Id)">Nuevo Candidato</button>
+                            <label style="float:right;">&nbsp;&nbsp;&nbsp;</label>
+                            <button type="button" id="btnEnviarNotificacion" class="btn-shadow btn btn-info btn-sm" style="float:right;" onclick="EnviarNotificacion(@ViewBag.Id)">Informar CV's Cargados</button>
+                        </div>
+                        <div class="box">
+                            <!-- /.box-header -->
+                            <div class="box-body">
+
+                                <input type="hidden" id="IdSolicitud" name="IdSolicitud" value="@ViewBag.Id" />
+                                @*<div id="DisableDiv" class="DisableDiv">*@
+                                <table id="tbCandidatosAgregados" class="table table-bordered table-striped table-responsive-lg">
+                                    <thead>
+                                        <tr>
+                                            <th>Nombres y apellidos</th>
+                                            <th>Curriculum vitae</th>
+                                            <th>Profesion</th>
+                                            <th>Calificación GTH</th>
+                                            <th>Calificación Jefe</th>
+                                            <th>Puntaje Global</th>
+                                            <th>Referencia</th>
+                                            <th>Aprobado&nbsp;</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    <tfoot>
+                                        <tr>
+                                            <th>Nombres y apellidos</th>
+                                            <th>Curriculum vitae</th>
+                                            <th>Profesion</th>
+                                            <th>Calificación GTH</th>
+                                            <th>Calificación Jefe</th>
+                                            <th>Puntaje Global</th>
+                                            <th>Referencia</th>
+                                            <th>Aprobado&nbsp;</th>
+                                            <th>Acciones</th>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+                                @*</div>*@
+                            </div>
+                            @*<div class="alert alert-danger" id="eliminarContacto">
+                                    Desea eliminar este contacto del proyecto?
+                                    &nbsp;&nbsp;&nbsp;&nbsp;
+                                    <span id="btnEliminarSi" title="Eliminar" class="glyphicon glyphicon-ok" aria-hidden="true" style="color: #4CAF50; cursor: pointer; font-size:13px;"></span>
+                                    &nbsp;
+                                    <span id="btnEliminarNo" title="Cancelar" class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px;"></span>
+                                </div>*@
+                            <!-- ELIMINAR CONTACTO -->
+                            @*<div class="alert alert-success" id="MsjCorrectoEliminarContacto">
+                                    <span class="glyphicon glyphicon-ok" aria-hidden="true" style="color: #4CAF50; cursor: pointer; font-size:13px;"></span>
+                                    &nbsp;&nbsp;&nbsp;
+                                    Se ha eliminado el contacto del proyecto.
+                                </div>*@
+                            <!-- FIN ELIMINAR CONTACTO -->
+                            <!-- ERROR ELIMINAR CONTACTO -->
+                            @*<div class="alert alert-success" id="MsjAlertaEliminarContacto">
+                                    <span class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px;"></span>
+                                    &nbsp;&nbsp;&nbsp;
+                                    Ha ocurrido un error, comuníquese con el administrador.
+                                </div>*@
+                        </div>
+
+
+
+                        <div class="clearfix" style="padding-bottom:10px;padding-right:17px;">
+                            <button type="submit" id="btnAprobar" name="btnAprobar" class="btn-shadow btn btn-success btn-sm block-element-btn" style="float:right;font-size:medium">&nbsp;&nbsp;Aprobar&nbsp;&nbsp;</button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<iframe id="upload_target1" name="upload_target" src="" class="frameHidden" style="display:none"></iframe>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        //$(".block-element-btn-example-1").click(function () {
+        //    $(".element-block-example").block({
+        //        message: t('<div class="loader mx-auto">\n                            <div class="ball-grid-pulse">\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                            </div>\n                        </div>')
+        //    })
+        //})
+
+        ObtenerEstado();
+        ObtenerDatosSolicitud();
+        listarCandidatos();
+
+
+    });
+
+
+
+    function ObtenerDatosSolicitud() {
+        $.ajax({
+
+            url: "/SeleccionSolicitudPersonal/ObtenerDatosSolicitud/@ViewBag.Id",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                mostrarDatosSolicitud();
+            },
+            error: function (source) {
+                alert("Error Carga Json Comercial");
+            }
+        });
+    }
+
+    function listarCandidatos() {
+    var idEstado = '@ViewBag.Estado';
+    console.log(idEstado);
+    var deshabilitarColumnas = idEstado === "5"; // Verifica si idEstado es 5
+
+    $('#tbCandidatosAgregados').dataTable().fnDestroy();
+    var table = $('#tbCandidatosAgregados').dataTable({
+        "order": [[0, "asc"]],
+        responsive: true,
+        "bPaginate": false,
+        "searching": false,
+        ajax: "/SeleccionPersonal/ListarCandidatoTodo/@ViewBag.Id",
+        columns: [
+            { data: "Candidato", "orderable": !deshabilitarColumnas }, // Columna Candidato
+            {
+                data: "CurriculumVitae",
+                render: function (data, type, row) {
+                    var cadena = "";
+                    if (data == "") {
+                        cadena = "No se cargó CV";
+                    } else {
+                        cadena = '<a href="' + data + '" target="_blank">CurriculumVitae</a>';
+                    }
+                    return cadena;
+                }
+            },
+            { data: "Profesion", "orderable": !deshabilitarColumnas }, // Columna Profesion
+            { data: "PuntajeGTH", "orderable": !deshabilitarColumnas }, // Columna PuntajeGTH
+            { data: "PuntajeJefe", "orderable": !deshabilitarColumnas }, // Columna PuntajeJefe
+            { data: "PuntajeTotal", "orderable": !deshabilitarColumnas }, // Columna PuntajeTotal
+            {
+                data: null,
+                render: function (data, type, row) {
+                    return '<div style="text-align:center"><button type="button" id="btnReferenciaCandidato' + data.IdCandidato + '"  name="Referencia' + data.IdCandidato + '" title="RegistrarReferencia" class="border-0 btn-transition btn btn-outline-warning" onclick="RegistrarReferencia(' + data.IdCandidato + ')" ' + (deshabilitarColumnas ? 'disabled' : '') + '><i class="fa fa-user-alt"></i></button></div>';
+                },
+                "orderable": !deshabilitarColumnas // Columna Referencia
+            },
+            {
+                data: null,
+                render: function (data, type, row) {
+                    return 'Si<input type="radio" id="AprobarSi' + data.IdCandidato + '" name="Aprobar' + data.IdCandidato + '" style="width:30px" value="1" ' + (deshabilitarColumnas ? 'disabled' : '') + ' />' +
+                           'No<input type="radio" id="AprobarNo' + data.IdCandidato + '" name="Aprobar' + data.IdCandidato + '" onClick="AlertaNO()" style="width:30px" value="0" ' + (deshabilitarColumnas ? 'disabled' : '') + ' />';
+                },
+                "orderable": !deshabilitarColumnas // Columna Aprobar
+            },
+            {
+                data: null,
+                render: function (data, type, row) {
+                    return '<div class="widget-content-left">' +
+                            '<button type="button" id="btnEditarCandidato' + data.IdCandidato + '" title="Editar Contacto" class="border-0 btn-transition btn btn-outline-success" onclick="editarCandidato(' + data.IdCandidato + ')" ' + (deshabilitarColumnas ? 'disabled' : '') + '><i class="fa fa-pencil-alt"></i></button>' +
+                            '<button type="button" id="btnEliminarCandidato' + data.IdCandidato + '" title="Eliminar Contacto" class="border-0 btn-transition btn btn-outline-danger" onclick="eliminarCandidato(' + data.IdCandidato + ')" ' + (deshabilitarColumnas ? 'disabled' : '') + '><i class="fa fa-trash-alt"></i></button>' +
+                           '</div>';
+                },
+                "orderable": !deshabilitarColumnas // Columna de botones de acción
+            }
+        ]
+    });
+}
+
+
+
+    //*************************************************************
+
+    //$("#submit").click(function () {
+    //    $("#submit").prop("disabled", false);
+    //    winPopUpModalLoad('Guardando', 'Espere Por Favor', 300, 130);
+    //});
+    function mostrarDatosSolicitud() {
+        $.each(data['Data'], function (index, value) {
+
+
+            var requisitosConcatenados = data['Data'][index]['RequisitosConcatenados'];
+            var contenidoRequisitos = '';
+
+            if (requisitosConcatenados !== null) {
+                if (requisitosConcatenados.trim() !== '') {
+                    var listaRequisitos = '<ul>';
+                    requisitosConcatenados.split(',').forEach(function (requisito) {
+                        listaRequisitos += '<li>' + requisito.trim() + '</li>';
+                    });
+                    listaRequisitos += '</ul>';
+                    contenidoRequisitos = listaRequisitos;
+                } else {
+                    contenidoRequisitos = '-';
+                }
+            } else {
+                contenidoRequisitos = '-';
+            }
+
+            var software = data['Data'][index]['Software'];
+            var contenidosoftware = '';
+
+            if (software !== null) {
+                if (software.trim() !== '') {
+                    var listasoftware = '<ul>';
+                    software.split(',').forEach(function (requisito) {
+                        listasoftware += '<li>' + requisito.trim() + '</li>';
+                    });
+                    listasoftware += '</ul>';
+                    contenidosoftware = listasoftware;
+                } else {
+                    contenidosoftware = '-';
+                }
+            } else {
+                contenidosoftware = '-';
+            }
+
+
+            var red = data['Data'][index]['Red'];
+            var contenidored = '';
+
+            if (red !== null) {
+                if (red.trim() !== '') {
+                    var listasoftware = '<ul>';
+                    red.split(',').forEach(function (requisito) {
+                        listasoftware += '<li>' + requisito.trim() + '</li>';
+                    });
+                    listasoftware += '</ul>';
+                    contenidored = listasoftware;
+                } else {
+                    contenidored = '-';
+                }
+            } else {
+                contenidored = '-';
+            }
+
+            var archivoExiste = false;
+
+
+
+
+            $("#divDatosSolicitud").empty();
+            $("#divDatosSolicitud").append(
+                '<div class="form-row" style="padding-top:16px;padding-left:10px">' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblMotivo" for="lblMotivo"> Motivo : &nbsp;</label>' +
+                '<label id="lblMotivo" for="lblMotivo"> ' + (data['Data'][index]['Motivo']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblGerencia" for="lblGerencia"> Gerencia : &nbsp;</label>' +
+                '<label id="lblGerencia" for="lblGerencia"> ' + (data['Data'][index]['Gerencia']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblArea" for="lblArea"> Área : &nbsp;</label>' +
+                '<label id="lblArea" for="lblArea"> ' + (data['Data'][index]['Area']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblEstado" for="lblEstado"> Estado : &nbsp;</label>' +
+                '<label id="lblEstado" for="lblEstado"> ' + (data['Data'][index]['Estado']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblCargo" for="lblCargo"> Cargo :  &nbsp;</label>' +
+                '<label id="lblCargo" for="lblCargo"> ' + (data['Data'][index]['Cargo']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblProyecto" for="lblProyecto"> Proyecto : &nbsp;</label>' +
+                '<label id="lblProyecto" for="lblProyecto"> ' + (data['Data'][index]['Proyecto']) + ' </label>' +
+                ((data['Data'][index]['Proyecto'] != '-') ? '<button type="button" id="btnEditarProyecto" name="btnEditarProyecto" title="Editar Proyecto" class="border-0 btn-transition btn btn-outline-success" onclick="editarProyecto(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-pencil-alt"></i></button>'
+                    : '<button type="button" id="btnAgregarProyecto" name="btnAgregarProyecto" title="Agregar Proyecto" class="border-0 btn-transition btn btn-outline-success" onclick="agregarProyecto(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-pencil-alt"></i></button>') +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblTipoContrato" for="lblTipoContrato"> TipoContrato : &nbsp;</label>' +
+                '<label id="lblTipoContrato" for="lblTipoContrato"> ' + (data['Data'][index]['TipoContrato']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPersonaReemplaza" for="lblPersonaReemplaza"> Reemplaza a : &nbsp;</label>' +
+                '<label id="lblPersonaReemplaza" for="lblPersonaReemplaza"> ' + (data['Data'][index]['PersonaReemplaza']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblRemuneracion" for="lblRemuneracion"> Remuneracion :  &nbsp;</label>' +
+                '<label id="lblRemuneracion" for="lblRemuneracion">S/. ' + (data['Data'][index]['Remuneracion']) +
+                '</label>' +
+                '<button type="button" id="btnEditarRemuneracion" name="btnEditarRemuneracion" title="Editar Remuneracion" class="border-0 btn-transition btn btn-outline-success" onclick="editarRemuneracion(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-pencil-alt"></i></button>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblCantidad" for="lblCantidad"> Cantidad de Vacante : &nbsp;</label>' +
+                '<label id="lblCantidad" for="lblCantidad"> ' + (data['Data'][index]['Cantidad']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblJefeInmediato" for="lblJefeInmediato"> Jefe Inmediato : &nbsp;</label>' +
+                '<label id="lblJefeInmediato" for="lblJefeInmediato"> ' + (data['Data'][index]['JefeInmediato']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblFechaInicioTrabajo" for="lblFechaInicioTrabajo"> Fecha Inicio Trabajo : &nbsp;</label>' +
+                '<label id="lblFechaInicioTrabajo" for="lblFechaInicioTrabajo"> ' + (data['Data'][index]['FechaInicioTrabajo']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblFechaFinTrabajo" for="lblFechaFinTrabajo"> Fecha Fin Trabajo :  &nbsp;</label>' +
+                '<label id="lblFechaFinTrabajo" for="lblFechaFinTrabajo"> ' + (data['Data'][index]['FechaFinTrabajo']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblFechaFinTrabajo" for="lblFechaFinTrabajo"> Fecha Fin Proyecto :  &nbsp;</label>' +
+                '<label id="lblFechaFinTrabajo" for="lblFechaFinTrabajo"> ' + (data['Data'][index]['FechaFinProyecto']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblUsuarioCreador" for="lblUsuarioCreador"> Creado Por : &nbsp;</label>' +
+                '<label id="lblUsuarioCreador" for="lblUsuarioCreador"> ' + (data['Data'][index]['UsuarioCreador']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblFechaCrea" for="lblFechaCrea"> Fecha Creación : &nbsp;</label>' +
+                '<label id="lblFechaCrea" for="lblFechaCrea"> ' + (data['Data'][index]['FechaCrea']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblJustificacion" for="lblJustificacion"> Justificacion : &nbsp;</label>' +
+                '<label id="lblJustificacion" for="lblJustificacion"> ' + (data['Data'][index]['Justificacion']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblRequisitos" for="lblRequisitos"> Requisitos Mínimos: &nbsp;</label>' +
+                (data['Data'][index]['Requisitos']) +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblTiempo" for="lblTiempo"> Duración del Contrato: &nbsp;</label>' +
+                '<label id="lblTiempo" for="lblTiempo">' + (data['Data'][index]['Tiempo']) +
+                '</label>' +
+                '<button type="button" id="btnEditarTiempo" name="btnEditarTiempo" title="Duración del Contrato" class="border-0 btn-transition btn btn-outline-success" onclick="editarTiempo(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-pencil-alt"></i></button>' +
+                '</div>' +
+                '</div>' +
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Presupuesto : &nbsp;</label>' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> ' + (data['Data'][index]['Presupuesto']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Modalidad : &nbsp;</label>' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> ' + (data['Data'][index]['Modalidad']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Ubicación : &nbsp;</label>' +
+                '<br><label id="lblPresupuesto" for="lblPresupuesto"> ' + (data['Data'][index]['UbicacionModalidad']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Requisitos Adicionales: &nbsp;</label>' +
+                contenidoRequisitos +
+                '</div>' +
+                '</div>' +
+
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Recursos Informaticos : &nbsp;</label>' +
+                '<br><label id="lblPresupuesto" for="lblPresupuesto"> ' + (data['Data'][index]['RecursoInformatico']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Recursos Comunicacion : &nbsp;</label>' +
+                '<br><label id="lblPresupuesto" for="lblPresupuesto"> ' + (data['Data'][index]['RecursoComunicacion']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Software : &nbsp;</label>' +
+                contenidosoftware +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Carpeta : &nbsp;</label>' +
+                '<br><label id="lblPresupuesto" for="lblPresupuesto"> ' + (data['Data'][index]['Carpeta']) + ' </label>' +
+                '</div>' +
+                '</div>' +
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group" id="Adjunto">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Adjunto : &nbsp;</label>' +
+
+                '</div>' +
+                '</div>' +
+
+
+
+                '<div class="col-md-3">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblPresupuesto" for="lblPresupuesto"> Red : &nbsp;</label>' +
+                contenidored+
+                '</div>' +
+                '</div>' +
+
+
+
+
+                '<div class="col-md-3" id="divAprobarRechazar">' +
+                '<div class="position-relative form-group">' +
+                '<label id="lblTiempo" for="lblTiempo"> Aprobar/Rechazar: &nbsp;</label>' +
+                '<div clas class="col-md-12">' +
+                '<button type="button" id="btnAprobarS" name="btnAprobarSolicitud" title="Aprobar Solicitud" class="btn btn-outline-success" onclick="aprobarSoli(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-check"></i> Aprobar</button>' +
+                '&nbsp;' +
+                '<button type="button" id="btnRechazarS" name="btnRechazaSolicitud" title="Rechazar Solicitud" class="btn btn-outline-danger" onclick="rechazarSoli(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-times"></i> Rechazar</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>'
+            );
+
+
+            $.ajax({
+                url: '/SeleccionSolicitudPersonal/VerificarExistenciaArchivo',
+                type: 'GET',
+                data: { id: data['Data'][index]['Id'] }, // Ajusta esto según lo que necesites pasar como parámetro
+                success: function (response) {
+                    console.log(response);
+                    if (response.existe) {
+                        $("#Adjunto").append(
+                            '<br><a href="/SeleccionSolicitudPersonal/DescargarArchivoSolicitud?id=' + (data['Data'][index]['Id']) + '">' + (data['Data'][index]['Cargo']) + '</a>'
+                        );
+                    } else {
+                        $("#Adjunto").append(
+                            '<br><label>No Hay Adjunto</label>'
+                        );
+                    }
+                },
+                error: function (error) {
+                    console.error('Error al verificar existencia del archivo:', error);
+                }
+            });
+
+
+        });
+        MostarBotonEditarRemuneracion();
+        MostarBotonProyecto();
+        MostarDivAprobarRechazar();
+    }
+
+
+    function ObtenerEstado() {
+        var idEstado = '@ViewBag.Estado';
+        var Aprobrar = '@ViewBag.ACCESOO';
+        var Solicitante = '@ViewBag.Solicitante';
+        if (idEstado == 1) {
+            var node = document.getElementById("tbCandidatosAgregados");
+            node.parentNode.removeChild(node);
+
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnAprobar").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+        }
+        else if (idEstado == 2) {
+            var node = document.getElementById("tbCandidatosAgregados");
+            node.parentNode.removeChild(node);
+
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnAprobar").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+        }
+        else if (idEstado == 6 && Aprobrar == 3 && Solicitante == 1) {
+
+        }
+        else if (idEstado == 6 && Aprobrar == 1) {
+
+        }
+        else if (idEstado == 6 && Aprobrar == 2) {
+
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            //document.getElementById("btnAprobar").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+        }
+        else if (idEstado == 6 && Aprobrar == 3) {
+
+            document.getElementById("btnAprobar").style.display = "none";
+
+        }
+        else if (idEstado == 6 && Solicitante == 1) {
+
+
+            //document.getElementById("btnAgregarCandidato").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+
+        }
+        else if (idEstado == 3 && Solicitante == 1 && Aprobrar == 3) {
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnAprobar").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+
+
+            $('#DisableDiv').fadeTo('slow', .8);
+            $('#DisableDiv').append('<div style="position: fixed;top:0;left:0;width: 100%;height:100%;z-index:1;opacity:0.1;filter: alpha(opacity = 50)"></div>');
+        }
+        else if (idEstado == 3 && Aprobrar == 1) {
+            //document.getElementById("Buscar").style.display = "none";
+        }
+        else if (idEstado == 3 && Aprobrar == 2) {
+            //document.getElementById("Buscar").style.display = "none";
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnAprobar").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+            $('#DisableDiv').fadeTo('slow', .8);
+            $('#DisableDiv').append('<div style="position: fixed;top:0;left:0;width: 100%;height:100%;z-index:2;opacity:0.1;filter: alpha(opacity = 50)"></div>');
+        }
+        else if (idEstado == 3 && Aprobrar == 3) {
+            //document.getElementById("Buscar").style.display = "none";
+            document.getElementById("btnAprobar").style.display = "none";
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnEditarRemuneracion").style.display = "none";
+            //document.getElementById("btnEnviarNotificacion").style.display = "none";
+            $('#DisableDiv').fadeTo('slow', .8);
+            $('#DisableDiv').append('<div style="position: fixed;top:0;left:0;width: 100%;height:100%;z-index:2;opacity:0.1;filter: alpha(opacity = 50)"></div>');
+
+
+        }
+        else if (idEstado == 3 && Solicitante == 1) {
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnAprobar").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+            $('#DisableDiv').fadeTo('slow', .8);
+            $('#DisableDiv').append('<div style="position: fixed;top:0;left:0;width: 100%;height:100%;z-index:2;opacity:0.1;filter: alpha(opacity = 50)"></div>');
+        }
+        else if (idEstado == 4) {
+
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnAprobar").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+            $('#DisableDiv').fadeTo('slow', .8);
+            $('#DisableDiv').append('<div style="position: fixed;top:0;left:0;width: 100%;height:100%;z-index:2;opacity:0.1;filter: alpha(opacity = 50)"></div>');
+        } else if (idEstado == 5) {
+
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnAprobar").style.display = "none";
+            //document.getElementById("btnEditarRemuneracion").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+/*
+             $('#DisableDiv').fadeTo('slow', .8);
+            $('#DisableDiv').append('<div style="position: fixed;top:0;left:0;width: 100%;height:100%;z-index:2;opacity:0.1;filter: alpha(opacity = 50)"></div>');
+ */
+
+            /*tbCandidatosAgregados*/
+
+
+
+        }
+    }
+
+
+
+    function MostarBotonEditarRemuneracion() {
+        var idEstado = '@ViewBag.Estado';
+        var Aprobrar = '@ViewBag.ACCESOO';
+        if (idEstado == 2 || idEstado == 3 || idEstado == 6) {
+            if (Aprobrar == 1 || Aprobrar == 3) {
+                document.getElementById("btnEditarRemuneracion").style.display = "inline";
+                document.getElementById("btnEditarTiempo").style.display = "inline";
+            } else {
+                document.getElementById("btnEditarRemuneracion").style.display = "none";
+                document.getElementById("btnEditarTiempo").style.display = "none";
+            }
+        } else {
+            document.getElementById("btnEditarRemuneracion").style.display = "none";
+            document.getElementById("btnEditarTiempo").style.display = "none";
+        }
+    }
+
+    function MostarBotonProyecto() {
+        var idEstado = '@ViewBag.Estado';
+        if (idEstado == 5) {
+            var btnEditarProyecto = document.getElementById("btnEditarProyecto");
+            if (btnEditarProyecto) {
+                btnEditarProyecto.style.display = "none";
+            }
+            var btnAgregarProyecto = document.getElementById("btnAgregarProyecto");
+            if (btnAgregarProyecto) {
+                btnAgregarProyecto.style.display = "none";
+            }
+        }
+    }
+
+    function MostarDivAprobarRechazar() {
+        var idEstado = '@ViewBag.Estado';
+        var Aprobrar = '@ViewBag.ACCESOO';
+        if (idEstado == 1 || idEstado == 2) {
+            if (Aprobrar == 1) {
+                document.getElementById("divAprobarRechazar").style.display = "inline";
+            } else {
+                document.getElementById("divAprobarRechazar").style.display = "none";
+            }
+        } else {
+            document.getElementById("divAprobarRechazar").style.display = "none";
+        }
+    }
+
+    function AgregarCandidato(id) {
+        //$("#modalAgregarCandidato").modal("show");
+        //$('#divAgregarCandidato').empty();
+        //$('#divAgregarCandidato').load('/SeleccionPersonal/CrearCandidato/' + id);
+        document.getElementById("btnEditarRemuneracion").style.display = "none";
+        $("#lblTitulo").text("Agregar Candidato");
+
+        $("#btnAgregarCandidato").attr("data-style", "expand-right");
+        $("#btnAgregarCandidato").attr("data-toggle", "modal");
+        $("#btnAgregarCandidato").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionPersonal/CrearCandidato/' + id);
+    }
+
+    function EnviarNotificacion(id) {
+        $("#lblTitulo").text("Enviar Mensaje de Cv's Cargados");
+
+        $("#btnEnviarNotificacion").attr("data-style", "expand-right");
+        $("#btnEnviarNotificacion").attr("data-toggle", "modal");
+        $("#btnEnviarNotificacion").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionPersonal/EnviarCorreoCvCargado/' + id);
+    }
+
+    function RegistrarReferencia(id) {
+        $("#lblTitulo").text("Referencia");
+
+        $("#btnReferenciaCandidato" + id).attr("data-style", "expand-right");
+        $("#btnReferenciaCandidato" + id).attr("data-toggle", "modal");
+        $("#btnReferenciaCandidato" + id).attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionPersonal/CrearReferenciaCandidato/' + id);
+    }
+
+
+    function editarCandidato(id) {
+        $("#lblTitulo").text("Editar Candidato");
+
+        $("#btnEditarCandidato" + id).attr("data-style", "expand-right");
+        $("#btnEditarCandidato" + id).attr("data-toggle", "modal");
+        $("#btnEditarCandidato" + id).attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionPersonal/EditarCandidato/' + id);
+    }
+
+    function eliminarCandidato(id) {
+        $("#lblTitulo").text("Eliminar Candidato");
+
+        $("#btnEliminarCandidato" + id).attr("data-style", "expand-right");
+        $("#btnEliminarCandidato" + id).attr("data-toggle", "modal");
+        $("#btnEliminarCandidato" + id).attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        ////$(".modal-dialog").addClass("modal-xs");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionPersonal/EliminarCandidato/' + id);
+    }
+
+    function editarRemuneracion(id) {
+        $("#lblTitulo").text("Editar Remuneración");
+
+        $("#btnEditarRemuneracion").attr("data-style", "expand-right");
+        $("#btnEditarRemuneracion").attr("data-toggle", "modal");
+        $("#btnEditarRemuneracion").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").addClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionSolicitudPersonal/EditarSolicitud/' + id);
+    }
+
+    function editarTiempo(id) {
+        $("#lblTitulo").text("Ingrese el Tiempo de Duracción del Contrato");
+
+        $("#btnEditarTiempo").attr("data-style", "expand-right");
+        $("#btnEditarTiempo").attr("data-toggle", "modal");
+        $("#btnEditarTiempo").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").addClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionSolicitudPersonal/IngresarDuracion/' + id);
+    }
+
+    function editarProyecto(id) {
+        $("#lblTitulo").text("Editar Proyecto");
+
+        $("#btnEditarProyecto").attr("data-style", "expand-right");
+        $("#btnEditarProyecto").attr("data-toggle", "modal");
+        $("#btnEditarProyecto").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").addClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionSolicitudPersonal/EditarProyecto/' + id);
+    }
+
+    function agregarProyecto(id) {
+        $("#lblTitulo").text("Agregar Proyecto");
+
+        $("#btnAgregarProyecto").attr("data-style", "expand-right");
+        $("#btnAgregarProyecto").attr("data-toggle", "modal");
+        $("#btnAgregarProyecto").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionSolicitudPersonal/AgregarProyecto/' + id);
+    }
+
+    function rechazarSoli(id) {
+        $("#lblTitulo").text("Rechazar Solicitud");
+
+        $("#btnRechazarS").attr("data-style", "expand-right");
+        $("#btnRechazarS").attr("data-toggle", "modal");
+        $("#btnRechazarS").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionPersonal/RechazarSolicitud/' + id);
+    }
+
+    function aprobarSoli(id) {
+        $("#lblTitulo").text("Aprobar Solicitud");
+
+        $("#btnAprobarS").attr("data-style", "expand-right");
+        $("#btnAprobarS").attr("data-toggle", "modal");
+        $("#btnAprobarS").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SeleccionPersonal/AprobarSolicitud/' + id);
+    }
+
+    function AlertaNO() {
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-bottom-right",
+            "preventDuplicates": true,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+        toastr.warning("Porfavor Indicar el Motivo de Rechazo del Candidato en la sección de editar...", "Motivo de Rechazo..!!!");
+    }
+
+    function uploadDone5(msg, descripcion) {
+
+        if (msg == "OK") {
+
+            toastr.success("La Aprobación se realizó con éxito.", "Aprobación de Candidatos");
+
+
+
+            $('#tbCandidatosAgregados').DataTable().ajax.reload();
+
+            document.getElementById("btnAprobar").style.display = "none";
+            document.getElementById("btnAgregarCandidato").style.display = "none";
+            document.getElementById("btnEnviarNotificacion").style.display = "none";
+            $('#DisableDiv').fadeTo('slow', .8);
+            $('#DisableDiv').append('<div style="position: fixed;top:0;left:0;width: 100%;height:100%;z-index:2;opacity:0.1;filter: alpha(opacity = 50)"></div>');
+
+        }
+        else if (msg == "VALIDAR") {
+
+            toastr.warning("Por favor, seleccione SI o NO por cada candidato.", "Aprobación de Candidatos");
+
+
+
+
+        }
+        else if (msg == "CREARCANDIDATO") {
+
+            toastr.warning("Debe crear candidato para poder aprobar.", "Aprobación de Candidatos");
+
+
+
+
+        }
+        else if (msg == "CALIFICAR") {
+
+            toastr.warning("El candidato que desea aprobar no está calificado.", "Aprobación de Candidatos");
+
+
+
+
+        }
+        else if (msg == "VALIDARCANTIDAD") {
+
+            toastr.warning("Los cantidad de candidatos que esta aprobando es mayor a la solicitada.", "Aprobación de Candidatos");
+
+
+
+
+        }
+        else {
+
+            toastr.warning("Contacte al administrador.", "Aprobacion de Candidatos");
+            //winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            //    "<div style='padding:10px 0px 10px 0px;'>Contacte al administrador.</div>" +
+            //    "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+            //    "<button id='continuee' class='k-button'>Continuar</button>" +
+            //    "</div></div>"
+            //    , 400, 140);
+            //$("#continuee").focus();
+            //var undo = $("#continuee")
+            //    .bind("click", function () {
+            //        closeWinModalPopUp();
+            //    });
+        }
+    }
+
+
+    //function uploadDone2(msg, descripcion) {
+
+    //    if (msg == "OK") {
+
+    //        $('#SmallModalContent').modal('show');
+    //        $("#SmallModalTitle").empty();
+    //        $("#SmallModalTitle").text("Candidado Eliminado");
+    //        $("#SmallModalBody").empty();
+    //        $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + descripcion + "</div>");
+    //        $("#SmallModalFooter").empty();
+    //        $("#SmallModalFooter").append("<div style='float:right;'>" +
+    //            "<button id='continues' class='k-button'>Continuar</button>" +
+    //            "</div>");
+
+    //        var undo = $("#continues")
+    //            .bind("click", function () {
+
+    //                $('#SmallModalContent').modal('hide');
+
+    //                $("#Buscar").click();
+    //                //location.reload(true);
+    //            });
+
+    //        var cancel = $("#cancel")
+    //            .bind("click", function () {
+    //                $('#SmallModalContent').modal('hide');
+
+    //                $("#Buscar").click();
+    //                //location.reload(true);
+    //            });
+
+    //    }
+
+    //}
+
+</script>

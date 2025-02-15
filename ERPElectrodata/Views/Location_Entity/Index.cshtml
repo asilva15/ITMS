@@ -1,0 +1,82 @@
+﻿@model ERPElectrodata.Models.LOCATION_ENTITY
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("Create", "Location_Entity", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmLocation_Entity", target = "upload_targetLE" }))
+{
+    @Html.ValidationSummary(true)
+    <fieldset>
+        <legend>LOCATION</legend>
+            <div class="divFondoUno">
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">                        
+                        <a href="#" onclick="NewSite()" title="Click here to register a new Site" >@ResourceLanguaje.Resource.Site</a>
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(model=>model.ID_SITE)
+                        @Html.ValidationMessageFor(model => model.ID_SITE)
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoDos">
+                <div class="divSpace3"></div>
+                <div class="divCont3">
+                    <div class="editor-label">
+                        @ResourceLanguaje.Resource.Location
+                    </div>
+                    <div class="k-textbox">
+                        @Html.TextBoxFor(model=>model.NAM_LOCA)
+                        @Html.ValidationMessageFor(model => model.NAM_LOCA)
+                    </div>
+                </div>
+            </div>
+            <div style="display:inline-block; float:right; padding: 15px 15px 15px 5px;">
+                <div style=" float:left; padding:0px 10px 0px 0px; ">
+                    <button id="submit" class="k-button">@ResourceLanguaje.Resource.BtnCreate</button>
+                </div>
+                <button id="cancel" class="k-button">@ResourceLanguaje.Resource.BtnCancel</button>
+            </div>
+    </fieldset>
+}
+<iframe id="upload_targetLE" name="upload_targetLE" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+
+<script type="text/javascript">
+
+    $("#submit").click(function () {
+        winPopUpModalLoad("Saving Your Location", "@ResourceLanguaje.Resource.PleaseWait", 300, 130);
+    });
+
+    $("#cancel").click(function (event) {
+        event.preventDefault();
+        closeWinFormModalPopUp();
+    });
+
+    $("#ID_SITE").kendoComboBox({
+        dataTextField: "NAM_SITE",
+        dataValueField: "ID_SITE",
+        filter: "contains",
+        autoBind: true,
+        delay: 500,
+        minLength: 0,
+        index: 0,
+        suggest: true,
+        dataSource: {
+            serverFiltering: false,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/Site_Entity/List?var=" + Math.random()
+            }
+        }
+    });
+    var ID_SITE = $("#ID_SITE").data("kendoComboBox");
+
+    if ('@ViewBag.ID_SITE' != 0) {        
+        ID_SITE.value(@ViewBag.ID_SITE);
+    }
+</script>

@@ -1,0 +1,359 @@
+﻿@model List<ERPElectrodata.Models.ListaUsuariosGrupos_Result>
+@{
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/js/standalone/selectize.min.js" integrity="sha256-+C0A5Ilqmu4QcSPxrlGpaZxJ04VjsRjKu+G82kl5UJk=" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.12.6/css/selectize.bootstrap3.min.css" integrity="sha256-ze/OEYGcFbPRmvCnrSeKbRTtjG4vGLHXgOqsyLFTRjg=" crossorigin="anonymous" />
+<input type="hidden" id="usuarioId" name="usuarioId" value="" />
+<input type="hidden" id="grupoId" name="grupoId" value="" />
+<input type="hidden" id="grupoPrincipalId" name="grupoPrincipalId" value="" />
+<input type="hidden" id="gruposAdicionales" name="gruposAdicionales" value="" />
+<div class="app-page-title cabeceraBg">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="font-icon-wrapper font-icon-lg bg-white">
+                <i class="fa fa-file icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                <div class="titleModule"><b><span id="tituloIndex" class="INCIDENTESYREQUERIMIENTOS">Grupos adicionales del usuario</span></b></div>
+                <div class="page-title-subheading">
+                    <span class="ListadeTicketsporcuentadesoporteporestado">Asociar usuarios a grupos.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card">
+    <div class="card-body">
+        <div class="mb-3">
+            <p class="card-title">Lista de usuarios</p>
+            <input id="listaUsuarios" name="listaUsuarios" type="text" style="width:100%">
+        </div>
+        <div class="mb-3">
+            <p class="card-title">Lista de grupos</p>
+            <input id="listaGrupos" name="listaGrupos" type="text" style="width:100%">
+        </div>
+        <div class="row">
+            <div class="col">
+                <div>
+                    <p class="card-title">INFORMACIÓN DE GRUPO</p>
+                </div>
+                <div id="usuarioInfo">
+                    <div class="row">
+                        <div class="col">
+                            <p class="card-title">Nombres</p>
+                            <p id="nombre">Nombre completo</p>
+                            <p class="card-title">Abreviatura</p>
+                            <p id="abreviatura">Abreviatura</p>
+                            <div id="agregarGrupoAdicional" style="display:block">
+                                <button class="btn btn-primary" onclick="agregarGrupoAdicional()">Agregar</button>
+                            </div>
+                            @*<div class="row">
+                                <div class="col" id="guardarGrupoPrincipal" style="display:none">
+                                    <button class="btn btn-primary" onclick="guardarGrupoPrincipal()">Guardar</button>
+                                </div>
+                                <div class="col" id="regresarAgregarGrupoAdicional" style="display:none">
+                                    <button class="btn btn-primary" onclick="regresarAgregarGrupoAdicional()">Regresar</button>
+                                </div>
+                            </div>*@
+                            <div id="grupoBotonesGrupoPrincipal" style="display:none">
+                                <button class="btn btn-primary" onclick="guardarGrupoPrincipal()" style="margin-right: 10px;">Guardar</button>
+                                <button class="btn btn-primary" onclick="regresarAgregarGrupoAdicional()">Regresar</button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col">
+                <div>
+                    <p class="card-title">Grupo por defecto</p>
+                    <div class="widget-content p-0">
+                        <div class="widget-content-wrapper">
+                            <div class="widget-content-left">
+                                <div class="widget-subheading">
+                                    <p id="grupoDefault">Grupo por defecto</p>
+                                </div>
+                            </div>
+                            <div class="widget-content-right" id="actualizarGrupoPrincipal" style="display:block">
+                                <button class="btn btn-primary" onclick="actualizarGrupoPrincipal()">Actualizar</button>
+                            </div>
+                           
+                        </div>
+                    </div>
+                </div>
+                <div id="gruposAsociados">
+                    <p class="card-title">Grupos asociados</p>
+                    <div id="listaGruposVinculados">
+                        @Html.Partial("_ListaUsuariosGrupos", Model)
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    $(document).ready(function () {
+        let listaClientes = [];
+        let listaGrupos = [];
+        var idPersEnti;
+        $("#listaUsuarios").kendoComboBox({
+            dataTextField: "FULL_NAME",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            value:"",
+            dataSource: {
+                schema: {
+                    data: "data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/GrupoUsuarios/CargarUsuarios"
+                }
+            },
+            change: function (e) {
+                var comboBox = e.sender;
+                idPersEnti = comboBox.value(); // Obtén el valor actual seleccionado
+
+
+                $.post("CargarListaGruposVinculados", { idUsuario: idPersEnti }, function (response) {
+                    $("#listaGruposVinculados").html(response);
+                });
+                $("#usuarioId").val(idPersEnti);
+               
+                listaUsuarios = comboBox.dataSource.data();
+                //for (var i = 0; i < listaUsuarios.length; i++) {
+                //    var usuario = listaUsuarios[i];
+                //    console.log(usuario);
+                //    if (usuario.ID_PERS_ENTI == idPersEnti) {
+                //        grupos.push(usuario.IdGrupo);
+                //    }
+                //}
+                //Colocar grupo por defecto
+                listaUsuarios.find(function (usuario) {
+                    if (usuario.ID_PERS_ENTI == idPersEnti) {
+                        $("#grupoPrincipalId").val(usuario.IdGrupoPorDefecto);
+                        console.log(usuario);
+                        console.log(usuario.IdGrupoPorDefecto);
+                        $("#grupoDefault").text(usuario.NombreGrupoPorDefecto);   
+                       
+                        $("#actualizarGrupoPrincipal").css("display", "block");
+                    }
+                });
+                
+
+            }
+
+        });
+
+        
+        $("#listaGrupos").kendoComboBox({
+            dataTextField: "NombreCompletoGrupo",
+            dataValueField: "IdGrupo",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            value:"",
+            dataSource: {
+                schema: {
+                    data: "data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/GrupoUsuarios/CargarGrupos"
+                }
+            },
+            change: function (e) {
+                var comboBox = e.sender;
+
+                var seleccion = comboBox.value();
+
+                listaGrupos = comboBox.dataSource.data();
+
+                var grupoSeleccionado = listaGrupos.find(function (grupo) {
+                    return grupo.IdGrupo.toString() === seleccion;
+                });
+
+                if (grupoSeleccionado) {
+                    pintarGrupo(grupoSeleccionado.NombreCompletoGrupo, grupoSeleccionado.NombreGrupo);
+                }
+                $("#grupoId").val(seleccion);
+            }
+        });
+
+    });
+    function actualizarGrupoPrincipal() {
+            document.getElementById("gruposAsociados").style.display = "none";
+        document.getElementById("agregarGrupoAdicional").style.display = "none";
+            //document.getElementById("obsActualizar").style.display = "block";
+        document.getElementById("actualizarGrupoPrincipal").style.display = "none";
+        document.getElementById("grupoBotonesGrupoPrincipal").style.display = "block";
+
+        //document.getElementById("guardarGrupoPrincipal").style.display = "block";
+        //document.getElementById("regresarAgregarGrupoAdicional").style.display = "block";
+            document.getElementById("tituloIndex").textContent ="Grupo principal del usuario";
+    }
+    function regresarAgregarGrupoAdicional() {
+        document.getElementById("gruposAsociados").style.display = "block";
+        document.getElementById("agregarGrupoAdicional").style.display = "block";
+        //document.getElementById("obsActualizar").style.display = "block";
+        document.getElementById("actualizarGrupoPrincipal").style.display = "block";
+        document.getElementById("grupoBotonesGrupoPrincipal").style.display = "none";
+
+        //document.getElementById("guardarGrupoPrincipal").style.display = "block";
+        //document.getElementById("regresarAgregarGrupoAdicional").style.display = "block";
+        document.getElementById("tituloIndex").textContent = "Grupos adicionales del usuario";
+    }
+
+
+    //Coloca los datos del grupo seleccionada por el usuario
+    function pintarGrupo(nombre, abreviatura) {
+        document.getElementById("nombre").textContent = nombre
+        document.getElementById("abreviatura").textContent = abreviatura
+        //document.getElementById("userID").value = id
+        //document.getElementById("guardar").style.display = "block"
+    }
+
+    //function agregarGrupoAdicional2() {
+    //    let seleccionGrupo = document.getElementById("grupoId").value;
+    //    let seleccionUsuario = document.getElementById("usuarioId").value;
+    //    let grupoPrincipalUsuario = document.getElementById("grupoPrincipalId").value;
+    //    var grupos=[];
+    //    $.post("CargarArregloGruposVinculados", { idUsuario: seleccionUsuario }, function (response) {
+    //        console.log("here");
+    //        console.log(response);
+    //        for (var i = 0; i < response.length; i++) {
+    //                grupos.push(response[i].IdGrupo);
+    //        }
+    //        console.log(grupos);
+    //    });
+    //    let flag = "";
+    //    if (seleccionGrupo == "" || seleccionUsuario == "") {
+    //        if (seleccionUsuario == "") {
+    //            flag += "-Seleccione un usuario.</br>";
+    //        }
+    //        if (seleccionGrupo == "") {
+    //            flag += "-Seleccione un grupo.";
+    //        }
+    //        toastr.error("", flag);
+    //    }
+    //    else {
+    //        if (seleccionGrupo==grupoPrincipalUsuario) {
+    //            toastr.warning("", "El usuario ya tiene el grupo asignado por defecto");
+    //        }
+    //        else {
+    //            console.log("aca");
+    //            console.log(grupos);
+    //            console.log(seleccionGrupo);
+    //            if (grupos.includes(seleccionGrupo)) {
+
+    //                toastr.warning("", "El usuario ya tiene el grupo asignado.</br>Por favor seleccione un grupo diferente");
+    //            }
+    //            else {
+    //                $.post("GuardarEliminarUsuarioVinculado", { idGrupo: seleccionGrupo, idUsuario: seleccionUsuario, accion: 1 }, function (response) {
+    //                    $("#listaGruposVinculados").html(response);
+    //                    toastr.success("", "El registro ha sido guardado.");
+    //                }).fail(function (error) {
+    //                    toastr.error("Error al guardar la información.");
+    //                });
+    //            }
+                
+    //        }
+           
+
+    //    }
+    //}
+        
+    function agregarGrupoAdicional() {
+        let seleccionGrupo = document.getElementById("grupoId").value;
+        let seleccionUsuario = document.getElementById("usuarioId").value;
+        let grupoPrincipalUsuario = document.getElementById("grupoPrincipalId").value;
+        let grupos = [];
+
+        $.post("CargarArregloGruposVinculados", { idUsuario: seleccionUsuario }, function (response) {
+
+            for (var i = 0; i < response.length; i++) {
+                grupos.push(response[i].IdGrupo);
+            }
+
+            console.log(grupos);
+            let flag = "";
+            if (seleccionGrupo === "" || seleccionUsuario === "") {
+                if (seleccionUsuario === "") {
+                    flag += "Seleccione un usuario.<br/>";
+                }
+                if (seleccionGrupo === "") {
+                    flag += "Seleccione un grupo.";
+                }
+                toastr.error("", flag);
+            } else {
+                if (seleccionGrupo === grupoPrincipalUsuario) {
+                    console.log(seleccionGrupo);
+                    console.log(grupoPrincipalUsuario);
+                    toastr.warning("", "El usuario ya tiene el grupo asignado por defecto");
+                } else {
+                    if (grupos.includes(parseInt(seleccionGrupo))) {
+                        toastr.warning("", "El usuario ya tiene el grupo asignado.<br/>Por favor seleccione un grupo diferente");
+                    } else {
+                        $.post("GuardarEliminarUsuarioVinculado", { idGrupo: seleccionGrupo, idUsuario: seleccionUsuario, accion: 1 }, function (response) {
+                            $("#listaGruposVinculados").html(response);
+                            toastr.success("", "El registro ha sido guardado.");
+                        }).fail(function (error) {
+                            toastr.error("Error al guardar la información.");
+                            console.error("Error al aagregar grupo adicional:", error);
+                        });
+                    }
+                }
+            }
+        });
+    }
+   
+   
+    function eliminarDesdeLista(seleccionGrupo) {
+        var idUsuario = document.getElementById("usuarioId").value
+        $.post("GuardarEliminarUsuarioVinculado", { idUsuario: idUsuario, idGrupo: seleccionGrupo, accion: 0 }, function (response) {
+            $("#listaGruposVinculados").html(response);
+            toastr.success("", "El registro ha sido eliminado.");
+        }).fail(function (error) {
+            toastr.error("Error al eliminar la información.");
+        });
+        
+    }
+    //Actualiza el grupo principal del usuario
+    function guardarGrupoPrincipal() {
+        let seleccionGrupo = document.getElementById("grupoId").value
+        let seleccionUsuario = document.getElementById("usuarioId").value
+        let flag = ""
+        if (seleccionGrupo == "" || seleccionUsuario == "") {
+
+            if (seleccionUsuario == "") {
+                flag += "-Seleccione un usuario.</br>";
+            }
+            if (seleccionGrupo == "") {
+                flag += "-Seleccione un grupo.";
+            }
+            toastr.error("", flag);
+        }
+        else {
+            $.post("ActualizarGrupoDefault", { idGrupo: seleccionGrupo, idUsuario: seleccionUsuario }, function (response) {
+                console.log(seleccionGrupo);
+                console.log(seleccionUsuario);
+                $("#grupoDefault").text(response);
+                $("#grupoPrincipalId").val(seleccionGrupo);
+                toastr.success("", "El registro ha sido guardado.");
+            }).fail(function (error) {
+                toastr.error("Error al guardar la información.");
+                console.error("Error al actualizar el grupo por defecto:", error);
+            });
+        }
+
+
+    }
+
+</script>

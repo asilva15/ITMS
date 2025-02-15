@@ -1,0 +1,118 @@
+﻿@{
+    Layout = null;
+}
+<link href="~/Content/ArchitectureUI/main.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.common.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.rtl.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.default.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.default.mobile.min.css" rel="stylesheet" />
+<link href="~/Content19/all.css" rel="stylesheet" />
+
+<script src="~/Scripts19/kendo/2019.3.1023/jquery.min.js"></script>
+<script src="~/Scripts19/kendo/2019.3.1023/jszip.min.js"></script>
+<script src="~/Scripts19/kendo/2019.3.1023/kendo.all.min.js"></script>
+
+
+
+
+<script src="~/Scripts/angular-ui/ui-bootstrap-tpls.min.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form id="Parametro">
+                        <div class="form-row">
+                            <div class="col-sm-12">
+                                <div class="form-group">
+                                    <label for="IdArea">Área(s) </label>
+                                    <select multiple="multiple" class="multiselect-dropdown form-control" id="IdArea" name="IdArea" style="width:100%;"></select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="FechaInicial">Fecha Inicial</label>
+                                    <input id="FechaInicial" name="FechaInicial" />
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                <label for="">&nbsp;</label>
+                                <input id="btnBuscar" name="btnBuscar" class="btn btn-block btn-primary btn-sm" type="button" value="Buscar" />
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="col-md-12">
+                    @*<iframe id="RptSemanalIngeniero" style="height:480px; width:100%;border: 0px #eee solid;"></iframe>*@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bodyForm" style="margin-top:10px;">
+    <div class="inBodyForm">
+        <iframe id="RptSemanalIngeniero" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript" src="~/Content/ArchitectureUI/assets/scripts/main.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script type="text/javascript">
+    function GenerateReport() {
+        if (@Session["ID_PERS_ENTI"] == 1007) {
+            if ($("#IdArea").val() == null || $("#FechaInicial").val() == null || $("#FechaInicial").val() == "") {
+                uploadDone("Completar la información solicitada.");
+            } else {
+                window.frames["RptSemanalIngeniero"].src = "/Reporting/Actividad/ActSemanalxIngeniero.aspx?var=" + Math.random() + "&IdArea=" + $("#IdArea").val() + "&FechaInicial=" + $("#FechaInicial").val();
+            }
+        } else {
+            
+            if ($("#FechaInicial").val() == null || $("#FechaInicial").val() == "") {
+                uploadDone("Completar la información solicitada.");
+                
+            } else {
+                if ($("#IdArea").val() == null) { sIdArea = ""; } else { sIdArea = $("#IdArea").val(); }
+                
+                window.frames["RptSemanalIngeniero"].src = "/Reporting/Actividad/ActSemanalxIngeniero.aspx?IdArea=" + sIdArea + "&FechaInicial=" + $("#FechaInicial").val();
+            }
+        }
+
+        //window.frames["RSActCliente"].src = "/Reporting/Actividad/ActxCliente.aspx?var=" + Math.random() + "&" + $("#Parametro").serialize();
+    }
+</script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#btnBuscar").click(function (event) {
+            GenerateReport();
+            event.preventDefault();
+        });
+
+        $("#FechaInicial").kendoDatePicker({
+            format: "MM/dd/yyyy"
+        });
+
+        $.ajax({
+            url: "/Activity/ListarAreaxOrganigramaMultiSelect",
+            type: 'post',
+            success: function (response) {
+                $.each(response, function (ind, elem) {
+                    $("#IdArea").append(elem.opcion);
+                });
+                $("#IdArea").multiselect("rebuild");
+                $("#IdArea").attr("disabled", false);
+            }
+        });
+    });
+
+    function uploadDone(msg) {
+        toastr.warning(msg, "Mensaje");
+    }
+
+</script>

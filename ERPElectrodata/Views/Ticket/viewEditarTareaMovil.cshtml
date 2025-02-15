@@ -1,0 +1,217 @@
+﻿@{
+    Layout = null;
+}
+
+<input id="IdTareaDetalle" value="@ViewBag.IdTareaDetalle" hidden />
+<div class="form-row">
+    <div class="col-md-6">
+        <div class="form-group">
+            Tipo de Servicio<span style="color:red">*</span>
+            <input id="tipoServicio" type="text" name="TipoServicio" value="@Model.TipoServicio" />
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            Moneda<span style="color:red">*</span>
+            <input id="moneda" type="text" name="Moneda" value="@Model.Moneda" />
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            Monto<span style="color:red">*</span>
+            <input id="monto" type="text" name="Monto" value="@Model.Monto" />
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col-md-6">
+        <div class="form-group">
+            Sede Imputado<span style="color:red">*</span>
+            <input id="sedeImputado" type="text" name="SedeImputado" value="@Model.SedeImputado" />
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            CeCo Imputado
+            <input id="ceCoImputado" type="text" name="CeCoImputado" value="@Model.CeCoImputado" class="k-textbox" style="width:100%; height:30px;" />
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            Partida Presupuestal
+            <input id="partidaPresupuestal" type="text" name="PartidaPresupuestal" value="@Model.PartidaPresupuestal" class="k-textbox" style="width:100%; height:30px;" />
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col-md-6">
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            Fecha Ejecutada<span style="color:red">*</span>
+            <input id="fechaEjecutada" type="text" name="FechaEjecutada" value="@Model.FechaEjecutada" />
+        </div>
+    </div>
+</div>
+<div class="form-row">
+    <div class="col-md-3">
+        <button id="btnEditarTarea" type="button" class="btn btn-primary"> <i class="fa fa-save"></i> Guardar</button>
+        <button id="btnCerrar" type="button" data-dismiss="modal" hidden></button>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#sedeImputado").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            dataSource: {
+                schema: {
+                    data: "Data"
+                },
+                transport: {
+                    read: "/Ticket/ListarTareaMovilSedes?var=" + Math.random()
+                }
+            },
+            filter: "contains",
+        }).data("kendoComboBox");
+        $("#tipoServicio").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            dataSource: {
+                schema: {
+                    data: "Data"
+                },
+                transport: {
+                    read: "/Ticket/ListarTareaMovilTipo?var=" + Math.random()
+                }
+            },
+            filter: "contains",
+        }).data("kendoComboBox");
+        $("#moneda").kendoComboBox({
+            dataTextField: "text",
+            dataValueField: "value",
+            dataSource: [{
+                text: "PEN",
+                value: "1"
+            }, {
+                text: "USD",
+                value: "2"
+            }],
+            filter: "contains",
+        }).data("kendoComboBox");
+        $("#monto").kendoNumericTextBox({
+            format: "n2",
+            decimals: 2,
+            spinners: false
+        });
+        $("#fechaEjecutada").kendoDateTimePicker({
+            format: ("dd/MM/yyyy HH:mm")
+        });
+        $("#btnEditarTarea").click(function () {
+            var idTareaDetalle = $("#IdTareaDetalle").val();
+
+            var mensaje = '';
+            var sedeImputado = $("#sedeImputado").val();
+            var moneda = $("#moneda").val();
+            var monto = $("#monto").val();
+            var ceCoImputado = $("#ceCoImputado").val();
+            var partidaPresupuestal = $("#partidaPresupuestal").val();
+            var tipoServicio = $("#tipoServicio").val();
+            var fechaEjecutada = $("#fechaEjecutada").val();
+
+            if (sedeImputado == '') mensaje += '-Seleccione una sede imputado para la tarea. \n';
+            if (moneda == '') mensaje += '-Seleccione una moneda para la tarea. \n';
+            if (monto == '') mensaje += '-Seleccione un monto para la tarea. \n';
+            if (tipoServicio == '') mensaje += '-Seleccione un tipo de servicio para la tarea. \n';
+            if (fechaEjecutada == '') mensaje += '-Seleccione una fecha ejecutada para la tarea. \n';
+
+            if (mensaje != "") {
+                toastr.warning(mensaje, "Advertencia");
+                return false;
+            } else {
+                var data = {
+                    SedeImputado: sedeImputado,
+                    Moneda: moneda,
+                    Monto: monto,
+                    CeCoImputado: ceCoImputado,
+                    PartidaPresupuestal: partidaPresupuestal,
+                    TipoServicio: tipoServicio,
+                    FechaEjecutada: fechaEjecutada
+                };
+
+                swal({
+                    title: `¿Deseas editar esta tarea?`,
+                    text: `Se editará la tarea: @ViewBag.CodTareaDetalle`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: '/Ticket/EditarTareaMovil?idTarea=' + idTareaDetalle,
+                            type: 'POST',
+                            data: data,
+                            success: function (response) {
+                                if (response == 'OK') {
+                                    $("#btnCerrar").click();
+                                    idSetTimeout = setTimeout(function (element) {
+                                        $(".ticketHijoIndex ul > .divListTMinsur").html('');
+
+                                        $.ajax({
+                                            contentType: 'application/json; charset=utf-8',
+                                            url: "/Ticket/ListarTareasPendientes",
+                                            type: "Get",
+                                            data: { idTicket: idTicket },
+                                            datatype: "json",
+                                            cache: false,
+
+                                            success: function (data) {
+                                                if (data) {
+                                                    tejerTareasPendientesMovil(data["tareaPendiente"]);
+
+                                                    swal.close();
+                                                }
+                                            }
+                                        });
+                                    }, 2000, $(this));
+
+                                    swal({
+                                        title: 'Guardando',
+                                        type: 'success',
+                                        text: 'Registro exitoso',
+                                        confirmButtonColor: "#DD6B55",
+                                        focusConfirm: false,
+                                        confirmButtonText:
+                                            'Continue',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!'
+                                    });
+                                } else if (response == 'ERROR') {
+                                    swal({
+                                        title: 'Warning',
+                                        type: 'info',
+                                        text: 'ERROR EN EL REGISTRO',
+                                        confirmButtonColor: "#DD6B55",
+                                        focusConfirm: false,
+                                        confirmButtonText: 'Continue',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!'
+                                    })
+                                } else {
+                                    alert(Error);
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        swal("Cancelado", "Ha cancelado la edición", "error");
+                    }
+                });
+            }
+        });
+    });
+
+</script>

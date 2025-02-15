@@ -1,0 +1,65 @@
+﻿<div>
+    @if (ViewBag.CantidadTareas == 0)
+    {
+        <div class="alert alert-dark" role="alert">
+            <p class="text-center font-weight-bold">No hay tareas activas.</p>
+        </div>
+    }
+    else
+    {
+        <div>
+            <table style="width: 100%;" class="table">
+                <thead>
+                    <tr role="row">
+                        <th>Código de Tarea</th>
+                        <th>Fecha de la Tarea</th>
+                        <th>Título</th>
+                        <th>Usuario Afectado</th>
+                        <th>Area Responsable</th>
+                        <th>Usuario Asignado</th>
+                    </tr>
+                </thead>
+                <tbody id="listaBnvMisTareasActivos">
+                </tbody>
+                <tbody id="listaBnvCargaMisTareasActivos">
+                    @Html.Partial("_CargaTicketsTabla", (int)ViewBag.CantidadPintar)
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-3">
+            <ul class="pagination" id="paginationMisTareasActivos"></ul>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if (@ViewBag.CantidadTareas != 0) {
+            $.jqPaginator('#paginationMisTareasActivos', {
+                totalPages: @ViewBag.CantidadTareas,
+                visiblePages: 10,
+                currentPage: 1,
+                onPageChange: function (num, type) {
+                    if (type == "change") {
+                        cambioPaginaMisTareasActivos(num)
+                    }
+
+                }
+            });
+
+        }
+    });
+    function cambioPaginaMisTareasActivos(pagina) {
+        if (@ViewBag.CantidadTareas != 0) {
+            document.getElementById("listaBnvMisTareasActivos").style.display = 'none'
+            document.getElementById("listaBnvCargaMisTareasActivos").style.display = 'table-row-group'
+            $.post("/Home/ActualizarMisTareasBnv", { pagina: pagina, estado: 1 }, function (response) {
+                $("#listaBnvMisTareasActivos").html(response);
+                document.getElementById("listaBnvMisTareasActivos").style.display = 'table-row-group'
+                document.getElementById("listaBnvCargaMisTareasActivos").style.display = 'none'
+            });
+        }
+
+    }
+</script>

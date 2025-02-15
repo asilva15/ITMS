@@ -1,0 +1,236 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <link href="~/Content/Ticket.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/Forms.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/FrmTicket.css" rel="stylesheet" type="text/css" />
+    <link href="~/Content/HomeIncident.css" rel="stylesheet" type="text/css" />
+    <style type="text/css">
+        #FormFindDelivery
+        {
+            font-size:.9em;
+        }
+    </style>
+</head>
+<body>
+    <div style="width:40%; float:left;">
+        <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.FindDelivery</div></div>
+        <div class="bodyForm">
+            <div class="inBodyForm">
+                <form id="FormFindDelivery">
+                    <div class="FondoBlanco">
+                        <div class="DivisionEn2">
+                          <div class="DivisionEn21d2">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Code
+                            </div>
+                            <div class="k-textbox">
+                                @Html.TextBox("COD_ASSE")
+                            </div>
+                          </div>
+                        </div>
+                        <div class="DivisionEn2">
+                          <div class="DivisionEn22d2">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.CreateBy
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextBox("UserId")
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="FondoGris">
+                        <div class="DivisionEn2">
+                          <div class="DivisionEn21d2">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.User
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextBox("ID_ENTI")
+                            </div>
+                          </div>
+                        </div>
+                    </div>
+                    <div class="FondoBlanco">
+                        <div class="DivisionEn2">
+                            <div class="DivisionEn21d2">
+                                <div class="editor-label">
+                                    <label>@ResourceLanguaje.Resource.StartDate @ResourceLanguaje.Resource.DateFormat</label>
+                                </div>
+                                <div>
+                                    <input id="StartDate" name="StartDate" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="DivisionEn2">
+                            <div class="DivisionEn22d2">
+                                <div class="editor-label">
+                                    <label>@ResourceLanguaje.Resource.EndDate @ResourceLanguaje.Resource.DateFormat</label>
+                                </div>
+                                <div>
+                                    <input id="EndDate" name="EndDate" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="FondoBlanco">
+                        <div style="font-size:1.1em; display:inline-block; width:100%;">            
+                            <div style="float:right; margin-right:16px;margin-top:5px;margin-bottom:5px;">
+                                <button id="newdelivery" class="k-button" onclick="NewDelivery(); return false;">@ResourceLanguaje.Resource.NewDelivery</button>
+                                <button id="submit" class="k-button" onclick="Find(); return false;">@ResourceLanguaje.Resource.BtnFind</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div style="width:1%; float:left;height:1px;">
+    </div>
+    <div style="width:29%; float:left; ">
+        <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.DeliveryByMonth</div></div>
+        <div class="bodyForm"><div class="inBodyForm">Body</div></div>
+    </div>
+    <div style="width:1%; float:left; height:1px;">
+    </div>
+    <div style="width:29%; float:right;">
+        <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.DeliveryByArea</div></div>
+        <div class="bodyForm"><div class="inBodyForm">Body</div></div>
+    </div>
+
+    s
+    <div id="resultFind" class="contentView"></div>
+
+
+    <div id="pagerFind" class="contentViewPager"></div>
+</body>
+</html>
+
+<script type="text/x-kendo-tmpl" id="templateFind">
+
+    <div class="incidentHomeList">
+        <div class = "incidentHomeListBlock1 hasLayout">
+            <div class = "incidentHomeListHeader">  
+            <div class="FondoNegro">
+                <div class="incidentHomeRequesterIcon" title="User">
+                    ${CLIE}
+                </div>
+                <div class="incidentHomeCreateIcon" title="Creation date @ResourceLanguaje.Resource.DateFormat">
+                    Create: ${CREATE}
+                </div>
+                <div class="incidentHomeClockIcon" title="Modification date @ResourceLanguaje.Resource.DateFormat">
+                    Modified: ${MODIFIED}
+                </div>
+            </div>
+                <div class="${ICO_PRIO}">
+                    ${NAM_TYPE_CLIE}
+                </div>
+            </div>
+        </div>
+        <div class = "incidentHomeSumary" >
+            <a href="\\DeliveryReception/DetailsDelivery/${ID_DELI_RECE}" TARGET='_BLANK'>#= SUM_DELI_RECE #</a>
+        </div>
+        <div class="contraya">
+            <div class="raya"></div>
+        </div>
+        <div class="incidentHomeRes">
+            <div class="ticket"> \\#
+            <a href="/DeliveryReception/DetailsDelivery/${ID_DELI_RECE}" TARGET='_BLANK'> ${CODE} </a> </div>
+            <div class="createBy" >Create By: ${CREATE_BY}</div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#UserId").kendoComboBox({
+            autoBind: false,
+            dataTextField: "PERS",
+            dataValueField: "ID_PERS",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Personnel/ListUsersCreateDelivery?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#ID_ENTI").kendoComboBox({
+            dataTextField: "REQU",
+            dataValueField: "ID_REQU",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Requester/Requester?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var start = $("#StartDate").kendoDatePicker({
+        }).data("kendoDatePicker");
+
+        var end = $("#EndDate").kendoDatePicker({
+        }).data("kendoDatePicker");
+
+    });
+
+    function Find() {
+        var dataSource = null;
+        var pager = null;
+
+        dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/DeliveryReception/FindDeliveryJson?var=" + Math.random() + "&" + $('#FormFindDelivery').serialize(),
+                    type: "GET",
+                    dataType: "json"
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#resultFind").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#templateFind").html())
+        });
+
+        pager = $("#pagerFind").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 60],
+            refresh: true
+        });
+    }
+
+    function NewDelivery() {
+        $("#contentAsset").empty();
+        $("#contentAsset").load("/DeliveryReception/Create" + "?var=" + Math.random());
+        return false;
+    }
+</script>

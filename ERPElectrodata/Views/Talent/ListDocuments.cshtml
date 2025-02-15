@@ -1,0 +1,121 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+<div id="treeviewDocs" style="padding: 3px 0 0 7px;"></div>
+
+@* TreeView Documents *@
+<script id="treeviewDocs-template" type="text/kendo-ui-template">
+    # if (item.ATTACH == false) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 2) { #
+        <a onclick="AuthorizationDownload('#: item.NAM_FILE #','#: item.ID_TYPE_DOCU #','#: item.ID_PARA #'); return false;" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #@Environment.NewLine@ResourceLanguaje.Resource.StartDateContractTalent: #: item.STAR_DATE #@Environment.NewLine@ResourceLanguaje.Resource.EndDateContractTalent: #: item.END_DATE #" target="_blank" style="text-decoration:none;cursor:pointer">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='D|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+    # } else if (item.ATTACH == true && item.ID_TYPE_DOCU == 8) { #
+        <a href="/Adjuntos/Talent/JobDescription/#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a>
+    # } else if (item.ATTACH == true && item.CONT == 1) { #
+        <a href="#: item.NAM_FILE #" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;">
+    <img src="/Content/Images/#: item.ICONO #" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+</a>
+    # } else if (item.ATTACH == true) { #
+        <a onclick="AuthorizationDownload('#: item.NAM_FILE #','#: item.ID_TYPE_DOCU #','#: item.ID_PARA #'); return false;" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;cursor:pointer">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a><a id='D|#: item.ID_PARA #' class='delete-link' href='\#' title='Remove'></a>
+    # } #
+</script>
+
+<script type="text/javascript"> 
+
+    $(document).ready(function () {
+
+        homogeneousDocs = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Talent/TreeDocs/@ViewBag.ID_PERS_ENTI",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE"
+                }
+            }
+        });
+
+        $("#treeviewDocs").kendoTreeView({
+            template: kendo.template($("#treeviewDocs-template").html()),
+            dataSource: homogeneousDocs,
+            dataTextField: "NAME_PARA"
+        });
+    });
+
+    function AuthorizationDownload(arc, id_type, iddocu) {
+        NameArc = "/Adjuntos/Talent/Documents/" + arc;
+        if (id_type == 3) {
+            window.open(NameArc, "_blank");
+        }
+        else {
+            var htmlForm = '<div id="FormAuthorization"></div>';
+            winFormPopUpModal("@ResourceLanguaje.Resource.ValidationsOfCredentials", htmlForm, 260, 205);
+            $("#FormAuthorization").load("/Account/ViewAuthorization?id=@ViewBag.ID_PERS_ENTI&id1=" + iddocu + "&fd=Documents&var=" + Math.random());
+        }
+        return false;
+    }
+
+    function winFormPopUpModal(title, contHtml, ancho, alto) {
+
+        var altobkg = 0;
+        var top = 0;
+        altpan = $(window).height(); // devuelve la altura del viewport del navegador
+        altobkg = $(document).height(); // devuelve la altura del documento HTML
+        altbar = $(window).scrollTop(); // devuelve la posición vertical actual de la barra de scroll
+        top = altbar + (altpan / 2);
+        $("#divpopupmodal").prepend("<div id='bkg' class='backgroundcad' style='z-index: 999; display: visibility; height: " + altobkg + "px;'>" +
+            "<div id='dlg' class='modalcad' style='z-index: 999; display: none; top: " + a_entero(top) + "px; width: " + a_entero(ancho) + "px; margin-left: -" + a_entero(ancho) / 2 + "px; height: " + a_entero(alto) + "px; margin-top: -" + a_entero(alto) / 2 + "px;'>" +
+            "<div id='titulomodal' class='titlemodalcad'>" +
+            "<div id='closebtnmodal' class='closebtnmodalcad' title='Cerrar'>X</div>" +
+            "</div><div id='contenidomodal' class='contenidomodal'></div></div></div>");
+
+        if ($('#bkg').css("visibility") == 'hidden') {
+            document.getElementById('bkg').style.visibility = '';
+            $("#bkg").hide();
+        }
+        if ($('#bkg').css("visibility") == 'hidden') {
+            document.getElementById('dlg').style.visibility = '';
+            $("#dlg").hide();
+        }
+        $("#bkg").fadeIn(300, "linear", function () {
+            $("#dlg").show(200, "swing");
+            $("#titulomodal").prepend(title)
+            $("#contenidomodal").prepend('<div style="text-align:justify">' + contHtml + '</div>')
+        });
+        $("#closebtnmodal").click(function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+    }
+
+    function closeWinModalPopUp(sw) {
+
+        $("#dlg").hide('200', "swing", function () {
+            $("#bkg").fadeOut("300");
+        });
+    }
+    function a_entero(valor) {
+        //intento convertir a entero.
+        //si era un entero no le afecta, si no lo era lo intenta convertir
+        valor = parseInt(valor);
+        //comprobamos si es un valor entero
+        if (isNaN(valor)) {
+            //no es entero 0
+            return 0;
+        } else {
+            //es un valor entero
+            return valor;
+        }
+    }
+</script>

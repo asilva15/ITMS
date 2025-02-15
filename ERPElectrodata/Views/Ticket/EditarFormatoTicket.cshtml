@@ -1,0 +1,108 @@
+﻿@{
+    ViewBag.Title = "EditarFormatoTicket";
+    Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    .cabeceraTb {
+        font-size: .9em;
+        font-weight: bold;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="form-row">
+                    <input type="hidden" name="IdTicket" id="IdTicket" value="@ViewBag.IdTicket" />
+
+                    <div class="col-md-8">
+                        <small>Afectación de Servicio</small>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label><input type="radio" name="AfectacionServicio" id="rbtSI" /> Sí </label>
+                            </div>
+                            <div class="col-md-3">
+                                <label><input type="radio" name="AfectacionServicio" id="rbtNO" /> No </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <small>Análisis Causa Raíz</small>
+                            <input class="form-control" id="txtAnalisisCausa" name="txtAnalisisCausa" />
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <small>Observaciones</small>
+                            <input class="form-control" id="txtObservaciones" name="txtObservaciones" />
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            &nbsp;<br />
+                            <button onclick="editarCamposFormato();" class="btn btn-primary btn-lg"> EDITAR TICKET</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#rbtNO").click(function () {
+            $("#txtAnalisisCausa").attr('disabled', 'disabled'); 
+        });
+        $("#rbtSI").click(function () {
+            $("#txtAnalisisCausa").removeAttr('disabled');
+
+        });
+    });
+    function editarCamposFormato() {
+        var afectacion = ''
+        
+        if ($('input[name="AfectacionServicio"]').is(':checked')) {
+
+            if ($("#rbtSI").is(':checked')) {
+                
+                afectacion = 'Si'
+            }
+            else {
+                afectacion = 'No'
+
+            }
+        } else {
+            alert('Se debe seleccionar si hay o no un Análisis Causa Raíz asociado al ticket');
+        }
+        
+        $.ajax({
+            url: "/OrderForm/EditarCamposManualesFormato?txtObservaciones=" + $("#txtObservaciones").val() +
+                "&txtAnalisisCausa=" + $("#txtAnalisisCausa").val() + "&AfectacionServicio=" + afectacion + "&IdTicket=" + $("#IdTicket").val(),
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                alert((data['Data']));
+                debugger
+                if (data['Data'] == 'Actualizado') {
+                    toastr.success("Actualizado");
+
+                } else {
+                    toastr.warning("Ha ocurrido un error, por favor verifique o notifique al administrador.");
+                }
+                
+            },
+            error: function (source) {
+            }
+        });
+
+
+    }
+</script>

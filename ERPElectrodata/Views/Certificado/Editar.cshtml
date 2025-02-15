@@ -1,0 +1,164 @@
+﻿
+@{
+    ViewBag.Title = "Editar";
+    Layout = null;
+}
+
+@using (Html.BeginForm("EditarCertificado", "Certificado", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmCandidatoReferencia", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+
+    <input type="hidden" id="Id" name="Id" value="@ViewBag.Id" />
+
+    <div class="tab-content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <form class="">
+                            <div class="form-row">
+
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        <label id="cbUsuario" for="cbUsuario" class="">Usuario</label>
+                                        <input id="txtUsuario" disabled />
+
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="position-relative form-group">
+                                        <label id="cbMarca" for="cbMarca" class="">Marca</label>
+                                        <input id="txtMarca" disabled />
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                @*<div class="col-md-6">
+            <div class="position-relative form-group">
+                <label id="lblFechaProgramada" for="lblFechaProgramada" class="">Fecha Programada </label>
+                <input id="txtFechaProgramada" disabled />
+            </div>
+        </div>*@
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <label id="cbNombre" for="cbNombre" class="">Nombre</label>
+                                        <input id="txtNombre" name="txtNombre" />
+
+                                    </div>
+                                </div>
+                                @if (@ViewBag.RRHH.ToString() == "1")
+                                {
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <label id="cbMonto" for="cbMonto" class="">Monto</label>
+                                            <input id="txtMonto" name="txtMonto" />
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="col-md-12">
+                                        <div class="position-relative form-group">
+                                            <label id="cbMonto" for="cbMonto" class="">Monto</label>
+                                            <input id="txtMonto" name="txtMonto" readonly class="disabled-input"/>
+                                        </div>
+                                    </div>
+
+                                }
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-8 ">
+                                    <br />
+                                </div>
+                                <div class="col-md-4 float-right">
+                                    <br />
+                                    <button id="Guardar" type="submit" class="mt-1 btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+<style>
+    .disabled-input {
+        background-color: #e9ecef; 
+        color: #495057; 
+        border: 1px solid #ced4da; 
+        cursor: not-allowed;
+    }
+</style>
+
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" style="display:none"></iframe>
+
+<script type="text/javascript">
+    
+
+    $(document).ready(function () {
+
+        $("#txtUsuario").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        $("#txtMarca").kendoMaskedTextBox({
+            mask: ""
+        });
+        $("#txtNombre").kendoMaskedTextBox({
+            mask: ""
+        });
+        $("#txtFechaProgramada").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        $("#txtMonto").kendoNumericTextBox({
+            format: "#",   
+            decimals: 0,     
+            min: 0,          
+            step: 1          
+        });
+
+        ObtenerDatos(@ViewBag.Id);
+    });
+
+    function ObtenerDatos(id) {
+
+        //var monto = $("#txtMonto").kendoNumericTextBox();
+
+        $.ajax({
+            url: "/Certificado/ObtenerDatosCertificado/" + id,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (data) {
+                $.each(data['data'], function (index, value) {
+                    $("#txtUsuario").val(data['data'][index]['Persona']);
+                    $("#txtMarca").val((data['data'][index]['Marca']));
+                    $("#txtNombre").val((data['data'][index]['Certificado']));
+                    $("#txtMonto").data("kendoNumericTextBox").value((data['data'][index]['Monto']));
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    function MensajeEditar(msg) {
+        if (msg == "OK") {
+            toastr.success("Se editó el nombre del certificado", "");
+
+            var tabla = $('#tbCertificado').DataTable();
+            tabla.ajax.reload();
+
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            
+        }
+        else {
+            toastr.error("Contacte al administrador", "Error");
+        }
+    }
+
+</script>

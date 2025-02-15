@@ -1,0 +1,215 @@
+﻿@{
+    ViewBag.Title = "Transferir Tarea";
+    Layout = null;
+}
+
+<input id="IdTareaDetalle" value="@ViewBag.IdTareaDetalle" hidden />
+<div class="main-card card">
+    <div class="card-header">
+        Usuario a Transferir
+    </div>
+    <div class="card-body">
+        @if (Convert.ToInt32(Session["ID_ACCO"]) == 56 || Convert.ToInt32(Session["ID_ACCO"]) == 57 || Convert.ToInt32(Session["ID_ACCO"]) == 58)
+        {
+            <div class="form-row mb-2">
+                <div class="col-md-12">
+                    <input id="IdQueu" value="@ViewBag.IdQueu" />
+                </div>
+            </div>
+        }
+        else
+        {
+            <input id="IdQueu" value="@ViewBag.IdQueu" hidden />
+        }
+        <div class="form-row">
+            <div class="col-md-9">
+                <input id="usuarioTransferencia" />
+            </div>
+            <div class="col-md-3">
+                <button id="btnTransferirTarea" type="button" class="btn btn-primary"> <i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var idAcco = parseInt(@Session["ID_ACCO"]);
+
+        if (idAcco == 56 || idAcco == 57 || idAcco == 58) {
+            $("#IdQueu").kendoComboBox({
+                autoBind: true,
+                dataValueField: "ID_QUEU",
+                dataTextField: "QUEU",
+                filter: "contains",
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                placeholder: "Area Responsable",
+                template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                    '<span><strong>${data.QUEU}</strong></span>' +
+                    '<span>${data.DES_QUEU}</span></div>',
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                    },
+                    sort: { field: "QUEU", dir: "asc" }
+                }
+            }).data("kendoComboBox");
+
+            //var usuarioTransferido = $("#usuarioTransferencia").kendoComboBox({
+            //    autoBind: true,
+            //    dataValueField: "ID_PERS_ENTI",
+            //    dataTextField: "ASSI",
+            //    placeholder: "Seleccione un usuario",
+            //    filter: "contains",
+            //    delay: 500,
+            //    minLength: 0,
+            //    suggest: true,
+            //    dataSource: {
+            //        transport: {
+            //            read: "/Home/ListaUsuariosPorCola?ID_QUEU=" + $("#IdQueu").val() + "&var=" + Math.random()
+            //        }
+            //    }
+            //}).data("kendoComboBox");
+            var usuarioTransferido = $("#usuarioTransferencia").kendoComboBox({
+                cascadeFrom: "IdQueu",
+                dataValueField: "ID_PERS_ENTI",
+                dataTextField: "ASSI",
+                placeholder: "Seleccione un usuario",
+                filter: "contains",
+                suggest: true,
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data"
+                    },
+                    transport: {
+                        read: "/Tarea/ListarAsignadosMinsur"
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#btnTransferirTarea").click(function () {
+                var id = $("#IdTareaDetalle").val();
+                var usuario = $("#usuarioTransferencia").val();
+                var idQueue = $("#IdQueu").val();
+
+                if (usuarioTransferido.value()) {
+                    swal({
+                        title: `¿Deseas asignar esta actividad?`,
+                        text: `Se asignará la actividad al usuario(a): ${usuarioTransferido.text()}`,
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Guardar",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: false,
+                        closeOnCancel: false
+                    }, function (dismiss) {
+                        if (dismiss) {
+                            $.ajax({
+                                url: '/Tarea/AsignarUsuarioTarea',
+                                data: JSON.stringify({
+                                    id,
+                                    usuario,
+                                    idQueue
+                                }),
+                                type: "POST",
+                                contentType: "application/json",
+                                success: function (result) {
+                                    if (result.message == 'OK') {
+                                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                                    }
+
+                                    MensajeConfirmacionTareasMinsur(result.message);
+                                }
+                            });
+
+                        }
+                        else {
+                            swal("Cancelado", "Ha cancelado la asignación", "error");
+                        }
+
+                    });
+                } else {
+                    toastr.warning('Seleccione un usuario');
+                }
+
+            });
+
+        } else {
+            var usuarioTransferido = $("#usuarioTransferencia").kendoComboBox({
+                autoBind: true,
+                dataValueField: "ID_PERS_ENTI",
+                dataTextField: "ASSI",
+                placeholder: "Seleccione un usuario",
+                filter: "contains",
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountEntity/AsignadoPorCola?ID_QUEU=" + $("#IdQueu").val() + "&VALOR="
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#btnTransferirTarea").click(function () {
+                var id = $("#IdTareaDetalle").val();
+                var usuario = $("#usuarioTransferencia").val();
+
+                if (usuarioTransferido.value()) {
+                    swal({
+                        title: `¿Deseas asignar esta actividad?`,
+                        text: `Se asignará la actividad al usuario(a): ${usuarioTransferido.text()}`,
+                        type: "warning",
+                        showCancelButton: true,
+                        confirmButtonColor: "#DD6B55",
+                        confirmButtonText: "Guardar",
+                        cancelButtonText: "Cancel",
+                        closeOnConfirm: false,
+                        closeOnCancel: false
+                    }, function (dismiss) {
+                        if (dismiss) {
+                            $.ajax({
+                                url: '/Tarea/ActualizarEstadoTareaDetalleBNV',
+                                data: JSON.stringify({
+                                    id,
+                                    estado: 'Transferido',
+                                    usuario
+                                }),
+                                type: "POST",
+                                contentType: "application/json",
+                                success: function (result) {
+                                    if (result.message == 'OK') {
+                                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                                    }
+
+                                    MensajeConfirmacionTareasBNV(result.message);
+                                }
+                            });
+
+                        }
+                        else {
+                            swal("Cancelado", "Ha cancelado la asignación", "error");
+                        }
+
+                    });
+                } else {
+                    toastr.warning('Seleccione un usuario');
+                }
+
+            });
+        }
+    });
+
+</script>

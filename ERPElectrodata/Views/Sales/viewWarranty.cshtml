@@ -1,0 +1,159 @@
+﻿@{
+    Layout = null;
+}
+@using (Html.BeginForm("SaveWarranty", "Sales", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmWarranty", name = "FrmWarranty", target = "ut_Warranty" }))
+{
+    <input type="hidden" name="ID_DETA_DOCU_SALE" id="ID_DETA_DOCU_SALE" value="@ViewBag.ID_DETA_DOCU_SALE" />
+    <input type="hidden" name="ID_DOCU_SALE" id="ID_DOCU_SALE" value="@ViewBag.ID_DOCU_SALE" />
+    <div class="divFondoUno">
+        <div class="divSpace2"></div>
+        <div class="divCont2">
+            <div class="editor-label">
+            
+            </div>
+            <div class="editor-field">
+                <input type="checkbox" id="OPT1" name="OPT1" checked="checked" style="cursor: pointer; background-size:auto;" />&nbsp; @ResourceLanguaje.Resource.RangeDate &nbsp;&nbsp;&nbsp;
+                <input type="checkbox" id="OPT2" name="OPT2" style="cursor:pointer;" />&nbsp;@ResourceLanguaje.Resource.Hours &nbsp;&nbsp;&nbsp;
+                <input type="checkbox" id="OPT3" name="OPT3" style="cursor:pointer;" />&nbsp;@ResourceLanguaje.Resource.Delete               
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos" id="divRangeDate">
+        <div class="divSpace2"></div>    
+        <div class="divCont2">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.StartDate
+            </div>
+            <div class="editor-field">
+                <input type="text" id="START_DATE" name="START_DATE" />
+            </div>
+        </div>
+        <div class="divSpace2"></div>
+        <div class="divCont2">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.EndDate
+            </div>
+            <div class="editor-field">
+                <input type="text" id="END_DATE" name="END_DATE" />
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos" id="divHours" style="display:none;">
+        <div class="divSpace2"></div>
+        <div class="divCont2">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.Hours
+            </div>
+            <div style="margin-top:0px;">
+                <input type="text" id="Hours" name="Hours" />
+            </div>
+        </div>
+    </div>   
+    <div style="display:inline-block; float:right; padding:15px 15px 15px 5px;">
+        <div style=" float:left; padding:0px 15px 0px 0px; ">
+            <button id="submit" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+        </div>
+        <button id="reset" class="k-button">@ResourceLanguaje.Resource.BtnCancel</button>
+    </div>
+}
+<iframe id="ut_Warranty" name="ut_Warranty" src="" class="frameHidden"></iframe>
+
+<script type="text/javascript">
+
+    $("#submit").click(function () {
+        winPopUpModalLoad("@ResourceLanguaje.Resource.SaleMsn03", "@ResourceLanguaje.Resource.PleaseWait", 300, 130);
+    });
+
+    $("#reset").click(function (event) {
+        event.preventDefault();
+        closeWinFormModalPopUp2();
+    });
+
+    $(document).ready(function () {
+        $('#OPT1').click(function () {
+            $('#OPT1').prop("checked", true);
+            $('#OPT2').prop("checked", false);
+            $('#OPT3').prop("checked", false);
+            HideShow(1);
+        });
+
+        $('#OPT2').click(function () {
+            $('#OPT1').prop("checked", false);
+            $('#OPT2').prop("checked", true);
+            $('#OPT3').prop("checked", false);
+            HideShow(2);
+        });
+
+        $('#OPT3').click(function () {
+            $('#OPT1').prop("checked", false);
+            $('#OPT2').prop("checked", false);
+            $('#OPT3').prop("checked", true);
+            HideShow(3);
+        });
+
+        function startChange() {
+            var startDate = START_DATE.value(),
+            endDate = END_DATE.value();
+
+            if (startDate) {
+                startDate = new Date(startDate);
+                startDate.setDate(startDate.getDate());
+                END_DATE.min(startDate);
+            } else if (endDate) {
+                START_DATE.max(new Date(endDate));
+            } else {
+                endDate = new Date();
+                START_DATE.max(endDate);
+                END_DATE.min(endDate);
+            }
+        }
+
+        function endChange() {
+            var endDate = END_DATE.value(),
+            startDate = START_DATE.value();
+
+            if (endDate) {
+                endDate = new Date(endDate);
+                endDate.setDate(endDate.getDate());
+                START_DATE.max(endDate);
+            } else if (startDate) {
+                END_DATE.min(new Date(startDate));
+            } else {
+                endDate = new Date();
+                START_DATE.max(endDate);
+                END_DATE.min(endDate);
+            }
+        }
+
+        var START_DATE = $("#START_DATE").kendoDatePicker({
+            change: startChange
+        }).data("kendoDatePicker");
+
+        var END_DATE = $("#END_DATE").kendoDatePicker({
+            change: endChange
+        }).data("kendoDatePicker");
+
+        START_DATE.max(END_DATE.value());
+        END_DATE.min(START_DATE.value());
+
+        $("#Hours").kendoNumericTextBox({
+            min: 1,
+            decimals: 0,
+        });
+    });
+
+    function HideShow(sw) {
+        if (sw == 1) {
+            $('#divRangeDate').css("display", "inline-block");
+            $('#divHours').css("display", "none");
+        }
+        else if (sw == 2) {
+            $('#divRangeDate').css("display", "none");
+            $('#divHours').css("display", "inline-block");
+        }
+        else {
+            $('#divRangeDate').css("display", "none");
+            $('#divHours').css("display", "none");
+        }
+    }
+</script>

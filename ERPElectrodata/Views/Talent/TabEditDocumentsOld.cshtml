@@ -1,0 +1,94 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+<div style="width:100%; height:542px; display:inline-block; margin-top:10px;">
+    <div style="float:left; width:32.66%;">
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.DocumentsTalent</div>
+            </div>
+            <div class="inBodyForm" style="overflow-y: auto; height:511px;" id="divContDocuments">
+                
+            </div>
+        </div>
+    </div>
+    <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+    <div style="width:32.66%; float:left;">        
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.AchievementsTalent</div>
+            </div>
+            <div class="inBodyForm" style="overflow-y: auto; height:236px;" id="divContAchievements">
+                
+            </div>
+        </div>
+        <div style="width:100%; height:12px;"></div>
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.IssuesTalent</div>
+            </div>
+            <div class="inBodyForm" style="overflow-y: auto; height:236px;">
+                <div id="ListIssue" style="padding: 3px 0 0 7px;"></div>                             
+            </div>
+        </div>
+    </div>
+    <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+    <div style="width:32.66%; float:left;">
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.AttachTalent</div>
+            </div>
+            <div class="inBodyForm" style="overflow-y: auto;">
+                <div id="cargarDocs"></div>                             
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript"> 
+    $(document).ready(function () {
+
+        $("#divContDocuments").empty();
+        $("#divContDocuments").load("/Talent/ListDocuments?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+        $("#divContAchievements").empty();
+        $("#divContAchievements").load("/Talent/ListAchievements?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+        $.ajax({
+            url: "/Talent/ListIssuesUser/@ViewBag.ID_PERS_ENTI",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showInfoIssues();
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+
+        $("#cargarDocs").empty();
+        $("#cargarDocs").load("/Talent/AttachDocs?id=@ViewBag.ID_PERS_ENTI&id1=@ViewBag.ID_PERS_STAT&var=" + Math.random());
+        
+
+    });
+
+    function showInfoIssues() {
+        var strHtml1 = '';
+
+        $("#ListIssue").empty();
+        $.each(data['data'], function (index, value) {
+            strHtml1 = strHtml1 +
+                '<div class ="divFondoUno" id="S' + (data['data'][index]['ID_PERS_DOCU']) + '"><div style="float:left; width:90%; padding: 0 0 0 10px;">' +
+                '<img src="/Content/Images/pdf.gif" style="width:14px; height:14px;" />' +
+                '<a href="/Adjuntos/Talent/Documents/' + (data['data'][index]['NAM_ATTA']) + '_' + (data['data'][index]['ID_PERS_DOCU']) + (data['data'][index]['EXT_ATTA']) + '" target="_blank" title="@ResourceLanguaje.Resource.DownloadTalent' + (data['data'][index]['NAM_ATTA']) + '" style="cursor:pointer;color:#444444;font-size: .9em;text-transform: none;text-decoration:none;">' + (data['data'][index]['NAM_ATTA']) + '</a><a id="S|' + (data['data'][index]['ID_PERS_DOCU']) + '" class="delete-link" href="\#" title="Remove"></a></div>' +
+                    '</div></div><br />';
+        });
+        $("#ListIssue").append(strHtml1);
+    }
+</script>

@@ -1,0 +1,362 @@
+﻿@model ERPElectrodata.Models.CLIENT_ASSET
+
+@{
+    ViewBag.Title = "Details Asset";
+    Layout = null;
+}
+
+<div>
+    <div style="width:60%; float:left;">
+        <div class="titleForm"><div class="title">Detalle del Activo</div></div>
+        <div class="bodyForm">
+            <div class="inBodyForm">
+                <div id="data"></div>
+
+                <div style="clear:both; margin-bottom:10px;"></div>
+
+                <div id="gridDetails" style="border:none"></div>
+                <div style="width: 96%; float:left; padding: 0px 0px 0 15px; ">
+                    <div id="pagerDetails" style="margin-top:5px; border-radius:4px;"></div>
+                </div>
+
+                <div style="clear:both; margin-bottom:10px;"></div>
+
+            </div>
+        </div>
+    </div>
+    <div style="width:35%; float:right;">
+        <div class="titleForm"></div>
+    </div>
+</div>
+
+<div>
+    <div style="width:39%; float:right;">
+        
+        <div class="titleForm">
+            <div class="title">Actividades</div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:332px">
+                <div id="gridActivities" style="border:none;height:283px;margin:5px; overflow-y:auto"></div>
+                <div id="pagerActivities" style="border-radius:4px;  margin:5px;"></div>
+            </div>
+        </div>
+        <div class="titleForm">
+            <div class="title">Formatos - Tickets</div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:332px">
+                <div id="gridFormato" style="border:none;height:283px;margin:5px; overflow-y:auto"></div>
+                <div id="pagerFormato" style="border-radius:4px;  margin:5px;"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<iframe id="upload_target" name="upload_target" src="" style="width:0px; height:0px; display:none;"></iframe>
+
+<script type="text/x-kendo-tmpl" id="templateA">
+    <div class="FondoGris01">
+        <div class="casilla">
+            ${TipoRegistro}
+        </div>
+        <div class="casilla">
+            ${NAM_COND}
+        </div>
+        <div class="casilla">
+            ${Usuario}<br>${AREA}
+        </div>
+        <div class="casilla">
+            Inicio: ${FechaInicio}<br>Fin: ${FechaCreacion}
+        </div>
+    </div>
+    <div style="width:100%;height:4px;"></div>
+</script>
+
+<script type="text/x-kendo-tmpl" id="templateC">
+    <div class="detailsSummary">
+        <div id="detSummary">
+            <div class="containerdt">
+                <div class="userData">
+                    <div class="asignedImage"><a href=""><img src="/Content/Fotos/${ID_FOTO}" /></a></div>
+                </div>
+                <div class="messageData">
+                    <div class="messageArrow"></div>
+                    <div class="messageBoxDet">
+                        <div class="msgBoxDetUser">
+                            ${UserId}
+                        </div>
+                        <div class="msgBoxDetCreate">
+                            ${FechaCreacion}
+                        </div>
+                    </div>
+                    <div class="messageBoxDet2">
+                        <div>
+                            ${TipoRegistro} | ${NAM_COND} |
+                            ${Usuario} | Inicio: ${FechaInicio} - Fin: ${FechaFin}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-kendo-tmpl" id="templateF">
+    <div class="FondoGris01">
+        <div class="casilla" style="width:50px">
+            ${NAM_TYPE_FORM}
+        </div>
+        <div class="casilla">
+            <a href="\\Inventario/TicketDetalle/${ID_TICK}" target='_BLANK' id="${ID_TICK}">#= COD_TICK #</a>
+        </div>
+        <div class="casilla">
+            ${FIR_NAME} ${LAS_NAME}
+        </div>
+        <div class="casilla">
+            ${CREATE_TICK}
+        </div>
+    </div>
+    <div style="width:100%;height:4px;"></div>
+</script>
+
+<script type="text/javascript">
+
+    var data,data1;
+    $(document).ready(function () {
+
+        $("#submit").click(function () {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingDetailTicket', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });
+
+        var IdInventario = @ViewBag.IdInventario;
+
+        var dataSourceF = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Inventario/InventarioTicket",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        id: IdInventario
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerFormato").kendoPager({
+            dataSource: dataSourceF,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridFormato").kendoListView({
+            dataSource: dataSourceF,
+            template: kendo.template($("#templateF").html())
+        });
+
+        //Aqui
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Inventario/InventarioDetalleTicket/" + "@ViewBag.IdInventario",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        _: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerDetails").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridDetails").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#templateC").html())
+        });
+
+        $("#pagerActivities").kendoPager({
+            dataSource: dataSource,
+            buttonCount:3,
+            messages: {
+                display: "{0} - {1} of {2}",
+                empty: "",
+                page: "Page",
+                of: "of {0}",
+                itemsPerPage: "",
+                first: "Go to the first page",
+                previous: "Go to the previous page",
+                next: "Go to the next page",
+                last: "Go to the last page",
+                refresh: "Refresh"
+            },
+            refresh: true
+        });
+
+        $("#gridActivities").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#templateA").html())
+        });
+        //fin Aqui
+
+        $.ajax({
+            url: "/Inventario/Activo/" + "@ViewBag.IdInventario",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showInfo();
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+
+        function showInfo() {
+
+            $.each(data['data'],function (index,value){
+                $("#data").append(
+                    '<div class ="divFondoDos">'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Código</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['Codigo'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Tipo de Activo</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['Nombre']).toLowerCase()+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Marca</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['Marca'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Modelo Comercial</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['Modelo'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Serie</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['Serie'])+'</div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class ="divFondoUno">'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Descripción</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['Descripcion'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Ubicación</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_LOCA'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Fecha de Registro</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['FECHACREA'])+'</div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class ="divFondoDos">'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Valor Activo</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['ValorActivo'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Riesgo Intrínseco</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['RiesgoIntrinseco'])+'</div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class = "FondoBlanco2">'+
+                        '<div class="detailsSummary">'+
+                            '<div id="detSummary">'+
+                                '<div class="containerdt">'+
+                                    '<div class="userData">'+
+                                        '<div class="asignedImage">'+'<a href="#"><img style="width:70px; height:66px;" src="/Content/Fotos/'+(data['data'][index]['FOTO'])+'"/></a></div>'+
+                                    '</div>'+
+                                    '<div class="messageData">'+
+                                        '<div class="messageArrow"></div>'+
+                                    '<div class ="messageBoxDet">'+
+                                        '<div class ="msgBoxDetUser">'+'Creado por '+
+                                            (data['data'][index]['UserId']).toLowerCase()+
+                                        '</div>'+
+                                    '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'
+                    );
+
+            });
+        }
+
+    });
+
+    function uploadDone(conf,msg){
+        closeWinModalPopUpLoad();
+        if(conf=='OK'){
+            var title = '@ResourceLanguaje.Resource.InformationSaved ';
+            if(msg=='0'){
+                var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"+
+                       "<div style='padding:10px 0px 10px 0px;'>Detail Asset information was succesfully saved</div>"+
+                       //"<div style='padding:10px 0px 10px 0px;'>Code: " + msg + "</div>"+
+                       "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                       "<button id='btnContinues' class='k-button'>Continue</button>" +
+                       "</div></div>";
+            }
+            else{
+                var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"+
+                       "<div style='padding:10px 0px 10px 0px;'>Detail Asset information was succesfully saved</div>"+
+                       "<div style='padding:10px 0px 10px 0px;'>Code Ticket: " + msg + "</div>"+
+                       "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                       "<button id='btnContinues' class='k-button'>Continue</button>" +
+                       "</div></div>";
+            }
+            winPopUpModal(title, body, 400, 180);
+
+            $("#closebtnmodal").click(function () {
+                location.reload(true);
+            });
+
+            $("#btnContinues").click(function () {
+                location.reload(true);
+            });
+        }
+        else{
+            var title = '@ResourceLanguaje.Resource.InformationMissing';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                "<div style='padding:10px 0px 10px 0px;'>"+msg+"</div>" +
+                "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                        "</div></div>";
+
+            winPopUpModal(title, body, 400, 150);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+
+</script>

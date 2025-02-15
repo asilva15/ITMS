@@ -1,0 +1,258 @@
+﻿@{
+    Layout = null;
+}
+
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<style>
+    .swal-button--cancel {
+        background-color: #808080 !important;
+        color: white;
+    }
+
+    .swal-button--defeat {
+        background-color: #F6B724 !important;
+    }
+
+    .swal-button--catch {
+        background-color: #4D7E70 !important;
+    }
+</style>
+<div id="TablaActividadesCambio">
+    <table id="tablaDetalleCambio" class="table table-bordered table-striped table-responsive-lg" style="width:100%">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Tipo de Tarea</th>
+                <th>Responsable</th>
+                <th>Descripción</th>
+                <th>Fecha Inicio Registrada</th>
+                <th>Fecha Fin Registrada</th>
+                <th>Fecha Inicio Real</th>
+                <th>Fecha Fin Real</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+ Modal Editar Actividad
+<div class="modal fade" id="ModalActividadesCambio" tabindex="-1" role="dialog" aria-labelledby="ModalActividadesCambioLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Editar Detalle del Cambio</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divEditarActividadCambio"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        CargarDetalleCambio();
+    });
+
+    function CargarDetalleCambio() {
+
+        $('#tablaDetalleCambio').dataTable().fnDestroy();
+
+
+        $('#tablaDetalleCambio').DataTable({
+            "order": [[0, "asc"]],
+            dom: 'Bfrtip',
+            ajax: "/ChangeRequest/ListarActividadesCambio/"+@ViewBag.ID_CHANGE_REQUEST,
+            columns: [
+                { data: "Orden" },
+                { data: "Tarea" },
+                { data: "Responsable" },
+                { data: "Detalle" },
+                { data: "FechaInicio" },
+                { data: "FechaFin" },
+                { data: "FechaInicioProgramada" },
+                { data: "FechaFinProgramada" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+
+                        $('#divEditarActividad'+data.IdDetalleCambio).hide();
+                        $('#divRealizarActividad'+data.IdDetalleCambio).hide();
+                        $('#divActividadRealizada' + data.IdDetalleCambio).hide();
+
+
+                        if(data.ActividadRealizada == 1){
+                            $('#divActividadRealizada'+data.IdDetalleCambio).show();
+                        }
+
+                        if(@ViewBag.MostrarOpciones == 1  && ( @ViewBag.Admin==1 || data.IdResponsable == @ViewBag.IdPersEnti)
+                            && data.ActividadRealizada==0 ){
+                            $('#divEditarActividad'+data.IdDetalleCambio).show();
+
+                            if(data.Estado==1){
+                                $('#divRealizarActividad'+data.IdDetalleCambio).show();
+                            }
+
+                        }
+
+
+                        return  '<div style=" text-align: center;">'+
+                                    '<div id="divEditarActividad'+data.IdDetalleCambio+'" >' +
+                                        '<span id="EditarActividad" title="Editar" class="fa fa-edit" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px;" data-toggle="modal" data-target="#miModal" onclick="EditarActividadCambio(' + data.IdDetalleCambio + ')"></span>' +
+                                    '</div>'+
+                                    '<div id="divRealizarActividad'+data.IdDetalleCambio+'" >' +
+                                        '<span id="RealizarActividad" title="Realizar Actividad" class="fa fa-exclamation-triangle" aria-hidden="true" style="color: #F2BA0C; cursor: pointer; font-size: 13px;" onclick="RealizarActividad(' + data.IdDetalleCambio + ')"></span>' +
+                                    '</div>'+
+                                '</div>'+
+                                '<div  id="divActividadRealizada'+data.IdDetalleCambio+'" style=" text-align: center;">' +
+                                    '<span title="Actividad Registrada" class="fa fa-check" aria-hidden="true" style="color: #679700; cursor: pointer; font-size: 13px;"></span>' +
+                                '</div>';
+                    }
+
+                },
+
+            ],
+            "bPaginate": false,
+            "searching": false,
+            "info": false,
+            buttons: [
+                {
+                    extend: 'pdfHtml5',
+                    text: 'PDF',//<i class="fa fa-file-pdf-o"></i>
+                    titleAttr: 'PDF',
+                    className: 'btn btn-outline-light'
+                },
+                {
+                    extend: 'excelHtml5',
+                    text: 'Excel',//<i class="fa fa-file-excel-o"></i>
+                    titleAttr: 'Excel',
+                    className: 'btn btn-outline-light'
+                },
+                {
+                    extend: 'copyHtml5',
+                    text: 'Copy',//<i class="fa fa-files-o"></i>'
+                    titleAttr: 'Copy',
+                    className: 'btn btn-outline-light'
+                },
+            ]
+        });
+    }
+    function EditarActividadCambio(id) {
+        $("#lblTitulo").text("Editar Actividad");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/ChangeRequest/EditarDetalleCambio/" + id);
+    }
+
+    function RealizarActividad(id) {
+
+
+        swal("Solicitud de Cambio", {
+            buttons: {
+
+                catch: {
+                    text: "Validar",
+                    value: "catch",
+                },
+               // defeat: "Rechazar",
+                cancel: "Cancelar",
+
+            },
+        })
+            .then((value) => {
+                switch (value) {
+                    case "catch":
+                        swal({
+                            text: 'Ingrese comentario sobre la actividad realizada!',
+                            content: "input",
+                            button: {
+                                text: "Aceptar",
+                                closeModal: false,
+                            },
+                        })
+                            .then(name => {
+                                var aux;
+                                aux = name;
+                                if (!name) {
+                                    // Mostrar alerta si no se ha ingresado ningún comentario
+                                    swal("Alerta", "Por favor, ingrese un comentario.", "warning");
+                                    throw null;
+                                }
+                                RegistrarComentario(id, aux);
+                                return RegistrarActividadRealizada(id);
+                            })
+                            .catch(() => {
+                                // Si se lanza la excepción, significa que se mostró la alerta de validación
+                            });
+                        break;
+                }
+            });
+    }
+
+    function RegistrarComentario(id, name) {
+
+
+        $.ajax({
+            url: "/ChangeRequest/GuardarComentario/",
+            data: "IdDetalleCambio=" +id +
+                "&IdCambio=" +@ViewBag.ID_CHANGE_REQUEST +
+                "&coment=" + name +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                swal.close();
+                toastr.success(resp, "Sistema Integrado de Gestión");
+                setTimeout(function () {
+                    location.reload();
+                }, 1400);
+            }
+        });
+
+
+    }
+
+    function RegistrarActividadRealizada(id){
+        $.ajax({
+            url: "/ChangeRequest/RegistrarActividadCambio/",
+            data: "IdDetalleCambio=" +id +
+                  "&IdCambio=" +@ViewBag.ID_CHANGE_REQUEST +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                swal.close();
+                toastr.success(resp, "Sistema Integrado de Gestión");
+                setTimeout(function () {
+                    location.reload();
+                }, 1400);
+            }
+        });
+    }
+
+    function RegistrarActividad(id){
+        $.ajax({
+            url: "/ChangeRequest/RechazarActividad/",
+            data: "IdDetalleCambio=" + id +
+                  "&IdCambio=" +@ViewBag.ID_CHANGE_REQUEST +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                swal.close();
+                toastr.success(resp, "Sistema Integrado de Gestión");
+                setTimeout(function () {
+                    location.reload();
+                }, 1400);
+            }
+        });
+    }
+
+</script>
+

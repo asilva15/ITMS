@@ -1,0 +1,224 @@
+﻿@{
+    ViewBag.Title = "ProgramaLicencia";
+    //Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style type="text/css">
+    a.tooltip span {
+        cursor: default;
+        display: none;
+        padding: 5px;
+        margin: -25px 0px 0px 120px;
+        width: 230px;
+        position: relative;
+        z-index: 9;
+    }
+
+    a.tooltip:hover span {
+        display: block;
+        position: absolute;
+        background: #000;
+        border: 1px solid #cccccc;
+        color: #ddd;
+        font-size: 14px;
+        font-weight: normal;
+        opacity: 0.9;
+    }
+
+    .bg-primary {
+        background-color: rgb(81, 104, 130);
+        font-size: 13px;
+    }
+
+    .contenido {
+        background: #DCDCDE;
+    }
+
+    td {
+        font-size: 12px;
+    }
+
+    #btnLicencias {
+        margin-left: 5px;
+        background: #F24541;
+        border-color: #F24541;
+        font-family: 'Segoe UI';
+    }
+
+    #componentes {
+        height: 50px;
+    }
+
+    .alerta {
+        margin-top: -40px;
+        width: 15px;
+        font-size: 8px;
+        height: 22px;
+        padding: 0;
+    }
+</style>
+
+
+
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">Mantenimientos de Activos</div>
+    <div class="card-body">
+        <table class="table table-borderless table-striped table-hover" style="width:100%" id="tbMantenimientos">
+            <thead>
+                <tr>
+                    <th>Tipo de Activo</th>
+                    <th>Activo</th>
+                    <th>Código</th>
+                    <th>Serie</th>
+                    <th>Fecha de Mant.</th>
+                    <th>Comentario</th>
+                    <th>Próx. Mantenimiento</th>
+                    <th>Creado por</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="TablaAlertas"></tbody>
+        </table>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        ObtenerListaAlertasActivoMantenimiento();
+        //Cargar combo de años
+        $("#Anio").kendoComboBox({
+            dataTextField: "Anio",
+            dataValueField: "Anio",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ProgramaLicencia/ListarAnioBusqueda?var=" + Math.random()
+                }
+            }
+        });
+        //Cargar combo de meses
+        $("#Mes").kendoComboBox({
+            dataTextField: "Mes",
+            dataValueField: "IdMes",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ProgramaLicencia/ListarMeswBusqueda?var=" + Math.random()
+                }
+            }
+        });
+    });
+
+    //Listar Licencias Por Vencer
+    function ObtenerListaAlertasActivoMantenimiento() {
+        $.ajax({
+            url: "/ActivoMantenimiento/VistaReporteAlertaActivoMantenimiento/",
+            data: "id=" + $("#IdActivo").val() + "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                mostrarDatosAlertaActivoMantenimiento();
+            },
+            error: function (source) {
+                toastr.error("Error Carga Json Alertas de Mantenimiento de Activos", "Mensaje");
+            }
+        });
+    }
+
+    function mostrarDatosAlertaActivoMantenimiento() {
+        $("#TablaAlertas").empty();
+        $.each(data['Data'], function (index, value) {
+            var proximoMantenimiento = "";
+            if ((data['Data'][index]['RecibioProximoMantenimiento']).substring(0, 1) == "-" || (data['Data'][index]['RecibioProximoMantenimiento']).substring(0, 1) == "0") { // se paso de la fecha programada
+                proximoMantenimiento = '<tr id="' + (data['Data'][index]['']) + '" style="background-color:#F25D50">' +
+                    '<td>' + (data['Data'][index]['TipoActivo']) + '</td>' +
+                    '<td>' + (data['Data'][index]['NAM_EQUI']) + '</td>' +
+                    '<td>' + (data['Data'][index]['COD_ASSE']) + '</td>' +
+                    '<td>' + (data['Data'][index]['SER_NUMB']) + '</td>' +
+                    '<td>' + (data['Data'][index]['FechaMantenimiento']) + '</td>' +
+                    '<td>' + (data['Data'][index]['ComentarioMantenimiento']) + '</td>' +
+                    '<td>' + (data['Data'][index]['ProximoMantenimiento']) + '</td>' +
+                    '<td>' + (data['Data'][index]['CreadoPor']) + '</td>';
+            } else { //se aproxima la fecha de mantenimiento del activo
+                proximoMantenimiento = '<tr id="' + (data['Data'][index]['']) + '" style="background-color:#FFDFF8">' +
+                    '<td>' + (data['Data'][index]['TipoActivo']) + '</td>' +
+                    '<td>' + (data['Data'][index]['NAM_EQUI']) + '</td>' +
+                    '<td>' + (data['Data'][index]['COD_ASSE']) + '</td>' +
+                    '<td>' + (data['Data'][index]['SER_NUMB']) + '</td>' +
+                    '<td>' + (data['Data'][index]['FechaMantenimiento']) + '</td>' +
+                    '<td>' + (data['Data'][index]['ComentarioMantenimiento']) + '</td>' +
+                    '<td>' + (data['Data'][index]['ProximoMantenimiento']) + '</td>' +
+                    '<td>' + (data['Data'][index]['CreadoPor']) + '</td>';
+            }
+            $("#TablaAlertas").append(
+                proximoMantenimiento +
+                '<td style="text-align: center; border-left: 1px solid #e2e2e2;width:10px;">' +
+                '<span  id="' + (data['Data'][index]['IdActivo']) + '" title="Mantenimiento del activo" class="fa fa-cog" aria-hidden="true" style="color: #5E677D; cursor: pointer; font-size:13px; " data-toggle="modal" data-target="#miModal" onclick="registrarMantenimiento(' + (data['Data'][index]['IdActivo']) + ')"></span>' +
+                '</td>' +
+                '</tr>'
+            );
+        });
+
+        $("#tbMantenimientos").DataTable({
+            responsive: true,
+            "bLengthChange": false,
+            //"bPaginate": false,
+            //"bInfo": false,
+            //"searching": false,
+            "pageLength": 15,
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ Registros por página",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+        });
+    }
+
+    function registrarMantenimiento(id) {
+        $("#lblTitulo").text("Mantenimiento Preventivo");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/ActivoMantenimiento/Crear/' + id);
+    }
+</script>

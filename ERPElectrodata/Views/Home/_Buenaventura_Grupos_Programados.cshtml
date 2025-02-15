@@ -1,0 +1,69 @@
+﻿@model  List<ERPElectrodata.Models.ListarTicketGrupoPorUsuario_Result>
+<div>
+    @if (ViewBag.CantidadTickets == 0)
+    {
+        <div class="alert alert-dark" role="alert">
+            <p class="text-center font-weight-bold">No hay tickets con estado programado.</p>
+        </div>
+    }
+    else
+    {
+        <div>
+            <table style="width: 100%;" class="table">
+                <thead>
+                    <tr role="row">
+                        <th>Codigo de ticket</th>
+                        <th>Fecha del Ticket</th>
+                        <th>Asunto</th>
+                        <th>Usuario Afectado</th>
+                        <th>Grupo resolutor</th>
+                        <th>Usuario Asignado</th>
+                        <th>Locación</th>
+                    </tr>
+                </thead>
+                <tbody id="listaBnvGrupoProgramados">
+                    @Html.Partial("_Buenaventura_TicketsGrupo", Model)
+                </tbody>
+                <tbody id="listaBnvCargaGrupoProgramados">
+                    @Html.Partial("_CargaTicketsTabla", (int)ViewBag.CantidadPintar)
+                </tbody>
+            </table>
+        </div>
+        <div class="mt-3">
+            <ul class="pagination" id="paginationGrupoProgramados"></ul>
+        </div>
+    }
+
+
+</div>
+@*<script type="text/javascript" src="~/Scripts/jq-paginator.js"></script>*@
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if (@ViewBag.CantidadTickets != 0) {
+            $.jqPaginator('#paginationGrupoProgramados', {
+                    totalPages: @ViewBag.CantidadTickets,
+                    visiblePages: 10,
+                    currentPage: 1,
+                    onPageChange: function (num, type) {
+                        if (type == "change") {
+                            cambioPaginaGrupoProgramados(num)
+                        }
+
+                    }
+            });
+
+        }
+    });
+    function cambioPaginaGrupoProgramados(pagina) {
+        if (@ViewBag.CantidadTickets != 0) {
+            document.getElementById("listaBnvGrupoProgramados").style.display = 'none'
+            document.getElementById("listaBnvCargaGrupoProgramados").style.display = 'table-row-group'
+            $.post("/Home/ActualizarGrupoBnv", { seccion: 5, pagina: pagina }, function (response) {
+                $("#listaBnvGrupoProgramados").html(response);
+                document.getElementById("listaBnvCargaGrupoProgramados").style.display = 'none'
+                document.getElementById("listaBnvGrupoProgramados").style.display = 'table-row-group'
+            });
+        }
+    }
+</script>

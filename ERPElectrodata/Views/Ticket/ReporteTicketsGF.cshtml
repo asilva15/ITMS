@@ -1,0 +1,722 @@
+﻿@{
+    //Layout = null;
+}
+
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">
+<script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<link rel="stylesheet" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<style>
+
+    .dataTables_wrapper .dataTables_paginate .paginate_button.current,
+    .dataTables_wrapper .dataTables_paginate .paginate_button {
+        margin-left: -20px !important;
+    }
+
+    .divFind {
+        width: 100%;
+        display: inline-block;
+        border: 1px #eee solid;
+    }
+
+    .divHead {
+        padding: 5px 10px 5px 10px;
+    }
+
+    .rowx {
+        float: left;
+        margin-left: 10px;
+    }
+</style>
+
+<input type="hidden" name="esGestorTareas" id="esGestorTareas" value="@ViewBag.esGestorTareas" />
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Reporte de Tickets
+                <div class="page-title-subheading">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+
+<div class="tab-content">
+    @using (Html.BeginForm("ExportarReporteTicketGF", "Ticket", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+    {
+        <input type="hidden" id="Estados" name="Estados" />
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-header">
+                        Busqueda de Tickets por Área Responsable
+                    </div>
+                    <fieldset class="card-body">
+                        <div class="form-row">
+
+                            <div class="col-md-6 col-lg-4">
+
+                                <div class="form-group">
+                                    Área Responsable
+                                    @Html.Editor("ID_QUEU")
+                                </div>
+                            </div>
+                            <div class="col-md-6 col-lg-4">
+                                <div class="form-group">
+                                    <label id="txtEstado" for="txtEstado">Estado </label>
+                                    <select id="ID_ESTADO" class="select2" multiple="multiple" type="text" style="width:100%"></select>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Desde
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" id="FechaInicial" name="FechaInicial" />
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="editor-label">
+                                    Hasta
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" id="FechaFinal" name="FechaFinal" />
+                                </div>
+                            </div>
+                            @*<div class="col-md-2">
+
+                                </div>*@
+                            <div class="col-md-2 col-lg-2">
+                                <div class="col-md-12">
+                                    <br />
+                                    <button onclick="ListarReporteTareas()" class="mb-2 mr-2 btn-block btn btn-primary btn-pill" type="button">BUSCAR</button>
+                                </div>
+                            </div>
+
+                            <div class="col-md-2 col-lg-2">
+                                <div class="col-md-12">
+                                    <br />
+                                    <button onclick="Exportar()" id="export" class="mb-2 mr-2 btn-block btn btn-success btn-pill" type="button">EXPORTAR</button>
+                                </div>
+                            </div>
+
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="card-title" id="titleForm">Reporte de Tickets</div>
+                <fieldset>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="position-relative form-group">
+                                <table id="tbReporteTicketBNV" class="display nowrap" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th style="display:none;">ID_TICK</th>
+                                            <th>Tipo Ticket</th>
+                                            <th>Código</th>
+                                            <th>Fecha de Creación</th>
+                                            <th>Tiempo de Resolución</th>
+                                            <th>Tiempo de Resolución (Horas)</th>
+                                            <th>Tiempo Real R. (Horas)</th>
+                                            <th>Creado por</th>
+                                            <th>Compañía</th>
+                                            <th>Solicitante</th>
+
+                                            <th>Usuario Final Afectado</th>
+                                            <th>Área Usuario Final Afectado</th>
+                                            <th>Prioridad</th>
+                                            <th>Acuerdo de Nivel de Servicio</th>
+                                            <th>Área Operativa</th>
+                                            <th>Asignado A</th>
+                                            <th>Estado</th>
+                                            <th>Espera Cliente</th>
+                                            <th>Fecha Programada</th>
+                                            <th>Hasta</th>
+
+                                            <th>Tiempo Restante Expira</th>
+                                            <th>Unidad de Servicio</th>
+                                            <th>MacroServicio</th>
+                                            <th>Servicio</th>
+                                            <th>Incidente/Requerimiento</th>
+                                            <th>Fuente Info.</th>
+                                            <th>Comentario Resuelto</th>
+                                            <th>Ticket Padre</th>
+                                            <th>Solicitud</th>
+                                            <th>Adicional 1</th>
+
+                                            <th>Adicional 2</th>
+                                            <th>Resuelto Por</th>
+                                            <th>Sede</th>
+                                            <th>Ticket Activo</th>
+                                            <th>En SLA</th>
+                                            <th>Tipo de Resolucion</th>
+                                            <th>Tipo Cliente</th>
+                                            <th>Control Remoto</th>
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#ID_ESTADO").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: true,
+            allowClear: true,
+            ajax: {
+                url: "/StatusTicket/ListarEstado",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+                @*var esGestorTarea = @ViewBag.esGestorTareas;*@
+                ActualizarReporteTickets();
+                var today = new Date();
+                var k_startdatetimepicker = $("#FechaInicial").kendoDateTimePicker({
+                    //value: today
+                }).data("kendoDateTimePicker");
+                var k_enddatetimepicker = $("#FechaFinal").kendoDateTimePicker({
+                    //value: today
+                }).data("kendoDateTimePicker");
+
+                var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+                    autoBind: true,
+                    dataTextField: "DES_QUEU",
+                    dataValueField: "ID_QUEU",
+                    filter: "contains",
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    template: '<div style="text-transform: capitalize; width:100%;">' +
+                        '<div><strong>#: data.QUEU #</strong></div>' +
+                        '<div>#: data.DES_QUEU #</div>' +
+                        '</div>',
+                    dataSource: {
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                        }
+                    }
+                }).data("kendoComboBox");
+
+
+
+
+
+
+
+            });
+
+    function ActualizarReporteTickets() {
+        //$("#tbReporteTicketBNV").dataTable().fnDestroy();
+        $("#tbReporteTicketBNV").DataTable({
+            responsive: false,
+            select: true,
+            dom: 'Bfrtip',
+            destroy: true,
+            scrollX: true,
+            ajax: {
+                url: "/Ticket/ListaReporteTicketBNV2",
+                data: { estado: 4 },
+                type: "GET",
+                error: function (xhr, error, thrown) {
+                    // Evitar mostrar la advertencia en la consola
+                }
+            },
+            columns: [
+                {
+                    data: "ID_TICK",
+                    visible: false, // Para ocultar la columna en la visualización
+                },
+                {
+                    data: "Type"
+                },
+                {
+                    data: "Code"
+                },
+                {
+                    data: "Creation_Date",
+                    "render": function (data) {
+                        return formatarFecha(data);
+                    },
+                     type: 'date', // Especifica el tipo de dato como "date"
+                    targets: [2] // Indica el índice de la columna
+                },
+                {
+                    data: "Resolution_Time"
+                },
+                {
+                    data: "Time_Resolution"
+                },
+                {
+                    data: "TiempoReal"
+                },
+                {
+                    data: "CreatedBy"
+                },
+
+                {
+                    data: "COM_NAME"
+                },
+                {
+                    data: "Requester"
+                },
+                //12
+
+
+                {
+                    data: "Affected_End_User"
+                },
+                {
+                    data: "Area_Affected_End_User"
+                },
+                {
+                    data: "Priority"
+                },
+                {
+                    data: "Service_Level_Agreement"
+                },
+                {
+                    data: "Queue"
+                },
+                {
+                    data: "Assigned"
+                },
+                {
+                    data: "Status"
+                },
+                {
+                    data: "EsperaCliente"
+                },
+                {
+                    data: "FEC_SCHE"
+                },
+                {
+                    data: "To_Date"
+                },
+                {
+                    data: "HOUR_EXPI_TICK"
+                },
+                {
+                    data: "Category"
+                },
+                {
+                    data: "SubCategory"
+                },
+                {
+                    data: "Class"
+                },
+                {
+                    data: "SubClass"
+                },
+                {
+                    data: "Source"
+                },
+                ////12
+                {
+                    data: "ComentarioResuelto"
+                },
+
+                {
+                    data: "Parent"
+                },
+                {
+                    data: "Summary"
+                },
+                //{
+                //    data: "Remote_Control"
+                //},
+                {
+                    data: "Adicional1"
+                },
+                //////12
+
+                {
+                    data: "Adicional2"
+                },
+                //{
+                //    data: "Attachments"
+                //},
+                //{
+                //    data: "FechaUltimoComent"
+                //},
+                //{
+                //    data: "UltimoComent"
+                //},
+
+
+
+
+
+                {
+                    data: "UsuarioResuelve"
+                },
+                {
+                    data: "Sede"
+                },
+                {
+                    data: "TicketActivo"
+                },
+                {
+                    data: "EnSla"
+                },
+                {
+                    data: "TipoResolucion"
+                },
+
+                {
+                    data: "TipoCliente"
+                },
+                {
+                    data: "ControlRemoto"
+                }
+            ],
+            order: [[0, 'desc']], // Ordena por la primera columna (ID_TICK) de forma descendente
+
+            buttons: [
+                 /*'excel'*/
+            ]
+        }).on('select', function (e, dt, type, indexes) {
+            if (type === 'row') {
+                window.open("/DetailsTicket/Index/" + dt.rows(indexes).data()[0].ID_TICK, "_blank");
+                //Por si se quiere dejar sin seleccionar la tabla luego de clickear
+                //dt.rows().deselect();
+            }
+        });
+    }
+            function Exportar() {
+                var fechaInicial = $("#FechaInicial").val();
+                var fechaFinal = $("#FechaFinal").val();
+
+                var estados = $("#ID_ESTADO option:selected").map(function () {
+                    return $(this).text();
+                }).get().join(',');
+                $("#Estados").val(estados);
+
+                // Validar si las fechas son nulas o "null"
+                if (fechaInicial === "" || fechaFinal === "" || fechaInicial === "null" || fechaFinal === "null") {
+                    // Mostrar mensaje emergente
+                    toastr.warning("Completar los campos de fecha");
+                } else {
+                    // Enviar el formulario si las fechas están completas
+                    $("#formExportar").submit();
+                }
+            }
+
+    function formatarFecha(date) {
+        // Verifica si la variable date es null o indefinida
+        if (date === null || date === undefined) {
+            return "";
+        }
+
+        var fecha = new Date(parseInt(date.substr(6)));
+
+        // Resto del código permanece igual
+        var formattedFecha = fecha.toLocaleString('es-ES', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+
+        return formattedFecha;
+    }
+
+
+
+            function ListarReporteTareas() {
+                var idqueu = $("#ID_QUEU").val();
+                var FechaInicial = $("#FechaInicial").val();
+                var FechaFinal = $("#FechaFinal").val();
+
+                var estados = $("#ID_ESTADO option:selected").map(function () {
+                    return $(this).text();
+                }).get().join(',');
+
+                $('#tbReporteTicketBNV').dataTable().fnDestroy();
+                var table = $('#tbReporteTicketBNV').dataTable({
+
+                    "order": [1, 'desc'],
+                    responsive: false,
+                    select: true,
+                    dom: 'Bfrtip',
+                    destroy: true,
+                    scrollX: true,
+					info:false,
+
+                    "bPaginate": true,
+                    "searching": true,
+
+                    ajax: {
+
+                        "url": "/Ticket/ListadoReporteTicketsBNV",
+                        "data": function (d) {
+                            d.ID_QUEU = idqueu;
+                            d.Estados = estados;
+                            d.FechaInicio = FechaInicial;
+                            d.FechaFin = FechaFinal;
+                        }
+
+
+                    },
+                    columns: [
+                        {
+                            data: "ID_TICK",
+                            visible: false, // Para ocultar la columna en la visualización
+                        },
+                        {
+                            data: "Type"
+                        },
+                        {
+                            data: "Code"
+                        },
+                        {
+                            data: "Creation_Date",
+                            "render": function (data) {
+                                return formatarFecha(data);
+                            },
+                            type: 'date', // Especifica el tipo de dato como "date"
+                            targets: [2] // Indica el índice de la columna
+                        },
+                        {
+                            data: "Resolution_Time",
+                            "render": function (data) {
+                                return formatarFecha(data);
+                            },
+                            type: 'date',
+                            targets: [2]
+                        },
+                        {
+                            data: "Time_Resolution"
+                        },
+                        {
+                            data: "TiempoReal"
+                        },
+                        {
+                            data: "CreatedBy"
+                        },
+
+                        {
+                            data: "COM_NAME"
+                        },
+                        {
+                            data: "Requester"
+                        },
+                        //12
+
+
+                        {
+                            data: "Affected_End_User"
+                        },
+                        {
+                            data: "Area_Affected_End_User"
+                        },
+                        {
+                            data: "Priority"
+                        },
+                        {
+                            data: "Service_Level_Agreement"
+                        },
+                        {
+                            data: "Queue"
+                        },
+                        {
+                            data: "Assigned"
+                        },
+                        {
+                            data: "Status"
+                        },
+                        {
+                            data: "EsperaCliente"
+                        },
+                        {
+                            data: "FEC_SCHE",
+                            "render": function (data) {
+                                return formatarFecha(data);
+                            },
+                            type: 'date',
+                            targets: [2]
+                        },
+                        {
+                            data: "To_Date",
+                            "render": function (data) {
+                                return formatarFecha(data);
+                            },
+                            type: 'date',
+                            targets: [2]
+                        },
+                        {
+                            data: "HOUR_EXPI_TICK"
+                        },
+                        {
+                            data: "Category"
+                        },
+                        {
+                            data: "SubCategory"
+                        },
+                        {
+                            data: "Class"
+                        },
+                        {
+                            data: "SubClass"
+                        },
+                        {
+                            data: "Source"
+                        },
+                        ////12
+
+                        {
+                            data: "ComentarioResuelto"
+                        },
+                        {
+                            data: "Parent"
+                        },
+                        {
+                            data: "Summary"
+                        },
+                        //{
+                        //    data: "Remote_Control"
+                        //},
+                        {
+                            data: "Adicional1"
+                        },
+                        //////12
+
+                        {
+                            data: "Adicional2"
+                        },
+
+
+
+                        {
+                            data: "UsuarioResuelve"
+                        },
+                        {
+                            data: "Sede"
+                        },
+                        {
+                            data: "TicketActivo"
+                        },
+                        {
+                            data: "EnSla"
+                        },
+                        {
+                            data: "TipoResolucion"
+                        },
+                        {
+                            data: "TipoCliente"
+                        },
+                        {
+                            data: "ControlRemoto"
+                        }
+                    ],
+                    order: [[0, 'desc']], // Ordena por la primera columna (ID_TICK) de forma descendente
+
+                    buttons: [
+                        /*'excel'*/
+                        /*'excel'*/
+                    ]
+                });
+
+                uploadDoneBuscar("OK");
+            }
+
+            function SeleccionarAsignado(id) {
+
+                $("#lblTitulo").text("Asignar Colaborador");
+                $(".modal-dialog").removeClass("modal-xl");
+                $(".modal-dialog").removeClass("modal-lg");
+                $(".modal-dialog").removeClass("modal-sm");
+                $(".modal-dialog").addClass("modal-md");
+                $("#modal-content").empty();
+                $("#modal-content").load(`/Ticket/ReporteTareasSelecAsignado/${id}?var=${Math.random()}`);
+            }
+
+            function uploadDoneBuscar(msg, msgerror) {
+                var fechaInicial = $("#FechaInicial").val();
+                var fechaFinal = $("#FechaFinal").val();
+
+                // Validar si las fechas son nulas o "null"
+                if (fechaInicial === "" || fechaFinal === "" || fechaInicial === "null" || fechaFinal === "null") {
+                    // Mostrar mensaje emergente
+                    toastr.warning("Completar los campos de fecha");
+                }
+                else {
+                    if (msg == "OK") {
+                        toastr.warning(msgerror, "Para visualizar más de 900 registros utilice el boton Exportar.");
+                    }
+                    else {
+
+                        toastr.warning(msgerror, "Error al buscar");
+                    }
+                }
+
+        }
+
+
+
+</script>

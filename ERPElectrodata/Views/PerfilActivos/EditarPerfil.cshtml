@@ -1,0 +1,163 @@
+﻿@{
+    ViewBag.Title = "NuevoPerfil";
+    Layout = null;
+}
+<style>
+    #cbCargo {
+        font-size:20px;
+    }
+</style>
+<div class="panel-body">
+    <div class="form-group-sm editor-field">
+        <div class="col-md-6">
+            <div style="font-size:14px;">Cargo: </div> 
+            <b><span id="cbCargo"></span></b>
+            <input type="hidden" id="IdCargo" name="IdCargo"/>
+        </div>
+        <div class="col-md-3">
+            &nbsp;     
+            <input id="btnActualizar" name="btnActualizar" class="btn btn-block btn-primary btn-sm" type="button" value="Actualizar"/>
+        </div>
+    </div>
+    <div class="col-md-12">
+        &nbsp;
+        <button id="btnCancelar" style="display:none" data-style="expand-right" data-dismiss="modal"></button>
+    </div>
+    <div class="form-group-sm editor-field">
+        <table id="tablaNuevoPerfil" class="table table-bordered table-hover" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Tipo de Asignación</th>
+                    <th>Activo / Programa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><select id="cbTipoAsignacion" class="form-control select2" type="text" style="width:100%" ></select></td>
+                    <td><select id="cbActivoPrograma" class="form-control select2" type="text" style="width:100%" ></select></td>
+                </tr>
+            </tbody>
+            @*<tfoot>
+                <tr>
+                    <th>Tipo de Asignación</th>
+                    <th>Activo / Programa</th>
+                </tr>
+            </tfoot>*@
+        </table>
+    </div>
+    <div id="divMensaje"></div>
+</div>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "/PerfilActivos/ObtenerDatosPerfil/@ViewBag.Id",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(data['Data'], function (index) {
+                    //var $cargo = $("<option></option>").val((data['Data'][index]['IdCargo'])).text((data['Data'][index]['Cargo']));
+                    //$("#cbCargo").append($cargo).trigger('change');
+                    $("#cbCargo").text((data['Data'][index]['Cargo']));
+                    $("#IdCargo").val((data['Data'][index]['IdCargo']));
+                    var $tipoAsignacion = $("<option></option>").val((data['Data'][index]['IdAccoPara'])).text((data['Data'][index]['ValAccoPara']));
+                    $("#cbTipoAsignacion").append($tipoAsignacion).trigger('change');
+                    var $activoPrograma = $("<option></option>").val((data['Data'][index]['IdActivoPrograma'])).text((data['Data'][index]['ActivoPrograma']));
+                    $("#cbActivoPrograma").append($activoPrograma).trigger('change');
+                });
+            },
+            error: function (source) {
+                alert("Error Carga Json Comercial");
+            }
+        });
+        $("#cbTipoAsignacion").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Parameter/ListarPorParametro?idparametro=52",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbTipoAsignacion").on('change', function (e) {
+            $("#cbActivoPrograma").empty();
+            var idTipoAsignacion = $("#cbTipoAsignacion").find(':selected').val()
+            $("#cbActivoPrograma").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/TipoActivo/ListarTipoActivo?idTipoAsignacion=" + idTipoAsignacion,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+        });
+
+        $("#btnActualizar").click(function () {
+            $('#divMensaje').empty();
+            $('#divMensaje').show("show");
+            $("#divMensaje").append("<div class='alert alert-warning'><div class='form-row'>Confirme si desea actualizar este perfil<span class='ml-auto'>" +
+                '<span title="Confirmar" class="btn btn-outline-success" aria-hidden="true" id="actualizar"><i class="fas fa-check"></i></span>' +
+                '<span title="Rechazar" class="btn btn-outline-danger" aria-hidden="true" onclick="cerrarMensaje();"><i class="fas fa-times"></i></span>' +
+                "</span></div></div>");
+            var eli = $("#actualizar").bind("click", function () {
+                $.ajax({
+                    url: "/PerfilActivos/ActualizarPerfilActivo/",
+                    data: "IdPerfilActivo=" + @ViewBag.Id +
+                          "&IdAccoPara=" + $("#cbTipoAsignacion").val() +
+                          "&IdActivoPrograma=" + $("#cbActivoPrograma").val() +
+                          "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        mensajeConfirmacion2(resp);
+                    }
+                });
+            });
+        });
+    });
+
+    function mensajeConfirmacion2(msg) {
+        if (msg == 'OK') {
+            toastr.success("Información Actualizada","Completado");
+            $("#btnCancelar").trigger({ type: "click" });
+            ListarPerfilActivos();
+        }
+        else if (msg == 'Mensaje') {
+            toastr.success(msg, msnErr);
+            $("#btnCancelar").trigger({ type: "click" });
+            ListarPerfilActivos();
+        } else {
+            toastr.error("El activo ya ha sido creado","Error");
+        }
+    }
+
+    function cerrarMensaje() {
+        $("#divMensaje").empty();
+    }
+</script>

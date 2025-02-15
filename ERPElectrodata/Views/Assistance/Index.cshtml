@@ -1,0 +1,258 @@
+﻿@{
+    Layout = null;
+}
+@if (ViewBag.ACCESO_SUBMENU == 1)
+{
+    <nav class="navSubMenu">
+        <ul>
+            <li><a href="#" onclick="Report()">@ResourceLanguaje.Resource.Report</a></li>
+            @if (ViewBag.VerWork == "1")
+            {
+                <li onclick="AttendanceByQueue(this)"><a href="#">By Queue</a></li>
+            }
+            @*<li onclick="FindTraining()"><a href="#">@ResourceLanguaje.Resource.FindTraining</a></li>*@
+        </ul>
+    </nav>
+}
+
+<div class="afterMain" id="divAttendance">
+
+    <div style="width: 100%; height: 30px; margin: 10px 0px 7px 0px; padding: 0px 0px 0px 0px; font-size: 0.95em;" id="divFiltro">
+        <div style="float:left;">@ResourceLanguaje.Resource.Staff : <input type="text" id="ID_ENTI" name="ID_ENTI" /></div>
+        <div style="float:left;margin:0px 10px 0px 10px;">@ResourceLanguaje.Resource.Year : <input type="text" id="ID_YEAR" name="ID_YEAR" /></div>
+        <div style="float:left;">@ResourceLanguaje.Resource.Month : <input type="text" id="ID_MONT" name="ID_MONT" /></div>
+        <div style="float: right;background-color:#eaeaea; display:block;vertical-align:middle; padding:3px 10px 3px 10px;"><a style="text-decoration:none" id="link_exportar" href="#" target="_blank">@ResourceLanguaje.Resource.Export </a></div>
+    </div>
+
+    <div style="width:100%;clear:both;">
+        <div style="float:left;width:49%;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.AttendanceControlByMonth</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="assistanceMonth" style="width:98%;height:345px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript">
+    function Report() {
+        document.getElementById("divContent").innerHTML = "";
+        $("#divContent").load("/Assistance/Index");
+    }
+
+    function AttendanceByQueue() {
+        //alert("En construccion");
+        $("#divAttendance").empty();
+        $("#divAttendance").load("/Assistance/AttendanceByQueue?var=" + Math.random());
+    }
+    function GraficoAsistencia(id) {
+
+
+        var ID_ENTIX = $("#ID_ENTI").data("kendoComboBox").dataItem().ID_PERS_ENTI;
+        var ID_YEARX = $("#ID_YEAR").data("kendoComboBox").dataItem().ID_YEAR;
+        var ID_MONTX = $("#ID_MONT").data("kendoComboBox").dataItem().ACCO_MONT;
+
+        $("#link_exportar").attr("href", "/Reporting/Assistance.aspx?id=" + ID_ENTIX + "&id1=" + ID_YEARX + "&id2=" + ID_MONTX)
+        //console.log($("#link_exportar"));
+
+        $.ajax({
+            url: '/Assistance/TAL_ASSI_GRAP/' + ID_ENTIX + '/' + ID_YEARX + '/' + ID_MONTX,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var xx = new Date()
+                var ingreso = [];
+                var salida = [];
+                var salmuerzo = [];
+                var almuerzo = [];
+                var ralmuerzo = [];
+
+                $.each(json['data'], function (index, value) {
+                    var s_ingreso = value['INGRESO'];
+                    var h_ingreso = null;
+                    var h_salida = null;
+                    var h_salmuerzo = null;
+                    var h_ralmuerzo = null;
+
+                    if (value['INGRESO'] != null) {
+                        h_ingreso = parseInt(value['INGRESO'].split(":")[0]) + (parseInt(value['INGRESO'].split(":")[1]) * 100 / 60) / 100;
+                    }
+                    if (value['SALIDA'] != null) {
+                        h_salida = parseInt(value['SALIDA'].split(":")[0]) + (parseInt(value['SALIDA'].split(":")[1]) * 100 / 60) / 100;
+                    }
+                    if (value['SALIDA_ALMUERZO'] != null) {
+                        h_salmuerzo = parseInt(value['SALIDA_ALMUERZO'].split(":")[0]) + (parseInt(value['SALIDA_ALMUERZO'].split(":")[1]) * 100 / 60) / 100;
+                    }
+                    if (value['REGRESO_ALMUERZO'] != null) {
+                        h_ralmuerzo = parseInt(value['REGRESO_ALMUERZO'].split(":")[0]) + (parseInt(value['REGRESO_ALMUERZO'].split(":")[1]) * 100 / 60) / 100;
+                    }
+                    var fecha = Date(value['YEAR'], value['MONTH'], value['DAY']);
+                    ingreso.push([value['DAY'], h_ingreso]);
+                    salida.push([value['DAY'], h_salida]);
+                    salmuerzo.push([value['DAY'], h_salmuerzo]);
+                    ralmuerzo.push([value['DAY'], h_ralmuerzo]);
+                    almuerzo.push([value['DAY'], h_salmuerzo, h_ralmuerzo]);
+                });
+
+                $('#assistanceMonth').highcharts({
+                    chart: {
+                        type: 'arearange'
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        gridLineWidth: 1,
+                        type: 'category'
+                    },
+                    yAxis: {
+                        title: {
+                            text: 'Hours'
+                        },
+                        min: 0,
+                        minRange: 24,
+                        lineWidth: 1,
+                    },
+                    plotOptions: {
+                        spline: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' }
+                        }
+                    },
+                    legend: {
+                        reversed: true
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            var cadena = "";
+                            $.each(this.points, function (index, value) {
+                                if (value.point.options.low === undefined) {
+                                    var decimal = 'x0' + String(Math.round(((value.y) - parseInt(value.y)) * 100 * 60) / 100);
+
+                                    cadena += '<span style="color:' + value.series.color + '">' + this.series.name + '</span>:\t<b>' +
+                                        parseInt(this.y) + ' : ' + (decimal).substring(decimal.length - 2, decimal.length) + '</b><br/>';
+                                }
+                                else {
+                                    var decimal = 'x0' + String(Math.round(((value.point.options.low) - parseInt(value.point.options.low)) * 100 * 60) / 100);
+                                    var decimal1 = 'x0' + String(Math.round(((value.point.options.high) - parseInt(value.point.options.high)) * 100 * 60) / 100);
+
+                                    cadena += '<span style="color:' + value.series.color + '">' + this.series.name + '</span>:\t<b>' +
+                                        parseInt(value.point.options.low) + ' : ' + (decimal).substring(decimal.length - 2, decimal.length) +
+                                        ' to ' + parseInt(value.point.options.high) + ' : ' + (decimal1).substring(decimal1.length - 2, decimal1.length) + '</b><br/>';
+                                }
+                            });
+                            return '<span style="font-size: 12px">Day ' + this.x + '</span><br/>' + cadena;
+                        },
+                        crosshairs: true,
+                        shared: true
+                    },
+
+                    series: [
+                        {
+                            name: 'Signed Out',
+                            type: 'spline',
+                            color: '#B21E1E',
+                            data: salida
+                        },
+                        {
+                            name: 'Break',
+                            type: 'arearange',
+                            color: '#FFBB00',
+                            data: almuerzo
+                        },
+                        {
+                            name: 'Signed In',
+                            type: 'spline',
+                            color: '#516882',
+                            data: ingreso
+                        }
+                    ]
+                });
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $.get("/Assistance/Equipo", function (json) {
+
+            var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+                index: 1,
+                dataTextField: "FIR_NAME",
+                dataValueField: "ID_PERS_ENTI",
+                template: '<div style="clear:both;"><div style="float:left"><img height="40" src=\"/Content/Fotos/${data.ID_FOTO}.jpg\" alt=\"#:data.ID_ENTI#\" /></div>' +
+                                  '<div style="" ><div style="height:40px ">&nbsp;${data.FIR_NAME}<br /></div></div></div>',
+                filter: "contains",
+                @*dataBound: function (e) {
+                        this.value("@Session["ID_PERS_ENTI"]");
+                    },*@
+                change: function (e) {
+                    GraficoAsistencia();
+                },
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['Data']
+            }).data("kendoComboBox");
+
+            //ID_ENTI.bind("select", GraficoAsistencia);
+            ID_ENTI.bind("change", function (e) {
+                GraficoAsistencia(ID_ENTI.dataItem().ID_PERS_ENTI)
+            });
+
+            $.get("/AccountingYear/ListYearWithMonth", function (json) {
+
+                var ID_YEAR = $("#ID_YEAR").kendoComboBox({
+                    //index: 0,
+                    dataTextField: "NAM_YEAR",
+                    dataValueField: "ID_YEAR",
+                    filter: "contains",
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    dataBound: function (e) {
+                        this.value(2014);
+                    },
+                    change: function (e) {
+                        GraficoAsistencia();
+                    },
+                    dataSource: json['DataYear']
+                }).data("kendoComboBox");
+
+                //ID_YEAR.text(json['ValYear']+'');
+
+                var ID_MONT = $("#ID_MONT").kendoComboBox({
+                    //index: 1,
+                    dataTextField: "NAM_ACCO_MONT",
+                    dataValueField: "ACCO_MONT",
+                    filter: "contains",
+                    autoBind: true,
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    value: json['ValMonth'],
+                    change: function (e) {
+                        GraficoAsistencia();
+                    },
+                    dataSource: json['DataMonth']
+                }).data("kendoComboBox");
+
+                GraficoAsistencia();//
+
+            });
+
+        });
+    });
+
+</script>

@@ -1,0 +1,176 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+//Layout = null;
+}
+
+<script type="text/javascript">
+
+    function GenerarReporte() {
+        //alert($("#Parametros").serialize());
+        window.frames["RSTicketTipo"].src = "/Reporting/Ticket/ReporteTicketTipo.aspx?var=" + Math.random() + "&" + $("#Parametros").serialize();
+    }
+
+    $(document).ready(function () {
+
+        var today = new Date();
+        var k_startdatetimepicker = $("#FechaInicial").kendoDateTimePicker({
+            value: new Date(2023, 1, 1)
+        }).data("kendoDateTimePicker");
+        var k_enddatetimepicker = $("#FechaFinal").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+
+
+        var ID_TYPE_TIKET;
+        var ID_TYPE_TICK = $("#ID_TYPE_TICK").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_TYPE_TICK",
+            dataValueField: "ID_TYPE_TICK",
+            suggest: true,
+            placeholder: "Seleccione...",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    // REFERENCIA al controlador TypeTicketController
+
+                    read: "/TypeTicket/ListarCboTypeTicketxEmpresa?var=" + Math.random()
+
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_TYPE_TICK.bind("change", function (e) {
+            ID_TYPE_TIKET = ID_TYPE_TICK.dataItem().ID_TYPE_TICK;
+
+            if (ID_TYPE_TICK.dataItem()) {
+                $('#ID_TYPE_TICK').attr('value', ID_TYPE_TICK.dataItem().ID_TYPE_TICK);
+            }
+            else {
+                $('#ID_TYPE_TICK').attr('value', 0);
+            }
+        });
+
+        var IdAreaOperativaRT = $("#IdAreaOperativaRT").kendoComboBox({
+            filter: "contains",
+            autoBind: true,
+            dataTextField: "DES_QUEU",
+            dataValueField: "ID_QUEU",
+            placeholder: "Seleccione...",
+            suggest: true,
+            template: '<div style="text-transform:capitalize; display: width:100%;">' +
+                '${data.DES_QUEU}</div>',
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAccoBVN?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+
+
+    });
+
+    function cambioIdiomaTexto() {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaTexto?IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+</script>
+
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte Backlog de Tickets
+    </div>
+    <div class="card-body">
+        <form id="Parametros">
+            <div class="form-row" style="margin-block-end: 10px; align-content: center; margin-inline: 10px; gap: 30px;">
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <div class="editor-label">
+                            Tipo Ticket
+                        </div>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.ID_TYPE_TICK, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(model => model.ID_TYPE_TICK)
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="position-relative form-group">
+                        <div class="editor-label">
+                            Área Responsable
+                        </div>
+                        <div class="editor-field">
+                            @Html.ValidationMessageFor(model => model.ID_QUEU)
+                            @Html.TextBox("IdAreaOperativaRT")
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row" style="margin-block-end: 10px; align-content: center; margin-inline: 10px; gap: 30px;">
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Desde
+                    </div>
+                    <div class="editor-field">
+                        <input type="text" id="FechaInicial" name="FechaInicial" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Hasta
+                    </div>
+                    <div class="editor-field">
+                        <input type="text" id="FechaFinal" name="FechaFinal" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button id="btnBuscar" onclick="GenerarReporte(); return false;" class="btn btn-primary btn-block" style="margin-left:0"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<div class="bodyForm">
+    <div class="inBodyForm">
+        <iframe id="RSTicketTipo" style="height:573px; width:100%; border: 0px #eee solid;"></iframe>
+    </div>
+</div>

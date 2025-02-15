@@ -1,0 +1,152 @@
+﻿@model ERPElectrodata.Models.NAME_CHART
+@{
+    Layout = null;
+}
+
+<style>
+    b {
+        color: #F83C50;
+    }
+</style>
+
+<div style="width:100%; display:inline-block;">
+    @using (Html.BeginForm("CrearNuevoaCargo", "Cargo", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormNewRequest", name = "FormNewRequest", target = "ut_NewRequest" }))
+    {
+        @Html.ValidationSummary(true)
+        <div class="col-md-12">
+
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="editor-label">
+                            Nombre cargo <b>*</b>
+                        </div>
+                        <div>
+                            <input id="txtNombreCargo" name="txtNombreCargo" class="form-control" type="text" />
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+        @*---------------------------Footer--------------------------------------------------------*@
+
+        <div class="card-footer">
+
+            <div class="col-md-12">
+                <div class="row">
+                  
+                    <div class="col-md-3">
+                        <button id="submitRequest" name="submitRequest" type="submit" class="btn btn-primary btn-block">Crear</button>
+                    </div>
+                    <div class="col-md-3">
+                        <button id="btnCancelar" class="ladda-button mb-2 btn btn-gradient-light btn-block widthMax" data-style="expand-right" data-dismiss="modal">
+                            <span class="ladda-label">Cancelar</span><span class="ladda-spinner"></span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+
+    }
+    <iframe id="ut_NewRequest" name="ut_NewRequest" src="" class="d-none" @*style="width:0px;height:0px;border-width:0px;display:none;"*@></iframe>
+</div>
+
+
+<script>
+    $(document).ready(function () {
+  
+
+        $("#submitRequest").click(function () {
+            var mensajes = []; // Array para almacenar los mensajes
+
+
+
+            if ($('#txtNombreCargo').val() === '') {
+                // El campo está vacío
+                $('#txtNombreCargo').focus();
+                mensajes.push("-Complete el nombre del Cargo");
+            }
+
+            if (mensajes.length > 0) {
+                toastr.warning(mensajes.join("\n"), "Mensaje"); // Mostrar mensajes en líneas separadas en la alerta
+                return false; // Cancelar el envío del formulario
+            } else {
+                $("#FormNewRequest").submit();
+            }
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+
+    });
+</script>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+
+        $("#areaprincial").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NOM_AREA",
+            placeholder: "Seleccione un área principal",
+            dataValueField: "ID_AREA",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Area/ListarAreaprincipal"
+                }
+
+            }
+        });
+
+        //.data("kendoComboBox");
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+
+        //ListarPlantilla();
+    });
+
+
+    function uploadDoneNR(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success(msnErr);
+            $("#btnBuscar").click();
+            $("#btnCancelar").click();
+        }
+        else {
+            toastr.error(msnErr);
+        }
+    }
+
+</script>
+

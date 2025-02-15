@@ -1,0 +1,276 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    ViewBag.Title = "Create";
+    Layout = null;
+}
+
+<div class="afterMain">
+<div style="float:left;width:60%">
+    <div class="titleForm">
+        <div class="title">@ResourceLanguaje.Resource.NewChange</div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            @using (Html.BeginForm("Create", "Change", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmChange", target = "upload_target" }))
+            {
+                @Html.ValidationSummary(true)
+                @Html.HiddenFor(model => model.ID_TYPE_TICK)
+                @Html.HiddenFor(model => model.ID_PRIO)
+                @Html.HiddenFor(model => model.ID_SOUR)
+                @Html.HiddenFor(model => model.ID_QUEU)
+                @Html.HiddenFor(model => model.ID_ACCO)
+                @Html.HiddenFor(model => model.ID_PERS_ENTI_ASSI)
+                @Html.HiddenFor(model => model.UserId)
+                @Html.HiddenFor(model => model.ID_STAT)
+                @Html.HiddenFor(model => model.ID_STAT_END)
+                @Html.HiddenFor(model => model.ID_PERS_ENTI_END)
+                <fieldset>
+                    <legend>CHANGE</legend>
+                    <div class="divFondoUno">
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Date
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextBoxFor(model => model.FEC_TICK, new { @readonly=true})
+                                @Html.ValidationMessageFor(model => model.FEC_TICK)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.DateScheduled
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextBoxFor(model => model.FEC_INI_TICK)
+                                @Html.ValidationMessageFor(model => model.FEC_INI_TICK)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Requester
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_PERS_ENTI)
+                                @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                            </div>
+                        </div> 
+                    </div>
+                    <div class="divFondoDos">            
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Category
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_CATE)
+                                @Html.ValidationMessageFor(model => model.ID_CATE)
+                            </div>
+                        </div>      
+                   </div>                      
+                    <div class="divFondoUno">
+                        <div style="width: 95.5%; float:left; padding: 0px 0px 0 15px;">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Summary
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextAreaFor(model => model.SUM_TICK)
+                                @Html.ValidationMessageFor(model => model.SUM_TICK)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divFondoUno">
+                        <div style="width: 96%; float:left; padding: 0px 0px 0 15px;">
+                            <input name="files" id="files" type="file" />
+                        </div>
+                    </div>        
+                    <div style="display:inline-block; float:right; padding:0px 15px 15px 5px;">
+                        <div style=" float:left; padding:0px 15px 0px 0px; ">
+                            <button id="submit" class="k-button" >Create</button>
+                        </div>
+                        <button id="reset" class="k-button">Cancel</button>
+                    </div>
+                </fieldset>
+            }    
+        </div>
+    </div>
+</div>
+</div>
+<iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+
+<script type="text/javascript">
+
+    function uploadDone(msg, code) {
+        closeWinModalPopUpLoad();
+        if (msg == "OK") {
+            var title = '@ResourceLanguaje.Resource.InformationSaved / @ResourceLanguaje.Resource.NotificationSend';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                   + "<div style='padding:10px 0px 10px 0px;'>Ticket information was succesfully saved</div>"
+                   + "<div style='padding:10px 0px 10px 0px;'>Code: " + code + "</div>"
+                   + "The notification was succesfully sent to: <br>End User, Staff, Service Desk and IT Coordinator.<br>" +
+                   "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                   "<button id='btnContinues' class='k-button'>Continue</button>" +
+                   "</div></div>";
+
+            winPopUpModal(title, body, 400, 230);
+
+            $("#closebtnmodal").click(function () {
+                location.reload(true);
+            });
+
+            $("#btnContinues").click(function () {
+                location.reload(true);
+            });
+
+        }
+        else {
+            var titleTK = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleTK = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+            }
+            else if (code == '1') {
+                titleTK = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+            }
+            else if (code == '3') {
+                titleTK = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.AttachMsn';
+            }
+
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            "<div style='padding:10px 5px 10px 10px;'>" + messageAsset + "</div>" +
+            "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+            "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                    "</div></div>";
+
+            winPopUpModal(titleTK, body, 420, 140);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_PERS_ENTI.bind("change", function (e) {
+            $("#ID_PERS_ENTI_END").val(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+        });
+
+        var FEC_INI_TICK = $("#FEC_INI_TICK").kendoDateTimePicker().data("kendoDateTimePicker");
+        FEC_INI_TICK.min("@ViewBag.FEC_TICK");
+
+        var FEC_TICK = $("#FEC_TICK").kendoDateTimePicker().data("kendoDateTimePicker");
+        FEC_TICK.value("@ViewBag.FEC_TICK");
+
+        $("#ID_CATE").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            //index: 2,
+            //placeholder: "Select Category...",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            template: '<div style="font-weight:bold;">${data.NAM_CATE_1}</div>' +
+                        '<div style="margin-left:5px;" >${data.NAM_CATE_2} </div>' +
+                        '<div style="margin-left:10px;">${data.NAM_CATE_3}</div>' +
+                        '<div style="margin-left:10px;">${data.NAM_CATE_4}</div>',
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/List"
+                }
+            }
+        }).data("kendoComboBox");
+        var ID_CATE = $("#ID_CATE").data("kendoComboBox");
+        ID_CATE.list.width(300);
+
+        $("#SUM_TICK").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach"
+            }
+        });
+
+        $("#submit").click(function () {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingYourTicket', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+
+            var title = '@ResourceLanguaje.Resource.OperationCancelled';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+            "<div style='padding:10px 0px 10px 0px;'>The operation to perform was cancelled</div>" +
+            "<div style='float:right; padding:20px 6px 0px 6px; font-size:0.9em;'>" +
+            "<button id='btnContinuer' class='k-button'>Continue</button>" +
+            "</div></div>";
+
+            winPopUpModal(title, body, 400, 150);
+
+            $("#btnContinuer").bind("click", function () {
+                location.reload(true);
+            });
+
+            $("#closebtnmodal").click(function () {
+                location.reload(true);
+            });
+
+        });
+    });
+
+</script>

@@ -1,0 +1,217 @@
+﻿@model ERPElectrodata.Models.ThemeModel
+@{
+    Layout = null;
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card element-block-example">
+            <div class="card-body">
+                <div class="card-title">Buscar Lecciones Aprendidas</div>
+                @using (Html.BeginForm("SaveTheme", "KnowledgeManagementController", FormMethod.Post, new { id = "form_create", name = "form_create" }))
+                {
+                    @Html.ValidationSummary(true)
+                    @(Html.Hidden("hdCuenta", (int)ViewBag.idCuenta))
+                    <input type="hidden" id="idCalificacion" name="idCalificacion" readonly="readonly" />
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class="">Código </label>
+                                @(Html.TextBoxFor(model => model.IdTema, new { id = "txtIdTema", @class = "form-control", @readonly = true  }))
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class="">Nombre </label>
+                                @(Html.TextBoxFor(model => model.Nomtema, new { id = "txtNomTema", onkeypress = "return soloLetras(event)", @class = "form-control", autocomplete = "off" }))
+                                @Html.ValidationMessageFor(model => model.Nomtema)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class="">Unidad de Negocio </label>
+                                @Html.Editor("ID_CATE_N1")
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class="">MacroServicio </label>
+                                @Html.Editor("ID_CATE_N2")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class="">Servicio </label>
+                                @Html.Editor("ID_CATE_N3")
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class="">Incidente/Requerimiento </label>
+                                @Html.EditorFor(model => model.idCategoria)
+                                @Html.ValidationMessageFor(model => model.idCategoria)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class="">Fecha de baja </label>
+                                @(Html.EditorFor(model => model.DateEnd))
+                                @Html.ValidationMessageFor(model => model.DateEnd)
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class=""> &nbsp; </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class="">&nbsp; </label>
+                                <button class="mb-2 mr-2 btn-pill btn btn-gradient-light btn-block ladda-button" type="button" data-style="expand-right" data-dismiss="modal">
+                                    Cancelar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="position-relative form-group">
+                                <label id="" for="" class=""> &nbsp; </label>
+                                <button id="btnSaveTheme" type="button" class="mb-2 mr-2 btn-pill btn btn-primary btn-block">Nuevo</button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="@Url.Content("~/Scripts/Itms/Theme/NewTheme.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/Validadores.js")" type="text/javascript"></script>
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var ID_CATE_N1 = $("#ID_CATE_N1").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N1.bind("change", function (e) {
+            if (ID_CATE_N1.dataItem()) {
+                $('#ID_CAT_N1').attr('value', ID_CATE_N1.dataItem().ID_CATE);
+            }
+            else {
+                $('#ID_CAT_N1').attr('value', 0);
+            }
+        });
+
+        var ID_CATE_N2 = $("#ID_CATE_N2").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N1",
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N2.bind("change", function (e) {
+            if (ID_CATE_N2.dataItem()) {
+                $('#ID_CAT_N2').attr('value', ID_CATE_N2.dataItem().ID_CATE);
+            }
+            else {
+                $('#ID_CAT_N2').attr('value', 0);
+            }
+        });
+
+        var ID_CATE_N3 = $("#ID_CATE_N3").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N2",
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N3.bind("change", function (e) {
+            if (ID_CATE_N3.dataItem()) {
+                $('#ID_CAT_N3').attr('value', ID_CATE_N3.dataItem().ID_CATE);
+            }
+            else {
+                $('#ID_CAT_N3').attr('value', 0);
+            }
+        });
+
+        var ID_CATE_N4 = $("#idCategoria").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N3",
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_CATE_N4.bind("change", function (e) {
+            if (ID_CATE_N4.dataItem()) {
+                $('#ID_CAT').attr('value', ID_CATE_N4.dataItem().ID_CATE);
+                if (ID_CATE_N4.dataItem().ID_TYPE_TICK != 0) {
+                    ID_TYPE_TICK.value(ID_CATE_N4.dataItem().ID_TYPE_TICK);
+                }
+            }
+            else {
+                $('#ID_CAT').attr('value', 0);
+            }
+        });
+    });
+
+</script>

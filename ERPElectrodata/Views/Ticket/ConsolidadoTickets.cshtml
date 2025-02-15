@@ -1,0 +1,258 @@
+﻿@{
+//Layout = null;
+}
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/DataTables/datatables.min.js"></script>
+<link href="~/Content/themes/plugin/DataTables/datatables.min.css" rel="stylesheet" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/1.10.16/sorting/datetime-moment.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-users icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Consolidado de Tickets
+                <div class="page-title-subheading">
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- FILTROS -->
+<div class="main-card card">
+    <div class="card-header">Filtros</div>
+    <div class="card-body">
+        <form id="ParametroOP">
+            <div class="">
+                <div class="col-md-12">
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label for="IdCuenta">Cuenta</label>
+                                        <input id="IdCuenta" name="IdCuenta" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label for="IdComp">Compañía Directa</label>
+                                        <input id="IdComp" name="IdComp" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label for="IdArea">Área</label>
+                                        <input id="IdArea" name="IdArea" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label for="IdEstado">Estado</label>
+                                        <input id="IdEstado" name="IdEstado" class="form-control" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label for="FechaIni">Desde</label>
+                                        <input id="FechaIni" name="FechaIni" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label for="FechaFin">Hasta</label>
+                                        <input id="FechaFin" name="FechaFin" class="form-control" />
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="position-relative form-group">
+                                        <label><br /></label>
+                                        <a id="btnBuscar" class="btn btn-primary btn-block" onclick="validarData();" style="color:white">
+                                            Generar reporte
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- REPORTE -->
+<div class="main-card card mt-3">
+    <div class="card-body">
+        <div class="col-md-12">
+            <iframe id="RptConsolidadoTickets" style="height:480px; width:100%;border: 0px #eee solid;"></iframe>
+        </div>
+    </div>
+</div>
+
+<script>
+    var IdCuentaMs;
+
+    $(document).ready(function () {
+
+        $("#IdCuenta").kendoMultiSelect({
+            dataTextField: "NAM_ACCO", //verificar en BD
+            dataValueField: "ID_ACCO", //verificar en BD
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TipoActivo/ListarCuentaTipoActivo?var=" + Math.random() //verificar en BD
+                }
+            }
+        });
+        IdCuentaMs = $("#IdCuenta").data("kendoMultiSelect");
+
+        function multiselect_change(e) {
+
+            $("#hdnEstado").val(this.value());
+        }
+
+        IdCuentaMs.bind("change", multiselect_change);
+    //$(document).ready(function () {
+    //    /*COMBO DE CUENTA*/
+    //    var IdCuenta = $("#IdCuenta").kendoComboBox({
+    //        //autoBind: false,
+    //        dataTextField: "NAM_ACCO",
+    //        dataValueField: "ID_ACCO",
+    //        filter: "contains",
+    //        delay: 500,
+    //        minLength: 0,
+    //        suggest: true,
+    //        placeholder: "Seleccione una cuenta",
+    //        //template: kendo.template($("#tmp-CIA").html()),
+    //        dataSource: {
+    //            //serverFiltering: true,
+    //            schema: {
+    //                data: "Data",
+    //                total: "Count"
+    //            },
+    //            transport: {
+    //                read: "/TipoActivo/ListarCuentaTipoActivo?var=" + Math.random()
+    //            }
+    //        }
+    //    }).data("kendoComboBox");
+
+        var IdComp = $("#IdComp").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            placeholder: "Seleccione una compañía directa",
+            //template: kendo.template($("#tmp-CIA").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount"
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#IdArea").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un área",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListarAreaxOrganigramaCbx"
+                }
+
+            }
+        });
+
+        $("#IdEstado").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NombreEstado",
+            placeholder: "Seleccione un estado",
+            dataValueField: "IdEstado",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/StatusTicket/ListarTicketStatus"
+                }
+
+            }
+        });
+
+        var todayDate = kendo.toString(kendo.parseDate(new Date()), 'MM/dd/yyyy');
+        var FechaIni = $("#FechaIni").kendoDatePicker({ format: "MM/dd/yyyy" }).data("kendoDatePicker");
+        FechaIni.value(todayDate);
+
+        var FechaFin = $("#FechaFin").kendoDatePicker({ format: "MM/dd/yyyy" }).data("kendoDatePicker");
+        FechaFin.value(todayDate);
+    });
+
+    function validarData() {
+        //Validar info
+        if (($("#FechaIni").val() == "" || $("#FechaFin").val() == "") &&IdCuentaMs.values()!="")
+            toastr.warning("Por favor ingrese un rango de fechas");
+        else
+            GenerarReporte();
+    }
+
+    function GenerarReporte() {
+        console.log(IdCuentaMs)
+        console.log($("#IdCuentaMs"))
+        window.frames["RptConsolidadoTickets"].src = "/Reporting/Ticket/ConsolidadoTicket.aspx?var=" + Math.random() +
+            "&idComp=" + $("#IdComp").val() +
+            "&idArea=" + $("#IdArea").val() +
+            "&idEstado=" + $("#IdEstado").val() +
+            "&fechaIni=" + $("#FechaIni").val() +
+            "&fechaFin=" + $("#FechaFin").val() +
+            "&idCuenta=" + $("#IdCuentaMs").val();
+    }
+</script>

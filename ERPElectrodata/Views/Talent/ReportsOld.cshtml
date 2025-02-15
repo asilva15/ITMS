@@ -1,0 +1,390 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="afterMain">
+    @* titleForm -- titleForm
+        bodyForm -- bodyForm*@
+    <div>
+        <div style="width: 50%; float:left;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.EmployeesByMonthTalent</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="STAFF_QTY" style="height:345px;width:98%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="width: 49%; height: 300px;float:right;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.StaffBySBUTalent</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="StaffBySBU" style="width:95%;height: 350px; float: left;"></div>
+                    <div id="Legend" style="width:90%;height: 350px; float: right; padding:50px 20px 0px 0px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="clear: both; height: 10px;"></div>
+    <div style="clear:both;">
+        <div style="float:left; width:50%;">
+            <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.StaffByLocation</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div id="staffByLocation" style="width:98%;height:345px;"></div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 49%; float:right;">
+            <div class="titleForm"><div class="title">Other Reports</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height:350px;">
+                    <div style="margin: 5px 0 0 10px; width: 100%;">
+                        ¬ <a href="/Reporting/WF_ReportBeneficiaries.aspx" target="_blank">Report Beneficiaries</a>
+                    </div>
+                    <div onclick="ReportMemorandum(this)" style="margin: 5px 0 0 10px; width: 100%;">¬ <a href="#">Report Memorandum</a></div>
+                    <div onclick="ReportChangeSalary(this)" style="margin: 5px 0 0 10px; width: 100%;">¬ <a href="#">Report Change Salary</a></div>
+                    <div style="margin: 5px 0 0 10px; width: 100%;">
+                        ¬ <a href="/Reporting/Talent/TA_PERS_BY_ACCO.aspx" target="_blank">Report Staff</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+    function ReportMemorandum() {
+        var title = 'Memorandum';
+        var contHtml = '<div id="divReportMemorandum"></div>';
+        var ancho = 250;
+        var alto = 150;
+        winPopUpModal(title, contHtml, ancho, alto);
+        $("#divReportMemorandum").load("/Inform/ViewReportMemorandum?var=" + Math.random());
+    }
+
+    function ReportChangeSalary() {
+        var title = '@ResourceLanguaje.Resource.Change @ResourceLanguaje.Resource.GrossSalary';
+        var contHtml = '<div id="divReportChangeSalary"></div>';
+        var ancho = 250;
+        var alto = 150;
+        winPopUpModal(title, contHtml, ancho, alto);
+        $("#divReportChangeSalary").load("/Inform/ViewReportChangeSalary?var=" + Math.random());
+    }
+
+    function toTitleCase(str) {
+        return str.replace(/\w\S*/g, function (txt) { return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase(); });
+    }
+
+    function GraficoLocation() {
+        $.ajax({
+            url: '/Assistance/StaffByLocation',
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var cat = {};
+                var catS = [];
+                var catSS = [];
+                var pie = [];
+                var dona = [];
+
+                $.each(json['Data'], function (index, value) {
+                    //var s_ingreso = value['INGRESO'];
+                    //console.log(value);
+                    if (typeof cat[value['NAM_SITE']] == 'undefined') {
+                        cat[value['NAM_SITE']] = value['Cant'];
+                    }
+                    else {
+                        cat[value['NAM_SITE']] = cat[value['NAM_SITE']] + value['Cant'];
+                    }
+
+                });
+
+                $.each(cat, function (i, item) {
+                    var color = null;
+                    var k = 1
+                    $.each(json['Data'], function (index, value) {
+                        if (value['NAM_SITE'] == i) {
+                            color = value['COLOR']
+                            var brightness = 0.25 - (k / 4) / 5;
+                            dona.push({
+                                name: toTitleCase(value['NAM_LOCA']),
+                                y: value['Cant'],
+                                color: Highcharts.Color(value['COLOR']).brighten(brightness).get()//value['COLOR']
+                            });
+                            k++;
+                        }
+
+                    });
+
+                    pie.push({
+                        name: toTitleCase(i),
+                        y: item,
+                        color: color
+                    });
+                });
+
+                //Inicio Pie
+                $('#staffByLocation').highcharts({
+                    chart: {
+                        type: 'pie'
+                    },
+                    title: {
+                        text: null
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    yAxis: {
+                        title: {
+                            text: null
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            center: ['50%', '50%']
+                        }
+                    },
+                    tooltip: {
+                        //valueSuffix: '%',
+                        headerFormat: headerFormat,
+                        pointFormat: '<span style="color:{series.color}"></span>{point.percentage:.1f} %<br/> Qty: {point.y}'
+                    },
+                    series: [{
+                        name: 'Site',
+                        data: pie,
+                        size: '45%',
+                        dataLabels: {
+                            formatter: function () {
+                                return this.y > 5 ? this.point.name : null;
+                            },
+                            color: 'white',
+                            distance: -30
+                        }
+                    }
+                    , {
+                        name: 'Location',
+                        data: dona,
+                        size: '70%',
+                        innerSize: '60%',
+                        dataLabels: {
+                            formatter: function () {
+                                // display only if larger than 1
+                                //console.log(this);
+                                return this.y > 1 ? '<b>' + this.point.name + ':</b><br> ' +
+                                    Highcharts.numberFormat(this.percentage, 2) + '%<br> Qty: ' + Highcharts.numberFormat(this.y, 0) : null;
+                            }
+                        }
+                    }
+                    ]
+                });
+                //Fin Pie
+            }
+        });
+    }
+
+$(document).ready(function () {
+
+    $.ajax({
+            url: '/Assistance/StaffByUEN?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                
+                var cat = [];
+                var catUEN = {};
+                var lim1 =  [];
+                var lim2 = [];
+                var lim3 = [];
+                var lim4 = [];
+                var serie1 = [];
+                var serie2 = [];
+                var serie3 = [];
+                var serie4 = [];
+
+                //var cat = [];
+                var catS = [];
+                var catSS = [];
+                var pie = [];
+                var dona = [];
+                var serie = [];
+
+                $.each(json['Data'], function (index, value) {
+                    //var s_ingreso = value['INGRESO'];
+                    //console.log(value['ID_UEN']);
+                    if (typeof catUEN[value['ID_UEN']] == 'undefined') {
+                        catUEN[value['ID_UEN']] = value['QUANTITY'];
+                    }
+                    else {
+                        catUEN[value['ID_UEN']] = catUEN[value['ID_UEN']] + value['QUANTITY'];
+                    }
+                });
+
+                //console.log(catUEN);
+
+                $.each(catUEN, function (i, item) {
+                    var color = null;
+                    var nombre = null;
+                    var limite = [];
+                    var linea = [];
+                    var cantidad = 0;
+                    //console.log(i);
+                    $.each(json['Data'], function (index, value) {
+
+                        if (value['ID_UEN'] == i) {
+                            limite.push([value['MonthYear'], value['MIN_QUAN'], value['MAX_QUAN']]);
+                            linea.push([value['MonthYear'], value['QUANTITY']]);
+                            color = value['COLOR'];
+                            nombre = value['NAM_CHAR'];
+                            cantidad = value['QUANTITY'];
+                        }
+
+                    });
+                    //console.log(limite);
+                    serie.push({
+                        name: toTitleCase(nombre),
+                        type: 'arearange',
+                        //linkedTo: i,
+                        color: color,
+                        data: limite
+                    }, {
+                        name: toTitleCase(nombre),
+                        type: 'line',
+                        //id: i,
+                        linkedTo: ':previous',
+                        color: color,
+                        data: linea
+                    });
+
+                    pie.push({
+                        name: toTitleCase(nombre),
+                        y: cantidad,
+                        color: color
+                    });
+                });
+
+                //Inicio Grafico Area
+                $('#STAFF_QTY').highcharts({
+                    chart:{
+                        zoomType: 'xy'
+                    },
+                    title: {
+                        text: null
+                    },
+                    credits:{
+                        enabled:false
+                    },
+                    xAxis: {
+                        categories: cat
+                        ,gridLineWidth: 0
+                        ,lineWidth: 1
+                    },
+                    yAxis:{
+                        lineWidth: 1
+                        , gridLineWidth: 0
+                        , title: {
+                            text:'Employees'
+                        }
+                    },
+                    plotOptions: {
+                        arearange: {
+                            fillOpacity: 0.15,
+                            lineWidth:0,
+                            showInLegend:true
+                        },
+                        line: {
+                            marker: {
+                                symbol: "circle"
+                            }
+                        }
+                    },
+                    tooltip:{
+                        crosshairs: true,
+                        shared: true,
+                        formatter: function () {
+                            var cadena = "";
+                            var limite = "";
+                            $.each(this.points, function (index, value) {
+                                //console.log(this);
+
+                                if (value.point.options.low === undefined) {
+                                    //var decimal = 'x0' + String(Math.round(((value.y) - parseInt(value.y)) * 100 * 60) / 100);
+                                    cadena += '<span style="color:' + value.series.color + '">' + this.series.name + '</span>:\t<b>' +
+                                       limite+ this.y + '</b><br/>';
+                                }
+                                else {
+                                    limite = value.point.options.low + " - " + value.point.options.high+" | "
+                                }
+                            });
+                            return cadena;
+                        }
+                    },
+                    labels: {
+                        items: [{
+                            //html: 'Total fruit consumption',
+                            style: {
+                                left: '40px',
+                                top: '8px',
+                                color: 'black'
+                            }
+                        }]
+                    },
+                    series: serie
+                });
+                //Fin Gráfico Área
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'StaffBySBU',
+                        type: 'pie'
+                    },
+                    //colors: ["#516882", "#B21E1E", "#7CBB00", "#FFBB00", "#333333"],
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    yAxis: {
+                        title: {
+                            text: null
+                        }
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true,
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Staff: <b>{point.y}</b>'//,
+                                //percentageDecimals: 2
+                            }
+                        }
+                    },
+                    series: [{
+                        //name: 'Versions',
+                        data: pie,
+                        //innerSize: '50%',
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b><br>' + (this.percentage < 100 ? ('' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br>Qty: ' + Highcharts.numberFormat(this.y,0);
+                            }
+                        }
+                    }]
+                });
+                //fin pie
+
+            }
+        });
+
+        //Staff By Site:
+        GraficoLocation()
+
+    });
+</script>

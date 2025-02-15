@@ -1,0 +1,356 @@
+﻿@model ERPElectrodata.Models.ActivoMantenimiento
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<body>
+    @using (Html.BeginForm("Crear", "ActivoMantenimiento", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAsset", target = "upload_target" }))
+    {
+        @Html.ValidationSummary(true)
+        <div class="form-group">
+            <div class="form-row">
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Fecha de Mantenimiento <b style="color:#F83C50">(*)</b>
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.FechaMantenimiento)
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Próximo Mantenimiento <b style="color:#F83C50">(*)</b>
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ProximoMantenimiento)
+                    </div>
+                </div>
+            </div>
+            <!--TIEMPO-->
+            <div class="form-row">
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Desde <b style="color:#F83C50">(*)</b>
+                    </div>
+                    <div class="editor-field">
+                        @Html.Editor("FechaDesde")
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="editor-label">
+                        Hasta <b style="color:#F83C50">(*)</b>
+                    </div>
+                    <div class="editor-field">
+                        @Html.Editor("FechaHasta")
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <br />
+                    <button id="btnRegistrar" class="btn btn-primary btn-block" @*onclick="validarFechas();"*@><i class="fa fa-save"></i> Guardar</button>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-12">
+                    <div class="editor-label">
+                        Comentarios
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextAreaFor(model => model.Comentario)
+                        @Html.ValidationMessageFor(model => model.Comentario)
+                    </div>
+                </div>
+            </div>
+            <div id="prueba">
+                <input id="idComponente" type="hidden" name="idComponente" value="" />
+                <input id="idsCondicion" type="hidden" name="idsCondicion" value="" />
+            </div>
+            <input id="idActivo" type="hidden" name="idActivo" value="@ViewBag.ID_ASSE" />
+
+            <div class="form-row">
+                <div class="col-md-12">
+                    <input name="files" id="files" type="file" />
+                </div>
+            </div>
+        </div>
+    }
+    <div class="card mb-3">
+        <div class="card-header-tab card-header" style="background:#2E6775;color:white;">Observaciones en componentes del Activo</div>
+
+        <div id="gridActivos" style="width:100%;margin:0 auto;"></div>
+
+        <div id="divAgregarComponente" style="background:#F3F3F3"></div>
+    </div>
+
+</body>
+</html>
+<iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="form-group col-md-12">
+        <div class="row no-gutters">
+            <div class="col-md-8">
+                <div id="TA${IdCompStockDet}" style="font-weight:bold;">${ NomSubtComp }</div>
+                <div><div style="font-weight:bold; float:left;">Componente :&nbsp;</div><div id="SE${IdCompStockDet}">${ Nombre }</div></div>
+                <div><div style="font-weight:bold; float:left;">Subtipo de Componente :&nbsp;</div><div id="MA${IdCompStockDet}">${ NomSubtComp }</div></div>
+            </div>
+            <div class="col-md-2">
+                <div class="position-relative form-group">
+                    <button id="${IdCompStockDet}" class='btn btn-primary btn-block' onclick="AgregarComponente(this);" style="width:85%;">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="m-0" />
+</script>
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+@*@section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }*@
+<script type="text/javascript">
+    var ids = '';
+    $(document).ready(function () {
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            }
+        });
+        var today = new Date();
+        var agregaMinuto = addMins(new Date(), 1);
+        var FechaMantenimiento = $("#FechaMantenimiento").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+        var FechaDesde = $("#FechaDesde").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+        var FechaHasta = $("#FechaHasta").kendoDateTimePicker({
+            value: agregaMinuto
+        }).data("kendoDateTimePicker");
+
+        var ProximoMantenimiento = $("#ProximoMantenimiento").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#Comentario").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false,
+            paste: OnPaste
+        });
+
+        CargarComponentes();
+
+        //$("#btnRegistrar").click(function (){
+        //    toastr.info("Espere un momento por favor.","Guardando...")
+        //});
+    });
+
+    function addMins(theDate, min) {
+        return new Date(theDate.getTime() + min * 60 * 1000);
+    }
+    
+    function CargarComponentes() {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/ActivoMantenimiento/CargarComponentes?var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        IdActivo: @ViewBag.ID_ASSE,
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+            }
+        });
+
+        $("#gridActivos").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html())
+        });
+    }
+
+        function condicionActivo(idCondicion, idActivo) {
+            var str = $("#idsCondicion").val();
+            var elem1, elem2, flag = 0;
+            //reemplazo si existe
+            if (str.indexOf(idActivo) != -1) {
+                elem1 = str.split(',');
+                for (i = 0; i < elem1.length; i++) {
+                    elem2 = elem1[i].split('_');
+                    if (elem2[0] == idActivo) {
+                        str = str.replace(elem1[i], idActivo + '_' + idCondicion);
+                        flag = 1;
+                    }
+                }
+            }
+            if (flag == 0) {
+                str = str + idActivo + '_' + idCondicion + ',';
+            }
+            $("#idsCondicion").val(str);
+        }
+
+        function AgregarComponente(btn) {
+            var sw = 0;
+            var elem = ids.split(',');
+            for (f = 0; f < elem.length - 1; f++) {
+                if (elem[f] == btn.id) {
+                    alert('El activo ya se ha agregado.');
+                    f = elem.length;
+                    sw = 1;
+                }
+            }
+            if (sw == 0) {
+                var strHtml =
+                    '<div id="divDetail_' + String(btn.id) + '" class="col-md-12" >' +
+                    '<div id="divDetailAsset_' + String(btn.id) + '" class ="form-group row" >' +
+                    '<div class = "col-md-3">' +
+                        '<div class = "smallField">Componente</div>' +
+                        '<div class = "smallTitle">' + String($("#SE" + btn.id).html()) + '</div>' +
+                    '</div>' +
+                    '<div class = "col-md-3">' +
+                        '<div class = "smallField">Subtipo de Componente</div>' +
+                        '<div class = "smallTitle">' + String($("#MA" + btn.id).html()) + '</div>' +
+                    '</div>' +
+                    '<div class = "col-md-5">' +
+                        '<div class = "smallField">Comentario</div>' +
+                        '<div class = "editor-field"><input class="form-control" placeholder="Observaciones del componente" type="text" name="ComentarioDet" onchange="condicionActivo(this.value, ' + btn.id + ');"></div>' +
+                    '</div>' +
+                    '<div class = "col-md-1"><button class="btn btn-danger" onclick="removeAsset(this);" id="removeAsset_' + String(btn.id) + '">X</button></div>' +
+                    '</div>' +
+                '</div>';
+                $("#divAgregarComponente").prepend(strHtml);
+
+                //CargarCondicion(btn.id);
+                ids = ids + String(btn.id) + ',';
+                $("#idComponente").val(ids);
+            }
+        }
+
+    function removeAsset(c) {
+        var elem = c.id.split('_');
+        ids = ids.replace(elem[1] + ',', '');
+        $("#idsComponente").val(ids);
+        $('#divDetail_' + String(elem[1])).remove();
+    }
+
+    function cancel() {
+        location.reload(true);
+    }
+
+    function uploadDone(msg, code, id, segundos,estado) {
+        if (msg == "OK") {
+            toastr.success("Información guardada", "Mensaje");
+
+            setTimeout(function () {
+                location.reload();
+            }, 800);
+        }
+        else {
+            toastr.error("Porfavor verifique los datos.", "Mensaje");
+
+        }
+    }
+
+    function validarFechas() {
+        $.ajax({
+            url: "/ActivoMantenimiento/ValidarFechas/",
+            data: "FechaDesde=" + $("#FechaDesde").val() +
+                  "&FechaHasta=" + $("#FechaHasta").val() +
+                  "&FechaMantenimiento=" + $("#FechaMantenimiento").val() +
+                  "&ProximoMantenimiento=" + $("#ProximoMantenimiento").val() +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (segundos) {
+                if (segundos != "ERROR") {
+                    winPopUpModal2("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 15px 0px;'>"
+                          + "<div style='padding:10px 0px 10px 0px;'>El tiempo de actividad es de " + @ViewBag.SegundosTotales + " segundos</div>"
+                          + "<div style='padding:10px 0px 10px 0px;'>seguro que desea continuar ?</div>" +
+                          "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                          "<button id='si' class='k-button'>SI</button>&nbsp;&nbsp;" +
+                          "<button id='no' class='k-button'>NO</button>" +
+                          "</div></div>"
+                            , 400, 160);
+
+                    var comp = $("#si").bind("click", function () {
+                        closeWinModalPopUp2();
+                        crearMantenimiento();
+                    });
+
+                    var undo = $("#no")
+                   .bind("click", function () {
+                       closeWinModalPopUp2();
+                   });
+
+                    $("#closebtnmodal").click(function () {
+                        closeWinModalPopUp2();
+                    });
+                }
+                else
+                {
+                    uploadDone("ERROR",0,0,0,0);
+                }
+            }
+        });
+    }
+
+    function crearMantenimiento() {
+        $.ajax({
+            url: "/ActivoMantenimiento/Crear/",
+            data: "idComponente=" + $("#idComponente").val() +
+                  "&idsCondicion=" + $("#idsCondicion").val() +
+                  "&idActivo=" + $("#idActivo").val() +
+                  "&FechaDesde=" + $("#FechaDesde").val() +
+                  "&FechaHasta=" + $("#FechaHasta").val() +
+                  "&FechaMantenimiento=" + $("#FechaMantenimiento").val() +
+                  "&ProximoMantenimiento=" + $("#ProximoMantenimiento").val() +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (resp) {
+                if (resp == "OK") {
+                    uploadDone("OK",0,0,0,0);
+                }
+            }
+        });
+    }
+    function MensajeTiempoActividad(SegundosTotales) {
+        toastr.warning("El tiempo de actividad es de " + SegundosTotales + " segundos. Si está seguro, por favor vuelva a <b>GUARDAR.</b>", "Advertencia");
+    }
+    function OnPaste(e) {
+        var texto = e.html
+        if ((/^<img src="/).test(e.html)) {
+            toastr.warning("No se permiten imágenes en este campo.");
+            e.html = "";
+        }
+        if (texto.includes('<img data-imagetype=')) {
+            toastr.warning("No se permiten imágenes en este campo.");
+            e.html = "";
+        }
+    }
+</script>

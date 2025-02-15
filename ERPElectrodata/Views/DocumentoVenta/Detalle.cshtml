@@ -1,0 +1,413 @@
+﻿@{
+    ViewBag.Title = "Detalle Documento de Venta";
+    //Layout = null;
+}
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Opciones</div>
+            <div class="card-body">
+                <div id="divOpciones" style="padding:5px;">
+                    <center>
+                        <button id="btnEditar" class="btn btn-block btn-primary btn-hover-shine" data-toggle="modal" data-target="#miModal">Editar</button>
+                        <button id="btnVerArchivos" class="btn btn-block btn-primary btn-hover-shine" data-toggle="modal" data-target="#miModal">Documentos</button>
+                        <button id="btnAdjuntar" class="btn btn-block btn-primary btn-hover-shine" data-toggle="modal" data-target="#miModal">Adjuntar</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <div class="mb-3 card">
+            <div class="card-header">
+                Datos del Registro de Venta
+                <div style="position:absolute; right:2%;">
+                    <a href="~/DocumentoVenta/Index" class="btn btn-primary">
+                        Listado
+                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="divDatoRegistro"></div>
+            </div>
+            <div class="card-header">
+                Marcas Asociadas
+            </div>
+            <div class="card-body">
+                <div>
+                    <button type="button" class="btn btn-primary" style="float:right;" data-toggle="modal" data-target="#miModal" onclick="EditarMarca(0)">Nuevo</button>
+                </div>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><div onclick="CreaSolucionTI();" style="cursor:pointer">Experiencia</div></th>
+                            <th>Marca</th>
+                            <th>Tipo de Cambio</th>
+                            <th>Monto Dolares</th>
+                            <th>Monto Soles</th>
+                            <th style="width:300px">Descripción</th>
+                            <th style="border-left: 1px solid #e2e2e2; ">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TablaMarca"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Cerrar</span></button>
+                <h4 class="modal-title" id="myModalLabel">Adjuntar Archivos</h4>
+            </div>
+            <div class="modal-body">
+                <div style="width:100%">
+                    <div class="divSpace3"></div>
+                    <div class="divCont2">
+                        <div class="editor-label">
+                            Tipo de Documento
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextBox("IdTipoDocumento")
+                        </div>
+                    </div>
+                    <div class="divSpace3"></div>
+                    <div class="divCont2">
+                        <div class="editor-label">
+                            Número de Documento
+                        </div>
+                        <div class="k-textbox">
+                            @Html.TextBox("NumeroDocumento")
+                        </div>
+                    </div>
+                </div><br /><br /><br />
+
+                <input name="files" id="files" type="file" />
+
+            </div>
+            <div class="modal-footer">
+                <button id="btnAdjuntarCerrar" type="button" class="k-button" data-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+@*@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}*@
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#btnVerArchivos").click(function () {
+            $("#lblTitulo").text("Documentos");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $("#modal-content").empty();
+            $("#modal-content").load("/DocumentoVenta/VerDocumento/@ViewBag.IdDocumentoVenta?var=" + Math.random());
+        });
+
+        $("#btnEditar").click(function () {
+            $("#lblTitulo").text("Editar Documento de Venta");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $("#modal-content").empty();
+            $("#modal-content").load("/DocumentoVenta/EditarDocumento/@ViewBag.IdDocumentoVenta?var=" + Math.random());
+        });
+
+        $("#btnAdjuntar").click(function () {
+            $("#lblTitulo").text("Adjuntar archivos");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+
+            $("#modal-content").empty();
+            $("#modal-content").html(
+                '<div class="form-row mb-2">'+
+                    '<div class="col-md-6">' +
+                        '<div class="editor-label">'+
+                               'Tipo de Documento'+
+                        '</div>'+
+                        '<div class="editor-label">'+
+                                '@Html.TextBox("IdTipoDocumento")'+
+                        '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6">'+
+                        '<div class="editor-label">'+
+                               'Número de Documento'+
+                        '</div>'+
+                        '<div class="k-textbox" style="width:100%">'+
+                                '@Html.TextBox("NumeroDocumento")'+
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="form-row">' +
+                    '<div class="col-md-12">' +
+                        '<input name="files" id="files" type="file" />'+
+                    '</div>'+
+                '</div>'
+            );
+
+            var IdTipoDocumento = $("#IdTipoDocumento").kendoComboBox({
+                dataTextField: "NAM_TYPE_DOCU_ATTA",
+                dataValueField: "ID_TYPE_DOCU_ATTA",
+                filter: "contains",
+                index: 1,
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Total"
+                    },
+                    transport: {
+                        read: "/TypeDocumentModule/ListByModule/3?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#files").kendoUpload({
+                localization: {
+                    select: "Adjuntar"
+                },
+                upload: function (e) {
+                    e.data = {
+                        IdTipoDocumento: IdTipoDocumento.dataItem().ID_TYPE_DOCU_ATTA,
+                        idDocVenta: '@ViewBag.IdDocumentoVenta',
+                        NumDoc: $("#NumeroDocumento").val()
+                    };
+                },
+                remove: function (e) {
+                    e.data = {
+
+                    };
+                },
+                async: {
+                    saveUrl: "/DocumentoVenta/AdjuntarArchivo",
+                    removeUrl: "/DocumentoVenta/RemoverArchivo"
+                },
+                complete: onComplete
+            });
+
+
+
+        });
+
+
+        ObtenerDatosRegistro();
+        ObtenerDatosMarca();
+    });
+
+    function onComplete(e) {
+        $("#NumeroDocumento").val('');
+    }
+
+    function ObtenerDatosRegistro() {
+        $.ajax({
+            url: "/DocumentoVenta/ObtenerDatosRegistro/@ViewBag.IdDocumentoVenta",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                mostrarDatosRegistro();
+            },
+            error: function (source) {
+                alert("Error Carga Json Ventas");
+            }
+        });
+    }
+
+    function ObtenerDatosMarca() {
+        $.ajax({
+            url: "/DocumentoVenta/ObtenerDatosMarca/@ViewBag.IdDocumentoVenta",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                mostrarDatosMarca();
+            },
+            error: function (source) {
+                alert("Error Carga Json Marcas");
+            }
+        });
+    }
+
+    //*************************************************************
+
+    $("#submit").click(function () {
+        $("#submit").prop("disabled", false);
+        toastr.success('Guardando Registro', 'Espere Por Favor');
+    });
+
+    function mostrarDatosRegistro() {
+        $("#divDatoRegistro").empty();
+
+        $.each(data1['Data'], function (index, value) {
+            $("#divDatoRegistro").append(
+                '<div class="form-group row">' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Tipo de OP</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['NAM_TYPE_DOCU_SALE']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">OP</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['NUM_DOCU_SALE']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-4">' +
+                        '<div style="font-weight:bold">Cliente</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['CLIENTE']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-4">' +
+                        '<div style="font-weight:bold">Cliente Final</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['CLIENTEFINAL']) + '</div>' +
+                    '</div>' +
+                 '</div>' +
+                 '<div class="form-group row">' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Inicio Contrato</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHAINICIOC']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Fin Contrato</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHAFINC']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Inicio Soporte</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHAINICIOS']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Fin Soporte</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHAFINS']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Creado por</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['NOMBRECREA']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Fecha Creación</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['FECHACREA']) + '</div>' +
+                    '</div>' +
+                 '</div>' +
+                 '<div class="form-group row">' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">Tipo de Cambio</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['TipoCambio']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">$ Monto Dólares</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['MontoDolares']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-2">' +
+                        '<div style="font-weight:bold">S/ Monto Soles</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['MontoSoles']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6">' +
+                        '<div style="font-weight:bold">Objeto del Servicio</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Servicio']) + '</div>' +
+                    '</div>' +
+                 '</div>' +
+                 '<div class="form-row">' +
+                    '<div class="col-md-12">' +
+                        '<div style="font-weight:bold">Descripción</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Descripcion']) + '</div>' +
+                    '</div>' +
+                 '</div>'
+            );
+
+        });
+    }
+
+    function mostrarDatosMarca() {
+        $("#TablaMarca").empty();
+        $.each(data1['Data'], function (index, value) {
+            $("#TablaMarca").append(
+                '<tr id="' + (data1['Data'][index]['Id']) + '">' +
+                    '<td>' + (data1['Data'][index]['Experiencia']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['NAM_MANU']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['TipoCambio']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['MontoDolares']) + '</td>' +
+                    '<td>' + (data1['Data'][index]['MontoSoles']) + '</td>' +
+                    '<td style="width:300px">' + (data1['Data'][index]['Descripcion']) + '</td>' +
+                    '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                        '<span  id="' + (data1['Data'][index]['Id']) + '" title="Editar" class="fa fa-pen" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px;" data-toggle="modal" data-target="#miModal" onclick="EditarMarca(' + (data1['Data'][index]['Id']) + ')"></span>' +
+                        '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                        (@ViewBag.Permitido == 1 ? '<span id="R' + (data1['Data'][index]['Id']) + '" title="Eliminar" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="EliminarMarca(' + (data1['Data'][index]['Id']) + ')"></span>' : '') +
+                    '</td>' +
+                '</tr>'
+            );
+        });
+    }
+
+    function EditarMarca(id) {
+        $("#lblTitulo").text("Crear/Editar Marca Asociada");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $("#modal-content").empty();
+        $("#modal-content").load("/DocumentoVenta/CrearEditarMarca/" + id + "?dv=@ViewBag.IdDocumentoVenta&var=" + Math.random());
+    }
+
+    function EliminarMarca(id) {
+        $.ajax({
+            url: "/DocumentoVenta/EliminarMarca/" + id + "",
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (source) {
+                uploadDone("OK",1);
+            },
+            error: function (source) {
+                alert("Error Eliminación Marcas");
+            }
+        });
+    }
+
+    function uploadDone(msg, code) {
+
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+
+            if (code == 0) {
+                ObtenerDatosRegistro();
+            }
+            if (code == 1) {
+                ObtenerDatosMarca();
+            }
+
+            toastr.success("Información actualizada", "Guardado");
+        }
+        else {
+
+            var mensaje = 'No se Actualizaron los Datos.\n\n';
+            if (code == 1) {
+                mensaje = 'Ya Existe la Experiencia y Marca.\n\n';
+            }
+            if (code == 2) {
+                mensaje = 'Por favor seleccione los campos obligatorios.';
+            }
+            toastr.error(mensaje,"Advertencia");
+        }
+    }
+
+    function CreaSolucionTI() {
+        var htmlForm = '<div id="FormCrear"></div>';
+        winFormPopUpModal("Crear una Solucion TI", htmlForm, 400, 110);
+        $("#FormCrear").load("/SolucionTI/CreaSolucion/");
+        return false;
+    }
+
+</script>

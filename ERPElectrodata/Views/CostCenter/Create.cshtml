@@ -1,0 +1,76 @@
+﻿@model ERPElectrodata.Models.COST_CENTER
+
+@{
+    Layout = null;
+}
+
+@* CREATE COST CENTER *@
+
+@using (Html.BeginForm("Create", "CostCenter", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmCostCenter", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Centro de costo <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.COD_COST_CENT)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 ">
+                <button id="cancelNewCostCenter" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6">
+                <button id="submitNewCostCenter" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitNewCostCenter").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewCostCenter").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+    });
+
+</script>
+
+<script type="text/javascript">
+
+     function uploadDoneCostCenter(msg, code,nombre) {
+
+         if (msg == "OK") {
+             $("[data-dismiss=modal]").trigger({ type: "click" });
+             toastr.success("Se registró correctamente el centro de costo.", "Información Guardada");
+
+             $("#ID_COST_CENT").data("kendoComboBox").dataSource.read();
+             var ID_COST_CENT = $("#ID_COST_CENT").data("kendoComboBox");
+             ID_COST_CENT.value(code);
+         }
+         else {
+             var messageAsset = '';
+             if (code == '0') {
+                 messageAsset = 'Complete los datos obligatorios.';
+             }
+             else if (code == '1') {
+                 messageAsset = 'Contacte al administrador.';
+             }
+             else {
+                 messageAsset = 'El centro de costo ya existe.';
+             }
+
+             toastr.warning(messageAsset, "Mensaje");
+         }
+     }
+</script>

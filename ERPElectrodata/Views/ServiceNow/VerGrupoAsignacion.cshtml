@@ -1,0 +1,80 @@
+﻿@{
+    ViewBag.Title = "VerCategoria";
+    Layout = null;
+}
+<div class="card-header d-flex">
+    <div>
+        Grupo de Asignación
+    </div>
+    <div style="flex-grow:1" class="justify-content-end d-flex">
+        <button class="btn btn-primary" data-toggle="modal" data-target="#miModal" onclick="agregarFilaGrupoAsignacion()">Nuevo</button>
+    </div>
+</div>
+<div class="card-body">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card card">
+                <div class="card-body">
+                    <table id="tbGrupoAsignacion" class="display" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Grupo de Asignación</th>
+                                <th>Fecha de creación</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+        const table = $("#tbGrupoAsignacion").DataTable({
+            scrollX: true,
+            ajax: "/ServiceNow/ObtenerListaGrupoAsignacion",
+            columns: [
+                { data: "id_GpoAsignacion" },
+                { data: "GpoAsignacion1" },
+                {
+                    data: "created_at",
+                    render: function (data, type, row) {
+                        if (data !== null) {
+                            let dateInMilliseconds = parseInt(data.replace(/\/Date\((\d+)\)\//, '$1'));
+                            let fecha = new Date(dateInMilliseconds);
+                            return fecha.toLocaleString();
+                        }
+                        return data
+                    }
+                },
+                {
+                    data: "id_GpoAsignacion",
+                    render: function (data, type, row) {
+                        return '<button class="btn btn-primary" data-toggle="modal" data-target="#miModal" onclick="editarFilaGrupoAsignacion(' + data + ')">Editar</button>';
+                    }
+                },
+            ]
+        })
+    })
+    function editarFilaGrupoAsignacion(id) {
+        $("#lblTitulo").text("Editar Grupo de Asignación");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').load("/ServiceNow/EditarGrupoAsignacion/" + id);
+    }
+    function agregarFilaGrupoAsignacion() {
+        $("#lblTitulo").text("Agregar Grupo de Asignación");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').load("/ServiceNow/AgregarGrupoAsignacion/");
+    }
+</script>

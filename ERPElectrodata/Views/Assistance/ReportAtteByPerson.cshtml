@@ -1,0 +1,80 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="main-card mb-3 card">
+    <div class="card-body">
+        <div class="col-sm-12 col-lg-12" style="width:100%;" id="allPerformance">
+            <form id="ParamByPerson">
+                <div class="row">
+                    <div class="col-sm-12 col-xl-3">
+                        @ResourceLanguaje.Resource.Staff :<br />
+                        <input type="text" id="ID_ENTI" name="ID_ENTI" style="width:100%;" />
+                    </div>
+                    <div class="col-sm-12 col-xl-3">
+                        Since Day :<br />
+                        <input type="text" id="SIN_DATE" name="SIN_DATE" style="width:100%;" />
+                    </div>
+                    <div class="col-sm-12 col-xl-3">
+                        To Day :<br />  
+                        <input type="text" id="TO_DATE" name="TO_DATE" style="width:100%;"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="main-card mb-3 card">
+    <div class="card-body">
+        <iframe id="MSRSAtteByPerson" style="height:400px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport() {
+        window.frames["MSRSAtteByPerson"].src = "/Reporting/Attendance/ByPerson.aspx?var=" + Math.random() + "&" + $("#ParamByPerson").serialize();
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $.get("/Assistance/Equipo", function (json) {
+            var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+                index: 1,
+                dataTextField: "FIR_NAME",
+                dataValueField: "ID_PERS_ENTI", 
+                template: '<div style="clear:both;width:100%;"><div style="float:left"><img height="40" src=\"/Content/Fotos/${data.ID_FOTO}.jpg\" alt=\"#:data.ID_ENTI#\" /></div>' +
+                                  '<div style="width:100%;"><div style="height:30px;font-size:.9em;width:100%;">&nbsp;${data.FIR_NAME}<br /></div></div></div>',
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['Data'],
+                change: function () {
+                    GenerateReport();
+                },
+                dataBound: function (e) {
+                    GenerateReport();
+                }
+            }).data("kendoComboBox");
+
+        });
+        $("#SIN_DATE").kendoDatePicker({
+            value: new Date('@DateTime.Now.Year', @DateTime.Now.Month-1, 1),
+            change: function () {
+                GenerateReport();
+            }
+        });
+        $("#TO_DATE").kendoDatePicker({
+            value: new Date('@DateTime.Now.Year', @DateTime.Now.Month-1, '@DateTime.Now.Day'),
+            change: function () {
+                GenerateReport();
+            }
+        });
+        //GenerateAttendance();
+    });
+
+</script>

@@ -1,0 +1,117 @@
+﻿@model ERPElectrodata.Models.Equivalencia
+@{
+    Layout = null;
+}
+<style>
+    .select2-container--bootstrap .select2-selection--single {
+        height: calc(2.25rem + 2px);
+    }
+
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card card">
+            @using (Html.BeginForm("AgregarEquivalencia", "ServiceNow", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAgregarEquivalencia", target = "upload_target" }))
+            {
+                <input type="hidden" id="id_GpoAsignacion" name="id_GpoAsignacion" value="@Model.id_GpoAsignacion"/>
+                <div class="card-body">
+                    <div class="col-md-12">
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="form-row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Nombre</label>
+                                            <input class="form-control" type="text" id="Nombre" name="Nombre" value="@Model.Nombre" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Area</label>
+                                            <input class="form-control" type="text" id="Area" name="Area" value="@Model.Area" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Correo Edata</label>
+                                            <input class="form-control" type="text" id="correoEdata" name="correoEdata" value="@Model.correoEdata" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Usuario Red</label>
+                                            <input class="form-control" type="text" id="usuarioRed" name="usuarioRed" value="@Model.usuarioRed" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label id="" for="" class="">Correo Hudbay</label>
+                                            <input class="form-control" type="text" id="correoHudbay" name="correoHudbay" value="@Model.correoHudbay" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Grupo de Asignación</label>
+                                            <select id="GrupoDeAsignacion1" class="form-control">
+                                                <option value="">&nbsp;</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-block text-right card-footer">
+                    <button class="btn-shadow btn btn-primary" id="submit" type="submit">Guardar</button>
+                </div>
+            }
+
+        </div>
+    </div>
+    <button id="closeModal" data-dismiss="modal" hidden></button>
+</div>
+<script>
+    $(document).ready(function () {
+
+        $.ajax({
+            url: '/ServiceNow/ObtenerGrupoAsignacion',
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                let grupoAsignacion = $('#GrupoDeAsignacion1').select2({
+                    data: data.data,
+                    theme: "bootstrap"
+                });
+                let idGrupo = '@Model.id_GpoAsignacion';
+                if (idGrupo) {
+                    $('#GrupoDeAsignacion1').val(idGrupo).trigger('change');
+                }
+            }
+        })
+
+        $('#GrupoDeAsignacion1').on('change', function (e) {
+            let gpoSeleccionado = $('#GrupoDeAsignacion1').select2('data')[0]
+            document.getElementById("id_GpoAsignacion").value = gpoSeleccionado.id
+            
+        });
+        $("#FrmAgregarEquivalencia").submit(function () {
+            let mensaje = "";
+            let selectGrupoAsignacion = $("#GrupoDeAsignacion1").select2("data");
+            if (selectGrupoAsignacion.length == 0) mensaje += "-El campo <b>'Grupo de Asignación'</b> no puede estar vacío.<br/>";
+            else if (selectGrupoAsignacion[0].text == ' ') mensaje += "-El campo <b>'Grupo de Asignación'</b> no puede estar vacío.<br/>";
+            if (mensaje != "") {
+                toastr.warning(mensaje, "Advertencia")
+                return false;
+            } else {
+                return true;
+            }
+
+        });
+
+    });
+</script>

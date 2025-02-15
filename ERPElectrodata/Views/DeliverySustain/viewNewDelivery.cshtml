@@ -1,0 +1,190 @@
+﻿@model ERPElectrodata.Models.DELIVERY_SUSTAIN
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>        
+
+    @using (Html.BeginForm("Create", "DeliverySustain", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormNewDelivery", name = "FormNewDelivery", target = "ut_NewDelivery" }))
+    {
+         <div class="modal-body">
+
+        <div class="divFondoUno">
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.NumberCheck
+                </div>
+                <div class="k-textbox">
+                    @Html.EditorFor(model => model.NUM_CHEC)
+                    @Html.ValidationMessageFor(model => model.NUM_CHEC)
+                </div>
+            </div>
+            <div class="divSpace2" style=" width:6.5%;"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.Date
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.DOC_DATE)
+                    @Html.ValidationMessageFor(model => model.DOC_DATE)
+                </div>
+            </div>
+        </div>
+        <div class="divFondoDos">
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.Currency
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.COIN)
+                    @Html.ValidationMessageFor(model => model.COIN)
+                </div>
+            </div>
+            <div class="divSpace2" style=" width:6.5%;"></div>
+            <div class="divCont2" id="divAmount">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.Amount
+                </div>
+                <div style="margin-top:0px;">
+                    @Html.EditorFor(model => model.DOC_AMOU)
+                    @Html.ValidationMessageFor(model => model.DOC_AMOU)
+                </div>
+            </div>
+        </div>
+
+           <div class="divFondoUno">
+              <div class="divSpace2"></div>
+                 <div class="divCont2">
+                     <div class="editor-label">
+                         Petty Cash Previous
+                     </div>
+                     <div class="editor-field">
+                         @Html.EditorFor(model => model.ID_PREV)
+                         @Html.ValidationMessageFor(model => model.ID_PREV)
+                     </div>
+                 </div> 
+             </div>
+
+
+
+    </div>@*----Fin Body----*@
+
+            @*---------------------------Footer--------------------------------------------------------*@
+            <div class="modal-footer">
+                <button id="submitRequest" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+            </div>
+
+            @*<div class="divFondoUno" style="margin-bottom:5px;">
+                    <div style="float: right; min-width: 10px; width:3%; height: 1px;"></div>
+                    <div style="display: inline-block; float: right; padding-top: 8px; ">
+                        <button id="submitRequest" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+                    </div>
+                </div>*@
+        }
+        <iframe id="ut_NewDelivery" name="ut_NewDelivery" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+    
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var DOC_DATE = $("#DOC_DATE").kendoDatePicker().data("kendoDatePicker");
+
+        var LCoin = [{ text: "@ResourceLanguaje.Resource.PeruvianNuevoSol", value: "MN" }, { text: "@ResourceLanguaje.Resource.DollarAmerican", value: "ME" }];
+        var COIN = $("#COIN").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            dataValueField: "value",
+            suggest: true,
+            dataSource: LCoin,
+            index: 0,
+        }).data("kendoComboBox");
+
+        $("#DOC_AMOU").kendoNumericTextBox({
+            min: 0
+        });
+
+        var ID_PREV = $("#ID_PREV").kendoComboBox({
+            dataTextField: "DOC_NUMB_AND_NAME_TYPE",
+            dataValueField: "ID_DELI_SUST",
+            template: '<div style="width:100%; display:inline-block;">' +
+                        '<div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; "><b>${DOC_NUMB}</b>&nbsp;(${DAT_REG})</div>' +
+                        '<div style="width:100%; float:left; text-transform:capitalize;font-size:.9em; margin-top:-2px;">Status: ${NAM_STAT_DELI_SUST}</div>' +                        
+                        '<div style="width:100%; float:left; text-transform:capitalize;font-size:.9em; margin-top:-4px;">@ResourceLanguaje.Resource.AmountAvailable: ${AMO_AVAI}</div>' +
+                        '</div>',
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            index: 0,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DeliverySustain/ListPettyCashPrevious?var=" + Math.random()
+                }
+            }
+        });
+
+
+
+
+    });
+
+    function SavingSubmit()
+    {
+        $('#myModalLoading').modal('show');
+    }
+
+    function uploadDonePettyCash(msg, msnErr) {
+        $('#myModalLoading').modal('hide');
+
+        if (msg == 'OK') {           
+
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.InformationSaved");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>"+msnErr+"</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                       "</div>");
+
+            var undo = $("#continues").bind("click", function () {
+               
+                $("#SmallModalContent").modal("hide");
+                $('#ModalContent').modal('hide');
+            });
+
+            $('#divGridClosure').data('kendoGrid').dataSource.read();
+            $('#divGridClosure').data('kendoGrid').refresh();
+        }
+        else {
+
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.InformationMissing");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + msnErr + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                       "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');               
+            });
+        }
+    }
+
+
+
+</script>
+

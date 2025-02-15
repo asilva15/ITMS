@@ -1,0 +1,390 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    ViewBag.Title = "Crear Entrega";
+    Layout = null;
+}
+
+<div class="afterMain">
+
+    <div style="float:left;width:100%;">
+        <div class="titleForm">
+            <div class="title">Recepción de Activo Interno</div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" id="Encabezado">
+                @using (Html.BeginForm("CrearRecepcion", "Inventario", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormDeliveryReception", target = "upload_target" }))
+                {
+                    @Html.ValidationSummary(true)
+                    <fieldset>
+                        <legend>Entrega Interna</legend>
+
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Usuario
+                                </div>
+                                <div class="editor-field">
+                                    @Html.TextBoxFor(model => model.ID_PERS_ENTI)
+                                    @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Fecha de Entrega @ResourceLanguaje.Resource.DateFormat
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.FEC_TICK)
+                                    @Html.ValidationMessageFor(model => model.FEC_TICK)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Area
+                                </div>
+                                <div class="editor-field">
+                                    @Html.TextBoxFor(model => model.ID_AREA)
+                                    @Html.ValidationMessageFor(model => model.ID_AREA)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Locación
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_LOCA)
+                                    @Html.ValidationMessageFor(model => model.ID_LOCA)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoUno">
+                            <div style="width: 98%; float:left; padding: 0px 0px 0 15px;">
+                                <div class="editor-label">
+                                    Comentario
+                                </div>
+                                <div class="editor-field">
+                                    @Html.TextAreaFor(model => model.SUM_TICK)
+                                    @Html.ValidationMessageFor(model => model.SUM_TICK)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div id="divActivosAgregados" style="width: 96%;text-align: center; padding: 0px 0px 0 15px;"></div>
+                            <div style="height: 10px"></div>
+                            <div style="display:inline-block; float:right; padding:0px 15px 15px 5px;">
+                                <div style="float:left;">
+                                    <button id="AdicionarActivo" class="k-button">Agregar Activo</button>
+                                </div>
+                                <div class="divSpace3"></div>
+                                <div style=" float:left;">
+                                    <button id="submit" class="k-button">Crear</button>
+                                </div>
+                                <div class="divSpace3"></div>
+                                <div style=" float:left;">
+                                    <button id="reset" class="k-button" onclick="cancel(); return false;">Cancelar</button>
+                                </div>
+                                <div class="divSpace3"></div>
+                            </div>
+                        </div>
+                        <iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+                        <input id="idsActivo" type="hidden" name="idsActivo" value="" />
+                    </fieldset>
+                }
+            </div>
+        </div>
+    </div>
+    <div style="width:35%;float:right;">
+        <div id="divAdicionarActivo"></div>
+        <div id="divPrint"></div>
+    </div>
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<script type="text/javascript">
+    var idx = 0;
+    var ids = '';
+    $(document).ready(function () {
+
+        $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                }
+            }
+        });
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").data("kendoComboBox");
+
+        $("#ID_AREA").kendoComboBox({
+            dataTextField: "NAM_AREA",
+            dataValueField: "ID_AREA",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Area/ListByClient?var=" + Math.random()
+                }
+            }
+        });
+        var ID_AREA = $("#ID_AREA").data("kendoComboBox");
+
+        ID_PERS_ENTI.bind("change", function (e) {
+            ID_AREA.value(ID_PERS_ENTI.dataItem().ID_AREA);
+        });
+
+        var FEC_TICK = $("#FEC_TICK").kendoDateTimePicker().data("kendoDateTimePicker");
+        FEC_TICK.min("@ViewBag.FEC_TICK");
+        FEC_TICK.value("@ViewBag.FEC_TICK");
+
+        var ID_LOCA = $("#ID_LOCA").kendoComboBox({
+            dataTextField: "NAM_LOCA",
+            dataValueField: "ID_LOCA",
+            template: '<div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                        '<div>${ data.NAM_LOCA }</div>',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Location/List?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#SUM_TICK").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#submit").click(function () {
+            winPopUpModalLoad("Guardando Información", "Espere por favor", 300, 130);
+        });
+
+        $("#AdicionarActivo").click(function (event) {
+            event.preventDefault();
+
+            winPopUpModal("Activo Interno", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;font-size:.95em;'>" +
+            "<div class='divFondoUno'><div style='width: 98%; float:left; padding: 0px 0px 0 5px;'>" +
+            "<div class='editor-label'>Activo Interno(Código de Activo)</div><div class='editor-field' style='width: 98%;'>" +
+            "<input id='IdInventario' type='text' name='IdInventario'></div></div></div>" +
+            "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+            "<button id='adicActivo' class='k-button' style='font-size:.9em;'>Agregar Activo</button></div></div>", 350, 150);
+
+            $("#IdInventario").kendoComboBox({
+                dataTextField: "Codigo",
+                dataValueField: "Id",
+                template: '<div style="border-top:1px dashed;padding:5px 0px 5px 0px;"><div style="font-weight:bold;">${ data.Codigo }</div>' +
+                    '<div><div style="font-weight:bold; float:left;">Articulo :&nbsp;</div>${ data.Articulo }</div>' +
+                    '<div><div style="font-weight:bold; float:left;">Tipo :&nbsp;</div>${ data.TipoInventario }</div>' +
+                    '<div><div style="font-weight:bold; float:left;">Serie :&nbsp;</div>${ data.Serie }</div>' +
+                    '<div><div style="font-weight:bold; float:left;">Marca :&nbsp;</div>${ data.Marca }</div>'+'</div>',
+                filter: "contains",
+                autoBind: false,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Grid",
+                        total: "Cantidad"
+                    },
+                    transport: {
+                        read: "/Inventario/ListarxTextoRecepcion?IdPersEnti=" + $("#ID_PERS_ENTI").val() + "&var=" + Math.random()
+                    }
+                }
+            });
+            var IdInventario = $("#IdInventario").data("kendoComboBox");
+            IdInventario.list.width(330);
+
+            $("#adicActivo").click(function () {
+                var dataItem = IdInventario.dataItem();
+                var sw = 0;
+                var elem = ids.split(',');
+                for (f = 0; f < elem.length - 1; f++) {
+                    if (elem[f] == dataItem.Id) {
+                        alert('Ya se encuentra agregado.');
+                        f = elem.length;
+                        sw = 1
+                    }
+                }
+                if (sw == 0) {
+                    var strHtml =
+                        '<div id="divDetail_' + String(dataItem.Id) + '">' +
+                        '<div id="divDetailAsset_' + String(dataItem.Id) + '" class ="FondoGris01" onmouseover=\'this.style.background="#F3F3F3"\' onmouseout=\'this.style.background="#F7F7F7"\'>' +
+                        '<div class = "casilla">' +
+                            '<div class = "smallField">Tipo de Activo</div>' +
+                            '<div class = "smallTitle">' + String(dataItem.TipoInventario).toUpperCase() + '</div>' +
+                        '</div>' +
+                        '<div class = "casilla">' +
+                            '<div class = "smallField">Código</div>' +
+                            '<div class = "smallTitle">' + String(dataItem.Codigo) + '</div>' +
+                        '</div>' +
+                        '<div class = "casilla">' +
+                            '<div class = "smallField">Número de Serie</div>' +
+                            '<div class = "smallTitle">' + String(dataItem.Serie) + '</div>' +
+                        '</div>' +
+                        '<div class = "casilla">' +
+                            '<div class = "smallField">Marca</div>' +
+                            '<div class = "smallTitle">' + String(dataItem.Marca) + '</div>' +
+                        '</div>' +
+                        '<div class = "casilla">' +
+                            '<div class = "smallField">Modelo</div>' +
+                            '<div class = "smallTitle">' + String(dataItem.Modelo) + '</div>' +
+                        '</div>' +
+                        '<div onclick="removeAsset(this);" id="removeAsset_' + String(dataItem.Id) + '" style="font-weight: bold; float:right; top:-1px; right:1px; text-align: center; position: relative; height: 30px; width: 40px; background-color: #FFFFFF; cursor: pointer; padding-top: 10px;" title="Eliminar" onmouseover=\'this.style.background="#B21E1E"; this.style.color="#FFFFFF";\' onmouseout=\'this.style.background="#FFFFFF"; this.style.color="#000000";\'>X</div>' +
+                    '</div>' +
+                    '<div style="height: 5px"></div></div>';
+                    $("#divActivosAgregados").prepend(strHtml);
+
+                    ids = ids + String(dataItem.Id) + ',';
+                    $("#idsActivo").val(ids);
+
+                    document.getElementById('bkg').style.height = String($(document).height()) + 'px';
+                }
+            });
+        });
+
+    });
+
+    function removeAsset(c) {
+        var elem = c.id.split('_');
+        ids = ids.replace(elem[1] + ',', '');
+        $("#idsActivo").val(ids);
+        $('#divDetail_' + String(elem[1])).remove();
+    }
+
+</script>
+
+<script type="text/javascript">
+    function cancel() {
+        winPopUpModal("Operation Cancelled", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;'>The operation to perform was cancelled</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='continuer' class='k-button'>Continue</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#continuer")
+            .bind("click", function () {
+                location.reload(true);
+            });
+
+        $("#closebtnmodal").click(function () {
+            location.reload(true);
+        });
+
+        return false;
+    }
+
+    function uploadDone(msg, code,id) {
+        if (msg == "OK") {
+            closeWinModalPopUpLoad();
+            winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0px 10px 0px;'>Información de Entrega Guardada.</div>"
+           + "<div style='padding:10px 0px 10px 0px;'>Código de Ticket: " + code + "</div>" +
+           "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>Continue</button>" +
+           "</div></div>"
+             , 400, 220);
+
+            var undo = $("#continues")
+           .bind("click", function () {
+               closeWinModalPopUp();
+               var newurl = location.host + "/TicketInventario";
+               location = "http://" + location.host + "/TicketInventario";
+           });
+
+            $("#closebtnmodal").click(function () {
+                //location.reload(true);
+                var newurl = location.host + "/TicketInventario";
+                location = "http://" + location.host + "/TicketInventario";
+            });
+        }
+        else {
+            closeWinModalPopUpLoad();
+            console.log(location.host + "/DeliveryReception/Details/" + 46972);
+
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+            }
+            else if (code == '1') {
+                titleAsset = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+                }
+            else {
+                titleAsset = '@ResourceLanguaje.Resource.Warning';
+                messageAsset = '@ResourceLanguaje.Resource.AssetMessage2';
+
+                var elem = msg.split(',');
+                for (f = 0; f < elem.length - 1; f++) {
+                    $("#divDetailAsset_" + elem[f]).addClass('borderDetailsRojo');
+                }
+            }
+
+            winPopUpModal(titleAsset, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + messageAsset + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+</script>

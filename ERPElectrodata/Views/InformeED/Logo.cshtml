@@ -1,0 +1,210 @@
+﻿@{
+    ViewBag.Title = "Logo";
+    Layout = null;
+}
+
+<style>
+    .drop-area {
+        border: 2px dashed #ccc;
+        border-radius: 20px;
+        padding: 20px;
+        text-align: center;
+        font-family: Arial, sans-serif;
+        font-size: 16px;
+        margin-top: 20px;
+        cursor: pointer;
+    }
+
+        .drop-area.dragover {
+            background-color: #f5f5f5;
+        }
+
+        .drop-area.image-dropped {
+            border: none;
+            padding: 0;
+            background-color: transparent;
+        }
+
+            .drop-area.image-dropped img {
+                max-width: 100%;
+                max-height: 400px;
+            }
+
+    #error-message {
+        color: red;
+        margin-top: 10px;
+        display: none;
+    }
+
+    #buttons-container {
+        text-align: center;
+        margin-top: 20px;
+    }
+
+        #buttons-container button {
+            margin: 10px;
+        }
+
+    #eliminar-btn {
+        background-color: transparent;
+        border: none;
+        color: red;
+        cursor: pointer;
+        display: none;
+        font-size: 20px;
+        margin-top: 10px;
+    }
+</style>
+
+
+<input id="DocuSaleLogo" name="DocuSale" value="@ViewBag.NumDocuSale" type="hidden" />
+<div class="container">
+    <div class="drop-area" id="drop-area">
+        <h3>Arrastra y suelta aquí la imagen</h3>
+        <p>O selecciona una imagen haciendo clic aquí.</p>
+        <input name="files" id="files" type="file"  accept="image/*" >
+    </div>
+    <div id="preview-container"></div>
+    <div id="error-message"></div>
+    <div id="buttons-container">
+        <button class="btn btn-primary" id="guardarLogo">Guardar</button>
+        <input type="button" data-dismiss="modal" class="btn btn-secondary" id="cerrar-btn" value="Cerrar">
+        <input type="button" class="btn btn-danger" id="eliminar-btn" value="&times;">
+    </div>
+</div>
+
+<script>
+
+ /*   var $a = jQuery.noConflict();*/
+    var droppedFile;
+
+    $(document).ready(function () {
+        var dropArea = document.getElementById("drop-area");
+
+        dropArea.addEventListener("dragenter", function () {
+            $("#drop-area").addClass("dragover");
+        });
+
+        dropArea.addEventListener("dragleave", function () {
+            $("#drop-area").removeClass("dragover");
+        });
+
+        dropArea.addEventListener("dragover", function (e) {
+            e.preventDefault();
+        });
+
+        dropArea.addEventListener("drop", function (e) {
+            e.preventDefault();
+            $("#drop-area").removeClass("dragover");
+            var files = e.dataTransfer.files;
+            if (files.length > 0) {
+                var file = files[0];
+                if (isValidImage(file)) {
+                    showPreviewImage(file);
+                    $("#error-message").hide();
+
+                } else {
+                    displayErrorMessage("La imagen seleccionada no es válida.");
+                }
+            }
+        });
+
+        $("#guardarLogo").click(function () {
+            var file = droppedFile || $("#files")[0].files[0]; // Toma la imagen arrastrada o seleccionada
+
+            if (isValidImage(file)) {
+                var formData = new FormData();
+                formData.append("files", file);
+
+                var DocuSale = $("#DocuSaleLogo").val();
+                $.ajax({
+                    url: "/InformeED/GuardarLogo?NumDocuSale=" + DocuSale,
+                    type: "POST",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function () {
+                        alert("Imagen guardada correctamente.");
+                        const boton = document.getElementById('cerrar-btn');
+                        boton.click();
+                    },
+                    error: function () {
+                        alert("Error al guardar la imagen.");
+                    }
+                });
+            } else {
+                displayErrorMessage("La imagen seleccionada no es válida.");
+            }
+        });
+
+        $("#eliminar-btn").click(function () {
+            $("#drop-area").removeClass("image-dropped");
+            $("#drop-area").html('<h3>Arrastra y suelta aquí la imagen</h3><p>O selecciona una imagen haciendo clic aquí.</p>'
+                + '<input name = "files" id = "files" type = "file"  accept = "image/*" >');
+            $("#preview-container").hide();
+            $("#eliminar-btn").hide();
+            $("#error-message").hide();
+        });
+
+        $("#cerrar-btn").click(function () {
+
+        });
+
+        var DocuSale = $("#DocuSaleLogo").val();
+        $.ajax({
+            url: "/InformeED/LogodePlantilla?NumDocuSale=" + DocuSale,
+            type: "GET",
+            success: function (data) {
+                if (data.Success) {
+                    var imagePath = data.FilePath;
+                    showPreviewImageFromPath(imagePath);
+                }
+            },
+            error: function () {
+                // Manejar el error si ocurre
+            }
+        });
+
+        
+
+        
+    });
+    function isValidImage(file) {
+
+        return file.type.startsWith("image/");
+    }
+
+    function displayErrorMessage(message) {
+        $("#error-message").text(message);
+        $("#error-message").show();
+    }
+
+    function showPreviewImage(file) {
+
+        droppedFile = file; // 
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            $("#drop-area").html('<img src="' + e.target.result + '">');
+            $("#drop-area").addClass("image-dropped");
+            $("#eliminar-btn").show();
+        };
+        reader.readAsDataURL(file);
+    }
+    //function showPreviewImageFromPath(imagePath) {
+    //    $("#drop-area").html('<img src="' + imagePath + '">');
+    //    $("#drop-area").addClass("image-dropped");
+    //    $("#eliminar-btn").show();
+    //}
+
+    function showPreviewImageFromPath(imagePath) {
+    var timestamp = new Date().getTime(); // Agregar un timestamp único
+    $("#drop-area").html('<img src="' + imagePath + '?t=' + timestamp + '">');
+    $("#drop-area").addClass("image-dropped");
+    $("#eliminar-btn").show();
+}
+
+
+
+</script>
+

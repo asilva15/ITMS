@@ -1,0 +1,474 @@
+﻿@model ERPElectrodata.Models.VACATION
+
+@{
+//Layout = null;
+}
+
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">
+<script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+@*<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>*@
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<link href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css" />
+
+<style>
+    .fc-time {
+        display: none;
+    }
+
+    .fc-title {
+        font-weight: bold;
+    }
+</style>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="pe-7s-car icon-gradient bg-mean-fruit"></i>
+            </div>
+            <div>
+                REPORTE DOCUMENTOS
+                <div class="page-title-subheading">En este módulo encontrarás todos los documentos de los Colaboradores</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="tab-content">
+    @using (Html.BeginForm("ExportarListadocumentoTrabajadores", "Talent", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+    {
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <div class="card-title">Filtrar</div>
+                        <form class="">
+                            <div class="form-row ">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblEstado" for="lblEstado" class="">Colaborador</label>
+                                        @Html.Editor("ID_ENTI")
+
+                                    </div>
+                                </div>
+
+
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblEstado" for="lblEstado" class="">Tipo de Documento</label>
+                                        @Html.Editor("ID_TYPE_DOCU")
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3 justify-content-center">
+                                    <div class="position-relative form-group justify-content-center">
+                                        <label id="lblEstado" for="lblEstado" class="">Estado Colaborador</label>
+                                        @Html.Editor("ID_PERS_STAT")
+
+                                    </div>
+                                </div>
+
+
+                            </div>
+                            <div class="form-row ">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaInicio" for="FechaInicioTrabajo" class="">Fecha Inicio</label>
+                                        @Html.TextBox("FechaIngresoInicio")
+
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaInicio" for="FechaInicioTrabajo" class="">Fecha Fin</label>
+                                        @Html.TextBox("FechaIngresoFin")
+
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+
+                                </div>
+
+
+
+                            </div>
+
+                            @*<div class="d-grid gap-2 d-md-flex justify-content-md-end">*@
+                            <div class="form-row">
+                                <div class="col-md-2">
+                                    <br />
+                                    <button type="button" class="btn btn-primary btn-block" id="Buscar" onclick="ListarTablaDocumentos()"><i class="fa fa-search"></i> Buscar</button>
+                                </div>
+                                <div class="col-md-7">
+                                </div>
+                                <div class="col-md-2  justify-content-end ">
+                                    <br />
+                                    <div class="" style="width:100%;">
+                                        <button type="button" id="export" class="btn btn-success btn-block" onclick="validaryExportarExel();"><i class="fa fa-file-excel"></i> Exportar</button>
+                                    </div>
+
+
+                                </div>
+
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="card-title" id="titleForm">Reporte de Documentos</div>
+                <fieldset>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="position-relative form-group">
+                                <table id="tbDocumentos" class="table table-bordered table-striped" style="width:100%;" > @*table-responsive-lg*@
+                                    <thead>
+                                        <tr>
+                                            @*<th>Id</th>*@
+                                            <th>COLABORADOR</th>
+                                            <th>FECHA INICIO</th>
+                                            <th>FECHA FIN</th>
+                                            <th>TIPO DOCUMENTO</th>
+                                            <th>DOCUMENTO</th>
+                                            <th>ESTADO </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                    @*<tfoot>
+                                        <tr>*@
+                                            @*<th>Id</th>*@
+
+
+                                            @*<th>COLABORADOR</th>
+                                            <th>FECHA</th>
+
+                                            <th>TIPO DOCUMENTO</th>
+                                            <th>TIPO DOCUMENTO</th>
+                                            <th>DOCUMENTO</th>
+
+                                            <th>ESTADO</th>
+
+
+                                        </tr>
+                                    </tfoot>*@
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+
+        var FechaIngresoInicio = $("#FechaIngresoInicio").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDateTimePicker");
+        var FechaIngresoFin = $("#FechaIngresoFin").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDateTimePicker");
+
+        //$("#IdUsuario").kendoComboBox({
+        //    dataTextField: "Evaluado",
+        //    dataValueField: "IdPersEnti",
+        //    filter: "contains",
+        //    autoBind: true,
+        //    delay: 500,
+        //    minLength: 0,
+        //    suggest: true,
+        //    dataSource: {
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/EvaluacionPersonal/ListarPersonal?var=" + Math.random()
+        //        }
+        //    },
+        //});
+        $("#ID_ENTI").kendoComboBox({
+            dataTextField: "NombreColaborador",
+            dataValueField: "IdEntidad",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Talent/ListarPersonalxDocumentos?var=" + Math.random()
+                }
+            },
+        });
+        $("#ID_TYPE_DOCU").kendoComboBox({
+            placeholder: "",
+            dataTextField: "NombreDocumento",
+            dataValueField: "IdTipoDocumentos",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Talent/ListarTipoDocumentos?var=" + Math.random()
+                }
+            }
+        });
+        $("#ID_PERS_STAT").kendoComboBox({
+            dataTextField: "NomnbreEstado",
+            dataValueField: "IdEstadoPersona",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Talent/ListarEstadoColaborador?var=" + Math.random()
+                }
+            },
+        });
+
+        var FechaIni = $("#FechaIngresoInicio").kendoDatePicker({
+            format: "dd/MM/yyyy",
+            //min: new Date(),
+            change: function () {
+                FechaInicio = this.value();
+            }
+        });
+
+        Date.prototype.addDays = function (days) {
+            const date = new Date(this.valueOf());
+            date.setDate(date.getDate() + days);
+            return date;
+        };
+
+
+
+        $("#SUMMARY").addClass("form-control");
+
+        /*$("#archivos").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            select: onSelectAttaCess,
+            multiple: false,
+        });*/
+
+
+        //function ExportarProgramas() {
+        //    valor = document.getElementById("FechaIngresoInicio").value;
+        //    valor2 = document.getElementById("FechaIngresoFin").value;
+        //    if (valor != "" && valor2 == "") {
+        //        alert('no puede estar vacia');
+        //    } else {
+        //        $("#formExportar").submit();
+        //    }
+        //}
+
+        ListarTablaDocumentos();
+        VerCalendario();
+
+        //$("#submit").click(function () {
+
+        //    toastr.info("Guardando...", "Espere por favor");
+        //});
+
+
+    });
+
+    //function validarSoloJs() {
+    //    valor = document.getElementById("FechaIngresoInicio").value;
+    //    valor2 = document.getElementById("FechaIngresoFin").value;
+    //    if (valor != "" && valor2 == "") {
+    //        alert('no puede estar vacia');
+    //    } else {
+    //        alert('exelente');
+    //    }
+    //}
+
+    function validaryExportarExel() {
+
+        novacio = document.getElementById("FechaIngresoInicio").value;
+        numero = document.getElementById("FechaIngresoFin").value;
+        nomcolaborador = document.getElementById("ID_ENTI").value;
+        tipoDocumento = document.getElementById("ID_TYPE_DOCU").value;
+        estadoColaborador = document.getElementById("ID_PERS_STAT").value;
+
+        console.log(novacio);
+        console.log(numero);
+        console.log(nomcolaborador);
+        console.log(tipoDocumento);
+        console.log(estadoColaborador);
+
+        if ((!novacio.length && !nomcolaborador.length && !tipoDocumento.length && !estadoColaborador.length)) {
+            toastr.warning("Elija un filtro")
+            return false;
+
+        } else if ((!novacio.length && numero.length) || (novacio.length && !numero.length)) {
+            toastr.warning("Es necesario llenar las 2 fechas")
+            return false;
+        } else if (estadoColaborador.length && !tipoDocumento.length && !nomcolaborador.length && !novacio.length) {
+            toastr.warning("Es necesario elegir otro filtro")
+            return false;
+        } else {
+            $("#formExportar").submit();
+
+        }
+    
+    }
+
+
+
+
+
+    function padLeft(n) {
+        return ("00" + n).slice(-2);
+    }
+
+
+    function ListarTablaDocumentos() {
+        $('#tbDocumentos').dataTable().fnDestroy();
+
+        var table = $('#tbDocumentos').dataTable({
+            "order": [[0, "asc"], [0, "asc"]],
+            responsive: true,
+            dom: 'lBfrtip',
+            "bPaginate": true,
+            "searching": true,
+            ajax: {
+                "url": "/Talent/ListarTablaDocumentos_User",
+                "data": function (d) {
+                    d.ID_ENTI = $("#ID_ENTI").val() == '' ? 0 : $("#ID_ENTI").val(),
+                        d.ID_TYPE_DOCU = $("#ID_TYPE_DOCU").val() == '' ? 0 : $("#ID_TYPE_DOCU").val(),
+                        d.FechaIngresoInicio = $("#FechaIngresoInicio").val() == '' ? '' : $("#FechaIngresoInicio").val(),
+                        d.FechaIngresoFin = $("#FechaIngresoFin").val() == '' ? '' : $("#FechaIngresoFin").val(),
+                        d.ID_PERS_STAT = $("#ID_PERS_STAT").val() == '' ? 0 : $("#ID_PERS_STAT").val()
+
+
+                }
+            },
+            columns: [
+                //{ data: "Id" },
+                { data: "NombreColaborador", width: "20%" },
+                { data: "Inicio" },
+                { data: "fechaFin" },
+                { data: "TipoDocumento" },
+                { data: "NombreDocumento" },
+                //{ data: "EstadoColaborador" }
+                {              
+                    data: null,
+                    render: function (data, type, row) {
+                        var opcion = "";
+                        if (data.EstadoColaborador == 1) {
+                            opcion = "Activo"//'<center><span class="badge badge-' + data.EstadoColor + '">Activo</span></center>';
+                        }
+                        else {
+                            opcion = "Inactivo"
+                        }
+                        return opcion
+                    }
+                }
+            ],
+
+        });
+
+    }
+
+    function verFormato(id) {
+        window.open("https://itms.electrodata.com.pe/Reporting/Vacaciones/Formato.aspx?id=" + id, '_blank');
+    }
+
+
+
+
+
+    function uploadDone(msg, code) {
+
+        //Cierre de la ventana de espera.
+        //closeWinModalPopUpLoad();
+
+        //Todo conforme se procede a mostrar mensaje de satisfacción.
+        if (msg == "OK") {
+            var title = 'Información Guardada';
+
+            swal({
+                title: title,
+                type: 'success',
+                text: code,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                //var newurl = location.host + "/#/Home";
+                //location = "http://" + location.host + "/#/Home";
+                location.reload();
+            })
+
+        }
+        //En caso exista disconformidad se muestra mensaje
+        else {
+            var title = 'Advertencia';
+            swal({
+                title: title,
+                type: 'info',
+                text: code,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+        }
+    }
+    window.onload = function () {
+
+        var contenedor = document.getElementById("contenedor_carga");
+        contenedor.style.visibility = "hidden";
+        contenedor.style.opacity = "0";
+
+
+    }
+</script>
+

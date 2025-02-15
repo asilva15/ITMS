@@ -1,0 +1,863 @@
+﻿@{
+    ViewBag.Title = "Index";
+    //Layout = null;
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+@*<script src="~/Bootstrap/js/bootstrap.min.js"></script>*@
+
+
+<input type="hidden" id="FlagTicket" name="FlagTicket" value="0" />
+@*<input type="hidden" id="Flag" name="Flag" value="0" />*@
+<div id="divContent">
+    <div class="app-page-title mb-2">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="fa fa-archive icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <b>GESTIÓN DE INFORMES</b>
+                    <div class="page-title-subheading">Lista de Informes.</div>
+                </div>
+            </div>
+            <div class="page-title-actions">
+                <div class="d-inline-block">
+                    <button class="btn-shadow btn btn-hover-shine btn-warning" data-toggle="modal" data-target="#miModal" onclick="VerCalendario();"><i class="fa fa-calendar"></i> Calendario</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Cliente</label>
+                <input id="IdCliente" name="IdCliente" type="text" style="width:100%" />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Cliente Final</label>
+                <input id="IdClienteFinal" name="IdClienteFinal" type="text" style="width:100%">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Marca</label>
+                <input id="IdMarca" name="IdMarca" type="text" style="width:100%">
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Responsable</label>
+                <input id="IdResponsable" name="IdResponsable" type="text" style="width:100%">
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="form-group">
+                <label>Ticket Asignado a </label>
+                <input id="IdPersEntiAssi" name="IdPersEntiAssi" type="text" style="width:100%">
+            </div>
+        </div>
+
+        <div class="col-md-1">
+            <br />
+            <br />
+            <div class="form-group">
+                <input type="checkbox" id="chkSoloTickets" name="chkSoloTickets" class="form-check-input" value="0"> Sólo Tickets
+            </div>
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>OP</label>
+                <input id="bOP" name="bOP" type="text" style="width:100%" />
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Fecha Inicio</label>
+                <input id="FInicio" name="FInicio" type="text" style="width:100%">
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="form-group">
+                <label>Fecha Fin</label>
+                <input id="FFin" name="FFin" type="text" style="width:100%">
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Estado</label>
+                <input id="IdEstadoInforme" name="IdEstadoInforme" type="text" style="width:100%">
+            </div>
+        </div>
+
+        <div class="col-md-2">
+            <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="Buscar"><i class="fa fa-search"></i> Buscar</button>
+            <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="Limpiar"><i class="fa fa-eraser"></i> Limpiar</button>
+            <br />
+        </div>
+
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3 col-xl-2 mb-4">
+            <div class="card widget-content btn" id="homInc" onclick="ListadoInformes(1)" style="background-color: #868686;">
+                <div class="widget-content-wrapper text-white">
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading" style="font-size: 12px;">Sin</div>
+                        <div class="widget-heading" style="font-size: 12px;">plantilla</div>
+                        <div class="widget-subheading" style="font-size: 11px;">Total @ViewBag.TotalSinTicket</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxSinTicket"> @ViewBag.TotalSinTicket</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-xl-2 mb-4">
+            <div class="card widget-content btn" id="homInc1" onclick="ListadoInformes(2)" style="background-color: #149CEA;">
+                <div class="widget-content-wrapper text-white">
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading" style="font-size: 12px;">Pendiente de</div>
+                        <div class="widget-heading" style="font-size: 12px;">Elaboración</div>
+                        <div class="widget-subheading" style="font-size: 11px;">Total @ViewBag.TotalElaboracion</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxElaboracion"> @ViewBag.TotalElaboracion</span></div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="col-lg-3 col-xl-2 mb-4">
+            <div class="card widget-content btn" id="homInc2" onclick="ListadoInformes(3)" style="background-color: #3AC47D;">
+                <div class="widget-content-wrapper text-white">
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading" style="font-size: 12px;">Pendiente de</div>
+                        <div class="widget-heading" style="font-size: 12px;">Aprobación</div>
+                        <div class="widget-subheading" style="font-size: 11px;">Total @ViewBag.TotalAprobacion</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxAprobacion"> @ViewBag.TotalAprobacion</span></div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xl-2 mb-4">
+            <div class="card widget-content btn" id="homInc3" onclick="ListadoInformes(4)" style="background-color: #9C0000;">
+                <div class="widget-content-wrapper text-white">
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading" style="font-size: 12px;">Pendiente de</div>
+                        <div class="widget-heading" style="font-size: 12px;">Corrección</div>
+                        <div class="widget-subheading" style="font-size: 11px;">Total @ViewBag.TotalCorreccion</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxCorreccion"> @ViewBag.TotalCorreccion</span></div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xl-2 mb-4">
+            <div class="card widget-content btn" id="homInc4" onclick="ListadoInformes(5)" style="background-color: #6C1754;">
+                <div class="widget-content-wrapper text-white">
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading" style="font-size: 12px;">Pendiente de</div>
+                        <div class="widget-heading" style="font-size: 12px;">Envío</div>
+                        <div class="widget-subheading" style="font-size: 11px;">Total @ViewBag.TotalEnvio</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxEnvio"> @ViewBag.TotalEnvio</span></div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xl-2 mb-4">
+            <div class="card widget-content btn" id="homInc5" onclick="ListadoInformes(6)" style="background-color: #0C72AC;">
+                <div class="widget-content-wrapper text-white">
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading" style="font-size: 12px;">Pendiente de</div>
+                        <div class="widget-heading" style="font-size: 12px;">Evidencia</div>
+                        <div class="widget-subheading" style="font-size: 11px;">Total @ViewBag.TotalEvidencia</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxEvidencia"> @ViewBag.TotalEvidencia</span></div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-xl-2">
+            <div class="card widget-content btn" id="homInc6" onclick="ListadoInformes(7)" style="background-color: #353030;">
+                <div class="widget-content-wrapper text-white">
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading" style="font-size: 12px;">Enviado</div>
+                        <div class="widget-heading" style="font-size: 12px;">Conforme</div>
+                        <div class="widget-subheading" style="font-size: 11px;">Total @ViewBag.TotalConforme</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxConforme"> @ViewBag.TotalConforme</span></div>
+                    </div>
+                </div>
+
+
+            </div>
+        </div>
+        <div class="col-lg-3 col-xl-2">
+            <div style="height: calc(1 * 100%); display: flex; justify-content: center; align-items: center;">
+                <button class="btn btn-danger" style="width: 100%;" id="flagButton">  <i class="fas fa-flag"></i> Proyecto con Formato de Informe Correcto</button>
+            </div>
+        </div>
+
+
+
+    </div>
+    <br />
+    <div  class="form-group row">
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1">
+                        <div id="originalTableContainer" class="table-wrapper">
+                            <div class="table-responsive" style="overflow-x: auto;">
+
+                                <table id="tbListadoInformes" class="table table-bordered table-striped" style="width:100%">
+                                    <thead style="font-size: 11px;">
+                                        <tr>
+                                            <th>OP</th>
+                                            <th>Cliente</th>
+                                            <th>Cliente Final</th>
+                                            <th>Título</th>
+                                            <th>Marca</th>
+                                            <th>Rango de Informe</th>
+                                            <th>Fecha Fin Soporte</th>
+                                            <th>Días para vencer informe</th>
+                                            <th>Fecha Máxima de Envío</th>
+                                            <th>Ticket</th>
+                                            <th>Ticket Asignado A</th>
+                                            <th>Estado</th>
+                                            <th>Aprobar Informe</th>
+                                            <th>Informes con la Misma OP</th>
+                                            <th>Editar Informe</th>
+                                            <th>Informe Orden</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="font-size: 11px;"></tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                        <div id="newDataTableContainer" class="table-responsive" style="overflow-x: auto;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</div>
+<input id="hdnEstado" name="hdnEstado" type="hidden" value="0" />
+<script>
+
+    $(document).ready(function () {
+
+
+        $("#FInicio").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDatePicker");
+        $("#FFin").kendoDatePicker({ format: "dd/MM/yyyy" }).data("kendoDatePicker");
+        var IdCliente = $("#IdCliente").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Sales/ListClients?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        IdCliente.list.width(300);
+
+        var IdClienteFinal = $("#IdClienteFinal").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Sales/ListClients?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        IdClienteFinal.list.width(300);
+
+        $("#IdMarca").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            }
+        });
+        var IdMarca = $("#IdMarca").data("kendoComboBox");
+
+        $("#IdResponsable").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ListarInformeResponsable?var=" + Math.random()
+                }
+            }
+        });
+
+        if (@ViewBag.IdResponsableUsuario!= 0) {
+            $("#IdResponsable").data("kendoComboBox").value(@ViewBag.IdResponsableUsuario);
+        } else {
+            $("#IdResponsable").data("kendoComboBox");
+        }
+
+        $("#bOP").kendoComboBox({
+            dataTextField: "OP",
+            dataValueField: "IdDocuSale",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ListarOP?var=" + Math.random()
+                }
+            }
+        });
+        var IdOp = $("#bOP").data("kendoComboBox");
+
+        $("#IdPersEntiAssi").kendoComboBox({
+            dataTextField: "TicketAsignadoA",
+            dataValueField: "IdPersEntiAssi",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ListarTicketAsignadoA?var=" + Math.random()
+                }
+            }
+        });
+        var IdPersEntiAssi = $("#IdPersEntiAssi").data("kendoComboBox");
+
+        $("#IdEstadoInforme").kendoMultiSelect({
+            dataTextField: "Estado",
+            dataValueField: "IdEstado",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ListarInformeEstado?var=" + Math.random()
+                }
+            }
+        });
+        var IdEstadoInforme = $("#IdEstadoInforme").data("kendoMultiSelect");
+
+        function multiselect_change(e) {
+
+            $("#hdnEstado").val(this.value());
+        }
+
+        IdEstadoInforme.bind("change", multiselect_change);
+
+        $("#chkSoloTickets").change(function () {
+            if (this.checked){
+                $("#FlagTicket").val("1");
+            } else {
+                $("#FlagTicket").val("0");
+            }
+        });
+
+        $("#Buscar").click(function () {
+           /* var valor = $("#Flag").val();*/
+            ListadoInformes(0);
+            ObtenerInformesxEstado();
+        });
+
+        $("#Limpiar").click(function () {
+            $("#IdCliente").data("kendoComboBox").value("");
+            $("#IdClienteFinal").data("kendoComboBox").value("");
+            $("#IdMarca").data("kendoComboBox").value("");
+            $("#IdResponsable").data("kendoComboBox").value("");
+            $("#bOP").data("kendoComboBox").value("");
+            $("#IdPersEntiAssi").data("kendoComboBox").value("");
+            $("#FInicio").data("kendoDatePicker").value("");
+            $("#FFin").data("kendoDatePicker").value("");
+            $("#IdEstadoInforme").data("kendoMultiSelect").value("");
+            $("#hdnEstado").val("");
+            $("#chkSoloTickets").each(function () {
+                this.checked = false;
+                $("#FlagTicket").val("0");
+            });
+            ListadoInformes(0);
+            ObtenerInformesxEstado();
+
+        });
+
+        $("#flagButton").click(function () {
+            $("#originalTableContainer").hide();
+
+            // Realizar una llamada AJAX para obtener los datos del procedimiento almacenado
+            $.ajax({
+                url: "/InformeED/ListarOPInformeFlag",
+                type: "GET",
+                dataType: "json",
+                success: function (response) {
+                    var data = response.Data;
+                    // Crear una nueva tabla con los datos recibidos y mostrarla
+                    var newTable = '<table id="newDataTable" class="table table-bordered table-striped" style="width:100%">' +
+                        '<thead style="font-size: 12px;">' +
+                        '<tr>' +
+                        '<th>OP</th>' +
+                        '<th>Titulo</th>' +
+                        '<th>Cliente</th>' +
+                        '<th>Cliente Final</th>' +
+                        '<th>Estado</th>' +
+                        '<th>Opciones</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody style="font-size: 12px;">';
+
+                    $.each(data, function (index, item) {
+                        console.log(item.OP);
+                        newTable += '<tr>' +
+                            '<td>' + item.OP + '</td>' +
+                            '<td>' + item.Titulo + '</td>' +
+                            '<td>' + item.Cliente + '</td>' +
+                            '<td>' + item.ClienteFinal + '</td>' +
+                            '<td>' + item.Estado + '</td>' +
+                            '<td>';
+
+                        // Verifica si el estado es "APROBADO"
+                        if (item.Estado.includes("APROBADO")) {
+                            newTable += '<div class="col-md-12">' +
+                                '<i class="fa fa-thumbs-up" style="color="green""></i>' +
+                                '</div>';
+                        } else {
+                            newTable += '<div class="col-md-12">' +
+                                '<button id="btnAprobarPlantilla" class="btn btn-light btn-hover-shine" onclick="AprobarPlantillaOP(' + item.IdDocuSale + ');"><i class="fa fa-check fa-xs"></i></button>' +
+                                '</div>';
+                        }
+
+                        newTable += '</td>' +
+                            '</tr>';
+                    });
+
+                    newTable += '</tbody>' +
+                        '</table>';
+                    $("#newDataTableContainer").html(newTable);
+                    $("#newDataTable").DataTable({
+                        responsive: true, // Hacer la tabla responsive
+                        dom: 'Bfrtip', // Mostrar los botones de exportación
+                        ordering: false // Mostrar los botones de exportación
+                    });
+
+
+                },
+                error: function (xhr, status, error) {
+                    console.error(error);
+                    // Manejar errores si es necesario
+                }
+            });
+        });
+
+        ListadoInformes(0);
+
+
+
+    });
+
+    function ListadoInformes(id) {
+       $("#originalTableContainer").show();
+        $("#newDataTableContainer").empty();
+
+        $('#tbListadoInformes').dataTable().fnDestroy();
+
+        var table = $('#tbListadoInformes').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            "order": [[14, "asc"]],
+            ajax: {
+                "url": "/InformeED/ListarInformes?fI=" + $("#FInicio").val() + "&fF=" + $("#FFin").val(),
+                "data": function (d) {
+                    d.IdCliente = $("#IdCliente").val() == '' ? 0 : $("#IdCliente").val(),
+                        d.IdClienteFinal = $("#IdClienteFinal").val() == '' ? 0 : $("#IdClienteFinal").val(),
+                        d.IdMarca = $("#IdMarca").val() == '' ? 0 : $("#IdMarca").val(),
+                        d.IdResponsable = $("#IdResponsable").val() == '' ? 0 : $("#IdResponsable").val(),
+                        d.bOP = $("#bOP").val() == '' ? 0 : $("#bOP").val(),
+                        d.IdsEstadoInforme = $("#hdnEstado").val(),
+                        d.FlagTicket = $("#FlagTicket").val() == '' ? 0 : $("#FlagTicket").val()
+                    d.Flag = id
+                    d.IdPersEntiAssi = $("#IdPersEntiAssi").val() == '' ? 0 : $("#IdPersEntiAssi").val()
+                }
+            },
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a style="font-size: 11px;" href=\"/OrderForm/DetalleProyecto/' + data.IdDocuSale + '" target="_blank">' + data.OP + '</a>';
+                    }
+                },
+                { data: "Cliente" },
+                { data: "ClienteFinal" },
+                { data: "Titulo" },
+                { data: "Marca" },
+                { data: "Inicio" },
+                { data: "FechaFinSoporte" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+
+                        var fechaActual = new Date();
+                        var diaActual = fechaActual.getDate();
+                        var mesActual = fechaActual.getMonth() + 1; // Sumamos 1 ya que los meses van de 0 a 11
+                        var añoActual = fechaActual.getFullYear();
+
+                        var fechaActualFormateada = (diaActual < 10 ? '0' : '') + diaActual + '/' + (mesActual < 10 ? '0' : '') + mesActual + '/' + añoActual;
+
+
+                        if (data.Diasparavencimiento == 0 && data.FechaInforme !== fechaActualFormateada) {
+                            return '<div class="contenedor" style = "position: relative;"><div class="badge badge-success" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);  font-size:10px">OK</div></div>';
+                        }
+
+                        else if (data.Diasparavencimiento < 11 || data.FechaInforme == fechaActualFormateada) {
+                            return '<div class="contenedor" style = "position: relative;"><div class="badge badge-danger" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%); font-size:10px">' + data.Diasparavencimiento + '</div></div>';
+                        } else {
+
+                            return '<div class="contenedor" style = "position: relative;"><div class="badge badge-secondary" style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);  font-size:10px">' + data.Diasparavencimiento + '</div></div>';
+                        }
+
+
+                    }
+                },
+                {
+
+                    data: null,
+                    render: function (data, type, row) {
+                        var fechaActual = new Date();
+                        var diaActual = fechaActual.getDate();
+                        var mesActual = fechaActual.getMonth() + 1; // Sumamos 1 ya que los meses van de 0 a 11
+                        var añoActual = fechaActual.getFullYear();
+
+                        var fechaActualFormateada = (diaActual < 10 ? '0' : '') + diaActual + '/' + (mesActual < 10 ? '0' : '') + mesActual + '/' + añoActual;
+
+                        if (data.Diasparavencimiento == 0 && data.FechaInforme !== fechaActualFormateada) {
+                            return '<div class="badge badge-success" style="font-size:10px">' + data.FechaInforme + '</div>';
+                        }
+                        else if (data.Diasparavencimiento < 11 || data.FechaInforme == fechaActualFormateada) {
+                            return '<div class="badge badge-danger" style="font-size:10px">' + data.FechaInforme + '</div>';
+                        } else {
+                            return '<div class="badge badge-secondary" style="font-size:10px">' + data.FechaInforme + '</div>';
+                        }
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.IdTicket != 0) {
+                            return '<a href=\"/DetailsTicket/Index/' + data.IdTicket + '" target="_blank">' + data.CodigoTicket + '</a>';
+                        }
+                        else {
+                            return '<div style="text-align: center;">-</div>';
+                        }
+                    }
+                },
+                { data: "TicketAsignadoA" },
+                { data: "EstadoInforme" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.EstadoInforme == "Pendiente de Aprobación" || (data.EstadoInforme == "Pendiente de Elaboración" && data.IdResponsableInforme == 1)) {
+                        var XOP = "'" + data.OP + "'";
+                        console.log(data)
+                            return '<div class="col-md-12">' +
+                                '<button id="btnAprobarInforme" class="btn btn-light btn-hover-shine"  data-toggle="modal" data-target="#modalAprobarInforme" onclick="AprobarInforme(' + data.IdDocuSale + ',' + XOP + ',' + data.IdInformeFecha + ');"><i class="fa fa-eye fa-xs"></i></button>' +
+                                '</div>';
+                        }
+
+                        else if (data.EstadoInforme == "Pendiente de Corrección") {
+                            return '<div class="col-md-12">' +
+                                '<button id="btnAprobarInforme" class="btn btn-light btn-hover-shine"  data-toggle="modal" data-target="#modalAprobarInforme" onclick="CorregirInforme(' + data.IdDocuSale + ',' + XOP + ',' + data.IdInformeFecha + ');"><i class="fa fa-eye fa-xs"></i></button>' +
+                                '</div>';
+                        }
+
+                        else {
+                            return '<div class="contenedor" style = "position: relative;"><div style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">' +
+                                '<i class="fa fa-eye-slash fa-xs"></i>' +
+                                '</div></div>';
+                        }
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var XOP = "'" + data.OP + "'";
+                        return '<div class="col-md-12">' +
+                            '<button id="btnInformesRelacionados" class="btn btn-light btn-hover-shine"  data-toggle="modal" data-target="#modalInformesRelacionados" onclick="InformesRelacionados(' + data.IdDocuSale + ',' + XOP + ');"><i class="fa fa-file fa-xs"></i></button>' +
+                            '</div>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.ResponsableInforme == 'NOC/SOC') {
+                            return '<div style=" text-align: center;">' +
+                                '<a id="btnEditarInforme" placeholder="Editar Informe" class="btn btn-light btn-hover-shine" href=\"/InformeED/Detalle/' + data.IdInformeFecha + '" target="_blank"><i class="fa fa-pen"></i></a>' +
+                                '</div>';
+                        }
+                        else{
+                        var XOP = "'" + data.OP + "'";
+                        var titulo = "'" + data.Titulo + "'";
+                        return '<div class="col-md-12">' +
+                            '<button id="btnMaquinaEstados" class="btn btn-light btn-hover-shine"  data-toggle="modal" data-target="#modalMaquinaEstados" onclick="MaquinaEstados(' + data.IdDocuSale + ',' + XOP + ',' + titulo + ',' + data.IdInformeFecha + ',' + data.IdEstadoInforme + ');"><i class="fa fa-pen fa-xs"></i></button>' +
+                                '</div>';
+                        }
+                    }
+                },
+                {
+                    data: "Diasparavencimiento",
+                    render: function (data, type, row) {
+                        return data === 0 ? 99999 : data;
+                    },
+                    visible: false
+                }
+            ],
+            buttons: [
+                { extend: 'csvHtml5', footer: true },
+                { extend: 'excelHtml5', footer: true },
+                { extend: 'pdfHtml5', orientation: 'landscape', footer: true },
+                { extend: 'print', orientation: 'landscape', footer: true }
+            ]
+        });
+
+    }
+
+    function ObtenerInformesxEstado() {
+
+        $.ajax({
+            url: "/InformeED/ObtenerInformesxEstado?fI=" + $("#FInicio").val() + "&fF=" + $("#FFin").val(),
+            data: {
+                IdCliente: $("#IdCliente").val() == '' ? 0 : $("#IdCliente").val(),
+                IdClienteFinal: $("#IdClienteFinal").val() == '' ? 0 : $("#IdClienteFinal").val(),
+                IdMarca: $("#IdMarca").val() == '' ? 0 : $("#IdMarca").val(),
+                IdResponsable: $("#IdResponsable").val() == '' ? 0 : $("#IdResponsable").val(),
+                IdsEstadoInforme: $("#hdnEstado").val(),
+                FlagTicket: $("#FlagTicket").val() == '' ? 0 : $("#FlagTicket").val(),
+                bOP: $("#bOP").val() == '' ? 0 : $("#bOP").val(),
+                IdPersEntiAssi: $("#IdPersEntiAssi").val() == '' ? 0 : $("#IdPersEntiAssi").val()
+            },
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                $.each(source['data'], function (index, value) {
+                    $("#boxSinTicket").text(source['data'][index]['TotalSinTicket']);
+                    $("#boxElaboracion").text(source['data'][index]['TotalElaboracion']);
+                    $("#boxAprobacion").text(source['data'][index]['TotalAprobacion']);
+                    $("#boxCorreccion").text(source['data'][index]['TotalCorreccion']);
+                    $("#boxEnvio").text(source['data'][index]['TotalEnvio']);
+                    $("#boxEvidencia").text(source['data'][index]['TotalEvidencia']);
+                    $("#boxConforme").text(source['data'][index]['TotalConforme']);
+                });
+            },
+        });
+    }
+
+    function AprobarInforme(id, OP, IdInformeEDDetalle) {
+
+        $("#lblTituloAprobarInforme").text("Módulo de Aprobación de Informe");
+
+        $('#modal-contentAprobarInforme').empty();
+        $('#modal-contentAprobarInforme').load('/InformeED/AprobarInforme?OP=' + id + '&IDI=' + IdInformeEDDetalle);
+
+    }
+
+    function CorregirInforme(id, OP, IdInformeEDDetalle) {
+
+        $("#lblTituloAprobarInforme").text("Módulo de Corrección de Informe");
+
+        $('#modal-contentAprobarInforme').empty();
+        $('#modal-contentAprobarInforme').load('/InformeED/CorregirInforme?OP=' + id + '&IDI=' + IdInformeEDDetalle);
+
+    }
+
+    function InformesRelacionados(id, OP) {
+
+        var enlace = '<a href=\"/OrderForm/DetalleProyecto/' + id + '" target="_blank">' + OP + '</a>';
+        $("#lblTituloInformesRelacionados").empty();
+        $("#lblTituloInformesRelacionados").append("Informes Relacionados a " + enlace);
+
+        $('#modal-contentInformesRelacionados').empty();
+        $('#modal-contentInformesRelacionados').load('/InformeED/InformesRelacionados?OP=' + id);
+
+    }
+
+    function MaquinaEstados(id, OP, titulo, iddetainforme, idEstadoInforme) {
+        console.log(idEstadoInforme)
+        console.log(id)
+        console.log(iddetainforme)
+        if (idEstadoInforme == 1) {
+            console.log('ingreso');
+            $("#lblTituloMaquinaEstados").text("Detalle de Informe - " + OP + " | " + titulo);
+            $('#modal-contentMaquinaEstados').empty();
+            $('#modal-contentMaquinaEstados').load('/InformeED/EditarInforme?OP=' + id + '&IDI=' + iddetainforme + '&Estado=' + idEstadoInforme);
+        }
+        if (idEstadoInforme == 2) {
+            $("#lblTituloMaquinaEstados").text("Detalle de Informe - " + OP + " | " + titulo);
+            $('#modal-contentMaquinaEstados').empty();
+            $('#modal-contentMaquinaEstados').load('/InformeED/PendienteElaboracionModal?OP=' + id + '&IDI=' + iddetainforme + '&Estado=' + idEstadoInforme);
+        }
+        if (idEstadoInforme == 3) {
+            $("#lblTituloMaquinaEstados").text("Detalle de Informe - " + OP + " | " + titulo);
+            $('#modal-contentMaquinaEstados').empty();
+            $('#modal-contentMaquinaEstados').load('/InformeED/PendienteAprobacionModal?OP=' + id + '&IDI=' + iddetainforme + '&Estado=' + idEstadoInforme);
+        }
+        if (idEstadoInforme == 4) {
+            $("#lblTituloMaquinaEstados").text("Detalle de Informe - " + OP + " | " + titulo);
+            $('#modal-contentMaquinaEstados').empty();
+            $('#modal-contentMaquinaEstados').load('/InformeED/PendienteCorreccionModal?OP=' + id + '&IDI=' + iddetainforme + '&Estado=' + idEstadoInforme);
+        }
+        if (idEstadoInforme == 5) {
+            $("#lblTituloMaquinaEstados").text("Detalle de Informe - " + OP + " | " + titulo);
+            $('#modal-contentMaquinaEstados').empty();
+            $('#modal-contentMaquinaEstados').load('/InformeED/PendienteEnvioModal?OP=' + id + '&IDI=' + iddetainforme + '&Estado=' + idEstadoInforme);
+        }
+        if (idEstadoInforme == 6) {
+            $("#lblTituloMaquinaEstados").text("Detalle de Informe - " + OP + " | " + titulo);
+            $('#modal-contentMaquinaEstados').empty();
+            $('#modal-contentMaquinaEstados').load('/InformeED/PendienteEvidenciaModal?OP=' + id + '&IDI=' + iddetainforme + '&Estado=' + idEstadoInforme);
+        }
+        if (idEstadoInforme == 7) {
+            $("#lblTituloMaquinaEstados").text("Detalle de Informe - " + OP + " | " + titulo);
+            $('#modal-contentMaquinaEstados').empty();
+            $('#modal-contentMaquinaEstados').load('/InformeED/EnviadoConformeModal?OP=' + id + '&IDI=' + iddetainforme + '&Estado=' + idEstadoInforme);
+        }
+
+
+    }
+
+    function VerCalendario() {
+        $("#lblTitulo").text("Cronograma de Informes");
+
+        //document.getElementById('idmodaldialog').classList.remove("modal-xl");
+        //document.getElementById('idmodaldialog').classList.remove("modal-lg");
+        //document.getElementById('idmodaldialog').classList.add("modal-lg");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/InformeED/Calendario/');
+    }
+
+    function AprobarPlantillaOP(idDocuSale) {
+        // Mostrar mensaje de confirmación
+        swal({
+            title: '¿Estás seguro de que deseas aprobar el Formato de Informe de este proyecto?',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, aprobarlo',
+            cancelButtonText: 'Cancelar'
+        },
+            function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        url: "/InformeED/AprobacionFormatoInforme/",
+                        type: "GET",
+                        data: "id=" + idDocuSale + "&var=" + Math.random(),
+                        dataType: "text",
+                        success: function (dato) {
+
+                            swal("Aprobado", "Informes siguientes serán notificados a persona aprobadora.", "success");
+                            $("#flagButton").click();
+                        },
+                        error: function (dato) {
+                           
+                        }
+                    });
+                } else {
+
+                    //swal("Cancelled", "Your imaginary file is safe :)", "error");
+                }
+            
+        });
+    }
+
+</script>

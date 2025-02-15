@@ -1,0 +1,1116 @@
+﻿@{
+    ViewBag.Title = "Detalle OP";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<style>
+    b {
+        color: #F83C50;
+    }
+
+    #dropzone {
+        background: white;
+        border-radius: 5px;
+        border: 2px dashed rgb(0, 135, 247);
+        border-image: none;
+        max-width: 500px;
+        margin-left: auto;
+        margin-right:  auto;
+    }
+</style>
+
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+@*<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />*@
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="main-card mb-4 card">
+                <div class="card-header">
+                    Contacto
+                    <div class="btn-actions-pane-right text-capitalize">
+                        <div class="badge badge-@ViewBag.ColorEstado ">Estado: @ViewBag.NombreEstado</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="col-md-2">
+                            <div>Tipo de Contacto <b>(*)</b></div> <!--IdAccoPara-->
+                            <select id="cbTipoContacto" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                        </div>
+                        <div class="col-md-3">
+                            <div><a data-toggle="modal" data-target="#miModal" style="color: #1e2b75;cursor:pointer" onclick="RegistrarContacto()"><u>Contacto</u> <b>(*)</b></a></div> <!--IdPersEnti-->
+                            <div class="form-row">
+                                <div class="col-md-10">
+                                    <select id="cbContacto" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                                </div>
+                                <div class="col-md-2">
+                                    <a style="color: #1e2b75;cursor:pointer" onclick="EditarContacto()" id="btnEditarContacto"><i class="fa fa-pen"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            Celular
+                            <input id="txtTelefono" name="txtTelefono" class="form-control input-sm" type="text" disabled="disabled" />
+                        </div>
+                        <div class="col-md-3">
+                            Correo
+                            <input id="txtCorreo" name="txtCorreo" class="form-control input-sm" type="text" disabled="disabled" />
+                        </div>
+                        <div class="col-md-2">
+                            <br />
+                            <button id="btnGuardarContacto" name="btnGuardarContacto" class="ladda-button mb-2 mr-2 btn btn-block btn-primary" data-style="expand-right" type="button" onclick="GuardarContacto();">
+                                <span class="ladda-label">
+                                    Guardar
+                                </span>
+                                <span class="ladda-spinner"></span>
+                            </button>
+                            @*<button id="btnGuardarContacto" name="btnGuardarContacto" class="btn btn-block btn-primary"><i class="fa fa-save"></i> Guardar</button>*@
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-4">
+                    <div class="main-card mb-4 card">
+                        <div class="card-header">Soporte Electrodata</div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <label>&nbsp;&nbsp<input type="checkbox" value="" id="chkAplicaSE">&nbsp;&nbsp;&nbsp;No aplica</label>
+                                    <br />
+                                </div>
+                                <div class="col-md-6">
+                                    <button id="btnSoporteED" name="btnSoporteED" style="cursor:pointer" class="btn btn-light btn-hover-shine btn-block" type="button" data-toggle="modal" data-target="#miModal" onclick="AgregarSoporteED();">Agregar Soporte ED</button>
+                                </div>
+                                <div class="col-md-6" style="display:none">
+                                    <button id="btnVerSoporteED" class="btn btn-primary" data-toggle="modal" data-target="#miModal" onclick="VerSoporteED()">Ver Soporte Electrodata</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="main-card mb-4 card">
+                        <div class="card-header">
+                            Informes
+                            <div class="btn-actions-pane-right">
+                                <button class="mb-2 mr-2 btn btn-sm btn-hover-shine btn-secondary" onclick="InformeAveria();">
+                                    Inf. de Avería<span class="badge badge-light">@ViewBag.AplicaInformeAveria</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <label>&nbsp;&nbsp<input type="checkbox" value="" id="chkAplicaInforme">&nbsp;&nbsp;&nbsp;No aplica</label>
+                                    <br />
+                                </div>
+                                <div class="col-md-6">
+                                    <button id="btnInformeED" name="btnInformeED" style="cursor:pointer" class="btn btn-light btn-hover-shine btn-block" type="button" data-toggle="modal" data-target="#miModal" onclick="AgregarInformeED();">Agregar Informe</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="main-card mb-4 card">
+                        <div class="card-header">Soporte Fabricante / RMA</div>
+                        <div class="card-body">
+
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<input type="checkbox" value="" id="chkAplicaFabricante">&nbsp;&nbsp;&nbsp;No aplica</label>
+                                    <br />
+                                </div>
+                                <div class="col-md-6">
+                                    <button id="btnSoporteFabricante" name="btnSoporteFabricante" style="cursor:pointer" class="btn btn-light btn-hover-shine btn-block" type="button" data-toggle="modal" data-target="#miModal" onclick="AgregarSoporteFabricante();">Agregar Marca</button>
+                                </div>
+                                <div class="col-md-6" style="display:none">
+                                    <button id="btnVerSoporteFabricante" class="btn btn-light btn-hover-shine btn-block" data-toggle="modal" data-target="#miModal" onclick="VerSoporteFabricante()">Ver Soporte Fabricante</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4 card">
+                <div class="card-header">
+                    Listado de soporte electrodata e informes
+                    <div class="btn-actions-pane-right">
+                        <button id="btnEnviarCorreo" name="btnEnviarCorreo" style="cursor:pointer" class="btn btn-primary btn-hover-shine btn-block" type="button" data-toggle="modal" data-target="#miModal" onclick="EnviarCorreoSoporte();">
+                            <i class="fa fa-envelope"></i> Enviar Correo
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab_1">
+                            <table id="tablaSoporteEdata" class="table table-bordered table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Soporte / Informe</th>
+                                        <th>Fabricante</th>
+                                        <th>Nro de Soportes</th>
+                                        <th>Fecha Fin</th>
+                                        <th>Editar</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-4 card">
+                <div class="card-header">Listado de soporte fabricante</div>
+                <div class="card-body">
+                    <div class="tab-content">
+                        <div class="tab-pane active" id="tab_1">
+                            <table id="tablaSoporteFabricante" class="table table-bordered table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Fabricante</th>
+                                        <th>Productos</th>
+                                        <th>Fecha Inicio Soporte</th>
+                                        <th>Fecha Fin Soporte</th>
+                                        <th>RMA</th>
+                                        <th>Opciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- FIN SOPORTE FABRICANTE -->
+        </div>
+
+        <div class="col-lg-2">
+            <div class="main-card mb-3 card">
+                <div class="card-header">Opciones</div>
+                <div class="card-body">
+                    <div id="divOpciones" style="padding:5px;">
+                        <center>
+                            Gerente de Proyecto: <br />
+                            @ViewBag.NOMBRE
+                            <div class="form-group">
+                                <img width="70" class="rounded" src="/Content/Fotos/@ViewBag.FOTO" alt="">
+                            </div>
+                            @if ((ViewBag.ESTADO == 2 && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                if (ViewBag.ADMINPMO == 1 && (ViewBag.ESTADO == 1 || ViewBag.ESTADO == 2))
+                                {
+                                    <button id="btnAsignarPM" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="AsignarResponsable();">Asignar Resp.</button>
+                                    if (ViewBag.OCULTARINGE == 0 && ViewBag.ESTADO == 2)
+                                    {
+                                        @*<button id="btnAsignarIng" class="k-button">Asignar Inge</button>*@
+                                    }
+                                }
+                                if (ViewBag.ESTADO == 2 && ViewBag.PMO == 1)
+                                {
+                                    <button id="btnEditar" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="EditarOP();">Editar OP</button>
+                                }
+                            }
+
+                            @if (ViewBag.Informe == 1)
+                            {
+                                <button id="btnSoporteInforme" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="SoporteInforme();">Mantenimientos e Informes</button>
+                            }
+                            <button id="btnInfoProyecto" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="InfoProyecto();">Info. Proyecto</button>
+                            <button id="btn
+                                    " style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Productos();">Productos</button>
+                            @if ((ViewBag.ESTADO == 2 && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1 || ViewBag.PMOSoporte == 1)
+                            {
+                                <button id="btnObservaciones" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Observaciones();">Observaciones</button>
+                            }
+                            @if (((ViewBag.ESTADO == 2 || ViewBag.ESTADO == 4) && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                <button id="btnVerArchivos" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Documentos();">Documentos</button>
+                            }
+                            @if ((ViewBag.ESTADO == 2 && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                <button id="btnAdjuntar" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Adjuntar();">Adjuntar</button>
+                                <button id="btnCerrarOP" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="CerrarOP();">Cerrar OP</button>
+                            }
+                            @if (((ViewBag.ESTADO == 2 || ViewBag.ESTADO == 4) && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                <button id="btnTraza" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Traza()">Traza</button>
+                            }
+                            @*<button id="btnProductoServicio" class="k-button" data-toggle="modal" data-target="#productosServicios">Productos Servicios</button>*@
+                            <button id="btnContacto" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="VerContacto();">Contactos</button>
+                            @if ((ViewBag.ESTADO == 2 && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                <button id="btnFacturacion" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Facturacion()">Facturación</button>
+                            }
+
+                            @if ((ViewBag.ESTADO == 2 || ViewBag.ESTADO == 4) && (ViewBag.PMO == 1 || ViewBag.ADMINPMO == 1))
+                            {
+                                <button id="btnActa" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" onclick="ActaConstitucion()">Acta de constitución</button>
+                            }
+                            <a href="\#/OrderForm/Gantt/@ViewBag.ID_DOCU_SALE" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" title="Ver Cronograma" target="_blank">Cronograma</a>
+                            @*<button onclick="VerCronogramaHistorico();" style="cursor:pointer;font-size:9.5px" class="btn btn-block btn-sm btn-primary" title="Cronograma Histórico">Cronograma Histórico</button>*@
+                            <a id="btnReporteProductosServicios" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" title="Ver Reporte" href="~/Reporting/OrderForm/ListarProductosServicios.aspx?&IdDocuSale=@ViewBag.ID_DOCU_SALE" target="_blank">Reporte</a>
+                            <a href="/OrderForm/DetalleProyecto/@ViewBag.ID_DOCU_SALE" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" title="Ver Detalle OP">Detalle</a>
+                        </center>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+@*@section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }*@
+<script type="text/javascript">
+        var estado = 0;
+        var numeroCombo = 1;
+        var numeroOpcion = 1;
+        $(document).ready(function () {
+            $('input').iCheck({
+                checkboxClass: 'icheckbox_square-blue',
+                radioClass: 'iradio_square-blue',
+                increaseArea: '20%' // optional
+            });
+
+            ListaSoporteED();
+            ListaSoporteFabricante();
+
+            $('#chkAplicaSE').on('ifChanged', function (event) {
+                if ($(this).is(':checked')) {
+                    //Checkeado
+                    CambiarEstadoSoporteED(0);
+                } else {
+                    //No Checkeado
+                    CambiarEstadoSoporteED(1);
+                }
+            });
+
+            $('#chkAplicaInforme').on('ifChanged', function (event) {
+                if ($(this).is(':checked')) {
+                    //Checkeado
+                    CambiarEstadoInformeED(0);
+                } else {
+                    //No Checkeado
+                    CambiarEstadoInformeED(1);
+                }
+            });
+            $('#chkAplicaFabricante').on('ifToggled', function (event) {
+                if ($(this).is(':checked')) {
+                    //Checkeado
+                    CambiarEstadoSoporteFabricante(0);
+                } else {
+                    //No Checkeado
+                    CambiarEstadoSoporteFabricante(1);
+                }
+            });
+
+            $("#cbTipoContacto").select2({
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/Parameter/ListarPorParametro?idparametro=48",
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+
+            $("#cbContacto").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/Contacto/ListarContactos?IdDocuSale="+@ViewBag.ID_DOCU_SALE,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page,
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                }
+            });
+
+            $("#cbContacto").change(function(){
+                $("#txtTelefono").val('');
+                $("#txtCorreo").val('');
+                CargarCelularCorreo();
+            });
+            $("#cbFabricante").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumResultsForSearch: 1,
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/SoporteFabricante/ListarFabricante",
+                    dataType: 'json',
+                    //type: "POST",
+                    //params: {
+                    //    contentType: 'application/json; charset=utf-8'
+                    //},
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                }
+            });
+
+            $("#txtTiempoSoporteMarca").change(function(){
+                $.ajax({
+                    url: "/SoporteED/CalcularFinSoporte/"+@ViewBag.ID_DOCU_SALE,
+                    data: "&TiempoSoporte=" + $("#txtTiempoSoporteMarca").val() + "&var=" + Math.random(),
+                    cache: false,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (data) {
+                        $("#dtFinSoporteMarca").val((data['Data'][index]['FinSoporte']));
+                    },
+                    error: function (source) {
+                        $('#msjAgregaMarca').empty();
+                        $('#msjAgregaMarca').show("show");
+                        $("#msjAgregaMarca").append("<div class='alert alert-danger'><strong>¡Cuidado!</strong> Debe ingresar la fecha de acta de conformidad. </div>");
+                        setTimeout(function() {
+                            $("#msjAgregaMarca").fadeOut(3000);
+                        },1000);
+                    }
+                });
+            });
+
+            $("#btnCerrarMsjConfirmacionSoporteFAB").click(function(){
+                location.reload();
+            });
+
+            if (@ViewBag.PMO != 1)
+            {
+                $("#divProyecto").hide();
+            }
+            $('#chkMantenimientoPeriodico').on('ifToggled', function (event) {
+                if ($(this).is(':checked')) {
+
+                    $("#divAgregarPeriodos").removeClass("divHide");
+                } else {
+                    $("#divAgregarPeriodos").addClass("divHide");
+                }
+            });
+
+        });
+
+    function CargarCelularCorreo() {
+        var idContacto = $("#cbContacto option:selected").val();
+        $.ajax({
+            url: "/OrderForm/ListarDatosContactos/" + idContacto,
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $.each(data['Data'], function (index, value) {
+                    $("#txtTelefono").val((data['Data'][index]['TEL_ENTI']));
+                    $("#txtCorreo").val((data['Data'][index]['EMA_ENTI']));
+                });
+            },
+            error: function (source) {
+                alert("Error al cargar los datos del contacto");
+            }
+        });
+    }
+
+        function GuardarContacto(id) {
+            $.ajax({
+                url: "/Contacto/GuardarContacto/",
+                data: "IdDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                      "&IdAccoPara=" + $("#cbTipoContacto").val() +
+                      "&IdPersEnti=" + $("#cbContacto").val() +
+                      "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        MensajeDatosProductosServicios('OK', 'El contacto se ha registrado con éxito.');
+                        $("#cbTipoContacto").empty();
+                        $("#cbContacto").empty();
+                        $("#txtTelefono").val('');
+                        $("#txtCorreo").val('');
+                    } else
+                        if(resp == "ERROR"){
+                            MensajeDatosProductosServicios('Mensaje','Verifique los datos porfavor.');
+                        } else
+                            if(resp == "EXISTE"){ // Ya existe el contacto en este proyecto
+                                MensajeDatosProductosServicios('Mensaje', 'Ya existe el contacto en este proyecto');
+                                $("#cbContacto").empty();
+                                $("#txtTelefono").val('');
+                                $("#txtCorreo").val('');
+                            }
+
+                }
+            });
+        }
+
+        function GuardarSoporteFab() {
+            // Checkbox marcado
+            //if ($("#chkMantPreiodico").is(':checked')) {
+                $.ajax({
+                    url: "/SoporteFabricante/GuardarSoporteFabPeriodico/",
+                    data: "IdDocuSale=" + @ViewBag.ID_DOCU_SALE +
+                          "&IdFabricante=" + $("#cbFabricante").val() +
+                          "&TiempoSoporte=" + $("#txtTiempoSoporteMarca").val() +
+                          "&FechaFinSoporte=" + $("#dtFinSoporteMarca").val() +
+                          "&MantPrev=" + $("#txtMantPrevMarca").val() +
+                          "&Productos=" + $("#txtProductos").val() +
+                          "&Observaciones=" + $("#txtObservacionesMarca").val() +
+                          "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == "OK") {
+                            $('#MsjConfirmacionSoporteFAB').modal({backdrop: 'static', keyboard: false});
+                            $('#soporteFab').modal("toggle");;
+                        }
+                        else
+                            if(resp == "1"){ //Campos vacíos
+                                $('#msjAgregaMarca').empty();
+                                $('#msjAgregaMarca').show("show");
+                                $("#msjAgregaMarca").append("<div class='alert alert-warning'><strong>¡Cuidado!</strong> Complete los campos necesarios. <b>(*)</b></div>");
+                                setTimeout(function() {
+                                    $("#msjAgregaMarca").fadeOut(3000);
+                                },1000);
+                            } else
+                                if(resp == "ERROR"){ //Error Try catch
+                                    $('#msjAgregaMarca').empty();
+                                    $('#msjAgregaMarca').show("show");
+                                    $("#msjAgregaMarca").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> Verifique los datos porfavor.</div>");
+                                    setTimeout(function() {
+                                        $("#msjAgregaMarca").fadeOut(3000);
+                                    },1000);
+                                }
+                    }
+                });
+        }
+
+        function CambiarEstadoSoporteED(IdAplica){
+            $.ajax({
+                url: "/SoporteED/CambiarEstadoED/"+@ViewBag.ID_DOCU_SALE,
+                data: "&IdAplica=" + IdAplica + "&var=" + Math.random(),
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    if (data == "OK") {
+                        toastr.success("Actualizado.", "");
+                    }
+                },
+                error: function (source) {
+                    toastr.error("Error");
+                }
+            });
+        }
+
+    function CambiarEstadoInformeED(IdAplica) {
+            debugger
+            $.ajax({
+                url: "/InformeED/CambiarEstado/"+@ViewBag.ID_DOCU_SALE,
+                data: "&IdAplica=" + IdAplica + "&var=" + Math.random(),
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    if (data == "OK") {
+                        toastr.success("Actualizado.", "");
+                    }
+                },
+                error: function (source) {
+                    toastr.error("Error");
+                }
+            });
+        }
+
+    function InformeAveria() {
+    swal({
+        title: '¿El Proyecto aplica Informe de Avería?',
+        text: 'Seleccione SI o NO.',
+        type: "info",
+        showCancelButton: true,
+        confirmButtonColor: "#DD6B55",
+        cancelButtonText: "No",
+        confirmButtonText: "Sí",
+        closeOnConfirm: false,
+        showLoaderOnConfirm: true
+    }, function (dismiss) {
+        if (dismiss) {
+
+            $.ajax({
+                url: "/InformeED/ValidarInformeAveria/" +@ViewBag.ID_DOCU_SALE,
+                data: "",
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    toastr.success("Se guardó la información.", "");
+                    swal.close();
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1600);
+                },
+                error: function (source) {
+                    alert("Error")
+                }
+            });
+        }
+                else {
+            $.ajax({
+    url: "/InformeED/ValidarInformeAveria2/" +@ViewBag.ID_DOCU_SALE,
+    data: "",
+    cache: false,
+    type: "GET",
+    dataType: "json",
+    success: function (data) {
+        toastr.success("Se guardó la información.", "");
+        swal.close();
+        setTimeout(function () {
+            location.reload();
+        }, 1600);
+    },
+    error: function (source) {
+        alert("Error")
+    }
+});
+        }
+    });
+}
+
+
+
+        function CambiarEstadoSoporteFabricante(IdAplica){
+            $.ajax({
+                url: "/SoporteFabricante/CambiarEstadoFabricante/"+@ViewBag.ID_DOCU_SALE,
+                data: "&IdAplica=" + IdAplica + "&var=" + Math.random(),
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    if (data == "OK") {
+                        toastr.success("Actualizado.", "");
+                    }
+                },
+                error: function (source) {
+                    toastr.error("Error");
+                }
+            });
+        }
+
+        function VerCronogramaHistorico() {
+            window.open("\#/OrderForm/CronogramaHistorico/"+@ViewBag.ID_DOCU_SALE);
+            return false;
+        }
+        function MensajeDatosProductosServicios(msg, msnErr) {
+            if (msg == 'OK') {
+                toastr.success(msnErr, "Información Actualizada.");
+            }
+
+            else if (msg == 'Mensaje') {
+                toastr.warning(msnErr, "Mensaje");
+            }
+        }
+
+    function ListaSoporteED() {
+        $('#tablaSoporteEdata').dataTable().fnDestroy();
+
+        $('#tablaSoporteEdata').DataTable({
+            "order": [[0, "desc"]],
+            responsive: true,
+            ajax: "/SoporteED/ListarSoporteInforme/" + @ViewBag.ID_DOCU_SALE,
+            columns: [
+                { data: "Tipo" },
+                { data: "Marca" },
+                { data: "NroSoportes" },
+                { data: "FechaFin" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var contenido = "";
+                        if (data.Tipo.includes("Informe")) {
+                            contenido = '<div style=" text-align: center;">' +
+                                            '<button id="btnEditarSoporteED" placeholder="Editar Informe" class="btn btn-light btn-hover-shine" data-toggle="modal" data-target="#miModal"  onclick="EditarInformeED(' + data.IdSoporte + ')" ><i class="fa fa-pen"></i></button>' +
+                                        '</div>';
+                        } else {
+                            contenido = '<div style=" text-align: center;">' +
+                                            '<button id="btnEditarSoporteED" placeholder="Editar Soporte" class="btn btn-light btn-hover-shine" data-toggle="modal" data-target="#miModal" onclick="EditarSoporteED(' + data.IdSoporte + ')" ><i class="fa fa-pen"></i></button>' +
+                                        '</div>';
+                        }
+                        return contenido;
+                    }
+                },
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+
+        });
+
+    }
+
+    function ListaSoporteFabricante() {
+        $('#tablaSoporteFabricante').dataTable().fnDestroy();
+
+        $('#tablaSoporteFabricante').DataTable({
+            /*"order": [[4, "asc"]],*/
+            responsive: true,
+            ajax: "/SoporteFabricante/ListarSoporteFabricante/" + @ViewBag.ID_DOCU_SALE,
+            columns: [
+                { data: "Fabricante" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style=" text-align: center;"></div>' +
+                        '<span >'+ data.Productos +'</span>' +
+                        '</div>';
+                    }
+                },
+                { data: "InicioSoporte" },
+                { data: "FinSoporte" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<span>'+ data.RMA +'</span>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style=" text-align: center;">' +
+                                '<button id="btnEditarSoporteFab" placeholder="Editar Soporte" class="btn btn-light btn-hover-shine" data-toggle="modal" data-target="#miModal" onclick="EditarSoporteFab(' + data.IdSoporteFAB + ')" ><i class="fa fa-pen"></i></button>' +
+                            '</div>';
+                    }
+                },
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+        });
+
+    }
+
+    function AgregarSoporteED() {
+        $("#lblTitulo").text("Registrar Soporte Electrodata");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/SoporteED/RegistroSoporteED/@ViewBag.ID_DOCU_SALE', function() {
+        // Limpiar la tabla antes de cargar nuevos datos
+        $("#tablaSoporteFabricanteAgregar").DataTable().clear().draw();
+
+        // Vincular evento clic para eliminar fila
+        $(".eliminar-fila").off("click").on("click", function () {
+            var table = $("#tablaSoporteFabricanteAgregar").DataTable();
+            table.row($(this).closest("tr")).remove().draw();
+        });
+    });
+
+    }
+
+    function AgregarInformeED() {
+        $("#lblTitulo").text("Registrar Informe");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/InformeED/RegistroInformeED/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function VerSoporteED() {
+        $("#lblTitulo").text("Listado - Soporte Electrodata");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/SoporteED/IndexSoporteED/@ViewBag.ID_DOCU_SALE');
+    }
+
+
+    function AgregarSoporteFabricante() {
+        $("#lblTitulo").text("Registrar Soporte Fabricante / RMA");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/SoporteFabricante/RegistroSoporteFabricante/@ViewBag.ID_DOCU_SALE');
+
+    }
+
+    function VerSoporteFabricante() {
+        $("#lblTitulo").text("Listado - Soporte Fabricante");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/SoporteFabricante/IndexSoporteFabricante/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function RegistrarContacto() {
+        $("#lblTitulo").text("Nuevo Contacto");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/Contacto/RegistroContacto/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function EditarContacto() {
+
+        $("#btnEditarContacto").removeAttr("data-style");
+        $("#btnEditarContacto").removeAttr("data-toggle");
+        $("#btnEditarContacto").removeAttr("data-target");
+        var IdEnti = $("#cbContacto option:selected").val();
+        if (IdEnti == 0 || IdEnti == null) {
+            toastr.warning("Seleccione un contacto.", "");
+        } else {
+            $("#btnEditarContacto").attr("data-style", "expand-right");
+            $("#btnEditarContacto").attr("data-toggle", "modal");
+            $("#btnEditarContacto").attr("data-target", "#miModal");
+
+            $("#lblTitulo").text("Editar Contacto");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Contacto/EditarContacto/' + IdEnti);
+
+        }
+    }
+    function AsignarResponsable() {
+        $("#lblTitulo").text("Asignar responsable");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/AsignarPM/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function EditarOP() {
+        $("#lblTitulo").text("Editar OP");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/EditarOP/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function SoporteInforme() {
+        $("#lblTitulo").text("Mantenimientos e Informes");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/InformeED/EditarSoporteInforme/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function InfoProyecto() {
+        $("#lblTitulo").text("Información Adicional del Proyecto");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/InfoAdicionalProyecto/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Productos() {
+        $("#lblTitulo").text("Productos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/VerProductos/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Observaciones() {
+        $("#lblTitulo").text("Comentarios");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/AgregarObservaciones/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Documentos() {
+        $("#lblTitulo").text("Documentos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/AdjuntarArchivos/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Adjuntar() {
+        $("#lblTitulo").text("Adjuntar Documentos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/AdjuntarDocumentos/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function CerrarOP() {
+        $("#lblTitulo").text("Cerrar OP");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/CerrarOP/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Traza() {
+        $("#lblTitulo").text("Trazabilidad");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/VerTraza/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function VerContacto() {
+        $("#lblTitulo").text("Contactos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/Contacto/VerContacto/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Facturacion() {
+        $("#lblTitulo").text("Mantenimientos Preventivos por facturar");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/VerFacturacion/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function ActaConstitucion() {
+       window.open('/OrderForm/GenerarActa/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function EditarSoporteED(id) {
+        $("#lblTitulo").text("Editar Soporte Electrodata");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/SoporteED/EditarSoporteED/' + id);
+    }
+
+    function EditarInformeED(id) {
+        $("#lblTitulo").text("Editar Informe");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').empty();
+
+        $('#modal-content').load('/SoporteED/EditarInformeED/' + id);
+    }
+    function EditarSoporteFab(id) {
+        $("#lblTitulo").text("Editar Soporte Fabricante");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/SoporteFabricante/EditarSoporteFabricante/' + id);
+    }
+
+    function NuevoSLA() {
+        $("#lblTitulo").text("Registrar SLA");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-md");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/SLA/CreaNuevoSLA/");
+    }
+
+    function EnviarCorreoSoporte() {
+        $("#lblTitulo").text("Enviar correo");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-sm");
+
+        $('#modal-content').empty();
+        $('#modal-content').append(
+            '<div class="form-row">'+
+                '<div class="col-md-12" >'+
+                    '<div class="position-relative form-group">'+
+                        '<label for="lblEliminar" align="justify"><strong>¿Enviar el listado de soportes e informes a SOC?</strong><br/> <span id="divCorreo"></span></label>'+
+                    '</div>'+
+                '</div>'+
+            '</div>'+
+            '<div class="form-row">'+
+                '<div class="col-md-12">'+
+                    '<div class="position-relative form-group" style="text-align:center">'+
+                        '<button type="button" class="btn-shadow btn btn-light btn-sm" onclick="NoGuardar()"> NO </button>&nbsp;&nbsp;'+
+                        '<button type="submit" class="btn-shadow btn btn-danger btn-sm" onclick="EnviarCorreo()"> Sí </button>'+
+                    '</div>'+
+                '</div>'+
+            '</div>');
+
+            $.ajax({
+                url: "/OrderForm/ObtenerDatoCorreoNOC/" +@ViewBag.ID_DOCU_SALE,
+                cache: false,
+                type: "GET",
+                dataType: "text",
+                success: function (data) {
+                    var mensaje = data;
+                    $("#divCorreo").text(mensaje);
+                },
+                error: function (source) {
+                }
+            });
+
+    }
+
+    function EnviarCorreo() {
+        $("[data-dismiss=modal]").trigger({ type: "click" });
+        toastr.info("Espere un momento por favor...", "Enviando correo");
+         $.ajax({
+             url: "/OrderForm/EnviarCorreoSoporte/" +@ViewBag.ID_DOCU_SALE,
+             cache: false,
+             type: "GET",
+             dataType: "text",
+             success: function (data) {
+                 if (data == "OK") {
+                     toastr.success("Se envió el reporte de soporte técnico y mantenimientos.", "Mensaje");
+                 } else {
+                     toastr.error("No se envió el correo.", "Error");
+                 }
+             },
+             error: function (source) {
+                 toastr.error("No se envió el correo.", "Error");
+              }
+            });
+    }
+    function NoGuardar() {
+        $("[data-dismiss=modal]").trigger({ type: "click" });
+    }
+
+    //// Función para añadir campo de descripción cuando se añade un nuevo archivo
+    $("#dropzoneform").on("addedfile", function (file) {
+        var descriptionField = document.createElement("textarea");
+        descriptionField.className = "image-description";
+        file.previewElement.appendChild(descriptionField);
+    });
+
+
+
+</script>

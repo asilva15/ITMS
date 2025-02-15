@@ -1,0 +1,83 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Ver Acciones</title>
+</head>
+<body>
+    <div>
+        <div id="divAccion"></div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        mostrarAcciones();
+    });
+
+    function mostrarAcciones() {
+        $.ajax({
+            url: "/OrderForm/ObtenerAcciones/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                dataAccion = source;
+                obtenerAcciones();
+            },
+            error: function (source) {
+                alert("Error Carga Json Acciones");
+            }
+        });
+    }
+
+    function obtenerAcciones() {
+        $("#divAccion").empty();
+        $.each(dataAccion['Data'], function (index, value) {
+
+            $("#divAccion").append(
+                 '<div class="chat-wrapper">' +
+                    '<div class="chat-box-wrapper" >' +
+                        '<div>' +
+                            '<div class="avatar-icon-wrapper mr-1">' +
+                                '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                    '<img src="/Content/Fotos/' + (dataAccion['Data'][index]['IdFoto']) + '.jpg" />' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="chat-box">' +
+                                '<div class="form">' +
+                                    (dataAccion['Data'][index]['Comentario']) +
+                                '</div>' +
+                            '</div>' +
+                            '<small class="opacity-6">' +
+                                (dataAccion['Data'][index]['Usuario']) + '  ' +
+                                '<i class="fa fa-calendar-alt mr-1"></i>' +
+                                (dataAccion['Data'][index]['FechaComentario']) + ' ' + (dataAccion['Data'][index]['Parametro']) + '-' + (dataAccion['Data'][index]['ParametroDetalle']) +
+                                '<span id="divOpcionComentario'+(dataAccion['Data'][index]['IdComentario'])+'" class="ClassComentario"></br><span id="btnEditar" style="cursor:pointer; font-size:12px" class="btn-link" data-toggle="modal" data-target="#miModal" onclick="EditarComentario(' + (dataAccion['Data'][index]['IdComentario']) + ')">Editar </span>' +
+                                '| <span id="btnEliminar" style="cursor:pointer; font-size:12px" class="btn-link" data-toggle="modal" data-target="#miModal" onclick="EliminarComentario(' + (dataAccion['Data'][index]['IdComentario']) + ')">Eliminar</span>' +
+                                '</span>'+
+                            '</small>' +
+                         '</div>' +
+                    '</div>' +
+                 '</div>'
+            );
+
+            if (parseInt(dataAccion['Data'][index]['IdTipoComentario']) != parseInt(@Session["ID_PERS_ENTI"]) && parseInt(@Session["ADMINISTRADOR"]) == 0) {
+                $("#divOpcionComentario" + (dataAccion['Data'][index]['IdComentario'])).hide();
+            }
+        });
+
+        if (@ViewBag.PerfilPMO== "0" || @ViewBag.Estado!= "2") {
+            $(".ClassComentario").hide();
+        }
+    }
+
+</script>

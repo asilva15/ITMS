@@ -1,0 +1,255 @@
+﻿@{
+    ViewBag.Title = "VerContacto";
+    Layout = null;
+}
+<style>
+    .cabeceraTb {
+        font-size: .9em;
+        font-weight: bold;
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            Compañía inicial
+                            <input class="form-control" id="idComp" name="idComp" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            Compañía final
+                            <input class="form-control" id="idCompEnd" name="idCompEnd" />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            Proyecto
+                            <input class="form-control" id="idOP" name="idOP" />
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="form-group">
+                            <small>Producto/Serie/Título OP</small>
+                            <input class="form-control" id="txtDescripcion" name="txtDescripcion" />
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            &nbsp;<br />
+                            <button onclick="listarProductoSerie();" class="btn btn-primary btn-lg">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tab-content">
+    <div class="tab-pane active" id="tab_1">
+        <table id="tbSerieOP" class="align-middle mb-0 table table-borderless table-striped table-hover" style="width:100%">
+            <thead>
+                <tr>
+                    <th class="cabeceraTb">OP</th>
+                    <th class="cabeceraTb">Compañía inicial</th>
+                    <th class="cabeceraTb">Compañía final</th>
+                    <th class="cabeceraTb">Producto</th>
+                    <th class="cabeceraTb">Serie</th>
+                    @*<th class="cabeceraTb">Opción</th>*@
+                </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+                <tr>
+                    <th class="cabeceraTb">OP</th>
+                    <th class="cabeceraTb">Compañía inicial</th>
+                    <th class="cabeceraTb">Compañía final</th>
+                    <th class="cabeceraTb">Producto</th>
+                    <th class="cabeceraTb">Serie</th>
+                    @*<th class="cabeceraTb">Opción</th>*@
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+<script id="tmp-Comp" type="text/x-kendo-template">
+    <div style="width: 100%; font-size: 1em;">
+        <span style="width:100%; font-size:1em;">#= COM_NAME #</span>
+        <div style="width:100%; font-size:0.9em; margin-top:-5px;">RUC: #= NUM_TYPE_DI #</div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //Desplegables
+        var idComp = $("#idComp").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            value: $("#ID_COMP").val(),
+            placeholder: "Empresa Inicial",
+            template: kendo.template($("#tmp-Comp").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var idCompEnd = $("#idCompEnd").kendoComboBox({
+            //autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            value: $("#ID_COMP_END").val(),
+            placeholder: "Empresa Final",
+            template: kendo.template($("#tmp-Comp").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var idOP = $("#idOP").kendoComboBox({
+            placeholder: "Número de OP",
+            cascadeFrom: "idComp",
+            dataTextField: "NUM_DOCU_SALE",
+            dataValueField: "ID_DOCU_SALE",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                '<div style="float:left;"><strong>${data.NUM_DOCU_SALE}</strong></div><br/>' +
+                '<div style="float:left; ">${data.Titulo}</div>' +
+                '</div>',
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            value: $("#IdProyectoSLA").val(),
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OrderForm/ListarCboOP",
+                }
+            }
+        }).data("kendoComboBox");
+
+        //Listado de contactos del proyecto
+        listarProductoSerie();
+
+        $('#idComp').change(function () {
+            swal({
+
+                title: "Loading Information...",
+                text: "Please wait...",
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                closeOnConfirm: false
+                //allowEscapeKey: false
+
+            });
+
+ 
+            $("#idOP").load("/OrderForm/ListarCboOP", function () {
+                swal.close();
+
+            });
+
+        });
+
+    });
+
+    function listarProductoSerie() {
+
+        $('#tbSerieOP').dataTable().fnDestroy();
+        $('#tbSerieOP').DataTable({
+            "order": [[4, "asc"]],
+            responsive: true,
+            dom: 'Bfrtip',
+            processing: true,
+            ajax: "/OrderForm/ListarProductoSerieOPSIDIGE?txtDescripcion=" + $("#txtDescripcion").val() +
+                "&idOP=" + $("#idOP").val() +
+                "&idComp=" + $("#idComp").val() +
+                "&idCompEnd=" + $("#idCompEnd").val(),
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<small><b>' + data.NumeroOP + '</b> - ' + data.TituloOP + '<small>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<small>' + data.CompaniaInicial + '<small>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<small>' + data.CompaniaFinal + '<small>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<small>' + data.Producto + '<small>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<small>' + data.Serie + '<small>';
+                    }
+                },
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        return '<div role="group" class="mb-1 btn-group-lg btn-group">' +
+                //            '<button style="font-size:8px;" class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3" title = "Seleccionar Proyecto" onclick="SeleccionarProyecto(' + data.IdOP + ',' + data.IdComp + ');"> <i class="fa fa-check" aria-hidden="true" style="font-size:10px;"></i></button>' +
+                //            '</div>';
+                //    }
+                //}
+            ],
+            buttons: [
+
+            ]
+        });
+
+    }
+
+    //function SeleccionarProyecto(idOP, idComp) {
+    //    var idCompT = $("#ID_COMP").data("kendoComboBox");
+    //    idCompT.value(idComp);
+    //    idCompT.trigger("change");
+
+    //    var idProyectoT = $("#IdProyectoSLA").data("kendoComboBox");
+    //    idProyectoT.value(idOP);
+    //    idProyectoT.trigger("change");
+    //    $("[data-dismiss=modal]").trigger({ type: "click" });
+    //}
+</script>

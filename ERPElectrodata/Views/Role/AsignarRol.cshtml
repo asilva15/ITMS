@@ -1,0 +1,356 @@
+﻿@{
+    ViewBag.Title = "AsignarRol";
+    Layout = null;
+}
+
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+
+<div class="main-card mb-1 card">
+    <div id="idUR" style="display:none"></div>
+    <button id="btnCerrarModal" type="button" data-dismiss="modal" style="display:none"></button>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-5">
+                <table id="usrTable" class="table table-hover table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="display:none">IdUsuario</th>
+                            <th style="width:60%">Usuario</th>
+                            <th style="width:30%">Opciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            @*<div class="col-md-1">
+                </div>*@
+            <div class="col-md-6">
+                <table id="roleUsrTable" class="table table-hover table-striped table-bordered" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>idPerfil</th>
+                            <th>Estado</th>
+                            <th style="width:7%"></th>
+                            <th style="width:93%">Rol</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-3 ml-auto">
+                <button type="button" class="btn btn-primary btn-block" onclick="Guardar()">
+                    Guardar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>*@
+<script>
+    //Variable de lenguaje para tablas
+    var leng_esp = {
+        "sProcessing": "Procesando...",
+        "sLengthMenu": "Mostrar _MENU_ registros",
+        "sZeroRecords": "No se encontraron resultados",
+        "sEmptyTable": "No se encontraron resultados.",
+        "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "sInfoPostFix": "",
+        "sSearch": "Buscar:",
+        "sUrl": "",
+        "sInfoThousands": ",",
+        "sLoadingRecords": "Cargando...",
+        "oPaginate": {
+            "sFirst": "Primero",
+            "sLast": "Último",
+            "sNext": "Siguiente",
+            "sPrevious": "Anterior"
+        },
+        "oAria": {
+            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+        },
+        "buttons": {
+            "copy": "Copiar",
+            "colvis": "Visibilidad"
+        }
+    };
+
+    $(document).ready(function () {
+        var fid = 0;
+        var frol = "";
+        var cont = 0;
+
+        //Dando estilo iCheck a los checkbox
+        //$('#chbEstadoRol').iCheck({
+        //    checkboxClass: 'icheckbox_flat-blue',
+        //    radioClass: 'iradio_flat-blue'
+        //});
+        //$('#chbEstadoRol').iCheck('check');
+        //$('#chbEstadoMenu').iCheck({
+        //    checkboxClass: 'icheckbox_flat-blue',
+        //    radioClass: 'iradio_flat-blue'
+        //});
+        //$('#chbEstadoMenu').iCheck('check');
+
+        //Limpieza de Tablas
+        $("#usrTable").dataTable().fnDestroy();
+        $("#roleUsrTable").dataTable().fnDestroy();
+        //Carga de Tablas
+        $('#roleUsrTable').DataTable({
+            responsive: true,
+            ordering: false,
+            bAutoWidth: false,
+            dom: 'frtp',
+            pagingType: "simple",
+            columnDefs: [
+                       {
+                           "targets": [0, 1],
+                           "visible": false,
+                           "searchable": false
+                       },
+                       {
+                           "targets": 2, "width": "7%"
+                       },
+                       {
+                           "targets": 3, "width": "93%"
+                       }
+            ],
+            language: leng_esp
+            });
+        var usrTab = $('#usrTable').DataTable({
+            responsive: true,
+            select: true,
+            ordering: false,
+            dom: 'frtp',
+            "pagingType": "simple",
+            ajax: {
+                url: "/Role/ListaComboUsuarios",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "Id"
+
+                },
+                {
+                    data: "Usuario"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div role="group" class="btn-group-md btn-group">' +
+                                '<button class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-2" title="Ver Roles" onclick="VerRoles(' + data.Id + ');"> <i class="fa fa-eye fa-lg" ></i></button>' +
+                                '<button class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-2" title="Duplicar Rol" onclick="DuplicarRolUsuario(' + data.Id + ',' + "'" + data.Usuario + "'" + ');"> <i class="fa fa-clone fa-lg"></i></button>'
+                        '</div>';
+                    }
+                }
+            ],
+            columnDefs: [
+               {
+                   "targets": [0],
+                   "visible": false,
+                   "searchable": false
+               }
+            ],
+            language: leng_esp
+        });
+    });
+
+
+    function VerRoles(idUsr) {
+        $.ajax({
+            type: "GET",
+            url: "/Role/ListaRolesActivosxUsr?idUsr=" + idUsr,
+            cache: false,
+            success: function (data) {
+                $('#roleUsrTable').DataTable().destroy();
+                var rolt = $('#roleUsrTable').DataTable({
+                    responsive: true,
+                    ordering:false,
+                    dom: 'frtp',
+                    pagingType:"simple",
+                    data: data,
+                    'drawCallback': function () {
+                        $('input[type="checkbox"]').iCheck({
+                            checkboxClass: 'icheckbox_flat-blue'
+                        });
+                    },
+                    columns: [
+                        {
+                            data: "idPerfil",
+                        },
+                        {
+                            data: "Estado"
+                        },
+                        {
+                            data: null,
+                            render: function (data, type, row) {
+                                var ch = "";
+                                if (data.Estado == 1) ch = "checked";
+                                return '<input id="chb' + data.idPerfil + '" type="checkbox" '+ ch +'/>';
+                            }
+                        }
+                        ,
+                        {
+                            data: "Nombre"
+                        }
+                    ]
+                    ,
+                    columnDefs: [
+                       {
+                           "targets": [0,1],
+                           "visible": false,
+                           "searchable": false
+                       },
+                       {
+                           "targets": 2, "width":"7%"
+                       },
+                       {
+                           "targets": 3, "width":"93%"
+                       }
+                    ],
+                    language: leng_esp
+                });
+            }
+        });
+        $("#idUR").val(idUsr);
+    }
+    
+    function Guardar() {
+        if ($("#idUR").val() == "") {
+            toastr.warning("Debe seleccionar un usuario.", "Advertencia");
+        } else {
+            var roles = new Array;
+            var tablaRolUsr = $("#roleUsrTable").DataTable();
+
+            //Recorre la tabla entera buscando checbox activos
+            tablaRolUsr.rows().iterator('row', function (context, index) {
+                let node = $(this.row(index).node());
+                var chb = (node.find('td').eq(0).find('input'))[0];
+
+                if (chb.checked == true) {
+                    roles[roles.length++] = chb.id.substr(3);
+                }
+            });
+
+            $.ajax({
+                type: "POST",
+                url: "/Role/ActualizarRoles?idUsr=" + $("#idUR").val(),
+                data: JSON.stringify(roles),
+                contentType: 'application/json; charset=utf-8',
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else {
+                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                        toastr.success("Roles Actualizados", "Exito!");
+                        Buscar();
+                    }
+                }
+            });
+        }
+    }
+
+    function DuplicarRolUsuario(idUsuario, nombreUsuario) {
+        $("#lblTitulo").text("Duplicar Rol");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-md");
+
+        $("#modal-content").html('<div class="main-card mb-2 card">' +
+                                    '<div class="card-body">' +
+                                        '<div class="form-row">' +
+                                            '<div class="col-md-6">' +
+                                                '<div class="position-relative form-group">' +
+                                                    '<label for="nombreMenu">Usuario (Perfil Origen)</label><br />' +
+                                                    '<input id="Usuario" type="text" disabled/>' +
+                                                '</div>' +
+                                            '</div>' +
+                                            '<div class="col-md-6">' +
+                                                '<div class="position-relative form-group">' +
+                                                    '<label for="Usuario2">Usuario (Perfil Destino)</label><br />' +
+                                                    '<input id="Usuario2" type="text" />' +
+                                                '</div>' +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class="form-row">' +
+                                            '<div class="col-md-6 ml-auto">' +
+                                                '<div class="form-row">' +
+                                                    '<div class="col-md-6">' +
+                                                        '<div class="position-relative form-group">' +
+                                                            '<button type="button" data-dismiss="modal" class="btn btn-secondary btn-block">Cancelar</button>' +
+                                                        '</div>' +
+                                                    '</div>' +
+                                                    '<div class="col-md-6">' +
+                                                        '<div class="position-relative form-group">' +
+                                                            '<button type="button" class="btn btn-primary btn-block" onclick="Duplicar('+ idUsuario +')">Guardar</button>' +
+                                                        '</div>' +
+                                                    '</div>' +
+                                                '</div>' +
+                                            '</div>' +
+                                        '</div>' +
+                                    '</div>' +
+                                '</div>');
+
+        $("#Usuario").val(nombreUsuario);
+        $("#Usuario").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        $("#Usuario2").kendoComboBox({
+            placeholder: "Seleccione un usuario",
+            dataTextField: "Usuario",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Role/ListaComboUsuarios?var=" + Math.random()
+                }
+            }
+        });
+
+
+    } 
+
+    function Duplicar(idUser1) {
+        var id2 = $("#Usuario2").val();
+        if (id2 == "") {
+            toastr.warning("Seleccione un usuario.", "Advertencia");
+        }
+        else {
+            var idUser2 = parseInt(id2);
+            $.ajax({
+                type: "POST",
+                url: "/Role/DuplicarRoles?idUser1=" + idUser1 + "&idUser2=" + idUser2,
+                cache: false,
+                success: function (data) {
+                    if (data != "OK") {
+                        toastr.warning("No se pudo completar la operacion", "Advertencia");
+                    } else {
+                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                        toastr.success("Duplicado completado!", "Completado");
+                        Buscar();
+                    }
+                }
+            });
+        }
+    }
+</script>

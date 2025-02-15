@@ -1,0 +1,239 @@
+﻿@model ERPElectrodata.Models.SLA
+
+@{
+    Layout = null;
+}
+
+<div style="width:100%; display:inline-block;">
+    @using (Html.BeginForm("EdicionSLA", "SLA", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormNewRequest", name = "FormNewRequest", target = "ut_NewRequest" }))
+    {
+        <div id="mensaje"></div>
+        @Html.HiddenFor(model => model.UsuarioCrea)
+        @Html.HiddenFor(model => model.FechaCrea)
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6">
+                    <div>Cuenta<b>*</b> </div>
+                    <select id="cbCuentaE" name="cbCuentaE" class="form-control select2" type="text" style="width:100%" ></select>
+                </div>
+                <div class="col-md-6">
+                    Nombre<b>*</b>
+                    <input id="Nom" name="Nom" class="form-control" type="text" value="@ViewBag.Nombre" />
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-2">
+                    <div class="editor-label">
+                        Estado
+                    </div>
+                    <div class="editor-field">
+                        <input type="checkbox" id="Estado" name="Estado" style="width:80%">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-12">
+            <br />
+        </div>
+        <div class="col-md-12">
+            <div class="col-md-12">
+                Detalle<b>*</b>
+            </div>
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab_1">
+                    <div class="box">
+                        <!-- /.box-header -->
+                        <div class="box-body">
+                            <table id="tbPrioridad" class="table table-bordered table-striped" style="width:100%;">
+                                <thead>
+                                    <tr>
+                                        <th></th>
+                                        <th>Prioridad</th>
+                                        <th>Tiempo de atención</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+
+                            </table>
+                        </div>
+                        <!-- /.box-body -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <input type="hidden" id="IDSLA" name="IDSLA" value="@ViewBag.IDSLA" />
+        @*---------------------------Footer--------------------------------------------------------*@
+        <div style="display:inline-block; float:right; padding:0px 15px 15px 5px;">
+            <div style=" float:right; padding:0px 0px 0px 0px; ">
+                <button id="reset" class="btn btn-link" data-dismiss="modal">Cancelar</button>
+            </div>
+            <div style=" float:right; padding:0px 15px 0px 0px; ">
+                <button id="submitRequest" class="btn btn-primary">Editar</button>
+            </div>
+        </div>
+    }
+    <iframe id="ut_NewRequest" name="ut_NewRequest" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#submitRequest").click(function () {
+            event.preventDefault();
+            //Valida si el SLA está asignado a algún soporte
+            ValidarEdicionSLA();
+        });
+        if("@ViewBag.Estado"=="1"){
+            $("#Estado").attr('checked',true)
+        }else{
+            $("#Estado").attr('checked',false)
+        }
+        $("#cbCuentaE").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione una cuenta",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListarCuentas_Kendo"
+                }
+
+            }
+        });
+        //Asignación inicial
+        $("#cbCuentaE").data("kendoComboBox").value(@ViewBag.IdCuenta);
+        ListarPrioridad();
+
+        ObtenerPrioridad();
+
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+
+    function ListarPrioridad() {
+        $('#tbPrioridad').dataTable().fnDestroy();
+        $('#tbPrioridad').DataTable({
+            "order": [[1, "asc"]],
+            //dom: 'Bfrtip',
+            ajax: {
+                "url": "/SLA/ListarEditarPrioridadSLA/" + @ViewBag.IDSLA + "/1",
+            },
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return "<input type='checkbox' id='Aplica" + data.IdPrioridad + "' name='Aplica" + data.IdPrioridad + "' style='width:15px;height:15px;'>";
+                    }
+                },
+                { data: "Prioridad" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        ValidarDecimales(data.IdPrioridad);
+                        if (data.IdSla == "0") {
+                            return "<input id='Tiempo" + data.IdPrioridad + "' name='Tiempo" + data.IdPrioridad + "' type='text' placeholder='' class='form-control input-md'>";
+                        } else {
+                            return "<input id='Tiempo" + data.IdPrioridad + "' name='Tiempo" + data.IdPrioridad + "' value='" + data.Tiempo + "' type='text' placeholder='' class='form-control input-md'>";
+                        }
+                    }
+                },
+            ],
+            "info": false,
+            "searching": false,
+            "paginate": false
+        });
+    }
+
+    function ObtenerPrioridad(){
+
+        $.ajax({
+            url: "/SLA/ListarEditarPrioridadSLA/"+ @ViewBag.IDSLA + "/2",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(source['data'], function (index, value) {
+                    $("#Aplica"+data['data'][index]['IdPrioridad']).attr('checked', true);
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    function ValidarDecimales(id) {
+        $("#Tiempo" + id).keypress(function (event) {
+            var charCode = (event.which) ? event.which : event.keyCode
+            if (
+                //(charCode != 45 || $("#txtCondParametro" + id).val().indexOf('-') != -1) &&
+                //(charCode != 46 || $("#txtCondParametro" + id).val().indexOf('.') != -1) &&
+                (charCode < 48 || charCode > 57))
+                event.preventDefault();
+            return true;
+        });
+
+        $("#Tiempo" + id).keyup(function (event) {
+            var $$this = $("#txtCondParametro" + id).val();
+            //alert($$this);
+            var charCode = (event.which) ? event.which : event.keyCode
+            if (charCode == 189 && $$this.indexOf('-') > 0) {
+                value = $$this.replace('-', '');
+                $("#txtCondParametro" + id).val(value);
+                event.preventDefault();
+            }
+        });
+        $("#Tiempo" + id).on('input', function () {
+            //this.value = parseFloat($("#txtCondParametro" + id).val(), 20).toFixed(3);
+            this.value = this.value
+              //.replace(/[^\d.]/g, '')             // numbers and decimals only
+              .replace(/(^[\d]{17})[\d]/g, '$1')   // not more than 17 digits at the beginning
+              //.replace(/(\..*)\./g, '$1')         // decimal can't exist more than once
+              .replace(/(\.[\d]{2})./g, '$1');    // not more than 2 digits after decimal
+        });
+    }
+
+    function uploadDoneNR(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success(msnErr);
+            $("#btnBuscar").click();
+            $("#reset").click();
+        }
+        else {
+            toastr.error(msnErr);
+        }
+    }
+
+    function ValidarEdicionSLA() {
+        $.ajax({
+                url: "/SLA/ValidarEdicionSLA?IdSLA=@ViewBag.IDSLA",
+                type: "GET",
+                dataType: "text",
+                success: function (resp) {
+                    if (resp != '') {
+                        toastr.warning(resp);
+                    } else if (resp == 'Error') {
+                        toastr.error("Ha ocurrido un error, por favor contacte al administrador.");
+                    } else {
+                        $("#FormNewRequest").submit();
+                    }
+                },
+                error: function (dato) {
+                    toastr.error("Ha ocurrido un error, contacte al administrador.");
+                }
+        });
+    }
+</script>

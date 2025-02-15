@@ -1,0 +1,223 @@
+﻿<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/DataTables/datatables.min.js"></script>
+<link href="~/Content/themes/plugin/DataTables/datatables.min.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Lista de Plantillas de Tickets
+                <div class="page-title-subheading">
+                    Listado de plantillas de tickets registrados.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title">Filtrar</div>
+                    <form class="">
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label for="cbTipoTicket" class="">Tipo Ticket</label>
+                                    <input id="cbTipoTicket" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label for="cbPrioridad" class="">Prioridad</label>
+                                    <input id="cbPrioridad" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-md-2 d-flex align-items-center">
+                                <div class="form-group" style="margin-top: 20px; ">
+                                    <button id="btnBuscar" type="button" class="mt-2 btn btn-primary" onclick="ListarPlantillas()">Buscar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tab-content table-responsive">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card element-block-example">
+                <div class="card-body">
+                    <div class="card-title">Plantillas</div>
+                    <form class="">
+                        <div class="" style="width: 98%;overflow-y: scroll;margin:0 auto;">
+                            <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%;" id="tbPlantillas">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Nombre</th>
+                                        <th class="text-center">Descripción</th>
+                                        <th class="text-center">Tipo Ticket</th>
+                                        <th class="text-center">Prioridad</th>
+                                        <th class="text-center">Categoría</th>
+                                        <th class="text-center">Estado</th>
+                                        <th class="text-center">Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#cbTipoTicket").kendoComboBox({
+            //autoBind: true,
+            dataValueField: "ID_TYPE_TICK",
+            dataTextField: "NAM_TYPE_TICK",
+            placeholder: "Seleccione un tipo de ticket",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    //read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                    read: "/TypeTicket/List?var=" + Math.random()
+                }
+            }
+        });
+        $("#cbPrioridad").kendoComboBox({
+            autoBind: false,
+            //cascadeFrom: "cbTipoTicket",
+            dataValueField: "ID_PRIO",
+            dataTextField: "NAM_PRIO",
+            placeholder: "Seleccione una prioridad",
+            //filter: "contains",
+            //delay: 500,
+            //minLength: 0,
+            //suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    //read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                    read: "/Priority/List"
+                }
+
+            }
+        });
+        ListarPlantillas();
+
+    });
+
+    function ListarPlantillas() {
+        const parametros = {
+            IdGrupo: $("#cbGrupo").val(),
+            IdTipoTicket: $("#cbTipoTicket").val(),
+            IdPrioridad: $("#cbPrioridad").val()
+        };
+        $('#tbPlantillas').dataTable().fnDestroy();
+        $('#tbPlantillas').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: `/Plantilla/ListarPlantillas`,
+                data: parametros,
+                type: "GET"
+            },
+            columns: [
+                {
+                    data: "Nombre"
+                },
+                {
+                    data: "SUM_TICK"
+                },
+                {
+                    data: "NAM_TYPE_TICK"
+                },
+                {
+                    data: "NAM_PRIO"
+                },
+                {
+                    data: "FULL_NAM_CATE"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let color, text = '';
+                        if (data.Estado == 1) { color = 'success'; text = 'Activo' } else { color = 'danger'; text = 'Inactivo' };
+                        let label = `<div class="badge badge-${color}">${text}</div>`
+                        return label;
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                        <a href="/Plantilla/Editar/${data.Id}" class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3"><i class="fa fa-edit" aria-hidden="true"></i> Editar</a>
+                                    </div>`
+                        return boton;
+                    }
+                },
+            ],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+
+    }
+
+    function MostrarMensaje(msg, descripcion) {
+
+        setTimeout(function () {
+            $(".modal-backdrop").remove();
+            $("#miModal").removeClass("show")
+        }, 180);
+
+        if (msg == "OK") {
+            toastr.success(descripcion, "");
+
+            var tabla = $('#tbListadoSolicitudes').DataTable();
+
+            tabla.ajax.reload();
+
+        }
+        else if (msg == "VACIO") {
+            toastr.warning("Por favor, seleccione una solicitud como mínimo", "Mensaje");
+        }
+        else {
+            toastr.danger("Contacte al administrador.", "Error");
+        }
+    }
+</script>

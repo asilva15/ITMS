@@ -1,0 +1,165 @@
+﻿@{
+    ViewBag.Title = "ListarSoportes";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<style>
+    .fondoSeleccion {
+        background-color: #D6E8E5;
+    }
+</style>
+<div id="mensajeSoporteED"></div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                <div id="titulo"></div>
+            </div>
+            <div class="card-body">
+
+
+                <div class="form-row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <div >
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="tab_1">
+                                        <div>
+                                            <!-- /.box-header -->
+                                            <div class="box-body">
+                                                <table id="tablaSoportes" class="table table-bordered table-striped" style="width:100%">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Ticket</th>
+                                                            <th>Fecha de mantenimiento</th>
+                                                            <th>Fecha inicial</th>
+                                                            <th>Opción</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                    <tfoot>
+                                                        <tr>
+                                                            <th>Ticket</th>
+                                                            <th>Fecha de mantenimiento</th>
+                                                            <th>Fecha inicial</th>
+                                                            <th>Opción</th>
+                                                        </tr>
+                                                    </tfoot>
+                                                </table>
+                                            </div>
+                                            <!-- /.box-body -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@*<div id="mensajeSoporteED"></div>
+<div class="panel panel-default">
+    <div class="panel-heading" id="titulo"></div>
+    <div class="panel-body">
+        <div class="box">
+            <div class="tab-content">
+                <div class="tab-pane active" id="tab_1">
+                    <div class="box">
+                         /.box-header 
+                        <div class="box-body">
+                            <table id="tablaSoportes" class="table table-bordered table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket</th>
+                                        <th>Fecha de mantenimiento</th>
+                                        <th>Fecha inicial</th>
+                                        <th>Opción</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th>Ticket</th>
+                                        <th>Fecha de mantenimiento</th>
+                                        <th>Fecha inicial</th>
+                                        <th>Opción</th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                         /.box-body 
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+<div id="EditarFechaMantenimiento"></div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        ListaSoporteED();
+        $.ajax({
+            url: "/SoporteED/datosOP/@ViewBag.IdDocuSale",
+            cache: false,
+            type: "GET",
+            dataType: "text",
+            success: function (data) {
+                $('#titulo').text(data);
+            }
+        });
+    });
+
+    function ListaSoporteED() {
+        $('#tablaSoportes').dataTable().fnDestroy();
+
+        var tablaSoportes = $('#tablaSoportes').DataTable({
+            "order": [[3, "asc"]],
+            //dom: 'Bfrtip',
+            ajax: "/SoporteED/ListarSoportes/"+@ViewBag.IdDocuSale,
+            columns: [
+                { data: "Codigo" },
+                { data: "FechaMantenimiento" },
+                { data: "FechaInicial" },
+                { data: "Edicion" },
+            ],
+            "bPaginate": true,
+        });
+        if(@ViewBag.Operaciones == 0){
+            var columna = tablaSoportes.column(3);
+            columna.visible(!columna.visible());
+        }
+    }
+
+    function EditarFechaMantenimiento(id) {
+        $("#EditarFechaMantenimiento").empty();
+        $('#EditarFechaMantenimiento').show("show");
+        $("#EditarFechaMantenimiento").load('/SoporteED/EditarFechaMantenimiento/' + id);
+        //$('td'[0]).css('background-color','green');
+        $("#tablaSoportes").on('click', 'tr', function(e) {
+            $('#tablaSoportes td').removeClass("fondoSeleccion");
+            e.preventDefault();
+                $(this).children("td").each(function(i) {
+                    //if(activo == 1)
+                    $(this).addClass("fondoSeleccion");
+                });
+            });
+            
+    }
+</script>

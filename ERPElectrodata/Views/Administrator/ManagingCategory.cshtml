@@ -1,0 +1,146 @@
+﻿
+@{
+//Layout = null;
+}
+<style>
+    .botonDelete {
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        background-color: #c35a50;
+        font-family: Arial;
+        font-size: 40px;
+        text-align: center;
+        color: black;
+        position: relative;
+        border-left: 1px solid white;
+        border-right: 1px solid white;
+        border-bottom: 1px solid white;
+    }
+</style>
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<div id="divContent">
+    <div class="app-page-title mb-2">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="fa fa-archive icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <b>Lista de Categorías</b>
+
+                </div>
+            </div>
+            <div class="page-title-actions">
+                <div class="d-inline-block">
+                    <button type="button" class="btn btn-primary btn-sm" style="float:right;" onclick="NewCategory()" data-toggle="modal" data-target="#miModal"><i class="fa fa-plus"></i> Crear Categoria</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="divSubContentCategory">
+    <div id="gridCategory" class="contentView"></div>
+    <div style="clear:both;"></div>
+    <div id="pagerCategory" class="contentViewPager"></div>
+</div>
+
+<div class="modal fade" id="modalCrearCategoria" role="dialog" aria-labelledby="modalCrearCategoriaLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" data-backdrop="false" id="cerrarAsig"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="modalCrearCategoriaLabel">Registro de Categoría</h4>
+            </div>
+            <div class="modal-body">
+                <div id="divRegistroCategoria"></div>
+                <!-- CONTENIDO -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="tmp-category">
+    <div style="display: inline-block; width: 100%;" id="divListVacation${ID_CATE}">
+        <input type="hidden" name="ID_CATE_DEL" id="ID_CATE_DEL" value="${ID_CATE}" />
+        <div style="border: 1px solid \\#516882; margin: 0px 0px 7px 0px; width: 60%; float: left;">
+            <div style="font-size: .9em; width: 99%; background-color: \\#516882; height: 20px; color: white; padding: 2px 0px 0px 1%; display: inline-block; position:relative;">
+                <div style="float:left; width:auto;color:white; text-align:right; text-transform:capitalize;">
+                    Nombre de Categoria: ${NAM_CATE}
+                </div>
+                <div style="float:left; width:auto;color:white; margin:0px 0px 0px 1%; text-align:right; text-transform:capitalize;">
+                    @ResourceLanguaje.Resource.Status: ${VIG_CATE}
+                </div>
+                <div style="float:right; width:49%;color:white; margin:0px 1% 0px 0px; text-align:right;">
+                    @ResourceLanguaje.Resource.CreatedDate: ${DATE_START}
+                </div>
+            </div>
+            <div class="incidentHomeListHeader">
+                <div style="min-width: 80px; margin:3px 0 0 0; height: auto; width: auto; text-align:right; float:left;">
+                    <div class="smallField"><b>Nivel :</b></div>
+                    <div class="smallField"><b>Abreviatura</b></div>
+                </div>
+                <div style="min-width: 180px; margin:3px 10px 0 0; height: auto; width: auto; text-align:left; float:left;">
+                    <div class="smallTitle" style="text-transform:capitalize;">&nbsp;${NIV_CATE}</div>
+                    <div class="smallTitle" style="text-transform:capitalize;">&nbsp;${ABR_CATE}</div>
+                </div>
+                <div style="min-width: 80px; margin:3px 0 0 0; height: auto; width: auto; text-align:right; float:left;">
+                    <div class="smallField"><b>Nombre de Cuenta:</b></div>
+                    <div class="smallField"><b>Actualizado:</b></div>
+                    <div class="smallField"><b>Creado por:</b></div>
+                </div>
+                <div style="min-width: 150px; margin: 3px 0 0 0; height: auto; width: auto; text-align: left; float: left;">
+                    <div class="smallTitle">&nbsp;${NAM_ACCO}</div>
+                    <div class="smallTitle">&nbsp;${DATE_END}</div>
+                    <div class="smallTitle">&nbsp;${ACCO_USR}</div>
+                </div>
+                <div style="width: 50px; margin: 4px 4px 0 0; height: 50px; background-color: #00a8e6; float: right; color: White; text-align: center;">
+                    <div title="Eliminar" class="botonDelete" onclick="deleteCategory(${ID_CATE})">x</div>
+                </div>
+                <div style="min-width: 50px; margin: 3px 0 0 0; height: 50px; width: auto; float: right; border-right: 1px dotted \\#ddd; display: inline-block;">
+                    <div style="float:left; width:33.33%; height:100%; position:relative; ">
+                        <a onclick="EditCategory(${ID_CATE},${ID_ACCO})"><div class="botonSummary" title="ver Detalle"></div></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+<script id="tmp-Categoria" type="text/x-kendo-template">
+    <div style="width:100%;" id="#= ID_CATE #">#= NAM_CATE #</div>
+</script>
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        FindCategory();
+    });
+
+    function NewCategory() {
+        $(".btnAbrirModal").attr("data-style", "expand-right");
+        $(".btnAbrirModal").attr("data-toggle", "modal");
+        $(".btnAbrirModal").attr("data-target", "#miModal");
+        $("#lblTitulo").text("Registro de Categoría");
+
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-md");
+        $("#modal-content").empty();
+
+        $("#modal-content").load("/Administrator/CrearCategoria?var=" + Math.random());
+        //$("#divRegistroCategoria").empty();
+        //$("#divRegistroCategoria").load("/Administrator/CrearCategoria?var=" + Math.random());
+    }
+    function FindCategory() {
+        $("#divSubContentCategory").empty();
+        $("#divSubContentCategory").load("/Administrator/viewFindCategory?var=" + Math.random());
+    }
+
+</script>
+

@@ -1,0 +1,442 @@
+﻿@model ERPElectrodata.Models.PERSON_STATUS
+
+@{
+    Layout = null;
+}
+
+<div class="bodyMarcoForm">
+@using (Html.BeginForm("ChangeStatus", "Talent", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormChangeStatus", target = "upload_changeStatus" }))
+{
+    <input type="hidden" name="ID_PERS_ENTI" value="@ViewBag.ID_PERS_ENTI" />
+    <div class="divFondoUno">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.NewTalent @ResourceLanguaje.Resource.StatusTalent
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(model => model.ID_PERS_STAT)
+                @Html.ValidationMessageFor(model => model.ID_PERS_STAT)
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos" style="display:none;" id="divCessDate">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Fecha de cese <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input type="text" name="CESS_DATE" id="CESS_DATE"/>
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.ReasonTalent
+            </div>
+            <div class="editor-field">
+                <input type="text" name="ID_REAS_END" id="ID_REAS_END" />
+            </div>
+        </div>
+    </div>
+    <div class="divFondoUno" style="display:none;" id="divTempStaff">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.TemporaryReplacementTalent
+            </div>
+            <div class="editor-field">
+                <input type="text" name="ID_PERS_ENTI_TEMP" id="ID_PERS_ENTI_TEMP" />
+            </div>
+        </div>
+    </div>
+    <div class="divFondoUno" id="divAttaCess">
+        <div style="width:100%; float:left;">
+            <div style="width: 100%; margin:0 auto;" id="divInputCess">
+                <input name="fileAttaCess" id="fileAttaCess" type="file" />
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos" id="divDates">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Fecha Inicio de Contrato <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="STAR_DATE" type="text" name="STAR_DATE" >
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Fecha Fin de Contrato <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="END_DATE" type="text" name="END_DATE" >
+            </div>
+        </div>
+    </div>
+    <div class="divFondoUno" id="divSalary">
+        <div class="divSpace3"></div>
+        <div class="divCont3" id="divCondition">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.ConditionContractTalent
+            </div>
+            <div class="editor-field">
+                <input id="ID_COND_CONT" type="text" name="ID_COND_CONT" >
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.GrossSalaryTalent
+            </div>
+            <div style="margin-top:0px;">
+                <input id="GROSS_SALARY" type="text" name="GROSS_SALARY" >
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos" id="divLocation">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                <a style="text-decoration:underline; cursor:pointer" onclick="JobTitleChange()" title="@ResourceLanguaje.Resource.SelectJobTitle">@ResourceLanguaje.Resource.JobTitleTalent</a>
+                <span style="color:red">(*)</span>
+            </div>
+            <input type="hidden" name="ID_CHAR" value="0" id="ID_CHAR" />
+            <div class="k-textbox">
+                <input type="text" id="NAM_CHAR" name="NAM_CHAR" readonly="readonly" style="text-transform:capitalize;" />
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Local <span style="color:red">(*)</span>
+            </div>
+            <div class="editor-field">
+                <input id="ID_LOCATION" type="text" name="ID_LOCATION">
+            </div>
+        </div>
+    </div>    
+    <div class="divFondoUno" id="divAttach">
+        <div style="width:100%; float:left;">
+            <div style="width: 100%; margin:0 auto;" id="divInputDocs">
+                <input name="filesDocs" id="filesDocs" type="file"/>
+            </div>
+        </div>
+    </div>
+    
+    <div class="divFondoUno">
+        <div class="divSpace3"></div>
+        <div style="display:inline-block; float:right; padding:5px 11px 0 5px;">
+            <div style=" float:left; ">
+                <button id="submit" class="k-button">@ResourceLanguaje.Resource.BtnSaveTalent</button>
+            </div>
+            @*<button id="reset" class="k-button">@ResourceLanguaje.Resource.BtnCancel</button>*@
+        </div>
+    </div>
+}
+</div>
+<iframe id="upload_changeStatus" name="upload_changeStatus" src="" style="width:0px;height:0px;border-width:0px;display:none; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+    var alt = 355;
+    $(document).ready(function () {
+
+        $("#submit").click(function () {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.Saving @ResourceLanguaje.Resource.Profile', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });
+
+        $("#ID_PERS_ENTI_TEMP").kendoComboBox({
+            dataTextField: "UserUpper",
+            dataValueField: "ID_PHOT",
+            template: '<div style="width:100%; height:48px;">' +
+                        '<div style="width:17%; min-width:40px; float:left; height:45px; margin-top:3px;"><img style="border:1px solid lavender;" src="/Content/Fotos/${ID_PHOT}.jpg" height="40" width="40"/></div>' +
+                        '<div style="width:70%; float:left; height:19px; text-transform:capitalize; margin-top:3px;"><b>${User}</b></div>' +
+                        '<div style="width:70%; float:left; height:19px; text-transform:capitalize;font-size:.85em; margin-top:-2px;">${JobTitle}</div>' +
+                      '</div>',
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TalentChart/ListStaffTempReplace?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random()
+                }
+            }
+        });
+        var ID_PERS_ENTI_TEMP = $("#ID_PERS_ENTI_TEMP").data("kendoComboBox");
+        ID_PERS_ENTI_TEMP.list.width(300);
+
+        $("#ID_PERS_STAT").kendoComboBox({
+            dataTextField: "NAM_STAT",
+            dataValueField: "ID_PERS_STAT",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            index: 0,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Person_Status/ListOption?var=" + Math.random() + "&id=@ViewBag.ID_PERS_STAT"
+                }
+            }
+        });
+
+        var ID_PERS_STAT = $("#ID_PERS_STAT").data("kendoComboBox");
+        ID_PERS_STAT.bind("change", function (e) {
+            if (ID_PERS_STAT.dataItem().ID_PERS_STAT == 1 || ID_PERS_STAT.dataItem().ID_PERS_STAT == 2) {
+                $("#divCessDate").css("display", "none");
+                $("#divTempStaff").css("display", "none");
+                $("#divCondition").css("display", "inline-block");
+                $("#divDates").css("display", "inline-block");
+                $("#divSalary").css("display", "inline-block");
+                $("#divLocation").css("display", "inline-block");
+                $("#divAttach").css("display", "inline-block");
+                $("#divAttaCess").css("display", "none");
+                $("#dlgF2").height(alt);
+            }
+            else if (ID_PERS_STAT.dataItem().ID_PERS_STAT == 3) {
+                $("#divCessDate").css("display", "inline-block");
+                $("#divAttaCess").css("display", "inline-block");
+                $("#divTempStaff").css("display", "inline-block");
+                $("#divCondition").css("display", "none");
+                $("#divDates").css("display", "none");
+                $("#divSalary").css("display", "none");
+                $("#divLocation").css("display", "none");
+                $("#divAttach").css("display", "none");
+                $("#dlgF2").height(190);
+            }
+            else {
+                $("#divCessDate").css("display", "none");
+                $("#divAttaCess").css("display", "none");
+                $("#divTempStaff").css("display", "none");
+                $("#divCondition").css("display", "none");
+                $("#divDates").css("display", "none");
+                $("#divSalary").css("display", "none");
+                $("#divLocation").css("display", "none");
+                $("#divAttach").css("display", "none");
+                $("#dlgF2").height(138);
+            }
+            recentrarForm2();
+        });
+
+        if ('@ViewBag.ID_PERS_STAT' == 1 || '@ViewBag.ID_PERS_STAT' == 2) { //Estado Actual: EMPLOYEES o TEMPORAL -> Cambia a 1era. Opcion CEASED
+            $("#divCessDate").css("display", "inline-block");
+            $("#divTempStaff").css("display", "inline-block");
+            $("#divAttaCess").css("display", "inline-block");
+            $("#divCondition").css("display", "none");
+            $("#divDates").css("display", "none");
+            $("#divSalary").css("display", "none");
+            $("#divLocation").css("display", "none");
+            $("#divAttach").css("display", "none");
+        }
+        else if ('@ViewBag.ID_PERS_STAT' == 3) { //Estado Actual: CEASED STAFF -> Cambia a 1era. Opcion AVAILABLE
+            $("#divCessDate").css("display", "none");
+            $("#divAttaCess").css("display", "none");
+            $("#divTempStaff").css("display", "none");
+            $("#divCondition").css("display", "none");
+            $("#divDates").css("display", "none");
+            $("#divSalary").css("display", "none");
+            $("#divLocation").css("display", "none");
+            $("#divAttach").css("display", "none");
+        }
+        else if ('@ViewBag.ID_PERS_STAT' == 4) { //Estado Actual: AVAILABLE STAFF -> Cambia a 1era. Opcion EMPLOYEE
+            $("#divCessDate").css("display", "none");
+            $("#divTempStaff").css("display", "none");
+            $("#divAttaCess").css("display", "none");
+            $("#divCondition").css("display", "inline-block");
+            $("#divDates").css("display", "inline-block");
+            $("#divSalary").css("display", "inline-block");
+            $("#divLocation").css("display", "inline-block");
+            $("#divAttach").css("display", "inline-block");
+        }
+
+        var CESS_DATE = $("#CESS_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        var STAR_DATE = $("#STAR_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        var END_DATE = $("#END_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#ID_COND_CONT").kendoComboBox({
+            dataTextField: "NAM_COND",
+            dataValueField: "ID_COND_CONT",
+            filter: "contains",
+            autoBind: true,
+            index: 1,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Contract_Condition/List?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#GROSS_SALARY").kendoNumericTextBox({
+            min: 0
+        });
+
+        $("#ID_LOCATION").kendoComboBox({
+            dataTextField: "NAME",
+            dataValueField: "ID_LOCA",
+            template: '<div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                        '<div>${ data.NAM_LOCA }</div>',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Location/ListChangeStatus?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random()
+                }
+            }
+        });
+        var ID_LOCA = $("#ID_LOCATION").data("kendoComboBox");
+
+        $("#ID_REAS_END").kendoComboBox({
+            dataTextField: "NAM_REAS",
+            dataValueField: "ID_REAS_END",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            index: 0,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Person_Status/ListReasonEndPeriod?var=" + Math.random()
+                }
+            }
+        });
+
+        var onSelectDocs = function (e) {
+            $.each(e.files, function (index, value) {
+                if (value.extension.toLowerCase() != ".pdf") {
+                    e.preventDefault();
+
+                    winPopUpModal("@ResourceLanguaje.Resource.WrongFileExtension", "<div style='border-bottom:1px dotted #dadada;padding:0 3px 20px 3px;'>" +
+                    "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.AssetMessage8</div>" +
+                    "<div style='float:right; padding:30px 0 0 0; '>" +
+                    "<button id='continuee' class='k-button'>Continue</button>" +
+                    "</div></div>", 400, 140);
+
+                    var undo = $("#continuee")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                    });
+
+                }
+                else {
+                    recentrarForm2();
+                    $("#divInputDocs").css("width", "95%");
+                }
+            });
+        };
+
+        function onRemove(e) {
+            // Array with information about the removed files
+            var files = e.files;
+            alt = 355;
+            mt = $("#dlgF2").css("margin-top");
+            valmt = parseInt(mt.substr(0, mt.length - 2));
+            valmt = valmt + 25;
+            $("#dlgF2").css("margin-top", valmt.toString() + "px");
+            $("#dlgF2").height(alt);
+            $("#divInputDocs").css("width", "100%");
+        }
+
+        $("#filesDocs").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach @ResourceLanguaje.Resource.Contract"
+            },
+            select: onSelectDocs,
+            remove: onRemove,
+            multiple: false,
+        });
+
+        var onSelectAttaCess = function (e) {
+            $.each(e.files, function (index, value) {
+                if (value.extension.toLowerCase() != ".pdf") {
+                    e.preventDefault();
+
+                    winPopUpModal("@ResourceLanguaje.Resource.WrongFileExtension", "<div style='border-bottom:1px dotted #dadada;padding:0 3px 20px 3px;'>" +
+                    "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.AssetMessage8</div>" +
+                    "<div style='float:right; padding:30px 0 0 0; '>" +
+                    "<button id='continuee' class='k-button'>Continue</button>" +
+                    "</div></div>", 400, 140);
+
+                    var undo = $("#continuee")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                    });
+                }
+                else {
+                    recentrarForm2();
+                    $("#divInputCess").css("width", "95%");
+                }
+            });
+        };
+
+        function onRemoveAttaCess(e) {
+            // Array with information about the removed files
+            var files = e.files;
+            alt = 300;
+            mt = $("#dlgF2").css("margin-top");
+            valmt = parseInt(mt.substr(0, mt.length - 2));
+            valmt = valmt + 25;
+            $("#dlgF2").css("margin-top", valmt.toString() + "px");
+            $("#dlgF2").height(alt);
+            $("#divInputCess").css("width", "100%");
+        }
+
+        $("#fileAttaCess").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach"
+            },
+            select: onSelectAttaCess,
+            remove: onRemoveAttaCess,
+            multiple: false,
+        });
+
+    });
+
+    function JobTitleChange() {
+        //window.close();
+        //$("#modalEstado").modal('toggle');
+        $("#modalCargo").modal('show');
+        @*var htmlForm = '<div id="FormJobTitle"></div>';
+        winFormPopUpModal("@ResourceLanguaje.Resource.ChartPopupTitle", htmlForm, 400, 400);*@
+        $("#divCargo").load("/TalentChart/ViewChartWithoutStaff?id=@ViewBag.ID_ENTI");
+        //return false;
+    }
+</script>

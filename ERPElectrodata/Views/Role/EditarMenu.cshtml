@@ -1,0 +1,95 @@
+﻿@{
+    ViewBag.Title = "EditarMenu";
+    Layout = null;
+}
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="main-card mb-2 card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-8">
+                <div class="position-relative form-group">
+                    <label for="nombreMenu">Menu</label><br />
+                    <input id="nombreMenu" type="text" />
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+            <div class="col-md-3">
+                <div class="position-relative form-group">
+                    <label for="chbEditMenu">Estado</label><br>
+                    <input id="chbEditMenu" type="checkbox" />
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-6 ml-auto">
+                <div class="form-row">
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" data-dismiss="modal" class="btn btn-secondary btn-block">Cancelar</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-primary btn-block" onclick="GuardarMenu()">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+
+    $(document).ready(function () {
+        //Dando estilo al input
+        $("#nombreMenu").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        //Dando estilo iCheck a checkbox
+        $('#chbEditMenu').iCheck({
+            checkboxClass: 'icheckbox_flat-blue',
+            radioClass: 'iradio_flat-blue'
+        });
+
+        //Rellenando datos
+        $("#nombreMenu").val("@ViewBag.NombreMenu");
+
+        if ("@ViewBag.EstadoMenu" == "True") {
+            $('#chbEditMenu').iCheck('check');
+        } else {
+            $('#chbEditMenu').iCheck('uncheck');
+        }
+
+    });
+
+    function GuardarMenu() {
+        if ($("#nombreMenu").val() == "") {
+            toastr.warning("El campo nombre no puede estar vacío", "Advertencia");
+        }
+        else {
+            $.ajax({
+                type: "POST",
+                url: "/Role/EditarMenu?id=" + "@ViewBag.IdMenu" + "&Nombre=" + $("#nombreMenu").val() + "&Estado=" + $("#chbEditMenu").iCheck('update')[0].checked,
+                cache: false,
+                success: function (data) {
+                    if (data == "ERROR") {
+                        toastr.error("Error");
+                    } else if (data == "DOBLE") {
+                        toastr.warning("El nombre ingresado ya ha sido registrado anteriormente", "Advertencia");
+                    } else {
+                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                        toastr.success("Registro Actualizado", "Exito!");
+                        $('#menuTable').DataTable().ajax.reload();
+                    }
+                }
+            });
+        }
+    }
+
+</script>

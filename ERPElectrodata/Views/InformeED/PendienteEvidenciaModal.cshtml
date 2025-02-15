@@ -1,0 +1,310 @@
+﻿@{
+    ViewBag.Title = "PendienteEvidenciaModal";
+    Layout = null;
+}
+
+<style>
+    #listEstadosPEVM::-webkit-scrollbar {
+        width: 12px; /* width of the entire scrollbar */
+    }
+
+    #listEstadosPEVM::-webkit-scrollbar-thumb {
+        background-color: #9B9B9B; /* color of the scroll thumb */
+        border-radius: 20px; /* roundness of the scroll thumb */
+        border: 3px solid white; /* creates padding around scroll thumb */
+    }
+</style>
+
+
+@using (Html.BeginForm("GuardarFormatoInforme", "InformeED", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmPEVM", name = "FrmPEVM", target = "upload_targetPEVM" }))
+{
+    <input id="IdInformePEVM" name="IdInforme" value="@ViewBag.IdDetaInforme" type="hidden" />
+    <input id="IdEstadoPEVM" name="IdEstado" value="@ViewBag.IdEstado" type="hidden" />
+    <input id="NumDocuSalePEVM" name="NumDocuSale" value="@ViewBag.NumDocuSale" type="hidden" />
+    <input id="IdPlantillaPEVM" name="IdPlantilla" type="hidden" />
+    <div class="container row">
+        <div class="col-md-3" style="border-right: solid; border-right-width: 0.5px; border-right-color: #A2A2A2;">
+            <p>Línea de Tiempo de Estado</p>
+
+            <div class="x_content estadosPEVM" id="estadosPEVM">
+                <ul id="listEstadosPEVM" class="todo-list-wrapper list-group list-group-flush" style="list-style: none; overflow-x:hidden; overflow-y: scroll; max-height:400px;"></ul>
+
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Estado</label>
+                    <input id="txtEstadoInformePEVM" name="txtEstadoInforme" class="form-control" type="text" style="width:100%" value="Pendiente de Elaboración" disabled>
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Responsable</label>
+                    <input id="txtResponsablePEVM" name="txtResponsable" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Tipo Informe</label>
+                    <input id="txtTipoInformePEVM" name="txtTipoInforme" class="form-control" type="text" style="width:100%" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Marca</label>
+                    <input id="txtMarcaPEVM" name="txtMarca" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label"><b>Ticket</b></label>
+                    <div>
+                        <span id="lblCodigoTicketPEVM"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Fecha Máxima de Envío</label>
+                    <input id="dtFechaMaximaEnvioPEVM" name="dtFechaMaximaEnvio" class="form-control" type="text" style="width:100%" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Correos</label>
+                    <input id="txtCorreoPEVM" name="txtCorreo" class="form-control" type="text" style="width:100%" disabled/>
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Dirección</label>
+                    <input id="txtDireccionPEVM" name="txtDireccion" class="form-control" type="text" style="width:100%" disabled/>
+
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Enlace Mesa de Partes Digital</label>
+                    <input id="txtEnlacePEVM" name="txtEnlace" class="form-control" type="text" style="width:100%" disabled/>
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Tipo Entrega (OP)</label>
+                    <input id="IdTipoEntregaPEVM" name="IdTipoEntrega" type="text" style="width:100%">
+                </div>
+                <div class="col-md-6">
+                    <br />
+                    <label class="label" style=" display: flex; justify-content: space-between; align-items: center;">
+                        <label class="label">CORREO ELECTRÓNICO</label>
+                        <a id="btnMaquinaEstadosPEVM" class="btn btn-light btn-hover-shine" data-toggle="modal" data-target="#modalLogo" onclick="adjuntarEvidenciaPEVM(3);"><i class="fa fa-eye"></i></a>
+
+                    </label>
+                    <label class="label" style=" display: flex; justify-content: space-between; align-items: center;">
+                        <label class="label">MESA DE PARTES FÍSICA</label>
+                        <a id="btnMaquinaEstadosPEVM" class="btn btn-light btn-hover-shine" data-toggle="modal" data-target="#modalLogo" onclick="adjuntarEvidenciaPEVM(1);"><i class="fa fa-eye"></i></a>
+
+                    </label>
+
+                    <label class="label" style=" display: flex; justify-content: space-between; align-items: center;">
+                        MESA DE PARTES DIGITAL
+                        <input class="form-control" type="text" id="cargoInformePEVM" style="margin-left: 10px;">
+                        <a id="btnMaquinaEstados" class="btn btn-light btn-hover-shine" onclick="GuardarCargoPEVM();"><i class="fa fa-save"></i></a>
+                    </label>
+
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-hover-shine btn-primary" style="float: right; ">Evidencias Adjuntadas</button>
+                </div>
+            </div>
+        </div>
+        <button data-dismiss="modal" id="btnCerrarModalPEVM" hidden>Cerrar</button>
+    </div>
+    <iframe id="upload_targetPEVM" name="upload_targetPEVM" src="" class="d-none"></iframe>
+}
+
+<script>
+
+    $(document).ready(function () {
+
+           var IDINPEVM = @ViewBag.IdDetaInforme;
+
+         $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "MaquinaEstados",
+            type: "Get",
+            data: { IDI: IDINPEVM },
+            datatype: "json",
+            cache: false,
+
+            success: function (data) {
+                if (data) {
+                    tejerMaquinaEstadoPEVM(data["Maquina"]);
+                }
+            },
+            error: function () {
+            }
+        });
+
+         $.ajax({
+             url: "/InformeED/ObtenerDatosPendienteEnvio/" + @ViewBag.IdDetaInforme,
+        type: "GET",
+            dataType: "json",
+                success: function (source) {
+                    $.each(source['Data'], function (index, value) {
+
+                        $("#txtEstadoInformePEVM").val(source['Data'][index]['EstadoInforme']);
+                        $("#txtResponsablePEVM").val(source['Data'][index]['ResponsableInforme']);
+                        $("#txtTipoInformePEVM").val(source['Data'][index]['TipoInforme']);
+                        $("#dtFechaMaximaEnvioPEVM").val(kendo.toString(new Date(source['Data'][index]['FechaMaximaEnvio']), "dd/MM/yyyy"));
+                        $("#txtMarcaPEVM").val(source['Data'][index]['Marca']);
+                        $("#IdTicketPEVM").val(source['Data'][index]['IdTicket']);
+                        $("#txtCorreoPEVM").val(source['Data'][index]['Correos']);
+                        $("#txtDireccionPEVM").val(source['Data'][index]['Direccion']);
+                        $("#txtEnlacePEVM").val(source['Data'][index]['Enlace']);
+                        $("#EstadoPEVModal").text(source['Data'][index]['EstadoInforme']);
+                        $("#cargoInformePEVM").val(source['Data'][index]['Cargo']);
+                        if ((source['Data'][index]['IdTicket']) != 0) {
+                            $("#lblCodigoTicketPEVM").append('<a href=\"/DetailsTicket/Index/' + source['Data'][index]['IdTicket'] + '" target="_blank">' + source['Data'][index]['CodigoTicket'] + '</a>');
+                        } else {
+                            $("#lblCodigoTicketPEVM").append("-");
+                        }
+
+                    });
+
+                }
+         });
+
+          $("#IdTipoEntregaPEVM").kendoMultiSelect({
+              dataTextField: "text",
+              dataValueField: "value",
+              filter: "contains",
+              autoBind: true,
+              suggest: true,
+              dataSource: [
+                  { text: "Mesa de Partes física", value: "1" },
+                  { text: "Mesa de Partes digital", value: "2" },
+                  { text: "Por correo electrónico", value: "3" }
+              ],
+        });
+
+          actualizarTipoEnvioPEVM();
+      });
+
+    function actualizarTipoEnvioPEVM() {
+
+        /*var IDIPEVM = $("#IdInformePEVM").val();*/
+        var listaTipoEntrega = $("#IdTipoEntregaPEVM").data("kendoMultiSelect")
+        var lista = []
+        $.ajax({
+            url: "/InformeED/ObtenerTipoEntrega?iddocusale=" + @ViewBag.NumDocuSale,
+            type: 'GET',
+            success: function (data) {
+                for (var i = 0; i < data.Data.length; i++) {
+                    lista.push(data.Data[i].Id.toString());
+                }
+
+                console.log(lista);
+                listaTipoEntrega.value(lista);
+            }
+        });
+    }
+
+    function MensajeConfirmacionPEVM(resp, descripcion) {
+        if (resp == "OK") {
+            toastr.success("", "El registro ha sido guardado.");
+            const boton = document.getElementById('btnCerrarModalPEVM');
+            boton.click();
+            ListadoInformes(2)
+            ObtenerInformesxEstado()
+        }
+        else if (resp == "ERROR") {
+            toastr.error("", "Debe completar todos los datos antes de guardar.");
+        } else {
+            toastr.error("Por favor contacte al administrador.", "Mensaje");
+        }
+    }
+
+
+    function tejerMaquinaEstadoPEVM(Maquina) {
+
+        console.log(Maquina);
+
+        if (parseInt(Maquina.length) > 0) {
+
+            $.each(Maquina, function (index, value) {
+
+                console.log(Maquina[index].Fecha);
+
+                if (Maquina[index].Hora == "" || Maquina[index].Hora == null || Maquina[index].Hora == undefined) {
+
+                    $(".estadosPEVM ul").append('<li><div class= "vertical-timeline vertical-timeline--animate vertical-timeline--one-column" >'
+                        + '<div class="vertical-timeline-item vertical-timeline-element">'
+                        + '<div>'
+                        + '      <span class="vertical-timeline-element-icon bounce-in">'
+                        + '          <i class="badge badge-dot badge-dot-xl badge-danger"> </i>'
+                        + '      </span>'
+                        + '      <div class="vertical-timeline-element-content bounce-in">'
+                        /*+ '          <h4 class="timeline-title">Con Plantilla</h4>'*/
+                        + '<p style="font-size:10px;">' + Maquina[index].NombreEstado + '</p>'
+                        + '          <span class="vertical-timeline-element-date" style="font-size:10px;"></span>'
+                        + '      </div>'
+                        + '  </div>'
+                        + ' </div>'
+                        + '</div >'
+                        + '</li >'
+                    );
+
+                }
+                else {
+                    $(".estadosPEVM ul").append('<li><div class= "vertical-timeline vertical-timeline--animate vertical-timeline--one-column" >'
+                        + '<div class= "vertical-timeline-item vertical-timeline-element" > '
+                        + '<div>'
+                        + '      <span class="vertical-timeline-element-icon bounce-in">'
+                        + '          <i class="badge badge-dot badge-dot-xl badge-success"> </i>'
+                        + '      </span>'
+                        + '      <div class="vertical-timeline-element-content bounce-in">'
+                        + '          <h4 class="timeline-title" style="font-size:12px;">' + Maquina[index].NombreEstado + '</h4>'
+                        + '          <p style="font-size:10px;">Hecho por: ' + Maquina[index].HechoPor + '</p>'
+                        + '          <span class="vertical-timeline-element-date" style="font-size:10px;">' + Maquina[index].Fecha + '<br />' + Maquina[index].Hora
+                        + '</span>'
+                        + '      </div>'
+                        + '  </div>'
+                        + '</div>'
+                        + '</div >'
+                        + '</li >'
+                    );
+
+                }
+
+            });
+
+        } else {
+            $(".estadosPEVM ul").append('<div class="smallField"> No se encontraron registros');
+        }
+
+
+    }
+
+    function adjuntarEvidenciaPEVM(idTipoEntrega) {
+
+        $("#lblTituloLogo").text("Subir Evidencia de Envio");
+        $('#modal-contentLogo').empty();
+        $('#modal-contentLogo').load('/InformeED/SubirEvidenciaModal/?IDI=' + @ViewBag.IdDetaInforme + '&IDTIPOENTREGA=' + idTipoEntrega);
+    }
+
+    function GuardarCargoPEVM() {
+        var IDIPEVM = $("#IdInformePEVM").val();
+        var Cargo = $("#cargoInformePEVM").val();
+
+        console.log(IDIPEVM)
+        $.ajax({
+            url: "/InformeED/GuardarCargoEvidencia?IDI=" + IDIPEVM + "&cargo=" + Cargo,
+            type: "POST",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                console.log(source)
+                toastr.success("", "El registro ha sido guardado.");
+
+            },
+        });
+    }
+
+</script>

@@ -1,0 +1,426 @@
+﻿@model ERPElectrodata.Models.SCHEDULER
+
+@{
+    Layout = null;
+}
+
+<div style="width:100%;">
+
+    <div style="float:left;width:60%;">
+        <div class="titleForm"><div class="title">Add Event</div></div>
+        <div class="bodyForm">
+            <div class="inBodyForm">
+                @using (Html.BeginForm("CreateRoom", "Scheduler", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmScheduleRoom", target = "upload_target" }))
+                {
+                    
+                    <div class="divFondoUno">
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Room
+                            </div>
+                            <div class="editor-field">
+                                <input type="text" id="ID_ROOM" name="ID_ROOM"/>
+                            </div>
+                        </div>
+
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Requester
+                            </div>
+                            <div class="editor-field">
+                                <input type="text" id="ID_REQU" name="ID_REQU" />
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                    <div class="divFondoDos">
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Title
+                            </div>
+                            <div class="editor-field">
+                                <input type="text" id="TIT_SCHE" name="TIT_SCHE" class="k-textbox" />
+                            </div>
+                        </div>
+
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.StartDate
+                            </div>
+                            <div class="editor-field" id="divSTA_DATE">
+                                @Html.TextBoxFor(model => model.STA_DATE)
+                            </div>
+                        </div>
+
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.EndDate
+                            </div>
+                            <div class="editor-field" id="divEND_DATE">
+                                @Html.TextBoxFor(model => model.END_DATE)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divFondoUno">
+
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @*<a href="#" onclick="NewClient()" title="Click here to register a new client" ></a>*@
+                                @ResourceLanguaje.Resource.AllDay
+                            </div>
+                            <div class="editor-field">
+                                <input type="checkbox" name="ALL_DAY" id="ALL_DAY" value="true" onchange="FxAllDay(this)" />
+                            </div>
+                        </div>
+
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Repeat
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_REPE)
+                            </div>
+                        </div>
+
+                        <div id="divREP_EVER">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    @ResourceLanguaje.Resource.RepeatEvery
+                                </div>
+                                <div class="editor-field">
+                                    @Html.TextBoxFor(model => model.REP_EVER, new { @class = "eve_hide hide" })
+                                    @Html.ValidationMessageFor(model => model.REP_EVER)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divFondoDos" id="divRepeatEnd">
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.End
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextBoxFor(model => model.ID_REPE_END)
+                            </div>
+                        </div>
+
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.End Value
+                            </div>
+                            <div class="editor-field" id="divREPE_END_VALU">
+                                @Html.TextBoxFor(model => model.REPE_END_VALU, new { @class = "k-textbox", @readonly = true })
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divFondoUno">
+                        <div class="divSpace3"></div>
+                        <div style="width:95.5%;float:left;">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.Summary
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextAreaFor(model => model.DES_SCHE, new { @rows = 5 })
+                                @Html.ValidationMessageFor(model => model.DES_SCHE)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divFondoUno" style="display:block;height:35px;">
+                        <div style="display:inline-block; float:right; padding:0px 15px 15px 5px; clear:both;">
+                            <div style=" float:left; padding:0px 15px 0px 0px; ">
+                                <button id="submit" class="k-button">@ResourceLanguaje.Resource.BtnCreate</button>
+                            </div>
+                            <button id="reset" class="k-button">@ResourceLanguaje.Resource.BtnCancel</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <iframe id="upload_target" name="upload_target" src="" class="frameHidden"></iframe>
+</div>
+
+<script type="text/javascript">
+    function uploadDone(msg, code) {
+
+        closeWinModalPopUpLoad();
+
+        if (msg == "OK") {
+            $("#divContent").empty();
+            $("#divContent").load("/Room/Index?var=" + Math.random());
+        }
+        else {
+            var title = '@ResourceLanguaje.Resource.InformationMissing';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                "<div style='padding:10px 0px 10px 0px;'>You should choose or complete the required information</div>" +
+                "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                        "</div></div>";
+
+            winPopUpModal(title, body, 400, 150);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+
+    $(document).ready(function () {
+
+        $("#submit").click(function () {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingYourEvent', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+    function FxAllDay(e) {
+        //var fecha_inicio, fecha_fin;
+        var x = document.getElementById("ALL_DAY").checked;
+
+        if (x == true)
+        {
+            fecha_inicio = $("#STA_DATE").val();
+            fecha_fin = $("#END_DATE").val();
+        }
+        
+
+        console.log(fecha_inicio);
+
+        var el_sd = document.getElementById("STA_DATE");
+        el_sd.parentNode.removeChild(el_sd);
+        document.getElementById("divSTA_DATE").innerHTML = '@Html.TextBoxFor(model => model.STA_DATE)';
+
+        var el_ed = document.getElementById("END_DATE");
+        el_ed.parentNode.removeChild(el_ed);
+        document.getElementById("divEND_DATE").innerHTML = '@Html.TextBoxFor(model => model.END_DATE)';
+
+        
+
+        if (x == true)
+        {
+            $("#STA_DATE").kendoDatePicker({ value: fecha_inicio });
+            $("#END_DATE").kendoDatePicker({ value: fecha_fin });
+        }
+        else {
+            $("#STA_DATE").kendoDateTimePicker({ value: fecha_inicio });
+            $("#END_DATE").kendoDateTimePicker({ value: fecha_fin });
+        }
+        
+    }
+
+    function endValue(e) {
+        var el = document.getElementById("REPE_END_VALU");
+        var parent = el.parentNode;
+        el.parentNode.removeChild(el);
+        document.getElementById("divREPE_END_VALU").innerHTML = '@Html.TextBoxFor(model => model.REPE_END_VALU)';
+
+        document.getElementById("REPE_END_VALU").setAttribute("value", '');
+
+
+        if (e.value() == 2) {
+            $("#REPE_END_VALU").kendoNumericTextBox({
+                decimals: 0,
+                min: 1,
+                value: 1,
+                format: "0"
+            });
+        }
+        else if (e.value() == 3) {
+            $("#REPE_END_VALU").kendoDatePicker();
+        }
+        else {
+            document.getElementById("REPE_END_VALU").setAttribute("class", 'k-textbox');
+            document.getElementById("REPE_END_VALU").setAttribute("readonly", 'true');
+        }
+    }
+
+    function rep_never() {
+        var rep = null,rep2 = null;
+        rep = document.getElementById("divREP_EVER");
+        rep2 = document.getElementById("divRepeatEnd")
+        var cmp_rep = document.getElementById("divREP_EVER");
+        cmp_rep.setAttribute("value", '');
+        rep.setAttribute("class", 'divHide');
+        rep2.setAttribute("class", 'divHide');
+        console.log(rep);
+    }
+
+    function visible(e) {
+        if (e.value() != 1)
+        {
+            var rep = null,rep2=null;
+            rep = document.getElementById("divREP_EVER");
+            rep2 = document.getElementById("divRepeatEnd");
+            rep.setAttribute("class", 'divVisible');
+            rep2.setAttribute("class", 'divVisible');
+
+            var cmp_rep = document.getElementById("REP_EVER");
+            cmp_rep.setAttribute("value", '1');
+
+        }
+        else {
+            rep_never();
+        }
+
+    }
+
+$(document).ready(function () {
+
+    $("#ID_ROOM").kendoComboBox({
+        index: 0,
+        dataTextField: "NAM_ROOM",
+        dataValueField: "ID_ROOM",
+        filter: "contains",
+        //autoBind: true,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/Room/ListRoom?_=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    $("#ID_REQU").kendoComboBox({
+        dataTextField: "CLIE",
+        dataValueField: "ID_PERS_ENTI",
+        filter: "contains",
+        autoBind: false,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    $("#DES_SCHE").kendoEditor(
+        {
+            tools: [
+                   "bold",
+                   "italic",
+                   "underline",
+                   "strikethrough",
+                   "foreColor",
+                   "backColor",
+                   "justifyLeft",
+                   "justifyCenter",
+                   "justifyRight",
+                   "justifyFull",
+                   "insertUnorderedList",
+                   "insertOrderedList",
+                   "indent",
+                   "outdent",
+                   "createLink",
+                   "unlink",
+                   "subscript",
+                   "superscript"
+                   , "createTable"
+            ], encoded: false
+        });
+
+    $("#STA_DATE").kendoDateTimePicker({
+        value: new Date("@ViewBag.start")
+    }).data("kendoDateTimePicker");
+
+    $("#END_DATE").kendoDateTimePicker({
+        value: new Date("@ViewBag.end")
+    }).data("kendoDateTimePicker");
+
+    $("#REP_EVER").kendoNumericTextBox({
+        decimals: 0,
+        min: 1,
+        value: 1,
+        format: "0"
+    });
+
+    $("#ID_REPE").kendoComboBox({
+        index:0,
+        dataTextField: "NAM_REPE",
+        dataValueField: "ID_REPE",
+        filter: "contains",
+        autoBind: true,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        change: function(e) {
+            //console.log(e.sender);
+            visible(e.sender);
+        },
+        dataBound: function(e) {
+            //console.log(e);
+            rep_never(e);
+        },
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/Repeat/ListVig?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+    $("#ID_REPE_END").kendoComboBox({
+        index: 0,
+        dataTextField: "NAM_REPE_END",
+        dataValueField: "ID_REPE_END",
+        filter: "contains",
+        autoBind: true,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        change: function (e) {
+            //console.log(e.sender);
+            endValue(e.sender);
+        },
+        //dataBound: function (e) {
+        //    console.log(e);
+        //    rep_never(e);
+        //},
+        dataSource: {
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/RepeatEnd/ListVig?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+});
+
+
+</script>

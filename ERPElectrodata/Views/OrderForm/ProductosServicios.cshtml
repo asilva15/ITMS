@@ -1,0 +1,99 @@
+﻿@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("AgregarObservacion", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAsignarPM", target = "upload_target" }))
+{
+    @Html.Hidden("Id")
+    <div class="divFondoDos" style="padding:0px 0px 0px 15px;">
+        <div style="float:left">
+            <div class="editor-label">
+                Contacto
+            </div>
+            <div class="editor-field">
+                @Html.Editor("TipoComent")
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos">
+        <div class="divSpace2"></div>
+        <div style="width:95.5%;float:left;">
+            <div class="editor-label">
+                Comentario/Acción
+            </div>
+            <div class="editor-field">
+                @Html.TextArea("Comentario")
+            </div>
+        </div>
+    </div>
+    <div class="divFondoUno">
+        <div style="height:5px;clear:both;"></div>
+        <div style="float:right; padding:0px 15px 15px 5px;">
+            <div style="float:left; padding:0px 15px 0px 0px; ">
+                <div class="divSpace3"></div>
+                <div style="float:left; padding-top:10px">
+                    <button id="submit" class="k-button">Crear</button>
+                </div>
+                <div class="divSpace3"></div>
+                <div style="float:left; padding-top:10px">
+                    <button id="reset" class="k-button">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("Id").val(@ViewBag.ID_DOCU_SALE);
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            closeWinFormModalPopUp();
+        });
+
+        var TipoComent = $("#TipoComent").kendoComboBox({
+            autoBind: true,
+            index: 0,
+            dataTextField: "NAM_TYPE_ACTI",
+            dataValueField: "ID_TYPE_ACTI",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OptionDocuSaleActivity/ListarOpcionObservacion"
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#Comentario").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+    })
+</script>

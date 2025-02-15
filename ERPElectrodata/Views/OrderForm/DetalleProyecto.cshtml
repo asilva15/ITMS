@@ -1,0 +1,930 @@
+﻿@{
+    ViewBag.Title = "Detalle OP";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+@*<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />*@
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+
+<style>
+    b {
+        color: #F83C50;
+    }
+</style>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-lg-10">
+            <div class="row">
+                <div class="col-md-5" id="divInfoComercial">
+                    <div class="mb-3 card">
+                        <div class="card-header">
+                            <span id="spanOP" style="font-size:12.5px">@ViewBag.OP&nbsp;</span>
+                            <span id="spanTitulo" style="font-size:12.5px"> @ViewBag.Titulo</span>
+                            <span id="spanEditarTitulo" title="Editar" class="fa fa-pen" aria-hidden="true" style="color:black; cursor: pointer; font-size:13px; " data-toggle="modal" data-target="#miModal" onclick="EditarTitulo()"></span>
+                            <div class="divAjax-Loading" style="display:none;" id="divLoading"></div>
+                        </div>
+                    </div>
+                    <div class="mb-3 card">
+                        <div class="card-header">
+                            Datos de Comercial
+                            <div class="btn-actions-pane-right text-capitalize">
+                                <div class="badge badge-@ViewBag.ColorEstado ">Estado: @ViewBag.NombreEstado</div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="divComercial"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-7" id="divInfoProyecto">
+                    <div class="mb-3 card">
+                        <div class="card-header">
+                            Datos de Proyecto
+                            <div class="btn-actions-pane-right text-capitalize">
+                                <div class="badge badge-@ViewBag.ColorRiesgo">Riesgo: @ViewBag.Riesgo</div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div id="divProyecto"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="mb-3 card">
+                        <div class="card-header">
+                            Comentarios
+                        </div>
+                        <div class="card-body">
+                            <!-- COMENTARIOS Y ACCIONES -->
+                            <div class="tab-pane tabs-animation" id="tab-content-1" role="tabpanel">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="mb-12">
+                                            <div class="card-header card-header-tab-animation">
+                                                <ul class="nav nav-justified">
+                                                    <li class="nav-item"><a data-toggle="tab" id="tabComentario" class="active nav-link" onclick="Comentarios(this)"><i class="fa fa-comment"></i> Comentarios</a></li>
+                                                    <!-- class "active" para mostrar el color link seleccionado-->
+                                                    <li class="nav-item"><a data-toggle="tab" id="tabAccion" class="nav-link" onclick="Acciones(this)"><i class="fa fa-calendar"></i> Acciones</a></li>
+                                                    <li class="nav-item"><a data-toggle="tab" id="tabSoporte" class="nav-link" onclick="Soporte(this)"><i class="fa fa-cogs"></i> Soporte</a></li>
+                                                </ul>
+                                            </div>
+                                            <div class="card-body">
+                                                <div class="tab-content">
+                                                    <div id="divDetails"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-2">
+            <div class="main-card mb-3 card">
+                <div class="card-header">Opciones</div>
+                <div class="card-body">
+                    <div id="divOpciones" style="padding:5px;">
+                        <center>
+                            Gerente de Proyecto: <br />
+                            @ViewBag.NOMBRE
+                            <div class="form-group">
+                                <img width="70" class="rounded" src="/Content/Fotos/@ViewBag.FOTO" alt="">
+                            </div>
+                            @*<div class="avatar-icon-wrapper avatar-icon-xl btn-hover-shine">
+            <div class="avatar-icon rounded"><img src="~/Content/Fotos/@ViewBag.FOTO"></div>
+        </div>*@
+                            @*<div class="asignedImage" style="padding-bottom:78px"><a href="#"><img src="/Content/Fotos/@ViewBag.FOTO" /></a></div>*@
+                            @if ((ViewBag.ESTADO == 2 && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                if (ViewBag.ADMINPMO == 1 && (ViewBag.ESTADO == 1 || ViewBag.ESTADO == 2))
+                                {
+                                    <button id="btnAsignarPM" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="AsignarResponsable();">Asignar Resp.</button>
+                                    if (ViewBag.OCULTARINGE == 0 && ViewBag.ESTADO == 2)
+                                    {
+                                        @*<button id="btnAsignarIng" class="k-button">Asignar Inge</button>*@
+                                    }
+                                }
+                                if (ViewBag.ESTADO == 2 && ViewBag.PMO == 1)
+                                {
+                                    <button id="btnEditar" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="EditarOP();">Editar OP</button>
+                                }
+                            }
+                            @if (ViewBag.Informe == 1)
+                            {
+                                <button id="btnSoporteInforme" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="SoporteInforme();">Mantenimientos e Informes</button>
+                            }
+                            <button id="btnInfoProyecto" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="InfoProyecto();">Info. Proyecto</button>
+                            <button id="btnProductos" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Productos();">Productos</button>
+                            @if ((ViewBag.ESTADO == 2 && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1 || ViewBag.PMOSoporte == 1)
+                            {
+                                <button id="btnObservaciones" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Observaciones();">Observaciones</button>
+                            }
+                            @if (((ViewBag.ESTADO == 2 || ViewBag.ESTADO == 4) && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                <button id="btnVerArchivos" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Documentos();">Documentos</button>
+                            }
+                            @if ((ViewBag.ESTADO == 2 && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                <button id="btnAdjuntar" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Adjuntar();">Adjuntar</button>
+                                <button id="btnCerrarOP" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="CerrarOP();">Cerrar OP</button>
+                            }
+                            @if (((ViewBag.ESTADO == 2 || ViewBag.ESTADO == 4) && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                <button id="btnTraza" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Traza()">Traza</button>
+                            }
+                            @if (ViewBag.ESTADO == 2 && (ViewBag.PMO == 1 || ViewBag.ADMINPMO == 1))
+                            {
+                                <a href="/OrderForm/SoporteProyecto/@ViewBag.ID_DOCU_SALE" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" title="Productos - Servicios">Productos Servicios</a>
+                            }
+                            <button id="btnContacto" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="VerContacto();">Contactos</button>
+                            @if ((ViewBag.ESTADO == 2 && ViewBag.PMO == 1) || ViewBag.ADMINPMO == 1)
+                            {
+                                <button id="btnFacturacion" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" onclick="Facturacion()">Facturación</button>
+                            }
+                            @if ((ViewBag.ESTADO == 2 || ViewBag.ESTADO == 4) && (ViewBag.PMO == 1 || ViewBag.ADMINPMO == 1))
+                            {
+                                <button id="btnActa" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" onclick="ActaConstitucion()">Acta de constitución</button>
+                            }
+                            @*Descomentar*@
+                            <a href="/OrderForm/Gantt/@ViewBag.ID_DOCU_SALE" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" title="Ver Cronograma" target="_blank">Cronograma</a>
+                            @*<button onclick="VerCronogramaHistorico();" style="cursor:pointer;font-size:9.5px" class="btn btn-block btn-sm btn-primary" title="Cronograma Histórico">Cronograma Histórico</button>*@
+                            <a id="btnReporteProductosServicios" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" title="Ver Reporte" href="~/Reporting/OrderForm/ListarProductosServicios.aspx?&IdDocuSale=@ViewBag.ID_DOCU_SALE" target="_blank">Reporte</a>
+                            <a id="btnOrdenCompra" style="cursor:pointer;" class="btn btn-hover-shine btn-block btn-sm btn-primary" title="Ver Ordenes de Compra" href="~/OrderForm/OrdenCompra?&OP=@ViewBag.ID_DOCU_SALE" target="_blank">Orden Compra</a>
+                            
+
+                        </center>
+                    </div>
+                </div>
+            </div>
+
+            @* Cronograma*@
+            <div id="divNotificaciones">
+                <div class="mb-3 card">
+                    <div class="card-header">
+                        Notificaciones
+                    </div>
+                    <div class="card-body">
+                        <div class="form-row" style="display:none">
+                            <div class="col-md-12">
+                                <button id="btnGenerarCronograma" class="btn btn-hover-shine btn-sm btn-light btn-block" data-toggle="modal" data-target="#miModal" onclick="Cronograma();">Generar Cronograma</button>
+                                <br />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class='alert alert-danger'>
+                                    <p id="spanMensajeCronograma" align="justify" style="font-size:13px"></p>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="mensajeDocumentos">
+                            <div class='alert alert-danger'>
+                                <strong>Documentos Obligatorios</strong></br><p id="spanDocumentosObligatorios" style="font-size:13px" align="justify"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe id="FormReprogramar" name="FormReprogramar" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+    var estado = 0;
+    var idContacto = 0;
+    $(document).ready(function () {
+
+        if (@ViewBag.PMO == 1) {
+            ObtenerDatosComercial();
+            ObtenerDatosProyecto();
+            if (@ViewBag.ESTADO == 1 || @ViewBag.ESTADO == 2) {
+                $("#divNotificaciones").show();
+                ListaDocumentosObligatorios();
+                MostrarMensajeCronograma(@ViewBag.ID_DOCU_SALE);
+            } else {
+                $("#divNotificaciones").hide();
+            }
+        } else {
+            $("#divInfoComercial").removeClass();
+            $("#divInfoComercial").addClass("col-md-12");
+            ObtenerDatosComercialSoporte();
+            $("#divNotificaciones").hide();
+            //Ocultar Información Proyecto
+            $("#divInfoProyecto").hide();
+        }
+
+        Comentarios();
+
+        $('#chkMantenimientoPeriodico').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#divAgregarPeriodos").removeClass("divHide");
+            } else {
+                $("#divAgregarPeriodos").addClass("divHide");
+            }
+        });
+
+        $("#divAgregarPeriodos").click(function () {
+            estado = estado + 1;
+            alert(estado);
+            $("#divPeriodo" + estado).removeClass("divHide");
+        });
+
+    });
+
+    function ListaDocumentosObligatorios(){
+        $.ajax({
+            url: "/OrderForm/ListarDocumentosObligatorios/" +@ViewBag.ID_DOCU_SALE,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                if(data==""){
+                    $("#mensajeDocumentos").hide();
+                }else{
+                    $("#spanDocumentosObligatorios").text(data);
+                }
+            },
+            error: function (source) {
+
+            }
+        });
+    }
+
+    function ObtenerDatosComercial() {
+        $.ajax({
+            url: "/OrderForm/OPObtenerDatosComercial/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                mostrarDatosComercial(source);
+            },
+            error: function (source) {
+                alert("Error Carga Json Comercial");
+            }
+        });
+    }
+    function ObtenerDatosComercialSoporte() {
+        $.ajax({
+            url: "/OrderForm/OPObtenerDatosComercial/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                mostrarDatosComercialSoporte(source);
+            },
+            error: function (source) {
+                alert("Error Carga Json Comercial");
+            }
+        });
+    }
+
+
+    function ObtenerDatosProyecto() {
+        $.ajax({
+            url: "/OrderForm/ObtenerDatosProyecto/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                mostrarDatosProyecto(source);
+            },
+            error: function (source) {
+                alert("Error Carga Json Proyectos");
+            }
+        });
+    }
+
+    function Comentarios() {
+        $("#divDetails").empty();
+        $("#divDetails").load("/OrderForm/VerComentarios/@ViewBag.ID_DOCU_SALE/@ViewBag.PMO/@ViewBag.ESTADO");
+    }
+
+    function Acciones() {
+        $("#divDetails").empty();
+        $("#divDetails").load("/OrderForm/VerAcciones/@ViewBag.ID_DOCU_SALE/@ViewBag.PMO/@ViewBag.ESTADO");
+    }
+
+    function Soporte() {
+        $("#divDetails").empty();
+        $("#divDetails").load("/OrderForm/VerSoporte/@ViewBag.ID_DOCU_SALE/@ViewBag.PMO/@ViewBag.ESTADO");
+    }
+
+    function mostrarDatosComercial(data) {
+
+        $.each(data['Data'], function (index, value) {
+
+            $("#divComercial").append(
+                '<div class="form-group">'+
+                    '<div class="row">'+
+                        '<div class="col-lg-6">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Cliente</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data['Data'][index]['Cliente'])+'</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-6">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Cliente Final</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data['Data'][index]['ClienteFinal']) +'</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+               '</div>'+
+                    '<div class="form-group">'+
+                        '<div class="row">'+
+                            '<div class="col-lg-6">'+
+                                '<div class="widget-content p-0">'+
+                                    '<div class="widget-content-wrapper">'+
+                                        '<div class="widget-content-left mr-3">'+
+                                            '<div class="widget-content-left">'+
+                                                '<img width="45" class="rounded-circle" src="/Content/Fotos/' + (data['Data'][index]['FotoVendedor'])+'.jpg" alt="">'+
+                                             '</div>'+
+                                        '</div>'+
+                                        '<div class="widget-content-left flex2">'+
+                                            '<div class="widget-heading">Vendedor</div>'+
+                                            '<div class="widget-subheading opacity-7">' + (data['Data'][index]['Vendedor']) +'</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+
+                            '<div class="col-lg-6">'+
+                                '<div class="widget-content p-0">'+
+                                    '<div class="widget-content-wrapper">'+
+                                        '<div class="widget-content-left mr-3">'+
+                                            '<div class="widget-content-left">'+
+                                                '<img width="45" class="rounded-circle" src="/Content/Fotos/' + (data['Data'][index]['FotoPreVenta'])+'.jpg" alt="">'+
+                                             '</div>'+
+                                        '</div>'+
+                                        '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Preventa</div>' +
+                                                '<div class="widget-subheading opacity-7">' + (data['Data'][index]['PreVenta']) + '</div>' +
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                         '</div>' +
+                    '</div>' +
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-lg-6">'+
+                                    '<div class="widget-content p-0">'+
+                                        '<div class="widget-content-wrapper">'+
+                                            '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Forma de Pago</div>'+
+                                                '<div class="widget-subheading opacity-7">' + (data['Data'][index]['FormaPago'])+'</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-lg-6">'+
+                                    '<div class="widget-content p-0">'+
+                                        '<div class="widget-content-wrapper">'+
+                                            '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Fecha Expiración</div>'+
+                                                '<div class="widget-subheading opacity-7">' + kendo.toString(kendo.parseDate((data['Data'][index]['FechaExpiracion']), 'yyyy/MM/dd'), "dd/MM/yyyy")+'</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-lg-6">'+
+                                    '<div class="widget-content p-0">'+
+                                        '<div class="widget-content-wrapper">'+
+                                            '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Fecha Registro</div>'+
+                                                '<div class="widget-subheading opacity-7">' + kendo.toString(kendo.parseDate((data['Data'][index]['FechaRegistro']), 'yyyy/MM/dd'), "dd/MM/yyyy")+'</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-lg-6">'+
+                                    '<div class="widget-content p-0">'+
+                                        '<div class="widget-content-wrapper">'+
+                                            '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Tipo de Proyecto</div>'+
+                                                '<div class="widget-subheading opacity-7">Servicio Electrodata</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                           '</div>'+
+                '</div>'
+            );
+        });
+    }
+
+    function mostrarDatosComercialSoporte(data) {
+
+        $.each(data['Data'], function (index, value) {
+
+            $("#divComercial").append(
+                '<div class="form-group">'+
+                    '<div class="row">'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Cliente</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data['Data'][index]['Cliente'])+'</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Cliente Final</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data['Data'][index]['ClienteFinal']) +'</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                            '<div class="col-lg-3">'+
+                                '<div class="widget-content p-0">'+
+                                    '<div class="widget-content-wrapper">'+
+                                        '<div class="widget-content-left mr-3">'+
+                                            '<div class="widget-content-left">'+
+                                                '<img width="45" class="rounded-circle" src="/Content/Fotos/' + (data['Data'][index]['FotoVendedor'])+'.jpg" alt="">'+
+                                             '</div>'+
+                                        '</div>'+
+                                        '<div class="widget-content-left flex2">'+
+                                            '<div class="widget-heading">Vendedor</div>'+
+                                            '<div class="widget-subheading opacity-7">' + (data['Data'][index]['Vendedor']) +'</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+
+                            '<div class="col-lg-3">'+
+                                '<div class="widget-content p-0">'+
+                                    '<div class="widget-content-wrapper">'+
+                                        '<div class="widget-content-left mr-3">'+
+                                            '<div class="widget-content-left">'+
+                                                '<img width="45" class="rounded-circle" src="/Content/Fotos/' + (data['Data'][index]['FotoPreVenta'])+'.jpg" alt="">'+
+                                             '</div>'+
+                                        '</div>'+
+                                        '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Preventa</div>' +
+                                                '<div class="widget-subheading opacity-7">' + (data['Data'][index]['PreVenta']) + '</div>' +
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                    '</div>'+
+               '</div>'+
+                        '<div class="form-group">'+
+                            '<div class="row">'+
+                                '<div class="col-lg-3">'+
+                                    '<div class="widget-content p-0">'+
+                                        '<div class="widget-content-wrapper">'+
+                                            '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Forma de Pago</div>'+
+                                                '<div class="widget-subheading opacity-7">' + (data['Data'][index]['FormaPago'])+'</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-lg-3">'+
+                                    '<div class="widget-content p-0">'+
+                                        '<div class="widget-content-wrapper">'+
+                                            '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Fecha Expiración</div>'+
+                                                '<div class="widget-subheading opacity-7">' + kendo.toString(kendo.parseDate((data['Data'][index]['FechaExpiracion']), 'yyyy/MM/dd'), "dd/MM/yyyy")+'</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-lg-3">'+
+                                    '<div class="widget-content p-0">'+
+                                        '<div class="widget-content-wrapper">'+
+                                            '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Fecha Registro</div>'+
+                                                '<div class="widget-subheading opacity-7">' + kendo.toString(kendo.parseDate((data['Data'][index]['FechaRegistro']), 'yyyy/MM/dd'), "dd/MM/yyyy")+'</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                                '<div class="col-lg-3">'+
+                                    '<div class="widget-content p-0">'+
+                                        '<div class="widget-content-wrapper">'+
+                                            '<div class="widget-content-left flex2">'+
+                                                '<div class="widget-heading">Tipo de Proyecto</div>'+
+                                                '<div class="widget-subheading opacity-7">Servicio Electrodata</div>'+
+                                            '</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                           '</div>'+
+                '</div>'
+            );
+        });
+    }
+    function mostrarDatosProyecto(data1) {
+        $("#divProyecto").empty();
+        $.each(data1['Data'], function (index, value) {
+
+            $("#divProyecto").append(
+
+                '<div class="form-group">'+
+                    '<div class="row">'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Fecha Límite PM</div>'+
+                                        '<div class="widget-subheading opacity-7">'+(data1['Data'][index]['FECHAPM'])+'</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Fecha De Compromiso</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['FECHACOMPROMISO']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Avance (%)</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['PorcentajeAvance']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Impacto</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['IMPACTO']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
+                '<div class="form-group">'+
+                    '<div class="row">'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Horas Programadas</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['HORASPROG']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">Horas Acumuladas</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['TiempoTranscurrido']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">$ Precio Venta (Sin IGV)</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['PRECIOVENTA']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">$ Precio Costo Cotizado (Sin IGV)</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['PCCOTIZADO']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
+                '<div class="form-group">'+
+                    '<div class="row">'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">$ Precio Costo Real</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['PCREAL']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">$ Precio Costo Cotizado (Compras)</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['PCCCOTIZADOCOMPRA']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">$ Precio Costo Real (Compras)</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['PCREALCOMPRA']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">$ Precio Costo Cotizado (Servicios)</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['PCCOTIZADOSERVICIO']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                '</div>'+
+                '<div class="form-group">'+
+                    '<div class="row">'+
+                        '<div class="col-lg-3">'+
+                            '<div class="widget-content p-0">'+
+                                '<div class="widget-content-wrapper">'+
+                                    '<div class="widget-content-left flex2">'+
+                                        '<div class="widget-heading">$ Precio Costo Real (Servicios)</div>'+
+                                        '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['PCREALSERVICIO']) + '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                            '<div class="col-lg-3">'+
+                                '<div class="widget-content p-0">'+
+                                    '<div class="widget-content-wrapper">'+
+                                        '<div class="widget-content-left mr-3">'+
+                                            '<div class="widget-content-left">'+
+                                                '<img width="45" class="rounded-circle" src="/Content/Fotos/' + (data1['Data'][index]['FotoEspecialista'])+'.jpg" alt="">'+
+                                             '</div>'+
+                                        '</div>'+
+                                        '<div class="widget-content-left flex2">'+
+                                            '<div class="widget-heading">Especialista</div>'+
+                                            '<div class="widget-subheading opacity-7">' + (data1['Data'][index]['Especialista']) +'</div>'+
+                                        '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                    '</div>'+
+                '</div>'
+            );
+        });
+    }
+
+    function listarTipoDocumentos() {
+        $.ajax({
+            url: "/TypeDocumentModule/ListarTipoDocumentos/",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                mostrarTipoDocumentos(source);
+            },
+            error: function (source) {
+                alert("Error Carga Json Tipo de Documentos");
+            }
+        });
+    }
+
+    function mostrarTipoDocumentos(data) {
+        $.each(data['Data'], function (index, value) {
+            $('.modal-body #documentos').append(
+                  '<input type="checkbox" id="Doc'+(data['Data'][index]['ID_TYPE_DOCU_ATTA'])+'" name="'+(data['Data'][index]['NAM_TYPE_DOCU_ATTA'])+'">'+ (data['Data'][index]['NAM_TYPE_DOCU_ATTA']) //+
+             );
+        });
+    }
+
+    function MostrarMensajeCronograma(IdDocuSale){
+        $.ajax({
+            url: "/OrderForm/ObtenerMensajeCronograma/" +IdDocuSale,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                if(data!="0"){
+                    $("#spanMensajeCronograma").text(data);
+                }
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+
+    function VerCronograma() {
+        window.open("\#/OrderForm/Gantt/"+@ViewBag.ID_DOCU_SALE);
+        return false;
+    }
+    function VerCronogramaHistorico() {
+        window.open("\#/OrderForm/CronogramaHistorico/"+@ViewBag.ID_DOCU_SALE);
+        return false;
+    }
+
+    function EditarTitulo() {
+        $("#lblTitulo").text("Editar Título");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/EditarTitulo/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function AsignarResponsable() {
+        $("#lblTitulo").text("Asignar responsable");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/AsignarPM/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function EditarOP() {
+        $("#lblTitulo").text("Editar OP");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/EditarOP/@ViewBag.ID_DOCU_SALE');
+    }
+    
+    function SoporteInforme() {
+        $("#lblTitulo").text("Mantenimientos e Informes");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/InformeED/EditarSoporteInforme/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function InfoProyecto() {
+        $("#lblTitulo").text("Información Adicional del Proyecto");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/InfoAdicionalProyecto/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Productos() {
+        $("#lblTitulo").text("Productos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/VerProductos/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Observaciones() {
+        $("#lblTitulo").text("Comentarios");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/AgregarObservaciones/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Documentos() {
+        $("#lblTitulo").text("Documentos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/AdjuntarArchivos/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Adjuntar() {
+        $("#lblTitulo").text("Adjuntar Documentos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/AdjuntarDocumentos/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function CerrarOP() {
+        $("#lblTitulo").text("Cerrar OP");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/CerrarOP/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Traza() {
+        $("#lblTitulo").text("Trazabilidad");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/VerTraza/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function VerContacto() {
+        $("#lblTitulo").text("Contactos");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/Contacto/VerContacto/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Facturacion() {
+        $("#lblTitulo").text("Mantenimientos Preventivos por facturar");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/VerFacturacion/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function Cronograma() {
+        $("#lblTitulo").text("Generar cronograma");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/GenerarCronograma/@ViewBag.ID_DOCU_SALE');
+    }
+
+    function ActaConstitucion() {
+       window.open('/OrderForm/GenerarActa/@ViewBag.ID_DOCU_SALE');
+    }
+</script>

@@ -1,0 +1,424 @@
+﻿@{
+    ViewBag.Title = "ReporteTicketGestionDeCambio";
+    Layout = null;
+}
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+
+
+    <div class="card-body">
+        <div class="card-title">Reporte de Tickets cerrados por Gestión de Cambios</div>
+        <div class="row" style="padding-left:2%">
+
+            <div class="col-sm-2">
+                <span class="TipoTicket"></span>
+                <select id='cbTipoTicket' name='cbTipoTicket' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+            </div>
+            <div class="col-sm-2">
+                <span class="Prioridad"></span>
+                <select id='cbPrioridad' name='cbPrioridad' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+            </div>
+            <div class="col-sm-2">
+                <span class="SolicitantedelCambio"></span>
+                <select id='cbSolicitante' name='cbResponsable' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+            </div>
+            <div class="col-sm-2">
+                <span class="FechadeCierre"></span><span class="(Inicio)"></span>
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                    <input type="text" class="form-control pull-right" id="dtFechaInicio" name="dtFechaInicio" value="@ViewBag.FechaInicio" />
+                </div>
+            </div>
+            <div class="col-sm-2">
+                <span class="FechadeCierre"></span><span class="(Fin)"></span>
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                    <input type="text" class="form-control pull-right" id="dtFechaFin" name="dtFechaFin" value="@ViewBag.FechaActual" />
+                </div>
+            </div>
+            <div class="col-sm-1">
+                <div class="form-group">
+                    @*<br />*@
+                    <button type="button" class="btn btn-warning btn-sm" onclick="ValidarParametros()"><span>Buscar</span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+<div class="tab-content">
+    <div class="tab-pane active" id="tab_1">
+        <div class="box">
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table id="tablaTicketsCerrados" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th><span class="TipoTicket"></span></th>
+                            <th><span class="Código"></span></th>
+                            <th><span class="Prioridad"></span></th>
+                            <th><span class="Creadopor"></span></th>
+                            <th><span class="Asignado"></span></th>
+                            <th><span class="FechaCreación"></span></th>
+                            <th><span class="FechadeCierre"></span></th>
+                            <th><span class="SolicitantedelCambio"></span></th>
+                            <th><span class="TipodeCambio"></span></th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th><span class="TipoTicket"></span></th>
+                            <th><span class="Código"></span></th>
+                            <th><span class="Prioridad"></span></th>
+                            <th><span class="Creadopor"></span></th>
+                            <th><span class="Asignado"></span></th>
+                            <th><span class="FechaCreación"></span></th>
+                            <th><span class="FechadeCierre"></span></th>
+                            <th><span class="SolicitantedelCambio"></span></th>
+                            <th><span class="TipodeCambio"></span></th>
+                            <th></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <!-- /.box-body -->
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#spanTitulo").addClass('ReportedeTicketscerradosporGestióndeCambios');
+        cambioIdioma('(Inicio)', $('#IdIdioma').val(), '(Inicio)');
+        cambioIdioma('(Fin)', $('#IdIdioma').val(), '(Fin)');
+        cambioIdioma('Buscar', $('#IdIdioma').val(), 'Buscar');
+        cambioIdioma('TipoTicket', $('#IdIdioma').val(), 'TipoTicket');
+        cambioIdioma('Prioridad', $('#IdIdioma').val(), 'Prioridad');
+        cambioIdioma('FechadeCierre', $('#IdIdioma').val(), 'FechadeCierre');
+        cambioIdioma('Código', $('#IdIdioma').val(), 'Código');
+        cambioIdioma('Creadopor', $('#IdIdioma').val(), 'Creadopor');
+        cambioIdioma('Asignado', $('#IdIdioma').val(), 'Asignado');
+        cambioIdioma('FechaCreación', $('#IdIdioma').val(), 'FechaCreación');
+        cambioIdioma('TipodeCambio', $('#IdIdioma').val(), 'TipodeCambio');
+        cambioIdioma('SolicitantedelCambio', $('#IdIdioma').val(), 'SolicitantedelCambio');
+        cambioIdioma('ReportedeTicketscerradosporGestióndeCambios', $('#IdIdioma').val(), 'ReportedeTicketscerradosporGestióndeCambios');
+
+        var idioma;
+        idioma = obtenerIdiomaTabla();
+
+        $('#dtFechaInicio').datepicker({
+            autoclose: true
+        });
+        $('#dtFechaFin').datepicker({
+            autoclose: true
+        });
+
+        $("#cbTipoTicket").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeTicket/ListarTipoTicket/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#cbPrioridad").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Priority/ListarPrioridadTicket/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbSolicitante").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioResponsable/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        ListarTicketsCerrados();
+        
+    });
+   
+    function ValidarParametros() {
+        if ($("#dtFechaInicio").val() == null || $("#dtFechaInicio").val() == 0 || $("#dtFechaFin").val() == null || $("#dtFechaFin").val() == 0) {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "Seleccione un rango de fechas." + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continuee' class='k-button'>Continuar</button>" +
+                                       "</div>");
+            var undo = $("#continuee")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        } else {
+            ListarTicketsCerrados()
+        }
+    }
+    function ListarTicketsCerrados(){
+        $('#tablaTicketsCerrados').dataTable().fnDestroy();
+
+        $('#tablaTicketsCerrados').DataTable({
+            //"order": [[4, "asc"]],
+            dom: 'Bfrtip',
+            responsive: true,
+            ajax: {
+                "url":"/Ticket/GestionCambioListarTicketsCerrados/"+$("#cbTipoTicket").val()+'/'+$("#cbPrioridad").val()
+                +'/'+$("#cbSolicitante").val(),
+                "data": function ( d ) {
+                    d.FechaInicio = $("#dtFechaInicio").val(),
+                    d.FechaFin=$("#dtFechaFin").val()
+                    // d.custom = $('#myInput').val();
+                    // etc
+                }
+            },
+            columns: [
+                { data: "TipoTicket" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href="/DetailsTicket/Index/' + data.IdTicket + '\" target="_blank">' + data.CodigoTicket + '</a>';
+                    }
+                },
+                { data: "Prioridad" },
+                { data: "UsuarioCreador" },
+                { data: "UsuarioAsignado" },
+                { data: "FechaCreacion" },
+                { data: "FechaCierre" },
+                { data: "SolicitanteCambio" },
+                { data: "TipoCambio" },
+                {
+                     data: null,
+                     render: function (data, type, row) {
+                         return '<button type="button" class="btn btn-default btn-sm"><a href="/ChangeRequest/ResumenGestionCambio/' + data.IdCambio + '\" target="_blank">Ir al Cambio</a></button>';
+                     }
+                 },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+
+    function cambioIdioma(id, idIdioma, llave) {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdioma?llave=" + llave + "&IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    $.each(data['Data'], function (index) {
+                        var valores = (data['Data'][index]).split("|");
+                        var cantValores = document.getElementsByClassName(valores[1]);
+                        for (var i = 0; i < cantValores.length; i++) {
+                            cantValores[i].innerText = valores[0];
+                        }
+                    });
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+    function obtenerIdiomaTabla() {
+        var idioma;
+        var esp = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad",
+                "Export": "Exportar"
+            }
+        };
+        var eng = {
+            "sEmptyTable": "No data available in table",
+            "sInfo": "Showing _START_ to _END_ of _TOTAL_ entries",
+            "sInfoEmpty": "Showing 0 to 0 of 0 entries",
+            "sInfoFiltered": "(filtered from _MAX_ total entries)",
+            "sInfoPostFix": "",
+            "sInfoThousands": ",",
+            "sLengthMenu": "Show _MENU_ entries",
+            "sLoadingRecords": "Loading...",
+            "sProcessing": "Processing...",
+            "sSearch": "Search:",
+            "sZeroRecords": "No matching records found",
+            "oPaginate": {
+                "sFirst": "First",
+                "sLast": "Last",
+                "sNext": "Next",
+                "sPrevious": "Previous"
+            },
+            "oAria": {
+                "sSortAscending": ": activate to sort column ascending",
+                "sSortDescending": ": activate to sort column descending"
+            },
+            "buttons": {
+                "copy": "Copy",
+                "colvis": "Visibility",
+                "Export": "Export"
+            }
+        };
+
+        var it = {
+            "sEmptyTable": "Nessun dato presente nella tabella",
+            "sInfo": "Vista da _START_ a _END_ di _TOTAL_ elementi",
+            "sInfoEmpty": "Vista da 0 a 0 di 0 elementi",
+            "sInfoFiltered": "(filtrati da _MAX_ elementi totali)",
+            "sInfoPostFix": "",
+            "sInfoThousands": ".",
+            "sLengthMenu": "Visualizza _MENU_ elementi",
+            "sLoadingRecords": "Caricamento...",
+            "sProcessing": "Elaborazione...",
+            "sSearch": "Cerca:",
+            "sZeroRecords": "La ricerca non ha portato alcun risultato.",
+            "oPaginate": {
+                "sFirst": "Inizio",
+                "sPrevious": "Precedente",
+                "sNext": "Successivo",
+                "sLast": "Fine"
+            },
+            "oAria": {
+                "sSortAscending": ": attiva per ordinare la colonna in ordine crescente",
+                "sSortDescending": ": attiva per ordinare la colonna in ordine decrescente"
+            },
+            "buttons": {
+                "copy": "Copiare",
+                "colvis": "Visibilità",
+                "Export": "Esportazione"
+            }
+        };
+
+        var port = {
+            "sEmptyTable": "Nenhum registro encontrado",
+            "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+            "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sInfoThousands": ".",
+            "sLengthMenu": "_MENU_ resultados por página",
+            "sLoadingRecords": "Carregando...",
+            "sProcessing": "Processando...",
+            "sZeroRecords": "Nenhum registro encontrado",
+            "sSearch": "Pesquisar",
+            "oPaginate": {
+                "sNext": "Próximo",
+                "sPrevious": "Anterior",
+                "sFirst": "Primeiro",
+                "sLast": "Último"
+            },
+            "oAria": {
+                "sSortAscending": ": Ordenar colunas de forma ascendente",
+                "sSortDescending": ": Ordenar colunas de forma descendente"
+            },
+            "select": {
+                "rows": {
+                    "_": "Selecionado %d linhas",
+                    "0": "Nenhuma linha selecionada",
+                    "1": "Selecionado 1 linha"
+                }
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidade",
+                "Export": "Exportar"
+            }
+        };
+        var idi = $("#IdIdioma").val();
+        switch (idi) {
+            case '1':
+                idioma = esp; break;
+            case '2':
+                idioma = eng; break;
+            case '3':
+                idioma = it; break;
+            case '5':
+                idioma = port; break;
+        }
+
+        return idioma;
+    }
+
+</script>
+

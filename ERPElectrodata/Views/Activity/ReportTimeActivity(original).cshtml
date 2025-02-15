@@ -1,0 +1,1186 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-default divFondoDos">
+            <div class="box-header with-border">
+            </div>
+            <div class="box-body">
+                <div class="form-group">
+                    <div class="col-lg-6">
+                        <div class="col-lg-12">
+                            <div>Area</div>
+                            <select id="ID_AREA" class="form-control select2" multiple="multiple" type="text" style="width:100%" ></select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        Desde
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" class="form-control pull-right" id="SIN_DATE">
+                        </div>
+                    </div>
+                    <div class="col-lg-2">
+                        Hasta
+                        <div class="input-group date">
+                            <div class="input-group-addon">
+                                <i class="fa fa-calendar"></i>
+                            </div>
+                            <input type="text" class="form-control pull-right" id="TO_DATE">
+                        </div>
+                    </div>
+                    <div class="col-lg-2 text-right">
+                        <button id="btnGenerar" class="btn btn-primary" onclick="fnBuscar(); return false;">Generar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="box-footer">
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@*<div id="FormFilterActivity" style="background-color: rgba(241,241,241,0.5)">
+        <div class="bodyForm">
+            <div class="inBodyForm">
+                <div id="allPerformance" style="width:100%;">
+                    <div style="padding-left: 10px;">
+                        <div style="width: 100%; height: 55px; margin: 10px 10px 7px 0px; padding: 0px 0px 0px 0px; font-size: 0.95em;" id="divFiltro">
+                            <form id="ParamByPerson">
+                                <div id="divArea" style="float: left; margin: 0px 10px 0px 10px; ">Area:<br />  <input type="text" id="ID_AREA" name="ID_AREA" /></div>
+                                <div style="float: left; margin: 0px 10px 0px 10px; ">Desde :<br /><input type="text" id="SIN_DATE" name="SIN_DATE" /></div>
+                                <div style="float: left; margin: 0px 10px 0px 10px; ">Hasta :<br />  <input type="text" id="TO_DATE" name="TO_DATE" /></div>
+                                <div style="float: left;"><button id="btnBuscar" class="k-button" style="margin: 15px;" onclick="fnBuscar(); return false;">Buscar</button></div>
+                            </form>
+                            <div style="clear:both;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>*@
+<div class="panel">
+    <div style="clear:both;width:100%;height:730px; margin-top:35px;" class="panel panel-primary">
+        <div class="panel-heading">Reporte Consolidado</div>
+        <div class="panel-body">
+            <div id="ListEnginer" style="width: 70%; height: 650px; float: left; margin-left: 150px;"></div>
+        </div>
+    </div>
+
+    <div style="clear:both; width:100%; height:450px; margin-top:35px;" class="panel">
+        <div style="width: 49.5%; float:left; " class="panel panel-primary">
+            <div class="panel-heading">Implementación</div>
+            <div class="panel-body">
+                <div id="ListEnginerImplementacion" style="width:98%;height: 450px;"></div>
+            </div>
+        </div>
+        <div style="width: 49.5%; float:right;" class="panel panel-primary">
+            <div class="panel-heading">Soporte Externo</div>
+            <div class="panel-body">
+                <div id="ListEnginerSExterno" style="width: 95%; height: 450px; float: left;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="clear:both; width:100%; height:450px; margin-top:35px;" class="panel">
+        <div style="width: 49.5%; float:left; " class="panel panel-primary">
+            <div class="panel-heading">Soporte Interno</div>
+            <div class="panel-body">
+                <div id="ListEnginerSInterno" style="width:98%;height: 450px;"></div>
+            </div>
+        </div>
+        <div style="width: 49.5%; float:right;" class="panel panel-primary">
+            <div class="panel-heading">Comercial</div>
+            <div class="panel-body">
+                <div id="ListEnginerComercial" style="width: 95%; height: 450px; float: left;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div style="clear:both; width:100%; height:450px; margin-top:35px;" class="panel">
+        <div style="width: 49.5%; float:left; " class="panel panel-primary">
+            <div class="panel-heading">Capacitaciones</div>
+            <div class="panel-body">
+                <div id="ListEnginerCapac" style="width:98%;height: 450px;"></div>
+            </div>
+        </div>
+        <div style="width: 49.5%; float:right;" class="panel panel-primary">
+            <div class="panel-heading">Otros</div>
+            <div class="panel-body">
+                <div id="ListEnginerOtros" style="width: 95%; height: 450px; float: left;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#SIN_DATE').datepicker({
+            autoclose: true,
+            startView: '-1d'
+        });
+
+        $('#TO_DATE').datepicker({
+            autoclose: true,
+            startView: '0d'
+        });
+
+        $("#ID_AREA").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: true,
+            allowClear: true,
+            ajax: {
+                url: "/Activity/ListarAreaxOrganigrama",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+    });
+    function fnBuscar() {
+
+        var idArea = new String($("#ID_AREA").val());
+
+        if (idArea == null || idArea == "null")
+            idArea = 0;
+
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            area: idArea
+        };
+
+        $("#ListEnginer").empty()
+
+        $("#ListEnginer").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><br /><br /><br /><h3>Cargando...</h3><br /><img src='../../Images/spinner.gif' style='height: 17%; width: 17%; text-align: center;'></div>");
+        $("#ListEnginerImplementacion").empty()
+
+        $("#ListEnginerImplementacion").append("<div id='Mensaje' style='text-align: center;' >" +
+            "<br /><br /><br /><h3>Cargando...</h3><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#ListEnginerSExterno").empty()
+
+        $("#ListEnginerSExterno").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><h3>Cargando...</h3><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#ListEnginerSInterno").empty()
+
+        $("#ListEnginerSInterno").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><h3>Cargando...</h3><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#ListEnginerComercial").empty()
+
+        $("#ListEnginerComercial").append("<div id='Mensaje' style='text-align: center;' >" +
+            "<br /><br /><br /><h3>Cargando...</h3><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#ListEnginerCapac").empty()
+
+        $("#ListEnginerCapac").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><h3>Cargando...</h3><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+        $("#ListEnginerOtros").empty()
+
+        $("#ListEnginerOtros").append("<div id='Mensaje' style='text-align: center;'>" +
+            "<br /><br /><br /><h3>Cargando...</h3><br /><img src='../../Images/spinner.gif' style='height: 25%; width: 25%; text-align: center;'></div>");
+
+
+        $.ajax({
+            url: "/Activity/ListTypeActivityAll",
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                //TODOS
+                var userAll = new Array();
+                var hoursAll = new Array();
+                var ImplemAll = new Array();
+                var SopExtAll = new Array();
+                var SopIntAll = new Array();
+                var ComerAll = new Array();
+                var CapacAll = new Array();
+                var SoporteAll = new Array();
+                var InformeAll = new Array();
+                var OtrosAll = new Array();
+                $.each(json['ListEnginer'], function (index, value) {
+                    userAll[index] = value['USUARIO'];
+                    hoursAll[index] = value['TOTAL'] / 3600;
+                    ImplemAll[index] = value['IMPLEMENTACION'] / 3600;
+                    SopExtAll[index] = value['SOPORTEEXT'] / 3600;
+                    SopIntAll[index] = value['SOPORTEINT'] / 3600;
+                    ComerAll[index] = value['COMERCIAL'] / 3600;
+                    CapacAll[index] = value['CAPACITACION'] / 3600;
+                    SoporteAll[index] = value['SOPORTE'] / 3600;
+                    InformeAll[index] = value['INFORME'] / 3600;
+                    OtrosAll[index] = value['OTROS'] / 3600;
+                });
+                $('#ListEnginer').highcharts({
+                    chart: {
+                        type: 'bar',
+                        marginTop: 20
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userAll,
+                        title: {
+                            text: 'Ingenieros',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    legend: {
+                        backgroundColor: '#FFFFFF',
+                        reversed: false,
+                        align: 'right',
+                        verticalAlign: 'top',
+                        layout: 'vertical',
+                        x: 0,
+                        y: 100
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Hrs',
+                        valueDecimals: 1,
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal',
+                        }
+                    },
+                    series: [{
+                        name: 'Implementación',
+                        color: '#376092',
+                        data: ImplemAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    debugger;
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }, {
+                        name: 'Soporte Externo',
+                        color: '#95B3D7',
+                        data: SopExtAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }, {
+                        name: 'Soporte Interno',
+                        color: '#E46C0A',
+                        data: SopIntAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }, {
+                        name: 'Comercial',
+                        color: '#77933C',
+                        data: ComerAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }, {
+                        name: 'Capacitación',
+                        color: '#FFFF00',
+                        data: CapacAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }, {
+                        name: 'Soporte',
+                        color: '#CBABA6',
+                        data: SoporteAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }, {
+                        name: 'Informe',
+                        color: '#4BD439',
+                        data: InformeAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }, {
+                        name: 'Otros',
+                        color: '#CCCCCC',
+                        data: OtrosAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/Activity/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+                //Implementacion
+                var userImplementacion = new Array();
+                var hoursImplementacion = new Array();
+                $.each(json['ListEnginerImplementacion'], function (index, value) {
+                    userImplementacion[index] = value['USUARIO_ALL'];
+                    hoursImplementacion[index] = value['IMPLEMENTACION_ALL'] / 3600;
+                });
+                $('#ListEnginerImplementacion').highcharts({
+                    chart: {
+                        type: 'bar',
+                        marginTop: 20
+                    },
+                    colors: ["#376092"],
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userImplementacion,
+                        title: {
+                            text: 'Ingenieros',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            },
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            var rv = null;
+                            var parametros = {
+                                inic: $("#SIN_DATE").val(),
+                                fin: $("#TO_DATE").val(),
+                                usr: this.x,
+                                tipo: 1
+                            };
+                            $.ajax({
+                                url: "/Activity/ListEnginerxClieImp",
+                                data: parametros,
+                                dataType: 'json',
+                                cache: false,
+                                async: false,
+                                success: function (json) {
+                                    var clientAll = new Array();
+                                    $.each(json['ListEnginerImp'], function (index, value) {
+                                        clientAll[index] = '<b>' + value['CLIENTE'] + ':</b> ' + (value['IMPLEMENTACION'] / 3600).toFixed(1) + ' Hrs ';
+                                    });
+                                    rv = ('' + clientAll).replace(/,/g, '<br>');
+                                }
+                            });
+                            return rv;
+                        },
+                        valueDecimals: 1
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursImplementacion,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+                //Soporte Externo
+                var userSExterno = new Array();
+                var hoursSExterno = new Array();
+                $.each(json['ListEnginerSExterno'], function (index, value) {
+
+                    userSExterno[index] = value['USUARIO_ALL'];
+                    hoursSExterno[index] = value['SEXTERNO_ALL'] / 3600;
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerSExterno',
+                        marginTop: 20
+                    },
+                    colors: ["#95B3D7"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userSExterno,
+                        title: {
+                            text: 'Ingenieros',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            var rv = null;
+                            var parametros = {
+                                inic: $("#SIN_DATE").val(),
+                                fin: $("#TO_DATE").val(),
+                                usr: this.x,
+                                tipo: 2
+                            };
+                            $.ajax({
+                                url: "/Activity/ListEnginerxClieSEx",
+                                data: parametros,
+                                dataType: 'json',
+                                cache: false,
+                                async: false,
+                                success: function (json) {
+                                    var clientAll = new Array();
+                                    $.each(json['ListEnginerExt'], function (index, value) {
+                                        clientAll[index] = '<b>' + value['CLIENTE'] + ':</b> ' + (value['SOPORTEEXT'] / 3600).toFixed(1) + ' Hrs ';
+                                    });
+                                    rv = ('' + clientAll).replace(/,/g, '<br>');
+                                }
+                            });
+                            return rv;
+                        },
+                        valueDecimals: 1
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursSExterno,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+                //Soporte Interno
+                var userSInterno = new Array();
+                var hoursSInterno = new Array();
+                $.each(json['ListEnginerSInterno'], function (index, value) {
+
+                    userSInterno[index] = value['USUARIO_ALL'];
+                    hoursSInterno[index] = value['SINTERNO_ALL'] / 3600;
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerSInterno',
+                        marginTop: 20
+                    },
+                    colors: ["#E46C0A"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userSInterno,
+                        title: {
+                            text: 'Ingenieros',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            var rv = null;
+                            var parametros = {
+                                inic: $("#SIN_DATE").val(),
+                                fin: $("#TO_DATE").val(),
+                                usr: this.x,
+                                tipo: 3
+                            };
+                            $.ajax({
+                                url: "/Activity/ListEnginerxClieSIn",
+                                data: parametros,
+                                dataType: 'json',
+                                cache: false,
+                                async: false,
+                                success: function (json) {
+                                    var clientAll = new Array();
+                                    $.each(json['ListEnginerIn'], function (index, value) {
+                                        clientAll[index] = '<b>' + value['CLIENTE'] + ':</b> ' + (value['SOPORTEINT'] / 3600).toFixed(1) + ' Hrs ';
+                                    });
+                                    rv = ('' + clientAll).replace(/,/g, '<br>');
+                                }
+                            });
+                            return rv;
+                        },
+                        valueDecimals: 1
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursSInterno,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+                //Comercial
+                var userComercial = new Array();
+                var hoursComercial = new Array();
+                $.each(json['ListEnginerComercial'], function (index, value) {
+
+                    userComercial[index] = value['USUARIO_ALL'];
+                    hoursComercial[index] = value['COMER_ALL'] / 3600;
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerComercial',
+                        marginTop: 20
+                    },
+                    colors: ["#77933C"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userComercial,
+                        title: {
+                            text: 'Ingenieros',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            var rv = null;
+                            var parametros = {
+                                inic: $("#SIN_DATE").val(),
+                                fin: $("#TO_DATE").val(),
+                                usr: this.x,
+                                tipo: 4
+                            };
+                            $.ajax({
+                                url: "/Activity/ListEnginerxClieSCOM",
+                                data: parametros,
+                                dataType: 'json',
+                                cache: false,
+                                async: false,
+                                success: function (json) {
+                                    var clientAll = new Array();
+                                    $.each(json['ListEnginerCOM'], function (index, value) {
+                                        clientAll[index] = '<b>' + value['CLIENTE'] + ':</b> ' + (value['COMERCIAL'] / 3600).toFixed(1) + ' Hrs ';
+                                    });
+                                    rv = ('' + clientAll).replace(/,/g, '<br>');
+                                }
+                            });
+                            return rv;
+                        },
+                        valueDecimals: 1
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursComercial,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    //
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+                //Capacitacion
+                var userCapacitacion = new Array();
+                var hoursCapacitacion = new Array();
+                $.each(json['ListEnginerCapac'], function (index, value) {
+
+                    userCapacitacion[index] = value['USUARIO_ALL'];
+                    hoursCapacitacion[index] = value['CAPAC_ALL'] / 3600;
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerCapac',
+                        marginTop: 20
+                    },
+                    colors: ["#FFFF00"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userCapacitacion,
+                        title: {
+                            text: 'Ingenieros',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            var rv = null;
+                            var parametros = {
+                                inic: $("#SIN_DATE").val(),
+                                fin: $("#TO_DATE").val(),
+                                usr: this.x,
+                                tipo: 6
+                            };
+                            $.ajax({
+                                url: "/Activity/ListEnginerxClieSCAP",
+                                data: parametros,
+                                dataType: 'json',
+                                cache: false,
+                                async: false,
+                                success: function (json) {
+                                    var clientAll = new Array();
+                                    $.each(json['ListEnginerCAP'], function (index, value) {
+                                        clientAll[index] = '<b>' + value['CLIENTE'] + ':</b> ' + (value['CAPACITACION'] / 3600).toFixed(1) + ' Hrs ';
+                                    });
+                                    rv = ('' + clientAll).replace(/,/g, '<br>');
+                                }
+                            });
+                            return rv;
+                        },
+                        valueDecimals: 1
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursCapacitacion,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+                //Otros
+                var userOtros = new Array();
+                var hoursOtros = new Array();
+                $.each(json['ListEnginerOtros'], function (index, value) {
+
+                    userOtros[index] = value['USUARIO_ALL'];
+                    hoursOtros[index] = value['OTROS_ALL'] / 3600;
+                });
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'bar',
+                        renderTo: 'ListEnginerOtros',
+                        marginTop: 20
+                    },
+                    colors: ["#CCCCCC"],
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: userOtros,
+                        title: {
+                            text: 'Ingenieros',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    tooltip: {
+                        formatter: function () {
+                            var rv = null;
+                            var parametros = {
+                                inic: $("#SIN_DATE").val(),
+                                fin: $("#TO_DATE").val(),
+                                usr: this.x,
+                                tipo: 8
+                            };
+                            $.ajax({
+                                url: "/Activity/ListEnginerxClieSOTR",
+                                data: parametros,
+                                dataType: 'json',
+                                cache: false,
+                                async: false,
+                                success: function (json) {
+                                    var clientAll = new Array();
+                                    $.each(json['ListEnginerOTR'], function (index, value) {
+                                        clientAll[index] = '<b>' + value['CLIENTE'] + ':</b> ' + (value['OTROS'] / 3600).toFixed(1) + ' Hrs ';
+                                    });
+                                    rv = ('' + clientAll).replace(/,/g, '<br>');
+                                }
+                            });
+                            return rv;
+                        },
+                        valueDecimals: 1
+                    },
+                    plotOptions: {
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            shadow: false
+                        }
+                    },
+                    legend: {
+                        enabled: false
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursOtros,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var usr = this.category;
+                                    var url = "http://" + location.host + "/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    @*$(document).ready(function () {
+        function addDays(theDate, days) {
+            return new Date(theDate.getTime() + days * 24 * 60 * 60 * 1000);
+        }
+        var yesterday = addDays(new Date(), -1);
+
+        var k_enddatetimepicker = $("#TO_DATE").kendoDatePicker({
+            value: new Date()
+        }).data("kendoDatePicker");
+
+        var k_startdatetimepicker = $("#SIN_DATE").kendoDatePicker({
+            value: yesterday
+        }).data("kendoDatePicker");
+
+        if (@ViewBag.ID_ACCO != 4){
+            $("#divArea").addClass("divHide");
+            $("#divImplementacion").addClass("divHide");
+            $("#divSoporteExterno").addClass("divHide");
+            $("#divComercial").addClass("divHide");
+        }
+
+    });*@
+
+    //var ID_AREA = $("#ID_AREA").kendoComboBox({
+    //    autoBind: false,
+    //    dataTextField: "NAM_CHAR",
+    //    dataValueField: "ID_CHAR",
+    //    filter: "contains",
+    //    delay: 500,
+    //    minLength: 0,
+    //    suggest: true,
+    //    dataSource: {
+    //        schema: {
+    //            data: "Data",
+    //            total: "Count"
+    //        },
+    //        transport: {
+    //            read: "/Activity/ListarAreas?var=" + Math.random()
+    //        }
+    //    }
+    //}).data("kendoComboBox");
+
+    //fnBuscar();
+
+</script>
+

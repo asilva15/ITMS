@@ -1,0 +1,338 @@
+﻿@{
+    ViewBag.Title = "ReportePlanoCategoria";
+    Layout = null;
+}
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+
+<div class="card-body">
+    <div class="card-title">Reporte de Tickets cerrados por Gestión de Cambios</div>
+    <div class="row" style="padding-left:2%">
+
+        <div class="col-sm-3">
+            <label id="" for="" class="">Año </label>
+            <select id="cbAño" name="cbAño" class="form-control select2" ></select>
+        </div>
+        <div class="col-sm-3">
+            <label id="" for="" class="">Mes </label>
+            <select id="cbMes" name="cbMes" class="form-control select2" ></select>
+        </div>
+
+        <div class="col-sm-2">
+            <div class="form-group">
+                <br />
+                <button type="button" class="btn btn-warning" onclick="ListarCategoria1()">Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>   
+
+
+
+<div class="tab-content">
+    <div class="tab-pane active" id="tab_1">
+        <div class="box">
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table id="tablaCategoria" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th><span class="Categoría"></span></th>
+                            <th><span class="Cantidad"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th><span class="Categoría"></span></th>
+                            <th><span class="Cantidad"></span></th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <!-- /.box-body -->
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#spanTitulo").addClass('ReporteporCategoría');
+        cambioIdioma('Año', $('#IdIdioma').val(), 'Año');
+        cambioIdioma('Mes', $('#IdIdioma').val(), 'Mes');
+        cambioIdioma('Buscar', $('#IdIdioma').val(), 'Buscar');
+        cambioIdioma('Categoría', $('#IdIdioma').val(), 'Categoría');
+        cambioIdioma('Cantidad', $('#IdIdioma').val(), 'Cantidad');
+        cambioIdioma('ReporteporCategoría', $('#IdIdioma').val(), 'ReporteporCategoría');
+        var idioma;
+        idioma = obtenerIdiomaTabla();
+        
+        $("#cbAño").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Ticket/ListarAños",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+            $("#cbMes").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/Ticket/ListarMeses",
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+
+                    },
+                },
+            });
+
+        //Asignación inicial
+        var $newOption = $("<option></option>").val("@ViewBag.Año").text("@ViewBag.Año");
+        $("#cbAño").append($newOption).trigger('change');
+        
+        var $newOption2 = $("<option></option>").val("@ViewBag.Mes").text("@ViewBag.NombreMes");
+        $("#cbMes").append($newOption2).trigger('change');
+
+        setTimeout(function () { MostrarCategorias() }, 1000);
+    });
+
+    function ListarCategoria1() {
+        if ($("#cbAño").val() == null || $("#cbAño").val() == 0 || $("#cbMes").val() == null || $("#cbMes").val() == 0) {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "Seleccione el Año y Mes." + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continuee' class='k-button'>Continuar</button>" +
+                                       "</div>");
+            var undo = $("#continuee")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        } else {
+            MostrarCategorias()
+        }
+    }
+    function MostrarCategorias() {
+        $('#tablaCategoria').dataTable().fnDestroy();
+        $('#tablaCategoria').DataTable({
+            //"order": [[4, "asc"]],
+            dom: 'Bfrtip',
+            ajax: "/Ticket/ListarReportePlanoCategoria/" + $("#cbMes").val() + '/' + $("#cbAño").val(),
+            columns: [
+                { data: "Categoria" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style="width:100%">' +
+                               '<label/>' + data.Total + ' tickets'+'</label></div>';
+                    }
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+
+    function cambioIdioma(id, idIdioma, llave) {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdioma?llave=" + llave + "&IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    $.each(data['Data'], function (index) {
+                        var valores = (data['Data'][index]).split("|");
+                        var cantValores = document.getElementsByClassName(valores[1]);
+                        for (var i = 0; i < cantValores.length; i++) {
+                            cantValores[i].innerText = valores[0];
+                        }
+                    });
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+    function obtenerIdiomaTabla() {
+        var idioma;
+        var esp = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad",
+                "Export": "Exportar"
+            }
+        };
+        var eng = {
+            "sEmptyTable": "No data available in table",
+            "sInfo": "Showing _START_ to _END_ of _TOTAL_ entries",
+            "sInfoEmpty": "Showing 0 to 0 of 0 entries",
+            "sInfoFiltered": "(filtered from _MAX_ total entries)",
+            "sInfoPostFix": "",
+            "sInfoThousands": ",",
+            "sLengthMenu": "Show _MENU_ entries",
+            "sLoadingRecords": "Loading...",
+            "sProcessing": "Processing...",
+            "sSearch": "Search:",
+            "sZeroRecords": "No matching records found",
+            "oPaginate": {
+                "sFirst": "First",
+                "sLast": "Last",
+                "sNext": "Next",
+                "sPrevious": "Previous"
+            },
+            "oAria": {
+                "sSortAscending": ": activate to sort column ascending",
+                "sSortDescending": ": activate to sort column descending"
+            },
+            "buttons": {
+                "copy": "Copy",
+                "colvis": "Visibility",
+                "Export": "Export"
+            }
+        };
+
+        var it = {
+            "sEmptyTable": "Nessun dato presente nella tabella",
+            "sInfo": "Vista da _START_ a _END_ di _TOTAL_ elementi",
+            "sInfoEmpty": "Vista da 0 a 0 di 0 elementi",
+            "sInfoFiltered": "(filtrati da _MAX_ elementi totali)",
+            "sInfoPostFix": "",
+            "sInfoThousands": ".",
+            "sLengthMenu": "Visualizza _MENU_ elementi",
+            "sLoadingRecords": "Caricamento...",
+            "sProcessing": "Elaborazione...",
+            "sSearch": "Cerca:",
+            "sZeroRecords": "La ricerca non ha portato alcun risultato.",
+            "oPaginate": {
+                "sFirst": "Inizio",
+                "sPrevious": "Precedente",
+                "sNext": "Successivo",
+                "sLast": "Fine"
+            },
+            "oAria": {
+                "sSortAscending": ": attiva per ordinare la colonna in ordine crescente",
+                "sSortDescending": ": attiva per ordinare la colonna in ordine decrescente"
+            },
+            "buttons": {
+                "copy": "Copiare",
+                "colvis": "Visibilità",
+                "Export": "Esportazione"
+            }
+        };
+
+        var port = {
+            "sEmptyTable": "Nenhum registro encontrado",
+            "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+            "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sInfoThousands": ".",
+            "sLengthMenu": "_MENU_ resultados por página",
+            "sLoadingRecords": "Carregando...",
+            "sProcessing": "Processando...",
+            "sZeroRecords": "Nenhum registro encontrado",
+            "sSearch": "Pesquisar",
+            "oPaginate": {
+                "sNext": "Próximo",
+                "sPrevious": "Anterior",
+                "sFirst": "Primeiro",
+                "sLast": "Último"
+            },
+            "oAria": {
+                "sSortAscending": ": Ordenar colunas de forma ascendente",
+                "sSortDescending": ": Ordenar colunas de forma descendente"
+            },
+            "select": {
+                "rows": {
+                    "_": "Selecionado %d linhas",
+                    "0": "Nenhuma linha selecionada",
+                    "1": "Selecionado 1 linha"
+                }
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidade",
+                "Export": "Exportar"
+            }
+        };
+        var idi = $("#IdIdioma").val();
+        switch (idi) {
+            case '1':
+                idioma = esp; break;
+            case '2':
+                idioma = eng; break;
+            case '3':
+                idioma = it; break;
+            case '5':
+                idioma = port; break;
+        }
+
+        return idioma;
+    }
+    
+
+</script>

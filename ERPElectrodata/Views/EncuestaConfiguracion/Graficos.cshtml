@@ -1,0 +1,582 @@
+﻿@{
+    ViewBag.Title = "EncuestaConfiguracion";
+    Layout = null;
+}
+
+
+<link href="~/Bootstrap/css/bootstrap.css" rel="stylesheet" />
+<link href="~/Bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+<link href="~/Content/sweet-alert.css" rel="stylesheet" />
+<script src="~/Bootstrap/js/bootstrap.min.js"></script>
+<script src="~/Scripts/sweet-alert.js"></script>
+<script src="~/Scripts/bootstrap-tags.js"></script>
+<script src="~/Scripts/bootstrap-tags.min.js"></script>
+<script src="~/Scripts/Itms/Plugins/jquery.validate.min.js"></script>
+<style>
+    b {
+        color:#F83C50;
+    }
+</style>
+<h3>Informe de Encuestas</h3>
+
+<div class="divSpace3"></div>
+<div style="float:left;">
+    <div class="editor-label">
+        Cuenta <b>(*)</b>
+    </div>
+    <div class="editor-field">
+        <input type="text" name="IdAcco" id="IdAcco"/>
+    </div>
+</div>
+<div style="float: left; margin: 0px 10px 0px 10px;">Desde : <b>(*)</b><br /><input type="text" id="FechaInicio" name="FechaInicio" /></div>
+<div style="float: left; margin: 0px 10px 0px 10px; ">Hasta : <b>(*)</b><br />  <input type="text" id="FechaFin" name="FechaFin" /></div>
+<div style="float: left;"><button id="btnBuscar" class="k-button" style="margin: 15px;">Buscar</button></div>
+
+<div style="clear:both; width:100%; height:450px; margin-top:35px;" class="panel">
+    <!--RESUMEN DE ENCUESTAS-->
+    <div style="width: 49%; float:left; height:430px;" class="panel panel-primary">
+        <div class="panel-heading"><div class="title">Resumen de Encuestas</div></div>
+        <div class="panel-body">
+            <div  class="panel-body" style="height: 350px;">
+                @*<div style="width:39%;height:100px;float:right;margin:40px 0px 0px 0px;font-size:.95em;">
+                    @Html.TextBox("S_ID_ACCO_YEAR")
+                    <div style="margin:10px 0px 0px 0px;">
+                        @Html.TextBox("S_ID_ACCO_MONT")
+                    </div>
+                </div>*@
+                <div id="resumenEncuestas" style="width:100%;height:348px; float:left;"></div>
+            </div>
+        </div>
+    </div>
+
+   <!--PREGUNTA 13-->
+    <div style="width: 49%; float:right; height:430px;" class="panel panel-primary">
+        <div class="panel-heading"><div class="title">¿Consideras que estábamos correctamente capacitados para resolver lo que necesitabas?</div></div>
+        <div class="panel-body">
+            <div class="panel-body" style="height: 350px;">
+                @*<div style="width:39%;height:100px;float:right;margin:40px 0px 0px 0px;font-size:.95em;">
+                        @Html.TextBox("S_ID_ACCO_YEAR")
+                        <div style="margin:10px 0px 0px 0px;">
+                            @Html.TextBox("S_ID_ACCO_MONT")
+                        </div>
+                    </div>*@
+                <div id="pregunta13Encuestas" style="width:100%;height:348px; float:left;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="clear:both; width:100%; height:450px; margin-top:35px;" class="panel">
+    <!--PREGUNTA 14-->
+    <div style="width: 49%; float:left; height:430px;" class="panel panel-primary">
+        <div class="panel-heading"><div class="title">¿Consideras que el proceso fue rápido y sencillo?</div></div>
+        <div class="panel-body">
+            <div class="panel-body" style="height: 350px;">
+                <div id="pregunta14Encuestas" style="width:100%;height:348px; float:left;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!--PREGUNTA 15-->
+    <div style="width: 49%; float:right; height:430px;" class="panel panel-primary">
+        <div class="panel-heading"><div class="title">En general ¿Qué tan satisfecho está con la resolución de su incidente y/o requerimiento?</div></div>
+        <div class="panel-body">
+            <div class="panel-body" style="height: 350px;">
+                <div id="pregunta15Encuestas" style="width:100%;height:348px; float:left;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var myTicketStatus;
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+    $(document).ready(function () {
+
+        var Acco = $("#IdAcco").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TipoActivo/ListarCuentaTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        Acco.bind("change", function (e) {
+            IdAcco = Acco.dataItem().ID_ACCO;
+        });
+
+        var today = new Date();
+        var FechaInicio = $("#FechaInicio").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+        var FechaFin = $("#FechaFin").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+
+        $("#btnBuscar").click(function () {
+            var IdAcco, FechaInicio, FechaFin;
+            IdAcco = $("#IdAcco").val();
+            FechaInicio = $("#FechaInicio").val();
+            FechaFin = $("#FechaFin").val();
+            if (IdAcco == 0 || FechaInicio == 0 || FechaFin == 0) {
+                winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                + "<div style='padding:10px 0px 10px 0px;'>Complete los datos porfavor</div>" +
+                "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continues' class='k-button'>Continuar</button>" +
+               "</div></div>", 400, 140);
+
+                var undo = $("#continues")
+               .bind("click", function () {
+                   closeWinModalPopUp();
+               });
+
+                $("#closebtnmodal").click(function () {
+                    closeWinModalPopUp();
+                });
+            }
+            else {
+                resumenEncuestas();
+                pregunta13Encuestas();
+                pregunta14Encuestas();
+                pregunta15Encuestas();
+            }
+        });
+
+    });
+
+    function resumenEncuestas() {
+
+        var FechaInicio = $("#FechaInicio").data("kendoComboBox");
+        var FechaFin = $("#FechaFin").data("kendoComboBox");
+
+        $.ajax({
+            url: '/EncuestaConfiguracion/encuestaResumen/',
+            dataType: 'json',
+            data: "IdAcco=" + $("#IdAcco").val() + "&FechaInicio=" + $("#FechaInicio").val() + "&FechaFin=" + $("#FechaFin").val() + "&var=" + Math.random(),
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+                    Cat[index] = value['CLASIFICACION'];
+                    vValue[index] = value['CANTIDAD'];
+                    Color[index] = value['COLOR'];
+                    acumulado = acumulado + value['CANTIDAD'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "#6A819B",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j)/(data[i].drilldown.data.length+20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'resumenEncuestas',
+                        type: 'pie'
+                    },
+                    credits:{enabled:false},
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip:{
+                        headerFormat:headerFormat,
+                        pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                        percentageDecimals: 2
+                    },
+                    series: [ {
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return  (this.y != null ? ('<b>' + this.point.name + '</b>'+( this.percentage < 100 ?  (': ' +Highcharts.numberFormat(this.percentage, 2) + ' %' ): '')) : null)+'<br><b>Qty</b>: '+this.y;
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+        myTicketStatus = setTimeout("resumenEncuestas(idclient);", 30000);
+
+    }
+
+    function pregunta13Encuestas() {
+
+        var FechaInicio = $("#FechaInicio").data("kendoComboBox");
+        var FechaFin = $("#FechaFin").data("kendoComboBox");
+
+        $.ajax({
+            url: '/EncuestaConfiguracion/encuestaPregunta13/', 
+            dataType: 'json',
+            data: "IdAcco=" + $("#IdAcco").val() + "&FechaInicio=" + $("#FechaInicio").val() + "&FechaFin=" + $("#FechaFin").val() + "&var=" + Math.random(),
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+                    Cat[index] = value['VALOR'];
+                    vValue[index] = value['PUNTOS'];
+                    Color[index] = value['COLOR'];
+                    acumulado = acumulado + value['PUNTOS'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "#6A819B",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'pregunta13Encuestas',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                        percentageDecimals: 2
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+        myTicketStatus = setTimeout("pregunta13Encuestas(idclient);", 30000);
+
+    }
+
+    function pregunta14Encuestas() {
+
+        var FechaInicio = $("#FechaInicio").data("kendoComboBox");
+        var FechaFin = $("#FechaFin").data("kendoComboBox");
+
+        $.ajax({
+            url: '/EncuestaConfiguracion/encuestaPregunta14/',
+            dataType: 'json',
+            data: "IdAcco=" + $("#IdAcco").val() + "&FechaInicio=" + $("#FechaInicio").val() + "&FechaFin=" + $("#FechaFin").val() + "&var=" + Math.random(),
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+                    Cat[index] = value['VALOR'];
+                    vValue[index] = value['PUNTOS'];
+                    Color[index] = value['COLOR'];
+                    acumulado = acumulado + value['PUNTOS'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "#6A819B",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color//,
+                        //x:namCat[i],
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            //total:500,
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'pregunta14Encuestas',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                        percentageDecimals: 2
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+        myTicketStatus = setTimeout("pregunta14Encuestas(idclient);", 30000);
+
+    }
+
+    function pregunta15Encuestas() {
+
+        var FechaInicio = $("#FechaInicio").data("kendoComboBox");
+        var FechaFin = $("#FechaFin").data("kendoComboBox");
+
+        $.ajax({
+            url: '/EncuestaConfiguracion/encuestaPregunta15/',
+            dataType: 'json',
+            data: "IdAcco=" + $("#IdAcco").val() + "&FechaInicio=" + $("#FechaInicio").val() + "&FechaFin=" + $("#FechaFin").val() + "&var=" + Math.random(),
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var Cat = new Array();
+                var vValue = new Array();
+                var Color = new Array();
+                var acumulado;
+
+                $.each(jsonx['pie'], function (index, value) {
+                    Cat[index] = value['VALOR'];
+                    vValue[index] = value['PUNTOS'];
+                    Color[index] = value['COLOR'];
+                    acumulado = acumulado + value['PUNTOS'];
+
+                });
+
+                var colors = Highcharts.getOptions().colors,
+                   colorPie = "#6A819B",
+                categories = ["All"],
+                name = 'Status',
+                data = [{
+                    y: acumulado,
+                    color: colorPie,
+                    drilldown: {
+                        name: 'Status',
+                        categories: Cat,
+                        data: vValue,
+                        color: colors[0]
+                    }
+                }];
+
+
+                // Build the data arrays
+                var browserData = [];
+                var versionsData = [];
+                for (var i = 0; i < data.length; i++) {
+
+                    // add browser data
+                    browserData.push({
+                        name: categories[i],
+                        y: data[i].y,
+                        color: data[i].color
+                    });
+
+                    // add version data
+                    for (var j = 0; j < data[i].drilldown.data.length; j++) {
+                        var brightness = (j) / (data[i].drilldown.data.length + 20);//0.2 - (j / data[i].drilldown.data.length) / 5;
+                        var valor = data[i].drilldown.data[j];
+                        versionsData.push({
+                            name: data[i].drilldown.categories[j],
+                            y: data[i].drilldown.data[j],
+                            color: Color[j]
+                        });
+                    }
+                }
+
+                // Create the chart
+                chart = new Highcharts.Chart({
+                    chart: {
+                        renderTo: 'pregunta15Encuestas',
+                        type: 'pie'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: ''
+                    },
+                    plotOptions: {
+                        pie: {
+                            shadow: false,
+                            showInLegend: true
+                        }
+                    },
+                    tooltip: {
+                        headerFormat: headerFormat,
+                        pointFormat: 'Percentage: <b>{point.percentage:.2f}%</b><br>Quantity: <b>{point.y}</b>',
+                        percentageDecimals: 2
+                    },
+                    series: [{
+                        data: versionsData,
+                        size: '50%',
+                        dataLabels: {
+                            formatter: function () {
+                                return (this.y != null ? ('<b>' + this.point.name + '</b>' + (this.percentage < 100 ? (': ' + Highcharts.numberFormat(this.percentage, 2) + ' %') : '')) : null) + '<br><b>Qty</b>: ' + this.y;
+                            }
+                        }
+                    }]
+                });
+            }
+
+        });
+        //
+        //
+        myTicketStatus = setTimeout("pregunta15Encuestas(idclient);", 30000);
+
+    }
+</script>

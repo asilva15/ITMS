@@ -1,0 +1,348 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<form class="form-group">
+    <div class="col-md-12">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="position-relative form-group">
+                    Cliente:
+                    <select id="ID_CLIE_REP" name="ID_CLIE_REP" class="form-control select2" type='text' style="width:100%" ></select>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="position-relative form-group">
+                    Cliente Final:
+                    <select id="ID_CLIE_FIN" name="ID_CLIE_FIN" class="form-control select2" type='text' style="width:100%" ></select>
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="position-relative form-group">
+                    Fecha Inicio
+                    <input type="text" class="form-control pull-right" id="dtFechaInicio" name="dtFechaInicio" value="@ViewBag.FechaInicio" />
+                </div>
+            </div>
+            <div class="col-lg-3">
+                <div class="position-relative form-group">
+                    Fecha Fin
+                    <input type="text" class="form-control pull-right" id="dtFechaFin" name="dtFechaFin" value="@ViewBag.FechaActual" />
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-3">
+                Área responsable
+                <select id="IdAreaResponsable" name="IdAreaResponsable" class="form-control" style="width: 100%;"></select>
+            </div>
+            <div class="col-lg-3">
+                Asignado a
+                <select id="IdAsignadoA" name="IdAsignadoA" class="form-control" style="width: 100%;"></select>
+            </div>
+
+            <div class="col-lg-2">
+                Estado
+                <select id="ID_STAT_END" name="IdEstados" class="form-control select2" multiple="multiple" type="text" style="width:100%"></select>
+            </div>
+
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <br />
+                    <button type="button" class="ladda-button mb-2 mr-2 btn btn-warning btn-block" data-style="expand-right" onclick="ValidarParametros()">
+                        <span class="ladda-label">
+                            <i class="fa fa-search"></i> Buscar
+                        </span>
+                        <span class="ladda-spinner">
+                        </span><div class="ladda-progress" style="width: 0px;"></div>
+                    </button>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <br />
+                    <button id="btnCalendario" type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#miModal" onclick="MostrarCalendario();">
+                        <i class="fa fa-calendar"></i>&nbsp;Calendario
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<div class="tab-content">
+    <div class="tab-pane active" id="tab_2">
+        <div class="box">
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table id="tablaTicketsMantenimientos" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Cliente Final</th>
+                            <th>Fecha Fin</th>
+                            <th>Marca</th>
+                            <th>Área</th>
+                            <th>Ingeniero</th>
+                            <th>Ticket</th>
+                            <th>OP</th>
+                            <th>Fecha de Mant.</th>
+                            <th>Estado</th>
+                            <th>Indicador</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Cliente Final</th>
+                            <th>Fecha Fin</th>
+                            <th>Marca</th>
+                            <th>Área</th>
+                            <th>Ingeniero</th>
+                            <th>Ticket</th>
+                            <th>OP</th>
+                            <th>Fecha de Mant.</th>
+                            <th>Estado</th>
+                            <th>Indicador</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#dtFechaInicio").kendoDatePicker();
+        $("#dtFechaFin").kendoDatePicker();
+
+        $("#ID_CLIE_REP").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarCompañiasxCuenta",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $("#ID_CLIE_FIN").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarCompañiasxCuenta",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $("#IdAreaResponsable").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountQueue/ListarAreaResponsable",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $("#IdAreaResponsable").on('change', function (e) {
+            $("#IdAsignadoA").empty();
+            var idAreaResponsable = $("#IdAreaResponsable").find(':selected').val();            
+            $("#IdAsignadoA").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/AccountEntity/ListarAsignadoA/" + idAreaResponsable,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+
+        });
+
+        var data = [
+            {
+                id: 0,
+                text: 'PENDIENTE'
+            },
+            {
+                id: 1,
+                text: 'ACTIVO'
+            },
+            {
+                id: 5,
+                text: 'PROGRAMADO'
+            },
+            {
+                id: 4,
+                text: 'RESUELTO'
+            },
+            {
+                id: 6,
+                text: 'CERRADO'
+            }
+        ];
+
+        $("#ID_STAT_END").select2({
+            placeholder: 'Selecione..',
+            minimumInputLength: 0,
+            multiple: true,
+            allowClear: true,
+            data: data
+        })
+        ListarTicketsMantenimientos();
+    });
+
+    function ValidarParametros() {
+        if ($("#dtFechaInicio").val() == null || $("#dtFechaInicio").val() == 0 || $("#dtFechaFin").val() == null || $("#dtFechaFin").val() == 0) {
+            toastr.warning( "Seleccione un rango de fechas.","");
+        } else {
+            ListarTicketsMantenimientos();
+        }
+    }
+
+    function MostrarCalendario() {
+        $("#lblTitulo").text("Calendario");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load('/OrderForm/CronogramaSoporte');
+    }
+
+    function ListarTicketsMantenimientos() {
+        $('#tablaTicketsMantenimientos').dataTable().fnDestroy();
+        $('#tablaTicketsMantenimientos').DataTable({
+            //"order": [[4, "asc"]],
+            dom: 'Bfrtip',
+            responsive: true,
+            ajax: {
+                "url": "/OrderForm/BuscarMantenimiento/" + $("#ID_CLIE_REP").val() + '/' + $("#ID_CLIE_FIN").val()
+                    + '/' + $("#IdAreaResponsable").val(),
+                "data": function (d) {
+                    d.FechaInicio = $("#dtFechaInicio").val(),
+                        d.FechaFin = $("#dtFechaFin").val(),
+                        d.IdAsignado = $("#IdAsignadoA").val(),
+                        d.IdEstados = new String($("#ID_STAT_END").val())
+                    // d.custom = $('#myInput').val();
+                    // etc
+                }
+            },
+            columns: [
+                { data: "Cliente" },
+                { data: "ClienteFinal" },
+                { data: "FechaFinMante" },
+                { data: "Marca" },
+                { data: "Area" },
+                { data: "IngenieroaCargo" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"../DetailsTicket/Index/' + data.IdTick + '\" target="_blank">' + data.Ticket + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"/OrderForm/DetalleProyecto/' + data.DocuSale + '\" target="_blank">' + data.OP + '</a>';
+                    }
+                },
+                { data: "FechaMantenimiento" },
+                { data: "Estado" },
+                { data: "Semaforo" },
+                //{ data: "FechaCreacion" },
+                //{ data: "FechaCierre" },
+                //{ data: "SolicitanteCambio" },
+                //{ data: "TipoCambio" },
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        return '<button type="button" class="btn btn-default btn-sm"><a href=\"#/ResumenGestionCambio/' + data.IdCambio + '\" target="_blank">Ir al Cambio</a></button>';
+                //    }
+                //},
+            ],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ],  
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+        });
+    }
+</script>

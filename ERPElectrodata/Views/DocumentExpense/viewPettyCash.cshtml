@@ -1,0 +1,338 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_EXPENSE
+
+@{
+    Layout = null;
+}
+
+<div style="display:inline-block; width:100%; margin: 10px 0px 5px 0px;">
+    <div style="width:70%; float:left;">
+        <div id="grid"></div>
+    </div>
+    <div style="width:30%; float:left;"></div>
+</div>
+
+<script id="templateProgress" type="text/x-kendo-template">
+    <ul class="poll-results">
+        <li>
+            <div id="divProgress#: ID_DELI_SUST #" style="width:92.5%;"></div>
+        </li>
+    </ul>
+    # progressGrid(ID_DELI_SUST); #
+</script>
+
+<script type="text/javascript">
+
+    function progressGrid(id) {
+        //var progressbars = [];
+        //$(".poll-results div").each(function () {
+        //    var pb = $(this).kendoProgressBar({
+        //        type: "percent",
+        //        animation: {
+        //            duration: 600
+        //        }
+        //    }).data("kendoProgressBar");
+        //    progressbars.push(pb);
+        //});
+
+        $("#divProgress" + id).kendoProgressBar({
+            type: "percent",
+            animation: {
+                duration: 600
+            }
+        }).data("kendoProgressBar");
+
+        //$("#divProgress" + id).data("kendoProgressBar").value(40);
+    }
+
+    $(document).ready(function () {
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/DeliverySustain/ListDeliverySustainType?id=1&var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 10,
+            schema: {
+                data: "Data",
+                total: "Count",
+                model: {
+                    fields: {
+                        DOC_NUMB: { type: "string" },
+                        DOC_DATE: { type: "date" },
+                        ID_DELI_SUST: { type: "number" },
+                    }
+                }
+            },
+            //group: {
+            //    field: "NAM_TYPE_DELI_SUST",
+            //    title: "Number",
+            //    aggregates: [{
+            //        field: "DOC_NUMB",
+            //        aggregate: "count"
+            //    }, {
+            //        field: "DOC_DATE",
+            //        aggregate: "count"
+            //    }, {
+            //        field: "COIN",
+            //        aggregate: "count"
+            //    }, {
+            //        field: "DOC_AMOU",
+            //        aggregate: "sum"
+            //    }, {
+            //        field: "DOC_REMA",
+            //        aggregate: "sum"
+            //    }, {
+            //        field: "DOC_STAT",
+            //        aggregate: "count"
+            //    }]
+            //},
+            //aggregate: [{ field: "NAM_TYPE_DELI_SUST", aggregate: "count" },
+            //            { field: "DOC_NUMB", aggregate: "count" },
+            //            { field: "DOC_AMOU", aggregate: "sum" },
+            //            { field: "DOC_REMA", aggregate: "sum" }]
+        });
+
+        var element = $("#grid").kendoGrid({
+            dataSource: dataSource,
+            height: 430,
+            sortable: true,
+            pageable: true,
+            selectable: true,
+            detailInit: detailInit,
+            dataBound: function () {
+                this.expandRow(this.tbody.find("tr.k-master-row").first());
+            },
+            columns: [
+                {
+                    field: "DOC_NUMB",
+                    title: "Number",
+                    width: "100px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    //groupFooterTemplate: "Total: #= count#",
+                    //footerTemplate: "Total: #: count #",
+                    //groupHeaderTemplate: "Total: #= count#",
+
+                },
+                {
+                    field: "DOC_DATE",
+                    title: "Date",
+                    format: "{0:d}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "COIN",
+                    title: "-",
+                    width: "30px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DOC_AMOU",
+                    title: "Amount",
+                    format: "{0:N}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    groupFooterTemplate: "Total: #= sum#",
+                },
+                {
+                    field: "DOC_REMA",
+                    title: "Remain",
+                    format: "{0:N}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DOC_STAT",
+                    title: "Status",
+                    width: "90px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "NULO",
+                    title: "Percentaje",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    template: kendo.template($("#templateProgress").html()),
+                }
+            ]
+        });
+    });
+
+    function detailInit(e) {
+        $("<div/>").appendTo(e.detailCell).kendoGrid({
+            dataSource: {
+                type: "GET",
+                dataType: "json",
+                transport: {
+                    read: "/DocumentExpense/ListDocumentExpense?var" + Math.random(),
+                },
+                serverPaging: true,
+                serverSorting: true,
+                serverFiltering: true,
+                pageSize: 10,
+                filter: { field: "ID_DELI_SUST", operator: "eq", value: e.data.ID_DELI_SUST },
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    model: {
+                        fields: {
+                            NUM_DOCU_SALE: { type: "string" },
+                            DOC_NUMB: { type: "string" },
+                            DOC_DATE: { type: "date" },
+                            AMOUNT: { type: "number" },
+                            ID_DELI_SUST: { type: "number" },
+                        }
+                    },
+                    group: { field: "ID_DELI_SUST", aggregates: [{ field: "ID_DELI_SUST", aggregate: "count" }] }
+                },
+            },
+            scrollable: false,
+            sortable: true,
+            pageable: true,
+            selectable: true,
+            columns: [
+                {
+                    field: "NUM_DOCU_SALE", title: "Number OP", width: "80px",
+                    groupFooterTemplate: "Total: #= count #",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                },
+                {
+                    field: "NAM_DOCU", title: "Type", width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DOC_NUMB", title: "Number", width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DOC_DATE", title: "Date", width: "80px", format: "{0:d}",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "SUPPLIER", title: "Supplier",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: left; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "COIN",
+                    title: "-",
+                    width: "30px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "AMOUNT",
+                    title: "Amount",
+                    format: "{0:N}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+            ]
+        });
+    }
+</script>

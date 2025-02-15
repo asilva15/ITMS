@@ -1,0 +1,158 @@
+﻿@{
+    ViewBag.Title = "EditarFechaMantenimiento";
+    Layout = null;
+}
+
+
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Modificar Fecha de Soporte Electrodata
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            Fecha de mantenimiento
+                            <div class="input-group date">
+                                <div class="input-group-addon">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control pull-right" id="dtFechaMant" value="@ViewBag.FechaMantenimiento" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            &nbsp;
+                            <button id="btnEditarFecha" name="btnEditarFecha" class="btn btn-block btn-primary" type="button" onclick="EditarFecha();">Guardar</button>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+    </div>
+</div>
+
+@*<div class="panel panel-default">
+    <div class="panel-heading">Modificar Fecha de Soporte Electrodata <span id="editNumOP"></span></div>
+    <div class="panel-body">
+        <div class="form-group">
+            <div class="col-md-4" style="font-size:11.5px">
+                Fecha de mantenimiento
+                <div class="input-group date">
+                    <div class="input-group-addon">
+                        <i class="fa fa-calendar"></i>
+                    </div>
+                    <input type="text" class="form-control pull-right" id="dtFechaMant" value="@ViewBag.FechaMantenimiento"/>
+                </div>
+            </div>
+        </div>
+        <div class="form-group-sm">
+            <div class="col-md-10">
+                <br />
+            </div>
+            <div class="col-md-2">
+                &nbsp;
+                <input id="btnEditarFecha" name="btnEditarFecha" class="btn btn-block btn-primary btn-sm" type="button" value="Guardar" onclick="EditarFecha();" />
+            </div>
+        </div>
+    </div>
+</div>*@
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $('#dtFechaMant').datepicker({
+            autoclose: false
+        });
+        $.ajax({
+            url: "/SoporteED/DatosFechaMantenimiento/@ViewBag.IdMantED",
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $("#dtFechaMant").val((data['Data'][index]['FechaMantenimiento']));
+                $("#editNumOP").val((data['Data'][index]['OP']));
+            },
+            error: function (source) {
+                MensajeSoporteED("Debe ingresar la fecha de acta de conformidad.");
+            }
+        });
+    });
+    function EditarFecha() {
+       $.ajax({
+           url: "/SoporteED/EditarFechaMant/@ViewBag.IdMantED",
+           data: "FechaMantenimiento=" + $('#dtFechaMant').val() +
+                 "&var=" + Math.random(),
+           type: "GET",
+           cache: false,
+           dataType: "text",
+           success: function (resp) {
+               if (resp == "OK") {
+                   MensajeConfirmacionED("La fecha de mantenimiento ha sido actualizada.");
+               }
+               else
+                   if(resp == "1"){ //Campos vacíos
+                       MensajeSoporteED("Ingrese la fecha de mantenimiento por favor. ");
+                   }
+           }
+       });
+    }
+    function MensajeSoporteED(msj){
+        //$('#mensajeSoporteED').empty();
+        //$('#mensajeSoporteED').show("show");
+        //$("#mensajeSoporteED").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> " + msj + " </div>");
+        //setTimeout(function() {
+        //    $("#mensajeSoporteED").fadeOut(4500);
+        //}, 1000);
+
+        swal({
+            title: '¡Alerta!',
+            type: 'info',
+            text: msj,
+            focusConfirm: false,
+            confirmButtonText:
+                'Continue',
+            confirmButtonAriaLabel: 'Thumbs up, great!'
+
+        })
+    }
+    function MensajeConfirmacionED(msj){
+        //$('#mensajeSoporteED').empty();
+        //$('#mensajeSoporteED').show("show");
+        //$("#mensajeSoporteED").append("<div class='alert alert-success'><strong>¡Bien!</strong> " + msj + " </div>");
+        //setTimeout(function() {
+        //    $("#mensajeSoporteED").fadeOut(4500);
+        //}, 1000);
+
+        swal({
+            title: '¡Bien!',
+            type: 'success',
+            text: msj,
+            focusConfirm: false,
+            confirmButtonText:
+                'Continue',
+            confirmButtonAriaLabel: 'Thumbs up, great!'
+
+        }, function () {
+                ListaSoporteED();
+                $("#EditarSoporteED").empty();
+                $('#EditarFechaMantenimiento').hide();
+                $('#tablaSoportes td').removeClass('fondoSeleccion');
+        })
+
+        
+    }
+</script>

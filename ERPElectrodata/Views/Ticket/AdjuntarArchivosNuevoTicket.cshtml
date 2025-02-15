@@ -1,0 +1,69 @@
+﻿@{
+    ViewBag.Title = "AdjuntarArchivosNuevoTicket";
+    Layout = null;
+}
+
+<div class="form-row">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label id="lblTipoDocumento" for="lblTipoDocumento">
+                Tipo de Documento
+            </label>
+            @Html.TextBox("ArrayFile")
+        </div>
+    </div>
+
+</div>
+
+<div class="form-row">
+    <div class="col-md-12">
+        <div class="position-relative form-group">
+            <input name="files" id="files" type="file" />
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            upload: function (e) {
+                e.data = {
+                    ID_TYPE_DOCU_ATTA: $("#ArrayFile").val(),
+                    KEY_ATTA: $("#KEY_ATTA").val()
+                };
+            },
+            remove: function (e) {
+                e.data = {
+                    KEY_ATTA: $("#KEY_ATTA").val()
+                };
+            },
+            async: {
+                saveUrl: "/Attach/SaveAttachTicket",
+                removeUrl: "/Attach/RemoveAsyncAttachTicket"
+            }
+        });
+
+        var ArrayFile = $("#ArrayFile").kendoComboBox({
+            dataTextField: "NAM_TYPE_DOCU_ATTA",
+            dataValueField: "ID_TYPE_DOCU_ATTA",
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Total"
+                },
+                transport: {
+                    read: "/TypeDocumentModule/ListByModule/1?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+    });
+</script>

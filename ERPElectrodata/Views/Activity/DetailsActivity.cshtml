@@ -1,0 +1,522 @@
+﻿@model ERPElectrodata.Models.ACTIVITY_LOG
+@{
+    ViewBag.Title = "ListarActividades";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/DataTables/datatables.min.js"></script>
+<link href="~/Content/themes/plugin/DataTables/datatables.min.css" rel="stylesheet" />
+<script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.3/moment.min.js"></script>
+<script src="//cdn.datatables.net/plug-ins/1.10.16/sorting/datetime-moment.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<style>
+    table.dataTable tbody tr.selected {
+        color: #ffffff;
+        background-color: #eeeeee; /* Not working */
+    }
+</style>
+@if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 56
+    || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 57
+   || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 58)
+{
+<script>window.location.href = "DetailsActivityMinsur";</script>
+}
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Lista de Actividades con Detalle
+                <div class="page-title-subheading">
+                    Visualización de detalles de las actividades registradas.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title">Filtrar</div>
+                    <form class="">
+                        <div class="form-row">
+                            <div class="col-md-2">
+                                <div class="position-relative form-group">
+                                    <label id="lblID_CLIE" for="ID_CLIE" class="">Cliente</label>
+                                    <input id="ID_CLIE" type="text">
+
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="position-relative form-group">
+                                    <label id="lblID_ENTI_FILTER" for="ID_ENTI_FILTER" class="">Usuario</label>
+                                    <input id="ID_ENTI_FILTER">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="position-relative form-group">
+                                    <label id="lblSIN_DATE" for="SIN_DATE" class="">Desde</label>
+                                    <input id="SIN_DATE">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="position-relative form-group">
+                                    <label id="lblTO_DATE" for="TO_DATE" class="">Hasta</label>
+                                    <input id="TO_DATE">
+
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblPALABRA_CLAVE" for="PALABRA_CLAVE" class="">Descripción</label><br />
+                                    <input id="PALABRA_CLAVE">
+
+                                </div>
+                            </div>
+                            <div class="col-md-1 float-right">
+                                <div class="position-relative form-group right">
+                                    <br />
+                                    <button id="Buscar" type="button" class="mt-2 btn btn-primary" onclick="ListarActividades()">Buscar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="tab-content table-responsive">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card element-block-example">
+                <div class="card-body">
+                    <div class="card-title">Actividades</div>
+                    <form class="">
+                        <div class="" style="width: 98%;overflow-y: scroll;margin:0 auto;">
+                            <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%;" id="tbListadoActividades">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">Cliente</th>
+                                        <th class="text-center">Usuario</th>
+                                        <th class="text-center">Fecha Inicio</th>
+                                        <th class="text-center">Fecha Fin</th>
+                                        <th class="text-center">Hrs</th>
+                                        <th class="text-center">Tipo Actividad</th>
+                                        <th class="text-center">Categoría</th>
+                                        <th class="text-center">Etapa</th>
+                                        <th class="text-center">Actividad</th>
+                                        <th class="text-center">Subcategoría</th>
+                                        <th class="text-center">Actividad remota</th>
+                                        <th class="text-center">Descripción</th>
+                                        <th class="text-center">Comentarios</th>
+                                        <th class="text-center">Acciones</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                                <tfoot>
+                                    <tr>
+                                        <th class="text-center">Cliente</th>
+                                        <th class="text-center">Usuario</th>
+                                        <th class="text-center">Fecha Inicio</th>
+                                        <th class="text-center">Fecha Fin</th>
+                                        <th class="text-center">Hrs</th>
+                                        <th class="text-center">Tipo Actividad</th>
+                                        <th class="text-center">Categoría</th>
+                                        <th class="text-center">Etapa</th>
+                                        <th class="text-center">Actividad</th>
+                                        <th class="text-center">Subcategoría</th>
+                                        <th class="text-center">Actividad remota</th>
+                                        <th class="text-center">Descripción</th>
+                                        <th class="text-center">Comentarios</th>
+                                        <th class="text-center">Acciones</th>
+                                        <th></th>
+                                    </tr>
+                                </tfoot>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $(".block-element-btn-example-1").click(function () {
+            $(".element-block-example").block({
+                message: t('<div class="loader mx-auto">\n                            <div class="ball-grid-pulse">\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                                <div class="bg-white"></div>\n                            </div>\n                        </div>')
+            })
+        });
+
+
+        var FechaInicio = $("#SIN_DATE").kendoDatePicker({
+            format: "dd/MM/yyyy"
+        });
+
+        var FechaFin = $("#TO_DATE").kendoDatePicker({
+            format: "dd/MM/yyyy"
+        });
+
+        $("#PALABRA_CLAVE").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        $("#ID_CLIE").kendoComboBox({
+            autoBind: true,
+            dataTextField: "COM_NAME",
+            placeholder: "Seleccione un cliente",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+
+            }
+        });
+
+        var ID_ENTI_FILTER = $("#ID_ENTI_FILTER").kendoComboBox({
+            autoBind: true,
+            placeholder: "Seleccione un usuario",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    ID_ENTI: "ID_ENTI"
+                },
+                transport: {
+                    read: "/Activity/ListPersonActivity?var=" + Math.random()
+                }
+            },
+            dataTextField: "PERSON",
+            dataValueField: "ID_PERS_ENTI",
+        }).data("kendoComboBox");
+
+        var param_url = !!location.href.match(/&/);
+        if (param_url == false) {
+            function endChange() {
+                var endDate = FechaFin.value(),
+                    startDate = FechaInicio.value();
+                if (endDate) {
+                    endDate = new Date(endDate);
+                    endDate.setDate(endDate.getDate());
+                    FechaInicio.max(endDate);
+                } else if (startDate) {
+                    FechaFin.min(new Date(startDate));
+                } else {
+                    endDate = new Date();
+                    FechaInicio.max(endDate);
+                    FechaFin.min(endDate);
+                }
+            }
+        }
+        else {
+            $.urlParam = function (name) {
+                var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+                if (results == null) {
+                    return null;
+                }
+                else {
+                    return results[1] || 0;
+                }
+            }
+            var DateIni = $.urlParam('SIN_DATE');
+            var DateFin = $.urlParam('TO_DATE');
+            var DateInDTP = $("#SIN_DATE").kendoDatePicker({ format: "dd/MM/yyyy", value: DateIni }).data("kendoDatePicker");
+            var DateEndDTP = $("#TO_DATE").kendoDatePicker({ format: "dd/MM/yyyy", value: DateFin }).data("kendoDatePicker");
+            ID_ENTI_FILTER.value(unescape($.urlParam('PALABRA_CLAVE')));
+
+            //$("#ID_ENTI_FILTER").data("kendoComboBox").value(unescape($.urlParam('PALABRA_CLAVE')));
+            //var combobox = $("#ID_ENTI_FILTER").data("kendoComboBox");
+
+        }
+        ListarActividades();
+
+    });
+    $(document).ready(function () {
+        toastr.warning("", "Se muestran 5000 registros como maximo");
+    });
+
+    function ListarActividades(param_url) {
+        //$.urlParam = function (name) {
+        //    var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        //    if (results == null) {
+        //        return null;
+        //    }
+        //    else {
+        //        return results[1] || 0;
+        //    }
+        //}
+        //var FechaInicio = $("#SIN_DATE").val();
+        //var FechaFin = $("#TO_DATE").val();
+
+        //function startChange() {
+        //    var startDate = FechaInicio.value(),
+        //        endDate = FechaFin.value();
+
+        //    if (startDate) {
+        //        startDate = new Date(startDate);
+        //        startDate.setDate(startDate.getDate());
+        //        FechaFin.min(startDate);
+        //    } else if (endDate) {
+        //        FechaInicio.max(new Date(endDate));
+        //    } else {
+        //        endDate = new Date();
+        //        FechaInicio.max(endDate);
+        //        FechaFin.min(endDate);
+        //    }
+        //}
+        //function endChange() {
+        //    var endDate = FechaFin.value(),
+        //        startDate = FechaInicio.value();
+
+        //    if (endDate) {
+        //        endDate = new Date(endDate);
+        //        endDate.setDate(endDate.getDate());
+        //        FechaInicio.max(endDate);
+        //    } else if (startDate) {
+        //        FechaFin.min(new Date(startDate));
+        //    } else {
+        //        endDate = new Date();
+        //        FechaInicio.max(endDate);
+        //        FechaFin.min(endDate);
+        //    }
+        //}
+
+        //var PARAM_SIN_DATE = decodeURIComponent($.urlParam('SIN_DATE'));
+        //var PARAM_TO_DATE = decodeURIComponent($.urlParam('TO_DATE'));
+        //var PARAM_PALABRA_CLAVE = decodeURIComponent($.urlParam('PALABRA_CLAVE'));
+
+        //var parametros = {
+        //    ID_CLIE: $("#ID_CLIE").val(),
+        //    ID_ENTI_FILTER: $("#ID_ENTI_FILTER").val(),
+        //    SIN_DATE: $("#SIN_DATE").val(),
+        //    TO_DATE: $("#TO_DATE").val(),
+        //    PALABRA_CLAVE: $("#PALABRA_CLAVE").val(),
+        //    URL: 0
+        //};
+        // -------
+
+        var parametros = {
+            ID_CLIE: $("#ID_CLIE").val(),
+            ID_ENTI_FILTER: $("#ID_ENTI_FILTER").val(),
+            SIN_DATE: $("#SIN_DATE").val(),
+            TO_DATE: $("#TO_DATE").val(),
+            PALABRA_CLAVE: $("#PALABRA_CLAVE").val(),
+            URL: 0
+        };
+
+
+
+        $('#tbListadoActividades').dataTable().fnDestroy();
+        moment.locale('es');
+        $.fn.dataTable.moment('D/M/YYYY H:mm');
+        var table = $('#tbListadoActividades').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            //select: true,
+            //"destroy": true,
+            ajax: {
+                url: "/Activity/ListActivityN",
+                data: parametros,
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "COM_NAME"
+                },
+                {
+                    data: "NAME_USER"
+                },
+                {
+                    data: "DATE_INIC"
+                    //data: null,
+                    //render: function (data, type, row) {
+                    //    var re = "";
+                    //    re += data.DATE_INIC;
+                    //    return new Date(parseInt(re.substr(6))).toLocaleString({ hour: "numeric" }).slice(0, -3);
+                    //}
+                },
+                {
+                    //data: "DATE_END"
+                    data: null,
+                    render: function (data, type, row) {
+                        var re = ""; re += data.DATE_END;
+                        return new Date(parseInt(re.substr(6))).toLocaleString({ hour: "numeric" }).slice(0, -3);
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return secondsToTime(data.TIEMPO_ACT);
+                    }
+                },
+                {
+                    data: "DES_ACT"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.CATEGORIA3 + '-' + data.CATEGORIA4;
+                    }
+                },
+                {
+                    data: "ETAPA"
+                },
+                {
+                    data: "ACTIVIDAD"
+                },
+                {
+                    data: "SUBCATEGORIA"
+                },
+                {
+                    data: "ACTIVIDADREMOTA"
+                },
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        var act = "" + data.NAM_SUB_TYPE;
+                //        act = act.substr(0, 4);
+                //        var cadena = "";
+                //        if (act == "OPVP" || act == "OPVN" || act == "RESS" || act == "REED" || act == "RECL" || act == "PRED" || act == "INTE" || act == "INSS" || act == "INED" || act == "EVED") {
+                //            cadena = '<a href=\"\\#/DetailsTicket/Index/' + data.COD_SUBTYPE_ACT + '" target="_blank" style="color:#3f6ad8;">' + data.NAM_SUB_TYPE + '</a>';
+                //        }
+                //        return cadena;
+
+                //    }
+                //},
+                {
+                    data: "NAM_SUB_TYPE"
+                },
+                {
+                    data: "COMENTARIO"
+                },
+                {
+                    data: "Edicion"
+                },
+                {
+                    data: null
+                }
+            ],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ]
+            , columnDefs: [
+                {
+                    "targets": [14],
+                    "visible": false,
+                    "searchable": false
+                }
+            ]
+            //, order: [[2, "desc"]]
+        });
+
+
+    }
+
+</script>
+
+
+<script type="text/javascript">
+
+    function MostrarMensaje(msg, descripcion) {
+
+        setTimeout(function () {
+            $(".modal-backdrop").remove();
+            $("#miModal").removeClass("show")
+        }, 180);
+
+        if (msg == "OK") {
+            toastr.success(descripcion, "");
+
+            var tabla = $('#tbListadoSolicitudes').DataTable();
+
+            tabla.ajax.reload();
+
+        }
+        else if (msg == "VACIO") {
+            toastr.warning("Por favor, seleccione una solicitud como mínimo", "Mensaje");
+        }
+        else {
+            toastr.danger("Contacte al administrador.", "Error");
+        }
+    }
+    function secondsToTime(seconds) {
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds - (hours * 3600)) / 60);
+        var time = "";
+
+        if (hours != 0) {
+            time = hours + ":";
+        }
+        if (minutes != 0 || time !== "") {
+            minutes = (minutes < 10 && time !== "") ? "0" + minutes : String(minutes);
+            if (hours != 0)
+                time += minutes;
+            else {
+                if (minutes < 9)
+                    time += "0:" + "0" + minutes;
+                else
+                    time += "0:" + minutes;
+            }
+        }
+        return time;
+    }
+
+    function editarActividad(id) {
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $(".modal-content").empty();
+        $("#lblTitulo").text("Mantenimiento Prioridad");
+        $(".modal-content").load('/Activity/EditarActividad?id=' + id);
+    }
+
+    function eliminarActividad(idAct) {
+        $.ajax({
+            url: "/Activity/EliminarActividad",
+            method: "POST",
+            data: { id: idAct }
+        });
+    }
+</script>

@@ -1,0 +1,208 @@
+﻿@model ERPElectrodata.Models.VACATION
+
+@{
+    Layout = null;
+}
+
+<nav class="navSubMenu">
+    <ul>
+        <li><a href="" onclick="NewVacation()">@ResourceLanguaje.Resource.NewVacation</a></li>
+        <li onclick="FindVacation()"><a href="">@ResourceLanguaje.Resource.FindVacation</a></li>
+        <li onclick="Absence()"><a href="">Absence</a></li>
+    </ul>
+</nav>
+
+<div id="divSubContent">
+    <div id="gridVacation" class="contentView">
+    </div>
+
+    <div id="pagerVacation" class="contentViewPager">
+    </div>
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="tpt-Vacation">
+    <div style="display: inline-block; width: 100%;" id="divListVacation${ID_VACA}">
+        <div style="border: 1px solid \\#516882; margin: 0px 0px 7px 0px; width: 60%; float: left;">
+            <div style="font-size: .9em; width: 99%; background-color: \\#516882; height: 20px; color: white; padding: 2px 0px 0px 1%; display: inline-block; position:relative;">
+                <div style="float:left; width:auto;color:white; text-align:right; text-transform:capitalize;">
+                    @ResourceLanguaje.Resource.Code: ${COD_VACA}
+                </div>
+                <div style="float:left; width:auto;color:white; margin:0px 0px 0px 1%; text-align:right; text-transform:capitalize;">
+                    @ResourceLanguaje.Resource.Status: ${NAM_VACA_STAT}
+                </div>                
+                @*<div title="Delete" class="botonDelete" onclick="deleteVacation(${ID_VACA})">x</div>*@
+                <div style="float:right; width:49%;color:white; margin:0px 1% 0px 0px; text-align:right;">
+                    @ResourceLanguaje.Resource.CreatedDate: ${DAT_REGI}
+                </div>
+            </div>
+            <div class="incidentHomeListHeader">
+                <div style="min-width: 48px; float: left; margin: 5px 5px 0 5px; width: 48px; height: 48px; border:1px solid \\#ddd">
+                    <img src="/Content/Fotos/${ID_FOTO}.jpg" width="48px" height="48px" />
+                </div>
+                <div style="min-width: 180px; margin:3px 10px 0 0; height: auto; width: auto; text-align:left; float:left;">
+                    <div class="smallTitle" style="text-transform:capitalize;">&nbsp;${Employee}</div>
+                    <div class="smallTitle" style="text-transform:capitalize;">&nbsp;${JobTitle}</div>
+                    <div class="smallTitle" style="text-transform:capitalize;">@ResourceLanguaje.Resource.CellPhone:&nbsp;${CEL_PERS}</div>
+                </div>
+                <div style="min-width: 80px; margin:3px 0 0 0; height: auto; width: auto; text-align:right; float:left;">
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.Since:</b></div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.To:</b></div>
+                    <div class="smallField"><b>@ResourceLanguaje.Resource.DateReturn:</b></div>
+                </div>
+                <div style="min-width: 150px; margin: 3px 0 0 0; height: auto; width: auto; text-align: left; float: left;">
+                    <div class="smallTitle">&nbsp;${DAT_STAR}</div>
+                    <div class="smallTitle">&nbsp;${DAT_END}</div>
+                    <div class="smallTitle">&nbsp;${DAT_RETU}</div>
+                </div>
+                <div style="width: 50px; margin: 4px 4px 0 0; height: 50px; background-color: \\#00a8e6; float: right; color: White; text-align: center;">
+                    <div style="width:100%; text-align:center; font-size:2.2em; font-family:'Segoe UI';"><b>${NUM_DAYS}</b></div>
+                    <div style="width:100%; text-align:center; font-size:.95em; margin-top:-3px;">@ResourceLanguaje.Resource.Days</div>
+                </div>
+                <div style="min-width: 100px; margin: 3px 0 0 0; height: 50px; width: auto; float: right; border-right: 1px dotted \\#ddd; display: inline-block;">
+                    <div style="float:left; width:33.33%; height:100%; position:relative;">
+                        <div class="botonDownload" title="Download File"></div>
+                    </div>
+                    <div style="float:left; width:33.33%; height:100%; position:relative;">
+                        <div class="botonUpload" title="Updolad File"></div>
+                    </div>
+                    <div style="float:left; width:33.33%; height:100%; position:relative;">
+                        <a href="/DetailsVacation/Index/${ID_VACA}" target="_blank"><div class="botonSummary" title="view Details"></div></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="margin: 0px 0px 7px 0px; width:39.5%; float:left;">
+            <div style="margin-left: 10px; position: relative; border: 1px solid \\#ccc; -moz-border-radius: 4px; -webkit-border-radius: 4px; border-radius: 4px; ">
+                <div class="messageArrow"></div>
+                <div style="height:55px; padding: 3px 0px 6px 0px; margin: 8px 8px 8px 8px; overflow: auto; text-align: justify; font-family:Tahoma; font-size:1em;">
+                    #= SUMMARY#
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('<audio id="audio_win"><source src="/Content/sound/recycle.wav" type="audio/wav"></audio>').appendTo("body");
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Vacation/List?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 1 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        var dataSource1 = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Vacation/ListGraf?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 1 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        })
+
+        $("#pagerVacation").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridVacation").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#tpt-Vacation").html())
+        });
+
+        dataSource1.fetch();
+    });
+
+    function NewVacation() {
+        $("#divSubContent").empty();
+        $("#divSubContent").load("/Vacation/viewNewVacation?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+    }
+
+    function FindVacation() {
+        $("#divSubContent").empty();
+        $("#divSubContent").load("/Vacation/viewFindVacation?var=" + Math.random());
+    }
+    function Absence() {
+        $("#divSubContent").empty();
+        $("#divSubContent").load("/Absence/Create?var=" + Math.random());
+    }
+
+    //function mouseOver(e) {
+    //    //e.style.background = "#fcfcfc";
+    //}
+
+    //function mouseOut(e) {
+    //    //e.style.background = "#ffffff";
+    //}
+
+    function deleteVacation(id) {
+        winPopUpModal("@ResourceLanguaje.Resource.Delete", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Are you sure to delete the vacation?</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#btnYes")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                winPopUpModalLoad('@ResourceLanguaje.Resource.DeletingRecord', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+                $.ajax({
+                    url: "/Vacation/Delete/" + id,
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        closeWinModalPopUpLoad();
+                        $("#divListVacation" + id).hide(1000);
+                        $('#audio_win')[0].play();
+                        
+                    },
+                    error: function (dato) {
+                        alert('ERROR');
+                        closeWinModalPopUpLoad();
+                    }
+                });
+            });
+
+        var undo = $("#btnNO")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        
+    }
+</script>

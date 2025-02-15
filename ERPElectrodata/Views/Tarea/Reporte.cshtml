@@ -1,0 +1,261 @@
+﻿@{
+    ViewBag.Title = "Reporte";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<style>
+
+    th {
+        padding: 10px;
+    }
+
+    #tbTareas td {
+        padding: 10px;
+    }
+
+</style>
+ 
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-tasks icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Reporte de Tareas
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    @using (Html.BeginForm("ExportarReporteTarea", "Tarea", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+    {
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Área Responsable
+                    </div>
+                    <div class="editor-field">
+                        <input id="IdQueu" name="IdQueu" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="editor-label">
+                        Desde
+                    </div>
+                    <div class="editor-field">
+                        <input id="FechaInicio" name="FechaInicio" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="editor-label">
+                        Hasta
+                    </div>
+                    <div class="editor-field">
+                        <input id="FechaFin" name="FechaFin" />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Código Tarea
+                    </div>
+                    <div class="editor-field k-textbox" style="width:100%">
+                        <input type="text" id="Codigo" name="Codigo" />
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Estado Tarea
+                    </div>
+                    <div class="editor-field">
+                        <input id="Estado" name="Estado" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button onclick="ListarReporteTareas()" class="mb-2 mr-2 btn-block btn btn-primary btn-pill" type="button">BUSCAR</button>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button id="export" class="mb-2 mr-2 btn-block btn btn-success btn-pill" type="submit">EXPORTAR</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+<div class="main-card card">
+    <div class="card-header">
+        Reporte de Tareas
+    </div>
+
+    <div class="card-body">
+        <div class="position-relative form-group">
+            <table id="tbTareas" class="display nowrap" style="width:100%">
+                <thead style="background: linear-gradient(to top, #1e3c72 0%, #1e3c72 1%, #2a5298 100%) !important; color: white; ">
+                    <tr>
+                        <th class="text-center"> Código Tarea </th>
+                        <th class="text-center"> Código Ticket </th>
+                        <th class="text-center"> Título de Tarea </th>
+                        <th class="text-center"> Descripción de Tarea </th>
+                        <th class="text-center"> Área Responsable </th>
+                        <th class="text-center"> Estado </th>
+                        <th class="text-center"> Asignado </th>
+                        <th class="text-center"> Fecha de Creación </th>
+                        <th class="text-center"> Fecha de Inicio </th>
+                        <th class="text-center"> Fecha Programado </th>
+                        <th class="text-center"> Fecha de Realización </th>
+                        <th class="text-center"> Tiempo de Resolución </th>
+                        <th class="text-center"> Tiempo de Respuesta </th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#FechaInicio").kendoDatePicker().data("kendoDateTimePicker");
+        $("#FechaFin").kendoDatePicker().data("kendoDateTimePicker");
+
+        $("#IdQueu").kendoComboBox({
+            dataTextField: "DES_QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#Estado").kendoComboBox({
+            dataTextField: "text",
+            dataValueField: "value",
+            filter: "contains",
+            dataSource: [{
+                text: "PROCEDE",
+                value: "1"
+            }, {
+                text: "NO PROCEDE",
+                value: "2"
+            }, {
+                text: "PENDIENTE",
+                value: "4"
+            }, {
+                text: "EN PROCESO",
+                value: "6"
+            }, {
+                text: "PROGRAMADO",
+                value: "7"
+            }]
+        }).data("kendoComboBox");
+    });
+
+    function ListarReporteTareas() {
+        var idQueu = $("#IdQueu").val();
+        var idEstado = $("#Estado").val();
+        var fechaInicio = $("#FechaInicio").val();
+        var fechaFin = $("#FechaFin").val();
+        var codigo = $("#Codigo").val();
+
+        $('#tbTareas').dataTable().fnDestroy();
+        $('#tbTareas').dataTable({
+            responsive: false,
+            dom: 'Bfrtip',
+            scrollX: true,
+            ajax: {
+                url: "/Tarea/ListadoReporteTareasBNV",
+                data: function (d) {
+                    d.IdQueu = idQueu;
+                    d.Estado = idEstado;
+                    d.FechaInicio = fechaInicio;
+                    d.FechaFin = fechaFin;
+                    d.Codigo = codigo;
+                },
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "CodigoTarea"
+                },
+                {
+                    data: "CodigoTicket"
+                },
+                {
+                    data: "Titulo"
+                },
+                {
+                    data: "Descripcion"
+                },
+                {
+                    data: "AreaResponsable"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.Estado == 1) {
+                            return '<div style="text-align:center"><div class="badge badge-success">Procede</div></div>';
+                        } else if (data.Estado == 2) {
+                            return '<div style="text-align:center"><div class="badge badge-danger">No Procede</div></div>';
+                        } else if (data.Estado == 5) {
+                            return '<div style="text-align:center"><div class="badge badge-secondary">Sin Asignar</div></div>';
+                        } else if (data.Estado == 6) {
+                            return '<div style="text-align:center"><div class="badge badge-info">En Proceso</div></div>';
+                        } else if (data.Estado == 7) {
+                            return '<div style="text-align:center"><div class="badge badge-warning">Programado</div></div>';
+                        } else {
+                            return '<div style="text-align:center"><div class="badge badge-warning">Pendiente</div></div>';
+                        }
+                    }
+                },
+                {
+                    data: "Usuario"
+                },
+                {
+                    data: "FechaCreacion"
+                },
+                {
+                    data: "FechaInicio"
+                },
+                {
+                    data: "FechaProgramado"
+                },
+                {
+                    data: "FechaRealizacion"
+                },
+                {
+                    data: "TiempoRealizacion"
+                },
+                {
+                    data: "TiempoRespuesta"
+                }
+            ],
+            rowCallback: function (row, data) {
+                $(row).on('click', function () {
+                    window.open('/DetailsTicket/Index/' + data.IdTicket, '_blank');
+                });
+            }
+        });
+
+        toastr.warning("Para visualizar más de 1000 registros utilice el botón Exportar.");
+    }
+
+</script>

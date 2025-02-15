@@ -1,0 +1,133 @@
+﻿@{
+    ViewBag.Title = "Programas";
+    Layout = null;
+}
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Historial de Mantenimiento de Activos
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+
+            <div class="col-md-3">
+                <div class="editor-label">
+                    Tipo Activo
+                </div>
+                <div class="editor-field">
+                    <input id="IdTipoActivo" name="IdTipoActivo" />
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="editor-label">
+                    Activo
+                </div>
+                <div class="editor-field">
+                    <input id="IdActivo" name="IdActivo" disabled />
+                </div>
+                <div style="background-color:white; background: url('/Content/Images/origen.jpg') no-repeat;height:10px; width:23px; z-index:2; position:absolute;"></div>
+                <div style="border-radius: 2px 2px 2px 2px; border: 1px solid #aaaaaa; margin-top: 6px; padding: 3px 3px 3px 3px; color: #38607d; z-index:1; text-align:justify">
+                    Recuerde, esta opción se habilitará después de seleccionar un tipo de activo.
+                </div>
+            </div>
+            <div class="col-md-2">
+                <br />
+                <button type="button" class="btn btn-primary btn-block" id="btnBuscar"><i class="fa fa-search"></i> Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="bodyForm">
+    <div class="inBodyForm">
+        <iframe id="rptActivoMantenimiento" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#IdTipoActivo").kendoComboBox({
+            dataTextField: "TipoActivo",
+            dataValueField: "IdTipoActivo",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ActivoMantenimiento/CargarTipoActivos?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                var selectedTipoActivo = this.value();
+
+                if (selectedTipoActivo !== "" && selectedTipoActivo !== null) {
+                    $.ajax({
+                        url: "/ActivoMantenimiento/CargarActivosAct",
+                        type: "GET",
+                        data: { TipoActivo: selectedTipoActivo },
+                        success: function (data) {
+                            var IdActivoComboBox = $("#IdActivo").data("kendoComboBox");
+                            IdActivoComboBox.setDataSource(new kendo.data.DataSource({ data: data.Data }));
+                            IdActivoComboBox.value(""); 
+                            IdActivoComboBox.enable(true); 
+                        },
+                        error: function (error) {
+                            console.error("Error al cargar datos para el segundo select", error);
+                        }
+                    });
+                } else {
+                    var IdActivoComboBox = $("#IdActivo").data("kendoComboBox");
+                    IdActivoComboBox.setDataSource(new kendo.data.DataSource({ data: [] }));
+                    IdActivoComboBox.value(""); 
+                    IdActivoComboBox.enable(false); 
+                }
+            }
+        });
+
+        $("#IdActivo").kendoComboBox({
+            dataTextField: "SER_NUMB",
+            dataValueField: "ID_ASSE",
+            template: '<div><div style="font-weight:bold;">${ data.COD_ASSE }</div>' +
+                '<div>${ data.SER_NUMB }</div></div>',
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ActivoMantenimiento/CargarActivosAct?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#btnBuscar").click(function () {
+
+            event.preventDefault();
+
+            var IdActivo = $("#IdActivo").data("kendoComboBox");
+            if ((IdActivo.value()) != 0) {
+                window.frames["rptActivoMantenimiento"].src = "/Reporting/Activo/ReporteHistorialActivoMantenimiento.aspx?var=" + Math.random()
+                    + "&IdActivo=" + $("#IdActivo").val();
+            }
+            else {
+                toastr.warning("Seleccione un activo.", "Mensaje");
+            }
+
+            return false;
+        });
+
+
+    });
+
+</script>

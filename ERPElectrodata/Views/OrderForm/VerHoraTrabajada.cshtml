@@ -1,0 +1,82 @@
+﻿@{
+    Layout = null;
+}
+
+    <div style="overflow-y:auto; height:550px;">
+        <table id="tbHorasTrabajadas" class="table table-hover table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th>Solicitante</th>
+                    <th>Ticket</th>
+                    <th>Hrs</th>
+                    <th>Descripción</th>
+                    <th>Fecha Inicia</th>
+                    <th>Fecha Término</th>
+                    <th>Fecha Creación</th>
+                </tr>
+            </thead>
+            <tbody id="TablaHoraTrab"></tbody>
+        </table>
+    </div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $.ajax({
+            url: "/OrderForm/ListarActividades/@ViewBag.ID_DOCU_SALE",
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                mostrarHoraTrabajada();
+            },
+            error: function (source) {
+                toastr.error("Error al cargar las horas trabajadas", "Mensaje");
+            }
+        });
+
+    });
+
+
+    function mostrarHoraTrabajada() {
+
+        $.each(data['Data'], function (index, value) {
+            var time = secondsToTime((data['Data'][index]['TIEMPO_ACT']));
+            $("#TablaHoraTrab").append(
+                                                    '<tr>' +
+                                                        '<td>' + (data['Data'][index]['NOMBRE']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['COD_TICK']) + '</td>' +
+                                                        '<td>' + time + '</td>' +
+                                                        '<td>' + (data['Data'][index]['COMENTARIO']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['FECHAINI']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['FECHAFIN']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['FECHACREA']) + '</td>' +
+                                                    '</tr>'
+                        );
+        });
+    }
+
+    function secondsToTime(seconds) {
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds - (hours * 3600)) / 60);
+        //var seconds = seconds - (hours * 3600) - (minutes * 60);
+        var time = "";
+
+        if (hours != 0) {
+            time = hours + ":";
+        }
+        if (minutes != 0 || time !== "") {
+            minutes = (minutes < 10 && time !== "") ? "0" + minutes : String(minutes);
+            if (hours != 0)
+                time += minutes;
+            else {
+                if (minutes < 9)
+                    time += "0:" + "0" + minutes;
+                else
+                    time += "0:" + minutes;
+            }
+        }
+        return time;
+    }
+
+        </script>

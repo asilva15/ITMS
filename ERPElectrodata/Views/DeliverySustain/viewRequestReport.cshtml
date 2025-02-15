@@ -1,0 +1,114 @@
+﻿@model ERPElectrodata.Models.DELIVERY_SUSTAIN
+
+@{
+    Layout = null;
+}
+
+<div style="float:left; width:30%; margin:8px 0 15px 0;">
+    <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.ReportRequests</div></div>
+    <div class="bodyForm">
+        <div id="divFindTalent" class="inBodyForm">
+            <fieldset style="font-size:.9em;">
+                <legend>User</legend>
+                <div class="divFondoUno">
+                    <div class="divSpace3"></div>
+                    <div class="divCont3">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.Request
+                        </div>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.ID_DELI_SUST)
+                            @Html.ValidationMessageFor(model => model.ID_DELI_SUST)
+                        </div>
+                    </div>
+                </div>
+                <div style="display:inline-block; float:right; padding: 5px 15px 15px 5px;">
+                    <div style=" float:left; padding:0px 15px 0px 0px; ">
+                        <button id="printMobility" class="k-button">@ResourceLanguaje.Resource.Mobility</button>
+                    </div>                    
+                    <button id="printRequest" class="k-button">@ResourceLanguaje.Resource.Report</button>
+                </div>
+            </fieldset>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var ID_DELI_SUST = $("#ID_DELI_SUST").kendoComboBox({
+            dataTextField: "DOC_NUMB",
+            dataValueField: "ID_DELI_SUST",
+            template: '<div style="width:100%; display:inline-block;">' +
+                        '<div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; "><b>${NAM_TYPE_DELI_SUST}: ${DOC_NUMB}</b>&nbsp;(${DAT_REG})</div>' +
+                        '<div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; margin-top:-2px;">@ResourceLanguaje.Resource.AmountAssigned: ${DOC_AMOU}</div>' +
+                        '<div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; margin-top:-2px;">@ResourceLanguaje.Resource.AmountPrevius: ${AMO_PREV}</div>' +
+                        '<div style="width:100%; float:left; text-transform:capitalize;font-size: 1em; margin-top:-4px;">@ResourceLanguaje.Resource.AmountAvailable: ${AMO_AVAI}</div>' +
+                      '</div>',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DeliverySustain/ListByID_PERS_ENTI_ASSI?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        ID_DELI_SUST.list.width(320);
+
+        $("#printRequest").click(function (event) {
+            event.preventDefault();
+
+            var ID_DELI_SUST = $("#ID_DELI_SUST").data("kendoComboBox");
+            if (a_entero(ID_DELI_SUST.value()) != 0) {
+                window.open('/Reporting/WF_ReportAccountability.aspx?id=' + ID_DELI_SUST.value(), '_blank');
+            }
+            else {
+                winPopUpModal("Error...", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                   "<div style='padding:10px 0px 10px 0px;'>@ResourceLanguaje.Resource.MsnRequestError</div>" +
+                       "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                       "<button id='continuee' class='k-button'>Continue</button>" +
+                       "</div></div>"
+                       , 400, 140);
+
+                var undo = $("#continuee")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+            }
+
+            return false;
+        });
+
+        $("#printMobility").click(function (event) {
+            event.preventDefault();
+
+            var ID_DELI_SUST = $("#ID_DELI_SUST").data("kendoComboBox");
+            if (a_entero(ID_DELI_SUST.value()) != 0) {
+                window.open('/Reporting/WF_ReportMobility.aspx?id=' + ID_DELI_SUST.value(), '_blank');
+            }
+            else {
+                winPopUpModal("Error...", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                   "<div style='padding:10px 0px 10px 0px;'>@ResourceLanguaje.Resource.MsnRequestError</div>" +
+                       "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                       "<button id='continuee' class='k-button'>Continue</button>" +
+                       "</div></div>"
+                       , 400, 140);
+
+                var undo = $("#continuee")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+            }
+
+            return false;
+        });
+    });
+
+</script>

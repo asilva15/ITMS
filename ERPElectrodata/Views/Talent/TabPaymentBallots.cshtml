@@ -1,0 +1,90 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+<div style="width:100%; height:456px; display:inline-block;">
+    <div style="width:49.5%; float:left; margin: 10px 0 10px 0;">
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.PaymentBallotsTalent</div>
+            </div>
+            <div class="inBodyForm" style="overflow-y: auto; height:415px;" id="divContInvoice">
+            </div>
+        </div>
+    </div>
+    <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+    <div style="width:49.5%; float:left; margin: 10px 0 10px 0;">
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">@ResourceLanguaje.Resource.AttachPaymentTalent</div>
+            </div>
+            <div class="inBodyForm">
+                <div id="cargarInvoice"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#divContInvoice").empty();
+        $("#divContInvoice").load("/Talent/ListInvoice?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+        //$("#cargarInvoice").empty();
+        //$("#cargarInvoice").load("/Talent/AttachInvoiceUser?id=@ViewBag.ID_PERS_ENTI" + "&var=" + Math.random());    
+    });
+
+    function Authorization(arc,iddoc) {
+        var htmlForm = '<div id="FormAuthorization"></div>';
+        winFormPopUpModal("Validación de Credenciales", htmlForm, 260, 205);
+        $("#FormAuthorization").load("/Account/ViewAuthorization?&id=@ViewBag.ID_PERS_ENTI&id1=" + iddoc + "&fd=Invoice&var=" + Math.random());
+        return false;
+    }
+
+    function Eliminar(id) {
+        //e.preventDefault();
+        //var ctrl = $(this);
+        //var id = $(this).attr("id");
+        //var elem = id.split('|');
+        
+        winPopUpModal("Eliminar", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>¿Estás seguro de borrar el archivo adjunto?</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.YesTalent</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#btnYes")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                $.ajax({
+                    url: "/Talent/DeleteAttachInvoice/" + id,
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (dato) {
+                        if (dato == 'OK') {
+                            $("#divContInvoice").empty();
+                            $("#divContInvoice").load("/Talent/ListInvoice?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+                        }
+                        else { alert('ERROR'); }
+                    },
+                    error: function (dato) {
+                        alert('ERROR');
+                    }
+                });
+            });
+
+        var undo = $("#btnNO")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+
+        $("#closebtnmodal").click(function () {
+            closeWinModalPopUp();
+        });
+
+    }
+</script>

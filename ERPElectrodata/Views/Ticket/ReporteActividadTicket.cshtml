@@ -1,0 +1,163 @@
+﻿@{
+//Layout = null;
+}
+
+
+<style>
+    .k-datepicker {
+        width: 120px !important;
+        min-width: 140px !important;
+        min-width: 140px !important;
+    }
+
+    .k-datetimepicker {
+        min-width: 160px;
+    }
+
+    #SIN_DATE {
+        width: 120px;
+    }
+
+    .k-combobox {
+        min-width: 170px;
+    }
+
+    .backgroundcad {
+        max-width: 100%;
+        min-width: 100%;
+    }
+
+    .text-box {
+        width: 187px;
+        height: 26px;
+    }
+
+    .table {
+        width: 100%;
+    }
+
+</style>
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card mb-3 card">
+            <div class="card-header">
+                Reporte De Actividades Por Ticket
+            </div>
+            <div class="card-body">
+                <form id="Parametros">
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="" for="" class="">Desde </label>
+                                <input type="text" id="FechaInicial" name="FechaInicial" />
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="" for="" class="">Hasta </label>
+                                <input type="text" id="FechaFinal" name="FechaFinal" />
+                            </div>
+                        </div>
+                        <div class="col-md-3" id="divSubCuenta">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label>Sub Cuenta</label>
+                                    <div class="position-relative form-check">
+                                        <label class="form-check-label">
+                                            <input type="radio" id="rbTodos" name="rbSubCuenta" class="form-check-input" value="0" checked> TODOS
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label><br /></label>
+                                    <div class="position-relative form-check">
+                                        <label class="form-check-label">
+                                            <input type="radio" id="rbInterno" name="rbSubCuenta" class="form-check-input" value="1"> INTERNO
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <label><br /></label>
+                                    <div class="position-relative form-check">
+                                        <label class="form-check-label">
+                                            <input type="radio" id="rbExterno" name="rbSubCuenta" class="form-check-input" value="2"> EXTERNO
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label id="" for="" class="">&nbsp; </label>
+                                <button id="btnBuscar" onclick="GenerarReporte(); return false;" class="mb-2 mr-2 btn-pill btn btn-primary btn-block"><span>Buscar</span></button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <iframe id="RSActividadTicket" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    function GenerarReporte() {
+        //alert($("#Parametros").serialize());
+        window.frames["RSActividadTicket"].src = "/Reporting/Ticket/TicketActividad.aspx?var=" + Math.random() + "&" + $("#Parametros").serialize();
+    }
+
+    $(document).ready(function () {
+        //top.cambioIdiomaxLlave('ReportedeActividadesporTicket|Desde|Hasta|Buscar');
+
+        var today = new Date();
+        var k_startdatetimepicker = $("#FechaInicial").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+        var k_enddatetimepicker = $("#FechaFinal").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+
+        if (@Session["ID_ACCO"] != 4) {
+            $("#divSubCuenta").css("display", "none");
+        }
+    });
+    function cambioIdiomaTexto() {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaTexto?IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+</script>

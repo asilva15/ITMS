@@ -1,0 +1,322 @@
+﻿@{
+    ViewBag.Title = "ManagingRoles";
+    Layout = null;
+}
+<div style="width:100%; height:542px; display:inline-block;">
+    <div style="float:left; width:62%;">
+        <div style="width:100%;">
+            <div class="titleForm">
+                <div class="title">Managing Roles</div>
+            </div>
+            <div class="inBodyForm" style="min-height:515px; padding-left: 10px;" id="">
+                <div style="width:30%; padding-top:10px; float:left;">
+                    <div>
+                        <div>
+                            @ResourceLanguaje.Resource.Staff<br />
+                            <input type="text" id="ID_ENTI" name="ID_ENTI" />
+                        </div>
+                    </div>
+                </div>  
+                <div style="width:59%; padding:10px; float:right;">
+                    <div>
+                        <div id="PerfilProfesional">
+                            <div class="row">
+                                <div class="col-sm-3" style="font-weight:bold;">
+                                    UEN
+                                </div>
+                                <div class="col-sm-1" style="font-weight:bold;">
+                                    :
+                                </div>
+                                <div class="col-sm-8" id="NameUE">
+                                  
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3" style="font-weight:bold;">
+                                    Area
+                                </div>
+                                <div class="col-sm-1" style="font-weight:bold;">
+                                    :
+                                </div>
+                                <div class="col-sm-8" id="NameArea">
+                                  
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-3" style="font-weight:bold;">
+                                    Job Title
+                                </div>
+                                <div class="col-sm-1" style="font-weight:bold;">
+                                    :
+                                </div>
+                                <div class="col-sm-8" id="NameCargo">
+                                 
+                                </div>
+                            </div>                           
+                        </div>                      
+                        <hr />
+                        <div>
+                            <div class="clearfix" style="padding-bottom:0px;">
+                                <button type="button" class="btn btn-primary btn-sm" style="float:right;" onclick="FnAddNewRoleByPerson()">Add New</button>
+                            </div>
+                            <div id="TablaAddNewRole" class="divHide" style="padding-top:15px;">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Select Role</th>
+                                            <th style="border-left: 1px solid #e2e2e2; width: 70px;">Options</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div class="editor-field">
+                                                    <input type="text" id="ID_ROLE" name="ID_ROLE" />
+                                                 </div>
+                                            </td>
+                                            <td style="text-align: center; border-left: 1px solid #e2e2e2; width:70px;" align="center">                                                
+                                                <span title="Save" class="glyphicon glyphicon-floppy-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px; " onclick="FncSaveRoles()"></span>
+                                                <span>&nbsp;&nbsp;</span>
+                                                <span title="Hide" class="glyphicon glyphicon-chevron-up" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px; " onclick="HideAddNewRole()"></span>
+                                            </td>                                    
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                           
+                        </div>
+                        <hr />                     
+                        <div>
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>                                      
+                                        <th>Role Name</th>                                      
+                                        <th style="border-left: 1px solid #e2e2e2; width: 70px;">Options</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="TablaListRoles">                                   
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>    
+                <div style="clear:both;"></div>             
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $.get("/Assistance/Equipo", function (json) {
+
+            var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+                index: 1,
+                dataTextField: "FIR_NAME",
+                dataValueField: "ID_PERS_ENTI",
+                template: '<div style="clear:both;"><div style="float:left"><img height="40" width="40" src=\"/Content/Fotos/${data.ID_FOTO}.jpg\" alt=\"#:data.ID_ENTI#\" /></div>' +
+                          '<div style="height:40px;"><div style="padding-top:10px;"><div>&nbsp;${data.FIR_NAME}</div><br /></div></div></div>',
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: json['Data'],
+            change: function () {
+                var value = this.value();
+                LoadRolesByPerson(value);
+            },
+            dataBound: function(e) {
+                var value = this.value();
+                LoadRolesByPerson(value);
+            }
+        }).data("kendoComboBox");
+
+        });
+    })
+
+    function LoadRolesByPerson(id)
+    {
+        //$("#TablaListRoles").append('Lista de Roles Para la Persona con ID: '+ id);
+        $.ajax({
+            url: "/Administrator/LoadRolesByPerson/"+id,
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                    HideAddNewRole();
+
+                    $("#NameUE").empty();
+                    $("#NameArea").empty();
+                    $("#NameCargo").empty();
+
+                    $("#NameUE").text((data['Orga']).NAME_UE);
+                    $("#NameArea").text((data['Orga']).NAME_AREA);
+                    $("#NameCargo").text((data['Orga']).JOB_TITLE);
+
+                $("#TablaListRoles").empty();
+                $.each(data['Data'], function (index, value) {
+                    $("#TablaListRoles").append('<tr>'+                                                  
+                                                    '<td>' + (data['Data'][index]['ROLE_NAME']) + '</td>' +
+                                                    '<td style="text-align: center; border-left: 1px solid #e2e2e2; width:70px;">' +
+                                                            '<span id="Remove' + (data['Data'][index]['ROLE_ID']) + '' + (data['Data'][index]['UserId']) + '" title="Remove" class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="RemoveRoles(' + (data['Data'][index]['ROLE_ID']) + ',' + (data['Data'][index]['UserId']) + ')"></span>' +
+                                                    '</td>' +
+                                                '</tr>');
+                });
+            },
+            error: function (source) {
+                alert("Error Loading Json...");
+            }
+        });
+    }
+
+    function RemoveRoles(RoleId, UserId)
+    {        
+        $('#SmallModalContent').modal('show');
+        $("#SmallModalTitle").empty();
+        $("#SmallModalTitle").text("Warning");
+        $("#SmallModalBody").empty();
+        $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Are you sure you want to delete</div>");
+        $("#SmallModalFooter").empty();
+        $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                          "<button id='continues' class='k-button'>Yes</button>" +
+                                          "<span>&nbsp;&nbsp;</span>"+
+                                          "<button id='cancel' class='k-button'>No</button>" +
+                                   "</div>");
+        var undo = $("#continues")
+        .bind("click", function () {
+            $('#SmallModalContent').modal('hide');
+
+            var idpersenti = $("#ID_ENTI").val();
+
+            $.ajax({
+                url: "/Administrator/RemoveRoleByUser/",
+                data: "RoleId=" + RoleId + "&UserId=" + UserId + "&idpersenti=" + idpersenti + "&var=" + Math.random(),
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+
+                        var idpersenti = $("#ID_ENTI").val();
+                        LoadRolesByPerson(idpersenti);
+
+                    }
+                }
+            });
+        });
+
+        var cancel = $("#cancel")
+      .bind("click", function () {
+          $('#SmallModalContent').modal('hide');      
+      });
+       
+    }
+    function FnAddNewRoleByPerson()
+    {
+        $("#TablaAddNewRole").removeClass("divHide");
+
+        var ID_ROLE = $("#ID_ROLE").kendoComboBox({
+            autoBind: true,
+            dataTextField: "ROLE_NAME",
+            dataValueField: "ROLE_ID",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListRoles?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+    }
+
+    function HideAddNewRole()
+    {
+        $("#ID_ROLE").val("");
+        $("#TablaAddNewRole").addClass("divHide");
+
+    }
+
+    function FncSaveRoles()
+    {
+        var idrole = $("#ID_ROLE").val();
+        var idpersenti = $("#ID_ENTI").val();
+
+        if(idrole!="")
+        {          
+            $.ajax({
+                url: "/Administrator/SaveRoles/",
+                data: "&idrole=" + idrole + "&idpersenti=" + idpersenti + "&var=" + Math.random(),
+                type: "POST",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+
+                    if (resp == "OK") {
+                        $("#TablaAddNewRole").addClass("divHide");
+                        LoadRolesByPerson(idpersenti);
+                    }
+                    else if (resp == "EXISTE")
+                    {
+                        $('#SmallModalContent').modal('show');
+                        $("#SmallModalTitle").empty();
+                        $("#SmallModalTitle").text("Warning");
+                        $("#SmallModalBody").empty();
+                        $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>The selected user already has this role</div>");
+                        $("#SmallModalFooter").empty();
+                        $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                          "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                   "</div>");
+                        var undo = $("#continues")
+                        .bind("click", function () {
+                            $('#SmallModalContent').modal('hide');
+                        });
+                    }else
+                    {
+                        $('#SmallModalContent').modal('show');
+                        $("#SmallModalTitle").empty();
+                        $("#SmallModalTitle").text("Warning");
+                        $("#SmallModalBody").empty();
+                        $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>There was an error in the transaction</div>");
+                        $("#SmallModalFooter").empty();
+                        $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                          "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                   "</div>");
+                        var undo = $("#continues")
+                        .bind("click", function () {
+                            $('#SmallModalContent').modal('hide');
+                        });
+                    }
+                }
+            });
+        }
+        else
+        {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Warning");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>You should select a role</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                       "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        }
+
+       
+    }
+
+</script>
+    

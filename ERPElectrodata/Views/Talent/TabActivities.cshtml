@@ -1,0 +1,335 @@
+﻿@model ERPElectrodata.Models.ACTIVITY_PERSON
+
+@{
+    Layout = null;
+}
+<script src="~/Scripts/highcharts/highcharts.js"></script>
+<div id="divContent" style="width:100%;">
+
+    <div class="col-sm-12 col-lg-3">
+        <div class="editor-label">
+            Date
+        </div>
+        <div class="" style="width:100%;">
+            <form id="FrmFilterDate">
+                <input type="text" name="dtp_dia" id="dtp_dia" />
+            </form>
+        </div>
+    </div>
+    <hr />
+    <div class="row">
+        <div class="col-sm-12 col-lg-5">
+            <div class="mb-0 card">
+                <div class="card-header-tab card-header">
+                    <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                        Agregar actividades
+                    </div>
+                </div>
+                <div class="p-0 card-body">
+                    <div class="pl-4 slick-slider-sm">
+                        @using (Html.BeginForm("Create", "ActivitiesPerson", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormDateActivities", target = "upload_target" }))
+                        {
+                            <input type="hidden" value="@ViewBag.ID_PERS_ENTI" name="ID_PERS_ENTI" />
+                            <div class="row">
+                                <div class="col-sm-12 col-lg-5">
+                                    <div class="editor-label">
+                                        Since
+                                    </div>
+                                    <div class="" style="width:100%;">
+                                        @Html.TextBoxFor(x => x.HOU_STAR, new { @style = "width:90%;" })
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-lg-5">
+                                    <div class="editor-label">
+                                        To
+                                    </div>
+                                    <div class="" style="width:100%;">
+                                        @Html.TextBoxFor(x => x.HOU_END, new { @style = "width:90%" })
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-lg-5">
+                                    <div class="editor-label">
+                                        Activity (max 50) :
+                                    </div>
+                                    <div class="" style="width:100%;">
+                                        @Html.TextBoxFor(x => x.DES_ACTI_PERS, new { @class = "k-textbox", @style = "width:90%" })
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-lg-5">
+                                    <div class="editor-label">
+                                        Client :<br />
+                                    </div>
+                                    <div class="" style="width:100%;">
+                                        @Html.TextBoxFor(x => x.CLI_ACTI_PERS, new { @class = "k-textbox", @style = "width:90%" })
+                                    </div>
+                                </div>
+                                <div class="col-sm-12 col-lg-5">
+                                    <div class="editor-label">
+                                        Ticket
+                                    </div>
+                                    <div class="" style="width:100%;">
+                                        @Html.TextBoxFor(x => x.ID_TICK, new { @style = "width:90%" })
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-5">
+                                <div class="col-sm-12 col-lg-9">&nbsp;</div>
+                                <div class="col-sm-12 col-lg-1">
+                                    <button id="submit" class="k-button" style="float:right;margin-right:15px;margin-top:5px;">Create</button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-lg-3">
+            <div class="mb-0 card">
+                <div class="card-header-tab card-header">
+                    <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                        Lista de actividades
+                    </div>
+                </div>
+                <div class="p-0 card-body">
+                    <div class="p-1 slick-slider-sm">
+                        <div id="gridActivities" style="border:0px solid red;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-12 col-lg-3">
+            <div class="mb-0 card">
+                <div class="card-header-tab card-header">
+                    <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                        Reporte de  actividades
+                    </div>
+                </div>
+                <div class="p-0 card-body">
+                    <div class="p-1 slick-slider-sm">
+                        <div id="divReportActivities" style="height:320px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" style="display:none;"></iframe>
+
+
+@*<div>
+        <h2>Contenido </h2>
+        Listado
+        Descripcion|hora inicio|hora fin|120 Minutos
+    </div>
+
+    <div>
+        Este modulo esta disponible durante el dia
+        Work Week
+        Pie Horas trabajadas vs Horas de descanzo
+        Total de Horas Semana 48 Horas
+        Adicional Horas Extra: Color Naranja
+
+    </div>
+
+    <div>
+        Example
+        1
+        2
+        3
+        4   Almuerzo
+        5
+        6
+        7
+        8
+
+    </div>*@
+
+<script type="text/javascript">
+
+    function ReportActivities() {
+
+        $.get("/ActivitiesPerson/ReportWeekly/@ViewBag.ID_PERS_ENTI?" + $("#FrmFilterDate").serialize(), function (json) {
+
+            console.log(json["HourExces"]);
+
+            $('#divReportActivities').highcharts({
+                chart: {
+                    plotBackgroundColor: null,
+                    plotBorderWidth: null,
+                    plotShadow: false
+                },
+                title: {
+                    text: 'Weekly Working Hours: ' + json["TotalHours"]
+                },
+                colors:["#CB3F37","#022A41","#679700"],
+                credits: {
+                    enabled:false
+                },
+                tooltip: {
+                    pointFormat: '<b>Hours:</b> {point.y:.2f}<br /><b>Percentage:</b> {point.percentage:.2f}%'
+                },
+                plotOptions: {
+                    pie: {
+                        allowPointSelect: true,
+                        cursor: 'pointer',
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.name}:<br /> {point.y:.2f} hours'
+                        },
+                        showInLegend: true
+                    }
+                },
+                series: [{
+                    type: 'pie',
+                    name: 'Work Hours',
+                    data: [
+                        ['Overtime', json["Overtime"]],
+                        ['Hours of Work', json["HorasWork"]],
+                        {
+                            name: 'Hours Worked',
+                            y: json["WorkHours"],
+                            sliced: true,
+                            selected: true
+                        }
+                    ]
+                }]
+            });
+
+        });
+    }
+
+    function LoadActivities() {
+
+        $("#gridActivities").empty();
+
+        if ($("#gridActivities").data("kendoListView")) {
+            $("#gridActivities").data("kendoListView").destroy();
+        }
+
+        $("#gridActivities").kendoGrid({
+            dataSource: {
+                //type: "odata",
+                transport: {
+                    read: {
+                        url: "/ActivitiesPerson/ListByPerson/" + "@ViewBag.ID_PERS_ENTI?" + $("#FrmFilterDate").serialize(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            ran: Math.random()
+                        }
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    model: {
+                        fields: {
+                            HOUR: { type: "string" },
+                            //HOU_END: { type: "string" },
+                            DES_ACTI_PERS: { type: "string" }
+                            //,NAM_TYPE_DOCU_ATTA: { type: "string" }
+                        }
+                    }
+                }
+                //,
+                ////pageSize: 100,
+                //group: {
+                //    field: "NAM_TYPE_DOCU_ATTA", aggregates: [
+                //       { field: "NAM_ATTA", aggregate: "count" }
+                //       , { field: "NAM_TYPE_DOCU_ATTA", aggregate: "count" }
+                //    ]
+                //}
+            },
+            sortable: true,
+            //scrollable: false,
+            //groupable: true,
+            filterable: true,
+            pageable: false,
+            height: 345,
+            columns: [{
+                field: "HOUR",
+                title: "Date"//,
+                //width: 200
+            }, {
+                field: "DES_ACTI_PERS",
+                title: "Description"
+            }]
+            //,rowTemplate: kendo.template($("#templateDownload").html())
+        });
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#HOU_STAR").kendoTimePicker({
+            format: "HH:mm",
+            value: new Date("@DateTime.Now.Year", "@DateTime.Now.Month" - 1, "@DateTime.Now.Day", 8, 00)
+        });
+        $("#HOU_END").kendoTimePicker({
+            format: "HH:mm",
+            value: new Date("@DateTime.Now.Year", "@DateTime.Now.Month" - 1, "@DateTime.Now.Day", 9, 00)
+        });
+
+        $("#dtp_dia").kendoDatePicker({
+            value: new Date("@DateTime.Now.Year", "@DateTime.Now.Month" - 1, "@DateTime.Now.Day"),
+            change: function () {
+                LoadActivities();
+                ReportActivities();
+            }
+        });
+
+        var ID_TICK = $("#ID_TICK").kendoComboBox({
+            autoBind: true,
+            dataTextField: "COD_TICK",
+            dataValueField: "ID_TICK",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            //template: kendo.template($("#tmp-CIA").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data"//,total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/TicketsNotClosedByPerson/@ViewBag.ID_PERS_ENTI?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        LoadActivities();
+        ReportActivities();
+    });
+
+    $("#submit").click(function () {
+        //winPopUpModalLoad('@ResourceLanguaje.Resource.SavingYourTicket', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        $('#myModalLoading').modal('show');
+    });
+
+    function uploadDone(msg, code) {
+        if(msg=='OK'){
+            $('#myModalLoading').modal('hide');
+
+            LoadActivities();
+            ReportActivities();
+        }
+        else {
+            $('#myModalLoading').modal('hide');
+            alert("Request Information");
+        }
+    }
+
+    function mensaje(msg, code) {
+        if (msg == 'OK') {
+            toastr.success("Se registró correctamente la actividad.", "");
+            LoadActivities();
+            ReportActivities();
+        }
+        else {
+            toastr.warning("Complete los campos por favor.", "");
+        }
+    }
+</script>

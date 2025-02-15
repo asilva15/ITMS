@@ -1,0 +1,288 @@
+﻿@{
+    ViewBag.Title = "MantTipoActivoBNV";
+    Layout = null;
+}
+
+<div class="form-row">
+    <div class="col-md-3">
+        <div class="editor-label">
+            Grupo
+        </div>
+        <div class="editor-field">
+            <input id="cbGrupo" name="cbGrupo" value="@ViewBag.IdGrupo" />
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="editor-label">
+            Tipo Activo
+        </div>
+        <div class="editor-field">
+            <input id="cbTipoActivo" name="cbTipoActivo" />
+        </div>
+    </div>
+    <div class="col-md-2">
+        <br />
+        <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="btnBuscar" onclick="ListarTipoActivoBNV()"><i class="fa fa-search"></i> Buscar</button>
+    </div>
+    <div class="col-md-2">
+        <br />
+        <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="btnNuevoTipoActivo" onclick="NuevoTipoActivoBNV()"><i class="fa fa-plus"></i> Nuevo</button>
+    </div>
+</div>
+
+<div class="table-responsive mt-3">
+    <div class="row">
+        <div class="col-md-12">
+            <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%;" id="tbListado">
+                <thead>
+                    <tr>
+                        <th class="text-center">Nombre</th>
+                        <th class="text-center">Descripción</th>
+                        <th class="text-center">Estado</th>
+                        <th class="text-center">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var cbGrupo = $("#cbGrupo").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarGruposBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var cbTipoActivo = $("#cbTipoActivo").kendoComboBox({
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            cascadeFrom: 'cbGrupo',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/ListarTipoActivoxGrupoBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ListarTabla();
+
+    });
+
+    function ListarTipoActivoBNV() {
+        var cbGrupo = $("#cbGrupo").data("kendoComboBox");
+
+        if (cbGrupo.dataItem() === undefined) {
+            toastr.warning("Seleccione un grupo.", "Mensaje");
+        } else {
+            ListarTabla();
+        }
+    }
+
+    function ListarTabla() {
+        const parametros = {
+            IdGrupo: $("#cbGrupo").val(),
+            IdTipoActivo: $("#cbTipoActivo").val()
+        };
+        var table = $('#tbListado').DataTable();
+        table.clear().destroy();
+        $('#tbListado').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: `/TypeAsset/ListadoTipoActivosBNV`,
+                data: parametros,
+                type: "GET"
+            },
+            columns: [
+                {
+                    data: "Nombre",
+                    width: "30%"
+                },
+                {
+                    data: "Descripcion",
+                    width: "40%"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let color, text = '';
+                        if (data.Estado == 1) { color = 'success'; text = 'Activo' } else { color = 'danger'; text = 'Inactivo' };
+                        let label = `<div class="badge badge-${color}">${text}</div>`
+                        return label;
+                    },
+                    width: "15%",
+                    className: 'text-center'
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        let boton;
+                        if (data.Estado == 1) {
+                            boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                        <button type="button" id="btnEliminarTipoActivo" onclick="EliminarTipoActivoBNV(${data.Id})" class="btn-shadow btn-hover-shine btn btn-danger btn-sm btn-pill pl-3"><i class="fa fa-edit" aria-hidden="true"></i> Desactivar</button>
+                                    </div>`
+                        } else {
+                            boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                                        <button type="button" id="btnActivarTipoActivo" onclick="ActivarTipoActivoBNV(${data.Id})" class="btn-shadow btn-hover-shine btn btn-success btn-sm btn-pill pl-3"><i class="fa fa-edit" aria-hidden="true"></i> Activar</button>
+                                    </div>`
+                        }
+                        return boton;
+                    },
+                    width: "15%",
+                    className: 'text-center'
+                },
+            ],
+            order: [[2, 'asc'], [0, 'asc']],
+            buttons: [
+                'csv', 'excel', 'pdf', 'print'
+            ]
+        });
+    }
+
+    function NuevoTipoActivoBNV() {
+        $("#btnNuevoTipoActivo").removeAttr("data-toggle");
+        $("#btnNuevoTipoActivo").removeAttr("data-target");
+
+        var cbGrupo = $("#cbGrupo").data("kendoComboBox");
+
+        if (cbGrupo.dataItem() === undefined) {
+            toastr.warning("Seleccione un grupo.", "Mensaje");
+        } else {
+            $("#lblTitulo").text("Nuevo Tipo de Activo");
+
+            $("#btnNuevoTipoActivo").attr("data-toggle", "modal");
+            $("#btnNuevoTipoActivo").attr("data-target", "#miModal");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/TypeAsset/Create/' + cbGrupo.dataItem().Id + '?mant=1');
+        }
+    }
+
+    function EditarTipoActivoBNV() {
+        $("#btnEditarTipoActivo").removeAttr("data-toggle");
+        $("#btnEditarTipoActivo").removeAttr("data-target");
+
+        var cbGrupo = $("#cbGrupo").data("kendoComboBox");
+
+        if (cbGrupo.dataItem() === undefined) {
+            toastr.warning("Seleccione un grupo.", "Mensaje");
+        } else {
+            $("#lblTitulo").text("Nuevo Tipo de Activo");
+
+            $("#btnEditarTipoActivo").attr("data-toggle", "modal");
+            $("#btnEditarTipoActivo").attr("data-target", "#miModal");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/TypeAsset/Create/' + cbGrupo.dataItem().Id + '?mant=1');
+        }
+    }
+
+    function EliminarTipoActivoBNV(id) {
+        swal({
+            title: `¿Desea desactivar este tipo de activo?`,
+            text: `Se desactivará el tipo de activo seleccionado`,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Guardar",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        }, function (dismiss) {
+            if (dismiss) {
+                $.ajax({
+                    url: "/TypeAsset/ModificarEstadoTipoActivoBNV/" + id + "?idEstado=0&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == 'ERROR') {
+                            toastr.error("Error al desactivar el tipo de activo.", "Mensaje");
+                        } else {
+                            toastr.success("Se desactivó el tipo de activo.", "Información Guardada");
+                            ListarTabla();
+                            $("#cbTipoActivo").data("kendoComboBox").dataSource.read();
+                            swal.close();
+                        }
+                    }
+                });
+            }
+            else {
+                swal("Cancelado", "Ha cancelado la operación", "error");
+            }
+        });
+    }
+
+    function ActivarTipoActivoBNV(id) {
+        swal({
+            title: `¿Desea activar este tipo de activo?`,
+            text: `Se activará el tipo de activo seleccionado`,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Guardar",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        }, function (dismiss) {
+            if (dismiss) {
+                $.ajax({
+                    url: "/TypeAsset/ModificarEstadoTipoActivoBNV/" + id + "?idEstado=1&var=" + Math.random(),
+                    type: "POST",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == 'ERROR') {
+                            toastr.error("Error al activar el tipo de activo.", "Mensaje");
+                        } else {
+                            toastr.success("Se activó el tipo de activo.", "Información Guardada");
+                            ListarTabla();
+                            $("#cbTipoActivo").data("kendoComboBox").dataSource.read();
+                            swal.close();
+                        }
+                    }
+                });
+            }
+            else {
+                swal("Cancelado", "Ha cancelado la operación", "error");
+            }
+        });
+    }
+
+    function uploadDone(msg, code, idActivo) { }
+
+</script>

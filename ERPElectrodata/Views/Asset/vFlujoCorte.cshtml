@@ -1,0 +1,137 @@
+﻿@{
+    ViewBag.Title = "vFlujoCorte";
+    Layout = null;
+}
+
+<style>
+    .frameHidden {
+        display: none;
+    }
+</style>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+@using (Html.BeginForm("DescargarCorteFlujo", "Asset", FormMethod.Post, new { target = "upload_targetProfile" }))
+{
+    <input id="IdGrupo" name="IdGrupo" value="@ViewBag.IdGrupo" class="frameHidden" />
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="position-relative form-group">
+                <label id="lbl" for="lbl">
+                    Para obtener el Reporte se tiene que seleccionar el mes y la unidad minera.
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="position-relative form-group">
+                <label>Fecha </label>
+                <input id="FechaRF" name="FechaRF" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="position-relative form-group">
+                <label>Unidad Minera </label>
+                <input id="UMineraRF" name="UMineraRF" />
+            </div>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6">
+                    &nbsp;
+                </div>
+                <div class="col-md-6">
+                    <button id="btnSubmit" class="btn btn-block btn-primary btn-sm">Generar Reporte</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<iframe id="upload_targetProfile" name="upload_targetProfile" class="frameHidden"></iframe>
+
+<script>
+    $(document).ready(function () {
+
+        var IdGrupo = $("#IdGrupo").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarGruposBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var UMineraRF = $("#UMineraRF").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            cascadeFrom: 'IdGrupo',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarUMineraBNV?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                if (UMinera.dataSource.view().length == 1) {
+                    UMinera.select(0);
+                }
+            }
+        }).data("kendoComboBox");
+
+        var FechaRF = $("#FechaRF").kendoDatePicker({
+            start: "year",
+            depth: "year",
+            format: "MMM yyyy",
+        });
+
+        $("#btnSubmit").on("click", function (e) {
+            e.stopPropagation();
+            var $formulario = $(this).closest("form");
+            toastr.info('Espere por favor...');
+            var valorFecha = $("#FechaRF").data("kendoDatePicker").value();
+
+            if (UMineraRF.value() == "" || valorFecha == null) {
+                toastr.warning("Complete la información.", "Mensaje");
+            } else {
+                $.ajax({
+                    url: $formulario.attr('action'),
+                    type: $formulario.attr('method'),
+                    data: $formulario.serialize(),
+                    success: function (response) {
+                        if (response.Estado == "ERROR") {
+                            toastr.warning(response.Msg, "Mensaje");
+                        } else {
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            toastr.success("Se descargará el reporte excel");
+                        }
+                    }
+                });
+            }
+
+        });
+    });
+</script>

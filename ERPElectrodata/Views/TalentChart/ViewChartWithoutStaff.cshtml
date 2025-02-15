@@ -1,0 +1,257 @@
+﻿@model ERPElectrodata.Models.CHART
+
+@{
+    Layout = null;
+}
+<style>
+    .k-icon{
+        padding:18px
+    }
+</style>
+<div style="width: 100%; height: 350px; overflow-y: auto;">
+    <div id="treeviewChart" style="padding: 0 0 0 7px;"></div>
+</div>
+
+<script id="treeviewChart-tmpt" type="text/kendo-ui-template">
+    <div style="width:100%;">
+        <img src="/Content/Images/#: item.ICON #" style="width:12px; height:12px; border:none;" />
+        # if ('@ViewBag.Procedencia' == 'area' ) { #
+        # if (item.ID_TYPE_CHAR == 2) { #
+        <span style="font-size: .9em; text-transform:capitalize; cursor:pointer;" title="@ResourceLanguaje.Resource.SelectArea"> #= item.NAME_PARA # </span>
+        # } else { #
+        <span style="font-size: .9em; text-transform:capitalize;" title="#: item.NAM_TYPE #"> #= item.NAME_PARA # </span>
+        # } #
+        # } else { #
+        # if (item.ID_TYPE_CHAR == 3) { #
+        <span style="font-size: .9em; text-transform:capitalize; cursor:pointer;" title="@ResourceLanguaje.Resource.SelectJobTitle"> #= item.NAME_PARA # </span>
+        # } else { #
+        <span style="font-size: .9em; text-transform:capitalize;" title="#: item.NAM_TYPE #"> #= item.NAME_PARA # </span>
+        # } #
+        # } #
+        # if (item.HAS_VALUE == false && item.HAS_CONTRACT == false && '@ViewBag.Procedencia' == 'mantto') { #
+        <a id='#: item.ID_PARA #|#: item.NAM_TYPE #|#: item.ID_CHAR_PARE #' class='delete-link' href='\#' title='Remove'></a>
+        # } #
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).on("click", ".delete-link", function (e) {
+        e.preventDefault();
+
+        var ctrl = $(this);
+        var id = $(this).attr("id");
+        var elem = id.split('|');
+
+        winPopUpModal("@ResourceLanguaje.Resource.Delete", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Are you sure to delete the " + elem[1] + "?</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#btnYes")
+            .bind("click", function () {
+                $.ajax({
+                    url: "/TalentChart/DeleteChart/" + elem[0] + "/" + elem[2],
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (resp) {
+                        var resps = resp.split('|');
+                        if (resps[0] == 'OK') {
+                            var treeView = $("#treeviewChart").data("kendoTreeView");
+                            if (resps[1] != 0) {
+                                var barDataItem = treeView.dataSource.get(resps[1]);
+                                var nodo = treeView.findByUid(barDataItem.uid);
+
+                                var selectedDataItem = treeView.dataItem(nodo);
+                                treeView.collapse(nodo);
+                                selectedDataItem.loaded(false);
+                                selectedDataItem.load();
+                                treeView.expand(nodo);
+                            }
+                            else {
+                                treeView.remove(ctrl.closest(".k-item"));
+                            }
+
+                            closeWinModalPopUp();
+                        }
+                        else {
+                            closeWinModalPopUp(); alert('ERROR');
+                        }
+                    },
+                    error: function (resp) {
+
+                        alert('ERROR');
+                    }
+                });
+            });
+
+        var undo = $("#btnNO")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+
+        $("#closebtnmodal").click(function () {
+            closeWinModalPopUp();
+        });
+    });
+
+    $(document).ready(function () {
+
+        $("#treeviewChart").empty();
+        homogeneous = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: ('@ViewBag.Procedencia' == 'area' ? "/TalentChart/TreeChartWithoutStaffID_ACCO"
+                            : "/TalentChart/TreeChartWithoutStaff/@ViewBag.ID_CIA"),
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE",
+                    ID_TYPE_CHAR: "ID_TYPE_CHAR",
+                    NAME_PARA: "NAME_PARA",
+                    NAM_TYPE: "NAM_TYPE",
+                    ID_NAM_CHAR: "ID_NAM_CHAR",
+                    MANAGEMENT: "MANAGEMENT",
+                    ID_CHAR_PARE: "ID_CHAR_PARE",
+                }
+            }
+        });
+
+        $("#treeviewChart").kendoTreeView({
+            template: kendo.template($("#treeviewChart-tmpt").html()),
+            dataSource: homogeneous,
+            dataTextField: "NAME_PARA",
+            select: onSelectTV,
+        });
+
+        function onSelectTV(e) {
+            $("#ED_ID_CHAR").val(0);
+            var dataItem = this.dataItem(e.node);
+            if ('@ViewBag.Procedencia' == 'mantto') {
+                $("#EDIT_TYPE_CHAR").val(dataItem.NAM_TYPE);
+                $("#EDIT_NAM_CHAR").val(dataItem.NAME_PARA);
+                $("#EDIT_ID_NAM_CHAR").val(dataItem.ID_NAM_CHAR);
+                $("#EDIT_ID_CHAR_PARE").val(dataItem.ID_CHAR_PARE);
+                $("#SN_ID_CHAR").val(dataItem.id);
+                $("#SN_ID_CHAR_PARE").val(dataItem.ID_CHAR_PARE);
+
+                if (dataItem.ID_TYPE_CHAR == 3) {
+                    $("#divManagement").css("display", "inline-block");
+                    $("#manaCB").prop("checked", dataItem.MANAGEMENT);
+                    $("#activeCB").prop("checked", dataItem.VIG_CHAR);
+                    $("#ED_ID_CHAR").val(dataItem.id);
+                }
+                else {
+                    $("#divManagement").css("display", "none");
+                }
+                $("#divButtom").css("display", "inline-block");
+            }
+            else if ('@ViewBag.Procedencia' == 'area') {
+                if (dataItem.ID_TYPE_CHAR == 2) {
+                    $("#ID_CHART").val(dataItem.id);
+                    $("#NAM_CHART").val(dataItem.NAME_PARA);
+                    $("[data-dismiss=modal]").trigger({ type: "click" });
+                    //closeWinFormModalPopUp();
+                }
+            }
+            else {
+                if (dataItem.ID_TYPE_CHAR == 3) {
+                    if ('@ViewBag.Procedencia' == 'find') {
+                        $("#ID_CHART").val(dataItem.id);
+                        $("#NAM_CHART").val(dataItem.NAME_PARA);
+                    }
+                    else if ('@ViewBag.Procedencia' == 'newGroup') {
+                        $("#ID_CHAR_PARE_@ViewBag.CurIdx").val(dataItem.ID_CHAR_PARE);
+                        $("#ID_CHAR_@ViewBag.CurIdx").val(dataItem.id);
+                        $("#NAM_CHAR_@ViewBag.CurIdx").val(dataItem.NAME_PARA);
+                    }
+                    else {
+                        $("#ID_CHAR_PARE").val(dataItem.ID_CHAR_PARE);
+                        $("#ID_CHAR").val(dataItem.id);
+                        $("#NAM_CHAR").val(dataItem.NAME_PARA);
+                    }
+                    //closeWinFormModalPopUp();
+                    $("[data-dismiss=modal]").trigger({ type: "click" });
+                    $("#modalCargo").modal("toggle");
+                }
+            }
+        }
+
+    });
+</script>
+
+<script type="text/javascript">
+    function uploadDoneChart(msg, code) {
+        if (msg == "OK") {
+            closeWinModalPopUpLoad();
+            closeWinFormModalPopUp();
+
+            winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0px 10px 0px;'>Organization Chart information was succesfully saved</div>"
+           + "<div style='padding:10px 0px 10px 0px;'></div>" +
+           "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>Continue</button>" +
+           "</div></div>"
+             , 400, 160);
+
+            var undo = $("#continues")
+           .bind("click", function () {
+               closeWinModalPopUp();
+
+           });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+            });
+
+            var treeView = $('#treeviewChart').data('kendoTreeView');
+            if (treeView != null) {
+                if (code != 0) {
+                    var barDataItem = treeView.dataSource.get(code);
+                    var nodo = treeView.findByUid(barDataItem.uid);
+
+                    var selectedDataItem = treeView.dataItem(nodo);
+                    treeView.collapse(nodo);
+                    selectedDataItem.loaded(false);
+                    selectedDataItem.load();
+                    treeView.expand(nodo);
+                }
+
+                document.FormEditNamChart.reset();
+                document.FormSubNodeChart.reset();
+                $("#divManagement").css("display", "none");
+                $("#divManageSN").css("display", "none");
+                $("#divICON").css("display", "none");
+
+            }
+            $("#divButtom").css("display", "none");
+        }
+        else {
+            closeWinModalPopUpLoad();
+            closeWinFormModalPopUp();
+
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+            }
+            winPopUpModal(titleAsset, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + messageAsset + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+</script>

@@ -1,0 +1,386 @@
+﻿@model ERPElectrodata.Models.ACTIVITY_LOG
+@{
+    Layout = null;
+}
+<style>
+    #NAME_CONTACTO {
+        width: 187px;
+        height: 26px;
+    }
+    #COMENTARIO_EDIT {
+        width: 460px !important;
+        height: 150px !important;
+    }
+</style>
+<div class="afterMain2">
+    <div style="float:left; width:100%;">
+        <div class="bodyForm">
+            <div id="divNewCategory" class="inBodyForm">
+                @using (Html.BeginForm("EditActivity", "Activity", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormActivity", target = "upload_target" }))
+                {
+                    <input type="hidden" name="ID_ENTI_ACT_EDIT" id="ID_ENTI_ACT_EDIT" value="@ViewBag.ID_CLIE_EDIT" />
+                    <input type="hidden" name="ID_USR_ACT_EDIT" id="ID_USR_ACT_EDIT" value="@ViewBag.ID_USR_ACT_EDIT" />
+                    <input type="hidden" name="ID_ACTI_LOG_EDIT" id="ID_ACTI_LOG_EDIT" value="@ViewBag.ID_ACTI_LOG_EDIT" />
+                    @Html.ValidationSummary(true)
+                    <fieldset>
+                        <legend>Actividad</legend>
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Cliente
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" disabled id="ID_CLIE_EDIT" name="ID_CLIE_EDIT" value="@ViewBag.ID_CLIE_EDIT" />
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Contacto
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" disabled id="NAME_CONTACTO" name="NAME_CONTACTO" value="@ViewBag.NAME_CONTACTO" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoDos">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Fecha Inicio
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" disabled id="DATE_INIC_EDIT" name="DATE_INIC_EDIT" value="@ViewBag.DATE_INIC_EDIT" />
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Fecha Final
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" disabled id="DATE_END_EDIT" name="DATE_END_EDIT" value="@ViewBag.DATE_END_EDIT" />
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Tipo Actividad
+                                </div>
+                                <div class="editor-field">
+                                    <input type="text" disabled id="ID_TYPE_ACT_EDIT" name="ID_TYPE_ACT_EDIT" value="@ViewBag.ID_TYPE_ACT_EDIT" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoUno" >
+                            <div class="divSpace3"></div>
+                            <div class="divCont3" id="ShowSubtypeEdit">
+                                <div class="editor-label">
+                                    SubTipo
+                                </div>
+                                <div class="editor-field">
+                                    <input type="hidden" id="ID_SUBTYPE_ACT_EDIT" name="ID_SUBTYPE_ACT_EDIT" value="@ViewBag.ID_SUBTYPE_ACT_EDIT" />
+                                    <input type='hidden' name="NAM_SUBTYPE_ACT_EDIT" id="NAM_SUBTYPE_ACT_EDIT" value="@ViewBag.NAM_SUBTYPE_ACT" />
+                                    <input type='text' disabled name="COD_SUBTYPE_ACT_EDIT" id="COD_SUBTYPE_ACT_EDIT" value="@ViewBag.COD_SUBTYPE_ACT_EDIT" />
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Comentario
+                                </div>
+                                <div>
+                                    <div id="divComentActiv"><textarea id="COMENTARIO_EDIT" disabled name="COMENTARIO_EDIT" cols="40" rows="5">@ViewBag.COMENTARIO_EDIT</textarea></div>
+                                    <div id="divComentTicket" style="width:100%">@Html.TextAreaFor(model => model.COMENTARIO)</div>
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                        </div>
+                        <div class="divFondoDos">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <div class="editor-label">
+                                    Motivo
+                                </div>
+                                <div class="editor-field">
+                                    <textarea id="MOTIVO_EDIT" disabled name="MOTIVO_EDIT" cols="40" rows="3" style="width: 700px;">@ViewBag.MOTIVO</textarea>
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                        </div>
+                        <div class="divFondoUno" style="margin-bottom:5px;">
+                            <div class="divSpace2"></div>
+                            <div style="display:inline-block; float:right; padding:5px 28px 0px 5px;">                                
+                                <button id="btnCerrar" class="k-button">Cerrar</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                }
+            </div>
+
+        </div>
+        <iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;display:none; visibility:hidden;"></iframe>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {        
+        var DATE_INIC_EDIT = $("#DATE_INIC_EDIT").kendoDateTimePicker().data("kendoDateTimePicker");
+        var DATE_END_EDIT = $("#DATE_END_EDIT").kendoDateTimePicker().data("kendoDateTimePicker");
+        DATE_INIC_EDIT.value("@ViewBag.DATE_INIC_EDIT");
+        DATE_END_EDIT.value("@ViewBag.DATE_END_EDIT");
+        var id_subtype_text = $('#ID_SUBTYPE_ACT_EDIT').val();
+        fnListarSubtype(id_subtype_text);
+
+        var ID_CLIE_EDIT = $("#ID_CLIE_EDIT").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            },            
+            change: function (e) {
+                 $('#ID_ENTI_ACT_EDIT').attr('value', ID_CLIE_EDIT.dataItem().ID_ENTI);
+                $("#ShowSubtype").addClass("divHide");
+            }
+        }).data("kendoComboBox");
+
+        var ID_TYPE_ACT_EDIT = $("#ID_TYPE_ACT_EDIT").kendoComboBox({
+            autoBind: false,
+            dataTextField: "DES_ACT",
+            dataValueField: "ID_TYPE_ACT",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListTypeActivity?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_ENTI_EDIT = $("#ID_ENTI_EDIT").kendoComboBox({
+            autoBind: false,
+            dataTextField: "FIR_NAME",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Assistance/Equipo?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                AddNewReceiver()
+            },
+        }).data("kendoComboBox");
+
+        $("#COMENTARIO").kendoEditor({
+            tools: [
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull"
+            ], encoded: false
+        });
+        
+        if (@ViewBag.TieneDetalle == 1){
+            $("#divComentActiv").addClass("divHide");
+        }else{
+            
+            $("#divComentTicket").addClass("divHide");
+        }
+
+    });    
+
+    function fnListarSubtype(id_subtype_text) {
+        
+        switch (id_subtype_text) {
+            case "1":
+                var id = parseInt($('#ID_ENTI_ACT_EDIT').val());
+                fnMostrarOP_EDIT(id);
+                $("#COD_SUBTYPE_ACT_EDIT").removeClass("divHide");
+                break;
+            case "2":
+                var id = $('#ID_ENTI_ACT_EDIT').val();
+                fnMostrarTICKET_EDIT(id);
+                $("#COD_SUBTYPE_ACT_EDIT").removeClass("divHide");
+                break;
+            case "3":
+                fnMostrarAREA_EDIT();
+                $("#COD_SUBTYPE_ACT_EDIT").removeClass("divHide");
+                break;
+            case "4":
+                fnMostrarVENDEDOR_EDIT();
+                $("#COD_SUBTYPE_ACT_EDIT").removeClass("divHide");
+                break;
+            case "6":
+                fnMostrarMARCA_EDIT();
+                $("#COD_SUBTYPE_ACT_EDIT").removeClass("divHide");
+
+                break;
+            case "8":
+                $("#COD_SUBTYPE_ACT_EDIT").addClass("divHide");
+                break;
+            default:
+                $("#COD_SUBTYPE_ACT_EDIT").addClass("divHide");
+                break;
+        }
+    }
+
+    function fnMostrarOP_EDIT(id) {
+        $("#ShowSubtypeEdit").removeClass("divHide");
+        var OP_EDIT = $("#COD_SUBTYPE_ACT_EDIT").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_TYPE_OPDOC_SALE",
+            dataValueField: "ID_DOCU_SALE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListOPActivityClient?id=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#NAM_SUBTYPE_ACT_EDIT').val(OP_EDIT.dataItem().NAM_TYPE_OPDOC_SALE);
+            }
+        }).data("kendoComboBox");
+    }
+    function fnMostrarTICKET_EDIT(id) {
+        $("#ShowSubtypeEdit").removeClass("divHide");
+        var TICKET_EDIT = $("#COD_SUBTYPE_ACT_EDIT").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COD_TICK",
+            dataValueField: "ID_TICK",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListTicketsNotClosed?id=" + id + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#NAM_SUBTYPE_ACT_EDIT').val(TICKET_EDIT.dataItem().COD_TICK);
+            }
+        }).data("kendoComboBox");
+        if (TICKET_EDIT.value != null) {
+            $("#COD_SUBTYPE_ACT_EDIT").kendoComboBox({}).data("kendoComboBox");
+        }
+    }
+    function fnMostrarAREA_EDIT() {
+        $("#ShowSubtype").show();
+        var AREA_EDIT = $("#COD_SUBTYPE_ACT_EDIT").kendoComboBox({
+            autoBind: false,
+            dataTextField: "ID_DETALLE",
+            dataValueField: "ID_AREA_ACT",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListArea?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                var AREA_ACT = AREA_EDIT.dataItem().ID_DETALLE;
+                $('#NAM_SUBTYPE_ACT_EDIT').val(AREA_ACT);
+            }
+        }).data("kendoComboBox");
+    }
+    function fnMostrarMARCA_EDIT() {
+        $("#ShowSubtype").show();
+        var MARCA_EDIT = $("#COD_SUBTYPE_ACT_EDIT").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: true,
+            index: 0,
+            suggest: true,
+            minLength: 3,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#NAM_SUBTYPE_ACT_EDIT').val(MARCA_EDIT.dataItem().NAM_MANU);
+            }
+        }).data("kendoComboBox");
+    }
+    function fnMostrarVENDEDOR_EDIT() {
+        $("#ShowSubtype").show();
+        var VENDEDOR_EDIT = $("#COD_SUBTYPE_ACT_EDIT").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_VENDOR",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListVendorAll?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#NAM_SUBTYPE_ACT_EDIT').val(VENDEDOR_EDIT.dataItem().NAM_VENDOR);
+            }
+        }).data("kendoComboBox");
+    }     
+    $("#btnCerrar").click(function (event) {
+        event.preventDefault();
+        closeWinFormModalPopUp();
+    });
+</script>

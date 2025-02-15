@@ -1,0 +1,1158 @@
+﻿@model ERPElectrodata.Models.CLIENT_ASSET
+
+@{
+    //Layout = null;
+    if (Convert.ToInt32(Session["ID_ACCO"]) == 55 && Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_OT"]) == 1 && Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_IT"]) == 0)
+    {
+        Layout = "~/Views/Shared/_LayoutHBOT.cshtml";
+    }
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-md-10">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Datos del Activo</div>
+            <div class="card-body">
+                <div style="width:100%;">
+                    <div id="divDatosActivo"></div>
+                    <div style="font-size:1em;" id="divBuscarImage"></div>
+                </div>
+            </div>
+        </div>
+
+        @if ((Convert.ToInt32(Session["ID_ACCO"].ToString()) != 60 && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 55) ||
+            (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 55 && ViewBag.Grupo != "OT"))
+        {
+            <div class="mb-3 card">
+                <div class="card-header-tab card-header">
+                    Datos de los Programas asociados al Activo
+                    <div class="btn-actions-pane-right">
+                        <button type="button" class="btn btn-hover-shine btn-primary" onclick="AgregarProgramaLicencia()"><i class="fa fa fa-plus"></i> Nuevo</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <div id="TablaNuevoPrograma" class="col-md-12" style="display:none">
+                            <div class="form-row">
+                                <div class="col-md-1">
+                                    <label class="label">Programa</label>
+                                </div>
+                                <div class="col-md-3">
+                                    <input id="cmbPrograma" name="cmbPrograma" />
+                                </div>
+                                <div class="col-md-1">
+                                    <span title="Guardar" class="fa fa-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; " onclick="GuardarNuevoPrograma()"></span>
+                                    <span>&nbsp;&nbsp;</span>
+                                    <span title="Cancelar" class="fa fa-angle-up" aria-hidden="true" style="color: #BA141A; cursor: pointer; " onclick="CancelarNuevoPrograma()"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="row no-gutters align-items-center">
+                            <table class="table table-bordered table-striped" id="tbActivoPrograma" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>Programa</th>
+                                        <th>C.Identifica</th>
+                                        <th>Tipo Licencia</th>
+                                        <th>Fecha Activacion</th>
+                                        <th>Fecha Vencimiento</th>
+                                        <th>Serie</th>
+                                        <th>Estado</th>
+                                        <th>Asignado por</th>
+                                        <th style="text-align:center;">Opción</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+    <div class="col-md-2">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Opciones</div>
+            <div class="card-body">
+                <div id="divOpciones">
+                    <center>
+                        @{
+                            try
+                            {
+                                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 4)
+                                {
+                                    if (Convert.ToInt32(Session["SUPERVISOR_SERVICEDESK"].ToString()) == 1)
+                                    {
+                                        <button id="btnEditar" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Editar</button>
+                                    }
+                                }
+                                else if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 55)
+                                {
+                                    <button id="btnEditarHudbay" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Editar</button>
+                                }
+                                else if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 56 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 57 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 58)
+                                {
+                                    if (Convert.ToInt32(Session["ID_QUEU"].ToString()) == 80 || Convert.ToInt32(Session["GESTOR_ACTIVOS_MINSUR_MARCOBRE_RAURA"].ToString()) == 1 || Convert.ToInt32(Session["ID_QUEU"].ToString()) == 1)
+                                    {
+                                        <button id="btnEditar" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Editar</button>
+                                    }
+
+
+                                }
+                                else if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                                {
+                                    <button id="btnEditarBNV" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Editar</button>
+                                }
+                                else
+                                {
+                                    <button id="btnEditar" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Editar</button>
+                                }
+
+                            }
+                            catch { }
+                        }
+                        <button id="btnActividades" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actividades</button>
+                        <button id="btnFormato" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Formato</button>
+                        @{
+                            try
+                            {
+                                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 4)
+                                {
+                                    if (Convert.ToInt32(Session["SUPERVISOR_SERVICEDESK"].ToString()) == 1)
+                                    {
+                                        <button id="btnActualizarHw" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar HW</button>
+                                        <button id="btnCondicion" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Condicion</button>
+                                        <button id="btnActualizarUbicacion" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar Ubicación</button>
+                                        <button id="btnMantenimiento" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Mantenimiento</button>
+                                    }
+                                }
+                                else if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 56 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 57 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 58)
+                                {
+                                    <button id="btnActualizarHw" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar HW</button>
+
+                                    if (Convert.ToInt32(Session["GESTOR_ACTIVOS_MINSUR_MARCOBRE_RAURA"].ToString()) == 1)
+                                    {
+                                        <button id="btnCondicion" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Condicion</button>
+                                    }
+
+                                    <button id="btnActualizarUbicacion" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar Ubicación</button>
+                                    <button id="btnMantenimiento" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Mantenimiento</button>
+                                }
+                                else if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                                {
+                                    <button id="btnCondicion" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Condicion</button>
+                                    if (ViewBag.Grupo != "MICROINFORMATICO" || Convert.ToInt32(Session["SUPERVISOR_ACTIVOS_BNV_MICROINFORMATICO"]) == 1)
+                                    {
+                                        <button id="btnActualizarUMinera" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar Ubicación</button>
+                                    }
+                                    if (ViewBag.Grupo == "MICROINFORMATICO")
+                                    {
+                                        <button id="btnBlocNotas" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Bloc de Notas</button>
+                                    }
+                                }
+                                else if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 55)
+                                {
+                                    if (ViewBag.Grupo != "OT")
+                                    {
+                                        <button id="btnActualizarHw" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar HW</button>
+                                    }
+                                    <button id="btnCondicion" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Condicion</button>
+                                    <button id="btnActualizarUbicacionHudbay" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar Ubicación</button>
+                                    if (ViewBag.Grupo != "OT")
+                                    {
+                                        <button id="btnMantenimiento" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Mantenimiento</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button id="btnActualizarHw" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar HW</button>
+                                    <button id="btnCondicion" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Condicion</button>
+                                    <button id="btnActualizarUbicacion" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Actualizar Ubicación</button>
+                                    <button id="btnMantenimiento" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Mantenimiento</button>
+                                }
+                            }
+                            catch { }
+                        }
+                        @{
+                            if ((Convert.ToInt32(Session["ID_ACCO"].ToString()) != 60 && Convert.ToInt32(Session["ID_ACCO"].ToString()) != 55) ||
+                                (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 55 && ViewBag.Grupo != "OT"))
+                            {
+                                <button id="btnHistorialMantenimientos" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal">Historial Mantenimientos</button>
+                            }
+                        }
+                        <button id="btnHistorialActivos" class="btn btn-hover-shine btn-block btn-sm btn-primary" data-toggle="modal" data-target="#miModal" type="button">Historial</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*@section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }*@
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        ObtenerDatosActivo();
+
+        if ((parseInt(@Session["ID_ACCO"]) != 60 && parseInt(@Session["ID_ACCO"]) != 55) ||
+            (parseInt(@Session["ID_ACCO"]) == 55 && "@ViewBag.Grupo" != "OT")) {
+            ObtenerDatosPrograma();
+        }
+
+        $("#btnEditar").click(function () {
+            $("#lblTitulo").text("Editar Activo");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/Editar/@ViewBag.ID_ASSE');
+        });
+
+        $("#btnEditarHudbay").click(function () {
+            $("#lblTitulo").text("Editar Activo");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/EditarHudbay/@ViewBag.ID_ASSE');
+        });
+
+        $("#btnEditarBNV").click(function () {
+            $("#lblTitulo").text("Editar Activo");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/EditarBNV/@ViewBag.ID_ASSE');
+        });
+
+        $("#btnActividades").click(function () {
+            $("#lblTitulo").text("Actividades y Comentarios");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/Actividades/@ViewBag.ID_ASSE');
+        });
+
+        $("#btnFormato").click(function () {
+            $("#lblTitulo").text("Formatos");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/Formatos/@ViewBag.ID_ASSE');
+        });
+
+        $("#btnActualizarHw").click(function () {
+            $("#lblTitulo").text("Agregar/Actualizar HW");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+            $("#btnActualizarHw").attr("data-backdrop", "static");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/Componentes/@ViewBag.ID_ASSE?crea=0');
+        });
+
+        $("#btnCondicion").click(function () {
+            $("#lblTitulo").text("Actualizar Condición");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-sm");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/Condicion/@ViewBag.ID_ASSE?idGrupo=@ViewBag.IdGrupo');
+        });
+
+        $("#btnActualizarUbicacion").click(function () {
+
+            $("#lblTitulo").text("Actualizar Ubicación");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-sm");
+
+            $('#modal-content').empty();
+            $('#modal-content').html('<div class="col-md-12">' +
+                    '<div class="row">Locación</div>'+
+                    '<div class="form-group row"><input id="ID_LOCA" type="text" name="ID_LOCA"></div>' +
+                    '<div class="row">'+
+                        '<button type="button" class="btn btn-primary btn-block" onclick="ActualizarUbicacion()"><i class="fa fa-save"></i> Guardar</button>'+
+                    '</div>' +
+                '</div> ');
+
+            $("#ID_LOCA").kendoComboBox({
+                        dataTextField: "NAM_LOCA",
+                        dataValueField: "ID_LOCA",
+                        template: '<div><div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                            '<div>${ data.NAM_LOCA }</div></div>',
+                        filter: "contains",
+                        autoBind: false,
+                        delay: 500,
+                        minLength: 0,
+                        suggest: true,
+                        dataSource: {
+                            serverFiltering: false,
+                            schema: {
+                                data: "Data",
+                                total: "Count"
+                            },
+                            transport: {
+                                read: "/Location/List?var=" + Math.random()
+                            }
+                        },
+                        select: function(e) {
+                            var userId = parseInt(@Html.Raw(Json.Encode(Session["UserId"])));
+
+                            var selectedDataItem = this.dataItem(e.item.index());
+
+                            if (selectedDataItem.ID_LOCA === 173015) {
+                                if (userId == 293 || userId == 187 || userId == 34) {
+                                    return;
+                                } else {
+                                    e.preventDefault();
+                                    uploadDone("INFO", "Esta locación está restringida para este usuario.", null);
+                                }
+                            }
+                        }
+                    });
+
+
+
+            $.ajax({
+                url: "/Asset/ObtenerLocacion/" + @ViewBag.ID_ASSE,
+                cache: false,
+                type: "GET",
+                dataType: "text",
+                success: function (data) {
+                    $("#ID_LOCA").data("kendoComboBox").value(data);
+                },
+                error: function (source) {
+                }
+            });
+
+        });
+
+        $("#btnActualizarUbicacionHudbay").click(function () {
+
+            $("#lblTitulo").text("Actualizar Ubicación");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-sm");
+
+            $('#modal-content').empty();
+            $('#modal-content').html('<div class="col-md-12">' +
+                    '<div class="row">Locación</div>'+
+                    '<div class="form-group row"><input id="ID_LOCA" type="text" name="ID_LOCA"></div>' +
+                    '<div class="row">'+
+                        '<button type="button" class="btn btn-primary btn-block" onclick="ActualizarUbicacion()"><i class="fa fa-save"></i> Guardar</button>'+
+                    '</div>' +
+                '</div> ');
+
+            if ("@ViewBag.Grupo" == "OT") {
+                $("#ID_LOCA").kendoComboBox({
+                    dataTextField: "text",
+                    dataValueField: "id",
+                    template: '<div><div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                        '<div>${ data.NAM_LOCA }</div></div>',
+                    filter: "contains",
+                    autoBind: false,
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    dataSource: {
+                        serverFiltering: false,
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/Location/ListarLocacionPorGrupo?idGrupo=@ViewBag.IdGrupo&var=" + Math.random()
+                        }
+                    }
+                });
+
+            } else {
+                $("#ID_LOCA").kendoComboBox({
+                    dataTextField: "NAM_LOCA",
+                    dataValueField: "ID_LOCA",
+                    template: '<div><div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                        '<div>${ data.NAM_LOCA }</div></div>',
+                    filter: "contains",
+                    autoBind: false,
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    dataSource: {
+                        serverFiltering: false,
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/Location/List?var=" + Math.random()
+                        }
+                    }
+                });
+            }
+
+            $.ajax({
+                url: "/Asset/ObtenerLocacion/" + @ViewBag.ID_ASSE,
+                cache: false,
+                type: "GET",
+                dataType: "text",
+                success: function (data) {
+                    $("#ID_LOCA").data("kendoComboBox").value(data);
+                },
+                error: function (source) {
+                }
+            });
+
+        });
+
+        $("#btnActualizarUMinera").click(function () {
+            $("#lblTitulo").text("Actualizar Ubicación");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-sm");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/UMinera/@ViewBag.ID_ASSE');
+        });
+
+        $("#btnBlocNotas").click(function () {
+            $("#lblTitulo").text("Bloc de Notas");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/BlocNotasBNV/@ViewBag.ID_ASSE');
+        });
+
+        $("#btnMantenimiento").click(function () {
+            $("#lblTitulo").text("Mantenimiento Preventivo");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/ActivoMantenimiento/Crear/@ViewBag.ID_ASSE');
+        });
+
+        $("#btnHistorialMantenimientos").click(function () {
+            $("#lblTitulo").text("Historial de Mantenimientos");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/ActivoMantenimiento/HistorialMantenimientos/@ViewBag.ID_ASSE');
+        });
+        $("#btnHistorialActivos").click(function () {
+
+            $("#lblTitulo").text("Historial de Activos");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/Asset/HistorialActivos/@ViewBag.ID_ASSE');
+        });
+    });
+
+    function ObtenerDatosActivo() {
+        $.ajax({
+            url: "/Asset/ObtenerDatosActivo/@ViewBag.ID_ASSE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                mostrarDatosActivo();
+            },
+            error: function (source) {
+                toastr.error("Error Carga Json Comercial", "Mensaje");
+            }
+        });
+    }
+
+    function ObtenerDatosPrograma() {
+        debugger
+        $('#tbActivoPrograma').dataTable().fnDestroy();
+
+        $('#tbActivoPrograma').DataTable({
+            responsive: true,
+            ajax: "/Programa/ObtenerActivoPrograma/@ViewBag.ID_ASSE",
+            columns: [
+                { data: "Programa" },
+                { data: "CodigoIdentifica" },
+                { data: "TipoLicencia" },
+                { data: "FechaActivacion" },
+                { data: "FechaVencimiento" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var serie = "";
+                        if(@ViewBag.Permiso == 1){
+                            serie = '<span>' + data.Serie + '</span>' ;
+                        } else {
+                            serie = '<span>**********</span>';
+                        }
+
+                        return serie
+                    }
+                },
+                { data: "Estado" },
+                { data: "Usuario" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var actualizarLicencia = "";
+
+                        if(data.TipoLicencia=="ANUAL"){
+                            actualizarLicencia = '<div style="text-align: center;">' +
+                                                    '<span id="Eliminar' + data.Id + '" title="Eliminar Asignación" class="fa fa-times" style="cursor:pointer;color:#BA141A" onclick="EliminarProgramaLicencia(' + data.Id + ')"></span>' +
+                                                    '<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
+                                                    '<span id="Actualizar' + data.Id + '" title="Actualizar Licencia" class="fa fa-retweet" style="cursor:pointer;color:#2D5C88" onclick="actualizarLicenciaPorVencer(' + data.Id + ')"></span>' +
+                                                '</div>';
+                        } else {
+                            actualizarLicencia = '<div style="text-align: center;">' +
+                                                    '<span id="Eliminar' + data.Id + '" title="Eliminar Asignación" style="cursor:pointer;color:#BA141A" class="fa fa-times" onclick="EliminarProgramaLicencia(' + data.Id + ')"></span>' +
+                                                '</div>';
+                        }
+
+                        return actualizarLicencia
+                    }
+                }
+            ],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+        });
+
+    }
+
+    function EliminarProgramaLicencia(id) {
+        $.ajax({
+            url: "/Programa/EliminarActivoPrograma/",
+            data: { id: id },
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp === "OK") {
+
+                    ObtenerDatosPrograma();
+                } else {
+
+                    console.error("Error al eliminar el activo del programa.");
+                }
+            },
+            error: function () {
+
+                console.error("Error en la llamada AJAX para eliminar el activo del programa.");
+            }
+        });
+    }
+
+
+    function actualizarLicenciaPorVencer(id) {
+        $.ajax({
+            url: "/Componente/actualizarLicenciaPorVencer/",
+            data: "id=" + id + "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    toastr.success("La licencia ha sido actualizada.", "Información Guardada");
+                } else {
+                    toastr.error("La licencia no ha podido ser actualizada, no se encontraron licencias liberadas disponibles.", "Mensaje");
+
+                }
+               ObtenerDatosPrograma();
+            }
+        });
+    }
+
+    function AgregarProgramaLicencia() {
+
+        $("#TablaNuevoPrograma").removeAttr("style");
+        $("#TablaNuevoPrograma").attr("style", "display:true");
+
+        var cmbPrograma = $("#cmbPrograma").kendoComboBox({
+            autoBind: true,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            template: '<div><div style="font-weight:bold;font-size:12px">${ data.Nombre }</div>' +
+                        '<div>Disponibles: ${ data.Cantidad }</div></div>',
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Programa/ListarProgramaLicencia?IdAsse="+@ViewBag.ID_ASSE+"&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var dtFechaVence = $("#dtFechaVence").kendoDateTimePicker().data("kendoDateTimePicker");
+
+    }
+
+    function CancelarNuevoPrograma() {
+        $("#TablaNuevoPrograma" ).removeAttr("style");
+        $("#TablaNuevoPrograma").attr("style", "display:none");
+    }
+
+    function GuardarNuevoPrograma() {
+
+        var ac = @ViewBag.ID_ASSE;
+        var pr = $("#cmbPrograma").val();
+        var fv = $("#dtFechaVence").val();
+
+        $.ajax({
+            url: "/Programa/GuardarActivoPrograma/",
+            data: "ac=" + ac + "&pr=" + pr + "&fv=" + fv + "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    $("#TablaNuevoPrograma").removeAttr("style");
+                    $("#TablaNuevoPrograma").attr("style", "display:none");
+                    $("#cmbPrograma").data("kendoComboBox").value("");
+                    ObtenerDatosPrograma();
+                    toastr.success("Se agregó el programa.", "Mensaje");
+                }
+            }
+        });
+    }
+
+
+    function mostrarDatosActivo() {
+
+        $.each(data['Data'], function (index) {
+            $("#divDatosActivo").empty();
+            $("#divDatosActivo").append(
+                '<div class="form-row">'+
+                '<div class ="col-md-6">' +
+                        (parseInt(@Session["ID_ACCO"]) == 60 ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Unidad Minera</b></div>' +
+                            '<div class = "col-md-7">@ViewBag.UMinera</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Grupo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Grupo']) + '</div>' +
+                        '</div>'
+                        : '' ) +
+                        (parseInt(@Session["ID_ACCO"]) != 60 ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Código de Activo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['CodigoActivo']) + '</div>' +
+                        '</div>'
+                        : '' ) +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Tipo de Activo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['TipoActivo']).toLowerCase() + '</div>' +
+                        '</div>' +
+                        ((data['Data'][index]['SubTipoActivo']) != '' ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Sub Tipo de Activo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['SubTipoActivo']).toLowerCase() + '</div>' +
+                        '</div>'
+                        : '') +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Marca</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Marca']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Modelo Comercial</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['NombreComercial']) + '</div>' +
+                        '</div>' +
+                        (parseInt(@Session["ID_ACCO"]) != 55 && parseInt(@Session["ID_ACCO"]) != 60 ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Modelo de Fábrica</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['NombreFabrica']) + '</div>' +
+                        '</div>'
+                        : '' ) +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Nombre de Equipo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['NombreActivo']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Número de Serie</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Serie']) + '</div>' +
+                        '</div>' +
+                        (parseInt(@Session["ID_ACCO"]) != 60 ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>MAC Física</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Mac']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>MAC Inalámbrica</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Mac_Address']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        ((parseInt(@Session["ID_ACCO"]) != 55 && parseInt(@Session["ID_ACCO"]) != 60) ||
+                         (parseInt(@Session["ID_ACCO"]) == 55 && "@ViewBag.Grupo" == "OT") ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>MAC Bluetooth</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['MacAddressBluetooth']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        ((parseInt(@Session["ID_ACCO"]) != 60 && parseInt(@Session["ID_ACCO"]) != 55) ||
+                         (parseInt(@Session["ID_ACCO"]) == 55 && "@ViewBag.Grupo" != "OT") ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Fecha de Adquisición</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaAdquisicion']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Asignado a</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Asignado']) + '</div>' +
+                        '</div>' +
+                        (parseInt(@Session["ID_ACCO"]) == 56 ||parseInt(@Session["ID_ACCO"]) == 57 || parseInt(@Session["ID_ACCO"]) == 58 ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Usuario responsable</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['UsuarioResponsable']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        (parseInt(@Session["ID_ACCO"]) != 60 ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Cargo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Cargo']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        (parseInt(@Session["ID_ACCO"]) != 60 || (parseInt(@Session["ID_ACCO"]) == 60 && (data['Data'][index]['Asignado']) != "SYSTEM MANAGER ") ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Area</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Area']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        (parseInt(@Session["ID_ACCO"]) != 60 ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Unidad de Negocio</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['AreaPadre']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Estado</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Estado']) + '</div>' +
+                        '</div>' +
+                        (parseInt(@Session["ID_ACCO"]) == 60 && '@ViewBag.Grupo' == "MOVIL" ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Antivirus</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Antivirus']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Aplicaciones</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Aplicaciones']) + '</div>' +
+                        '</div>'
+                        : '' ) +
+                    '</div>' + // FIN DE BLOQUE1
+                '<div class="col-md-6">' +
+
+                        (parseInt(@Session["ID_ACCO"]) != 55 && parseInt(@Session["ID_ACCO"]) != 60 ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Modo de Compra</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['ModoCompra']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Código Solped</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Solped']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Centro de Costo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['CentroCosto']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Costo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Costo']) + '</div>' +
+                        '</div>' +
+                                '<div class = "row">' +
+                                    '<div class = "col-md-5"><b>Lote</b></div>' +
+                                    '<div class = "col-md-7">' + (data['Data'][index]['Lote']) + '</div>' +
+                            '</div>'
+                        : '' ) +
+                        (parseInt(@Session["ID_ACCO"]) == 60 && '@ViewBag.Grupo' == "MICROINFORMATICO" ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Proyecto</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Contrato']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Fecha Inicio</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaAdquisicion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Fecha Fin</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaFin']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Tarifa</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Costo']) + '</div>' +
+                        '</div>'
+                        : '' ) +
+                        (parseInt(@Session["ID_ACCO"]) == 60 && '@ViewBag.Grupo' == "MOVIL" ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Contrato</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Contrato']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Fecha Inicio</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaAdquisicion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Fecha Renovación</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaFin']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Monto Mensual sin IGV</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Costo']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Monto total Plan</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['MontoTotal']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Modalidad</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Modalidad']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Operador</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Operador']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Plan</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Plan']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Anexo</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['IpLocal']) + '</div>' +
+                        '</div>'
+                        : '' ) +
+                        (parseInt(@Session["ID_ACCO"]) == 60 && '@ViewBag.Grupo' == "INFRAESTRUCTURA" ?
+                            '<div class = "row">' +
+                                '<div class = "col-md-5"><b>Contrato</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['Contrato']) + '</div>' +
+                            '</div>' +
+                            '<div class = "row">' +
+                                '<div class = "col-md-5"><b>Modo de Compra</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['ModoCompra']) + '</div>' +
+                            '</div>' +
+                            '<div class = "row">' +
+                                '<div class = "col-md-5"><b>Ip Local</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['IpLocal']) + '</div>' +
+                            '</div>' +
+                            '<div class = "row">' +
+                                '<div class = "col-md-5"><b>MAC Física</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['Mac']) + '</div>' +
+                            '</div>' +
+                            ((data['Data'][index]['TipoActivo']) == "SERVIDOR" ?
+                                '<div class = "row">' +
+                                    '<div class = "col-md-5"><b>Procesador 1 - RAM 1</b></div>' +
+                                    '<div class = "col-md-7">' + (data['Data'][index]['ProcesadorRam1']) + '</div>' +
+                                '</div>' +
+                                '<div class = "row">' +
+                                    '<div class = "col-md-5"><b>Procesador 2 - RAM 2</b></div>' +
+                                    '<div class = "col-md-7">' + (data['Data'][index]['ProcesadorRam2']) + '</div>' +
+                                '</div>' +
+                                '<div class = "row">' +
+                                    '<div class = "col-md-5"><b>Cantidad HD</b></div>' +
+                                    '<div class = "col-md-7">' + (data['Data'][index]['CantidadHD']) + '</div>' +
+                                '</div>' +
+                                '<div class = "row">' +
+                                    '<div class = "col-md-5"><b>Capacidad HD</b></div>' +
+                                    '<div class = "col-md-7">' + (data['Data'][index]['CapacidadHD']) + '</div>' +
+                                '</div>'
+                            : '' )
+                        : '' ) +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Condición</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Condicion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Lugar</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Sitio']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Locación</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Locacion']) + '</div>' +
+                        '</div>' +
+                        (parseInt(@Session["ID_ACCO"]) == 60 && '@ViewBag.Grupo' == "MICROINFORMATICO" ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Ubicación</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Ubicacion']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Fecha de Creación</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaCreacion']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Última Actualización</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaActualizacion']) + '</div>' +
+                        '</div>' +
+                        ((parseInt(@Session["ID_ACCO"]) != 55 && parseInt(@Session["ID_ACCO"]) != 60) ||
+                         (parseInt(@Session["ID_ACCO"]) == 55 && "@ViewBag.Grupo" == "OT") ?
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Ip Local</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['IpLocal']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Ip Pública</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['IpPublica']) + '</div>' +
+                        '</div>' +
+                        '<div class = "row">' +
+                            '<div class = "col-md-5"><b>Contrato</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Contrato']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        (parseInt(@Session["ID_ACCO"]) == 4 ?
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Valor Activo</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['ValorActivo']) + '</div>' +
+                             '</div>' +
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Riesgo Intrínseco</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['RiesgoIntrinseco']) + '</div>' +
+                             '</div>' +
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>MAC Inalámbrica</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['Mac_Address']) + '</div>' +
+                             '</div>'
+                         : '') +
+                         (parseInt(@Session["ID_ACCO"]) == 19 ?
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Fecha Inicio de Préstamo</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['FecIniPrest']) + '</div>' +
+                             '</div>' +
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Fecha Fin de Préstamo</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['FecFinPrest']) + '</div>' +
+                                '</div>'
+                         : '') +
+                        ((parseInt(@Session["ID_ACCO"]) == 19 || (parseInt(@Session["ID_ACCO"]) == 55 && "@ViewBag.Grupo" != "OT") || (parseInt(@Session["ID_ACCO"]) == 1 && ("@ViewBag.ID_TYPE_ASSE" == 6 || "@ViewBag.ID_TYPE_ASSE" == 3 || "@ViewBag.ID_TYPE_ASSE" == 1223 ))) ?
+                        '<div class="row">' +
+                            '<div class="col-md-5"><b>Garantía</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['fechaFinGarantia']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        ((parseInt(@Session["ID_ACCO"]) != 60 && parseInt(@Session["ID_ACCO"]) != 55) ||
+                         (parseInt(@Session["ID_ACCO"]) == 55 && "@ViewBag.Grupo" != "OT") ?
+                        '<div class="row">' +
+                            '<div class="col-md-5"><b>Orden de compra</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['OrdenCompra']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        (parseInt(@Session["ID_ACCO"]) == 55 && "@ViewBag.Grupo" == "OT" ?
+                        '<div class="row">' +
+                            '<div class="col-md-5"><b>Lote</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['Lote']) + '</div>' +
+                        '</div>'
+                        : '') +
+                        (parseInt(@Session["ID_ACCO"]) == 56 || parseInt(@Session["ID_ACCO"]) == 57 || parseInt(@Session["ID_ACCO"]) == 58 ?
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Grupo</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['Grupo']) + '</div>' +
+                             '</div>' +
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Arrendador</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['Arrendador']) + '</div>' +
+                            '</div>' +
+                            '<div class="row">' +
+                            '<div class="col-md-5"><b>Fecha Fin Contrato</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['FechaFinContrato']) + '</div>' +
+                            '</div>' +
+                            '<div class="row">' +
+                            '<div class="col-md-5"><b>Tipo usuario</b></div>' +
+                            '<div class = "col-md-7">' + (data['Data'][index]['TipoUsuario']) + '</div>' +
+                            '</div>'
+                                : '' ) +
+                        (parseInt(@Session["ID_ACCO"]) == 1 ?
+                             '<div class="row">' +
+                                '<div class="col-md-5"><b>Usado Por Contratista</b></div>' +
+                                '<div class = "col-md-7">' + (data['Data'][index]['PorContratista']) + '</div>' +
+                             '</div>' +
+                             (data['Data'][index]['PorContratista'] == 'SI' ?
+                                '<div class="row">' +
+                                    '<div class="col-md-5"><b>Empresa</b></div>' +
+                                    '<div class = "col-md-7">' + (data['Data'][index]['EmpresaContratista']) + '</div>' +
+                                 '</div>' +
+                                 '<div class="row">' +
+                                    '<div class="col-md-5"><b>Usuario</b></div>' +
+                                    '<div class = "col-md-7">' + (data['Data'][index]['UsuarioContratista']) + '</div>' +
+                                 '</div>' +
+                                 '<div class="row">' +
+                                    '<div class="col-md-5"><b>Área</b></div>' +
+                                    '<div class = "col-md-7">' + (data['Data'][index]['AreaContratista']) + '</div>' +
+                                 '</div>'
+                             : '' )
+                    : '') +
+                    '</div>' +
+                '</div>'+
+                '<div class="chat-wrapper">' +
+                    '<div class="chat-box-wrapper" >' +
+                        '<div>' +
+                            '<div class="avatar-icon-wrapper mr-1">' +
+                                '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                    '<img src="/Content/Fotos/' + (data['Data'][index]['Foto'])  + '.jpg" />' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="chat-box">' +
+                                '<div class="form" id="clipboard">' +
+                                    (data['Data'][index]['Resumen']) +
+                                '</div>' +
+                            '</div>' +
+                            '<small class="opacity-7">' +
+                                (data['Data'][index]['Creador']) +
+                                ((data['Data'][index]['NombreArchivo']) != "-" ?
+                                    '<div class="msgBoxBody">' +
+                                    '<li><a href="/Adjuntos/Asset/' + (data['Data'][index]['NombreArchivo']) + '_'+ (data['Data'][index]['IdArchivo'])+(data['Data'][index]['ExtensionArchivo'])+ '" target="_blank">'+
+                                    (data['Data'][index]['NombreArchivo'])+(data['Data'][index]['ExtensionArchivo'])+ '</a ></li> '+
+                                    '</div>' : '') +
+                            '</small>' +
+                         '</div>' +
+                    '</div>' +
+                 '</div>'+
+                    '<div class = "FondoBlanco2">' +
+                        //'<div class="detailsSummary">' +
+                        //    '<div id="detSummary">' +
+                        //        '<div class="containerdt">' +
+                        //            '<div class="userData">' +
+                        //                '<div class="asignedImage">' + '<a href="#"><img style="width:70px; height:66px;" src="/Content/Fotos/' + (data['Data'][index]['Foto']) + '.jpg"/></a></div>' +
+                        //            '</div>' +
+                        //            '<div class="messageData">' +
+                        //                '<div class="messageArrow"></div>' +
+                        //            '<div class ="messageBoxDet">' +
+                        //                '<div class ="msgBoxDetUser">' + 'Creado por ' +
+                        //                    (data['Data'][index]['Creador']).toLowerCase() +
+                        //                '</div>' +
+                        //            '</div>' +
+                        //            '<div class="msgBoxBody">' +
+                        //                (data['Data'][index]['Resumen']) +
+                        //            '</div>' +
+                        //            ((data['Data'][index]['NombreArchivo']) != "-" ?
+                        //            '<div class="msgBoxBody">' +
+                        //            '<li><a href="/Adjuntos/Asset/' + (data['Data'][index]['NombreArchivo']) + '_'+ (data['Data'][index]['IdArchivo'])+(data['Data'][index]['ExtensionArchivo'])+ '" target="_blank">'+
+                        //            (data['Data'][index]['NombreArchivo'])+(data['Data'][index]['ExtensionArchivo'])+ '</a ></li> '+
+                        //            '</div>' : '') +
+                        //            '</div>' +
+                        //        '</div>' +
+                        //    '</div>' +
+                        //'</div>' +
+                    '</div>'
+            );
+
+            $("#divBuscarImage").html(
+                '<a style="color:#004170;" href="https://www.google.com.pe/search?hl=es-419&site=imghp&tbm=isch&source=hp&biw=1366&bih=414&q='
+                + (data['Data'][index]['TipoActivo']).replace(" ", "+") + '+'
+                + (data['Data'][index]['Marca']).replace(" ", "+") + '+'
+                + (data['Data'][index]['NombreComercial']).replace(" ", "+") + '&oq='
+                + (data['Data'][index]['TipoActivo']).replace(" ", "+") + '+'
+                + (data['Data'][index]['Marca']).replace(" ", "+") + '+'
+                + (data['Data'][index]['NombreComercial']).replace(" ", "+")
+                + '" target="_blank">Buscar imagen en la web</a>');
+        });
+    }
+
+    function ActualizarUbicacion() {
+
+        $.ajax({
+            url: "/Asset/ActualizarUbicacion/",
+            data: "IdAsse=" + @ViewBag.ID_ASSE +
+                  "&IdLoca=" + $("#ID_LOCA").val() +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+                toastr.success(resp, "Información Guardada");
+                if(resp="El Registro ha sido actualizado."){
+                    ObtenerDatosActivo();
+                }
+            }
+        });
+
+    }
+
+    function uploadDone(msg, code) {
+
+        if (msg == "OK") {
+            toastr.success("Información Actualizada.", "Mensaje");
+            if (code == 1) {
+                location.reload();
+            }
+        } else if (msg == "INFO") {
+            toastr.warning(code, "Mensaje");
+        }
+        else {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+
+            var mensaje = 'No se Actualizaron los Datos.\n\n'
+
+            if (code == 'Acta') { mensaje = mensaje + 'Falta Acta de Conformidad' + '\n'; }
+            if (code == 'Informe') { mensaje = mensaje + 'Falta Informe Técnico' + '\n'; }
+
+            toastr.error(mensaje, "Mensaje");
+        }
+    }
+
+</script>

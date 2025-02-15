@@ -1,0 +1,99 @@
+﻿@{
+    Layout = null;
+}
+
+<style>
+    .frameHidden {
+        display: none;
+    }
+</style>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+@using (Html.BeginForm("DescargarExcelGCambios", "ChangeRequest", FormMethod.Post, new { target = "upload_targetProfile" }))
+{
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="position-relative form-group">
+                <label id="lbl" for="lbl">
+                    Para obtener el Reporte se tiene que ingresar un periodo
+                    (Desde/Hasta)
+                </label>
+                <label id="lblF" for="lblF">
+                    El Reporte se descargará en un excel.
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="position-relative form-group">
+                <label id="lblDesde">Desde </label>
+                <input id="FROM_DATE" type="text" name="FROM_DATE" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="position-relative form-group">
+                <label id="lblHasta">Hasta </label>
+                <input id="TO_DATE" type="text" name="TO_DATE" />
+            </div>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6">
+                    &nbsp;
+                </div>
+                <div class="col-md-6">
+                    <button id="btnSubmit" class="btn btn-block btn-primary btn-sm" data-dismiss="modal">Generar Reporte</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<iframe id="upload_targetProfile" name="upload_targetProfile" class="frameHidden"></iframe>
+
+<script>
+    $(document).ready(function () {
+        var FROM_DATE = $("#FROM_DATE").kendoDatePicker({
+            format: "yyyy/M/d",
+        }).data("kendoDatePicker");
+        var TO_DATE = $("#TO_DATE").kendoDatePicker({
+            format: "yyyy/M/d",
+        }).data("kendoDatePicker");
+
+        $("#btnSubmit").on("click", function (e) {
+            e.stopPropagation();
+            var $formulario = $(this).closest("form");
+            toastr.info('Espere por favor...');
+
+            $.ajax({
+                url: $formulario.attr('action'),
+                type: $formulario.attr('method'),
+                data: $formulario.serialize(),
+                success: function (result) {
+                    if (result.success == null) {
+                        toastr.success("Se descargará el reporte excel");
+                        FROM_DATE.value(null);
+                        TO_DATE.value(null);
+                    } else if (!result.success) {
+                        if (result.message == null) {
+                            toastr.info("No se encontraron resultados para el rango de fechas proporcionado");
+                        }
+                        else {
+                            toastr.error(result.message);
+                        }
+                    } else {
+                        toastr.success(result.message);
+                    }
+                },
+                error: function (xhr, status, error) {
+                    toastr.error('Ha ocurrido un error, contacte al administrador');
+                }
+            });
+        });
+    });
+</script>

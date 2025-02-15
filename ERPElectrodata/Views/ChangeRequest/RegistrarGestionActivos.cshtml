@@ -1,0 +1,928 @@
+﻿@{
+    ViewBag.Title = "RegistrarGestionCambio";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link rel="stylesheet" href="~/Content/themes/plugin/iCheck/all.css">
+<script src="~/Content/themes/plugin/iCheck/icheck.min.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    r {
+        color: #F83C50;
+        font-weight: bol;
+    }
+
+    #SmallModalTitle {
+        font-size: 18px;
+    }
+
+    /*.modal:nth-of-type(even) {
+        z-index: 1042 !important;
+    }
+
+    .modal-backdrop.in:nth-of-type(even) {
+        z-index: 1041 !important;
+    }*/
+</style>
+@using (Html.BeginForm("GuardarGestionActivo", "ChangeRequest", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmRegistrarCambio", name = "FrmRegistrarCambio", target = "FrmRegistrarCambio" }))
+{
+
+
+    <div id="mensajeGestionCambio"></div>
+    <input type="hidden" id="Contador" name="Contador" value="0" />
+    <input type="hidden" id="Flag" name="Flag" value="0" />
+    <input type="hidden" id="IdTicket" name="IdTicket" value="@ViewBag.IdTicket" />
+    <input type="hidden" id="ClasificacionCambio" name="ClasificacionCambio" />
+    <input type="hidden" id="TipoCambio" name="TipoCambio" />
+    <input type="hidden" id="Prioridad" name="Prioridad" />
+    @*<input type="hidden" id="CambioLight" name="CambioLight" />
+        <input type="hidden" id="CambioStandard" name="CambioStandard" />
+        <input type="hidden" id="PerfilActivos" name="PerfilActivos" />*@
+    <input type="hidden" id="CaracteristicasImpacto" name="CaracteristicasImpacto" />
+    <div class="row">
+        <div class="col-md-6">
+            <div class="main-card mb-3 card">
+                <div class="card-header">
+                    Clasificación del Cambio
+                </div>
+                <div class="card-body">
+
+
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                Clasificación del Cambio <r>(*)</r>
+                                <select id="cbClasificacionCambio" name="cbClasificacionCambio" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-row" id="divTipoDescripcion">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                Descripción <r>(*)</r>
+                                <input id="txtTipoDescripcion" name="txtTipoDescripcion" class="form-control" type="text" style="width:100%" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-row" id="divTipoCambio">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                Tipo del Cambio <r>(*)</r>
+                                <select id="cbTipoCambio" name="cbTipoCambio" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                Prioridad del Cambio <r>(*)</r>
+                                <select id="cbPrioridad" name="cbPrioridad" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-md-6">
+            <div class="main-card mb-3 card">
+                <div class="card-header">
+                    Características del Impacto
+                </div>
+                <div class="card-body">
+
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div id="divImpacto">
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-row" id="divImpactoDescripcion">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    Descripción <r>(*)</r>
+                                    <input id="txtImpactoDescripcion" name="txtImpactoDescripcion" class="form-control" type="text" />
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-header">
+                    Desarrollo del Cambio
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                ¿Porque requiere realizar el cambio? <r>(*)</r>
+                                <input id="txtPregunta1" name="txtPregunta1" class="form-control" type="text" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                Describir el cambio<r> (*)</r>
+                                <input id="txtPregunta2" name="txtPregunta2" class="form-control" type="text" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                ¿Cual son los beneficios del cambio? <r>(*)</r>
+                                <input id="txtPregunta3" name="txtPregunta3" class="form-control " type="text" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                ¿Cual es el riesgo relacionado al cambio? <r>(*)</r>
+                                <input id="txtPregunta4" name="txtPregunta4" class="form-control" type="text" />
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-header">
+                    Detalle del Cambio
+                </div>
+                <div class="card-body">
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <button type="button" class="btn btn-primary btn-block" id="add_row">
+                                    <i class="fa fa-plus"></i> Agregar
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <table id="tablaDetalleCambio" class="table table-bordered table-striped table-responsive" style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th>Actividad</th>
+                                            <th>Responsable</th>
+                                            <th>Fecha Inicio</th>
+                                            <th>Fecha Fin</th>
+                                            <th>Descripción</th>
+                                            <th>Opciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <select id='cbActividad0' name='cbActividad0' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+
+                                            </td>
+                                            <td>
+                                                <select id='cbResponsable0' name='cbResponsable0' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+
+                                            </td>
+                                            <td>
+                                                <div class='input-group date'>
+                                                    <div class='input-group-addon'>
+                                                        <i class='fa fa-calendar'></i>
+                                                    </div>
+                                                    <input type='text' class='form-control pull-right' id='dtFechaInicio0' name='dtFechaInicio0' />
+
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class='input-group date'>
+                                                    <div class='input-group-addon'>
+                                                        <i class='fa fa-calendar'></i>
+                                                    </div>
+                                                    <input type='text' class='form-control pull-right' id='dtFechaFin0' name='dtFechaFin0' />
+
+                                                </div>
+                                            </td>
+
+                                            <td><input id='Descripcion0' name='Descripcion0' type='text' placeholder='Descripción' class='form-control input-md'></td>
+
+                                            <td style='text-align:center'><button id='EliminarFila' type='button' class='btn btn-danger btn-sm'><strong>X</strong></button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                &nbsp;
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <button id="submit" class="btn btn-block btn-primary" onclick="MensajeCargando();">GUARDAR</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+    @*<div class="panel panel-default" id="gestionCambio">
+            <div class="panel-heading">
+                <span>Gestión de Cambios</span>
+            </div>
+            <div class="panel-body">
+                <div class="col-md-6">
+                    <div class="panel panel-default ">
+                        <div class="panel-heading">Clasificación del Cambio</div>
+                        <div class="panel-body" id="divClasificacionCambio">
+                            <div class="col-md-6">
+                                Clasificación del Cambio <r>(*)</r>
+                            </div>
+                            <div class="col-md-6">
+                                <select id="cbClasificacionCambio" name="cbClasificacionCambio" class="form-control input-sm select2" type="text" style="width:100%" />
+                            </div>
+                            <div id="divTipoDescripcion">
+                                <div class="col-md-6" style="padding-top:8px">
+                                    <div> Descripción <r>(*)</r></div>
+                                </div>
+                                <div class="col-md-6" style="padding-top:8px">
+                                    <input id="txtTipoDescripcion" name="txtTipoDescripcion" class="form-control" type="text" style="width:100%" />
+                                </div>
+                            </div>
+                            <div id="divTipoCambio">
+                                <div class="col-md-6" style="padding-top:10px">
+                                    Tipo del Cambio <r>(*)</r>
+                                </div>
+                                <div class="col-md-6" style="padding-top:10px">
+                                    <select id="cbTipoCambio" name="cbTipoCambio" class="form-control input-sm select2" type="text" style="width:100%" />
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="padding-top:10px">
+                                Prioridad del Cambio <r>(*)</r>
+                            </div>
+                            <div class="col-md-6" style="padding-top:10px">
+                                <select id="cbPrioridad" name="cbPrioridad" class="form-control input-sm select2" type="text" style="width:100%" />
+                            </div>
+                            <div class="col-md-12" style="padding-top:5px">
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">Características del Impacto</div>
+                        <div class="panel-body" style="overflow-y: scroll; height: 143px;">
+                            <div id="divImpacto">
+                            </div>
+                            <div id="divImpactoDescripcion">
+                                <div class="col-md-5" style="padding-top:10px;text-align:right">
+                                    <div> Descripción <r>(*)</r></div>
+                                </div>
+                                <div class="col-md-7" style="padding-top:10px">
+                                    <input id="txtImpactoDescripcion" name="txtImpactoDescripcion" class="form-control" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-12" id="comentarios">
+                        <div class="panel panel-default" style="width:100%;">
+                            <div class="panel-heading">Desarrollo del Cambio</div>
+                            <div class="panel-body">
+                                <div class="col-md-6">
+                                    <div> ¿Porque requiere realizar el cambio? <r>(*)</r></div>
+                                    <input id="txtPregunta1" name="txtPregunta1" class="form-control" type="text" />
+                                </div>
+                                <div class="col-md-6">
+                                    <div>Describir el cambio<r> (*)</r></div>
+                                    <input id="txtPregunta2" name="txtPregunta2" class="form-control" type="text" />
+                                </div>
+                                <div class="col-md-6">
+                                    <div>¿Cual son los beneficios del cambio? <r>(*)</r></div>
+                                    <input id="txtPregunta3" name="txtPregunta3" class="form-control " type="text" />
+                                </div>
+                                <div class="col-md-6">
+                                    <div>¿Cual es el riesgo relacionado al cambio? <r>(*)</r></div>
+                                    <input id="txtPregunta4" name="txtPregunta4" class="form-control" type="text" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                <div class="col-md-12">
+                    <div class="panel panel-default" style="width:100%;">
+                        <div class="panel-heading">Detalle del Cambio</div>
+                        <div class="panel-body">
+                            <button type="button" class="btn btn-primary pull-left" id="add_row">
+                                <i class="glyphicon glyphicon-plus"></i> Agregar
+                            </button>
+                            <br /><br /><br />
+                            <div id="Parametro">
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="tab_1">
+                                        <div class="box">
+                                             /.box-header
+                                            <div class="box-body">
+                                                <table id="tablaDetalleCambio" class="table table-bordered table-striped" style="width:100%">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Actividad</th>
+                                                            <th>Responsable</th>
+                                                            <th>Fecha Inicio</th>
+                                                            <th>Fecha Fin</th>
+                                                            <th>Descripción</th>
+                                                            <th class="opciones">Opciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td class='col-md-2'>
+                                                                <select id='cbActividad0' name='cbActividad0' class='form-control input-sm select2' type='text' style="width:100%" />
+
+                                                            </td>
+                                                            <td class='col-md-2'>
+                                                                <select id='cbResponsable0' name='cbResponsable0' class='form-control input-sm select2' type='text' style="width:100%" />
+
+                                                            </td>
+                                                            <td class='col-md-2'>
+                                                                <div class='input-group date'>
+                                                                    <div class='input-group-addon'>
+                                                                        <i class='fa fa-calendar'></i>
+                                                                    </div>
+                                                                    <input type='text' class='form-control pull-right' id='dtFechaInicio0' name='dtFechaInicio0' />
+
+                                                                </div>
+                                                            </td>
+                                                            <td class='col-md-2'>
+                                                                <div class='input-group date'>
+                                                                    <div class='input-group-addon'>
+                                                                        <i class='fa fa-calendar'></i>
+                                                                    </div>
+                                                                    <input type='text' class='form-control pull-right' id='dtFechaFin0' name='dtFechaFin0' />
+
+                                                                </div>
+                                                            </td>
+
+                                                            <td class='col-md-3'><input id='Descripcion0' name='Descripcion0' type='text' placeholder='Descripción' class='form-control input-md'></td>
+
+                                                            <td class='col-md-1 opciones' style='text-align:center'><button id='EliminarFila' type='button' class='btn btn-danger btn-sm'><strong>X</strong></button></td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                             /.box-body
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    <br />
+                </div>
+                <div class="col-md-3" id="btnGuardarCambio">
+                    <button id="submit" class="btn btn-block btn-primary" onclick="MensajeCargando();"><i class="glyphicon glyphicon-floppy-disk"></i>  GUARDAR</button>
+                    <button class="scrollup"><i class="glyphicon glyphicon-floppy-disk"></i>  scroll</button>
+
+                </div>
+                <div>
+                    <label></label>
+                </div>
+            </div>
+        </div>*@
+}
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<iframe id="FrmRegistrarCambio" name="FrmRegistrarCambio" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+
+<script>
+    var caracteristicasImpacto = "";
+    $(document).ready(function () {
+        @*$('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+        $('#cbCambioLight').iCheck({
+            checkboxClass: 'icheckbox_square-aero',
+            radioClass: 'iradio_square-aero',
+            increaseArea: '20%' // optional
+        });
+        $('#cbCambioStandard').iCheck({
+            checkboxClass: 'icheckbox_square-aero',
+            radioClass: 'iradio_square-aero',
+            increaseArea: '20%' // optional
+        });
+        $('.SolicitudDeActivo').hide();
+        $('#gestionCambio').hide();
+        $('#cbCambioLight').iCheck('check');
+        $('#chkPerfilActivo').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#chkSolicitudActivo').iCheck('uncheck');
+                $('#chkPerfilActivo').iCheck('check');
+                $('.SolicitudDeActivo').hide('show');
+                CambioLight();
+            }
+            else{
+                $('#gestionCambio').hide();
+            }
+        });
+        $('#chkSolicitudActivo').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#chkSolicitudActivo').iCheck('check');
+                $('#cbCambioLight').iCheck('check');
+                $('#chkPerfilActivo').iCheck('uncheck');
+                $('.SolicitudDeActivo').show('show');
+                CambioLight();
+            }
+            else {
+                $('#gestionCambio').hide();
+                $('#cbCambioLight').iCheck('uncheck');
+                $('#cbCambioStandard').iCheck('uncheck');
+            }
+        });
+        $('#cbCambioLight').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#cbCambioStandard').iCheck('uncheck');
+                $('#cbCambioLight').iCheck('check');
+                CambioLight();
+            } else {
+                $('#gestionCambio').hide();
+            }
+        });
+        $('#cbCambioStandard').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $('#cbCambioStandard').iCheck('check');
+                $('#cbCambioLight').iCheck('uncheck');
+                $('#gestionCambio').show();
+                if(@ViewBag.IdTipoCambioCategoria!="0"){
+                     var $newOption = $("<option></option>").val("@ViewBag.IdTipoCambioCategoria").text("@ViewBag.TipoCambioCategoria");
+                     $("#cbClasificacionCambio").append($newOption).trigger('change');
+                    //setTimeout(function(){ObtenerImpacto(@ViewBag.IdTipoCambioCategoria);},1500);
+                }
+                $("#add_row").show();
+                $(".opciones").show();
+                $('#comentarios').show();
+                HabilitarCombos(false);
+            } else {
+                $('#gestionCambio').hide();
+            }
+        });*@
+
+        //if ($(this).is(':checked')) {
+        //    $('#chkSolicitudActivo').iCheck('check');
+        //    $('#cbCambioLight').iCheck('check');
+        //    $('#chkPerfilActivo').iCheck('uncheck');
+        //    $('.SolicitudDeActivo').show('show');
+            //CambioLight();
+        //}
+        //else {
+        //    $('#gestionCambio').hide();
+        //    $('#cbCambioLight').iCheck('uncheck');
+        //    $('#cbCambioStandard').iCheck('uncheck');
+        //}
+
+        $("#divTipoDescripcion").hide();
+        $("#divImpactoDescripcion").hide();
+        if(@ViewBag.IdTipoCambioCategoria=="0"){
+            ListarCambioImpacto();
+        }
+        ObtenerDatosDetalleCambio(0);
+
+        $('body').css('padding-right','0');
+
+        var i=1;
+        $("#add_row").click(function(){
+            var newRow = $("<tr>");
+            var cols =
+                "<td>"+
+                "<select id='cbActividad" + i + "' name='cbActividad" + i +"' class='form-control input-sm select2' type='text' style='width:100%' ></select>"+
+                "</td>"+
+                "<td>"+
+                "<select id='cbResponsable" + i + "' name='cbResponsable" + i +"' class='form-control input-sm select2' type='text' style='width:100%' ></select>"+
+                "</td>"+
+                "<td>"+
+                    "<div class='input-group date'>"+
+                        "<div class='input-group-addon'>"+
+                        "     <i class='fa fa-calendar'></i>"+
+                        "</div>"+
+                        "<input type='text' class='form-control pull-right' id='dtFechaInicio"+i+"' name='dtFechaInicio"+i+"' />"+
+                    "</div>"+
+                "</td>"+
+                "<td>"+
+                    "<div class='input-group date'>"+
+                        "<div class='input-group-addon'>"+
+                        "     <i class='fa fa-calendar'></i>"+
+                        "</div>"+
+                        "<input type='text' class='form-control pull-right' id='dtFechaFin"+i+"' name='dtFechaFin"+i+"'  />"+
+                    "</div>"+
+                "</td>"+
+                "<td><input  id='Descripcion"+i+"' name='Descripcion"+i+"' type='text' placeholder='Descripción'  class='form-control input-md'></td>"+
+                "<td style='text-align:center'><button id='EliminarFila' type='button' class='btn btn-danger btn-sm' ><strong>X</strong></button></td>";
+
+            newRow.append(cols);
+            $("#tablaDetalleCambio").append(newRow);
+
+            ObtenerDatosDetalleCambio(i);
+            $("#Contador").val(i);
+
+            i++;
+        });
+
+        $("#tablaDetalleCambio").on("click", "#EliminarFila", function (event) {
+            $(this).closest("tr").remove();
+            //i--;
+        });
+
+        CargarClasificacionCambio();
+
+        $("#cbClasificacionCambio").on('change', function (e) {
+            $("#cbTipoCambio").empty();
+            $("#cbPrioridad").empty();
+            var cbClasificacionCambio = $("#cbClasificacionCambio").find(':selected').val();
+            //Impacto
+            $("#divImpacto").empty();
+            ListarCambioImpacto();
+
+            //$('input[type=checkbox]').prop("checked",false);
+            setTimeout(function () {
+                //Obteniendo el impacto por Clasificación del Cambio
+                ObtenerImpacto(cbClasificacionCambio);
+            },800);
+
+            $("#cbTipoCambio").select2({
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/ChangeRequest/ListarCambioClasificacionTipo/" + cbClasificacionCambio,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+
+            $("#cbPrioridad").select2({
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/ChangeRequest/ListarCambioPrioridad/" +cbClasificacionCambio+"/"+@ViewBag.IdCuenta,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+            //Tipo Descripción
+            $.ajax({
+                url: "/ChangeRequest/ObtenerTipoDescripcion/"+cbClasificacionCambio,
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (data) {
+                    if(data=="true"){
+                        $("#divTipoDescripcion").show();
+                        $("#divTipoCambio").hide();
+                        $("#txtTipoDescripcion").val('');
+                    }else{
+                        $("#divTipoDescripcion").hide();
+                        $("#divTipoCambio").show();
+                        $("#txtTipoDescripcion").val('');
+                    }
+
+
+                },
+                error: function (source) {
+
+                }
+            });
+
+        });
+
+        var $newOption = $("<option></option>").val("1").text("Menor");
+        $("#cbClasificacionCambio").append($newOption).trigger('change');
+        var $clasificacion = $("<option></option>").val("1").text("Ampliación o asignación de nuevos equipos, periféricos o elementos de telefonía.");
+        $("#cbTipoCambio").append($clasificacion).trigger('change');
+        var $prioridad = $("<option></option>").val("1").text("Baja");
+        $("#cbPrioridad").append($prioridad).trigger('change');
+        var $actividad = $("<option></option>").val("1").text("Tareas previas");
+        $("#cbActividad0").append($actividad).trigger('change');
+        $("#add_row").hide();
+        $(".opciones").hide();
+    });
+
+    function ListarCambioImpacto() {
+        caracteristicasImpacto = "";
+        $.ajax({
+            url: "/ChangeRequest/ListImpact/",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(source['Data'], function (index, value) {
+                    $("#divImpacto").append(
+                        '<div class="custom-checkbox custom-control">' +
+                            '<input type="checkbox"  id="' + data['Data'][index]['idImpact'] + '" name="' + data['Data'][index]['detail'] + '"  value="' + data['Data'][index]['ischecked'] + '" onclick="impactoDescripcion(this,'+(data['Data'][index]['ischecked'])+')">'+
+                            '<label clas="custom-control-label" for="'+data['Data'][index]['idImpact'] +'">'+
+                            data['Data'][index]['detail']+
+                            '</label></div>'
+                    );
+                    //caracteristicasImpacto = caracteristicasImpacto + data['Data'][index]['idImpact'] + '|' + data['Data'][index]['detail'] + ',';
+                    //if(($('#cbCambioLight').is(':checked') == true || $('#chkPerfilActivo').is(':checked') == true) && $('#cbClasificacionCambio').val() == 1){
+                        $('#3').attr('checked',true);
+                    //    HabilitarCheckbox('#'+data['Data'][index]['idImpact'],true);
+                    //}
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+    function ObtenerImpacto(id){
+
+        $.ajax({
+            url: "/ChangeRequest/ObtenerImpactoCambio/"+id+"/"+@ViewBag.IdCuenta,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(source['data'], function (index, value) {
+                    $("#"+data['data'][index]['id']).attr('checked', true);
+                });
+
+            },
+            error: function (source) {
+
+            }
+        });
+    }
+
+    function impactoDescripcion(cb,checked) {
+
+        var indice = 0;
+        $('input[type=checkbox]:checked').each(function() {
+            if(($(this).attr("value"))=="false"){
+                indice=indice+1;
+            }
+        });
+        if(checked==false){
+            if (cb.checked && indice==1){
+                $("#divImpactoDescripcion").show();
+                $("#txtImpactoDescripcion").val('');
+
+            }
+            else if (cb.checked && indice!="0"){ }
+            else if(indice!="0"){ }
+            else{
+                $("#divImpactoDescripcion").hide();
+                $("#txtImpactoDescripcion").val('');
+            }
+        }
+
+    }
+
+    function ObtenerDatosDetalleCambio(i){
+
+
+        $("#cbActividad"+i).select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioTareas/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#cbResponsable"+i).select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioResponsable/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $('#dtFechaInicio'+i).datepicker({ autoclose: true });
+        $('#dtFechaFin'+i).datepicker({ autoclose: true });
+
+    }
+
+    function MensajeCargando(){
+        //if($('#chkPerfilActivo').is(':checked') == true || $('#cbCambioLight').is(':checked') == true){
+            var cImpacto = "";
+            var ar = [];
+            ar = caracteristicasImpacto.split(",");
+            for(var i = 0; i < ar.length; i++){
+                var id = []
+                id = ar[i].split("|");
+                if($("#"+id[0]).is(':checked') == true)
+                    cImpacto = cImpacto + id[0] + ',';
+            }
+            $("#CaracteristicasImpacto").val(cImpacto);
+
+            $('#ClasificacionCambio').val($('#cbClasificacionCambio').val());
+            $('#TipoCambio').val($('#cbTipoCambio').val());
+            $('#Prioridad').val($('#cbPrioridad').val());
+            if($('#chkPerfilActivo').is(':checked') == true){
+                $('#PerfilActivos').val(1);
+            }else{
+                $('#PerfilActivos').val(0);
+            }
+            if($('#cbCambioLight').is(':checked') == true){
+                $('#CambioLight').val(1);
+            }else{
+                $('#CambioLight').val(0);
+            }
+            if($('#cbCambioStandard').is(':checked') == true){
+                $('#CambioStandard').val(1);
+            }else{
+                $('#CambioStandard').val(0);
+            }
+        //}
+        //else
+        //{
+        //    $('#PerfilActivo').val(0);
+        //    $('#CambioLight').val(0);
+        //    $('#CambioStandard').val(0);
+        //    $('#ClasificacionCambio').val(0);
+        //    //if()
+        //    $('#TipoCambio').val($('#cbTipoCambio').val());
+        //}
+        swal({ title: "Procesando información, por favor espere.", text: "Gestión de Cambios", showConfirmButton: false, imageUrl: "/images/spinner.gif" })
+
+    }
+    function MensajeConfirmacion(msj, flag,ticket) {
+        swal.close();
+        $( ".modal" ).scrollTop( 0 );
+
+        if (flag == 1) {
+
+            //$('#SmallModalContent').modal('hide');
+            //$('#SolicitudCambio').modal("hide");
+
+            //$('#SmallModalContent').modal('show');
+            //$("#SmallModalTitle").empty();
+            //$("#SmallModalTitle").text("Sistema Integrado de Gestión");
+            //$("#SmallModalBody").empty();
+            //$("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + msj + "</div>");
+            //$("#SmallModalFooter").empty();
+            //$("#SmallModalFooter").append("<div style='float:right;'>" +
+            //                                  "<button id='continuee' class='k-button'>Continuar</button>" +
+            //                           "</div>");
+            //var undo = $("#continuee")
+            //.bind("click", function () {
+            //    $('#SmallModalContent').modal('hide');
+            //    //if(ticket == 0)
+            //        location.reload();
+            //    //else
+            //    //    window.location.href = "/DetailsTicket/Index/" + ticket;
+            //});
+
+            toastr.success(msj, "Sistema Integrado de Gestión");
+
+            setTimeout(function () {
+                location.reload();
+            }, 4000);
+
+        } else if (flag == 2) {
+
+            //$('#mensajeGestionCambio').empty();
+            //$('#mensajeGestionCambio').show("show");
+            //$("#mensajeGestionCambio").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> " + msj + " </div>");
+            //setTimeout(function () {
+            //    $("#mensajeGestionCambio").fadeOut(5500);
+            //}, 1000);
+
+            toastr.warning(msj, "¡Alerta!");
+        }
+
+    }
+
+    function CargarClasificacionCambio(){
+        $("#cbClasificacionCambio").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Administrator/ListarPrioridadCambio/"+@ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+    }
+
+    function CambioLight(){
+        $('#cbClasificacionCambio').empty();
+        var $newOption = $("<option></option>").val("1").text("Menor");
+        $("#cbClasificacionCambio").append($newOption).trigger('change');
+        var $clasificacion = $("<option></option>").val("1").text("Ampliación o asignación de nuevos equipos, periféricos o elementos de telefonía.");
+        $("#cbTipoCambio").append($clasificacion).trigger('change');
+        var $prioridad = $("<option></option>").val("1").text("Baja");
+        $("#cbPrioridad").append($prioridad).trigger('change');
+        var $actividad = $("<option></option>").val("1").text("Tareas previas");
+        $("#cbActividad0").append($actividad).trigger('change');
+        $("#add_row").hide();
+        $(".opciones").hide();
+        $('#gestionCambio').show();
+        $('#comentarios').hide();
+        //HabilitarCombos(true);
+    }
+
+    //function HabilitarCombos(opcion){
+    //    // Inhabilitar combos
+    //    $('#cbClasificacionCambio').prop('disabled', opcion);
+    //    $('#cbTipoCambio').prop('disabled', opcion);
+    //    $('#cbPrioridad').prop('disabled', opcion);
+    //}
+
+    //function HabilitarCheckbox(id,opcion){
+    //    $(id).prop('disabled', opcion);
+    //}
+</script>

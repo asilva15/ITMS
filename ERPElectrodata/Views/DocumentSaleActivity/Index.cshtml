@@ -1,0 +1,494 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_SALE_ACTIVITY
+
+@{
+    ViewBag.Title = "Details OP";
+    Layout = null;
+}
+
+
+<div style="float:left; width:65%;">
+    <div class="titleForm">
+        <div class="title" id="divTitle">
+            @ViewBag.Titulo
+        <div class="divAjax-Loading" style="display:none;" id="divLoading"></div>
+    </div>
+</div>
+<div class="bodyForm">
+    <div class="inBodyForm">
+        <div id="divDocuSaleActi">
+        </div>
+        <div id="divDetailsArticleService" class="divFondoUno"></div>
+        <div style="clear:both;">
+
+            @using (Html.BeginForm("CreateActivity", "DocumentSaleActivity", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmCreateActivity", target = "ut_Activity" }))
+            {
+                @Html.ValidationSummary(true)
+                <input type="hidden" name="ID_DOCU_SALE_HF" id="ID_DOCU_SALE_HF" value="@ViewBag.ID_DOCU_SALE" />
+                @Html.HiddenFor(model => model.ID_STAT_DOCU_SALE, new { @Value = ViewBag.ID_STAT_DOCU_SALE })
+                <div class="divFondoDos">
+                    <div class="divSpace2_a"></div>
+                    <div class="divCont2">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.Type
+                        </div>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.ID_TYPE_ACTI)
+                            @Html.ValidationMessageFor(model => model.ID_TYPE_ACTI)
+                        </div>
+                    </div>
+                </div>
+                <div class="divFondoUno" id="divDateActConf" style="display:none;">
+                    <div class="divSpace2_a"></div>
+                    <div class="divCont2">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.DateActConf
+                        </div>
+                        <div class="editor-field">
+                            <input type="text" name="DATE_ATTA" id="DATE_ATTA" value=" " />
+                        </div>
+                    </div>
+                </div>                  
+                <div class="divFondoUno" id="divCOMMENT">
+                    <div class="divSpace2_a"></div>
+                    <div style="width:96%;float:left">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.Comment
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextAreaFor(model => model.COM_ACTI_DOCU_SALE, new { rows = "20" })
+                            @Html.ValidationMessageFor(model => model.COM_ACTI_DOCU_SALE)
+                        </div>
+                    </div>
+                </div>
+                <div style="width:100%;" id="divATTACH">
+                    <div style="width: 98.8%; margin: 0 auto;" id="divAttach">
+                        <div style="width: 100%; float:left;">
+                            <input name="files" id="files" type="file" />
+                        </div>
+                    </div>
+                </div>
+                <div class="divFondoUno" id="divAssignee" style="display:none;">
+
+                </div>
+                <div style="margin:0px 15px 0px 0px; height:25px; border:0px solid black; width:98%;" id="divACTION">
+                    <div style="float:right;padding:10px 0px 0px 0px; ">
+                        <button id="submit" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+                    </div>
+                </div>
+                <iframe id="ut_Activity" name="ut_Activity" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+                <div style="clear:both; padding-top:10px;"></div>
+            }
+        </div>
+        <div class="divFondoUno">
+            <div id="divDetails"></div>
+        </div>
+
+        <div style="clear:both; padding-bottom:5px;"></div>
+
+    </div>
+</div>
+</div>
+
+<div style="float:right; width:34%;">
+    <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.Activities</div></div>
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            <div id="divActivities" style="padding:5px;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $("#submit").click(function () {
+        $("#submit").prop("disabled", false);
+        winPopUpModalLoad('@ResourceLanguaje.Resource.Saving OP', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+    });
+
+    $(document).ready(function () {        
+        @*if (parseInt(@Session["Operations_Module"]) == 1) {
+            $("#divCOMMENT").addClass("divHide");
+        }
+        else {
+            $("#divCOMMENT").removeClass("divHide");
+        }*@
+
+        $.ajax({
+            url: "/DocumentSaleActivity/ListByIdDocuSale/@ViewBag.ID_DOCU_SALE",
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                showDetailsDocuSale();
+                //console.log(data1);
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+
+        $("#COM_ACTI_DOCU_SALE").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        var ID_TYPE_ACTI = $("#ID_TYPE_ACTI").kendoComboBox({
+            autoBind: true,
+            index: 0,
+            dataTextField: "NAM_TYPE_ACTI",
+            dataValueField: "ID_TYPE_ACTI",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OptionDocuSaleActivity/ListOptionDocuSaleActivity/@ViewBag.Status/@ViewBag.ID_DOCU_SALE"
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_TYPE_ACTI.bind("change", function (e) {
+            var id = ID_TYPE_ACTI.dataItem().ID_TYPE_ACTI;
+            if (id == 1 || id == 4 || id == 6) {
+                $("#divCOMMENT").css("display", "inline-block");
+                $("#divATTACH").css("display", "inline-block");
+                $("#divACTION").css("display", "inline-block");
+                $("#divAssignee").css("display", "none");
+                if (id == 4) {
+                    $("#divDateActConf").css("display", "inline-block");
+                }
+                else {
+                    $("#divDateActConf").css("display", "none");
+                }
+           }
+            else if (id == 2 || id == 3) {
+                $("#divDateActConf").css("display", "none");
+                $("#divCOMMENT").css("display", "none");
+                $("#divATTACH").css("display", "none");
+                $("#divACTION").css("display", "none");
+                $("#divAssignee").css("display", "inline-block");
+                $("#divLoading").css("display", "block");
+
+                $("#divAssignee").empty();
+                if (id == 2) {
+                    $("#divAssignee").load("/Sales/ViewAssignee?var=" + Math.random() + "&id=@ViewBag.ID_DOCU_SALE&id1=", function () {
+                        $("#divLoading").css("display", "none");
+                    });
+                }
+            }
+
+        });
+
+        var DATE_ATTA = $("#DATE_ATTA").kendoDatePicker().data("kendoDatePicker");
+
+        var onSelect = function (e) {
+            $("#divAttach").css("width", "96%");
+        };
+
+        var onRemove = function (e) {
+            if(e.files == null) {
+                $("#divAttach").css("width", "98.8%");
+            }
+        };
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach"
+            },
+            select: onSelect,
+            remove: onRemove,
+        });
+
+        $("#divDetailsArticleService").empty();
+        $("#divDetailsArticleService").load("/Sales/ViewDetailArticleService?var=" + Math.random() + "&id=@ViewBag.ID_DOCU_SALE&proc=detail", function () {
+            $("#divLoading").css("display", "none");
+        });
+
+    });
+
+    function showDetailsDocuSale() {
+        $.each(data1['Data'], function (index, value) {
+
+            $("#divDocuSaleActi").append(
+                '<div class="divFondoUno">' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.ServiceCompany</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['NAM_COMP']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Status</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['NAM_STAT_DOCU_SALE']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">OS</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['OS']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Date</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['DAT_DOCU_SALE']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.ExpirationTime</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['EXP_DATE']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.CreatedBy</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['UserReg']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="divFondoDos">' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">Customer</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['ClieName']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Addres</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['ClieAddr']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.PhoneNumber</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['ClieTele']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.PhoneExtension</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['ClieExte']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="divFondoUno">' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Contact</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['ContUser']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.JobTitle</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['ContJobT']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.PhoneNumber</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['ContTele']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.PhoneExtension</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['ContExte']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="divFondoDos">' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">Final Customer</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['EndClieName']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Addres</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['EndClieAddr']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.PhoneNumber</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['EndClieTele']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.PhoneExtension</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['EndClieExte']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="divFondoUno">' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Vendor</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['Vendor']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Email</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['VendorEma']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.PhoneNumber</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['VendorTel']) + '</div>' +
+                    '</div>' +
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.PhoneExtension</div>' +
+                        '<div class="smallField">' + (data1['Data'][index]['VendorExt']) + '</div>' +
+                    '</div>' +
+                    (data1['Data'][index]['ID_TICK'] == 0 ? '' :
+                    '<div class="casilla">' +
+                        '<div class="smallTitle">@ResourceLanguaje.Resource.Code Ticket</div>' +
+                        '<div class="smallField"><a href="#/DetailsTicket/Index/' + (data1['Data'][index]['ID_TICK']) + '" title="click here to enter the ticket" target="_blank" style="text-decoration:none;">' + (data1['Data'][index]['COD_TICK']) + '</div>' +
+                    '</div>') +
+                '</div>' +
+                '<div class="divFondoUno">' +
+                    '<div class="detailsSummary">' +
+                        '<div id="detSummary">' +
+                            '<div class="containerdt">' +
+                                '<div class ="userData">' +
+                                    '<div class="asignedImage"><a><img src="/Content/Fotos/' + (data1['Data'][index]['UserFoto']) + '.jpg"/></a></div>' +
+                                '</div>' +
+                                '<div class="messageData">' +
+                                    '<div class="messageArrow"></div>' +
+                                    '<div class="messageBoxDet">' +
+                                        '<div class="msgBoxDetUser">' + '@ResourceLanguaje.Resource.CreatedBy ' + (data1['Data'][index]['NameUser']) +
+                                        '</div>' +
+                                    '</div>' +
+                                    '<div class="msgBoxBody">' + (data1['Data'][index]['SUM_DOCU_SALE']) +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>'
+            );
+        });
+
+        $.each(data1['Data1'], function (index, value) {
+            $("#divActivities").append(
+                '<div class="listActCont">' +
+                    '<div class="listActContGris">' +
+                        (data1['Data1'][index]['NAM_TYPE_ACTI']) +
+                    '</div>' +
+                    '<div class="listActContGrisR">' +
+                        (data1['Data1'][index]['User']) +
+                    '</div>' +
+                    '<div class="listActContGrisC">' +
+                        (data1['Data1'][index]['CREATED']) +
+                    '</div>' +
+                '</div>'
+                );
+
+            $("#divDetails").append('<div class="detailsSummary">' +
+                        '<div id="detSummary">' +
+                            '<div class="containerdt">' +
+                                '<div class="userData">' +
+                                    '<div class="asignedImage"><a href="#"><img src="/Content/Fotos/' + (data1['Data1'][index]['PHOTO']) + '.jpg"/></a></div>' +
+                                '</div>' +
+                                '<div class="messageData">' +
+                                    '<div class="messageArrow"></div>' +
+                                        '<div class ="messageBoxDet">' +
+                                            '<div class ="msgBoxDetUser">' +
+                                                (data1['Data1'][index]['User']).toLowerCase() +
+                                            '</div>' +
+                                            '<div class ="msgBoxDetCreate">' +
+                                                (data1['Data1'][index]['CREATED']) +
+                                            '</div>' +
+                                        '</div>' +
+                                        '<div class ="messageBoxDet2">' +
+                                            '<div class ="msgBoxDetTDI' + (data1['Data1'][index]['ID_TYPE_ACTI']) + '">' +
+                                                (data1['Data1'][index]['NAM_TYPE_ACTI']).toLowerCase() +
+                                            '</div>' +
+                                            '<div class="msgBoxDetAs"> ' + ' ' +
+                                                //((data1['data'][index]['ID_TYPE_DETA_TICK']) == 3 ? (": " + (data1['data'][index]['NAM_STAT']).toLowerCase() + " " + (data1['data'][index]['FEC_SCHE'])) : '') +
+                                                ((data1['Data1'][index]['ID_TYPE_ACTI']) == 2 ? (": " + data1['Data1'][index]['ASSI']).toLowerCase() : '') +
+                                                //((data1['data'][index]['ID_TYPE_DETA_TICK']) == 4 ? (data1['data'][index]['COD_PARENT']):'')+
+                                            '</div>' +
+                                        '</div>' +
+                                    '<div class="msgBoxBody">' +
+                                        (data1['Data1'][index]['COM_ACTI_DOCU_SALE']) +
+                                    '</div>' +
+                                    '<div class ="dadjuntos">' +
+                                        (data1['Data1'][index]['ADJ']) +
+                                '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>');
+        });
+    }
+</script>
+
+<script type="text/javascript">
+    function uploadDone(acc, title, msn) {
+
+        closeWinModalPopUpLoad();        
+
+        if (acc == "OK" || acc == "OK_ASSI" || acc == "OK_ACTCONF") {
+            
+            if (acc == "OK_ASSI") {
+                winPopUpModal("@ResourceLanguaje.Resource.InformationSaved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+               + "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.SaleMsn01</div>"
+               + "<div>Ticket Code: " + msn + "</div>" +
+               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+               "</div></div>"
+                 , 400, 160);
+            }
+            else {
+                winPopUpModal(title, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                "<div style='padding:10px 0 10px 0;'>" + msn + "</div>" +
+                "<div></div>" +
+                "<div style='float:right; padding:30px 0px 0px 0px;'>" +
+                "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                "</div></div>", 400, 140);
+            }
+
+            var undo = $("#continues")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                location.reload(true);
+            });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+                location.reload(true);
+            });
+        }
+        else if(acc == "OK_WARR"){
+            winPopUpModal("@ResourceLanguaje.Resource.InformationSaved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.SaleMsn02</div>" +
+            "<div></div>" +
+            "<div style='float:right; padding:30px 0px 0px 0px;'>" +
+            "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+            "</div></div>", 400, 140);
+
+            $("#divDetailsArticleService").empty();
+            $("#divDetailsArticleService").load("/Sales/ViewDetailArticleService?var=" + Math.random() + "&id=" + title + "&proc=detail", function () {
+                $("#divLoading").css("display", "none");
+            });
+
+            var undo = $("#continues")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                closeWinFormModalPopUp2();
+                $("#submit").prop("disabled", false);
+            });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+                closeWinFormModalPopUp2();
+                $("#submit").prop("disabled", false);
+            });
+        }
+        else {
+            winPopUpModal(title, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + msn + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+                $("#submit").prop("disabled", false);
+            });
+        }
+    }
+</script>
+
+

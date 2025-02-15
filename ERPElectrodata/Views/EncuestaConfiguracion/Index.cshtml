@@ -1,0 +1,483 @@
+﻿@model ERPElectrodata.Models.EncuestaConfiguracion
+@{
+    ViewBag.Title = "EncuestaConfiguracion";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+</script>
+<style type="text/css">
+    a.tooltip span {
+        cursor: default;
+        display: none;
+        padding: 5px;
+        margin: -25px 0px 0px 120px;
+        width: 230px;
+        position: relative;
+        z-index: 9;
+    }
+
+    a.tooltip:hover span {
+        display: block;
+        position: absolute;
+        background: #000;
+        border: 1px solid #cccccc;
+        color: #ddd;
+        font-size: 14px;
+        font-weight: normal;
+        opacity: 0.9;
+    }
+
+    .bg-primary {
+        background-color: rgb(81, 104, 130);
+        font-size: 13px;
+    }
+
+    .detalle {
+        font-size: 13px;
+        color: #7F7F7F;
+    }
+
+    .contenido {
+        background: #DCDCDE;
+    }
+
+    #BtnEditar {
+        color: #2D5C88;
+        background: #ffffff;
+        border: 0;
+    }
+
+    #Enviar {
+        color: #2D5C88;
+        background: #ffffff;
+        border: 0;
+    }
+
+
+    #caja {
+        /*border:1px solid black;*/
+        height: 25px;
+        padding-top: -5px;
+    }
+
+    #pagerdivPrograma {
+        margin-top: 0;
+        padding-top: 0;
+    }
+
+    #exportar {
+        /*clear:both;*/
+        float: right;
+        height: 28px;
+        width: 70px;
+    }
+
+    #Buscar {
+        margin-right: 20px;
+    }
+
+    b {
+        color: #F83C50;
+    }
+
+    .bg-primary {
+        
+    }
+</style>
+<div class="afterMain" id="divContainerCrearCuenta">
+    <div style="float: left; width:100%">
+        <div class="titleForm">
+            <div class="title">
+                Configuración de Envío de Encuestas 
+            </div>
+        </div>
+
+        <div class="bodyForm" id="divNuevaLicencia">
+            <div class=" inbodyform">
+
+                <!--Declaración de Formulario-->
+                @using (Html.BeginForm("Crear", "EncuestaConfiguracion", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEncuestaConfiguracion", target = "upload_target" }))
+                {
+                    @Html.ValidationSummary(true)
+                    <fieldset>
+                        <legend>Sub Tipo Componente</legend>
+
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3" style="width:25%;">
+                                <div class="editor-label">
+                                    Cuenta <b>(*)</b>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.TextBoxFor(model => model.IdAcco)
+                                    @Html.ValidationMessageFor(model => model.IdAcco)
+                                </div>
+                            </div>
+
+                            @*<div class="divSpace3"></div>*@
+                            <div class="divCont3" style="width:10%;">
+                                <div class="editor-label">
+                                    Envío Automático?
+                                </div>
+                                <div class="editor-field">
+                                    @Html.CheckBox("EnvioAutomatico", false)
+                                    @Html.ValidationMessageFor(model => model.EnvioAutomatico)
+                                </div>
+                            </div>
+
+                            <div class="divCont3" style="width:10%;" id="divEnvioDiario">
+                                <div class="editor-label">
+                                    Envío Diario?
+                                </div>
+                                <div class="editor-field">
+                                    @Html.CheckBox("EnvioDiario", false)
+                                    @Html.ValidationMessageFor(model => model.EnvioDiario)
+                                </div>
+                            </div>
+
+                            @*<div class="divSpace3"></div>*@
+                            <div class="divCont3" style="width:25%;" id="divNroEncuestas">
+                                <div class="editor-label">
+                                    Número de Encuestas <b>(*)</b>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.TextBoxFor(model => model.NroEncuestas)
+                                    @Html.ValidationMessageFor(model => model.NroEncuestas)
+                                </div>
+                            </div>
+
+                            &nbsp;&nbsp;&nbsp;
+                            <button id="submit" class="k-button" style="float:right;">Crear</button>
+                        </div>
+                    </fieldset>
+                }
+                @*<button id="Buscar" type="button" class="k-button" style="float:right;" onclick="CargarGrilla()">Buscar</button>*@
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden"></iframe>
+<div style="width: 100%; margin:15px auto;" id="cabecera">
+    <div class="bodyForm">
+        <div class="inBodyForm" style="height:100%; background-color:white">
+            <div class="bg-primary" style="width:100%;">
+                <div class="bg-primary" style="float:left; width:100%;">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:18%"><strong>Cuenta</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:10%"><strong>Nro de Encuestas</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:15%"><strong>Fecha Última de Envío</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:17%"><strong>Envío Automático</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:16%"><strong>Envío Diario</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:7%"><strong>Editar</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:10%"><strong>Enviar Encuesta</strong></div>
+            </div>
+            <div style="float:left; width:100%;height:10px;"></div>
+            <div id="divComponente" class="contentView"></div>
+            <div id="pagerdivComponente" class="contentViewPager" style="width:99%"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaComponente">
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:18%;height:18px;" class="detalle">${NAM_ACCO}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float:left; width:10%;height:10px;" class="detalle">${NroEncuestas}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float: left; width:15%" class="detalle">${FechaUltimaEnvio}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float: left; width:17%" class="detalle">${EnvioAutomatico}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float: left; width:16%" class="detalle">${EnvioDiario}</div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    @*<button type="button" class="glyphicon glyphicon-pencil" style="float:left;" id="Editar" ></button>*@
+
+    <div style="float: left; width:7%;" onclick="EditarEncuestaConfiguracion(${IdEncuestaConfiguracion})">
+        <button type="button" id="BtnEditar" class="glyphicon glyphicon-pencil" style="cursor: pointer; font-size:15px;" title="Editar Configuración"></button>        
+    </div>
+    <div style="float:left; width:1%">&nbsp;</div>
+    <div style="float: left; width:10%;" onclick="GenerarEncuestas(${IdEncuestaConfiguracion})">
+        <button type="button" id="Enviar" class="glyphicon glyphicon-send" style="cursor: pointer; font-size:15px;" title="Enviar Encuestas"></button>
+    </div>
+
+    @*<div style="float:left; width:10%">&nbsp;</div>*@
+    <div style="float:left; width:100%;" id="caja"><hr /></div>
+</script>
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+        $("#divEnvioDiario").hide();
+        $('#EnvioAutomatico').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#divEnvioDiario").show();
+            } else {
+                ////$("#hdnTkAutomatico").val(0);
+                $("#divEnvioDiario").hide();
+            }
+        });
+
+        $('#EnvioDiario').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#divNroEncuestas").hide();
+            } else {
+                $("#divNroEncuestas").show();
+            }
+        });
+
+        $("#NroEncuestas").kendoNumericTextBox({
+            min: 0,
+            decimals: 0,
+            format: '#'
+        });
+
+        CargarGrilla();
+
+        var IdCuenta;
+
+        var Acco = $("#IdAcco").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TipoActivo/ListarCuentaTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        Acco.bind("change", function (e) {
+            IdAcco = Acco.dataItem().ID_ACCO;
+        });
+    });
+
+    function CargarGrilla(){
+        $("#pagerdivComponente").empty();
+        $("#divComponente").empty();
+
+        if ($("#divComponente").data("kendoListView")) {
+            $("#pagerdivComponente").data("kendoPager").destroy();
+            $("#divComponente").data("kendoListView").destroy();
+        }
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/EncuestaConfiguracion/EncuestaConfiguracionListar/0?var",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random(),
+                        //IdAcco: $("#IdAcco").val() == '' ? 0 : $("#IdAcco").val(),
+                        //NroEncuestas: $("#NroEncuestas").val() == '' ? 0 : $("#NroEncuestas").val()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerdivComponente").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divComponente").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaComponente").html())
+        });
+    }
+
+</script>
+
+<script type="text/javascript">
+
+    function uploadDone(msg, code, id) {
+        if (msg == "OK") {
+                winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                    + "<div style='padding:10px 0px 10px 0px;'>La información ha sido actualizada.</div>"
+                    + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                    "<button id='continues' class='k-button'>Continuar</button>" +
+                    "</div></div>", 400, 160);
+
+                var undo = $("#continues")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                        $("#IdAcco").data("kendoComboBox").text('');
+                        $("#NroEncuestas").data("kendoNumericTextBox").value('');
+                        CargarGrilla();
+                        //location.replace(location.href.replace("Edit", "Details")) 
+                    });
+
+                $("#closebtnmodal").click(function () {
+                    closeWinModalPopUp();
+                    $("#IdAcco").data("kendoComboBox").text('');
+                    $("#NroEncuestas").data("kendoNumericTextBox").value('');
+                    CargarGrilla();
+                });
+            } 
+            else {
+                winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                    "<div style='padding:10px 0px 10px 0px;'>Complete la información solicitada</div>" +
+                    "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                    "<button id='continuee' class='k-button'>Continuar</button>" +
+                    "</div></div>"
+                    , 400, 140);
+
+                var undo = $("#continuee")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                    });
+            }
+        }
+
+        function EditarEncuestaConfiguracion(id) {
+            var htmlForm = '<div id="FormEditarEncuestaConfiguracion"></div>';
+            winFormPopUpModal("Editar Configuración de Envío de Encuestas", htmlForm, 500, 200);
+            $("#FormEditarEncuestaConfiguracion").load("/EncuestaConfiguracion/Editar/" + id);
+            return false;
+        }
+
+        function GenerarEncuestas(id,tipo) { 
+            $.ajax({
+                url: "/EncuestaConfiguracion/GenerarEncuesta/",
+                data: "id=" + id + "&tipo=" + tipo + "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                beforeSend: function () {
+                    swal({ title: "", text: "Enviando Encuestas", showConfirmButton: false, imageUrl: "../../Images/spinner.gif" })
+                },
+                success: function (query) {
+                    swal.close();
+                    mostrarMensaje(query,id);
+                },
+                error: function (source) {
+                    alert("Error al enviar las encuestas");
+                }
+            });
+        }
+
+        function mostrarMensaje(msg,id) {
+            if(msg == ""){
+                winPopUpModal("Envío de Encuestas", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>"
+                + "<div style='padding:10px 0px 0px 0px;'>Se han enviado satisfactoriamente las encuestas.</div>"
+                + "<br>" +
+                "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                "<button id='continues' class='k-button'>Continuar</button>" +
+                "</div></div>", 400, 140);
+
+                var undo = $("#continues")
+               .bind("click", function () {
+                   closeWinModalPopUp();
+                   CargarGrilla();
+               });
+
+                $("#closebtnmodal").click(function () {
+                    closeWinModalPopUp();
+                    CargarGrilla();
+                });
+                        
+            } else 
+                if(msg == 0){
+                    winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>"
+                    + "<div style='padding:10px 0px 0px 0px;'>No se han encontrado tickets para el envío de encuestas</div>"
+                    + "<br>" +
+                    "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                    "<button id='continues' class='k-button'>Continuar</button>" +
+                    "</div></div>", 400, 140);
+
+                    var undo = $("#continues")
+                   .bind("click", function () {
+                       closeWinModalPopUp();
+                       CargarGrilla();
+                   });
+
+                    $("#closebtnmodal").click(function () {
+                        closeWinModalPopUp();
+                        CargarGrilla();
+                    });
+                } else 
+                    if(msg == 1){
+                        winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 15px 0px;'>"
+                       + "<div style='padding:10px 0px 10px 0px;'>No han pasado 30 días desde la última fecha de envío</div>"
+                       + "<div style='padding:10px 0px 10px 0px;'>seguro que desea enviar?</div>" +
+                       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                       "<button id='si' class='k-button'>SI</button>&nbsp;&nbsp;" +
+                       "<button id='no' class='k-button'>NO</button>" +
+                       "</div></div>"
+                         , 400, 160);
+
+                        var comp = $("#si").bind("click", function () {
+                            GenerarEncuestas(id,0);
+                            closeWinModalPopUp();
+                        });
+
+                        var undo = $("#no")
+                       .bind("click", function () {
+                           closeWinModalPopUp();
+                           CargarGrilla();
+                       });
+
+                        $("#closebtnmodal").click(function () {
+                            closeWinModalPopUp();
+                            CargarGrilla();
+                        });
+                    } else 
+                        if(msg == 2){
+                            winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>"
+                           + "<div style='padding:10px 0px 0px 0px;'>La cuenta no se encuentra configurada con el tipo de encuestas</div>"
+                           + "<br>" +
+                           "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                           "<button id='continues' class='k-button'>Continuar</button>" +
+                           "</div></div>", 400, 140);
+
+                                    var undo = $("#continues")
+                                   .bind("click", function () {
+                                       closeWinModalPopUp();
+                                       CargarGrilla();
+                                   });
+
+                                    $("#closebtnmodal").click(function () {
+                                        closeWinModalPopUp();
+                                        CargarGrilla();
+                                    });
+                        }
+        }
+
+</script>
+

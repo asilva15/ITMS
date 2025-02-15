@@ -1,0 +1,199 @@
+﻿@{
+    ViewBag.Title = "Componente";
+    //Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Componentes
+        <div class="btn-actions-pane-right">
+            <a type="button" class="btn btn-primary btn-sm btn-hover-shine" id="VistaDesagrupada" onclick="CargarGrilla(0)" href="ComponenteStockCabecera/Index/0"><i class="fa fa-eye"></i> Vista Desagrupada</a>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-1">
+                Tipo de Activo
+            </div>
+            <div class="col-md-2">
+                <input id="IdTipoActivo">
+            </div>
+            <div class="col-md-1">
+                Componente
+            </div>
+            <div class="col-md-2">
+                <input id="IdComponente">
+            </div>
+            <div class="col-md-1">
+                SubTipo Componente
+            </div>
+            <div class="col-md-2">
+                <input id="IdSubTipoComponente">
+            </div>
+            <div class="col-md-1">
+                @using (Html.BeginForm("ExportarVistaAgrupada", "ComponenteStockCabecera", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+                {
+                    <button type="button" class="btn btn-light btn-block btn-hover-shine" onclick="ExportarComponentes();" id="exportar">Exportar</button>
+                }
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-primary btn-block btn-hover-shine" style="float:right;" id="Buscar" onclick="CargarGrilla(this)"><i class="fa fa-search"></i> Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <div class="col-md-3"><strong>TIPO DE ACTIVO</strong></div>
+            <div class="col-md-3"><strong>COMPONENTE</strong></div>
+            <div class="col-md-3"><strong>SUBTIPO COMPONENTE</strong></div>
+            <div class="col-md-1"><strong>TOTAL</strong></div>
+            <div class="col-md-1"><strong>EN USO</strong></div>
+            <div class="col-md-1"><strong>DISPONIBLE</strong></div>
+        </div>
+    </div>
+    <div id="divComponente" class="contentView"></div>
+    <div id="pagerdivComponente" class="contentViewPager"></div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaComponente">
+    <a href="\\ComponenteStockCabecera/Index/${IdSubtComp}" target="_blank" class="text-decoration-none" style="width:100%">
+        <div class="card-body py-3 btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-3">${NAM_TYPE_ASSE}</div>
+                <div class="col-md-3">${Nombre}</div>
+                <div class="col-md-3">${NomSubtComp}</div>
+                <div class="col-md-1">${Total}</div>
+                <div class="col-md-1">${EnUso}</div>
+                <div class="col-md-1">${Disponible}</div>
+            </div>
+        </div>
+        <hr class="m-0" />
+    </a>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var IdTipoActivo = $("#IdTipoActivo").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_TYPE_ASSE",
+            dataValueField: "ID_TYPE_ASSE",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeAsset/ListarTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdComponente = $("#IdComponente").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IdTipoActivo",
+            filter: "contains",
+            dataTextField: "Nombre",
+            dataValueField: "IdComponente",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Componente/ListarComponente?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdSubTipoComponente = $("#IdSubTipoComponente").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "IdComponente",
+            filter: "contains",
+            dataTextField: "Nombre",
+            dataValueField: "IdSubtComp",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SubTipoComponente/ListarSubTipoComponentes?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        CargarGrilla();
+    });
+
+    function ExportarComponentes() {
+        $("#formExportar").submit();
+    }
+
+    function CargarGrilla(sw) {
+        $("#checkAll").prop("checked", false);
+        $("#divBandeja").css("top", "20px");
+        $("#divCheckAll").css("margin-top", "0px");
+        $("#divButtons").css("display", "none");
+
+        $("#pagerdivComponente").empty();
+        $("#divComponente").empty();
+
+        if ($("#divComponente").data("kendoListView")) {
+            $("#pagerdivComponente").data("kendoPager").destroy();
+            $("#divComponente").data("kendoListView").destroy();
+        }
+        //------------------------------MODIFICACIÓN DE LA URL PARA LOS FILTROS-----------------------------
+        //Lista los requerimientos para mostrar en los componentes.
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/ComponenteStockCabecera/CompListarVistaAgrupada/0?var",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random(),
+                        IdTipoActivo: $("#IdTipoActivo").val() == '' ? 0 : $("#IdTipoActivo").val(),
+                        IdComponente: $("#IdComponente").val() == '' ? 0 : $("#IdComponente").val(),
+                        IdSubTipoComponente: $("#IdSubTipoComponente").val() == '' ? 0 : $("#IdSubTipoComponente").val()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerdivComponente").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divComponente").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaComponente").html())
+        });
+    }
+
+</script>

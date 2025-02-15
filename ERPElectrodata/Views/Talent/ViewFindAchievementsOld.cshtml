@@ -1,0 +1,378 @@
+﻿@model ERPElectrodata.Models.PERSON_DOCUMENTS
+
+@{
+    Layout = null;
+}
+
+<style>
+    #exportar {
+        margin-top: -50px;
+        float: right;
+    }
+</style>
+
+<h1>Talento - Logros</h1>
+@using (Html.BeginForm("ExportarListaDocumentos", "Talent", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+{
+    <button type="button" class="btn btn-primary btn-warning" onclick="ExportarDocumentos();" id="exportar">Exportar</button>
+    <input id="FechaIniVencimiento1" name="FechaIniVencimiento1" hidden>
+    <input id="FechaFinVencimiento1" name="FechaFinVencimiento1" hidden>
+}
+<div class="afterMain">
+    <div style="float:left; width:100%;">
+        <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.FindAchievementsTalent</div></div>
+
+        <div class="bodyForm">
+            <div id="divFindAchievements" class="inBodyForm">
+                @using (Html.BeginForm("FindAchie", "Talent", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmFindAchievements", name = "FrmFindAchievements", target = "ut_FindAchie" }))
+                {
+                    <fieldset>
+                        <legend>ASSET</legend>
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Tipo Documento
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_TYPE_DOCU)
+                                    @Html.ValidationMessageFor(model => model.ID_TYPE_DOCU)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Marca
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.IdMarca)
+                                    @Html.ValidationMessageFor(model => model.IdMarca)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Propietario
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_PERS_ENTI)
+                                    @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Grado de instrucción
+                                </div>
+                                <div class="editor-field">
+                                    <div id="ID_DEGR_INST"></div>
+                                    @*@Html.EditorFor(model => model.ID_PERS_ENTI)
+                                        @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Nombre del Documento
+                                </div>
+                                <div class="k-textbox">
+                                    @Html.EditorFor(model => model.NAM_ATTA)
+                                    @Html.ValidationMessageFor(model => model.NAM_ATTA)
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Fecha de vencimiento inicio
+                                </div>
+                                <div class="editor-field">
+                                    <input id="FechaIniVencimiento" name="FechaIniVencimiento" onblur="document.getElementById('FechaIniVencimiento1').value = this.value">
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="float:left;">
+                                <div class="editor-label">
+                                    Fecha de vencimiento fin
+                                </div>
+                                <div class="editor-field">
+                                    <input id="FechaFinVencimiento" name="FechaFinVencimiento" onblur="document.getElementById('FechaFinVencimiento1').value = this.value">
+                                </div>
+                            </div>
+                            <div class="divSpace3"></div>
+                            <div style="display:inline-block; float:right; padding:5px 10px 0px 5px;">
+                                <div style=" float:left; padding:0px 15px 0px 0px; ">
+                                    <button id="submit" class="btn btn-primary btn-sm" onclick="FindAchie(); return false;">@ResourceLanguaje.Resource.BtnFindTalent</button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </fieldset>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+<div style="clear:both;"></div>
+<div id="resultFind" style="margin:10px 0 0 0; padding-bottom:1%; ">
+</div>
+<div id="pagerFind" style="margin:10px 0 0 0">
+</div>
+
+<script type="text/x-kendo-tmpl" id="tpt-Achievements">
+    # if (sw1 != 0) { Agrupar(ID_PERS_ENTI); } #
+    # if (sw1 == 0) { #
+    <div style="margin-top: 1%;"></div>
+    <div style="width:100%; Display:inline-block;">
+        <div style="width:98%; margin:0 auto;">
+            <div class="marcoAchie1"><b>${USUARIO} - ${Profesion}</b></div>
+            <div class="marcoAchie2">
+                <div class="marcoAchie2Sangria">
+                    ${NAM_DOCU}:
+                    @{
+                        try
+                        {
+                            if (@ViewBag.Perfil == "V")
+                            {
+
+                                <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                            }
+                            else if (@ViewBag.Perfil == "D")
+                            {
+                                <a href="${ARCHIVO}" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent ${NAM_ATTA}" target="_blank">
+                                    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                    <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                                </a>
+                            }
+                        }
+                        catch { }
+                    }
+                    @*<a href="${ARCHIVO}" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent ${NAM_ATTA}" target="_blank">*@
+                    @*<img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                        <span style="text-transform:capitalize;">${NAM_ATTA}</span>*@
+                    @*</a>*@
+                    # if (Marca != "") { # - Marca: ${Marca}  # } #
+                    # if (FechaFin != "") { # Vigencia Inicio: ${FechaInicio} Vigencia Fin: ${FechaFin} # } #
+                </div>
+                # swFirst(ID_PERS_ENTI); #
+                # } else if (sw1 == sw2) { #
+                <div class="marcoAchie2Sangria">
+                    ${NAM_DOCU}:
+                    @{
+                        try
+                        {
+                            if (@ViewBag.Perfil == "V")
+                            {
+
+                                <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                            }
+                            else if (@ViewBag.Perfil == "D")
+                            {
+                                <a href="${ARCHIVO}" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent ${NAM_ATTA}" target="_blank">
+                                    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                    <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                                </a>
+                            }
+                        }
+                        catch { }
+                    }
+                    # if (Marca != "") { # - Marca: ${Marca}  # } #
+                    # if (FechaFin != "") { # Vigencia Inicio: ${FechaInicio} Vigencia Fin: ${FechaFin} # } #
+                </div>
+                # } else { #
+            </div>
+        </div>
+    </div>
+    <div style="margin-top: 1%;"></div>
+    <div style="width:100%; Display:inline-block;">
+        <div style="width:98%; margin:0 auto;">
+            <div class="marcoAchie1"><b>${USUARIO} - ${Profesion}</b></div>
+            <div class="marcoAchie2">
+                <div class="marcoAchie2Sangria">
+                    ${NAM_DOCU}:
+                    @{
+                        try
+                        {
+                            if (@ViewBag.Perfil == "V")
+                            {
+
+                                <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                            }
+                            else if (@ViewBag.Perfil == "D")
+                            {
+                                <a href="${ARCHIVO}" style="text-decoration:none;" title="@ResourceLanguaje.Resource.DownloadTalent ${NAM_ATTA}" target="_blank">
+                                    <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+                                    <span style="text-transform:capitalize;">${NAM_ATTA}</span>
+                                </a>
+                            }
+                        }
+                        catch { }
+                    }
+                    # if (Marca != "") { # - Marca: ${Marca}  # } #
+                    # if (FechaFin != "") { # Vigencia Inicio: ${FechaInicio} Vigencia Fin: ${FechaFin} # } #
+                </div>
+                # swFirst(ID_PERS_ENTI); #
+                # } #
+            
+</script>
+
+<script type="text/javascript">
+    var sw1 = 0;
+    var sw2 = 0;
+    $(document).ready(function () {
+
+        $("#ID_TYPE_DOCU").kendoComboBox({
+            dataTextField: "NAM_DOCU",
+            dataValueField: "ID_TYPE_DOCU",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeDocument/ListTypeDocumentsAchievements?var=" + Math.random()
+                }
+            }
+        });
+        var ID_TYPE_DOCU = $("#ID_TYPE_DOCU").data("kendoComboBox");
+
+        var IdPersona = $("#ID_PERS_ENTI").kendoComboBox({
+            index: 1,
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            //dataSource: json['Data'],
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/PersonaPorCompania?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var IdGradoInstruccion = $("#ID_DEGR_INST").kendoComboBox({
+            dataTextField: "NAM_DEGR_INST",
+            dataValueField: "ID_DEGR_INST",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: false,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/DegreeInstruction/ListDegreeInstruction?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdMarca").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            }
+        });
+        var IdMarca = $("#IdMarca").data("kendoComboBox");
+        var FechaIniVencimiento = $("#FechaIniVencimiento").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaFinVencimiento = $("#FechaFinVencimiento").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        FindAchie();
+
+    });
+
+    function FindAchie() {
+
+        sw1 = 0;
+        sw2 = 0;
+        var dataSource = null;
+        var pager = null;
+
+        $("#pagerFind").empty();
+        $("#resultFind").empty();
+
+        if ($("#resultFind").data("kendoListView")) {
+            $("#pagerFind").data("kendoPager").destroy();
+            $("#resultFind").data("kendoListView").destroy();
+        }
+
+        dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Talent/FindAchieResult?var=" + Math.random() + "&" + $('#FrmFindAchievements').serialize() + "&ID_DEGR_INST=" + $("#ID_DEGR_INST").val(),
+                    type: "GET",
+                    dataType: "json"
+                }
+
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#resultFind").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#tpt-Achievements").html())
+        });
+
+        pager = $("#pagerFind").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 60],
+            refresh: true
+        });
+
+        return false;
+    }
+
+    function swFirst(id) {
+        sw1 = id;
+    }
+
+    function Agrupar(id) {
+        sw2 = id;
+    }
+
+    function ExportarDocumentos() {
+        $("#formExportar").submit();
+    }
+</script>

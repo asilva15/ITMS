@@ -1,0 +1,139 @@
+﻿@{
+    ViewBag.Title = "VerContacto";
+    Layout = null;
+}
+
+    <div class="alert alert-danger" id="eliminarContacto">
+        Desea eliminar este contacto del proyecto?
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <span id="btnEliminarSi" title="Eliminar" class="fa fa-check" aria-hidden="true" style="color: #4CAF50; cursor: pointer; font-size:13px;"></span>
+        &nbsp;
+        <span id="btnEliminarNo" title="Cancelar" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px;"></span>
+    </div>
+        <!-- ELIMINAR CONTACTO -->
+        <div class="alert alert-success" id="MsjCorrectoEliminarContacto">
+            <span class="fa fa-check" aria-hidden="true" style="color: #4CAF50; cursor: pointer; font-size:13px;"></span>
+            &nbsp;&nbsp;&nbsp;
+            Se ha eliminado el contacto del proyecto.
+        </div>
+        <!-- FIN ELIMINAR CONTACTO -->
+        <!-- ERROR ELIMINAR CONTACTO -->
+        <div class="alert alert-success" id="MsjAlertaEliminarContacto">
+            <span class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px;"></span>
+            &nbsp;&nbsp;&nbsp;
+            Ha ocurrido un error, comuníquese con el administrador.
+        </div>
+        <!-- FIN ERROR ELIMINAR CONTACTO -->
+        <div class="tab-content">
+            <div class="tab-pane active" id="tab_1">
+                <table id="tbContactosAgregados" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Contacto</th>
+                            <th>Nombres</th>
+                            <th>Apellidos</th>
+                            <th>Celular</th>
+                            <th>Correo</th>
+                            <th>Observacion</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Tipo de Contacto</th>
+                            <th>Nombres</th>
+                            <th>Apelidos</th>
+                            <th>Celular</th>
+                            <th>Correo</th>
+                            <th>Observacion</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+
+<script type="text/javascript">
+
+    var idContacto = 0;
+    $(document).ready(function () {
+
+        //Oculta mensaje correcto de eliminacion de contacto del proyecto
+        $("#MsjCorrectoEliminarContacto").hide();
+        $("#MsjAlertaEliminarContacto").hide();
+        //Oculta mensaje de eliminacion del contacto de proyecto
+        $("#eliminarContacto").hide();
+
+        $("#btnEliminarSi").click(function () {
+            $.ajax({
+                url: "/Contacto/EliminarContacto/",
+                data: "IdContacto=" + idContacto +
+                    "&var=" + Math.random(),
+                type: "GET",
+                cache: false,
+                dataType: "text",
+                success: function (resp) {
+                    if (resp == "OK") {
+                        $("#eliminarContacto").hide("hide");
+                        $("#MsjCorrectoEliminarContacto").show("show");
+                        setTimeout(function () {
+                            $("#MsjCorrectoEliminarContacto").fadeOut(3000);
+                        }, 1000);
+                        listarContactosDeProyecto();
+                    } else
+                        if (resp == "ERROR") {
+                            $("#eliminarContacto").hide("hide");
+                            $("#MsjCorrectoEliminarContacto").show("show");
+                            setTimeout(function () {
+                                $("#MsjCorrectoEliminarContacto").fadeOut(3000);
+                            }, 1000);
+                        }
+
+                }
+            });
+        });
+
+        $("#btnEliminarNo").click(function () {
+            $("#eliminarContacto").hide("show");
+        });
+
+        //Listado de contactos del proyecto
+        listarContactosDeProyecto();
+    });
+
+    function eliminarContacto(id){
+        idContacto = id;
+        $("#eliminarContacto").show();
+    }
+
+    function listarContactosDeProyecto() {
+
+        $('#tbContactosAgregados').dataTable().fnDestroy();
+        setTimeout(function () {
+
+            $('#tbContactosAgregados').DataTable({
+                "order": [[4, "asc"]],
+                responsive: true,
+                dom: 'Bfrtip',
+                ajax: "/Contacto/ListarContactosAgregados/@ViewBag.ID_DOCU_SALE",
+                columns: [
+                    { data: "TipoContacto" },
+                    { data: "Nombres" },
+                    { data: "Apellidos" },
+                    { data: "Telefono" },
+                    { data: "Correo" },
+                    { data: "Observacion" },
+                    { data: null,
+                        render: function (data, type, row) {
+                            return '<div style="text-align:center"><span  id="' + data.IdContacto + '" title="Eliminar Contacto" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px; " onclick="eliminarContacto(' + (data.IdContacto) + ')"></span></div>';
+                        }
+                    }
+                ],
+                buttons: [
+                    'csv', 'excel', 'pdf', 'print'
+                ]
+            });
+        }, 1000);
+    }
+</script>

@@ -1,0 +1,449 @@
+﻿@{
+    ViewBag.Title = @ResourceLanguaje.Resource.IncidentRequest;
+    @Layout = null;
+}
+
+<style type="text/css">
+    a.tooltip span {
+        cursor: default;
+        display: none;
+        padding: 5px;
+        margin: -25px 0px 0px 120px;
+        width: 230px;
+        position: relative;
+        z-index: 9;
+    }
+
+    a.tooltip:hover span {
+        display: block;
+        position: absolute;
+        background: #000;
+        border: 1px solid #cccccc;
+        color: #ddd;
+        font-size: 14px;
+        font-weight: normal;
+        opacity: 0.9;
+    }
+</style>
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+</script>
+<div id="divContent">
+    <div class="row">
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-danger btn" id="homInc5" onclick="ClickExt(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Activos</div>
+                        <div class="widget-subheading">Total @ViewBag.TAActive</div>
+                    </div>
+                    <div class="widget-content-right d-flex justify-content-center align-items-center">
+                        <div id="loadActiveE" class="spinner-border text-secondary" role="status" style="width:20px; height:20px">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="widget-numbers text-white"><span>@ViewBag.PActive</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-warning btn" id="homInc6" onclick="ClickExt(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Programados</div>
+                        <div class="widget-subheading">Total @ViewBag.TAScheduled</div>
+                    </div>
+                    <div class="widget-content-right d-flex justify-content-center align-items-center">
+                        <div id="loadProgramadoE" class="spinner-border text-secondary" role="status" style="width:20px; height:20px">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="widget-numbers text-white"><span>@ViewBag.PScheduled</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-success btn" id="homInc7" onclick="ClickExt(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Resueltos</div>
+                        <div class="widget-subheading">Total @ViewBag.TAResolved</div>
+                    </div>
+                    <div class="widget-content-right d-flex justify-content-center align-items-center">
+                        <div id="loadResueltoE" class="spinner-border text-secondary" role="status" style="width:20px; height:20px">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="widget-numbers text-white"><span>@ViewBag.PResolved</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-info btn" id="homInc8" onclick="ClickExt(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Cerrados</div>
+                        <div class="widget-subheading">Total @ViewBag.TAClosed</div>
+                    </div>
+                    <div class="widget-content-right d-flex justify-content-center align-items-center">
+                        <div id="loadCerradoE" class="spinner-border text-secondary" role="status" style="width:20px; height:20px">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="widget-numbers text-white"><span>@ViewBag.PClosed</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="TimeServer" name="TimeServer" value="@ViewBag.TimeServer" />
+    <div id="gridTicketsExt" class="contentView">
+    </div>
+    <div id="pagerTicketsExt" class="contentViewPager">
+    </div>
+    <div id="listViewExterno"></div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="templateExterno">
+    <a href="\/\#${URL}${ID_INCI}" class="text-decoration-none" target="_blank" title="${SUM_INCI_PLAIN}">
+        <div class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-4">
+                    <div class="small">
+                        ${NAM_TYPE_TICK} ${COD_INCI}
+                    </div>
+                    <div class="small">Asignado a: ${ASSI}</div>
+                    # if (VIS_COMP) { #
+                    <div class="small"><b>${REQU} (${CIA})</b></div>
+                    # } else { #
+                    <div class="small"><b>${REQU}</b></div>
+                    # } #
+                    <div class="small">Creado: ${CREATEBY} ${CREATE_INCI}</div>
+                    <div class="small">Actualizado: ${MODIFIED_INCI}</div>
+                </div>
+                <div class="col-6">
+                    <div class="small" title="${SUM_INCI_PLAIN}">${Titulo}</div>
+                    <div class="small">${NAM_CATE} > ${NAM_SUBC} > ${NAM_CLAS} > ${NAM_SUBCLAS}</div>
+                </div>
+                <div class="d-none d-md-block col-2">
+                    <div class="row no-gutters align-items-center">
+
+                        <div class="media col-12 align-items-center">
+                            <img style="width: 40px; height: auto;" src="/Content/Fotos/${ID_FOTO_ASSI}.jpg" alt=" " class="d-block ui-w-30 rounded-circle">
+                            <div class="media-body flex-truncate ml-2">
+
+                                # if(NAM_PRIO.indexOf("P1") > -1) {#
+                                <div class="badge badge-danger">${NAM_PRIO} ${HOU_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("P2") > -1) {#
+                                <div class="badge badge-warning">${NAM_PRIO} ${HOU_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("P3") > -1) {#
+                                <div class="badge badge-success">${NAM_PRIO} ${HOU_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("P4") > -1) {#
+                                <div class="badge badge-info">${NAM_PRIO} ${HOU_PRIO}</div>
+                                # } #
+
+                                # if(EXP_TIME.indexOf("Stopped") > -1 ) {#
+                                # if(ID_STAT_END != 4 && ID_STAT_END != 6) { #
+                                <div class="line-height-1 text-truncate">${DATE_SCHE} | ${HOUR_SCHE}</div>
+                                # } #
+                                # } else { #
+                                <div class="line-height-1 text-truncate">${EXP_TIME}</div>
+                                # } #
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+</script>
+
+<script type="text/javascript">
+    var con = 0;
+    var timer;
+    var eEActivos, eEProgramados, eEResueltos, eECerrados
+    $(document).ready(function () {
+        //ListByStatus();
+        //var dataSource = new kendo.data.DataSource({
+        //    transport: {
+        //        read: {
+        //            url: "/Ticket/ListByStatus_SubCuenta?id=0&subCuenta=" + "EXTERNO",
+        //            type: "GET",
+        //            dataType: "json",
+        //            data: {
+        //                q: "#kendoui",
+        //                ran: Math.random()
+        //            }
+        //        }
+        //    },
+        //    autoSync: true,
+        //    serverFiltering: true,
+        //    filter: { field: "Status", operator: "eq", value: 0 },
+        //    serverPaging: true,
+        //    pageSize: 15,
+        //    schema: {
+        //        data: "Data",
+        //        total: "Count"
+        //    }
+        //});
+        //$("#pagerTicketsExt").kendoPager({
+        //    dataSource: dataSource,
+        //    pageSizes: [15, 30, 65],
+        //    refresh: true
+        //});
+
+        //$("#gridTicketsExt").kendoListView({
+        //    dataSource: dataSource,
+        //    template: kendo.template($("#template2").html()),
+
+        //});
+        var id = 0,
+            subCuenta = 'EXTERNO',
+            idEstado = 0;
+        //ListarTicketPorEstado(id, 'EXTERNO', idEstado);
+        if (eEActivos == undefined && eEProgramados == undefined && eEResueltos == undefined && eECerrados == undefined) {
+            CargarTodosTicketsPorEstadoE(id, subCuenta, idEstado)
+        }
+        else {
+            if (eEActivos != undefined) {
+                document.getElementById("loadActiveE").style.display = "none"
+                NewListarTicketPorEstadoE(eEActivos)
+
+            }
+            if (eEProgramados != undefined) {
+                document.getElementById("loadProgramadoE").style.display = "none"
+            }
+            if (eEResueltos != undefined) {
+                document.getElementById("loadResueltoE").style.display = "none"
+            }
+            if (eECerrados != undefined) {
+                document.getElementById("loadCerradoE").style.display = "none"
+            }
+        }
+    });
+
+    function ListarTicketPorEstado(id, subCuenta, idEstado) {
+        $("#listViewExterno").empty();
+        $("#listViewExterno").kendoListView({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Ticket/ListarTicketPorEstado?" +
+                            "id=" + id +
+                            "&subCuenta=" + subCuenta +
+                            "&ID_STAT=" + idEstado,
+                        type: "GET",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                pageSize: 10
+            },
+            template: kendo.template($("#template2").html()),
+            pageable: true
+        });
+    }
+
+    async function CargarTodosTicketsPorEstadoE(id, subCuenta, idEstado) {
+        console.log(subCuenta)
+        await listarTicketsEE(id, subCuenta, 0).then(resolve => {
+            eEActivos = resolve
+            NewListarTicketPorEstadoE(eEActivos)
+            document.getElementById("loadActiveE").style.display = "none"
+        })
+        await Promise.all([
+            listarTicketsEE(id, subCuenta, 5).then(result => {
+                document.getElementById("loadProgramadoE").style.display = "none"
+                eEProgramados = result
+            }),
+            listarTicketsEE(id, subCuenta, 4).then(result => {
+                document.getElementById("loadResueltoE").style.display = "none"
+                eEResueltos = result
+            }),
+            listarTicketsEE(id, subCuenta, 6).then(result => {
+                document.getElementById("loadCerradoE").style.display = "none"
+                eECerrados = result
+            })
+        ])
+    }
+    function NewListarTicketPorEstadoE(data) {
+        if (data != undefined) {
+            $("#listViewExterno").empty();
+            $("#listViewExterno").kendoListView({
+                dataSource: {
+                    data: data.Data,
+                    pageSize: 10
+                },
+                template: kendo.template($("#template2").html()),
+                pageable: true
+            });
+        }
+       
+    }
+
+    function listarTicketsEE(id, subCuenta, idEstado) {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/Ticket/ListarTicketPorEstado?" +
+                    "id=" + id +
+                    "&subCuenta=" + subCuenta +
+                    "&ID_STAT=" + idEstado,
+                type: "GET",
+                cache: false,
+                async: true,
+                success: function (jsonx) {
+                    resolve(jsonx)
+                }
+
+            });
+        })
+    }
+
+    //function ClickExt(parm) {
+    //    var bandera = 0;
+    //    if (parm.id == "homInc2") {
+    //        bandera = 5;
+    //    }
+    //    else if (parm.id == "homInc3") {
+    //        bandera = 4;
+    //    }
+    //    else if (parm.id == "homInc4") {
+    //        bandera = 6;
+    //        toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda ir a <b><a href="/#/FindTicket" style="text-decoration:none;color:black;">Buscar Tickets</a></b>');
+    //    } else if (parm.id == "homInc5") {
+    //        bandera = 0;
+    //    } else if (parm.id == "homInc6") {
+    //        bandera = 5;
+    //    } else if (parm.id == "homInc7") {
+    //        bandera = 4;
+    //    } else if (parm.id == "homInc8") {
+    //        bandera = 6;
+    //        toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda ir a <b><a href="/#/FindTicket" style="text-decoration:none;color:black;">Buscar Tickets</a></b>')
+    //    }
+    //    ListarTicketPorEstado(0, '', bandera);
+    //    //for (var i = 1; i < 5; i++) {
+    //    //    $("#homInc" + i).removeClass("tab-active");
+    //    //    $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+    //    //    $("#letrashomInc" + i).removeClass("letrasActive");
+    //    //}
+    //    //$("#" + parm.id).addClass("tab-active");
+    //    //$("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+    //    //$("#letras" + parm.id).addClass("letrasActive");
+
+    //    //var bandera = 0;
+    //    //if (parm.id == "homInc2") {
+    //    //    bandera = 5;
+    //    //}
+    //    //else if (parm.id == "homInc3") {
+    //    //    bandera = 4;
+    //    //}
+    //    //else if (parm.id == "homInc4") {
+    //    //    bandera = 6;
+    //    //} else if (parm.id == "homInc5") {
+    //    //    bandera = 0;
+    //    //} else if (parm.id == "homInc6") {
+    //    //    bandera = 5;
+    //    //} else if (parm.id == "homInc7") {
+    //    //    bandera = 4;
+    //    //} else if (parm.id == "homInc8") {
+    //    //    bandera = 6;
+    //    //}
+    //    //var listView = $("#gridTicketsExt").data("kendoListView");
+    //    //listView.dataSource.filter({ field: "S", operator: "eq", value: bandera });
+
+    //}
+
+    function ClickExt(parm) {
+        var bandera = 0;
+        if (parm.id == "homInc2") {
+            bandera = 5;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 4;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 6;
+            toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda ir a <b><a href="/FindTicket" style="text-decoration:none;color:black;">Buscar Tickets</a></b>');
+        } else if (parm.id == "homInc5") {
+            bandera = 0;
+            NewListarTicketPorEstadoE(eEActivos)
+        } else if (parm.id == "homInc6") {
+            bandera = 5;
+            NewListarTicketPorEstadoE(eEProgramados)
+        } else if (parm.id == "homInc7") {
+            bandera = 4;
+            NewListarTicketPorEstadoE(eEResueltos)
+        } else if (parm.id == "homInc8") {
+            bandera = 6;
+            if (eECerrados != undefined) {
+                NewListarTicketPorEstadoE(eECerrados)
+                toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda ir a <b><a href="/FindTicket" style="text-decoration:none;color:black;">Buscar Tickets</a></b>')
+            }
+            
+        }
+    }
+
+    function UpdateBarStatus() {
+        if (typeof $("#gridTicketsExt").data("kendoListView") === "undefined") {
+
+            clearTimeout(myVar);
+            return false;
+        }
+        else {
+
+        }
+        $.ajax({
+            url: '/Ticket/UpdateBarStatus/0?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var active = 0, activeT = 0;
+                $.each(jsonx['Data'], function (index, value) {
+
+                    if (value['ID_STAT'] == 1) {
+                        active = active + value['Tickets'];
+                        activeT = activeT + value['Total'];
+                    }
+                    else if (value['ID_STAT'] == 3) {
+                        active = active + value['Tickets'];
+                        activeT = activeT + value['Total'];
+                    }
+                    else {
+                        $("#box" + value['NAM_STAT']).html(value['Tickets']);
+                        $("#boxT" + value['NAM_STAT']).html("@ResourceLanguaje.Resource.TotalAccount " + value['Total']);
+                    }
+
+                });
+
+                $("#boxActive").html(active);
+                $("#boxTActive").html("@ResourceLanguaje.Resource.TotalAccount " + activeT);
+
+                var listViewd = $("#gridTicketsExt").data("kendoListView");
+                listViewd.dataSource.page(listViewd.dataSource.page());
+
+            }
+
+        });
+
+    }
+
+</script>

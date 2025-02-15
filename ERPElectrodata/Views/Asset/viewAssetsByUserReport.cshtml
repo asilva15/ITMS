@@ -1,0 +1,124 @@
+﻿@model ERPElectrodata.Models.CLIENT_ASSET
+
+@{
+    Layout = null;
+}
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Reporte de Activos por Usuario
+    </div>
+    <div class="card-body">
+        <form id="Parametros">
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="editor-label">
+                        Usuario
+                    </div>
+                    <div class="editor-field">
+                        <input id="ID_PERS_ENTI" class="form-control" name="ID_PERS_ENTI" placeholder="Seleccionar o escribir" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button id="btnBuscar" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+                <div class="col-md-6" style="padding-left:100px">
+                    <div id="divUsuario" style="width:100%">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<div class="bodyForm">
+    <div class="inBodyForm">
+        <iframe id="RSActivoxUsuario" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        // Llama a la función para cargar los datos después de que la vista esté cargada
+        loadDataAsync();
+
+        // Evento click para el botón Buscar
+        $("#btnBuscar").click(function (event) {
+            event.preventDefault();
+
+            var ID_PERS_ENTI = $("#ID_PERS_ENTI").data("kendoComboBox");
+            if ((ID_PERS_ENTI.value()) != 0) {
+                window.frames["RSActivoxUsuario"].src = "/Reporting/Activo/ActivoxUsuario.aspx?id=" + ID_PERS_ENTI.value();
+            }
+            else {
+                toastr.warning("Seleccione un usuario.", "Mensaje");
+            }
+
+            return false;
+        });
+
+    });
+
+    function loadDataAsync() {
+        // Realiza la llamada AJAX para cargar los datos del ComboBox en segundo plano
+        $.ajax({
+            url: "/AccountEntity/ListarPorCuentas",
+            type: "GET",
+            success: function (data) {
+                var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+                    dataTextField: "CLIE",
+                    dataValueField: "ID_PERS_ENTI",
+                    filter: "contains",
+                    autoBind: false,
+                    suggest: true,
+                    dataSource: {
+                        data: data,
+                        schema: {
+                            total: "Count"
+                        }
+                    }
+                }).data("kendoComboBox");
+
+                if (@ViewBag.IdAcco == 55) {
+                    ID_PERS_ENTI.bind("change", function (e) {
+                        ObtenerCargoxUsuario(ID_PERS_ENTI.dataItem().ID_PERS_ENTI);
+                    });
+                }
+            },
+            error: function () {
+                toastr.error("Error al cargar los datos en segundo plano", "Mensaje");
+            }
+        });
+    }
+
+    function ObtenerCargoxUsuario(id) {
+        $.ajax({
+            url: "/AccountEntity/ObtenerCargoxUsuario/" + id,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                var data = source.Data;
+                $("#divUsuario").empty();
+                $.each(data, function (index) {
+                    $("#divUsuario").append(
+                        '<div class="row">' +
+                        '<div class="col-md-3"><b>Cargo: </b></div>' +
+                        '<div class="col-md-6">' + (data[index]['Cargo']) + '</div>' +
+                        '</div>' +
+                        '<div class="row">' +
+                        '<div class="col-md-3"><b>Area: </b></div>' +
+                        '<div class="col-md-6">' + (data[index]['Area']) + '</div>' +
+                        '</div>');
+                });
+            },
+            error: function () {
+                toastr.error("Error Carga Json Comercial", "Mensaje");
+            }
+        });
+    }
+
+
+</script>

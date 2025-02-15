@@ -1,0 +1,986 @@
+﻿@model ERPElectrodata.Models.DETAILS_TICKET
+
+@{
+    //Layout = null;
+    var id1 = ViewBag.Id1;
+    var id2 = ViewBag.Id2;
+    if (Convert.ToInt32(Session["ID_ACCO"]) == 55 && Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_OT"]) == 1 && Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_IT"]) == 0)
+    {
+        Layout = "~/Views/Shared/_LayoutHBOT.cshtml";
+    }
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">
+                <div id="titleDetDelRec" class="title">Details</div>
+            </div>
+            <div class="card-body">
+                <div class="col-md-12">
+                    <div id="Encabezado"></div>
+                </div>
+                @using (Html.BeginForm("CreateDetailsDelivery", "DeliveryReception", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmDetailDelivery", target = "upload_target" }))
+                {
+                    @Html.ValidationSummary(true)
+
+                    @Html.HiddenFor(model => model.ID_TICK)
+
+
+
+
+                    <div class="col-md-12">
+                        <div class="form-row">
+                            <div class="col-md-4">
+                                <div class="editor-label">
+                                    Tipo <b style="color:red">(*)</b>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_TYPE_DETA_TICK)
+                                    @Html.ValidationMessageFor(model => model.ID_TYPE_DETA_TICK)
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="editor-label">
+                                    Desde
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.FROM_TIME)
+                                </div>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="editor-label">
+                                    Hasta
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.TO_TIME)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div id="divEstado" class="col-md-4" style="display:none">
+                                <div class="editor-label">
+                                    Estado <b style="color:red">(*)</b>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_STAT)
+                                    @Html.ValidationMessageFor(model => model.ID_STAT)
+                                </div>
+                            </div>
+
+                            <div id="divFechaProgramada" class="col-md-4" style="display:none">
+                                <div class="editor-label">
+                                    Fecha Programada <b style="color:red">(*)</b>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.FEC_SCHE)
+                                    @Html.ValidationMessageFor(model => model.FEC_SCHE)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="editor-label">
+                                    Comentario <b style="color:red">(*)</b>
+                                </div>
+                                <div class="editor-field">
+                                    @Html.TextAreaFor(model => model.COM_DETA_TICK, new { rows = "20" })
+                                    @Html.ValidationMessageFor(model => model.COM_DETA_TICK)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                                <input name="files" id="file" type="file" />
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-6"></div>
+                            <div class="col-md-3">
+                                <button id="print" class="btn btn-light btn-block" type="button">Imprimir</button>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" id="submit" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div id="comment" class="col-md-12"></div>
+                        </div>
+                    </div>
+                    <iframe id="upload_target" name="upload_target" src="" style="display:none;"></iframe>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Activos</div>
+            <div class="card-body divHide" id="divResp">
+                <div class="card-body py-3 btn-shadow btn-outline-focus mb-0" style="font-size:12px">
+                    <div class="row">
+                        <div class="col-sm-12 col-lg-12">
+                            <div class="smallField"><b>Usuario responsable</b></div>
+                            <div class="smallTitle" id="usuarioResp"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" id="divContr" style="display: none;">
+                <div id="divContratista"></div>
+            </div>
+            <div class="card-body">
+                <div id="divActivosTicket"></div>
+            </div>
+        </div>
+
+        <div class="mb-3 card" id="divLicencias">
+            <div class="card-header-tab card-header">Licencias</div>
+            <div class="card-body">
+                <div id="gridLicencias" class="contentView"></div>
+            </div>
+        </div>
+
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Actividades</div>
+            <div class="card-body">
+                <div id="gridActivities" class="contentView"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+</div>
+<script type="text/x-kendo-tmpl" id="templateA">
+    <div class="card-body py-3 btn-shadow btn-outline-focus">
+        <div class="row no-gutters align-items-center" style="font-size:13px">
+            <div class="casilla">
+                Tipo Actividad: ${NAM_TYPE_DETA_TICK}
+            </div>
+            <div class="casilla">
+                Fecha creación: ${CREATE_DETA_INCI}
+            </div>
+            <div class="casilla">
+                Persona: ${PERS}
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-kendo-tmpl" id="templateC">
+    <div class="card-body py-3 btn-shadow btn-outline-focus">
+        <div class="row no-gutters align-items-center" style="font-size:13px">
+            <div class="casilla">
+                Tipo Actividad: ${Nombre}
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    //bloquear formulario cuando captura al submit
+    $(function () {
+        //cuando se capture el submit desctiva los botones y los inputs
+        $('form').on('submit', function () {
+            var str_Comentario = $("#COM_DETA_TICK").val();
+            var str_cboTipo = $("#ID_TYPE_DETA_TICK").val();
+            var str_Estado = $("#ID_STAT").val();
+            var str_FechaProgramada = $("#FEC_SCHE").val();
+
+            if (str_Comentario != '' && str_Comentario != null && str_Comentario != undefined
+                && str_cboTipo != '' && str_cboTipo != null && str_cboTipo != undefined) {
+
+                var uno = document.getElementById('submit');
+                if (uno.textContent == ' Guardando...')
+                    uno.textContent = ' Guardar';
+                else uno.textContent = ' Guardando...'
+
+
+                //agrego la clase disabled a los inputs
+                $('form input').addClass('disabled');
+                //agrego el atributo disabled a los botones
+                $('form button').attr('disabled', 'disabled');
+
+
+                if (str_cboTipo = 3
+                    && str_Estado != '' && str_Estado != null && str_Estado != undefined
+                    && str_FechaProgramada != '' && str_FechaProgramada != null && str_FechaProgramada != undefined) {
+
+                    //agrego la clase disabled a los inputs
+                    $('form input').addClass('disabled');
+                    //agrego el atributo disabled a los botones
+                    $('form button').attr('disabled', 'disabled');
+                } else if (str_cboTipo = 7) {
+
+                }
+
+            }
+
+        });
+    });
+
+</script>
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+
+        $.ajax({
+            url: "/DeliveryReception/ListByIdJson/" + "@ViewData["ID_TICK"]",
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showInfo();
+            },
+            error: function (source) {
+                data = source;
+                showInfo();
+            }
+        });
+
+        //Fechas
+        var today = new Date();
+        var newDate = addMins(new Date(), 1);
+        //var today = kendo.date.today();
+        var time_from = $("#FROM_TIME").kendoDateTimePicker({ value: today, change: startChange }).data("kendoDateTimePicker");
+        var time_to = $("#TO_TIME").kendoDateTimePicker({ value: newDate, change: endChange }).data("kendoDateTimePicker");
+        time_from.max(time_to.value());
+        time_to.max(time_to.value());
+    });
+
+    $("#print").click(function (event) {
+        event.preventDefault();
+
+        if ('@ViewData["NAM_TYPE_FORM"]' == 'RECEPTION') {
+            window.open('/Reporting/ReceptionReport.aspx?id=' + "@ViewData["ID_TICK"]" + '&ID_TYPE_ASSE=0', '_blank');
+        }
+        else {
+            if ('@Session["ID_ACCO"]' == 19) {
+                if ('@ViewData["reporteCel"]' == 1) {
+                    window.open('/Reporting/DeliveryReport.aspx?id=' + "@ViewData["ID_TICK"]" + '&ID_TYPE_ASSE=2', '_blank');
+                }
+                if ('@ViewData["reporteRadio"]' == 1) {
+                    window.open('/Reporting/DeliveryReport.aspx?id=' + "@ViewData["ID_TICK"]" + '&ID_TYPE_ASSE=14', '_blank');
+                }
+                if ('@ViewData["reporteEquipo"]' == 1) {
+                    window.open('/Reporting/DeliveryReport.aspx?id=' + "@ViewData["ID_TICK"]" + '&ID_TYPE_ASSE=0', '_blank');
+                }
+            } else {
+                window.open('/Reporting/DeliveryReport.aspx?id=' + "@ViewData["ID_TICK"]", '_blank');
+            }
+        }
+        return false;
+    });
+
+    function addMins(theDate, min) {
+        return new Date(theDate.getTime() + min * 60 * 1000);
+    }
+
+    function startChange() {
+        var startDate = time_from.value(),
+        endDate = time_to.value();
+
+        if (startDate) {
+            startDate = new Date(startDate);
+            startDate.setDate(startDate.getDate());
+            time_to.min(startDate);
+        } else if (endDate) {
+            time_from.max(new Date(endDate));
+        } else {
+            endDate = new Date();
+            time_from.max(endDate);
+            time_to.min(endDate);
+        }
+    }
+
+    function endChange() {
+        var endDate = time_to.value(),
+        startDate = time_from.value();
+
+        if (endDate) {
+            endDate = new Date(endDate);
+            endDate.setDate(endDate.getDate());
+            time_from.max(endDate);
+        } else if (startDate) {
+            time_to.min(new Date(startDate));
+        } else {
+            endDate = new Date();
+            time_from.max(endDate);
+            time_to.min(endDate);
+        }
+    }
+
+
+
+    function showInfo() {
+
+        var strTitle = '';
+        if ('@ViewData["NAM_TYPE_FORM"]' == 'RECEPTION') {
+            strTitle = 'Detalle Reception # @ViewData["COD_TICK"]';
+        }
+        else {
+            strTitle = 'Detalle Delivery # @ViewData["COD_TICK"]';
+        }
+        $("#titleDetDelRec").empty();
+        $("#titleDetDelRec").append(strTitle);
+
+        $("#Encabezado").empty();
+        $.each(data['data'], function (index, value) {
+            $("#Encabezado").append(
+                '<div class = "row">' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Usuario Final</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['CLIE']) + '</div>' +
+                    '</div>' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Estado</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_STAT']) + '</div>' +
+                    '</div>' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Prioridad</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_PRIO']) + '</div>' +
+                    '</div>' +
+                    '<div class ="col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Area</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_AREA']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class = "row">' +
+                     '<div class="col-sm-6 col-lg-3">' +
+                        '<div class="smallTitle"><b>Tiempo para expirar</b></div>' +
+                        '<div class="smallField">' + (data['data'][index]['EXP_TIME']) + '</div>' +
+                     '</div>' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Fuente</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_SOUR']) + '</div>' +
+                    '</div>' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Categoría</b></div>' +
+                        '<div class = "smallTitle">' +
+                            ("@ViewBag.ID_ACCO" == 56 || "@ViewBag.ID_ACCO" == 57 || "@ViewBag.ID_ACCO" == 58 ?
+                            "@ViewBag.Cate1"
+                            :(data['data'][index]['Cate']))+
+                        '</div>' +
+                    '</div>' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>SubCategoría</b></div>' +
+                        '<div class = "smallTitle">' +
+                            ("@ViewBag.ID_ACCO" == 56 || "@ViewBag.ID_ACCO" == 57 || "@ViewBag.ID_ACCO" == 58 ?
+                            "@ViewBag.Cate2"
+                            :(data['data'][index]['SubCate'])) +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class ="row">' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Clase</b></div>' +
+                        '<div class = "smallTitle">' +
+                            ("@ViewBag.ID_ACCO" == 56 || "@ViewBag.ID_ACCO" == 57 || "@ViewBag.ID_ACCO" == 58 ?
+                            "@ViewBag.Cate3"
+                            :(data['data'][index]['Class'])) +
+                        '</div>' +
+                    '</div>' +
+                    '<div class ="col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>SubClase</b></div>' +
+                        '<div class = "smallTitle">' +
+                            ("@ViewBag.ID_ACCO" == 56 || "@ViewBag.ID_ACCO" == 57 || "@ViewBag.ID_ACCO" == 58 ?
+                            "@ViewBag.Cate4"
+                            :(data['data'][index]['SubClass'])) +
+                        '</div>' +
+                    '</div>' +
+
+                    ("@ViewBag.ID_ACCO" == 56 || "@ViewBag.ID_ACCO" == 57 || "@ViewBag.ID_ACCO" == 58 ?
+                    ("@ViewBag.Cate5" != "" ?
+                        '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Categoria 5</b></div>' +
+                        '<div class = "smallTitle">' + "@ViewBag.Cate5" + '</div>' +
+                        '</div>':
+                        "") +
+                    ("@ViewBag.Cate6" != "" ?
+                        '<div class = "col-sm-6 col-lg-3">' +
+                            '<div class = "smallField"><b>Categoria 6</b></div>' +
+                            '<div class = "smallTitle">' + "@ViewBag.Cate6" + '</div>' +
+                        '</div>':"")
+                    :"")+
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Sitio</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_SITE']) + '</div>' +
+                    '</div>' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Locacion</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_LOCA']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class ="row">' +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Fecha Creación</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['CREATE_TICK']) + '</div>' +
+                    '</div>' +
+                      '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class="smallField"><b>Fecha Modificación</b></div>' +
+                        '<div class="smallTitle">' + (data['data'][index]['MODIFIED_TICK']) + '</div>' +
+                     '</div>' +
+                    ((data['data'][index]['ID_STAT']) == 5 ?
+                    '<div class="col-sm-6 col-lg-3">' +
+                        '<div class="smallField"><b>Fecha Programación</b></div>' +
+                        '<div class="smallTitle">' + (data['data'][index]['DATE_SCHE']) + '</div>' +
+                    '</div>' : '') +
+                    '<div class = "col-sm-6 col-lg-3">' +
+                        '<div class = "smallField"><b>Adjuntos</b></div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['ATTA_TOT']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class="chat-wrapper">' +
+                    '<div class="chat-box-wrapper" >' +
+                        '<div>' +
+                            '<div class="avatar-icon-wrapper mr-1">' +
+                                '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                    '<img src="/Content/Fotos/' +  (data['data'][index]['PHOTO'])   + '.jpg" />' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="chat-box">' +
+                                '<div class="form" id="clipboard">' +
+                                    (data['data'][index]['SUM_TICK']) +
+                                '</div>' +
+                            '</div>' +
+                            '<small class="opacity-7" style="font-size:12px">' +
+                                    'Creado por: '+(data['data'][index]['USER']) +
+                                    ("@ViewBag.ACCESO_EDIT" == 1 ?
+                                    ' | ' +
+                                         '<a style="cursor:pointer; color:#369;" href="javascript:void(0)" data-toggle="modal" data-target="#miModal" onclick="EditComment(@ViewData["ID_TICK"])"> Editar <i class="fa fa-pen"></i></a>'
+                                    : '') +
+                                    '<div class="msgBoxBody">' +
+                                        (data['data'][index]['ADJUNTOS']) +
+                                    '</div>' +
+                            '</small>' +
+                         '</div>' +
+                    '</div>' +
+                 '</div>'+
+                '</div>');
+
+            LlenarActivos(data['data'][index]['ID_TICK']);
+            if (@ViewBag.IdAcco == 56 || @ViewBag.IdAcco == 57 || @ViewBag.IdAcco == 58) {
+                $("#divResp").removeClass("divHide");
+                ObtenerUsuarioResponsable(data['data'][index]['ID_TICK']);
+            } else {
+                $("#divResp").addClass("divHide");
+            }
+            if (@ViewBag.IdAcco == 1) {
+                ObtenerDatosContratista(data['data'][index]['ID_TICK']);
+            }
+        });
+
+        if (parseInt('@ViewData["ID_STAT_END"]') == 6) {
+
+            var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").kendoComboBox({
+                autoBind: true,
+                index: 1,
+                dataTextField: "NAM_TYPE_DETA_TICK",
+                dataValueField: "ID_TYPE_DETA_TICK",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/TypeDetailsTicket/ListTypeDetailsTicketByID_MODUID_STAT_END/2"
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+        else {
+            var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").kendoComboBox({
+                autoBind: true,
+                index: 1,
+                dataTextField: "NAM_TYPE_DETA_TICK",
+                dataValueField: "ID_TYPE_DETA_TICK",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/TypeDetailsTicket/ListTypeDetailsTicketByID_MODU/2"
+                    }
+                }
+            }).data("kendoComboBox");
+
+        }
+
+        var onSelect = function (e) {
+            var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").data("kendoComboBox");
+            $.each(e.files, function (index, value) {
+                if (value.extension.toLowerCase() != ".pdf") {
+                    e.preventDefault();
+                    toastr.error("Seleccione un archivo pdf.", "Alerta");
+                }
+            });
+        };
+
+        $("#file").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            select: onSelect
+        });
+
+        var ID_STAT = $("#ID_STAT").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_STAT",
+            dataValueField: "ID_STAT",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/StatusTicket/StatusMODU"
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_TYPE_DETA_TICK.bind("change", function (e) {
+
+            if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 3) {
+                $("#divEstado").removeAttr("style");
+                $("#divEstado").attr("style", "display:true");
+                $("#divFechaProgramada").removeAttr("style");
+                $("#divFechaProgramada").attr("style", "display:true");
+
+                ID_STAT.value(5);
+
+            } else {
+                $("#divEstado").removeAttr("style");
+                $("#divEstado").attr("style", "display:none");
+                $("#divFechaProgramada").removeAttr("style");
+                $("#divFechaProgramada").attr("style", "display:none");
+            }
+        });
+
+        var FEC_SCHE = $("#FEC_SCHE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+
+        $("#COM_DETA_TICK").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#submit").click(function () {
+            winPopUpModalLoad("Saving Your Asset", "Please Wait", 300, 130);
+        });
+    }
+
+    var FuenteDatos = new kendo.data.DataSource({
+        transport: {
+            read: {
+                url: "/DeliveryReception/ListDetailsTicketByID_TICK/" + "@ViewData["ID_TICK"]",
+                type: "GET",
+                dataType: "json",
+                data: {
+                    q: "#kendoui",
+                    ran: Math.random(),
+                }
+            }
+        },
+        autoSync: true,
+        serverFiltering: true,
+        serverPaging: true,
+        pageSize: 15,
+        schema: {
+            data: "data",
+            total: "Count"
+        }
+    });
+
+
+    $("#gridActivities").kendoListView({
+        dataSource: FuenteDatos,
+        template: kendo.template($("#templateA").html())
+    });
+
+    /**/
+
+    var id1Value = '@id1';
+    var id2Value = '@id2';
+
+    if (id1Value == "") {
+        $("#divLicencias").hide();
+    } else {
+
+        function LlenarLicencias() {
+            $.ajax({
+                url: "/DeliveryReception/ListDetailsLicencia/",
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                data: {
+                    idLicencia: id1Value,
+                    idPersonEntity: id2Value,
+                    ran: Math.random(),
+                },
+                success: function (source) {
+                    data = source;
+                    showListaLicencias();
+                },
+                error: function (source) {
+                    data = source;
+                    showListaLicencias();
+                }
+            });
+        }
+
+        function showListaLicencias() {
+            $.each(data['data'], function (index, value) {
+                $("#gridLicencias").append(
+                    '<div class="card-body py-3 btn-shadow btn-outline-focus mb-2" style="font-size:12px">' +
+                    '<div class="row">' +
+                    '<div class="col-sm-6 col-lg-4">' +
+                    '<div class = "smallField"><b>Programa</b></div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['Nombre']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-sm-6 col-lg-4">' +
+                    '<div class = "smallField"><b>Codigo</b></div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['CodigoPrograma']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-sm-6 col-lg-4">' +
+                    '<div class = "smallField"><b>Periodo</b></div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['NombrePeriodo']) + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="row">' +
+                    '<div class="col-sm-6 col-lg-4">' +
+                    '<div class = "smallField"><b>Solped</b></div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['Solped']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-sm-6 col-lg-4">' +
+                    '<div class = "smallField"><b>Version Licencia</b></div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['VersionLicencia']) + '</div>' +
+                    '</div>' +
+                    '<div class="col-sm-6 col-lg-4">' +
+                    '<div class = "smallField"><b>Proveedor</b></div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['Proveedor']) + '</div>' +
+                    '</div>' +
+                    '</div>' +
+                    '<div class="row">' +
+                    '</div>');
+            });
+        }
+
+        LlenarLicencias();
+    }
+
+    /**/
+
+    function LlenarActivos(id) {
+        $.ajax({
+            url: "/DeliveryReception/ListAssetByID_TICK/" + id,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showListaAsset();
+            },
+            error: function (source) {
+                data = source;
+                showListaAsset();
+            }
+        });
+        ListComment(id);
+    }
+
+    function ObtenerUsuarioResponsable(id) {
+        $.ajax({
+            url: "/DeliveryReception/ObtenerUsuarioResponsable/" + id,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $("#usuarioResp").empty();
+                $.each(data['data'], function (index, value) {
+                    $("#usuarioResp").append((data['data'][index]['Usuario']));
+                });
+            }
+        });
+    }
+
+    function obtenerUsuarioResponsable() {
+        $.each(data['data'], function (index, value) {
+            $("#usuarioResp").append((data['data'][index]['Usuario']));
+        });
+    }
+
+    function ObtenerDatosContratista(id) {
+        $.ajax({
+            url: "/DeliveryReception/ObtenerDatosContratista/" + id,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (response) {
+                var data = response.data[0];
+
+                if (data.PorContratista == 'SI') {
+                    $("#divContr").show();
+
+                    $("#divContratista").append(
+                        '<div class="card-body py-3 btn-shadow btn-outline-focus" style="font-size:12px">' +
+                            '<div class="row">' +
+                                '<div class="col-sm-6 col-lg-4">' +
+                                    '<div class = "smallField"><b>Empresa Contratista</b></div>' +
+                                    '<div class = "smallTitle">' + data.EmpresaContratista + '</div>' +
+                                '</div>' +
+                                '<div class="col-sm-6 col-lg-4">' +
+                                    '<div class = "smallField"><b>Usuario</b></div>' +
+                                    '<div class = "smallTitle">' + data.UsuarioContratista + '</div>' +
+                                '</div>' +
+                                '<div class="col-sm-6 col-lg-4">' +
+                                    '<div class = "smallField"><b>Área</b></div>' +
+                                    '<div class = "smallTitle">' + data.AreaContratista + '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>');
+                }
+            }
+        });
+    }
+
+    function showListaAsset() {
+        $.each(data['data'], function (index, value) {
+            $("#divActivosTicket").append(
+                '<div class="card-body py-3 btn-shadow btn-outline-focus mb-2" style="font-size:12px">' +
+                    '<div class="row">' +
+                        '<div class="col-sm-6 col-lg-4">' +
+                            '<div class = "smallField"><b>Tipo Activo</b></div>' +
+                            '<div class = "smallTitle">' + (data['data'][index]['NAM_TYPE_ASSE']) + '</div>' +
+                        '</div>' +
+                        '<div class="col-sm-6 col-lg-4">' +
+                            '<div class = "smallField"><b>Activo</b></div>' +
+                            '<div class = "smallTitle">' + (data['data'][index]['CODE']) + '</div>' +
+                        '</div>' +
+                        '<div class="col-sm-6 col-lg-4">' +
+                            '<div class = "smallField"><b>Número de Serie</b></div>' +
+                            '<div class = "smallTitle">' + (data['data'][index]['SER_NUMB']) + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<div class="col-sm-6 col-lg-4">' +
+                            '<div class = "smallField"><b>Nombre Activo</b></div>' +
+                            '<div class = "smallTitle">' + (data['data'][index]['NAM_EQUI']) + '</div>' +
+                        '</div>' +
+                        '<div class="col-sm-6 col-lg-4">' +
+                            '<div class = "smallField"><b>Marca</b></div>' +
+                            '<div class = "smallTitle">' + (data['data'][index]['NAM_MANU']) + '</div>' +
+                        '</div>' +
+                        '<div class="col-sm-6 col-lg-4">' +
+                            '<div class = "smallField"><b>Modelo Comercial</b></div>' +
+                            '<div class = "smallTitle">' + (data['data'][index]['NAM_COMM_MODE']) + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    '<div class="row">' +
+                        '<div class="col-sm-12 col-lg-12">' +
+                            '<div class = "smallField"><button data-toggle="modal" data-target="#miModal" onclick="EditarActivo(' + (data['data'][index]['ID_ASSE']) + ')" class="btn btn-light btn-block btn-sm" ><i class="fa fa-pen"></i> Editar</button></div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>');
+        });
+    }
+
+    function EditarActivo(id) {
+        $("#lblTitulo").text("Editar Activo");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+
+        if (parseInt(@ViewBag.IdAcco) == 60) {
+            $('#modal-content').load("/Asset/EditarBNV/" + id + "?var=" + Math.random());
+        } else if (parseInt(@ViewBag.IdAcco) == 55) {
+            $('#modal-content').load("/Asset/EditarHudbay/" + id + "?var=" + Math.random());
+        } else {
+            $('#modal-content').load("/Asset/Editar/" + id + "?var=" + Math.random());
+        }
+    }
+
+    function ListComment(id) {
+        $.ajax({
+            url: "/DeliveryReception/ListarComentariosActivos/" + id,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showCommentDetails();
+            },
+            error: function (source) {
+                data = source;
+                showCommentDetails();
+            }
+        });
+    }
+
+    function showCommentDetails() {
+        $("#comment").empty();
+        $.each(data['data'], function (index, value) {
+
+            $("#comment").append(
+
+                '<div class="chat-wrapper">' +
+                    '<div class="chat-box-wrapper" >' +
+                        '<div>' +
+                            '<div class="avatar-icon-wrapper mr-1">' +
+                                '<div class="avatar-icon avatar-icon-lg rounded">' +
+                                    '<img src="/Content/Fotos/' +  (data['data'][index]['PHOTO'])   + '.jpg" />' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div>' +
+                            '<div class="chat-box">' +
+                                '<div class="form" id="clipboard">' +
+                                       (data['data'][index]['COM_DETA_TICK']) +
+                                '</div>' +
+                            '</div>' +
+                            '<small class="opacity-7" style="font-size:12px">' +
+                                    (data['data'][index]['NAM_TYPE_DETA_TICK']) + ' | ' +
+                                    (data['data'][index]['PERS']) + ' '+
+                                    (data['data'][index]['CREATE_DETA_INCI']) +' | ' +
+                                           ("@ViewBag.ACCESO_EDIT" == 1 ?
+                                            '<a style="color:#369; cursor:pointer;" data-toggle="modal" data-target="#miModal" onclick="EditDetailComment(' + (data['data'][index]['ID_DETA_TICK']) + ')"> Editar <i class="fa fa-pen"></i></a>'
+                                            : '') +
+
+                                       '<div class ="messageBoxDet2">' +
+                                            '<div class ="msgBoxDetTDI"> Inicio Actividad:&nbsp;' +
+                                            (data['data'][index]['DATE_INIC']) +
+                                            ' - Fin Actividad:&nbsp;' +
+                                            (data['data'][index]['DATE_END']) +
+                                            '</div>' +
+                                            '<div class="msgBoxDetAs"> ' + ' ' +
+                                                ((data['data'][index]['ID_TYPE_DETA_TICK']) == 3 ? ((data['data'][index]['NAM_STAT']) + " " + (data['data'][index]['FEC_SCHE'])) : '') +
+                                            '</div>' +
+                                        '</div>' +
+                                    '<div class="msgBoxBody">' +
+                                       (data['data'][index]['ADJUNTOS']) +
+                                    '</div>' +
+                            '</small>' +
+                         '</div>' +
+                    '</div>' +
+                 '</div>'
+            );
+        });
+    }
+
+    function EditComment(id) {
+        $("#lblTitulo").text("Editar Comentario");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Asset/UpdateComentAsset/" + id + "?_=" + Math.random());
+    }
+
+    function EditDetailComment(id) {
+        $("#lblTitulo").text("Editar Comentario");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Asset/UpdateComentDetailsTicketAsset/" + id + "?_=" + Math.random());
+    }
+
+</script>
+
+<script type="text/javascript">
+    function uploadDone(msg, code, id) {
+        if (msg == "OK") {
+            var typeformat = 'Delivery';
+            if ('@ViewData["NAM_TYPE_FORM"]' == 'RECEPTION')
+            {
+                typeformat = 'Reception';
+
+            }
+
+            toastr.success(typeformat + " - Se actualizaron los datos.", "Información Guardada");
+
+            setTimeout(function () {
+                location.reload(true);
+            }, 1200);
+
+        }
+        else {
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                messageAsset = 'Complete la información.';
+            }
+            else if (code == '1') {
+                messageAsset = 'Contacte al administrador.';
+            }
+            else if (code == '3') {
+                messageAsset = 'Seleccione un archivo pdf.';
+            }
+            else if (code == '4') {
+                messageAsset = '"Seleccione un archivo pdf.';
+            }
+            else if (code == '5') {
+                messageAsset = 'Seleccione la fecha programada. ';
+            }
+            else if (code == '6') {
+                messageAsset = 'Selecciona un estado.';
+            }
+            else {
+                messageAsset = '@ResourceLanguaje.Resource.AssetMessage2';
+
+                var elem = msg.split(',');
+                for (f = 0; f < elem.length - 1; f++) {
+                    $("#divDetailAsset_" + elem[f]).addClass('borderDetailsRojo');
+                }
+            }
+
+            toastr.warning(messageAsset, "Mensaje");
+        }
+    }
+
+ 
+
+</script>

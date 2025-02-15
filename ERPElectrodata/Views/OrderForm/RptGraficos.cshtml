@@ -1,0 +1,79 @@
+﻿@{
+    Layout = null;
+}
+
+<div class="box">
+    <form id="Parametro">
+        <div class="box-body">
+            <div class="row">
+                <div class="col-sm-3">
+                    <div class="form-group">
+                        <label for="cbPM">Project Manager</label>
+                        <select id="PM" name="PM" class="form-control select2" style="width:100%" ></select>
+                    </div>
+                </div>
+                <div class="col-sm-2">
+                    <div class="form-group">
+                        <label><br /></label>
+                        <button id="btnBuscar" type="button" class="ladda-button mb-2 mr-2 btn btn-warning btn-block" data-style="expand-right">
+                            <span class="ladda-label">
+                                <i class="fa fa-search"></i> Buscar
+                            </span>
+                            <span class="ladda-spinner">
+                            </span><div class="ladda-progress" style="width: 0px;"></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="box" style="margin-top:10px;">
+    <div class="box-body">
+        <iframe id="RSProyGraficos" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function GenerateReport() {
+        var idPM = $("#PM").val() == null ? 0 : $("#PM").val();
+        window.frames["RSProyGraficos"].src = "/Reporting/OrderForm/ProyGraficos.aspx?var=" + Math.random() + "&PM=" + idPM;
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#PM").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarProjectManager",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#btnBuscar").click(function (event) {
+            GenerateReport();
+            event.preventDefault();
+        });
+
+    });
+
+</script>
+

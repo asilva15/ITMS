@@ -1,0 +1,298 @@
+﻿@{
+    Layout = null;
+}
+
+            <div style="width:100%; height:456px;" id="divListBeneficiaries"></div>
+            <div id="addnewbene"></div>
+
+
+
+        <script type="text/javascript">
+                $(document).ready(function () {
+                    $.ajax({
+                        url: "/Talent/ListaBeneficiarios/@ViewBag.ID_PERS_ENTI",
+                        data: "var=" + Math.random(),
+                        cache: false,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (source) {
+                            datos = source;
+                            if ('@ViewBag.sw' == '1') {
+                                showListBeneficiaries();
+                            }
+                            else {
+                                showListBeneficiariesDelete();
+                            }
+                        },
+                        error: function (source) {
+                            //alert("Error Carga Json");
+                        }
+                    });
+                });
+
+
+                $("#newbeneficiary").click(function () {
+                    $("#newbeneficiary").hide("slow");
+                    $("#divListBeneficiaries").animate({ width: 'hide' }, "slow");
+                    $("#addnewbene").load("/Talent/NewBeneficiary?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+                });
+
+
+            function Edit(id, idkd, BFN, BSN, BLN, BMN, DNI, BRITH) {
+                    $("#diveditAtta").css("display", "none");
+                    $("#diveditbene").css('display', 'inline');
+
+
+                    $("#ID_BENI_EDIT").val(id);
+                    //$("#divTitleBene").html('@ResourceLanguaje.Resource.BtnEdit @ResourceLanguaje.Resource.BeneficiaryTalent');
+                    $("#ID_KINDRED").data("kendoComboBox").value(idkd);
+                    $("#New_FIR_NAME").val(BFN);
+                    $("#New_SEC_NAME").val(BSN);
+                    $("#New_LAS_NAME").val(BLN);
+                    $("#New_MOT_NAME").val(BMN);
+                    $("#New_NUMB_DNI").val(DNI);
+                    if(BRITH=='-')
+                    {
+                        $("#New_DATE_BIRTH").val("");
+                    }
+                    else
+                    {
+                        $("#New_DATE_BIRTH").val(BRITH);
+                       
+                    }                  
+
+
+                    $("#EditReset").css('display', 'inline-block');
+                   
+                }
+
+                function showListBeneficiaries() {
+                    //$("#divListBeneficiaries").append('<div style="height:8px;"></div>');
+                    $.each(datos['data'], function (index, value) {
+                        $("#divListBeneficiaries").append('<div style="margin-top:10px; width:100%; float:left; display:inline-block;"><div style="width:97%; margin:0 auto;">' +
+                            '<div class ="divListWhite" style="width:100%;" id="Bene_' + (datos['data'][index]['ID_BENE']) + '" onmouseover="onMouseOverBene(' + (datos['data'][index]['ID_BENE']) + ')" onmouseout="onMouseOutBene(' + (datos['data'][index]['ID_BENE']) + ')" >' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.KindredTalent</b></div>' +
+                                        '<div class = "smallTitle">' + (datos['data'][index]['NAM_KIND']) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.BeneficiaryTalent</b></div>' +
+                                        '<div class = "smallTitle">' + (datos['data'][index]['Beneficiari']) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.DateBirthTalent</b></div>' +
+                                        '<div class = "smallTitle">' + (datos['data'][index]['BRITH']) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.AgeTalent</b></div>' +
+                                        '<div class = "smallTitle">' + (datos['data'][index]['EDAD']) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>DNI</b></div>' +
+                                        '<div class = "smallTitle" id="divATTDNI' + (datos['data'][index]['ID_BENE']) + '">' + datos['data'][index]['NUMB_DNI'] + '</div>' +
+                                    '</div>' +
+                            '</div></div></div>');
+
+                        @*if (datos['data'][index]['ATT_DNI'] == true) {
+                            $("#divATTDNI" + datos['data'][index]['ID_BENE']).append('<a href="/Adjuntos/Talent/BeneficiaryDNI/' + (datos['data'][index]['NAM_FILE_DNI']) + '" title="@ResourceLanguaje.Resource.Download DNI" target="_blank" style="text-decoration:none; color:#999999;">' + (datos['data'][index]['NUMB_DNI']) + '</a>');
+                        }
+                        else {
+                            $("#divATTDNI" + datos['data'][index]['ID_BENE']).append(datos['data'][index]['NUMB_DNI']);
+                        }
+                        if (datos['data'][index]['ATT_EVID_STUD'] == true) {
+                            $("#divATTDNI" + datos['data'][index]['ID_BENE']).append('&nbsp;&nbsp;/ &nbsp;<a href="/Adjuntos/Talent/BeneficiaryCE/' + (datos['data'][index]['NAM_FILE_CE']) + '" title="@ResourceLanguaje.Resource.Download @ResourceLanguaje.Resource.EvidenceStudies" target="_blank" style="text-decoration:none; color:#999999;">C.E.</a>');
+                        }*@
+                    });
+                }
+
+                function showListBeneficiariesDelete() {
+                    //$("#divListBeneficiaries").append('<div style="height:8px;"></div>');
+                    $.each(datos['data'], function (index, value) {
+                        $("#divListBeneficiaries").append('<div id="divBene_' + (datos['data'][index]['ID_BENE']) + '" style="margin-top:10px; width:100%; float:left; display:inline-block;"><div style="width:97%; margin:0 auto;">' +
+                            '<div class ="divListWhite" style="width:100%;" id="Bene_' + (datos['data'][index]['ID_BENE']) + '" onmouseover="onMouseOverBene(' + (datos['data'][index]['ID_BENE']) + ')" onmouseout="onMouseOutBene(' + (datos['data'][index]['ID_BENE']) + ')" >' +
+                                '<div style="width:90%; float:left;">' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.Kindred</b></div>' +
+                                        '<div class = "smallTitle">' + (datos['data'][index]['NAM_KIND']) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.Beneficiary</b></div>' +
+                                        '<div class = "smallTitle">' + (datos['data'][index]['Beneficiari']) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.DateBirth</b></div>' +
+                                        '<div class = "smallTitle">' + (datos['data'][index]['BRITH']) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>@ResourceLanguaje.Resource.Age</b></div>' +
+                                        '<div class = "smallTitle">' + (datos['data'][index]['EDAD']) + '</div>' +
+                                    '</div>' +
+                                    '<div class = "divLectSpacio5"></div>' +
+                                    '<div class = "divLectCont5">' +
+                                        '<div class = "smallField"><b>DNI</b></div>' +
+                                        '<div class = "smallTitle" id="divATTDNI' + (datos['data'][index]['ID_BENE']) + '">'+datos['data'][index]['NUMB_DNI']+'</div>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div style="width:10%; float:left; min-width:34px;">' +
+                                    '<div style="float:right; margin-right:2px;">' +
+
+                                       '<div  id="BeneDel_' + (datos['data'][index]['ID_BENE']) + '" style="width:80px; height:25px; text-align:center; padding-top:9px; visibility:hidden;">' +
+                                        '<img  onclick="Edit(' + datos['data'][index]['ID_BENE'] + ',' + datos['data'][index]['ID_KINDRED'] + ',\'' + (datos['data'][index]['BENI_FIR_NAME']) + '\',\'' + (datos['data'][index]['BENI_SEC_NAME']) + '\',\'' + (datos['data'][index]['BENI_LAS_NAME']) + '\',\'' + (datos['data'][index]['BENI_MOT_NAME']) + '\',\'' + (datos['data'][index]['NUMB_DNI']) + '\',\'' + (datos['data'][index]['BRITH']) + '\')" ' +
+                                        'style="display:inline-block; cursor:pointer;" title="Edit" src="/Content/Images/editbene.png" />' +
+                                        '<img onclick="ListAttaBenef(' + datos['data'][index]['ID_BENE'] + ')" style="display:inline-block; cursor:pointer; padding:0px 5px 0px 5px;" title="Documents" src="/Content/Images/documentsbene.png" />' +
+                                        '<img onclick="removeBeneficiary(' + (datos['data'][index]['ID_BENE']) + ');" style="display:inline-block; cursor:pointer; " title="Delete" src="/Content/Images/deletebene.png" />' +
+                                        '</div>' +
+
+                                    '</div>' +
+                                '</div>' +
+                            '</div></div></div>');
+
+                        @*if (datos['data'][index]['ATT_DNI'] == true) {
+                            $("#divATTDNI" + datos['data'][index]['ID_BENE']).append('<a href="/Adjuntos/Talent/BeneficiaryDNI/' + (datos['data'][index]['NAM_FILE_DNI']) + '" title="@ResourceLanguaje.Resource.Download DNI" target="_blank" style="text-decoration:none; color:#999999;">' + (datos['data'][index]['NUMB_DNI']) + '</a>');
+                        }
+                        else {
+                            $("#divATTDNI" + datos['data'][index]['ID_BENE']).append(datos['data'][index]['NUMB_DNI']);
+                        }
+                        if (datos['data'][index]['ATT_EVID_STUD'] == true) {
+                            $("#divATTDNI" + datos['data'][index]['ID_BENE']).append('&nbsp;&nbsp;/ &nbsp;<a href="/Adjuntos/Talent/BeneficiaryCE/' + (datos['data'][index]['NAM_FILE_CE']) + '" title="@ResourceLanguaje.Resource.Download @ResourceLanguaje.Resource.EvidenceStudies" target="_blank" style="text-decoration:none; color:#999999;">C.E.</a>');
+                        }*@
+                    });
+                }
+
+            function onMouseOverBene(id) {
+
+                    $("#Bene_" + id).css("background-color", "#fcfcfc");
+                    $("#BeneDel_" + id).css("visibility", "visible");
+                    //$("#BeneDel_" + id).css("border", "1px solid #B21E1E");
+            }
+
+                function onMouseOutBene(id) {
+                    $("#Bene_" + id).css("background-color", "#ffffff");
+                    $("#BeneDel_" + id).css("visibility", "hidden");
+                    //$("#BeneDel_" + id).css("border", "1px solid #ffffff");
+                }
+
+
+                function removeBeneficiary(c) {
+                    //var elem = c.id.split('_');
+
+                    winPopUpModal("@ResourceLanguaje.Resource.Delete", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+                   "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>@ResourceLanguaje.Resource.MsnDeleteBeneficiary</div>" +
+                   "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                   "<button id='btnYesBen' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNOBen' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+                   , 350, 130);
+
+                    var undo = $("#btnYesBen")
+                        .bind("click", function () {
+                            $.ajax({
+                                url: "/Beneficiary/DeleteBeneficiary/" +c,
+                                data: "var=" + Math.random(),
+                                type: "GET",
+                                dataType: "text",
+                                success: function (dato) {
+                                    if (dato == 'OK') {
+                                        $('#divBene_' + String(c)).remove();
+                                        closeWinModalPopUp();
+                                    }
+                                    else { closeWinModalPopUp(); alert('ERROR'); }
+                                },
+                                error: function (dato) {
+                                    alert('ERROR');
+                                }
+                            });
+                        });
+
+                    var undo = $("#btnNOBen")
+                        .bind("click", function () {
+                            closeWinModalPopUp();
+                        });
+                }
+
+            function ListAttaBenef(id){                
+                
+
+                $.ajax({
+                    url: "/Beneficiary/ListAttaBene/"+id,
+                    data: "var=" + Math.random(),
+                    cache: false,
+                    type: "GET",
+                    dataType: "json",
+                    success: function (source) {
+                       dataatta = source;
+
+                        showListAttaBene();
+
+                    },
+                    error: function (source) {
+                        //alert("Error Carga Json");
+                    }
+                });
+            }
+
+            function showListAttaBene() {
+                //alert("llego aqui");
+                $("#diveditbene").css("display", "none");
+                $("#diveditAtta").css("display", "inline");
+                $("#divAttaBene").empty();
+
+                $.each(dataatta['Data'], function (index, value) {                 
+
+                    $("#divAttaBene").append('<div>' +
+                                               '<div id="divAttaBene_' + (dataatta['Data'][index]['ID_ATTA']) + '">' +
+                                               '<div style="font-size: 0.9em; font-weight: bold; color: #444; text-transform: capitalize; text-align: left;">' + (dataatta['Data'][index]['NAM_TYPE_ATTA']) + '<br /></div>'+                                              
+                                                 '<ul><li><a href="/Adjuntos/Talent/BeneficiaryDNI/' + (dataatta['Data'][index]['NAM_ATTA']) + '_' + (dataatta['Data'][index]['ID_ATTA']) + (dataatta['Data'][index]['EXT_ATTA']) + '" target="blank" style="text-decoration:none;">' +
+                                                    (dataatta['Data'][index]['NAM_ATTA']) + (dataatta['Data'][index]['EXT_ATTA']) +
+                                                  '</a><span>&nbsp;<span onclick="DeleteAtta(' + (dataatta['Data'][index]['ID_ATTA']) + ')" class="delete-atta-bene" title="Remove"></span></span></li></ul>' +                                                    
+                                                 '</div>'+
+                                               '</div>');
+
+                })
+            }
+
+            function DeleteAtta(id) {             
+
+                  winPopUpModal("@ResourceLanguaje.Resource.Delete", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+                   "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Remove Attachment</div>" +
+                   "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+                   "<button id='btnYesBen' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNOBen' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+                   , 350, 130);
+
+                        var undo = $("#btnYesBen")
+                            .bind("click", function () {
+                                $.ajax({
+                                    url: "/Beneficiary/DeleteAttaBene/" + id,
+                                    data: "var=" + Math.random(),
+                                    type: "GET",
+                                    dataType: "text",
+                                    success: function (dato) {
+                                        
+                                        if (dato == 'OK') {
+                                          $('#divAttaBene_' + String(id)).remove();
+                                            closeWinModalPopUp();
+                                        }
+                                        else { closeWinModalPopUp(); alert('ERROR'); }
+                                    },
+                                    error: function (dato) {
+                                        alert('ERROR');
+                                    }
+                                });
+                            });
+
+                        var undo = $("#btnNOBen")
+                            .bind("click", function () {
+                                closeWinModalPopUp();
+                            });
+                    }
+               
+   
+        </script>

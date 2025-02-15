@@ -1,0 +1,205 @@
+﻿@{
+    /**/
+
+    Layout = null;
+}
+
+
+@using (Html.BeginForm("TicketReport", "InformGFCDH", FormMethod.Post, new { id = "FormTicketReport" }))
+{
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="position-relative form-group">
+                <label id="lbl" for="lbl">
+                    Para obtener el Reporte se tiene que ingresar un periodo
+                    (Desde/Hasta)
+                </label>
+                <label id="lblF" for="lblF">
+                    El Reporte se generará en una nueva ventana.
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="position-relative form-group">
+                <label id="lblDesde">Desde </label>
+                @Html.TextBox("FROM_DATE")
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="position-relative form-group">
+                <label id="lblHasta">Hasta </label>
+                @Html.TextBox("TO_DATE")
+            </div>
+        </div>
+    </div>
+    <div class="form-row">
+        <div class="col-md-6">
+            <div class="position-relative form-group">
+                <label id="lblArea">Área </label>
+                @Html.TextBox("IdAreaOperativa")
+            </div>
+        </div>
+    </div>
+    <div class="form-row" id="divSubCuenta">
+        <div class="col-md-4">
+            <label>Sub Cuenta</label>
+            <div class="position-relative form-check">
+                <label class="form-check-label">
+                    <input type="radio" id="rbTodos" name="rbSubCuenta" class="form-check-input" value="0" checked> TODOS
+                </label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label><br /></label>
+            <div class="position-relative form-check">
+                <label class="form-check-label">
+                    <input type="radio" id="rbInterno" name="rbSubCuenta" class="form-check-input" value="1"> INTERNO
+                </label>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label><br /></label>
+            <div class="position-relative form-check">
+                <label class="form-check-label">
+                    <input type="radio" id="rbExterno" name="rbSubCuenta" class="form-check-input" value="2"> EXTERNO
+                </label>
+            </div>
+        </div>
+    </div>
+    <div class="divider"></div>
+    <div class="form-row">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-6">
+                    &nbsp;
+                </div>
+                <div class="col-md-6">
+                    <a id="linkTicketReport" class="btn btn-block btn-primary btn-sm" href="/Reporting/TicketAllDetail.aspx" target="_blank"><span>Generar Reporte</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<script>
+    $(document).ready(function () {
+        //top.cambioIdiomaxLlave('ParaobtenerelReportesetienequeingresarunperiodo|(Desde/Hasta)|ElReportesegeneraráenunanuevaventana|Crear|Cancelar');
+
+        var FROM_DATE = $("#FROM_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        var TO_DATE = $("#TO_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        //FROM_DATE.bind("change", function (e) {
+        //    alert(1);
+        //    document.getElementById('linkTicketReport').href = "/Reporting/TicketAllDetail.aspx?" + $("#FormTicketReport").serialize();
+        //});
+
+        //TO_DATE.bind("change", function (e) {
+        //    alert(1);
+        //    document.getElementById('linkTicketReport').href = "/Reporting/TicketAllDetail.aspx?" + $("#FormTicketReport").serialize();
+        //});
+
+        //$("#rbTodos").bind("change", function (e) {
+        //    alert(2);
+        //    document.getElementById('linkTicketReport').href = "/Reporting/TicketAllDetail.aspx?" + $("#FormTicketReport").serialize();
+        //});
+        //$("#rbInterno").bind("change", function (e) {
+        //    alert(3);
+        //    document.getElementById('linkTicketReport').href = "/Reporting/TicketAllDetail.aspx?" + $("#FormTicketReport").serialize();
+        //});
+        //$("#rbExterno").bind("change", function (e) {
+        //    alert(4);
+        //    document.getElementById('linkTicketReport').href = "/Reporting/TicketAllDetail.aspx?" + $("#FormTicketReport").serialize();
+        //});
+
+        $("#reseet").click(function (event) {
+            event.preventDefault();
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+        $("#linkTicketReport").click(function () {
+            document.getElementById('linkTicketReport').href = "/Reporting/TicketAllDetail.aspx?" + $("#FormTicketReport").serialize();
+        });
+        if (@Session["ID_ACCO"] != 4) {
+            $("#divSubCuenta").css("display", "none");
+        }
+        if (@Session["ID_ACCO"] != 60) {
+            var IdAreaOperativa = $("#IdAreaOperativa").kendoComboBox({
+                dataTextField: "QUEU",
+                dataValueField: "ID_QUEU",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                placeholder: "Área Responsable",
+                template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+                    '<span><strong>${data.QUEU}</strong></span><br />' +
+                    '<span style="font-size:.9em; position:absolute; top:15px;">${data.DES_QUEU}</span></div>',
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+        } else {
+            var IdAreaOperativa = $("#IdAreaOperativa").kendoComboBox({
+                dataTextField: "DES_QUEU",
+                dataValueField: "ID_QUEU",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                placeholder: "Área Responsable",
+                template: '<div style="text-transform:capitalize; display: width:100%;">' +
+                    '${data.DES_QUEU}</div>',
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+    });
+
+    function cambioIdiomaTexto() {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaTexto?IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+</script>

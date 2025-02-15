@@ -1,0 +1,95 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+<div id="divContent" class="afterMain">
+    <div style="width: 100%; float:left;">
+        <div class="titleForm">
+            <div class="title">
+                <img src="~/Content/Images/MesaAyuda.png" />
+                Reporte de Tickets por Activos
+                <div style="width:100px; float:right; padding-right:5px">
+                    @using (Html.BeginForm("ExportarListaTicketActivo", "Supervision", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+                    {
+                        <input type="hidden" name="TipoActivo" id="TipoActivo" value="@ViewBag.IdTipoActivo">
+                        <button type="button" class="btn btn-block btn-warning" onclick="ExportarListaTicketActivo();">Exportar</button>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:100%; background-color:white">
+                <div class="bg-primary" style="width:100%">
+                    <div class="bg-primary" style="float:left; width:100%">&nbsp;</div>
+                    <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                    <div class="bg-primary" style="float:left; width:29%"><strong>TICKET</strong></div>
+                    <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                    <div class="bg-primary" style="float:left; width:29%"><strong>CATEGORIA</strong></div>
+                    <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                    <div class="bg-primary" style="float:left; width:39%"><strong>COMENTARIO</strong></div>
+                </div>
+                <div style="float:left; width:100%"><hr /></div>
+                <div id="divTicketActivo" class="contentView"></div>
+                <div id="pagerTicketActivo" class="contentViewPager" style="width:99%"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaTicket">
+    <a href="\\DetailsTicket/Index/${IdTicket}" target="_blank">
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:29%">${Estado}<br />${CodigoTicket}<br />${Asignado}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:29%">${Categoria3}<br />${Categoria4}<br />${TipoActivo}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:39%">#= Comentario #</div>
+        <div style="float:left; width:100%"><hr /></div>
+    </a>
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //Lista Prioridad
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Supervision/ObtenerTicketActivoDetalle/9",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 5,
+            schema: {
+                data: "ListaTicketActivo",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerTicketActivo").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divTicketActivo").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaTicket").html())
+        });
+
+    });
+
+    function ExportarListaTicketActivo() {
+        $("#formExportar").submit();
+    }
+</script>

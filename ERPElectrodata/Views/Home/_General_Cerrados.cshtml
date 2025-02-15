@@ -1,0 +1,51 @@
+﻿@model List<ERPElectrodata.Models.TicketsPorGrupo_Result>
+
+<div>
+    <div id="listaCargaCerrados">
+        @Html.Partial("_CargaTickets", (int)ViewBag.CantidadPintar)
+    </div>
+    <div id="listaCerrados">
+
+    </div>
+    <div id="paginadorCerrados" class="mt-3" style="display: none">
+        <ul class="pagination" id="paginationCerrados"></ul>
+    </div>
+
+</div>
+
+@*<script type="text/javascript" src="~/Scripts/jq-paginator.js"></script>*@
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if (@ViewBag.CantidadTickets != 0) {
+            $.jqPaginator('#paginationCerrados', {
+                totalPages: @ViewBag.CantidadTickets,
+                visiblePages: 10,
+                currentPage: 1,
+                onPageChange: function (num, type) {
+                    if (type == "change") {
+                        cambioPaginaCerrados(num)
+                    }
+
+                }
+            });
+
+        }
+    });
+    function cambioPaginaCerrados(pagina) {
+        document.getElementById("listaCerrados").style.display = 'none'
+        document.getElementById("listaCargaCerrados").style.display = 'block'
+        if (@ViewBag.CantidadPintar != 0) {
+            $.post("/Home/ActualizarActivos", { seccion: 6, pagina: pagina }, function (response) {
+                $("#listaCerrados").html(response);
+                document.getElementById("paginadorCerrados").style.display = 'block'
+                document.getElementById("listaCargaCerrados").style.display = 'none'
+                document.getElementById("listaCerrados").style.display = 'block'
+            });
+        } else {
+            document.getElementById("listaCargaCerrados").style.display = 'none'
+            document.getElementById("listaCerrados").style.display = 'block'
+        }
+
+    }
+</script>

@@ -1,0 +1,98 @@
+﻿@{
+    Layout = null;
+}
+
+<div style="width: 100%; float:left;">
+    <div class="titleForm">
+        <div class="title">
+            <img src="~/Content/Images/MesaAyuda.png" />
+            Reporte por Prioridad Top 20 - Incidentes Abiertos
+            <div style="width:100px; float:right; padding-right:5px">
+                @using (Html.BeginForm("ExportarListaPrioridad", "Supervision", FormMethod.Post, new { id = "formExportar", name = "formExportar" }))
+                {
+                    <button type="button" class="btn btn-block btn-warning" onclick="ExportarListaPrioridad();">Exportar</button>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm" style="height:100%; background-color:white">
+            <div class="bg-primary" style="width:100%">
+                <div class="bg-primary" style="float:left; width:100%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:14%"><strong>TICKET</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:14%"><strong>CATEGORIA</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:22%"><strong>COMENTARIO</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:22%"><strong>CAUSAS</strong></div>
+                <div class="bg-primary" style="float:left; width:1%">&nbsp;</div>
+                <div class="bg-primary" style="float:left; width:23%"><strong>ESTADO ACTUAL</strong></div>
+            </div>
+            <div style="float:left; width:100%"><hr /></div>
+            <div id="divIncidentePrioridad" class="contentView"></div>
+            <div id="pagerIncidentePrioridad" class="contentViewPager" style="width:99%"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="plantillaPrioridad">
+    <a href="\\DetailsTicket/Index/${ID_TICK}" target="_blank">
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:14%">${TIEMPO_TICK} HRS &nbsp;${PRIORIDAD}<br />${CODIGO}<br />${ASIGNADO}<br />${FECHACREA}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:14%">${CLASE}<br />${SUBCLASE}</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:22%">#= COMENTARIO #</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:22%">#= CAUSA #</div>
+        <div style="float:left; width:1%">&nbsp;</div>
+        <div style="float:left; width:23%">#= ESTADO_ACTUAL #</div>
+        <div style="float:left; width:100%"><hr /></div>
+    </a>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        //Lista Prioridad
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Supervision/ObtenerIncidentePrioridad",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 5,
+            schema: {
+                data: "ListaPrioridad",
+                total: "Cantidad"
+            }
+        });
+
+        $("#pagerIncidentePrioridad").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [5, 10, 15],
+            refresh: true
+        });
+
+        $("#divIncidentePrioridad").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#plantillaPrioridad").html())
+        });
+
+    });
+
+    function ExportarListaPrioridad() {
+        $("#formExportar").submit();
+    }
+</script>

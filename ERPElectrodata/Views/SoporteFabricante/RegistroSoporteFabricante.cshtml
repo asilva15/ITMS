@@ -1,0 +1,451 @@
+﻿@model ERPElectrodata.Models.SoporteFabricante
+
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+<style>
+
+    .k-content.k-iframe {
+        box-sizing: border-box;
+        border-width: 0.02px;
+        border-style: solid;
+        border-color: #bdbdbd !important;
+        border-radius: 4px;
+    }
+    table.k-editor {
+        height: 60px;
+        border-color: white!important;
+    }
+    tr[role="presentation"] {
+        display: none;
+    }
+
+</style>
+@*<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>*@
+
+@using (Html.BeginForm("GuardarSoporteFabricante", "SoporteFabricante", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmRegistrar", name = "FrmRegistrar", target = "FrmRegistrar" }))
+{
+    
+    <input type="hidden" id="IdDocuSale" name="IdDocuSale" value="@ViewBag.IdDocuSale" />
+    
+    <div class="tab-content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">Agregar Marca</div>
+                    <div class="card-body">
+
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="col-md-4">
+                                    <label id="lblFabricante" for="cbFabricante" class="">Fabricante <b>(*)</b></label>
+                                    <input id="cbFabricante" name="cbFabricante" class="dropdownKendo">
+                                </div>
+                                <div class="col-md-4">
+                                    <label id="lblProductos" for="cbProductos" class="">Productos <b>(*)</b></label>
+                                    <input id="cbProductos" name="cbProductos" type="text" style="width: 100%" data-text-field="text" data-value-field="value">
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label id="lblRMA" for="txtRMA" class="">RMA</label>
+                                    <br />
+                                    <input id="checkRMA" name="checkRMA" type="checkbox" onchange="HabilitarRMA()"/>
+                                    <input style="border-width: 0.02px;border-style: solid;border-color: #bdbdbd !important;border-radius:2px;" type="text" id="txtRMA" name="txtRMA" disabled />
+                                </div>
+                            </div>
+                            <br />
+                            <div class="form-row">
+                                <div class="col-md-6">
+                                    <label id="lblInicioSoporteMarca" for="dtInicioSoporteMarca" class="">Fecha Inicio Soporte <b>(*)</b></label>
+                                    <input type="date" id="dtInicioSoporteMarca" name="dtInicioSoporteMarca" placeholder="" class="form-control pull-right" value="" style="width: 100%; font-size: 14px;" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label id="lblFinSoporteMarca" for="dtFinSoporteMarca" class="">Fecha Fin Soporte<b>(*)</b></label>
+                                    <input type="date" id="dtFinSoporteMarca" name="dtFinSoporteMarca" placeholder="" class="form-control pull-right" value="" style="width: 100%; font-size: 14px;" />
+                                </div>
+                                
+                            </div>
+                            <br />
+                            <div class="form-row">
+
+                                <div class="col-md-8">
+                                    Observaciones
+                                    <textarea id="txtObservacionesMarca" name="txtObservacionesMarca" placeholder="Observaciones..."></textarea>
+                                </div>
+
+                                
+
+                                <div class="col-md-4">
+                                    <br />
+                                    <input class="btn btn-block btn-primary btn-sm" value="Agregar" onclick="AgregarSoporteFab()" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="card-header">Listado de soporte fabricante / RMA</div>
+                            <div class="card-body">
+                                <div class="tab-content">
+                                    <div class="tab-pane active" id="tab_1">
+                                        <table id="tablaSoporteFabricanteAgregar" class="table table-bordered table-striped" style="width: 100%; font-size: 12px;">
+                                            <thead>
+                                                <tr>
+                                                    <th>Fabricante</th>
+                                                    <th>Productos</th>
+                                                    <th>Inicio Soporte</th>
+                                                    <th>Fin Soporte</th>
+                                                    <th>RMA</th>
+                                                    @*<th>Observaciones</th>*@
+                                                    <th>Opciones</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="form-row">
+                                <div class="col-md-9">
+                                </div>
+                                <div class="col-md-3">
+                                    <input id="btnGuardarSoporteFab" name="btnGuardarSoporteFab" class="btn btn-block btn-primary btn-sm" type="submit" value="Guardar" />
+                                    @*<input id="btnGuardarSoporteFab" name="btnGuardarSoporteFab" class="btn btn-block btn-primary btn-sm" type="button" value="Guardar" onclick="GuardarSoporteFab();" />*@
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>  
+    
+}
+
+<iframe id="FrmRegistrar" name="FrmRegistrar" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        //$("#dtInicioSoporteMarca").kendoDatePicker();
+        //$("#dtFinSoporteMarca").kendoDatePicker();
+        $('#dtInicioSoporteMarca').val('@ViewBag.FechaIni');
+        $('#dtFinSoporteMarca').val('@ViewBag.FechaFi');
+
+        //Check No Aplica
+        $('#chkAplicaSE').on('ifChanged', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoSoporteED(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoSoporteED(1);
+            }
+        });
+        $('#chkAplicaInforme').on('ifChanged', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoInformeED(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoInformeED(1);
+            }
+        });
+        $('#chkAplicaFabricante').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoSoporteFabricante(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoSoporteFabricante(1);
+            }
+        });
+
+        var cbFabricante = $("#cbFabricante").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "id",
+            optionLabel: {
+                text: "Seleccionar",
+                id: null
+            },
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            change: function (e) {
+                var selectedFabricanteId = this.value();
+                $("#cbProductos").data("kendoMultiSelect").dataSource.transport.options.read.data = { ID_DOCU_SALE: @ViewBag.IdDocuSale,ID_MANU: selectedFabricanteId };
+                $("#cbProductos").data("kendoMultiSelect").dataSource.read();
+            },
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/SoporteFabricante/ListarFabricanteOP",
+                        data: { NumDocuSale: @ViewBag.IdDocuSale },
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: function (response) {
+                        return response;
+                    }
+                }
+            }
+        });
+
+        $("#cbProductos").kendoMultiSelect({
+            dataTextField: "text",
+            placeholder: "Seleccionar productos",
+            dataValueField: "id",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/SoporteFabricante/ListaProductosxFabricante",
+                        data: { ID_DOCU_SALE: @ViewBag.IdDocuSale,ID_MANU: 0 },
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: function (response) {
+                        return response;
+                    }
+                }
+            }
+        });
+
+        var cbRMA = $("#cbRMA").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "id",
+            optionLabel: {
+                text: "Seleccionar",
+                id: null
+            },
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/SoporteFabricante/ListarRMA",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: function (response) {
+                        return response;
+                    }
+                }
+            }
+        });
+
+
+
+
+        $("#txtTiempoSoporteMarca").change(function(){
+            $.ajax({
+                url: "/SoporteED/CalcularFinSoporte/"+@ViewBag.IdDocuSale,
+                data: "&TiempoSoporte=" + $("#txtTiempoSoporteMarca").val() + "&var=" + Math.random(),
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    $("#dtFinSoporteMarca").val((data['Data'][index]['FinSoporte']));
+                },
+                error: function (source) {
+                    MensajeSoporteFabricante("Debe ingresar la fecha de acta de conformidad.");
+                }
+            });
+        });
+
+        $("#txtProductos").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+            ], encoded: false
+        });
+        $("#txtObservacionesMarca").kendoEditor({
+            tools: [], encoded: false
+        });
+       
+    });
+
+    var contador = 1;
+
+    function AgregarSoporteFab() {
+
+        var ID_MANU = $("#cbFabricante").data("kendoDropDownList").value();
+        var fabricante = $("#cbFabricante").data("kendoDropDownList").text();
+        var codigosProductos = obtenerCodigosProductos();
+        var nombresProductos = obtenerNombresProductos();
+        var productosSeleccionados = obtenerProductosConcat();
+        var inicioSoporte = $("#dtInicioSoporteMarca").val();
+        var finSoporte = $("#dtFinSoporteMarca").val();
+        var rma = $("#txtRMA").val();
+        var observaciones = $("#txtObservacionesMarca").data("kendoEditor").value();
+
+        var formattedInicio = formatDate(inicioSoporte);
+        var formattedFin = formatDate(finSoporte);
+
+
+        //validaciones
+        if (fabricante == "Seleccionar") {
+
+            toastr.warning("Seleccione un Fabricante.", "Mensaje");
+            return null;
+        }
+        if (productosSeleccionados == "") {
+
+            toastr.warning("Seleccione un Producto.", "Mensaje");
+            return null;
+        }
+        if (inicioSoporte == "") {
+
+            toastr.warning("Seleccione una Fecha Inicio Soporte.", "Mensaje");
+            return null;
+        }
+        if (finSoporte == "") {
+
+            toastr.warning("Seleccione una Fecha Fin Soporte", "Mensaje");
+            return null;
+        }
+
+
+        var newRow =
+            "<tr><td><input id='fabricante" + contador + "' name='fabricante" + contador + "' value='" + ID_MANU + "' hidden />" + fabricante + "</td>" +
+            "<td><input id='codigoproducto" + contador + "' name='codigoproducto" + contador + "' value='" + codigosProductos + "' hidden />" +
+            "<input id='nombreproducto" + contador + "' name='nombreproducto" + contador + "' value='" + nombresProductos + "' hidden />" +
+            "<input id='productos" + contador + "' name='productos" + contador + "' value='" + productosSeleccionados + "' hidden />" + productosSeleccionados + "</td>" +
+            "<td><input id='fechainicio" + contador + "' name='fechainicio" + contador + "' value='" + inicioSoporte + "' hidden />" + formattedInicio + "</td>" +
+            "<td><input id='fechafin" + contador + "' name='fechafin" + contador + "' value='" + finSoporte + "' hidden />" + formattedFin + "</td>" +
+            "<td><input id='rma" + contador + "' name='rma" + contador + "' value='" + rma + "' hidden />" + rma + "</td>" +
+            "<td hidden><input id='observaciones" + contador + "' name='observaciones" + contador + "' value='" + observaciones + "' hidden /></td>" +
+            "<td><a class='btn btn-light btn-hover-shine eliminar-fila'><i class='fa fa-trash'></i></a></td></tr>";
+
+        var table = $("#tablaSoporteFabricanteAgregar").DataTable();
+        table.row.add($(newRow)).draw();
+
+        $("#cbFabricante").data("kendoDropDownList").value("");
+        $("#cbProductos").data("kendoMultiSelect").value([]);
+       /* $("#c").val("");*/
+        $("#checkRMA").prop("checked", false);
+
+        // Limpiar y deshabilitar el campo de texto
+        $("#txtRMA").val("").prop("disabled", true);
+
+        // Limpiar el área de texto y desactivar el editor Kendo
+        $("#txtObservacionesMarca").data("kendoEditor").value("");
+
+        contador++;
+
+        // Vincular evento clic para eliminar fila
+        $(".eliminar-fila").click(function () {
+            var table = $("#tablaSoporteFabricanteAgregar").DataTable();
+            table.row($(this).closest("tr")).remove().draw();
+        });
+    }
+
+
+
+    function obtenerCodigosProductos() {
+        var productos = $("#cbProductos").data("kendoMultiSelect").value();
+        var codigosProductos= "";
+        productos.forEach(function (producto, index) {
+            codigosProductos += producto;
+            if (index < productos.length - 1) {
+                codigosProductos += "|";
+            }
+        });
+        return codigosProductos;
+    }
+
+    function obtenerNombresProductos() {
+        var productos = $("#cbProductos").data("kendoMultiSelect").dataItems();
+        var nombresProductos = productos.map(function (producto) {
+            return producto.text;
+        });
+        return nombresProductos.join("|");
+    }
+
+    function obtenerProductosConcat() {
+        var productos = $("#cbProductos").data("kendoMultiSelect").dataItems();
+        var nombresProductos = productos.map(function (producto) {
+            return "● " + producto.text;
+        });
+        return nombresProductos.join("<br><br>") ;
+    }
+
+
+    function MensajeConfirmacion(resp){
+        if (resp == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("", "El registro ha sido guardado.");
+            var tbProyectos = $('#tablaSoporteFabricante').DataTable();
+            tbProyectos.ajax.reload();
+        }
+        else {
+            if (resp == "1") {
+                toastr.warning("Complete los campos necesarios.", "Mensaje");
+            }
+            else if (resp == "AGREGAR SOPORTES") {
+                toastr.warning("Debe agregar al menos un Soporte Fabricante.", "Mensaje");
+            }
+            else if (resp == "ERROR") {
+                toastr.warning("Verifique los datos porfavor.", "Mensaje");
+            }
+        }
+    }
+
+    function formatDate(dateString) {
+        var date = new Date(dateString);
+        var day = date.getUTCDate();
+        var month = date.getUTCMonth() + 1; // Los meses en JavaScript son indexados desde 0
+        var year = date.getUTCFullYear();
+
+        // Agregar un cero inicial si el día o el mes son menores que 10
+        if (day < 10) {
+            day = '0' + day;
+        }
+        if (month < 10) {
+            month = '0' + month;
+        }
+
+        return day + '/' + month + '/' + year;
+    }
+
+    function HabilitarRMA() {
+        var checkbox = document.getElementById("checkRMA");
+        var textField = document.getElementById("txtRMA");
+
+        if (checkbox.checked) {
+            textField.disabled = false; 
+            textField.value = "8x5 NBD"; 
+        } else {
+            textField.disabled = true;
+            textField.value = "";
+        }
+    }
+
+
+
+</script>

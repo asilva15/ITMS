@@ -1,0 +1,315 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    ViewBag.Title = "ListaProyectos";
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+    //Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div id="divContent">
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="font-icon-wrapper font-icon-lg">
+                    <i class="fa fa-users icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <div class="titleModule"><b>Talento - Perfil</b></div>
+                    <div class="page-title-subheading">
+                        Perfil del colaborador
+                    </div>
+                </div>
+                <div class="derecha">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="tabstrip">
+        <ul>
+            <li class="k-state-active">
+                @ResourceLanguaje.Resource.ProfileTalent
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.DocumentsTalent
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.PaymentBallotsTalent
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.BeneficiariesTalent
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.VacationsTalent
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.ActivitiesTalent
+            </li>
+        </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    var NameArc = '';
+    var fl1 = 0;
+
+    function Assistance() {
+        document.getElementById("divContent").innerHTML = "";
+        $("#divContent").load("/Assistance/Index");
+    }
+
+    $(document).ready(function () {
+
+        $("#tabstrip").kendoTabStrip({
+            animation: { open: { effects: "fadeIn" } },
+            contentUrls: [
+                        '/Talent/TabProfile?id=@ViewBag.ID_PERS_ENTI&id1=@ViewBag.FOTO'+'&_'+Math.random(),
+                        '/Talent/TabDocuments/@ViewBag.ID_PERS_ENTI' + '?_' + Math.random(),
+                        '/Talent/TabPaymentBallots/@ViewBag.ID_PERS_ENTI' + '?_' + Math.random(),
+                        '/Talent/TabBeneficiaries/@ViewBag.ID_PERS_ENTI' + '?_' + Math.random(),
+                        '/Talent/TabVacation/@ViewBag.ID_PERS_ENTI' + '?_' + Math.random(),
+                        '/Talent/TabActivities/@ViewBag.ID_PERS_ENTI' + '?_' + Math.random()
+            ]
+        });
+
+    });
+
+    function IsNumeric(expression) {
+        return (String(expression).search(/^\d+$/) != -1);
+    }
+
+    function Profile() {
+        location.reload(true);
+    }
+    function Scheduler(parm) {
+        DeseleccionarTraining();
+        $("#divContent").empty();
+        $("#divContent").load("/Room/Index?var=" + Math.random());
+    }
+    function FindAchievements() {
+        DeseleccionarTraining();
+        $("#divContent").empty();
+        $("#divContent").load("/Talent/ViewFindAchievements?var=" + Math.random());
+    }
+    function Training() {
+        SeleccionarTraining();
+        $("#divContent").empty();
+        $("#divContent").load("/Training/Index?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+    }
+
+    function SeleccionarTraining() {
+        $("#aTraining").css("color", "Black");
+        $("#aTraining").css("font-weight", "bold");
+        $("#liTraining").css("background-color", "#eaeaea");
+        $("#liTraining").css("margin-right", "-5px");
+        fl1 = 1;
+    }
+    function DeseleccionarTraining() {
+        if(fl1==1){
+            $("#aTraining").css("color", "White");
+            $("#aTraining").css("font-weight", "initial");
+            $("#liTraining").css("background-color", "#333333");
+            $("#liTraining").css("margin-right", "-4px");
+            fl1 = 0;
+        }
+    }
+</script>
+
+<script type="text/javascript">
+
+     function uploadDone(msg, code, cdg) {
+
+         if (msg == "OK") {
+             if (code == "OpenPDF") {
+                 $("[data-dismiss=modal]").trigger({ type: "click" });
+                 //closeWinFormModalPopUp();
+                 window.open("/Talent/ViewDownload/" + cdg, "_blank");
+             }
+             else if (code == "Training") {
+                 //closeWinModalPopUpLoad();
+                 $("[data-dismiss=modal]").trigger({ type: "click" });
+                 winPopUpModal("Information Saved", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                + "<div style='padding:10px 0px 10px 0px;'>Training information was succesfully saved</div>"
+                + "<div>" + cdg + "</div>" +
+                "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                "<button id='continues' class='k-button'>Continue</button>" +
+                "</div></div>"
+                  , 400, 160);
+
+                 Training();
+                 var undo = $("#continues")
+                 .bind("click", function () {
+                     $("[data-dismiss=modal]").trigger({ type: "click" });
+                     //closeWinModalPopUp();
+                 });
+
+                 $("#closebtnmodal").click(function () {
+                     $("[data-dismiss=modal]").trigger({ type: "click" });
+                     //closeWinModalPopUp();
+                 });
+             }
+             else {
+
+                 closeWinModalPopUpLoad();
+                 if (code == "AttachInvoice") {
+                     $("#divContInvoice").empty();
+                     $("#divContInvoice").load("/Talent/ListInvoice?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+
+                     $("#cargarInvoice").empty();
+                     $("#cargarInvoice").load("/Talent/AttachInvoiceUser?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+                 }
+                 else {
+                     winPopUpModal("Information Saved / Notification Send", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                    + "<div style='padding:10px 0px 10px 0px;'>Profile information was succesfully saved</div>"
+                    + "<div style='padding:10px 0px 10px 0px;'></div>" +
+                    "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                    "<button id='continues' class='k-button'>Continue</button>" +
+                    "</div></div>"
+                      , 400, 160);
+
+                     if (code == "Attach") {
+                         var undo = $("#continues")
+                        .bind("click", function () {
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            //closeWinModalPopUp();
+                            location.reload(true);
+                        });
+
+                         $("#closebtnmodal").click(function () {
+                             location.reload(true);
+                         });
+                     }
+                     else if (code == "AttachAchie") {
+                         //Recargando el TreeView
+                         $.ajax({
+                             url: "/Talent/TreeAchi/@ViewBag.ID_PERS_ENTI",
+                             data: "var=" + Math.random(),
+                             cache: false,
+                             type: "GET",
+                             dataType: "json",
+                             success: function (data) {
+                                 $("#treeviewAchi").data("kendoTreeView").dataSource.data(data);
+                             },
+                             error: function (source) {
+                                 //alert("Error Carga Json");
+                             }
+                         });
+
+                         $(".k-upload-files").remove();
+                         document.FormAttachDocs.reset();
+
+                         var undo = $("#continues")
+                         .bind("click", function () {
+                             $("[data-dismiss=modal]").trigger({ type: "click" });
+                             //closeWinModalPopUp();
+                         });
+
+                         $("#closebtnmodal").click(function () {
+                             $("[data-dismiss=modal]").trigger({ type: "click" });
+                             //closeWinModalPopUp();
+                         });
+                     }
+                     else if (code == "AttachIssue") {
+                         $.ajax({
+                             url: "/Talent/ListIssuesUser/@ViewBag.ID_PERS_ENTI",
+                             data: "var=" + Math.random(),
+                             cache: false,
+                             type: "GET",
+                             dataType: "json",
+                             success: function (source) {
+                                 data = source;
+                                 loadDataIssue();
+                             },
+                             error: function (source) {
+                                 //alert("Error Carga Json");
+                             }
+                         });
+
+                         $(".k-upload-files").remove();
+                         document.FormAttachDocs.reset();
+
+                         var undo = $("#continues")
+                         .bind("click", function () {
+                             $("[data-dismiss=modal]").trigger({ type: "click" });
+                             //closeWinModalPopUp();
+                         });
+
+                         $("#closebtnmodal").click(function () {
+                             $("[data-dismiss=modal]").trigger({ type: "click" });
+                             //closeWinModalPopUp();
+                         });
+                     }
+                     else {
+                         var undo = $("#continues")
+                        .bind("click", function () {
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            //closeWinModalPopUp();
+                        });
+                     }
+                 }
+             }
+         }
+         else {
+             $("[data-dismiss=modal]").trigger({ type: "click" });
+             //closeWinModalPopUpLoad();
+
+             var titulo = '';
+             var mensaje = '';
+             if (code == '0') {
+                 titulo = '@ResourceLanguaje.Resource.InformationMissing';
+                 mensaje = '@ResourceLanguaje.Resource.InformationMissingMsn';
+             }
+             else if (code == '1') {
+                 titulo = '@ResourceLanguaje.Resource.BasedDrawback';
+                 mensaje = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+             }
+             else if (code == '4') {
+                 titulo = '@ResourceLanguaje.Resource.InformationMissing';
+                 mensaje = '@ResourceLanguaje.Resource.AttachMsn';
+             }
+             else if (code == '5') {
+                 titulo = '@ResourceLanguaje.Resource.WrongCredentials';
+                 mensaje = '@ResourceLanguaje.Resource.WrongCredentialsMsn1';
+             }
+             else if (code == '6') {
+                 titulo = '@ResourceLanguaje.Resource.WrongCredentials';
+                 mensaje = '@ResourceLanguaje.Resource.WrongCredentialsMsn2';
+             }
+             else if (code == '7') {
+                 titulo = '@ResourceLanguaje.Resource.InformationMissing';
+                 mensaje = 'El archivo no existe.';
+             }
+
+             //winPopUpModal(titulo, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+             //   "<div style='padding:10px 0px 10px 0px;'>" + mensaje + "</div>" +
+             //       "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+             //       "<button id='continuee' class='k-button'>Continue</button>" +
+             //       "</div></div>"
+             //       , 400, 140);
+             toastr.warning(titulo, mensaje);
+
+             var undo = $("#continuee")
+             .bind("click", function () {
+                 $("[data-dismiss=modal]").trigger({ type: "click" });
+                 //closeWinModalPopUp();
+             });
+         }
+ }
+
+    function ExportarDocumentos() {
+        $("#formExportar").submit();
+    }
+</script>

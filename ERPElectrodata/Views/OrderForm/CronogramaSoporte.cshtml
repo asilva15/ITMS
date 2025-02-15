@@ -1,0 +1,223 @@
+﻿@{
+    ViewBag.Title = "CronogramaSoporte";
+    Layout = null;
+}
+
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">
+
+<script src="~/Content/themes/plugin/fullcalendar/moment.min.js"></script>
+<script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>*@
+
+<div class="main-card card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-4">
+                Cliente
+                <select id="cbCliente" name="cbCliente" class="form-control input-sm select2" type="text" style="width:100%"></select>
+            </div>
+            <div class="col-md-4">
+                Cliente Final
+                <select id="cbClienteFinal" name="cbClienteFinal" class="form-control input-sm select2" type="text" style="width:100%"></select>
+            </div>
+            <div class="col-md-4">
+                Marca
+                <select id="cbMarca" name="cbMarca" class="form-control input-sm select2" type="text" style="width:100%"></select>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4">
+                Tipo
+                <select id="Tipo" name="Tipo" class="form-control input-sm select2" type="text" style="width:100%">
+                    <option value="">Seleccione...</option>
+                    <option value="Soporte ED">Soporte ED</option>
+                    <option value="Informe">Informe</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                OP
+                <input id="txtOP" name="txtOP" class="form-control" type="text" />
+            </div>
+            <div class="col-sm-2">
+                <div class="form-group">
+                    <br />
+                    <button type="button" class="btn btn-warning btn-block" onclick="VerCalendario()">Buscar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <div class="form-row">
+        <div class="col-md-12">
+            @*<div id='calendar'></div>*@
+            <div id="calendarioSoportePMO">
+            </div>
+        </div>
+    </div>
+</div>
+<strong style="padding-left:15px">*Calendario Soporte e Informes PMO</strong>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        //$('#calendarioSoportePMO').fullCalendar('destroy');
+
+        $("#cbCliente").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarCompañiasxCuenta",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $("#cbClienteFinal").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarCompañiasxCuenta",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+
+        $("#cbMarca").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumResultsForSearch: 1,
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/SoporteFabricante/ListarFabricante",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+
+
+        setTimeout(function () {
+            VerCalendario();
+        }, 500);
+    });
+
+    function VerCalendario() {
+        $('#calendarioSoportePMO').fullCalendar('destroy');
+
+
+        $('#calendarioSoportePMO').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'month,agendaWeek,agendaDay'
+            },
+            buttonText: {
+                today: 'hoy',
+                month: 'mes',
+                week: 'semana',
+                day: 'día'
+            },
+            //Random default events
+            events: function (start, end, timezone, callback) {
+                $.ajax({
+                    url: '/OrderForm/ListarCronogramaSoporteOP/',
+                    type: "POST",
+                    datatype: 'json',
+                    data: {
+                        IdCliente: $("#cbCliente").val() == "" ? "0" : $("#cbCliente").val(),
+                        IdClienteFinal: $("#cbClienteFinal").val() == "" ? "0" : $("#cbClienteFinal").val(),
+                        IdMarca: $("#cbMarca").val() == "" ? "0" : $("#cbMarca").val(),
+                        Tipo: $("#Tipo").val(),
+                        OP: $("#txtOP").val(),
+                        //start: start.format(),
+                        //end: end.format()
+                    },
+                    success: function (data) {
+                        var events = [];
+
+                        $.each(data['data'], function (index, value) {
+
+                            events.push({
+                                id: (data['data'][index]['IdDocuSale']),
+                                title: (data['data'][index]['OP']),
+                                description: (data['data'][index]['Marca']),
+                                start: (data['data'][index]['FechaProgramada']),
+                                backgroundColor: (data['data'][index]['Color']),
+                                borderColor: (data['data'][index]['Color']),
+                                url: "javascript:VerTicket(" + (data['data'][index]['IdTicket']) + ")",
+                            });
+
+                        });
+
+                        callback(events);
+                    },
+                    error: function (err) {
+
+                    }
+                });
+            },
+            eventRender: function (event, element) {
+                $('.fc-row.fc-week.fc-widget-content.fc-rigid').attr("style", "min-height:95px");
+                element.find('.fc-title').append("<br/>" + event.description);
+            },
+            //eventAfterAllRender: function () {
+            //    $('.fc-row.fc-week.fc-widget-content.fc-rigid').attr("style", "min-height:170px");
+            //},
+            editable: false,
+            droppable: true, // this allows things to be dropped onto the calendar !!!
+            eventLimit: true,
+        });
+    }
+
+    function VerTicket(id) {
+        if (id != 0) {
+            window.open("http://" + location.host + "/DetailsTicket/Index/" + id)
+        }
+    }
+
+</script>

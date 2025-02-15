@@ -1,0 +1,58 @@
+﻿@{
+    ViewBag.Title = "EditarRiesgo";
+    Layout = null;
+}
+
+<div class="form-group">
+    <div class="row">
+        <div class="col-md-8">
+            Riesgo
+            <input type="text" class="form-control" id="cbRiesgo" name="EditarTicbRiesgotuloOP" value="@ViewBag.IdRiesgo" />
+        </div>
+        <div class="col-md-4">
+            <br />
+            <button id="btnGuardarRiesgo" type="button" class="btn btn-primary" onclick="ActualizarRiesgo();">Guardar</button>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var cbRiesgo = $("#cbRiesgo").kendoComboBox({
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarxParametro?idparametro=42"
+                }
+            }
+        });
+    });
+     function ActualizarRiesgo() {
+        $.ajax({
+            url: "/OrderForm/EditarRiesgoOP/@ViewBag.ID_DOCU_SALE/" + $("#cbRiesgo").val(),
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+                toastr.success("Se actualizó el riesgo", "");
+                var tbProyectos = $('#tbProyectos').DataTable();
+                tbProyectos.ajax.reload();
+            },
+            error: function (source) {
+                toastr.error("No se actualizó el riesgo","Error");
+            }
+        });
+    }
+</script>

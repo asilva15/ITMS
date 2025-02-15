@@ -1,0 +1,209 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    Layout = null;
+}
+
+<div class="afterMain" id="divContainerNewTicket">
+    <div style="float:left;width:60%">
+        <div class="titleForm"><div class="title">@ResourceLanguaje.Resource.NewTicket</div></div>
+        <div class="bodyForm" id="divNewTicket">
+            <div class="inBodyForm">
+                @using (Html.BeginForm("Create", "ClientITO", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmTicket", target = "upload_target" }))
+                {
+                    @Html.ValidationSummary(true)
+
+                    <fieldset>
+                        &aacute;
+                        <ul style="margin:0px;padding:0px;">
+
+                        </ul>
+                        &oacute;
+                        
+                        <br />
+                    <div class="divFondoUno" style="">
+                        <div class="divSpace3"></div>
+                        <div class="divCont3">
+                            <div class="editor-label">
+                                @ResourceLanguaje.Resource.AffectedEndUser
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_PERS_ENTI)
+                                @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                            </div>
+                        </div>
+                        </div>
+
+                        <div class="divFondoDos">
+                            <div class="divSpace3"></div>
+                            <div style="width:95.5%;float:left;">
+                                <div class="editor-label">
+                                    @ResourceLanguaje.Resource.Summary
+                                </div>
+                                <div class="editor-field">
+                                    @Html.TextAreaFor(model => model.SUM_TICK)
+                                    @Html.ValidationMessageFor(model => model.SUM_TICK)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="divFondoUno">
+                            <div class="divSpace3"></div>
+                            <div class="divCont3">
+                                <input name="files" id="files" type="file" />
+                            </div>
+                        </div>
+
+
+                        <div style="display:inline-block; float:right; padding:0px 15px 15px 5px;">
+                            <div style=" float:left; padding:0px 15px 0px 0px; ">
+                                <button id="submit" class="k-button">Create</button>
+                            </div>
+                            <button id="reset" class="k-button">Cancel</button>
+                        </div>
+                    
+                    </fieldset>
+                }
+                <iframe id="upload_target" name="upload_target" src="" class="frameHidden"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+function uploadDone(msg, code) {
+
+    closeWinModalPopUpLoad();
+
+    if (msg == "OK") {
+        var title = '@ResourceLanguaje.Resource.InformationSaved / @ResourceLanguaje.Resource.NotificationSend';
+        var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                + "<div style='padding:10px 0px 10px 0px;'>Ticket information was succesfully saved</div>"
+                + "<div style='padding:10px 0px 10px 0px;'>Code: " + code + "</div>"
+                + "The notification was succesfully sent to: <br>End User, Staff, Service Desk and IT Coordinator.<br>" +
+                "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                "<button id='btnContinues' class='k-button'>Continue</button>" +
+                "</div></div>";
+
+        winPopUpModal(title, body, 400, 230);
+
+        $("#closebtnmodal").click(function () {
+            location.reload(true);
+        });
+
+        $("#btnContinues").click(function () {
+            location.reload(true);
+        });
+
+    }
+    else {
+        var title = '@ResourceLanguaje.Resource.InformationMissing';
+        var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            "<div style='padding:10px 0px 10px 0px;'>You should choose or complete the required information</div>" +
+            "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+            "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                    "</div></div>";
+
+        winPopUpModal(title, body, 400, 150);
+
+        $("#btnContinuee").click(function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+    }
+}
+
+</script>
+
+<script type="text/javascript">
+
+$(document).ready(function () {
+
+    $("#submit").click(function () {
+        winPopUpModalLoad('@ResourceLanguaje.Resource.SavingYourTicket', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+    });
+
+    $("#reset").click(function (event) {
+        event.preventDefault();
+
+        var title = '@ResourceLanguaje.Resource.OperationCancelled';
+        var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+        "<div style='padding:10px 0px 10px 0px;'>The operation to perform was cancelled</div>" +
+        "<div style='float:right; padding:20px 6px 0px 6px; font-size:0.9em;'>" +
+        "<button id='btnContinuer' class='k-button'>Continue</button>" +
+        "</div></div>";
+
+        winPopUpModal(title, body, 400, 150);
+
+        $("#btnContinuer").bind("click", function () {
+            location.reload(true);
+        });
+
+        $("#closebtnmodal").click(function () {
+            location.reload(true);
+        });
+
+    });
+
+
+    //---------------------------COMBO1---------------------------------
+
+    var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+        dataTextField: "NOMBRE",
+        dataValueField: "ID_PERS_ENTI",
+        filter: "contains",
+        autoBind: false,
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            serverFiltering: true,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/ClientITO/LystForName?var=" + Math.random()
+            }
+        }
+    }).data("kendoComboBox");
+
+
+    //ID_PERS_ENTI.value( $("#ID_PERS_ENTI").val());
+
+    $("#SUM_TICK").kendoEditor({
+        tools: [
+            "bold",
+            "italic",
+            "underline",
+            "strikethrough",
+            "foreColor",
+            "backColor",
+            "justifyLeft",
+            "justifyCenter",
+            "justifyRight",
+            "justifyFull",
+            "insertUnorderedList",
+            "insertOrderedList",
+            "indent",
+            "outdent",
+            "createLink",
+            "unlink",
+            "subscript",
+            "superscript"
+        ], encoded: false
+    });
+
+    $("#files").kendoUpload({
+        localization: {
+            select: "@ResourceLanguaje.Resource.Attach"
+        }
+    });
+
+})
+</script>
+
+
+

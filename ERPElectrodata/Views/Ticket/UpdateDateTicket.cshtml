@@ -1,0 +1,1417 @@
+﻿@model ERPElectrodata.Models.TICKET
+
+@{
+    /**/
+    var idStatEnd = Model.ID_STAT_END;
+    ViewBag.ID_ACCO = Convert.ToInt32(Session["ID_ACCO"].ToString());
+
+    Layout = null;
+}
+<style>
+    .delete-link {
+        background: transparent url("/Content/Images/close_active.png") no-repeat 50% 50%;
+    }
+
+    label {
+        display: block;
+    }
+
+    .oculto {
+        display: none;
+    }
+</style>
+@using (Html.BeginForm("UpdateDateTicket", "Ticket", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEditTicket", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+    <input type="hidden" value="@ViewBag.UploadFile" name="KEY_ATTA" readonly="readonly" />
+    <input type="hidden" value="@ViewBag.IdComp" name="ID_COMP" id="ID_COMP" readonly="readonly" />
+    <input type="hidden" value="@ViewBag.IdSLA" name="IdSLA" id="IdSLA" readonly="readonly" />
+    <input type="hidden" value="@ViewBag.IdPersEnti" name="IdPersEnti" id="IdPersEnti" readonly="readonly" />
+    <div class="main-card card">
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label id="" for="" class="">Título de la Solicitud</label>
+                        @Html.TextBoxFor(model => model.TITLE_TICK, new { @class = "form-control", @placeholder = "Título de la Solicitud" })
+                        @Html.ValidationMessageFor(model => model.TITLE_TICK)
+                    </div>
+                </div>
+            </div>
+            @{
+                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                {
+
+                    <div class="form-row">
+                        @*<div class="col-md-6">
+                                Categoría
+                                @Html.EditorFor(model => model.ID_CATE)
+                                @Html.ValidationMessageFor(model => model.ID_CATE)
+                            </div>*@
+
+                        <div class="col-md-6">
+                            Macroservicio <span style="color:red">(*)</span>
+                            @Html.Editor("ID_CATE_N1")
+                        </div>
+                        <div class="col-md-6">
+                            Categoría 1 <span style="color:red">(*)</span>
+                            @Html.Editor("ID_CATE_N2")
+                        </div>
+                        @*<div class="col-md-6">
+                                Compañía Final
+                                <input id="ID_COMP_END" type="text" name="ID_COMP_END" value="@ViewBag.IdCompEnd">
+                            </div>*@
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Categoría 2 <span style="color:red">(*)</span>
+                            @Html.Editor("ID_CATE_N3")
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                Categoría 3 <span style="color:red">(*)</span>
+                                @Html.EditorFor(model => model.ID_CATE, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.ID_CATE)
+                            </div>
+
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @*<div class="form-row">
+                        <div class="col-md-6">
+                            Categoría
+                            @Html.EditorFor(model => model.ID_CATE)
+                            @Html.ValidationMessageFor(model => model.ID_CATE)
+                        </div>
+                    </div>*@
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Unidad de Negocio
+                            <input id="ID_CATE_NN1" name="ID_CATE_NN1" value="@ViewBag.Cate1" />
+                        </div>
+                        <div class="col-md-6">
+                            Macroservicio
+                            <input id="ID_CATE_NN2" name="ID_CATE_NN2" value="@ViewBag.Cate2" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Servicio
+                            <input id="ID_CATE_NN3" name="ID_CATE_NN3" value="@ViewBag.Cate3" />
+                        </div>
+                        <div class="col-md-6">
+                            Incidente/Requerimiento
+                            @Html.EditorFor(model => model.ID_CATE)
+                            @Html.ValidationMessageFor(model => model.ID_CATE)
+                        </div>
+                    </div>
+                }
+            }
+
+            <div class="form-row">
+                @{
+                    if (Convert.ToInt32(Session["ID_ACCO"].ToString()) >= 60 && Convert.ToInt32(Session["ID_ACCO"].ToString()) <= 74)
+                    {
+                        <div class="col-md-6">
+                            <div class="form-group" id="divSolman" hidden>
+                                Solman
+                                @*@Html.Editor("SOLMAN")*@
+                                @Html.TextBoxFor(model => model.Solman, new { @class = "form-control" })
+                                @Html.ValidationMessageFor(model => model.Solman)
+
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="col-md-6">
+                            Ticket Externo
+                            @{
+                                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 1 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 25)
+                                {
+                                    @Html.TextBoxFor(model => model.TicketExterno, new { @class = "form-control" })
+                                    @Html.ValidationMessageFor(model => model.TicketExterno)
+                                }
+                            }
+                        </div>
+                    }
+                }
+            </div>
+            <div class="form-row">
+                <div class="col-md-6">
+                    Prioridad
+                    @Html.EditorFor(model => model.ID_PRIO)
+                    @Html.ValidationMessageFor(model => model.ID_PRIO)
+                </div>
+                <div class="col-md-6" id="divfechaschedule">
+                    @Html.HiddenFor(model => model.ID_TICK)
+                    @Html.HiddenFor(model => model.ID_ACCO)
+                    Fecha de Inicio
+                    <input id="FEC_INI_TICK_EDIT" name="FEC_INI_TICK_EDIT" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-6">
+                    Usuario afectado
+                    @{
+                        if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                        {
+                            @*@Html.TextBoxFor(m => m.ID_PERS_ENTI_END, new { id = "ID_PERS_ENTI_END2", name = "ID_PERS_ENTI_END2", @class = "form-control" })*@
+                            @Html.TextBoxFor(m => m.ID_PERS_ENTI_END, new { id = "ID_PERS_ENTI_END2", name = "ID_PERS_ENTI_END2" })
+
+                        }
+                        else
+                        {
+                            @Html.EditorFor(model => model.ID_PERS_ENTI_END)
+                            @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_END)
+
+                        }
+                    }
+
+                </div>
+                <div class="col-md-6">
+                    Fecha de recepción de Solicitud
+                    <input id="FechaRecepcionSolicitud" name="FechaRecepcionSolicitud" />
+                </div>
+            </div>
+
+            <div class="form-row">
+                @if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                {
+                    <div class="col-md-6">
+                        Usuario Solicitante
+                        @Html.TextBoxFor(m => m.ID_PERS_ENTI, new { id = "ID_PERS_ENTI2", name = "ID_PERS_ENTI2" })
+                    </div>
+                }
+                <div class="col-md-6" id="divUsuarioVIP" hidden>
+                    VIP
+                    @Html.EditorFor(model => model.UsuarioVIP)
+                </div>
+                <div class="col-md-6" id="divFalsoPositivo" hidden>
+                    Positivo - Falso Positivo
+                    @Html.EditorFor(model => model.FalsoPositivo)
+                </div>
+                <div class="col-md-6">
+                    Medio de Comunicación
+                    @Html.EditorFor(model => model.ID_SOUR)
+                    @Html.ValidationMessageFor(model => model.ID_SOUR)
+                </div>
+                <div class="col-md-6" id="divMotivoSource" hidden>
+                    Motivo Regularización
+                    @Html.EditorFor(model => model.IdMotivoSource)
+                </div>
+            </div>
+            <div class="form-row" id="divTicketProblema">
+                <div class="col-md-6">
+                    Agregar Tickets
+                    @Html.Editor("ID_TICK_PARENT")
+                </div>
+                <div class="col-md-6">
+                    Tickets Relacionados:
+                    <div class="divCont3 ShowReceiver">
+                        <input type="hidden" name="Cont" id="idcontreciever" value="0" />
+                        <div id="NewReceiver"></div>
+                    </div>
+                </div>
+            </div>
+
+            @{
+                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                {
+                    <div class="form-row" id="divlocarazon">
+                        <div class="col-md-4" id="divLoca">
+                            <div class="form-group">
+                                Locación
+                                @Html.Editor("ID_LOCA")
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="editor-label">
+                                Razón
+                            </div>
+                            <div class="editor-field">
+                                <input id="ID_RAZON2" type="text" name="ID_RAZON2" value="@ViewBag.IdRazon">
+                            </div>
+
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                Modalidad de Trabajo
+                                @Html.Editor("IdModTrabajo")
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-row" id="divPaseModTrabAnalista">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                Tipo de Pase
+                                @Html.Editor("IdTipoPase")
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                Analista
+                                @Html.TextBoxFor(model => model.ID_PERS_ENTI_ANLT)
+                                @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_ANLT)
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+
+
+            @{
+                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                {
+                    <div class="form-row">
+                        <div class="col-md-4">
+                            TAG
+                            <input value="@Model.TAG" id="TAG" name="TAG" type="text" class="form-control" style="height: 30px;" />
+                        </div>
+
+
+                        <div id="impactoServicioDiv" class="col-md-4">
+                            Impacto del Servicio
+                            <div class="editor-field">
+                                <input id="ImpactoServicioComboBox" name="ImpactoServicio" />
+                            </div>
+                        </div>
+
+
+                        <div class="col-md-4" id="IdGarantiaProveedor">
+                            Ticket - Garantia Proveedor
+                            <input value="@Model.GarantiaProveedor" id="GarantiaProveedor" name="GarantiaProveedor" type="text" class="form-control" style="height: 30px;" />
+                        </div>
+
+
+
+
+
+                    </div>
+                }
+            }
+
+            <div class="form-row">
+                <div class="col-md-12">
+                    Summary
+                    @Html.TextAreaFor(model => model.SUM_TICK)
+                    @Html.ValidationMessageFor(model => model.SUM_TICK)
+                </div>
+            </div>
+
+            @{
+                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60)
+                {
+
+                }
+                else
+                {
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            Adicional 1
+                            @Html.TextAreaFor(model => model.Adicional1, new { style = "height: 100px", rows = "3" })
+                            @Html.ValidationMessageFor(model => model.Adicional1)
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            Adicional 2
+                            @Html.TextAreaFor(model => model.Adicional2, new { style = "height: 100px" })
+                            @Html.ValidationMessageFor(model => model.Adicional2)
+                        </div>
+                    </div>
+                }
+
+            }
+
+
+            <div class="form-row">
+                <div class="col-md-12">
+                    <input name="archivos" id="archivos" type="file" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-9">
+                    &nbsp;
+                </div>
+                <div class="col-md-3">
+                    <button id="submit" class="btn btn-warning btn-block">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @*<div class="modal-body">
+            <div class="divFondoDos">
+                <div class="divCont3">
+                    <div class="editor-label">
+                        Categoría
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_CATE)
+                        @Html.ValidationMessageFor(model => model.ID_CATE)
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoDos">
+                <div class="divCont3">
+                    <div class="editor-label">
+                        Prioridad
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_PRIO)
+                        @Html.ValidationMessageFor(model => model.ID_PRIO)
+                    </div>
+                </div>
+                <div id="divfechaschedule" class="divCont3" style="float:right;">
+                    @Html.HiddenFor(model => model.ID_TICK)
+                    @Html.HiddenFor(model => model.ID_ACCO)
+                    <div class="editor-label">
+                        Start Date Ticket
+                    </div>
+                    <div class="editor-field">
+                        <input id="FEC_INI_TICK_EDIT" name="FEC_INI_TICK_EDIT" />
+                    </div>
+                </div>
+                <div style="clear:both;"></div>
+            </div>
+            <div class="divFondoDos">
+                <div class="divCont3">
+                    <div class="editor-label">
+                        Usuario afectado
+                    </div>
+                    <div class="editor-field">
+                        @Html.EditorFor(model => model.ID_PERS_ENTI_END)
+                        @Html.ValidationMessageFor(model => model.ID_PERS_ENTI_END)
+                    </div>
+                </div>
+                <div class="divCont3" style="float:right;">
+                    <div class="editor-label">
+                        Fecha de recepción de Solicitud
+                    </div>
+                    <div class="editor-field">
+                        <input id="FechaRecepcionSolicitud" name="FechaRecepcionSolicitud" />
+                    </div>
+                </div>
+            </div>
+            <div class="divFondoDos" id="divTicketProblema">
+                <div class="divCont3">
+                    <div class="editor-label">
+                        Agregar Tickets
+                    </div>
+                    <div class="editor-field">
+                        @Html.Editor("ID_TICK_PARENT")
+                    </div>
+                </div>
+                <div class="divCont3" style="float: right">
+                    <div class="editor-label">
+                        Tickets Relacionados:
+                    </div>
+                    <div class="editor-field">
+                        <div class="divCont3 ShowReceiver">
+                            <input type="hidden" name="Cont" id="idcontreciever" value="0" />
+                            <div id="NewReceiver"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="editor-label">
+                @Html.LabelFor(model => model.SUM_TICK)
+            </div>
+            <div class="editor-field">
+                @Html.TextAreaFor(model => model.SUM_TICK)
+                @Html.ValidationMessageFor(model => model.SUM_TICK)
+            </div>
+            <div>
+                <div class="editor-label">
+                    Adicional 1
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.Adicional1, new { style = "height: 100px" })
+                    @Html.ValidationMessageFor(model => model.Adicional1)
+                </div>
+            </div>
+            <div>
+                <div class="editor-label">
+                    Adicional 2
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.Adicional2, new { style = "height: 100px" })
+                    @Html.ValidationMessageFor(model => model.Adicional2)
+                </div>
+            </div>
+            <input name="archivos" id="archivos" type="file" />
+        </div>
+
+        <div class="modal-footer">
+            <button id="submit" class="k-button">Guardar</button>
+        </div>*@
+}
+
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden divHide" hidden></iframe>
+
+
+
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+ var idAcco = @ViewBag.ID_ACCO;
+            if (idAcco === 60) {
+                $("#ImpactoServicioComboBox").kendoComboBox({
+                    dataTextField: "text",
+                    dataValueField: "value",
+                    dataSource: [
+                        { text: "Si", value: "Si" },
+                        { text: "No", value: "No" }
+                    ],
+                    change: function (e) {
+                        $("#ImpactoServicioHidden").val(this.value());
+                    }
+                });
+
+                var initialImpactoServicio = "@Model.ImpactoServicio" || "@ViewBag.ImpactoServicio";
+                $("#ImpactoServicioComboBox").data("kendoComboBox").value(initialImpactoServicio);
+
+                var idStatEnd = @idStatEnd;
+                if (idStatEnd === 6) {
+                    var divImpactoServicio = document.getElementById("impactoServicioDiv");
+                    if (divImpactoServicio) {
+                        divImpactoServicio.style.display = "none";
+                    }
+                }
+
+                if (parseInt(@Model.ID_SOUR) == 11) {
+                    $("#divMotivoSource").removeAttr("hidden");
+                }
+
+                $("#divUsuarioVIP").removeAttr("hidden");
+                $("#divFalsoPositivo").removeAttr("hidden");
+
+                $('#FrmEditTicket').on("submit", function () {
+                    var mensaje = '';
+
+                    var idSour = $('#ID_SOUR').val();
+                    var idMotivoSour = $('#IdMotivoSource').val();
+                    if (idSour == 11 && idMotivoSour == '') {
+                        mensaje = 'Seleccione el motivo de regularización. \n';
+                    }
+
+                    var vip = $('#UsuarioVIP').val();
+                    if (vip == '') {
+                        mensaje = 'Seleccione si la atención gestionada es para un usuario VIP. \n';
+                    }
+
+                    var falsoPositivo = $('#FalsoPositivo').val();
+                    if (falsoPositivo == '') {
+                        mensaje = 'Seleccione si es Positivo o Falso Positivo. \n';
+                    }
+
+                    if (mensaje != "") {
+                        toastr.warning(mensaje, "Advertencia");
+                        return false;
+                    }
+
+                });
+            }
+
+        var categoriasHalibitadas = true
+        if (@ViewBag.Habilitado == 0){
+            categoriasHalibitadas = false
+        }
+        $("#archivos").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            upload: function (e) {
+                e.data = {
+                    ID_TYPE_DOCU_ATTA: $("#ArrayFile").val(),
+                    KEY_ATTA: '@ViewBag.UploadFile'
+                };
+            },
+            remove: function (e) {
+                e.data = {
+                    KEY_ATTA: '@ViewBag.UploadFile'
+                };
+            },
+            async: {
+                saveUrl: "/Attach/EditSaveAttachTicket",
+                removeUrl: "/Attach/EditRemoveAsyncAttachTicket"
+            }
+        });
+
+
+        $("#SUM_TICK").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ],
+            encoded: false,
+            paste: OnPaste
+        });
+        $("#Adicional1").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ],
+            encoded: false,
+            paste: OnPaste
+        });
+        $("#Adicional2").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ],
+            encoded: false,
+            paste: OnPaste
+        });
+        var ID_TICK_PARENT = $("#ID_TICK_PARENT").kendoComboBox({
+            autoBind: false,
+            //cascadeFrom: "ID_CATE",
+            //enable: false,
+            placeholder: "SELECCIONAR TICKET",
+            dataTextField: "TICKET",
+            dataValueField: "ID_TICK",
+            filter: "contains",
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/ListarTickets?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                AgregarTicket()
+            },
+        }).data("kendoComboBox");
+
+        if (@Session["ID_ACCO"] == 60) {
+
+            //CargaInicialCategorias(categoriasHalibitadas)
+            CargaCategorias(categoriasHalibitadas)
+
+
+        } else {
+            //$("#ID_CATE").kendoComboBox({
+            //    autoBind: true,
+            //    filter: "contains",
+            //    dataTextField: "NAM_CATE",
+            //    dataValueField: "ID_CATE",
+            //    enable: categoriasHalibitadas,
+            //    template: '<div style="font-weight:bold;">${data.NAM_CATE_1}</div>' +
+            //        '<div style="margin-left:5px;" >  ${data.NAM_CATE_2} </div>' +
+            //        '<div style="margin-left:10px;">${data.NAM_CATE_3}</div>' +
+            //        '<div style="margin-left:10px;">${data.NAM_CATE_4}</div>',
+            //    dataSource: {
+            //        serverFiltering: false,
+            //        schema: {
+            //            data: "Data",
+            //            total: "Count"
+            //        },
+            //        transport: {
+            //            read: "/CategoryTicket/List"
+            //        },
+            //        dataBound: function (e) {
+            //            evaluarGarantia();
+            //        }
+            //    }
+            //}).data("kendoComboBox");
+            var ID_CATE_NN1 = $("#ID_CATE_NN1").kendoComboBox({
+                autoBind: true,
+                dataTextField: "NAM_CATE",
+                dataValueField: "ID_CATE",
+                enable: categoriasHalibitadas,
+                filter: "contains",
+                dataSource: {
+                    serverFiltering: false,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            var ID_CATE_NN2 = $("#ID_CATE_NN2").kendoComboBox({
+                autoBind: true,
+                cascadeFrom: "ID_CATE_NN1",
+                dataTextField: "NAM_CATE2",
+                dataValueField: "ID_CATE2",
+                enable: categoriasHalibitadas,
+                filter: "contains",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            var ID_CATE_NN3 = $("#ID_CATE_NN3").kendoComboBox({
+                autoBind: true,
+                cascadeFrom: "ID_CATE_NN2",
+                dataTextField: "NAM_CATE3",
+                dataValueField: "ID_CATE3",
+                enable: categoriasHalibitadas,
+                filter: "contains",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory3?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+
+            $("#ID_CATE").kendoComboBox({
+                autoBind: true,
+                cascadeFrom: "ID_CATE_NN3",
+                dataTextField: "NAM_CATE4",
+                dataValueField: "ID_CATE4",
+                enable: categoriasHalibitadas,
+                filter: "contains",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory4?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+
+        if (parseInt(@Session["ID_ACCO"]) == 60) {
+            var ID_PERS_ENTI2 = $("#ID_PERS_ENTI2").kendoComboBox({
+                dataTextField: "CLIE",
+                dataValueField: "ID_PERS_ENTI",
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/AccountEntity/CargarListaAsignadosBnv"
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+
+        var ID_PRIO = $("#ID_PRIO").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_PRIO",
+            dataValueField: "ID_PRIO",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Priority/ListarMenor/@ViewBag.IdPrioridad"
+                }
+            }
+        }).data("kendoComboBox");
+
+
+        var ID_PERS_ENTI_END = $("#ID_PERS_ENTI_END").kendoComboBox({
+            autoBind: true,
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            enable: categoriasHalibitadas,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    //Establecer url de donde se consume recursos en Json.
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_SOUR = $("#ID_SOUR").kendoComboBox({
+            //index: 1,
+            dataTextField: "NAM_SOUR",
+            dataValueField: "ID_SOUR",
+            suggest: true,
+            placeholder: "Canal de Comunicación",
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SourceTicket/List"
+                }
+            },
+            change: function () {
+                if (typeof $("#IdMotivoSource") != "undefined" && ID_SOUR.value() == 11) {
+                    $("#divMotivoSource").removeAttr("hidden");
+                } else {
+                    $("#divMotivoSource").attr("hidden", true);
+                }
+
+                //debugger
+                if (typeof $("#ID_PERS_ENTI_END2") != "undefined") {
+                   // debugger
+
+                    var myComboBox = $("#ID_PERS_ENTI_END2").data("kendoComboBox");
+
+                    myComboBox.dataSource.read().then(function () {
+                        var view = myComboBox.dataSource.view();
+                        for (var i = 0; i <= view.length - 1; i++) {
+                            if (view[i].CLIE == myComboBox.text()) {
+                                //alert(view[i].CLIE);
+                                myComboBox.value(view[i].ID_PERS_ENTI);
+                                //alert(myComboBox.value());
+                            }
+                        }
+
+                    });
+
+                    //myComboBox.dataSource.refresh();
+                    myComboBox.refresh();
+                }
+
+            },
+        }).data("kendoComboBox");
+
+        var IdMotivoSource = $("#IdMotivoSource").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            cascadeFrom: 'ID_SOUR',
+            filter: "contains",
+            autoBind: false,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/ListarMotivoSource?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var UsuarioVIP = $("#UsuarioVIP").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            dataSource: [{
+                Nombre: "SI",
+                Id: "1"
+            }, {
+                Nombre: "NO",
+                Id: "2"
+            }],
+            filter: "contains",
+        }).data("kendoComboBox");
+
+        $('#FalsoPositivo').kendoComboBox({
+            dataTextField: "text",
+            dataValueField: "value",
+            dataSource: [{
+                text: "Positivo",
+                value: "1"
+            }, {
+                text: "Falso Positivo",
+                value: "2"
+            }],
+            filter: "contains",
+        }).data("kendoComboBox");
+
+        $("#FEC_INI_TICK_EDIT").kendoDateTimePicker();
+
+        var d = new Date('@ViewBag.FEC_TICK');
+        var FEC_INI_TICK_EDIT = $("#FEC_INI_TICK_EDIT").data("kendoDateTimePicker");
+        FEC_INI_TICK_EDIT.min(new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours(), d.getMinutes(), d.getSeconds(), d.getMilliseconds()));
+
+        var f = new Date('@ViewBag.FEC_INI_TICK_EDIT');
+        FEC_INI_TICK_EDIT.value(new Date(f.getFullYear(), f.getMonth(), f.getDate(), f.getHours(), f.getMinutes(), f.getSeconds(), f.getMilliseconds()));
+
+         $("#FechaRecepcionSolicitud").kendoDateTimePicker()
+        var fR = new Date('@ViewBag.FechaRecepcionSolicitud');
+        var FechaRecepcionSolicitud = $("#FechaRecepcionSolicitud").data("kendoDateTimePicker");
+        var fRN = new Date('@ViewBag.FechaRecepcionSolicitud');
+        FechaRecepcionSolicitud.value(new Date(fRN.getFullYear(), fRN.getMonth(), fRN.getDate(), fRN.getHours(), fRN.getMinutes(), fRN.getSeconds(), fRN.getMilliseconds()));
+
+        @*if (@Session["ID_ACCO"] == 60) {
+            FechaRecepcionSolicitud.min("@ViewBag.FEC_INI_TICK_EDIT");
+            FechaRecepcionSolicitud.value("@ViewBag.FEC_INI_TICK_EDIT");
+        }*@
+
+
+        if (@ViewBag.Habilitado == 0){
+            ID_PRIO.enable(false);
+            //ID_PERS_ENTI_END.enable(false);
+            ID_TICK_PARENT.enable(false);
+        }
+
+        if(@ViewBag.FlagProblema==0){
+            $("#divTicketProblema").hide();
+        }
+
+        if (@Session["ID_ACCO"] ==60) {
+
+        $.ajax({
+            url: "/CategoryTicket/ListarPermisoCategoriaBNV/" + $("#ID_CATE").val(),
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (data) {
+                if (data == "OK") {
+                    //$("#divlocarazon").removeAttr("hidden");
+                    $("#divSolman").removeAttr("hidden");
+                    $("#divPaseModTrabAnalista").removeAttr("hidden");
+
+                }
+                else {
+                   // $("#divLoca").attr("hidden", true);
+                    $("#divPaseModTrabAnalista").attr("hidden", true);
+                    $("#IdTipoPase").val('');
+                    //$("#IdModTrabajo").val('');
+                    $("#ID_PERS_ENTI_ANLT").val('');
+                    $("#divSolman").attr("hidden", true);
+                    $("#SOLMAN").val('');
+
+                }
+
+            },
+            error: function (source) {
+            }
+        });
+
+        //var ID_LOCA = $("#ID_LOCA").kendoComboBox({
+        //    autoBind: true,
+        //    dataTextField: "text",
+        //    dataValueField: "id",
+        //    filter: "contains",
+        //    delay: 500,
+        //    minLength: 0,
+        //    suggest: true,
+        //    dataSource: {
+        //        serverFiltering: true,
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/Location/ListarLocacionxCuenta"
+        //        }
+        //    }
+        //}).data("kendoComboBox");
+
+        var ID_LOCA = $("#ID_LOCA").kendoComboBox({
+            autoBind: true,
+            //cascadeFrom: "ID_EMP",
+            dataTextField: ("@ViewBag.IdAcco" == 60) ? "text" :"NamLoca",
+            dataValueField: ("@ViewBag.IdAcco" == 60) ? "id" :"IdLoca",
+            template: ("@ViewBag.IdAcco" == 60) ?'<div>${ data.text }</div>' :'<div><div style="font-weight:bold">${ data.NamSite }</div>' +
+                '<div>${ data.NamLoca }</div></div>',
+            filter: "contains",
+            suggest: true,
+            index: 0,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Location/ListarLocacionesxCompania?IdEnti=" + @ViewBag.IdCompania +"&Tipo=" + 1 + "&var=" + Math.random()
+                }
+            }
+        });
+
+        var ID_RAZON2 = $("#ID_RAZON2").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/StatusTicket/ListarRazon?IDSTAT=" + @ViewBag.ID_ESTADO_END,
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_TIPOPASE = $("#IdTipoPase").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/ListarTipoPase",
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_MODTRABAJO = $("#IdModTrabajo").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Ticket/ListarModalidadTrabajo"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_PERS_ENTI_ANLT = $("#ID_PERS_ENTI_ANLT").kendoComboBox({
+        autoBind: true,
+        dataTextField: "Personal",
+        dataValueField: "IdPersEnti",
+        filter: "contains",
+        delay: 500,
+        minLength: 0,
+        suggest: true,
+        dataSource: {
+            serverFiltering: true,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                read: "/AccountEntity/ListarPersonalxCuenta?IdCuenta=" + @Session["ID_ACCO"],
+            }
+        }
+            }).data("kendoComboBox");
+
+        var ID_PERS_ENTI_END2 = $("#ID_PERS_ENTI_END2").kendoComboBox({
+            autoBind: true,
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            //index: 0,
+            minLength:3,
+            dataSource: {
+                //serverFiltering: true,
+            schema: {
+                data: "Data",
+                total: "Count"
+            },
+            transport: {
+                //Establecer url de donde se consume recursos en Json.
+                //read: "/AccountEntity/AEUByAcco3?IdComp=" + @ViewBag.IdCompania, // + "&var=" + Math.random()
+                read: {
+                    //cache: false,
+                        /*url: ($("#ID_SOUR").val() == 12 || $("#ID_SOUR").val() == 5) ? "/AccountEntity/CargarListaAsignadosBnvDePortales" : "/AccountEntity/CargarListaAsignadosBnv"*/
+                        url: function () {
+
+                            var z;
+
+                            if ($("#ID_SOUR").val() == 12 || $("#ID_SOUR").val() == 5)       {
+                                z = "/AccountEntity/CargarListaAsignadosBnvDePortales";
+                            } else {
+                                z = "/AccountEntity/CargarListaAsignadosBnv";
+                            }
+
+                            return z;
+                        }
+                }
+            }
+            },
+        }).data("kendoComboBox");
+        }
+    });
+
+    function listaCategorias() {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/CategoryTicket/ListaCategoriasBnv/?ID_CATE=@ViewBag.IDCATE",
+                type: 'GET',
+                success: function (result) {
+                    //do the necessary updations
+                    resolve(result)
+                },
+                error: function (result) {
+                    resolve(null)
+                }
+            });
+
+        })
+    }
+    async function CargaCategorias(categoriasHalibitadas) {
+        const categorias = Promise.resolve(listaCategorias())
+        categorias.then((value) => {
+            $("#ID_CATE_N1").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            enable: categoriasHalibitadas,
+            cascadeFrom: "ID_TYPE_TICK",
+            dataValueField: "ID_CATE",
+            placeholder: "Seleccionar ... ",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListaPorCategoryEditTicketBnv?ID_ACCO=" + @Session["ID_ACCO"]+ "&tipo=@ViewBag.ID_TYPE_TICK" + "&ID_CATE=0"+ "&var=" + Math.random()
+                }
+            }
+            }).data("kendoComboBox");
+
+
+
+            $("#ID_CATE_N2").kendoComboBox({
+            autoBind: true,
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N1",
+            dataTextField: "NAM_CATE2",
+            enable: categoriasHalibitadas,
+            dataValueField: "ID_CATE2",
+            placeholder: "Seleccionar ... ",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+            }).data("kendoComboBox");
+
+            $("#ID_CATE_N3").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N2",
+            dataTextField: "NAM_CATE3",
+            enable: categoriasHalibitadas,
+            dataValueField: "ID_CATE3",
+            placeholder: "Seleccionar ... ",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory3?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+            }).data("kendoComboBox");
+
+            $("#ID_CATE").kendoComboBox({
+            autoBind: true,
+            filter: "contains",
+            cascadeFrom: "ID_CATE_N3",
+            dataTextField: "NAM_CATE4",
+            dataValueField: "ID_CATE4",
+            enable: categoriasHalibitadas,
+            placeholder: "Seleccionar ... ",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory4?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+            $("#ID_CATE_N1").data("kendoComboBox").value(value.Data[0].NAM_CATE_1);
+            $("#ID_CATE_N2").data("kendoComboBox").value(value.Data[0].NAM_CATE_2);
+            $("#ID_CATE_N3").data("kendoComboBox").value(value.Data[0].NAM_CATE_3);
+            //$("#ID_CATE_N4").data("kendoComboBox").value(value.Data[0].NAM_CATE_4);
+        })
+
+    }
+    function AgregarTicket() {
+        $("#idcontreciever").show();
+        $(".ShowReceiver").show();
+
+        var cont = $("#idcontreciever").val();
+        cont = parseInt(cont) + 1;
+
+        var ID_TICK_PARENT = $("#ID_TICK_PARENT").data("kendoComboBox");
+        var Name = ID_TICK_PARENT.text();
+        var valor = ID_TICK_PARENT.value();
+
+        $("#NewReceiver").append("<div id='divname" + cont + "'>" + Name +
+        "<input type='hidden' name='RECEIVER" + cont + "' id='RECEIVER" + cont + "' value='" + valor + "'>" +
+        "<span>&nbsp;<a  onclick='DeleteReceiver(" + cont + ")' class='delete-link' title='Remove' href='javascript:void(0)'></a></span></div>");
+        var v = parseInt(cont);
+        $("#idcontreciever").val(v);
+        //ID_TICK_PARENT.value('');
+        //$("#ID_TICK_PARENT").val('');
+
+    }
+    function DeleteReceiver(id) {
+        $("#divname" + id + "").remove();
+        var cont = $("#idcontreciever").val();
+        cont = parseInt(cont) - 1;
+        $("#idcontreciever").val(cont);
+    }
+
+    function uploadDoneEdit(val, msg) {
+        if (val == "OK") {
+            swal({
+                title: "Información Guardada / Notificación Enviada",
+                type: 'success',
+                text: msg,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continue',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                location.reload();
+            });
+           // $('#EditCommentModal').modal('hide');
+           // winPopUpModal("Información Guardada / Notificación Enviada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           //        + "<div style='padding:10px 0px 10px 0px;'>"+msg+"</div>"
+           //        + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           //        "<button id='continues' class='k-button'>Continuar</button>" +
+           //        "</div></div>", 400, 160);
+
+           // $("#continues").focus();
+           // var undo = $("#continues")
+           //.bind("click", function () {
+           //    closeWinFormModalPopUp();
+           //    closeWinModalPopUp();
+           //    location.reload();
+           //});
+
+           // $("#closebtnmodal").click(function () {
+           //     closeWinFormModalPopUp();
+           //     closeWinModalPopUp();
+           //     location.reload();
+           // });
+        }
+        else if (val == 'ERRORBCP') {
+            swal("Error al registrar", msg, "error")
+            //$('#EditCommentModal').modal('hide');
+            //winPopUpModal("Error al registrar", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            //    "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+            //    "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+            //    "<button id='continuee' class='k-button'>Continuar</button>" +
+            //    "</div></div>"
+            //    , 400, 140);
+
+            //$("#continuee").focus();
+            //var undo = $("#continuee")
+            //    .bind("click", function () {
+            //        closeWinModalPopUp();
+            //    });
+        }
+        else {
+            swal("Error al registrar", msg, "error")
+            //$('#EditCommentModal').modal('hide');
+            //winPopUpModal("Error al registrar", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+            //   "<div style='padding:10px 0px 10px 0px;'>"+msg+"</div>" +
+            //   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+            //   "<button id='continuee' class='k-button'>Continuar</button>" +
+            //   "</div></div>"
+            //   , 400, 140);
+
+            //$("#continuee").focus();
+            //var undo = $("#continuee")
+            //.bind("click", function () {
+            //    closeWinModalPopUp();
+            //});
+        }
+    }
+    function OnPaste(e) {
+        //var texto = e.html
+        //if ((/^<img src="/).test(e.html)) {
+        //    toastr.warning("No se permiten imágenes en este campo.");
+        //    e.html = "";
+        //}
+        //if (texto.includes('<img data-imagetype=')) {
+        //    toastr.warning("No se permiten imágenes en este campo.");
+        //    e.html = "";
+        //}
+        if (/<img\s+[^>]*>/i.test(e.html)) {
+            toastr.warning("No se permiten imágenes en este campo.");
+            e.html = "";
+        } else if ((/^<img src="data:image/).test(e.html)) {
+            toastr.warning("No se permiten imágenes en este campo.");
+            e.html = "";
+        }
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#IdGarantiaProveedor').hide();
+
+        function evaluarGarantia() {
+            var idCateN1 = $('#ID_CATE_N1').val();
+            var idCateN2 = $('#ID_CATE_N2').val();
+            var idCateN3 = $('#ID_CATE_N3').val();
+            var idCate = $('#ID_CATE').val();
+
+            // Si el campo ID_CATE está vacío, ocultar #IdGarantiaProveedor y salir de la función
+            if (!idCate || !idCateN1 || !idCateN2 || !idCateN3) {
+                $('#IdGarantiaProveedor').hide();
+                return;
+            }
+
+            $.ajax({
+                url: '@Url.Action("MostrarGarantiaBNV", "Administrator")',
+                type: 'GET',
+                dataType: 'json',
+                data: {
+                    cat1: idCateN1,
+                    cat2: idCateN2,
+                    cat3: idCateN3,
+                    cat4: idCate
+                },
+                success: function(response) {
+                    if (response.resultado !== undefined) {
+                        var resultado = response.resultado;
+                        if (resultado === 1) {
+                            $('#IdGarantiaProveedor').show();
+                        } else {
+                            $('#IdGarantiaProveedor').hide();
+                        }
+                    } else if (response.error !== undefined) {
+                        console.log("Error: " + response.error);
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log("Error de AJAX: " + error);
+                }
+            });
+        }
+
+        $('#ID_CATE').change(function() {
+            evaluarGarantia();
+        });
+
+        $('#ID_CATE_N1').change(function() {
+            evaluarGarantia();
+        });
+
+        $('#ID_CATE_N2').change(function() {
+            evaluarGarantia();
+        });
+
+        $('#ID_CATE_N3').change(function() {
+            evaluarGarantia();
+        });
+
+
+        window.onload = function() {
+            evaluarGarantia();
+        };
+
+        setTimeout(evaluarGarantia, 8000);
+
+    });
+</script>

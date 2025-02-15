@@ -1,0 +1,114 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+
+<style>
+    .k-button.k-upload-selected {
+        display: none !important
+    }
+
+    .k-button.k-clear-selected {
+        display: none !important
+    }
+</style>
+
+@*<input type="hidden" name="IdTicketAcceso" id="IdTicketAcceso" value="@ViewBag.IdTicketAcceso" />*@
+<input type="hidden" name="IdTick" id="IdTick" value="@ViewBag.ID_TICK" />
+
+<fieldset>
+
+    <h5 style="text-align: center; font-weight: bold;">¿Desea generar un ticket de Remediación de Host?</h5> <h6 style="text-align: center">Recuerde que el ticket se generará con el último comentario que tenga el estado "Remediación Host"</h6>
+
+    <div class="form-group row">
+        <div class="col-md-12">
+            <div class="editor-label">
+                Comentario u observación
+            </div>
+            <div>
+                <textarea id="Comentario" name="Comentario" class="form-control" rows="5" placeholder="Ingrese un comentario u observación adicional..">@ViewBag.Comentario</textarea>
+            </div>
+        </div>
+    </div>
+
+    <br>
+    <div class="form-row">
+        <div class="col-md-6"></div>
+        <div class="col-md-3">
+            <button id="cancelAcceso" class="btn btn-light btn-block">Atrás        </button>
+        </div>
+        <div class="col-md-3">
+            <button id="generarTicketRemediacionHost" class="btn btn-primary btn-block btn-success">Crear</button>
+        </div>
+    </div>
+
+</fieldset>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        @*console.log('@ViewBag.ID_TICK');*@
+
+        $("#generarTicketRemediacionHost").click(function () {
+
+            var params = {
+                IdTick: $("#IdTick").val(),
+                Comentario: $("#Comentario").val(),
+            };
+
+            $.ajax({
+                url: "/Ticket/GenerarTicketRemediacionHostBNV",
+                data: params,
+                type: "POST",
+                cache: false,
+                dataType: "JSON",
+                success: function (resp) {
+
+                    if (resp.Respuesta == "OK") {
+                        var id = resp.id;
+                        uploadDone(resp.Respuesta, id);
+                    }
+                    else {
+                        uploadDone(resp.Respuesta, id);
+                    }
+                }
+            });
+        });
+
+        $("#cancelAcceso").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+
+        function uploadDone(msg, id) {
+            if (msg === "OK") {
+                toastr.success("Ticket de Remediación Generado", "Éxito");
+                setTimeout(function () {
+                    $("[data-dismiss=modal]").trigger("click");
+                    window.open("@*/#*@/DetailsTicket/Index/" + id, "_blank");
+                }, 3000);
+            } else {
+                toastr.warning("Ingrese los campos requeridos", "Advertencia");
+            }
+        }
+
+        //function uploadDone(msg, msgerror) {
+
+        //    if (msg == "OK") {
+        //        toastr.success(msgerror, "Ticket de Remediación Generado");
+        //        setTimeout(function () {
+        //            $("[data-dismiss=modal]").trigger({ type: "click" });
+        //            //location.reload();
+        //            window.open("/DetailsTicket/Index/" + id, "_blank");
+        //        }, 3000);
+        //    }
+        //    else {
+
+        //        toastr.warning(msgerror, "Ingrese los campos requeridos");
+        //    }
+        //}
+
+    });
+
+</script>

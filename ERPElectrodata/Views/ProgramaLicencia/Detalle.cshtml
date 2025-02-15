@@ -1,0 +1,397 @@
+﻿@{
+    ViewBag.Title = "Detalle Licencia";
+    //Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        <div class="title" id="divTitle"></div>
+        @if (Convert.ToInt32(Session["SUPERVISOR_PERMISO_LICENCIAS"]) == 1)
+        {
+           
+            
+
+                <div class="btn-actions-pane-right">
+                    <button id="btnCrearLicencia" class="btn btn-hover-shine btn-primary"><i class="fa fa-pen"></i> Crear</button>
+                </div>
+        }
+    </div>
+    <div class="card-body">
+        <div id="divDato">
+
+        </div>
+    </div>
+</div>
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Licencias Disponibles
+    </div>
+    <div class="card-body">
+        <div class="row no-gutters align-items-center">
+            <table id="TablaLicencias" class="table table-bordered table-striped" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        @*<th>Programa</th>*@
+                        <th>Código</th>
+                        @*<th>Tipo de Licencia</th>
+        <th>Serie</th>*@
+                        <th>Fecha Compra</th>
+                        <th>Fecha Activacion</th>
+                        <th>Fecha Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Activo/Serie</th>
+                        <th>Usuario Asignado</th>
+                        <th>Opciones</th>
+                        <th>
+                            <div style="text-align:center;">
+                                All <input type="checkbox" id="headerCheckbox" class="checkbox-class header-checkbox" checked style="background-color: #182ebb; border-color: #182ebb;" />
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+                <tfoot>
+                    <tr>
+                        <th>#</th>
+                        @*<th>Programa</th>*@
+                        <th>Código</th>
+                        @*<th>Tipo de Licencia</th>
+                            <th>Serie</th>*@
+                        <th>Fecha Compra</th>
+                        <th>Fecha Activacion</th>
+                        <th>Fecha Vencimiento</th>
+                        <th>Estado</th>
+                        <th>Activo/Serie</th>
+                        <th>Usuario Asignado</th>
+                        <th>Opciones</th>
+                        <th>
+                            Renovar
+                        </th>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+
+@*@section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }*@
+
+<script type="text/javascript">
+
+    var tablaLicencias;
+    var idProveedor;
+    var idPrograma;
+    var version;
+
+    $(document).ready(function () {
+
+        /*CREAR LICENCIA */
+
+        $("#btnCrearLicencia").click(function () {
+
+                $("#lblTitulo").text("Crear Licencia");
+
+            $("#btnCrearLicencia").attr("data-toggle", "modal");
+            $("#btnCrearLicencia").attr("data-target", "#miModal");
+
+                $(".modal-dialog").removeClass("modal-sm");
+                $(".modal-dialog").removeClass("modal-lg");
+                $(".modal-dialog").addClass("modal-lg");
+
+            $('#modal-content').empty();
+
+            var versionCodificada = encodeURIComponent(version.trim());
+
+
+            $('#modal-content').load("/ProgramaLicencia/CrearLicencia?IdProveedor=" + idProveedor + "&IdPrograma=" + idPrograma + "&Version=" + versionCodificada + "&var=" + Math.random());
+
+
+            $('#miModal').on('hidden.bs.modal', function () {
+                ObtenerDatosLicencia();
+            });
+
+        });
+
+
+        /*FIN DE CREAR LICENCIA */
+
+        var licencia = @Html.Raw(Json.Encode(Model));
+
+        if (licencia !== null && licencia !== undefined) {
+            $("#divDato").empty();
+            $("#divTitle").empty();
+
+            $("#divTitle").append('Programa - ' + licencia.Programa);
+            idProveedor = licencia.IdProveedor;
+            idPrograma = licencia.IdPrograma;
+            version = licencia.VersionPrograma;
+
+            var contenidoHtml =
+                '<div class="form-row">' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Código de Programa</b></div>' +
+                '<div class="descripcion">' + licencia.CodigoPrograma + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Version de Programa</b></div>' +
+                '<div class="descripcion">' + licencia.VersionPrograma + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Proveedor</b></div>' +
+                '<div class="descripcion">' + licencia.Proveedor + '</div>' +
+                    '</div>' +
+                '</div>' + //Fin Bloque
+                '<div class="form-row">' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Telefono</b></div>' +
+                '<div class="descripcion">' + licencia.TelefonoProveedor + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Contacto Proveedor</b></div>' +
+                '<div class="descripcion">' + licencia.ContactoProveedor + '</div>' +
+                    '</div>' +
+                    '<div class="col-md-6 col-lg-3">' +
+                        '<div class="titulo"><b>Cantidad de Licencias</b></div>' +
+                '<div class="descripcion">' + licencia.Cantidad + '</div>' +
+                    '</div>' +
+                '</div>' ;
+
+
+            $("#divDato").html(contenidoHtml);
+
+            $("#btnRenovar").remove();
+
+            $(".btn-actions-pane-right").append(
+                '<button id="btnRenovar" class="btn btn-hover-shine btn-primary"  onclick="Renovar()" ><i class="fa fa-retweet"></i> Renovar Licencia</button>'
+            );
+
+
+            console.log(licencia);
+        }
+
+        bindCheckboxEvents();
+        ObtenerDatosLicencia();
+    });
+
+    function editarLicencia(id) {
+        $("#lblTitulo").text("Editar Licencia");
+
+        $("#btnEditar").attr("data-toggle", "modal");
+        $("#btnEditar").attr("data-target", "#miModal");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/ProgramaLicencia/EditarLicencias/" + id + "?var=" + Math.random());
+    }
+
+    function Renovar() {
+
+        var idsSeleccionados = obtenerIdsSeleccionados();
+
+        $("#lblTitulo").text("Renovar Licencia");
+        $("#btnRenovar").attr("data-toggle", "modal");
+        $("#btnRenovar").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load("/ProgramaLicencia/Renovar?idsSeleccionados=" + idsSeleccionados + "&var=" + Math.random());
+
+    };
+
+    function obtenerIdsSeleccionados() {
+        var ids = [];
+
+        tablaLicencias.rows().every(function (index, element) {
+            var rowData = this.data();
+            var checkbox = $(':checkbox', this.node());
+
+            if (checkbox.prop('checked')) {
+                ids.push(rowData.Id);
+            }
+        });
+
+        return ids;
+    }
+
+
+      function ObtenerDatosLicencia() {
+
+        $('#TablaLicencias').dataTable().fnDestroy();
+
+          tablaLicencias= $('#TablaLicencias').DataTable({
+            "order": [[1, "asc"]],
+            dom: 'Bfrtip',
+            responsive: true,
+            ajax: {
+                url: "/ProgramaLicencia/ListarLicenciasDisponibles/",
+                data: {
+                    idProveedor: idProveedor,
+                    idPrograma: idPrograma,
+                    version: version,
+                }
+            },
+            columns: [
+                { data: null },
+                /*{ data: "Nombre", "orderable": true },*/
+                { data: "Codigo" },
+                //{ data: "TipoLicencia" },
+                //{ data: "Serie" },
+                { data: "FechaCompra" },
+                { data: "FechaActivacion" },
+                { data: "FechaVencimiento" },
+                { data: "Activo" },
+                { data: "SerieActivo" },
+                { data: "UsuarioAsignado" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var str = "";
+                        if (data.Activo == "Disponible") {
+                            if (data.Activo == "Disponible") {
+                                str = '<div style="text-align:center">' +
+                                    '<span id="btnEditar_' + data.Id + '" title="Editar Licencia"  class="fa fa-edit" style="color: #009688; font-size: 14px; cursor: pointer;"  data-toggle="modal" data-target="#miModal" onclick="editarLicencia(' + data.Id + ')">' +
+                                    '</span>' +
+                                    '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                    '<span id="' + data.Id + '" title="Liberar Licencia" class="fa fa-file" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:14px; " onclick="habilitarLicencia(' + data.Id + ')"></span>' +
+                                    '<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
+                                    '<span id="' + data.Id + '" title="Eliminar Licencia" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:14px; " onclick="eliminarLicencia(' + data.Id + ')"></span>' +
+                                    '</div>';
+                            }
+
+                        } else if (data.FechaActivacion=="-") {
+                            str = '<div style="text-align:center">' +
+                                '<span id="btnEditar_' + data.Id + '" title="Editar Licencia"  class="fa fa-edit" style="color: #009688; font-size: 14px; cursor: pointer;"  data-toggle="modal" data-target="#miModal" onclick="editarLicencia(' + data.Id + ')">' +
+                                '</span>' +
+                                '<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
+                                '<span id="' + data.Id + '" title="Eliminar Licencia" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:14px; " onclick="eliminarLicencia(' + data.Id + ')"></span>' +
+                                '</div>';
+                        }
+                            else if(data.Activo=="Liberado"){
+                            str = '<div style="text-align:center">' +
+                                '<span id="btnEditar_' + data.Id + '" title="Editar Licencia"  class="fa fa-edit" style="color: #009688; font-size: 14px; cursor: pointer;"  data-toggle="modal" data-target="#miModal" onclick="editarLicencia(' + data.Id + ')">' +
+                                '</span>' +
+                                '<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
+                                    '<span  id="' + data.Id + '" title="Cancelar liberación de Licencia" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:14px; " onclick="deshabilitarLicencia(' + data.Id + ')"></span>' +
+                                '</div>';
+                            }else {
+                                str = '<div style="text-align:center">' +
+                                      '</div>';
+                            }
+
+                        return str
+                    }
+                },
+                {
+                    data: null,
+                    defaultContent: '<div style="text-align:center;"><input type="checkbox" class="checkbox-class row-checkbox" checked style="background-color: #182ebb; border-color: #182ebb;" /></div>'
+                },
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                $('td:eq(0)', row).html(dataIndex + 1);
+            },
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ registros",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+
+        });
+    }
+
+    function bindCheckboxEvents() {
+        $('#TablaLicencias thead').on('change', '.header-checkbox', function () {
+            var checked = this.checked;
+            tablaLicencias.rows().every(function () {
+                var columnIndex = tablaLicencias.column({ search: 'applied' }).index();
+                $(':checkbox', this.node()).prop('checked', checked);
+            });
+        });
+
+        $('#TablaLicencias tbody').on('change', '.row-checkbox', function () {
+        });
+    }
+
+    function habilitarLicencia(id) {
+        $.ajax({
+            url: "/ProgramaLicencia/HabilitarLicencia/" + id + "?var",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                toastr.success("La Licencia ha sido liberada.", "Información Guardada");
+                ObtenerDatosLicencia();
+            },
+            error: function (source) {
+                toastr.error("Error al activar la licencia.", "Error");
+            }
+        });
+    }
+
+    function deshabilitarLicencia(id) {
+        $.ajax({
+            url: "/ProgramaLicencia/DeshabilitarLicencia/" + id + "?var",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                toastr.success("La liberación de la licencia ha sido cancelada.", "Actualización");
+                ObtenerDatosLicencia();
+            },
+            error: function (source) {
+                toastr.error("Error al cancelar la licencia.", "Error");
+            }
+        });
+    }
+
+    function eliminarLicencia(id) {
+        $.ajax({
+            url: "/ProgramaLicencia/eliminarLicencia/" + id + "?var",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                toastr.success("La Licencia ha sido eliminada.", "Eliminación");
+                ObtenerDatosLicencia();
+            },
+            error: function (source) {
+                toastr.error("Error al eliminar la licencia.", "Error");
+            }
+        });
+    }
+
+</script>
+
+

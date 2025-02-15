@@ -1,0 +1,1053 @@
+﻿@model ERPElectrodata.Models.ObtenerRenovacion_Result
+@{
+    ViewBag.Title = "RenovarSolicitud";
+
+    var redItems = Model.Red.Split(',');
+
+    string[] softwareItems = Model.Software.Split(',');
+    List<string> filteredItems = new List<string>();
+    string otroSoftware = null;
+
+    foreach (var item in softwareItems)
+    {
+        string trimmedItem = item.Trim();
+        if (trimmedItem.StartsWith("Otro: "))
+        {
+            otroSoftware = trimmedItem.Substring("Otro: ".Length);
+        }
+        else
+        {
+            filteredItems.Add(trimmedItem);
+        }
+    }
+
+    string filteredSoftware = string.Join(",", filteredItems);
+
+    string[] partesCarpeta = Model.Carpeta.Split(':');
+
+    string nombreCarpeta = partesCarpeta[0].Trim();
+
+    string tipoAcceso = partesCarpeta.Length > 1 ? partesCarpeta[1].Trim() : string.Empty;
+
+}
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+
+    #FrmSeleccionSolicitudPersonal fieldset:not(:first-of-type) {
+        display: none;
+    }
+
+    .contenedor-botones {
+        display: flex;
+        flex-direction: row;
+    }
+
+        .contenedor-botones input[type="radio"] {
+            margin-right: 5px;
+        }
+</style>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Selección de Personal
+                <div class="page-title-subheading">
+                    En este módulo puedes solicitar y revisar el avance del proceso de Selección de uno o más candidatos.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@*<div class="tab-content">*@
+@using (Html.BeginForm("CrearSolicitud", "SeleccionSolicitudPersonal", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmSeleccionSolicitudPersonal", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title" id="titleForm">Registrar Solicitud de Personal</div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <fieldset>
+                        <br />
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblMotivoVacante" for="IdMotivoVacante" class="">Motivo de la Vacante <span style="color:red">*</span> </label>
+                                    @Html.EditorFor(model => model.IdMotivoVacante)
+                                    @Html.ValidationMessageFor(model => model.IdMotivoVacante)
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divCantidadVacante">
+                                <div class="position-relative form-group">
+                                    <label id="lblCantidad" for="CantidadVacante" class="">Cantidad <span style="color:red">*</span></label>
+                                    @Html.EditorFor(model => model.CantidadVacante)
+                                    @Html.ValidationMessageFor(model => model.CantidadVacante)
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divGerencia">
+                                <div class="position-relative form-group">
+                                    <label id="lblGerencia" for="IdGerencia" class="">Gerencia <span style="color:red">*</span></label>
+                                    @*<input type="text" name="IdGerencia" id="IdGerencia" />*@
+                                    @Html.EditorFor(model => model.IdGerencia)
+                                    @Html.ValidationMessageFor(model => model.IdGerencia)
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divArea">
+                                <div class="position-relative form-group">
+                                    <label id="lblArea" for="IdArea" class="">Área <span style="color:red">*</span></label>
+                                    @Html.EditorFor(model => model.IdArea)
+                                    @Html.ValidationMessageFor(model => model.IdArea)
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divReemplazaA" style="display:none">
+                                <div class="position-relative form-group">
+                                    <label id="lblReemplazarA" for="cbReemplazarA" class="">Reemplaza A <span style="color:red">*</span></label>
+
+                                    @Html.EditorFor(model => model.IdPersonaReemplaza)
+                                    @Html.ValidationMessageFor(model => model.IdPersonaReemplaza)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3" id="divCargo">
+
+                                <div class="position-relative form-group">
+                                    <label id="lblCargo" for="Cargo" class="">Cargo de la Vacante  <span style="color:red">*</span></label>
+                                    @Html.EditorFor(model => model.Cargo)
+                                    @Html.ValidationMessageFor(model => model.Cargo)
+
+                                    <input name="cargoManual" id="cargoManual" />
+
+                                    <div style="margin:10px;display: inline-block">
+                                        <input type="checkbox" name="nuevo" id="nuevoPuesto" value="nuevo" />
+                                        <label for="nuevoPuesto" id="labelNuevoPuesto">Nuevo Puesto</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divJefeInmediato">
+                                <div class="position-relative form-group">
+                                    <label id="lblJefeInmediato" for="IdJefeInmediato" class="">Jefe Inmediato <span style="color:red">*</span></label>
+                                    @Html.EditorFor(model => model.IdJefeInmediato)
+                                    @Html.ValidationMessageFor(model => model.IdJefeInmediato)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3" id="divFechaInicio">
+                                <div class="position-relative form-group">
+                                    <label id="lblFechaInicio" for="FechaInicioTrabajo" class="">Fecha de Inicio Contrato<span style="color:red">*</span></label>
+                                    @Html.TextBoxFor(model => model.FechaInicioTrabajo)
+                                    @Html.ValidationMessageFor(model => model.FechaInicioTrabajo)
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divFechaFin">
+                                <div class="position-relative form-group">
+                                    <label id="lblFechaFin" for="FechaFinTrabajo" class="">Fecha de Fin Contrato<span style="color:red">*</span></label>
+                                    @Html.TextBoxFor(model => model.FechaFinTrabajo)
+                                    @Html.ValidationMessageFor(model => model.FechaInicioTrabajo)
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divDuracionContrato">
+                                <div class="position-relative form-group">
+                                    <label id="lblDuracionContrato" for="DuracionContrato">Duración Contrato</label>
+
+                                    @Html.EditorFor(model => model.DuracionContrato)
+                                    @Html.ValidationMessageFor(model => model.DuracionContrato)
+
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divTipoContrato">
+                                <div class="position-relative form-group">
+                                    <label id="lblTipoContrato" for="IdTipoContrato" class="">Tipo de Contrato <span style="color:red">*</span></label>
+                                    @Html.EditorFor(model => model.IdTipoContrato)
+                                    @Html.ValidationMessageFor(model => model.IdTipoContrato)
+                                </div>
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="form-row">
+                            <div class="col-md-3" id="divAplica">
+                                <label for="rbtAplica">¿Aplica proyecto?</label>&nbsp;&nbsp;&nbsp;
+                                <input type="radio" id="rbtSi" name="rbtAplica" checked />
+                                <label for="rbtAplica">Si</label>&nbsp;
+                                <input type="radio" id="rbtNo" name="rbtAplica" />
+                                <label for="rbtAplica">No</label>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3" id="divCliente">
+                                <div class="position-relative form-group">
+                                    <label id="lblCliente" for="cbCliente" class="">Cliente <span style="color:red">*</span></label>
+                                    <input type="text" name="cbCliente" id="cbCliente" />
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divProyecto">
+                                <div class="position-relative form-group">
+                                    <label id="lblProyecto" for="IdProyecto" class="">Proyecto (OP) <span style="color:red">*</span></label>
+                                    @Html.EditorFor(model => model.IdProyecto)
+                                    @Html.ValidationMessageFor(model => model.IdProyecto)
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divFechaFinProyecto">
+                                <div class="position-relative form-group">
+                                    <label id="lblFechaFin" for="FechaFinTrabajo" class="">Fecha Fin de Proyecto <span style="color:red">*</span></label>
+                                    @Html.TextBoxFor(model => model.FechaFinProyecto)
+                                    @Html.ValidationMessageFor(model => model.FechaFinProyecto)
+                                </div>
+                            </div>
+                            <div class="col-md-3" id="divPresupuesto">
+                                <div class="position-relative form-group">
+                                    <label id="lblPresupuesto" for="Presupuesto" class="">Presupuesto <span style="color:red">*</span></label>
+                                    @Html.EditorFor(model => model.Presupuesto)
+                                    @Html.ValidationMessageFor(model => model.Presupuesto)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-9">
+                                <div class="position-relative form-group">
+                                    <label id="lblJustificacion" for="Justificacion" class="">Justificación de la Vacante <span style="color:red">*</span></label>
+                                    @Html.EditorFor(model => model.Justificacion)
+                                    @Html.ValidationMessageFor(model => model.Justificacion)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="position-relative form-group">
+                            <label id="lblRequisitos" for="Requisitos" class="">Requisitos Mínimos <span style="color:red">*</span> (Perfil del puesto. NOTA: Adjuntar perfil si es una nueva posición)</label>
+                            @*<textarea name="Requisitos" id="Requisitos" rows="4"></textarea>*@
+                            @Html.TextAreaFor(model => model.Requisitos)
+                            @Html.ValidationMessageFor(model => model.Requisitos)
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3" id="divFormato">
+                                <div class="position-relative form-group">
+
+                                    <label id="lblJustificacion" for="Justificacion" class=""><i class="fa fa-download"></i> Descargar Formato: </label>
+                                    <img src="/Content/Images/docx.png" style="width:14px; height:14px;"><a style="margin-left:5px;" href="/SeleccionSolicitudPersonal/DescargarFormato?archivo='FORMATO DE PERFIL DE PUESTO'" target="_blank" title="Descargar Formato de Perfil de Puesto">Perfil de Puesto</a>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="form-group row" id="divAdjunto">
+                            <div class="col-sm-12 col-lg-12">
+                                <input name="archivos" id="archivos" type="file" />
+                            </div>
+                        </div>
+                        <input type="button" name="password" class="next btn btn-info btn-lg btn-block col-md-3 offset-md-9" value="Siguiente" />
+
+                    </fieldset>
+
+                    <fieldset id="seccionDos">
+                        <br />
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblMotivoVacante" for="IdMotivoVacante" class="">Requisitos Adicionales<span style="color:red">*</span></label>
+
+                                    <br />
+                                    <div class="checkboxes-container" style="white-space: nowrap;">
+
+
+                                      
+                                            <div style="margin:10px;display: inline-block; cursor:pointer;">
+                                                <input type="checkbox" name="sctrSuperficie" value="SCTR Superficie" @(Model.RequisitosConcatenados.Contains("SCTR Superficie") ? "checked" : "") /> SCTR Superficie
+                                            </div>
+
+                                            <div style="margin:10px;display: inline-block; cursor:pointer;">
+                                                <input type="checkbox" name="sctrSocavon" value="SCTR Socavón" @(Model.RequisitosConcatenados.Contains("SCTR Socavón") ? "checked" : "") /> SCTR Socavón
+                                            </div>
+
+                                            <div style="margin:10px;display: inline-block; cursor:pointer;">
+                                                <input type="checkbox" name="tRegistro" value="T-Registro" @(Model.RequisitosConcatenados.Contains("T-Registro") ? "checked" : "") /> T-Registro
+                                            </div>
+
+                                            <div style="margin:10px;display: inline-block; cursor:pointer;">
+                                                <input type="checkbox" name="elVidaLey" value="El Vida ley" @(Model.RequisitosConcatenados.Contains("El Vida ley") ? "checked" : "") /> El Vida ley
+                                            </div>
+                                        
+
+
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-3">
+                                <div class="position-relative form-group">
+                                    <label id="lblMotivoVacante" for="IdMotivoVacante" class="">Modalidad de Trabajo<span style="color:red">*</span></label>
+                                    <div class="contenedor-botones">
+
+                                        <div style="margin:5px;">
+                                            <input type="radio" id="opcion1" name="opcion" value="Remoto" @(Model.Modalidad == "Remoto" ? "checked" : "")>
+                                            <label for="opcion1">Remoto</label>
+                                        </div>
+                                        <div style="margin:5px;">
+                                            <input type="radio" id="opcion2" name="opcion" value="Presencial" @(Model.Modalidad == "Presencial" ? "checked" : "")>
+                                            <label for="opcion2">Presencial</label>
+                                        </div>
+                                        <div style="margin:5px;">
+                                            <input type="radio" id="opcion3" name="opcion" value="Híbrido" @(Model.Modalidad == "Híbrido" ? "checked" : "")>
+                                            <label for="opcion3">Híbrido</label>
+                                        </div>
+
+                                    </div>
+                                    <div id="IdUbicacion">
+                                        <label for="Ubicacion">Ubicación</label>
+                                        <input type="text" name="Ubicacion" id="Ubicacion" class="form-control" value="@(Model.UbicacionModalidad)" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <button type="button" class="previous btn btn-secondary btn-lg" style="width: 300px;">Anterior</button>
+                        <button type="button" class="next btn btn-info btn-lg" style="width: 300px; float: right">Siguiente</button>
+                    </fieldset>
+                    <fieldset>
+                        <br />
+                        <div class="form-row">
+                            <div class="col-md-6" id="divRecursosInformaticos" style="border-bottom:1px solid #495057;">
+                                <div class="position-relative form-group">
+                                    <label id="lblRecursoInformatico" for="RecursoInformatico" class="">Recursos Informaticos <span style="color:red">* </span> (Laptop, Teclado, Mouse)</label>
+                                    @Html.TextAreaFor(model => model.RecursoInformatico)
+                                    @Html.ValidationMessageFor(model => model.RecursoInformatico)
+                                </div>
+                            </div>
+                            <div class="col-md-6" id="divRecursosComunicacion" style="border-left:1px solid #495057;border-bottom:1px solid #495057;">
+                                <div class="position-relative form-group">
+                                    <div class="position-relative form-group">
+                                        <label id="lblRecursosComunicacion" for="RecursosComunicacion" class="">Recursos Comunicacion <span style="color:red">*</span> (Celular, Anexo)</label>
+                                        @Html.TextAreaFor(model => model.RecursoComunicacion)
+                                        @Html.ValidationMessageFor(model => model.RecursoComunicacion)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="col-md-6" id="divSoftware">
+                                <label id="lblSoftware" for="Software" class="">Software<span style="color:red">*</span></label>
+                                <div class="position-relative form-group">
+                                    <label class=""> </label>
+                                    <br />
+                                    <div class="checkboxes-container" style="white-space: nowrap;">
+
+                                        <div style="margin:10px;display: inline-block">
+                                            <input type="checkbox" name="cSIDIGE" value="SIDIGE" @(softwareItems.Any(s => s.Trim() == "SIDIGE") ? "checked" : "") /> SIDIGE
+                                        </div>
+                                        <div style="margin:10px;display: inline-block">
+                                            <input type="checkbox" name="cBITRIX" value="BITRIX" @(softwareItems.Any(s => s.Trim() == "BITRIX") ? "checked" : "") /> BITRIX
+                                        </div>
+                                        <div style="margin:10px;display: inline-block">
+                                            <input type="checkbox" name="cITMS" value="ITMS" @(softwareItems.Any(s => s.Trim() == "ITMS") ? "checked" : "") /> ITMS
+                                        </div>
+                                        <div style="margin:10px;display: inline-block">
+                                            <input type="checkbox" id="Otro" name="cOtro" value="Otro" @(string.IsNullOrEmpty(otroSoftware) ? "" : "checked") /> Otro
+                                        </div>
+
+                                    </div>
+                                    <input type="text" name="Especificar" id="Especificar" value="@otroSoftware" style="width:100%" class="k-textbox" />
+                                </div>
+                            </div>
+                            <div class="col-md-6" id="divRecursosRed" style="border-left:1px solid #495057;">
+                                <div class="position-relative form-group">
+                                    <label id="lblRecursosRed" for="RecursosRed" class="">Recursos de Red<span style="color:red">*</span></label>
+                                    <div class="col-md-12">
+                                        <label>Accesos:</label>
+
+                                      
+
+                                        <div class="col-md-12">
+                                        
+                                                <div style="margin:10px;display: inline-block; cursor:pointer;">
+                                                    <input type="checkbox" name="CuentaRed" value="Cuenta de Red" @(Model.Red.Contains("Cuenta de Red") ? "checked" : "") /> Cuenta de Red
+                                                </div>
+
+                                                <div style="margin:10px;display: inline-block; cursor:pointer;">
+                                                    <input type="checkbox" name="Email" value="Email" @(Model.Red.Contains("Email") ? "checked" : "") /> Email
+                                                </div>
+
+
+                                        </div>
+                                    </div>
+                                    <div class="container-fluid">
+                                        <label>Carpetas de Servidor:</label>
+                                        <div class="row">
+                                            <div class="col-md-6" id="divCarpeta">
+                                                <label id="lblCarpeta" for="IdCarpeta" class="">Carpeta </label>
+                                                <input type="text" name="Carpeta" id="Carpeta" value="@nombreCarpeta" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label>Permisos:</label>
+                                                <div>
+                                                    <label class="col-xs-4" style="line-height:40px">
+                                                        <input type="radio" name="permisos" value="Lector" @(Model.Carpeta.Contains("Lector") ? "checked" : "")>
+                                                        Lector
+                                                    </label>
+                                                    <label class="col-xs-4">
+                                                        <input type="radio" name="permisos" value="Editor"  @(Model.Carpeta.Contains("Editor") ? "checked" : "")>
+                                                        Editor
+                                                    </label>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <button type="button" name="previous" class="previous btn btn-secondary col-xs-3 col-sm-3 col-md-3" value="Anterior">Anterior</button>
+                        <button type="submit" name="submit" class="btn btn-info block-page-btn-example-1 col-xs-3 col-sm-3 col-md-3" value="Crear Solicitud" style="float:right">Crear Solicitud</button>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+
+        $('#nuevoPuesto').prop('disabled', true);
+        $("#labelNuevoPuesto").css("color", "rgba(0, 0, 0, 0.5)");
+
+        $("#FrmSeleccionSolicitudPersonal").submit(function () {
+            $("#DuracionContrato").prop("disabled", false);
+            $("#IdUbicacion").prop("disabled", false);
+        });
+
+
+        const opciones = document.querySelectorAll('input[name="opcion"]');
+        document.getElementById("IdUbicacion").style.display = "none";
+        opciones.forEach(opcion => {
+            opcion.addEventListener('change', function () {
+                if (this.value === 'Remoto') {
+                    document.getElementById("IdUbicacion").style.display = "none";
+                    $("#Ubicacion").val('');
+                } else if (this.value === 'Presencial') {
+                    document.getElementById("IdUbicacion").style.display = "block";
+                } else if (this.value === 'Híbrido') {
+                    document.getElementById("IdUbicacion").style.display = "block";
+                }
+            });
+        });
+
+                var modalidad = "@Model.Modalidad";
+        var radioButtons = document.querySelectorAll('input[type=radio][name=opcion]');
+        radioButtons.forEach(function (radioButton) {
+            if (radioButton.value === modalidad) {
+                radioButton.checked = true;
+                if (modalidad === "Presencial" || modalidad === "Remoto") {
+                    document.getElementById("IdUbicacion").style.display = "block";
+                }
+            }
+        });
+
+        $("#rbtSi").click(function () {
+            document.getElementById("divCliente").style.display = "block";
+            document.getElementById("divProyecto").style.display = "block";
+            document.getElementById("divFechaFinProyecto").style.display = "block";
+            document.getElementById("divPresupuesto").style.display = "block";
+        });
+
+        $("#rbtNo").click(function () {
+            document.getElementById("divProyecto").style.display = "none";
+            document.getElementById("divCliente").style.display = "none";
+            document.getElementById("divFechaFinProyecto").style.display = "none";
+            document.getElementById("divPresupuesto").style.display = "none";
+
+            var comboBoxCliente = $("#cbCliente").data("kendoComboBox");
+            comboBoxCliente.value('');
+
+            var comboBoxProyecto = $("#IdProyecto").data("kendoComboBox");
+            comboBoxProyecto.value('');
+
+            var datePicker = $("#FechaFinProyecto").data("kendoDatePicker");
+            datePicker.value(null);
+
+            var numericTextBox = $("#Presupuesto").data("kendoNumericTextBox");
+            numericTextBox.value(0);
+        });
+
+        var current = 1,
+            current_step,
+            next_step,
+            prev_step,
+            steps;
+
+        steps = $("fieldset").length;
+
+        $(".next").click(function () {
+            current_step = $(this).parent();
+            next_step = $(this).parent().next();
+            next_step.show();
+            current_step.hide();
+            setProgressBar(++current);
+            if (current === 1) {
+                document.getElementById("titleForm").innerHTML = "Registrar Solicitud de Personal";
+            } else if (current === 2) {
+                document.getElementById("titleForm").innerHTML = "Datos Adicionales del Contrato";
+            } else if (current === 3) {
+                document.getElementById("titleForm").innerHTML = "Solicitud de Recursos Tecnológicos";
+            }
+        });
+
+        $(".previous").click(function () {
+            current_step = $(this).parent();
+            prev_step = $(this).parent().prev();
+            prev_step.show();
+            current_step.hide();
+            setProgressBar(--current);
+            if (current === 1) {
+                document.getElementById("titleForm").innerHTML = "SRegistrar Solicitud de Personal";
+            } else if (current === 2) {
+                document.getElementById("titleForm").innerHTML = "Datos Adicionales del Contrato";
+            } else if (current === 3) {
+                document.getElementById("titleForm").innerHTML = "Solicitud de Recursos Tecnológicos";
+            }
+        });
+
+
+        setProgressBar(current);
+
+        function setProgressBar(curStep) {
+            var percent = parseFloat((100 / steps) * curStep);
+            percent = percent.toFixed();
+            $(".progress-bar").css("width", percent + "%").html(percent + "%");
+        }
+
+        $(".block-page-btn-example-1").click(function () {
+            t.blockUI({
+                message: $(".body-block-example-1")
+            })
+        })
+
+        $("#CantidadVacante").kendoNumericTextBox({
+            format: "#.#",
+            decimals: 0,
+            min: 0,
+            max: 25,
+            value: 1
+        });
+
+        $("#Presupuesto").kendoNumericTextBox({
+            format: "#.#",
+            decimals: 0,
+            min: 0,
+            value: 0
+        });
+
+        $("#Requisitos").kendoEditor({
+            resizable: {
+                content: true,
+                toolbar: true,
+            },
+            encoded: false,
+            placeholder: "Completa al menos 3 requisitos mínimos..."
+        });
+
+        $("#RecursoInformatico").kendoEditor({
+            resizable: {
+                content: true,
+                toolbar: true,
+            },
+            encoded: false,
+            placeholder: "Completa los Recursos Tecnologicos"
+        });
+
+
+        $("#RecursoComunicacion").kendoEditor({
+            resizable: {
+                content: true,
+                toolbar: true,
+            },
+            encoded: false,
+            placeholder: "Completa los Recursos Comunicacion"
+        });
+
+
+        $("#Justificacion").kendoMaskedTextBox({
+            mask: ""
+        });
+
+         $("#cargoManual").kendoMaskedTextBox({
+            mask: ""
+        });
+        $("#cargoManual").hide();
+
+        $("#DuracionContrato").kendoMaskedTextBox({
+            mask:""
+        });
+
+        $("#DuracionContrato").prop("disabled", true);
+
+        $("#PerfilTipo").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        $("#JustificacionRecurso").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        $("#Carpeta").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        $("#FechaInicioTrabajo").kendoDatePicker({
+            format: "dd/MM/yyyy"
+        });
+
+         $("#FechaFinTrabajo").kendoDatePicker({
+            format: "dd/MM/yyyy"
+         });
+
+        $("#FechaFinProyecto").kendoDatePicker({
+            format: "dd/MM/yyyy"
+        });
+
+            function calcularDuracionContrato() {
+                var fechaInicio = $("#FechaInicioTrabajo").data("kendoDatePicker").value();
+                var fechaFin = $("#FechaFinTrabajo").data("kendoDatePicker").value();
+
+                if (fechaInicio && fechaFin) {
+                    // Sumar un día a la fecha de fin
+                    var fechaFinAjustada = new Date(fechaFin);
+                    fechaFinAjustada.setDate(fechaFinAjustada.getDate() + 1);
+
+                    var inicio = new Date(fechaInicio);
+                    var fin = new Date(fechaFinAjustada);
+
+                    var diffYears = fin.getFullYear() - inicio.getFullYear();
+                    var diffMonths = fin.getMonth() - inicio.getMonth();
+                    var diffDays = fin.getDate() - inicio.getDate();
+
+                    if (diffDays < 0) {
+                        diffMonths--;
+                        var auxDate = new Date(fin.getFullYear(), fin.getMonth(), 0);
+                        diffDays += auxDate.getDate();
+                    }
+                    if (diffMonths < 0) {
+                        diffYears--;
+                        diffMonths += 12;
+                    }
+
+                    var duracion = "";
+                    if (diffYears > 0) {
+                        duracion += diffYears + " año";
+                        if (diffYears > 1) duracion += "s";
+                        if (diffMonths > 0 || diffDays > 0) duracion += " ";
+                    }
+                    if (diffMonths > 0) {
+                        duracion += diffMonths + " mes";
+                        if (diffMonths > 1) duracion += "es";
+                        if (diffDays > 0) duracion += " ";
+                    }
+                    if (diffDays > 0) {
+                        if (duracion !== "") duracion += " y ";
+                        duracion += diffDays + " día";
+                        if (diffDays > 1) duracion += "s";
+                    }
+
+                    $("#DuracionContrato").val(duracion);
+                }
+            }
+
+        $("#FechaInicioTrabajo, #FechaFinTrabajo").on("change", function () {
+            calcularDuracionContrato();
+        });
+
+        $("#Criticidad").kendoNumericTextBox({
+            min: 1,
+            max: 2,
+            decimals: 0,
+            format: '#'
+        });
+
+     
+
+        $('#Otro').on('click', function () {
+            var c = document.getElementById('Otro').checked;
+            if (c) {
+                $("#Especificar").show();
+            }
+            else {
+
+                $("#Especificar").hide();
+            }
+        });
+
+        var otroSoftware = "@otroSoftware";
+
+        if (otroSoftware != '') {
+            $("#Especificar").show();
+            console.log("Valor de otroSoftware:", otroSoftware);
+        } else {
+
+            $("#Especificar").hide();
+        }
+
+        var idMotivoV = $("#IdMotivoVacante").kendoComboBox({
+            placeholder: "",
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            index: 0,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ListarMotivoVacante?var=" + Math.random()
+                }
+            },
+
+            change: function (e) {
+                switch ($("#IdMotivoVacante").val()) {
+                    case "1"://Nuevo Puesto
+                        document.getElementById("divAplica").style.display = "block";
+                        document.getElementById("divCliente").style.display = "block";
+                        document.getElementById("divProyecto").style.display = "block";
+                        document.getElementById("divCargo").style.display = "block";
+                        document.getElementById("divJefeInmediato").style.display = "block";
+                        document.getElementById("divCantidadVacante").style.display = "block";
+                        document.getElementById("divReemplazaA").style.display = "none";
+                        document.getElementById("divFechaFin").style.display = "block";
+                        document.getElementById("divPresupuesto").style.display = "block";
+                        document.getElementById("divFormato").style.display = "block";
+                        document.getElementById("divAdjunto").style.display = "block";
+                        document.querySelector('#rbtSi').checked = true;
+                        toastr.clear();
+                        toastr.info("Se selecciona esta opción cuando es un puesto nuevo.", "Mensaje");
+                        break;
+                    case "4"://Ampliacion
+                        document.getElementById("divFechaFin").style.display = "block";
+                        document.getElementById("divCliente").style.display = "block";
+                        document.getElementById("divAplica").style.display = "block";
+                        document.getElementById("divProyecto").style.display = "block";
+                        document.getElementById("divReemplazaA").style.display = "none";
+                        document.getElementById("divCantidadVacante").style.display = "block";
+                        document.getElementById("divCargo").style.display = "block";
+                        document.getElementById("divJefeInmediato").style.display = "block";
+                        document.getElementById("divPresupuesto").style.display = "block";
+                        document.getElementById("divFormato").style.display = "none";
+                        document.getElementById("divAdjunto").style.display = "none";
+                        document.querySelector('#rbtSi').checked = true;
+                        toastr.clear();
+                        toastr.info("Se selecciona esta opción cuando la posición ya existe.", "Mensaje");
+                        break;
+
+                    case "2"://Reemplazo
+                        document.getElementById("divCantidadVacante").style.display = "none";
+                        document.getElementById("divFechaFin").style.display = "block";
+                        document.getElementById("divCargo").style.display = "block";
+                        document.getElementById("divJefeInmediato").style.display = "none";
+                        document.getElementById("divAplica").style.display = "block";
+                        document.getElementById("divCliente").style.display = "block";
+                        document.getElementById("divProyecto").style.display = "block";
+                        document.getElementById("divReemplazaA").style.display = "block";
+                        document.getElementById("divPresupuesto").style.display = "block";
+                        document.getElementById("divFormato").style.display = "none";
+                        document.getElementById("divAdjunto").style.display = "none";
+                        document.querySelector('#rbtSi').checked = true;
+                        toastr.clear();
+                        toastr.info("Se selecciona esta opción cuando se va a reemplazar a un colaborador.", "Mensaje");
+                        break;
+
+                    case "3"://Proyecto
+                        document.getElementById("divReemplazaA").style.display = "none";
+                        document.getElementById("divCantidadVacante").style.display = "block";
+                        document.getElementById("divAplica").style.display = "none";
+                        document.getElementById("divCliente").style.display = "block";
+                        document.getElementById("divProyecto").style.display = "block";
+                        document.getElementById("divCargo").style.display = "block";
+                        document.getElementById("divJefeInmediato").style.display = "block";
+                        document.getElementById("divFechaFin").style.display = "block";
+                        document.getElementById("divPresupuesto").style.display = "block";
+                        document.getElementById("divFormato").style.display = "none";
+                        document.getElementById("divAdjunto").style.display = "none";
+                        toastr.clear();
+                        break;
+                    default:
+                        toastr.danger("Seleccione un motivo de la vacante.");
+                }
+            }
+
+        });
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            location.reload(true);
+        });
+
+        var cbCliente = $("#cbCliente").kendoComboBox({
+            placeholder: "",
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdProyecto").kendoComboBox({
+            cascadeFrom: "cbCliente",
+            placeholder: "",
+            dataTextField: "PROYECTO",
+            dataValueField: "ID_DOCU_SALE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ListarProyectoVigente?var=" + Math.random()
+                }
+            }
+        });
+
+        var IdGerencia = $("#IdGerencia").kendoComboBox({
+            placeholder: "",
+            dataTextField: "NAM_CHAR",
+            dataValueField: "ID_CHAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ObtenerListadoGerencias?var=" + Math.random()
+                }
+            }
+        });
+
+        var IdArea = $("#IdArea").kendoComboBox({
+            cascadeFrom: "IdGerencia",
+            placeholder: "",
+            dataTextField: "title",
+            dataValueField: "ID_CHAR",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ObtenerListadoAreasxGerencia?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                var selectedValue = this.value();
+                if (selectedValue !== "") {
+                    $("#labelNuevoPuesto").css("color", "black");
+                    $('#nuevoPuesto').prop('disabled', false);
+                } else {
+
+                    $("#labelNuevoPuesto").css("color", "rgba(0, 0, 0, 0.5)");
+                    $('#nuevoPuesto').prop('disabled', true);
+                }
+            }
+        });
+
+
+        var Cargo = $("#Cargo").kendoComboBox({
+            cascadeFrom: "IdArea",
+            dataTextField: "NAM_CHAR",
+            dataValueField: "NAM_CHAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: { url: "/SeleccionSolicitudPersonal/ListarCargoSolicitud?var=" + Math.random() }
+                }
+            }
+        });
+
+        $('#nuevoPuesto').change(function () {
+            var cargoComboBox = $("#Cargo").data("kendoComboBox");
+
+            if (cargoComboBox) {
+                if ($(this).is(':checked')) {
+                    cargoComboBox.wrapper.hide();
+                    cargoComboBox.enable(false);
+                    $('#cargoManual').show();
+                } else {
+                    cargoComboBox.wrapper.show();
+                    cargoComboBox.enable(true);
+                    $('#cargoManual').hide();
+                }
+            } else {
+                console.error("El ComboBox de Kendo no está definido.");
+            }
+        });
+
+        var IdPersonaReemplaza = $("#IdPersonaReemplaza").kendoComboBox({
+            cascadeFrom: "IdArea",
+            dataTextField: "Nombre",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: { url: "/SeleccionSolicitudPersonal/ObtenerListadoPersonalxArea?var=" + Math.random() }
+                }
+            }
+        });
+
+        $("#IdTipoContrato").kendoComboBox({
+            placeholder: "",
+            dataTextField: "CONDITION",
+            dataValueField: "ID_COND_CONT",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ListarTipoContrato?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdJustificacion").kendoComboBox({
+            placeholder: "",
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/SeleccionSolicitudPersonal/ListarJustificacionSolicitud?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdJefeInmediato").kendoComboBox({
+            placeholder: "",
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                transport: {
+                    read: { url: "/AccountEntity/ListarPersonalEdata" }
+                }
+            }
+        });
+
+        var onSelectAttaCess = function (e) {
+            $.each(e.files, function (index, value) {
+                if (value.extension.toLowerCase() != ".docx") {
+                    e.preventDefault();
+                    toastr.error("Por favor, carga un archivo con extensión .docx","@ResourceLanguaje.Resource.WrongFileExtension");
+                }
+            });
+        };
+        $("#archivos").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            select: onSelectAttaCess,
+            multiple: false,
+        });
+    });
+</script>
+
+<script type="text/javascript">
+
+    function MostrarMensaje(msg, descripcion) {
+
+
+        if (msg == "OK") {
+            toastr.success(descripcion, "");
+            setTimeout(function () {
+                window.location.href = "@Url.Content("~/SeleccionSolicitudpersonal/ListarSolicitudPersonal")"
+            }, 1500);
+        }
+        else if (msg == "VACIO") {
+            toastr.warning("Completar la información solicitada.", "Mensaje");
+        }
+        else if (msg == "MENSAJE") {
+            toastr.warning(descripcion, "Mensaje");
+        }
+        else {
+            toastr.danger("Completar la información solicitada.", "Error");
+        }
+    }
+</script>
+

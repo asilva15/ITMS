@@ -1,0 +1,232 @@
+﻿@{
+    ViewBag.Title = "Inventario";
+    Layout = null;
+}
+
+<div id="divContent">
+    <h1 class="titleModule">Inventario</h1>
+    <div class="divFondoDos" style="padding:10px,10px;">
+        <div class="editor-label" style="float:left; padding: 5px;">
+            Tipo Activo
+        </div>
+        <div class="editor-field" style="float:left;">
+            <input id="IdTipoInventario" />
+        </div>
+        <div class="editor-label" style="float:left; padding: 5px;">
+            Area
+        </div>
+        <div class="editor-field" style="float:left;">
+            <input id="IdArea" />
+        </div>
+        <div class="editor-label" style="float:left; padding: 5px;">
+            Usuario
+        </div>
+        <div class="editor-field" style="float:left;">
+            <input id="IdUsuario" />
+        </div>
+        <div class="editor-label" style="float:left; padding: 5px;" title="Código de Activo">
+            Palabra Clave
+        </div>
+        <div class="k-textbox" style="float:left;" title="Código de Activo">
+            <input id="PalabraClave" />
+        </div>
+        <div class="editor-label" style="float:left; padding: 5px;">
+        </div>
+        
+        <div style="float:right; padding-left: 15px;">
+            <button type="button" class="btn btn-primary btn-sm" style="float:right;" id="btnTraza">Traza</button>
+        </div>
+        <div style="float:right; padding-left: 15px;">
+            <button type="button" class="btn btn-primary btn-sm" style="float:right;" id="btnExportar">Exportar</button>
+        </div>
+        <div style="float:right; padding-left: 15px;">
+            <button type="button" class="btn btn-primary btn-sm" style="float:right;" id="Buscar">Buscar</button>
+        </div>
+    </div>
+    <div style="height:15px;"></div>
+    <div id="listView" class="contentView">
+    </div>
+
+    <div id="pager" class="contentViewPager">
+    </div>
+</div>
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="incidentHomeList">
+        <div class="incidentHomeListBlock1 hasLayout">
+            <div class="incidentHomeListHeader">
+                <div class="FondoNegro">
+                    <div class="incidentHomeRequesterIcon" title="Usuario">
+                        Asignado a: ${ASIGNADO}
+                    </div>
+                    <div class="incidentHomeCreate" title="Record date">
+                        Creado por: ${NOMBRECREA}
+                    </div>
+                    <div class="incidentHomeModified" title="Modification date">
+                        Modificado por: ${NOMBREMODIFICA}
+                    </div>
+                </div>
+                <div style="float:right;background-color:darkred;color:white;text-transform: capitalize;padding:3px 10px 3px 10px;">
+                    ${TipoInventario}
+                </div>
+            </div>
+        </div>
+        <div class="incidentHomeSumary" style="height:70px;">
+            <a href="\\Inventario/Detalle/${Id}" target="_blank" style="height: 60px">
+                <div style="float:left;width:30%;">
+                    <div style="clear:both;">
+                        <div class="titleSummary">Código de Activo :</div><div class="textSummary"> ${Codigo}</div>
+                    </div>
+                    <div style="clear:both;">
+                        <div class="titleSummary">Articulo :</div><div class="textSummary"> ${Articulo}</div>
+                    </div>
+                    <div style="clear:both;">
+                        <div class="titleSummary">Marca :</div><div class="textSummary"> ${Marca}</div>
+                    </div>
+                </div>
+                <div style="float:left;width:30%;">
+                    <div style="clear:both;">
+                        <div class="titleSummary">Modelo :</div><div class="textSummary">  ${Modelo}</div>
+                    </div>
+                    <div style="clear:both;">
+                        <div class="titleSummary">Serie :</div><div class="textSummary"> ${Serie}</div>
+                    </div>
+                    <div style="clear:both;">
+                        <div class="titleSummary">Descripción :</div><div class="textSummary"> ${Descripcion}</div>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="contraya">
+            <div class="raya"></div>
+        </div>
+        <div class="incidentHomeRes">
+            <div style="background-repeat: no-repeat; display:block; float:left; width:21%; padding:3px 0px 3px 5px;text-transform:capitalize;">
+                Inventario Interno
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var IdTipoInventario = $("#IdTipoInventario").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Inventario/ListarTipoInventario"
+                }
+            }
+        });
+
+        $("#IdUsuario").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                }
+            }
+        });
+        var IdUsuario = $("#IdUsuario").data("kendoComboBox");
+
+        $("#IdArea").kendoComboBox({
+            dataTextField: "NAM_AREA",
+            dataValueField: "ID_AREA",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Area/ListByClient?var=" + Math.random()
+                }
+            }
+        });
+        var IdArea = $("#IdArea").data("kendoComboBox");
+
+        $("#btnExportar").click(function () {
+            event.preventDefault();
+            var IdTipo = $("#IdTipoInventario").val() == '' ? 0 : $("#IdTipoInventario").val();
+            var IdArea = $("#IdArea").val() == '' ? 0 : $("#IdArea").val();
+            var IdUsuario = $("#IdUsuario").val() == '' ? 0 : $("#IdUsuario").val();
+            var PalabraClave = $("#PalabraClave").val();
+            window.open('/Reporting/Inventario/Inventario.aspx?tp=' + IdTipo + '&ar=' + IdArea + '&us=' + IdUsuario + '&pc=' + PalabraClave, '_blank');
+        });
+
+        $("#btnTraza").click(function () {
+            event.preventDefault();
+            var IdTipo = $("#IdTipoInventario").val() == '' ? 0 : $("#IdTipoInventario").val();
+            var IdArea = $("#IdArea").val() == '' ? 0 : $("#IdArea").val();
+            var IdUsuario = $("#IdUsuario").val() == '' ? 0 : $("#IdUsuario").val();
+            var PalabraClave = $("#PalabraClave").val();
+            window.open('/Reporting/Inventario/InventarioTraza.aspx?tp=' + IdTipo + '&ar=' + IdArea + '&us=' + IdUsuario + '&pc=' + PalabraClave, '_blank');
+        });
+
+        $("#Buscar").click(function () {
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/Inventario/Listar?var" + Math.random(),
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random(),
+                            IdTipo: $("#IdTipoInventario").val() == '' ? 0 : $("#IdTipoInventario").val(),
+                            IdArea: $("#IdArea").val() == '' ? 0 : $("#IdArea").val(),
+                            IdUsuario: $("#IdUsuario").val() == '' ? 0 : $("#IdUsuario").val(),
+                            PalabraClave: $("#PalabraClave").val()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 15,
+                schema: {
+                    data: "Grid",
+                    total: "Cantidad"
+                }
+            });
+
+            $("#pager").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [15, 30, 60],
+                refresh: true
+            });
+
+            $("#listView").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#template").html())
+            });
+        });
+
+        $("#Buscar").click();
+
+    });
+
+</script>

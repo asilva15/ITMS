@@ -1,0 +1,385 @@
+﻿@{
+    ViewBag.Title = "CargaMasivaArchivos";
+}
+
+<style>
+    #PreVisualizacion {
+        display: none;
+    }
+
+    #btnImportar {
+        text-transform: none;
+    }
+
+    #btnImportar {
+        width: 122px;
+        background-color: #3f6ad8; /* Blue background color */
+        color: white; /* White text color */
+        border: none; /* Remove border */
+        padding: 10px 20px; /* Add padding */
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        margin: 4px 2px;
+        cursor: pointer;
+        border-radius: 5px;
+    }
+
+        #btnImportar:hover {
+            background-color: #345ea1; /* Darker blue on hover */
+        }
+
+    #btnGuardar {
+        background-color: #6c757d;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        margin: 4px 2px;
+        border-radius: 5px;
+    }
+
+        #btnGuardar:hover {
+            background-color: #5a6268;
+        }
+
+    #btnPlantilla {
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 14px;
+        margin: 4px 2px;
+        border-radius: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+
+
+<body>
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-file"></i>
+                </div>
+                <div>
+                    Carga Masiva de Archivos
+                    <div class="page-title-subheading">
+                        En este módulo se importan activos (MAXIMO 1000 REGISTROS).
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3">
+        <div class="card-header-tab card-header" id="divTitle">
+            <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+                <i class="header-icon lnr-upload mr-3 text-muted opacity-6" id="iconTitle"> </i>
+                Importar Activos
+            </div>
+
+        </div>
+        <br />
+        <div id="filters" class="form-inline mb-3 ml-auto ml-lg-5">
+
+            <div class="container">
+                <div class="row justify-content-start">
+                    <div class="col-md-12 d-flex justify-content-end">
+                        <form id="uploadForm" enctype="multipart/form-data" class="mr-2">
+                            <input type="file" id="fileInput" name="file" style="display:none;" />
+                            <button type="button" id="btnImportar" class="btn btn-light Active btn-lg custom-btn"><i class="fas fa-file-import mr-2"></i> Importar</button>
+                        </form>
+                        <button type="button" id="btnGuardar" class="btn btn-success btn-lg custom-btn" disabled>Guardar Datos</button>
+                        <a id="btnPlantilla" href="/Asset/DescargarPlantillaMinsur" class="btn btn-info btn-lg custom-btn">Descargar Plantilla</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-3" id="PreVisualizacion">
+
+        <div class="card-header-tab card-header" id="divTitle">
+            <div class="card-header-title font-size-lg text-capitalize font-weight-normal" id="Titulo">
+                <i class="header-icon lnr-laptop-phone mr-3 text-muted opacity-6" id="iconTitle"> </i>Pre-Visualización de Datos
+            </div>
+
+        </div>
+        <br />
+
+        <div class="card-body">
+
+            <div id="loaderDatosBusqueda" class="loader-container">
+                <div class="loader"></div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="dataTablePreVisualizacion" class="table table-striped table-bordered">
+                </table>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+<script>
+    $(document).ready(function () {
+
+        $("#fileInput").change(function () {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+
+            if (file) {
+                var fileName = file.name;
+                var fileExtension = fileName.split('.').pop().toLowerCase();
+
+                if (fileExtension == 'xlsx') {
+                    var formData = new FormData();
+                    formData.append('file', file);
+
+                    Swal.fire({
+                        title: "Cargando la información",
+                        html: "Por favor, espere...<br><span id='progressText'>0%</span>",
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            const progressBar = document.createElement('progress');
+                            progressBar.setAttribute('max', '100');
+                            Swal.getContent().appendChild(progressBar);
+
+                            const progressText = document.getElementById('progressText');
+
+                            const interval = setInterval(() => {
+                                progressBar.value += 10;
+                                const currentPercentage = progressBar.value + '%';
+                                progressText.textContent = currentPercentage;
+
+                                if (progressBar.value >= 100) {
+                                    progressBar.value = 0;
+                                    //Swal.close();
+                                }
+                            }, 2000);
+
+                            $.ajax({
+                                //url: 'Action("PrevisualizarDatos", "Asset")',
+                                url: '/Asset/ValidarCargaMasivaMinsur',
+                                type: 'POST',
+                                data: formData,
+                                contentType: false,
+                                processData: false,
+                                success: function (result) {
+                                    progressText.textContent = '100%';
+                                    progressBar.value = 100;
+                                    clearInterval(interval);
+                                    Swal.close();
+
+                                    $('#PreVisualizacion').show();
+
+                                    if (result.message == "OK") {
+                                        $('#btnGuardar').prop("disabled", false);
+                                    } else {
+                                        $('#btnGuardar').prop("disabled", true);
+                                        toastr.error("Por favor validar la información.", "Todos los registros no son válidos");
+                                    }
+
+
+                                    var dataTable = $('#dataTablePreVisualizacion').DataTable({
+                                        "language": {
+                                            "decimal": "",
+                                            "emptyTable": "No hay datos disponibles en la tabla",
+                                            "info": "Mostrando _START_ a _END_ de _TOTAL_ entradas",
+                                            "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                                            "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                                            "infoPostFix": "",
+                                            "thousands": ",",
+                                            "lengthMenu": "Mostrar _MENU_ entradas",
+                                            "loadingRecords": "Cargando...",
+                                            "processing": "Procesando...",
+                                            "search": "Buscar:",
+                                            "zeroRecords": "No se encontraron registros coincidentes",
+                                            "paginate": {
+                                                "first": "Primero",
+                                                "last": "Último",
+                                                "next": "Siguiente",
+                                                "previous": "Anterior"
+                                            },
+                                            "aria": {
+                                                "sortAscending": ": activar para ordenar la columna en orden ascendente",
+                                                "sortDescending": ": activar para ordenar la columna en orden descendente"
+                                            }
+                                        },
+                                        "columns": [
+                                            {
+                                                data: 'EstadoValidacion',
+                                                title: 'Validación',
+                                                render: function (data, type, row) {
+                                                    let color, text = '';
+                                                    if (data === false) { color = 'danger'; text = 'No Válido' } else { color = 'success'; text = 'Válido' };
+                                                    let label = `<div class="badge badge-${color}">${text}</div>`
+                                                    return label;
+                                                    className: 'text-center'
+                                                }
+                                            },
+                                            { data: 'Errores', title: 'Observación' },
+                                            { data: 'NombreActivo', title: 'NombreEquipo' },
+                                            { data: 'Serie', title: 'Serie*' },
+                                            { data: 'TipoActivo', title: 'TipoActivo*' },
+                                            { data: 'SubTipoActivo', title: 'SubTipoActivo' },
+                                            { data: 'Codigo', title: 'CodigoActivo*' },
+                                            { data: 'Grupo', title: 'Grupo' },
+                                            { data: 'Marca', title: 'Marca*' },
+                                            { data: 'Modelo', title: 'ModeloComercial*' },
+                                            { data: 'ModeloFabrica', title: 'ModeloFabrica' },
+                                            { data: 'Arrendador', title: 'Arrendador' },
+                                            { data: 'Solped', title: 'Solped' },
+                                            { data: 'CentroCosto', title: 'CentroCosto' },
+                                            { data: 'ModoCompra', title: 'ModoCompra*' },
+                                            { data: 'Tarifa', title: 'Costo' },
+                                            { data: 'FechaFin', title: 'FechaFinContrato' },
+                                            { data: 'Sitio', title: 'Sitio*' },
+                                            { data: 'Locacion', title: 'Locacion*' },
+                                            { data: 'FechaInicio', title: 'FechaAdquisicion' },
+                                            { data: 'Condicion', title: 'Condicion*' },
+                                            { data: 'Estado', title: 'Estado*' },
+                                            { data: 'UsuarioResponsable', title: 'UsuarioResponsable' },
+                                            { data: 'UsuarioAsignado', title: 'UsuarioAsignado' },
+                                            { data: 'IpLocal', title: 'IpLocal' },
+                                            { data: 'IpPublica', title: 'IpPublica' },
+                                            { data: 'Contrato', title: 'Contrato' },
+                                            { data: 'MacFisica', title: 'MacFisica' },
+                                            { data: 'MacInalambrica', title: 'MacInalambrica' },
+                                            { data: 'MacBluetooth', title: 'MacBluetooth' }
+                                        ]
+                                    });
+
+                                    dataTable.clear().rows.add(result.previsualizacionDatos).draw();
+
+                                },
+
+                                error: function (xhr, status, error) {
+                                    console.error(xhr.responseText);
+                                }
+                            });
+                        }
+                    });
+
+                } else {
+                    toastr.warning("Por favor, cargue un archivo con extensión .xlsx", "Extensión de archivo incorrecta");
+                }
+            }
+        });
+
+        $("#btnImportar").click(function () {
+            $("#fileInput").val('');
+
+            $('#btnGuardar').prop('disabled', true);
+            $('#PreVisualizacion').hide();
+            if ($.fn.DataTable.isDataTable('#dataTablePreVisualizacion')) {
+                $('#dataTablePreVisualizacion').DataTable().destroy();
+            }
+
+            $("#fileInput").click();
+
+        });
+
+        $("#btnGuardar").click(function () {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+
+            if (file) {
+                var formData = new FormData();
+                formData.append('file', file);
+
+                saveData(formData);
+
+            } else {
+                alert('Por favor, seleccione un archivo antes de guardar.');
+            }
+        });
+
+
+        function saveData(formData) {
+            Swal.fire({
+                title: "Guardando datos...",
+                html: "Por favor, espere...<br><span id='progressText'>0%</span>",
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    const progressBar = document.createElement('progress');
+                    progressBar.setAttribute('max', '100');
+                    Swal.getContent().appendChild(progressBar);
+
+                    const progressText = document.getElementById('progressText');
+
+                    const interval = setInterval(() => {
+                        progressBar.value += 10;
+                        const currentPercentage = progressBar.value + '%';
+                        progressText.textContent = currentPercentage;
+
+                        if (progressBar.value >= 100) {
+                            progressBar.value = 0;
+                            //Swal.close();
+                        }
+                    }, 2000);
+
+                    $.ajax({
+                        url: '/Asset/InsertarCargaMasivaMinsur',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function (result) {
+                            progressText.textContent = '100%';
+                            progressBar.value = 100;
+                            clearInterval(interval);
+                            Swal.close();
+
+                            $('#PreVisualizacion').hide();
+                            $('#btnGuardar').prop("disabled", true);
+
+                            if (result.message == "OK") {
+                                toastr.success("Se guardó la información.", "Completado");
+                                setTimeout(function () {
+                                    window.location.href = "http://" + location.host + "/Asset/index";
+                                }, 2000);
+                            } else {
+                                toastr.error("Error al cargar la información.", "Error");
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error al guardar datos',
+                                text: xhr.responseText
+                            });
+                        }
+                    });
+                }
+            });
+
+        }
+
+    });
+</script>

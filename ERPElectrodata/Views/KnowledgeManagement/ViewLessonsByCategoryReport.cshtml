@@ -1,0 +1,253 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+
+<div class="afterMain">
+    <div class="card-body">
+        @(Html.Hidden("hdCuenta", (int)ViewBag.idCuenta))
+        <div class="card-title">Lecciones Por Categoria</div>
+        <div class="form-row">
+            <div class="col-md-3">
+                <div class="position-relative form-group">
+                    <label id="" for="" class="">Nivel1 </label>
+                    <input id="Nivel1">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="position-relative form-group">
+                    <label id="" for="" class="">Macroservicio </label>
+                    <input id="Nvel2">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="position-relative form-group">
+                    &nbsp;
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="position-relative form-group">
+                    &nbsp;
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-3">
+                <div class="position-relative form-group">
+                    <label id="" for="" class="">Servicio </label>
+                    <input id="Nivel3">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="position-relative form-group">
+                    <label id="" for="" class="">Incidente/Requerimiento </label>
+                    <input id="Nivel4">
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="position-relative form-group">
+                    <label id="" for="" class=""> &nbsp; </label>
+                    <button id="printLessonCategoryByUser" class="mb-2 mr-2 btn-pill btn btn-primary btn-block">Buscar</button>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="position-relative form-group">
+                    &nbsp;
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <div class="bodyForm" style="margin-top:10px;">
+        <div class="inBodyForm">
+            <iframe id="RSLeccionesCategoria" style="height:500px; width:100%;border: 0px #eee solid;"></iframe>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        id = $('#hdCuenta').val();
+        var idcateee = 0;
+        /*carga de Combos*/
+        var Nivel1 = $("#Nivel1").kendoComboBox({
+            autoBind: false,
+            index: -1,
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            dataValueField: "ID_CATE",
+            dataBound: function (e) {
+
+            },
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + id + "&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        var NivelAccion2 = $("#Nvel2").kendoComboBox({}).data("kendoComboBox");
+        var NivelAccion3 = $("#Nivel3").kendoComboBox({}).data("kendoComboBox");
+        var NivelAccion4 = $("#Nivel4").kendoComboBox({}).data("kendoComboBox");
+
+
+        Nivel1.bind("change", function (e) {
+            if (Nivel1.dataItem()) {
+                $('#Nivel1').attr('value', Nivel1.dataItem().ID_CATE);
+                cargarCombosAnidados(Nivel1.dataItem().ID_CATE, id);
+                limpiarCategorias();
+            }
+            else {
+                $('#Nivel1').attr('value', 0);
+            }
+        });
+
+
+
+        //ID_CATE = $("#ID_CATE").kendoComboBox({
+        //    autoBind: false,
+        //    filter: "contains",
+        //    autoBind: true,
+        //    dataTextField: "NAM_CATE",
+        //    dataValueField: "ID_CATE",
+        //    template: '<div style="font-weight:bold;">${data.NAM_CATE_1}</div>' +
+        //                '<div style="margin-left:5px;" >  ${data.NAM_CATE_2} </div>' +
+        //                '<div style="margin-left:10px;">${data.NAM_CATE_3}</div>' +
+        //                '<div style="margin-left:10px;">${data.NAM_CATE_4}</div>',
+        //    dataSource: {
+        //        serverFiltering: true,
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/CategoryTicket/List"
+        //        }
+        //    }
+        //}).data("kendoComboBox");
+
+        function cargarCombosAnidados(idcatNivel1, id) {
+            var Nvel2 = $("#Nvel2").kendoComboBox({
+                autoBind: false,
+                index: -1,
+                dataTextField: "NAM_CATE",
+                filter: "contains",
+                dataValueField: "ID_CATE",
+                dataSource: {
+                    serverFiltering: false,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategoryLessonLearned?ID_ACCO=" + id + "&ID_CATE=" + idcatNivel1 + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+            Nvel2.bind("change", function (e) {
+                if (Nvel2.dataItem()) {
+                    $('#Nvel2').attr('value', Nvel2.dataItem().ID_CATE);
+                }
+                else {
+                    $('#Nvel2').attr('value', 0);
+                }
+            });
+
+            var Nivel3 = $("#Nivel3").kendoComboBox({
+                autoBind: false,
+                index: -1,
+                dataTextField: "NAM_CATE",
+                filter: "contains",
+                cascadeFrom: "Nvel2",
+                dataValueField: "ID_CATE",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory?ID_ACCO=" + id + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+            Nivel3.bind("change", function (e) {
+                if (Nivel3.dataItem()) {
+                    $('#Nivel3').attr('value', Nivel3.dataItem().ID_CATE);
+                }
+                else {
+                    $('#Nivel3').attr('value', 0);
+                }
+            });
+
+            var Nivel4 = $("#Nivel4").kendoComboBox({
+                autoBind: false,
+                index: -1,
+                dataTextField: "NAM_CATE",
+                filter: "contains",
+                cascadeFrom: "Nivel3",
+                dataValueField: "ID_CATE",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory?ID_ACCO=" + id + "&var=" + Math.random()
+                    }
+                }
+            }).data("kendoComboBox");
+            Nivel4.bind("change", function (e) {
+
+                if (Nivel4.dataItem()) {
+                    $('#Nivel4').attr('value', Nivel4.dataItem().ID_CATE);
+                    idcateee = $('#Nivel4').val();
+                }
+                else {
+                    $('#Nivel4').attr('value', 0);
+                }
+            });
+            /*Fin*/
+        }
+
+
+        function limpiarCategorias() {
+            $("#Nvel2").data("kendoComboBox").value("");
+            $("#Nivel3").data("kendoComboBox").value("");
+            $("#Nivel4").data("kendoComboBox").value("");
+        }
+
+        $("#printLessonCategoryByUser").click(function (event) {
+
+            event.preventDefault();
+
+            var ID_CATE = $("#Nivel4").data("kendoComboBox");
+            if ((idcateee) != 0 && ID_CATE.value() != "") {
+                window.frames["RSLeccionesCategoria"].src = '/Reporting/GestionConocimiento/WF_ReportLessonLearnedByCategory.aspx?ID_CATEGORY=' + $("#Nivel4").attr("value");
+            }
+            else {
+                toastr.warning("Selecciona todas las categorias.", "Error.");
+            }
+
+            return false;
+        });
+
+
+        $("#cancelReportAsset").click(function () {
+            closeWinFormModalPopUp();
+        });
+
+
+    });
+
+</script>

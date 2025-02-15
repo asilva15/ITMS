@@ -1,0 +1,238 @@
+﻿@model ERPElectrodata.Models.ThemeModel
+@{
+    Layout = null;
+}
+<div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+        <div class="modal-header backgroud-header-gray">
+            <h4 class="modal-title color-white">Módulo de Gestión del Conocimiento - Nuevo Tema</h4>
+        </div>
+        <div class="modal-body">
+            <div class="row">
+                @using (Html.BeginForm("SaveTheme", "KnowledgeManagementController", FormMethod.Post, new { id = "form_create", name = "form_create" }))
+                {
+                    @Html.ValidationSummary(true)
+                    @(Html.Hidden("idcategoria", (int)ViewBag.idcategoria))
+                    <div class="row ">
+                        <div class="col-sm-6 m-t-5">
+                            <div class="col-sm-3">
+                                Código
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        @(Html.TextBoxFor(model => model.IdTema, new { id = "txtIdTema", @class = "form-control usuario", style = "width:50%;", @readonly = true }))
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 m-t-5">
+                            <div class="col-sm-3">
+                                Nombre
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        @(Html.TextBoxFor(model => model.Nomtema, new { id = "txtNomTema", onkeypress = "return soloLetras(event)", @class = "form-control usuario", autocomplete = "off" }))
+                                        @Html.ValidationMessageFor(model => model.Nomtema)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-sm-6 m-t-5">
+                            <div class="col-sm-3">
+                                Categoría
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        @(Html.EditorFor(model => model.idCategoria, new { autocomplete = "off" }))
+                                        @Html.ValidationMessageFor(model => model.idCategoria)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6 m-t-5">
+                            <div class="col-sm-3">
+                                Fecha de Baja
+                            </div>
+                            <div class="col-sm-9">
+                                <div class="form-group">
+                                    <div class="fg-line">
+                                        @(Html.EditorFor(model => model.DateEnd))
+                                        @Html.ValidationMessageFor(model => model.DateEnd)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                }
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" style="display:inline-block" class="btn btn-default btn-default-repsol waves-effect" id="btnSaveThemeTicket">Guardar</button>
+            <button type="button" style="display:inline-block" class="btn btn-default btn-default-repsol waves-effect" id="myBotonCerrar" data-dismiss="modal">Cerrar</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    /*################################################################## GCR161203 #######################################################################################*/
+    $(document).ready(function () {
+        /*var CB = $("select").kendoComboBox(); var $cbx = $("select").data("kendoComboBox") $cbx.select(2);*/
+        var categoria = $("#idCategoria").kendoComboBox({}).data("kendoComboBox");
+
+        categoria = $("#idCategoria").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            autoBind: true,
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            template: '<div style="font-weight:bold;">${data.NAM_CATE_1}</div>' +
+                        '<div style="margin-left:5px;" >  ${data.NAM_CATE_2} </div>' +
+                        '<div style="margin-left:10px;">${data.NAM_CATE_3}</div>' +
+                        '<div style="margin-left:10px;">${data.NAM_CATE_4}</div>',
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/List"
+                }
+            }
+        }).data("kendoComboBox");
+
+        if (parseInt($("#idcategoria").val()) != 0)
+            categoria.value($("#idcategoria").val());
+
+        var DateEndNuevo = $("#DateEnd").kendoDateTimePicker({ enabled: false }).data("kendoDateTimePicker");
+    });
+
+
+    /*################################################################## GCR161203 #######################################################################################*/
+    $('#btnSaveThemeTicket').click(function (event) {
+
+        var theme = {
+            IdTema: $("#txtIdTema").val(),
+            IdCuentaCatTema: $("#hdIdCuentaCatTema").val(),
+            Nomtema: $("#txtNomTema").val().toUpperCase(),
+            idCategoria: $("#idCategoria").val(),
+            DateEnd: $("#DateEnd").val(),
+        };
+
+        /*Validaciones previas al registrpo de temas*/
+        if (theme.Nomtema == "" || theme.Nomtema == null) {
+            swal("¡Por favor Ingrese el nombre del tema!", "Nuevo Tema", "info");
+            return false;
+        }
+
+
+        if (theme.idCategoria == "" || theme.idCategoria == null) {
+            swal("¡Por favor Ingrese la categoría!", "Nuevo Tema", "info");
+            return false;
+        }
+
+
+        if (theme.DateEnd == "" || theme.DateEnd == null) {
+            swal("¡Por favor Ingrese una fecha de baja!", "Nuevo Tema", "info");
+            return false;
+        }
+
+        var estado = ValidarFecha(theme.DateEnd);
+        if (!estado) {
+            swal("¡Por favor Ingrese una fecha mayor o igual a la actual!", "Nuevo Tema", "info");
+            return false;
+        }
+
+        /*Fin*/
+
+        swal({
+            title: "¿Está seguro de registrar el Tema?",
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            cancelButtonText: "Cancelar",
+            confirmButtonText: "Aceptar",
+            closeOnConfirm: false
+        },
+               function () {
+                   var param = {
+                       objThemeModel: theme,
+                       TypeOperation: 1
+                   };
+                   var url = "/KnowledgeManagement/SaveTheme";
+                   $.ajax({
+                       contentType: 'application/json; charset=utf-8',
+                       url: url,
+                       type: "Post",
+                       data: JSON.stringify(param),
+                       datatype: "json",
+                       cache: false,
+                       beforeSend: function () {
+                           swal({ title: "Procesando información, por favor espere.", text: "Mantenimiento del Temas", showConfirmButton: false, imageUrl: "../../images/search_abs.gif" })
+                       },
+                       success: function (json) {
+
+                           if (json["idTema"]) {
+                               $("#myBotonCerrar").click();
+                               Crear_SuccessTicket()
+                               var idTema = $("#IdTema").data("kendoComboBox");
+                               idTema.dataSource.read();
+                               idTema.refresh();
+                               idTema.value(json["idTema"]);
+                               // window.parent.cargarTemas(25, $("#idcategoria").val());
+                           } else {
+                               Crear_FailedTicket()
+                           }
+                       },
+                       error: function () {
+                           Crear_FailedTicket()
+                       }
+                   });
+               });
+    });
+    /*################################################################## GCR161203 #######################################################################################*/
+    function ValidarFecha(Fecha) {
+
+        var diaIngreso = 0;
+        var mesingreso = 0;
+        var valor = false;
+        var hoy = new Date();
+        var dd = hoy.getDate();
+        var mm = hoy.getMonth() + 1;
+        var yyyy = hoy.getFullYear();
+
+        if (dd < 10) { dd = '0' + dd }
+
+        if (mm < 10) { mm = '0' + mm }
+
+        hoy = yyyy + mm + dd;
+
+        var FechaString = Fecha.split("/");
+
+        diaIngreso = parseInt(FechaString[1]); if (diaIngreso < 10) { diaIngreso = '0' + parseInt(FechaString[1]) }
+
+        mesingreso = parseInt(FechaString[0]); if (parseInt(FechaString[0]) < 10) { mesingreso = '0' + parseInt(FechaString[0]) }
+
+        var FechaFinal = FechaString[2].substring(0, 4) + mesingreso + diaIngreso;
+
+        if (FechaFinal >= hoy) { var valor = true; }
+        return valor;
+    }
+    /*################################################################## GCR161203 #######################################################################################*/
+    function Crear_SuccessTicket() {
+
+        swal("¡Tema creado correctamente!", "Mantenimiento de Temas", "success");
+    }
+    /*################################################################## GCR161203 #######################################################################################*/
+    function Crear_FailedTicket() {
+        swal("¡Error al intentar crear el tema!", "Mantenimiento de Temas", "error");
+        $('#modal-NewTheme').modal('show');
+    }
+    /*################################################################## GCR161203 #######################################################################################*/
+</script>
+
+

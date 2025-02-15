@@ -1,0 +1,207 @@
+﻿@{
+//Layout = null;
+}
+
+<div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+<div style="width:100%;min-width:5px;float:left;">
+    <div class="titleForm">
+        <div class="title">Soporte de Garantías por Producto</div>
+    </div>
+    <div class="inBodyForm" style="height:700px; padding:10px 20px 10px 20px;" id="">
+        <div style="width:100%;">
+            <div class="divFondoDos" style="padding-bottom:10px;">
+                <div class="editor-label" style="float:left; padding: 5px;">
+                    Compañía
+                </div>
+                <div class="editor-field" style="float:left;">
+                    <input id="ID_COMP" name="ID_COMP" />
+                </div>
+                <div class="editor-label" style="float:left; padding: 5px;">
+                    Fecha Inicio
+                </div>
+                <div class="editor-field" style="float:left;">
+                    <input id="FechaInicio">
+                </div>
+                <div class="editor-label" style="float:left; padding: 5px;">
+                    Fecha Fin
+                </div>
+                <div class="editor-field" style="float:left;">
+                    <input id="FechaFin">
+                </div>
+                <div class="editor-label" style="float:left; padding: 5px;">
+                    Palabra Clave
+                </div>
+                <div class="k-textbox" style="float:left;">
+                    <input id="PalabraClave">
+                </div>
+                <div class="editor-label" style="float:left; padding: 5px;">
+                </div>
+                <button type="button" class="btn btn-primary btn-sm" style="float:left;" onclick="LoadTableSoporte()">Buscar</button>
+                @{ if (@ViewBag.Permitido == 1) { 
+                <button type="button" class="btn btn-primary btn-sm" style="float:right;" onclick="FnAddNewSoporte()">Nuevo</button>
+                }
+                }
+            </div>
+            <div style="overflow-y:auto; height:550px;">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Compañía</th>
+                            <th>Código Producto</th>
+                            <th>Descripción</th>
+                            <th>Serie</th>
+                            <th>Fecha Fin Garantía</th>
+                            <th>Nro Preventivos</th>
+                            <th>Bolsa Horas</th>
+                            <th>Observaciones</th>
+                            <th>Op</th>
+                            <th style="border-left: 1px solid #e2e2e2; ">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TableSoporte"></tbody>
+                </table>
+            </div>
+            <div id="pager" class="contentViewPager">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="tmp-CIA" type="text/x-kendo-template">
+    <div style="width: 100%; font-size: 1em;">
+        <span style="width:100%; font-size:1em;">#= COM_NAME #</span>
+        <div style="width:100%; font-size:0.9em; margin-top:-5px;">RUC: #= NUM_TYPE_DI #</div>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var ID_COMP = $("#ID_COMP").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            template: kendo.template($("#tmp-CIA").html()),
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+        ID_COMP.list.width(350);
+
+        var FechaInicio = $("#FechaInicio").kendoDateTimePicker().data("kendoDateTimePicker");
+        var FechaFin = $("#FechaFin").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        LoadTableSoporte();
+
+        //var dataSource = new kendo.data.DataSource({
+        //    transport: {
+        //        read: {
+        //            url: "/Asset/ListByStatus/0?var" + Math.random(),
+        //            type: "GET",
+        //            dataType: "json",
+        //            data: {
+        //                q: "#kendoui",
+        //                ran: Math.random()
+        //            }
+        //        }
+        //    },
+        //    autoSync: true,
+        //    serverFiltering: true,
+        //    serverPaging: true,
+        //    pageSize: 15,
+        //    schema: {
+        //        data: "Grid",
+        //        total: "Cantidad"
+        //    }
+        //});
+
+        //$("#pager").kendoPager({
+        //    dataSource: dataSource,
+        //    pageSizes: [15, 30, 60],
+        //    refresh: true
+        //});
+    });
+
+
+    var x = 0;
+    // Cargamos los datos.
+    function LoadTableSoporte() {
+
+        var parametros = {
+            IdComp: $("#ID_COMP").val() == '' ? 0 : $("#ID_COMP").val(),
+            FechaInicio: $("#FechaInicio").val(),
+            FechaFin: $("#FechaFin").val(),
+            PalabraClave: $("#PalabraClave").val()
+        };
+
+        $.ajax({
+            url: "/Soporte/List",
+            data: parametros,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                $("#TableSoporte").empty();
+
+                $.each(data['Data'], function (index, value) {
+
+                    $("#TableSoporte").append(
+                                                    '<tr id="Soporte' + (data['Data'][index]['IdSoporte']) + '">' +
+                                                        '<td>' + (data['Data'][index]['COM_NAME']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['CodigoProducto']) + '</td>' +
+                                                        '<td style="width:20%">' + (data['Data'][index]['Producto']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['Serie']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['FechaFinGarantia']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['NroPreventivos']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['BolsaHoras']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['Observaciones']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['Op']) + '</td>' +
+                                                        ("@ViewBag.Permitido" == 1 ?
+                                                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                                            '<span  id="' + (data['Data'][index]['IdSoporte']) + '" title="Edit" class="glyphicon glyphicon-pencil" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="EditSoporte(' + (data['Data'][index]['IdSoporte']) + ')"></span>' +
+                                                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                                        '</td>' : '' ) +
+                                                    '</tr>'
+                        );
+                });
+
+            },
+            error: function (source) {
+                alert("Error Carga Json");
+            }
+        });
+
+        //$("#pager").kendoPager({
+        //    dataSource: data,
+        //    pageSizes: [15, 30, 60],
+        //    refresh: true
+        //});
+
+    }
+
+    function FnAddNewSoporte() {
+        var htmlForm = '<div id="FormNewSoporte"></div>';
+        winFormPopUpModal("Nuevo Soporte", htmlForm, 730, 350);
+        $("#FormNewSoporte").load("/Soporte/AddEdit?id=0&var=" + Math.random());
+    }
+
+    function EditSoporte(id) {
+        var htmlForm = '<div id="FormNewSoporte"></div>';
+        winFormPopUpModal("Editar Soporte", htmlForm, 730, 350);
+        $("#FormNewSoporte").load("/Soporte/AddEdit?id=" + id + "&var=" + Math.random());
+    }
+
+</script>

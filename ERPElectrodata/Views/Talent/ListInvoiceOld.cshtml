@@ -1,0 +1,103 @@
+﻿@model ERPElectrodata.Models.CLASS_ENTITY
+
+@{
+    Layout = null;
+}
+
+<div id="treeviewInvoice" style="padding: 3px 0 0 7px;"></div> 
+
+@* TreeView Payment Ballots *@
+<script id="treeviewInvoice-template" type="text/kendo-ui-template"> 
+    # if (item.SIGNED === undefined) { #
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    # } else if (item.SIGNED == true) { #
+        <a href="" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;" onclick="Authorization('#: item.NAM_FILE #','#: item.ID_FILE #'); return false;">
+        <img src="/Content/Images/Check.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a>
+        # if (parseInt(@Session["ADMINISTRADOR"]) == 1 || parseInt(@Session["RRHH"])==1) { #
+        <a id='I|#: item.ID_FILE #' class='delete-link' title='Remove' onclick="Eliminar('#: item.ID_FILE #');"></a>     
+        # } #
+    # } else if (item.SIGNED == false && @ViewBag.OPT_DELETE == 0 && @ViewBag.ANIO_MES < item.ANIO_MES ) { #
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />
+        <span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+    # } else if (item.SIGNED == false && @ViewBag.OPT_DELETE == 0 ) { #
+        <a href="" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;" onclick="Authorization('#: item.NAM_FILE #','#: item.ID_FILE #'); return false;">
+            <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span>
+        </a>
+    # } else if (item.SIGNED == false && @ViewBag.OPT_DELETE == 1 ) { #
+        <a href="" title="@ResourceLanguaje.Resource.DownloadTalent #: item.NAM_ATTA #" target="_blank" style="text-decoration:none;" onclick="Authorization('#: item.NAM_FILE #','#: item.ID_FILE #'); return false;">
+        <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" /><span style="font-size: .9em;"> #: item.NAME_PARA # </span></a>
+        # if (parseInt(@Session["ADMINISTRADOR"]) == 1 || parseInt(@Session["RRHH"])==1) { #
+        <a id='I|#: item.ID_FILE #' class='delete-link' title='Remove' onclick="Eliminar('#: item.ID_FILE #');"></a>
+        # } #
+    # } #
+
+</script>
+
+<script type="text/javascript"> 
+    $(document).ready(function () {
+       
+        homogeneousInvoice = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Talent/TreeInvoice/@ViewBag.ID_PERS_ENTI",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE"
+                }
+            }
+        });
+
+        $("#treeviewInvoice").kendoTreeView({
+            template: kendo.template($("#treeviewInvoice-template").html()),
+            dataSource: homogeneousInvoice,
+            dataTextField: "NAME_PARA",
+        });
+        
+        @*$(document).on("click", ".delete-link", function (e) {
+            e.preventDefault();
+            var ctrl = $(this);
+            var id = $(this).attr("id");
+
+            winPopUpModal("@ResourceLanguaje.Resource.Delete", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+           "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Are you sure to delete the attachment?</div>" +
+           "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+           "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+           , 350, 130);
+
+            var undo = $("#btnYes")
+                .bind("click", function () {
+                    $.ajax({
+                        url: "/Talent/DeleteAttachInvoice/" + id,
+                        data: "var=" + Math.random(),
+                        type: "GET",
+                        dataType: "text",
+                        success: function (dato) {
+                            if (dato == 'OK') {
+                                var treeview = $("#treeviewInvoice").data("kendoTreeView");
+                                treeview.remove(ctrl.closest(".k-item"));
+                                closeWinModalPopUp();
+                            }
+                            else { closeWinModalPopUp(); alert('ERROR'); }
+                        },
+                        error: function (dato) {
+                            alert('ERROR');
+                        }
+                    });
+                });
+
+            var undo = $("#btnNO")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+            });
+
+        });*@
+    });
+</script>

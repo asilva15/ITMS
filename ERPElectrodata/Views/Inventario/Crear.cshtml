@@ -1,0 +1,251 @@
+﻿@model ERPElectrodata.Models.Inventario
+
+@{
+    ViewBag.Title = "Crear";
+    Layout = null;
+}
+
+<div class="afterMain">
+    <div style="float:left;">
+        <div class="titleForm">
+            <div class="title">Nuevo Activo de Inventario</div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="padding-bottom:10px;">
+                @using (Html.BeginForm("CrearArticulo", "Inventario", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmActivos", target = "upload_target" }))
+                {
+                    <div class="divFondoUno">
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Código
+                            </div>
+                            <div class="k-textbox">
+                                @Html.EditorFor(model => model.Codigo)
+                                @Html.ValidationMessageFor(model => model.Codigo)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Tipo
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.IdTipoInventario)
+                                @Html.ValidationMessageFor(model => model.IdTipoInventario)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Artículo
+                            </div>
+                            <div class="k-textbox">
+                                @Html.TextBoxFor(model => model.Articulo)
+                                @Html.ValidationMessageFor(model => model.Articulo)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Marca
+                            </div>
+                            <div class="k-textbox">
+                                @Html.TextBoxFor(model => model.Marca)
+                                @Html.ValidationMessageFor(model => model.Marca)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Modelo
+                            </div>
+                            <div class="k-textbox">
+                                @Html.TextBoxFor(model => model.Modelo)
+                                @Html.ValidationMessageFor(model => model.Modelo)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divFondoDos">
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Serie
+                            </div>
+                            <div class="k-textbox">
+                                @Html.TextBoxFor(model => model.Serie)
+                                @Html.ValidationMessageFor(model => model.Serie)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Descripción
+                            </div>
+                            <div class="k-textbox">
+                                @Html.EditorFor(model => model.Descripcion)
+                                @Html.ValidationMessageFor(model => model.Descripcion)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Valor Activo (0-5)
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ValorActivo)
+                                @Html.ValidationMessageFor(model => model.ValorActivo)
+                            </div>
+                        </div>
+                        <div class="divSpace3"></div>
+                        <div style="float:left;">
+                            <div class="editor-label">
+                                Riesgo Intrínseco (0-11)
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextBoxFor(model => model.RiesgoIntrinseco)
+                                @Html.ValidationMessageFor(model => model.RiesgoIntrinseco)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="divFondoUno">
+                        <div style="display:inline-block; float:right; padding:0px 18px 0px 0px;">
+                            <div style=" float:left; padding:0px 15px 0px 0px; ">
+                                <button id="submit" class="k-button">Crear</button>
+                            </div>
+                            <button id="reset" class="k-button" onclick="cancel(); return false;">Cancelar</button>
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+    @section Scripts {
+        @Scripts.Render("~/bundles/jqueryval")
+    }
+
+    <script type="text/javascript">
+
+        $(document).ready(function () {
+
+            var IdTipoInventario = $("#IdTipoInventario").kendoComboBox({
+                dataTextField: "Nombre",
+                dataValueField: "Id",
+                filter: "contains",
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Inventario/ListarTipoInventario"
+                    }
+                }
+            });
+
+            $("#ValorActivo").kendoNumericTextBox({
+                min: 0,
+                max: 5,
+                decimals: 0
+            });
+
+            $("#RiesgoIntrinseco").kendoNumericTextBox({
+                min: 0,
+                max: 11,
+                decimals: 0
+            });
+
+            //$("#submit").click(function () {
+            //    winPopUpModalLoad("Saving Your Asset", "Please Wait", 300, 130);
+            //});
+
+        });
+    </script>
+
+    <script type="text/javascript">
+    function cancel() {
+        winPopUpModal("Registro Cancelado", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+       "<div style='padding:10px 0px 10px 0px;'>Se ha cancelado el registro</div>" +
+       "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+       "<button id='continuer' class='k-button'>Continuar</button></div></div>"
+       , 350, 130);
+
+        var undo = $("#continuer").bind("click", function () {
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+
+        $("#closebtnmodal").click(function () {
+            //location.reload(true);
+        });
+
+        return false;
+    }
+
+    function uploadDone(msg) {
+
+        if (msg == "OK") {
+            closeWinModalPopUpLoad();
+            winPopUpModal("Registro Exitoso", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0px 10px 0px;'>El Activo interno se ha registrado correctamente</div>"
+           + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>Continuar</button>" +
+           "</div></div>"
+             , 400, 140);
+
+            var undo = $("#continues").bind("click", function () {
+
+                location = "http://" + location.host + "/Inventario";
+
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+                //location.reload(true);
+            });
+
+            $("#closebtnmodal").click(function () {
+                //location.reload(true);
+                location = "http://" + location.host + "/Inventario";
+            });
+        }
+        else {
+
+            closeWinModalPopUpLoad();
+
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+            }
+            else if (code == '1') {
+                titleAsset = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+            }
+            else if (code == '2') {
+                titleAsset = '@ResourceLanguaje.Resource.SessionExpired';
+                messageAsset = '@ResourceLanguaje.Resource.SessionTerminated';
+            }
+
+            winPopUpModal(titleAsset, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + messageAsset + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+
+    </script>

@@ -1,0 +1,307 @@
+﻿@{
+    ViewBag.Title = "Detalle Tareas";
+    Layout = "~/Views/Shared/_LayoutKendo22.cshtml";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+
+<style>
+    .divCabecera {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-tasks icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Lista de tareas
+                <div class="page-title-subheading">
+                    Listado de tareas asociadas a una categoría.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    <div class="card-header divCabecera">
+        Datos de categoría
+        <button class="btn-shadow btn btn-primary mr-4" type="button" onclick="EditarCategoriaTarea();">
+            Actualizar
+        </button>
+    </div>
+
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="smallField"><b>Categoría</b></div>
+                <div class="smallTitle">@ViewBag.NomCategoria</div>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-12">
+                <div class="smallField"><b>Resolver Ticket</b></div>
+                <input id="ResuelveTick" type="checkbox" @(ViewBag.ResuelveTick ? "checked" : "") />
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-md-12">
+                <div class="smallField"><b>Estado</b></div>
+                <input id="EstadoCate" type="checkbox" @(ViewBag.Estado ? "checked" : "") />
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    <div class="card-header divCabecera">
+        Tareas
+        <button class="btn-shadow btn btn-primary mr-4" type="button" data-toggle="modal" data-target="#miModal" onclick="GestionarTareas();">
+            Gestionar
+            <i class="fa fa-wrench"></i>
+        </button>
+    </div>
+
+    <div class="card-body">
+        <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%;" id="tbTareas">
+            <thead>
+                <tr>
+                    <th class="text-center">Orden</th>
+                    <th class="text-center">Título</th>
+                    <th class="text-center">Descripción</th>
+                    <th class="text-center">Grupo</th>
+                    @if (Convert.ToInt32(Session["ID_ACCO"]) == 56 || Convert.ToInt32(Session["ID_ACCO"]) == 57 || Convert.ToInt32(Session["ID_ACCO"]) == 58)
+                    {
+                        <th class="text-center">Descripción Pendiente</th>
+                    }
+                    else if (Convert.ToInt32(Session["ID_ACCO"]) == 60)
+                    {
+                        <th class="text-center">Usuario Asignado</th>
+                    }
+                    <th class="text-center">Tarea Precedente</th>
+                    <th class="text-center">Estado</th>
+                    @*<th class="text-center">Acciones</th>*@
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var idAcco = parseInt(@Session["ID_ACCO"]);
+
+        if (idAcco == 56 || idAcco == 57 || idAcco == 58) {
+            ListarTareas();
+        } else {
+            ListarTareasBNV();
+        }
+    });
+
+    function ListarTareas() {
+        $('#tbTareas').dataTable().fnDestroy();
+        $('#tbTareas').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: "/Tarea/ListarTareasPorCategoria/@ViewBag.Id",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            order: [
+                [6, 'asc'],
+                [0, 'asc']
+            ],
+            columns: [
+                {
+                    data: "Orden",
+                    className: "text-center"
+                },
+                {
+                    data: "TituloTarea",
+                    orderable: false
+                },
+                {
+                    data: "DescripcionTarea",
+                    orderable: false
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return data.NAM_QUEU + " - " + data.DES_QUEU;
+                    },
+                    orderable: false
+                },
+                {
+                    data: "DescPendiente",
+                    orderable: false
+                },
+                {
+                    data: "TareaPadre",
+                    orderable: false
+                },
+                {
+                    data: "Estado",
+                    render: function (data, type, row) {
+                        let color = data ? 'success' : 'danger';
+                        let text = data ? 'Activo' : 'Inactivo';
+                        let label = `<div class="badge badge-${color}">${text}</div>`;
+                        return label;
+                    },
+                    orderable: false,
+                    className: "text-center"
+                },
+                //{
+                //    data: "IdTarea",
+                //    render: function (data, type, row) {
+                //        let boton = `<div role="group" class="mb-3 btn-group-lg btn-group">
+                //                <button data-toggle="modal" data-target="#miModal" onclick="EditarTarea(${data});" class="btn-shadow btn-hover-shine btn btn-light btn-sm btn-pill pl-3">
+                //                    <i class="fa fa-edit" aria-hidden="true"></i> Editar
+                //                </button>
+                //             </div>`;
+                //        return boton;
+                //    },
+                //    orderable: false,
+                //    className: "text-center"
+                //},
+            ]
+        });
+    }
+
+    function ListarTareasBNV() {
+        $('#tbTareas').dataTable().fnDestroy();
+        $('#tbTareas').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: "/Tarea/ListarTareasPorCategoriaBNV/@ViewBag.Id",
+                type: "GET",
+                dataSrc: "Data"
+            },
+            order: [
+                [6, 'asc'],
+                [0, 'asc']
+            ],
+            columns: [
+                {
+                    data: "Orden",
+                    className: "text-center"
+                },
+                {
+                    data: "Titulo",
+                    orderable: false
+                },
+                {
+                    data: "Descripcion",
+                    orderable: false
+                },
+                {
+                    data: "DES_QUEU",
+                    orderable: false
+                },
+                {
+                    data: "UsuarioAsignado",
+                    orderable: false
+                },
+                {
+                    data: "TareaPadre",
+                    orderable: false
+                },
+                {
+                    data: "Estado",
+                    render: function (data, type, row) {
+                        let color = data ? 'success' : 'danger';
+                        let text = data ? 'Activo' : 'Inactivo';
+                        let label = `<div class="badge badge-${color}">${text}</div>`;
+                        return label;
+                    },
+                    orderable: false,
+                    className: "text-center"
+                }
+            ]
+        });
+    }
+
+    function GestionarTareas() {
+        $("#lblTitulo").html(`Gestionar Tareas
+                    <button class="btn-shadow btn btn-primary ml-2" type="button" style="height: 38px;" onclick="AgregarLiTarea();">
+                        +
+                    </button>`);
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/Tarea/CrearTareas/@ViewBag.Id");
+    }
+
+    function EditarCategoriaTarea() {
+        var resuelveTick = $("#ResuelveTick").prop("checked");
+        var estadoCate = $("#EstadoCate").prop("checked");
+
+        swal({
+            title: `¿Desea editar la categoría?`,
+            text: `Se editarán los valores seleccionados`,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#DD6B55",
+            confirmButtonText: "Guardar",
+            cancelButtonText: "Cancel",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        }, function (dismiss) {
+            if (dismiss) {
+                $.ajax({
+                    url: '/Tarea/EditarCategoria',
+                    type: 'POST',
+                    contentType: "application/json",
+                    data: JSON.stringify({
+                        id: '@ViewBag.Id',
+                        estadoCate,
+                        resuelveTick
+                    }),
+                    contentType: "application/json",
+                    success: function (result) {
+                        if (result.message == 'OK') {
+                            toastr.success("Información guardada correctamente.");
+
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1000);
+
+                        } else if (result.message == 'ERROR') {
+                            swal({
+                                title: 'Warning',
+                                type: 'info',
+                                text: 'ERROR EN LA EDICIÓN',
+                                confirmButtonColor: "#DD6B55",
+                                focusConfirm: false,
+                                confirmButtonText: 'Continue',
+                                confirmButtonAriaLabel: 'Thumbs up, great!'
+                            })
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error(xhr.responseText);
+                    }
+                });
+            } else {
+                swal("Cancelado", "Ha cancelado la creación", "error");
+            }
+        });
+    }
+
+</script>

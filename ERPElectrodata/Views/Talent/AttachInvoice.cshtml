@@ -1,0 +1,295 @@
+﻿@model ERPElectrodata.Models.ACCOUNTING_MONTH
+
+@{
+    Layout = null;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/4.0.6/sweetalert2.min.css" rel="stylesheet" />
+@using (Html.BeginForm("AttachInvoice", "Talent", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormAttachInvoice", name = "FormAttachInvoice", target = "upload_targetInvoice" }))
+{
+    <div class="col-sm-12 col-lg-12">
+        <div class="row">
+            <input type="hidden" id="HD_SIGNED" name="HD_SIGNED" value="@ViewBag.Profile" />
+            <input type="hidden" id="HD_File" name="HD_File" value="0" />
+            <div class="col-sm-12 col-lg-12">
+                <div class="row">
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.EmployeesTalent
+                        </div>
+                        <div class="editor-field" style="width:100%;">
+                            <input type="text" name="ID_PERS_ENTI_EMP" id="ID_PERS_ENTI_EMP" class="dropdownKendo" style="width:100%;" />
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.TypeTalent
+                        </div>
+                        <div class="editor-field" style="width:100%;">
+                            <input type="text" name="ID_TYPE_PAYM" id="ID_TYPE_PAYM" class="dropdownKendo" style="width:100%;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-12">
+                <div class="row">
+                    <div class="col-sm-12 col-lg-6" style="display:none;">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.StatusTalent
+                        </div>
+                        <div class="editor-field" style="width:100%;">
+                            <input type="text" name="SIGNED" id="SIGNED" class="dropdownKendo" />
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="editor-label">
+                            Año
+                        </div>
+                        <div class="editor-field" style="width:100%;">
+                            <input type="text" name="ID_ACCO_YEAR" id="ID_ACCO_YEAR" class="dropdownKendo" style="width:100%;" />
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.MonthTalent
+                        </div>
+                        <div class="editor-field" style="width:100%;">
+                            <input type="text" name="ID_ACCO_MONT" id="ID_ACCO_MONT" class="dropdownKendo" style="width:100%;" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-12 col-lg-10" id="divFiles">
+                <div class="editor-label">
+                    &nbsp;
+                </div>
+                <input name="filesInvoice" id="filesInvoice" type="file" style="width:80%;" />
+            </div>
+
+            <div class="col-sm-12 col-lg-12">
+                <div class="row">
+                    <div class="col-sm-12 col-lg-9">
+                        <div class="editor-label">
+                            &nbsp;
+                        </div>
+                    </div>
+                    <div class="col-sm-12 col-lg-3">
+                        <div class="editor-label">
+                            &nbsp;
+                        </div>
+                        <button id="submitInvoice" class="btn btn-primary" style="width:100%;">@ResourceLanguaje.Resource.BtnSaveTalent</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+<iframe id="upload_targetInvoice" name="upload_targetInvoice" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+
+<script type="text/javascript">
+
+    var arc = null;
+    $("#submitInvoice").click(function (event) {
+        event.preventDefault();
+        //kendoDropDownList
+        var ID_ACCO_YEAR = $("#ID_ACCO_YEAR").data("kendoDropDownList");
+        var ID_ACCO_MONT = $("#ID_ACCO_MONT").data("kendoDropDownList");
+        var ID_PERS_ENTI_EMP = $("#ID_PERS_ENTI_EMP").data("kendoDropDownList");
+        if ($("#HD_File").val() == 0) {
+            toastr.warning("@ResourceLanguaje.Resource.PaymentBallotsMsn2Talent", "@ResourceLanguaje.Resource.InformationMissing");
+        }
+        else {
+            var tipo = $("#ID_TYPE_PAYM").val();
+            var msn2 = "@ResourceLanguaje.Resource.PaymentBallotsMsn3Talent";
+            if (tipo == 3) { var msn2 = "@ResourceLanguaje.Resource.PaymentBallotsMsn4Talent"; }
+            else if (tipo == 4) { var msn2 = "@ResourceLanguaje.Resource.CertificateUtilitiesTalent"; }
+
+            var span = document.createElement("span");
+            span.innerHTML = "<b>@ResourceLanguaje.Resource.EmployeeTalent:</b> " + ID_PERS_ENTI_EMP.text().toLowerCase() + "</br>" +
+                "<b>@ResourceLanguaje.Resource.Year:</b> " + ID_ACCO_YEAR.text() + "<br>" +
+                "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.MonthTalent:</b> " + ID_ACCO_MONT.text().toLowerCase() + "</span><br>" +
+                "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.FilenameTalent:</b> " + arc + "</span><br><br>" + msn2;
+            swal({
+                title: "@ResourceLanguaje.Resource.Notification",
+                content: span,
+                type: 'success',
+                buttons: {
+                    cancelar: {
+                        text: "No"
+                    },
+                    agregar: {
+                        text: "Si"
+                    },
+                }
+            }).then((value) => {
+                switch (value) {
+
+                    case "cancelar":
+                        break;
+
+                    case "agregar":
+                        $('#FormAttachInvoice').submit();
+                        break;
+                }
+            });
+        }
+    });
+
+    $(document).ready(function () {
+
+        var ID_TYPE_PAYM = $("#ID_TYPE_PAYM").kendoDropDownList({
+            dataTextField: "NAM_TYPE_PAYM",
+            dataValueField: "ID_TYPE_PAYM",
+            index:0,
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            readonly:true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypePayment/List?var=" + Math.random()
+                }
+            }
+        });
+
+        ID_TYPE_PAYM.bind("change", function (e) {
+            var ID_ACCO_MONT = $("#ID_ACCO_MONT").data("kendoDropDownList");
+            ID_ACCO_MONT.refresh();
+        });
+
+        var ID_ACCO_YEAR = $("#ID_ACCO_YEAR").kendoDropDownList({
+            dataTextField: "ID_ACCO_YEAR",
+            dataValueField: "ID_ACCO_YEAR",
+            index: 0,
+            filter: "contains",
+            width: 100,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountingYear/List?var=" + Math.random()
+                },
+            }
+        });
+
+        $("#ID_ACCO_MONT").kendoDropDownList({
+            dataTextField: "NAM_ACCO_MONT",
+            dataValueField: "ID_ACCO_MONTH",
+            cascadeFrom: 'ID_ACCO_YEAR',
+            index: 0,
+            filter: "contains",
+            width: 100,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountingMonth/List?var=" + Math.random()
+                },
+            }
+        });
+
+        var ListSigned = [{ text: "@ResourceLanguaje.Resource.Unsigned", value: 0 }, { text: "@ResourceLanguaje.Resource.Signed", value: 1 }];
+        var SIGNED = 1;//Firma de la boleta Activa.
+        var onSelectInvo = function (e) {
+            $.each(e.files, function (index, value) {
+                if (value.extension.toLowerCase() != ".pdf") {
+                    e.preventDefault();
+
+                    toastr.warning("@ResourceLanguaje.Resource.AssetMessage8", "@ResourceLanguaje.Resource.WrongFileExtension");
+                    $("#HD_File").val(0);
+                    arc = null;
+                }
+                else{
+                    $("#HD_File").val(1);
+                    arc = value.name;
+                    $("#divFiles").css("width", "93.5%");
+                    $("#divFiles").css("margin-left", "3.8%");
+                }
+            });
+        };
+
+        $("#filesInvoice").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            select: onSelectInvo,
+            remove : function(e){
+                $("#HD_File").val(0);
+                arc = null;
+                $("#divFiles").css("width", "96%");
+                $("#divFiles").css("margin-left", "2%");
+            }
+        });
+
+        if ('@ViewBag.Profile' == '1') {
+            SIGNED.enable(false);
+        }
+
+        $("#ID_PERS_ENTI_EMP").kendoDropDownList({
+            dataTextField: "UserUpper",
+            dataValueField: "ID_PERS_ENTI",
+            template: '<div style="width:100%;">' +
+                '<div style="width:85%; float:left; text-transform:capitalize;font-size:1em; margin-top:3px;"><b>${User}</b></div>' +
+                '<div style="width:85%; float:left; text-transform:capitalize;font-size:.9em; margin-top:-2px;">${JobTitle}</div>' +
+                '</div>',
+            filter: "contains",
+            index: 0,
+            width: 100,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TalentChart/ListStaffEDNotPaymentBallots?var=" + Math.random()
+                },
+            }
+        });
+        var ID_PERS_ENTI_EMP = $("#ID_PERS_ENTI_EMP").data("kendoDropDownList");
+
+        var ID_ACCO_YEAR = $("#ID_ACCO_YEAR").data("kendoDropDownList");
+        ID_ACCO_YEAR.bind("dataBound", function (e) {
+            ID_ACCO_YEAR.value(ID_ACCO_YEAR.dataItem().YearNow);
+        });
+
+        var ID_ACCO_MONT = $("#ID_ACCO_MONT").data("kendoDropDownList");
+        ID_ACCO_MONT.bind("dataBound", function (e) {
+            ID_ACCO_MONT.value(ID_ACCO_MONT.dataItem().MonthNow);
+        });
+
+    });
+
+    function ObtenerTipo(){
+        var ID_TYPE_PAYM = $("#ID_TYPE_PAYM").data("kendoDropDownList");
+        return ID_TYPE_PAYM.value();
+    }
+</script>

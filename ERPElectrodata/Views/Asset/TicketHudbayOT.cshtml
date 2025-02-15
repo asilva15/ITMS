@@ -1,0 +1,430 @@
+﻿@{
+    ViewBag.Title = "Lista de Tickets";
+    if (Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_OT"]) == 1 && Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_IT"]) == 0)
+    {
+        Layout = "~/Views/Shared/_LayoutHBOT.cshtml";
+    }
+}
+
+<div id="divContent">
+    <div class="app-page-title mb-2">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="fa fa-archive icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <b>TICKETS DE ACTIVOS</b>
+                    <div class="page-title-subheading">Lista de Tickets de Activos OT por estados.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <input id="IdGrupo" value="@ViewBag.IdGrupoOT" hidden />
+        <div class="col-md-3">
+            Responsable
+            <input id="cbResponsable" />
+        </div>
+        <div class="col-md-3">
+            Usuario Afectado
+            <input id="cbUserioAfectad">
+        </div>
+        <div class="col-md-3">
+            Descripción del ticket
+            <input id="PalabraClave" class="k-textbox" style="width:100%">
+        </div>
+        <div class="col-md-2">
+            <br />
+            <button type="button" class="btn btn-hover-shine btn-block btn-primary" id="btnBuscar"><i class="fa fa-search"></i> Buscar</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-6 col-xl-3">
+            <div id="homInc1" class="card mb-3 widget-content btn btn-danger" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="icon-wrapper rounded-circle">
+                            <div class="icon-wrapper-bg bg-white opacity-1"></div>
+                            <i class="fa fa-user"></i>
+                        </div>
+                    </div>
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading"> &nbsp; Entrega Pendientes</div>
+                        <div class="widget-heading" id="boxTPDELIVERY"> &nbsp; Total @ViewBag.TAActive</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white">
+                            <span id="boxPDELIVERY" class="boxQty"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div id="homInc2" class="card mb-3 widget-content btn btn-success" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="icon-wrapper rounded-circle">
+                            <div class="icon-wrapper-bg bg-white opacity-1"></div>
+                            <i class="fa fa-archive"></i>
+                        </div>
+                    </div>
+                    <div id="letrashomInc1" class="widget-content-left">
+                        <div class="widget-heading"> &nbsp; Entrega Cerrados</div>
+                        <div class="widget-heading" id="boxTCDELIVERY"> &nbsp; Total @ViewBag.TAScheduled</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxCDELIVERY">@ViewBag.PScheduled</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div id="homInc3" class="card mb-3 widget-content btn btn-danger" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="icon-wrapper rounded-circle">
+                            <div class="icon-wrapper-bg bg-white opacity-1"></div>
+                            <i class="fa fa-user"></i>
+                        </div>
+                    </div>
+                    <div class="widget-content-left">
+                        <div class="widget-heading"> &nbsp; Recepción Pendientes</div>
+                        <div class="widget-heading" id="boxTPRECEPTION"> &nbsp; Total @ViewBag.TAResolved</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxPRECEPTION">@ViewBag.PResolved</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div id="homInc4" class="card mb-3 widget-content btn btn-success" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="icon-wrapper rounded-circle">
+                            <div class="icon-wrapper-bg bg-white opacity-1"></div>
+                            <i class="fa fa-archive"></i>
+                        </div>
+                    </div>
+                    <div class="widget-content-left">
+                        <div class="widget-heading"> &nbsp; Recepción Cerrados</div>
+                        <div class="widget-heading" id="boxTCRECEPTION"> &nbsp; Total @ViewBag.TAClosed</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span id="boxCRECEPTION" class="boxQty">@ViewBag.PClosed</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="gridTickets" class="contentView"></div>
+
+    <div id="pagerTickets" class="contentViewPager"></div>
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <a href="${URL}${ID_INCI}" target='_BLANK' id="Resumen" title="${SUM_INCI_PLAIN}" class="text-decoration-none" style="width:100%">
+        <div class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center mb-3">
+                <div class="col-md-12 col-lg-10">
+                    <div class="card-header-sm pr-0 pl-0 mb-2" style="font-weight:bold">
+                        <div class="row no-gutters align-items-center">
+                            <div id="${ID_INCI}" onclick="child(this)" class="${PARENT}">
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                Asignado a: ${ASSI}
+                            </div>
+                            # if (VIS_COMP) { #
+                            <div class="col-md-6 col-lg-3" title="${CIA_TOOL}">
+                                ${REQU} (${CIA})
+                            </div>
+                            # } else { #
+                            <div class="col-md-6 col-lg-3">
+                                ${REQU}
+                            </div>
+                            # } #
+                            <div class="col-md-6 col-lg-3">
+                                Creado: ${CREATE_INCI}
+                            </div>
+                            <div class="col-md-6 col-lg-3">
+                                Actualizado: ${MODIFIED_INCI}
+                            </div>
+                            # if (COUNTSON > 0) { #
+                            <div id="btnExpandir${ID_INCI}" class="btnExpand" onclick="jsViewSon(${ID_INCI})" title="View tickets son"></div>
+                            <div class="divAjax-Loading" style="display:none; float:right;" id="divLoading${ID_INCI}"></div>
+                            # } #
+                        </div>
+                    </div>
+                    <div class="row no-gutters align-items-center" style="max">
+                        #= SUM_INCI #
+                    </div>
+                </div>
+                <div class="col-md-12 col-lg-2 badge badge-info" style="text-align: center;">
+                    <div class="${ICO_PRIO}">
+                        ${NAM_STAT} <span> ${NAM_PRIO} ${HOU_PRIO}</span>
+                    </div>
+                    # if(EXP_TIME.indexOf("Stopped") > -1 ) {#
+                        # if(ID_STAT_END != 4 && ID_STAT_END != 6) { #
+                        <div title="Date Scheduled">
+                            <div style="font-size:.85em;">${DATE_SCHE} | ${HOUR_SCHE}</div>
+                        </div>
+                    # } #
+                    # } else { #
+                        <div id="divContentTimeRemaining${ID_INCI}" title="Expiration Time">
+                            <div id="divTimeRemaining${ID_INCI}" >${EXP_TIME}</div>
+                        </div>
+                    # } #
+                </div>
+            </div>
+            <hr class="m-0" />
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-6 col-lg-3">
+                    <div style="float:left;">
+                        ${NAM_TYPE_TICK} \\#
+                    </div>
+                    <div style="float:left;">
+                        #= COD_INCI #
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-6">
+                   ${NAM_CATE} > ${NAM_SUBC} > ${NAM_CLAS} > ${NAM_SUBCLAS}
+                    # if(NUM_OP != '') { #
+                    <a href="\\#/DocumentSaleActivity/Index/${ID_DOCU_SALE}" target="_blank" title="View OP">
+                        ${COD_TYPE_DOCU_SALE} ${NUM_OP}
+                    </a>
+                    # } else { #
+                    > Via ${NAM_SOUR}
+                    # } #
+                </div>
+                <div class="col-md-6 col-lg-3">Creado por: ${CREATEBY}</div>
+            </div>
+        </div>
+    </a>
+    <div style="width:100%; height:100%; position:relative; float:left;" id="divSON${ID_INCI}">
+    </div>
+    <div id="btn${ID_INCI}">
+    </div>
+    <div style="clear:both">
+    </div>
+
+</script>
+
+<script type="text/javascript">
+    var con = 0;
+    var timer;
+    function jsViewSon(id) {
+
+        $("#divLoading" + id).css("display", "block");
+        var className = $('#btnExpandir' + id).attr('class');
+        if (className == 'btnExpand') {
+            $("#divSON" + id).show('blind', function () {
+                var txt = $("#divSON" + id).html();
+                if (txt.length == 6 || txt.length == 0) {
+                    $("#divSON" + id).empty();
+                    $("#divSON" + id).load("/Ticket/viewListTicketSon?id=" + id + "&var=" + Math.random(), function () {
+
+                    });
+                }
+                else { $("#divLoading" + id).css("display", "none"); }
+
+                $("#btnExpandir" + id).removeClass("btnExpand").addClass("btnContract");
+            });
+        }
+        else {
+            $("#divSON" + id).hide('blind', function () {
+                //expandiendo los ticket despues de cerrar el detalle de la OP
+                $("#divLoading" + id).css("display", "none");
+                $("#btnExpandir" + id).removeClass("btnContract").addClass("btnExpand");
+            });
+        }
+    }
+
+    $(document).ready(function () {
+
+        //Listar Responsable
+        var IdResponsable = $("#cbResponsable").kendoComboBox({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarResponsableHBOT?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        //Listar Usuarios Afectados
+        var IdUsuarioAfectado = $("#cbUserioAfectad").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarResponsables?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        //buscar .....
+        $("#btnBuscar").click(function () {
+
+            if ($("#letrashomInc1").hasClass("letrasActive")) {
+                bandera = 0;
+            }
+            if ($("#letrashomInc2").hasClass("letrasActive")) {
+                bandera = 1;
+            }
+            if ($("#letrashomInc3").hasClass("letrasActive")) {
+                bandera = 2;
+            }
+            if ($("#letrashomInc4").hasClass("letrasActive")) {
+                bandera = 3;
+            }
+
+            ListByStatusTickett(bandera);
+            UpdateBarStatus();
+        });
+
+        ListByStatusTickett(0);
+
+        UpdateBarStatus();
+
+    });
+
+    var bandera = 0;
+
+    function ListByStatusTickett(bandera) {
+
+        $("#pagerTickets").empty();
+        $("#gridTickets").empty();
+
+        if ($("#gridTickets").data("kendoListView")) {
+            $("#pagerTickets").data("kendoPager").destroy();
+            $("#gridTickets").data("kendoListView").destroy();
+        }
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Asset/ListByStatusTicket/1?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        IdResponsable: $("#cbResponsable").val() == '' ? 0 : $("#cbResponsable").val(),
+                        IdUsuarioAfectado: $("#cbUserioAfectad").val() == '' ? 0 : $("#cbUserioAfectad").val(),
+                        PalabraClave: $("#PalabraClave").val(),
+                        IdGrupo: $("#IdGrupo").length ? ($("#IdGrupo").val() == '' ? 0 : $("#IdGrupo").val()) : 0
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: bandera },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+        console.log(dataSource)
+        $("#pagerTickets").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridTickets").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html()),
+        });
+    }
+
+    function Click(parm) {
+
+        for (var i = 1; i < 5; i++) {
+            $("#homInc" + i).removeClass("tab-active");
+            $("#StatusSelecthomInc" + i).removeClass("tab-active-marks2");  //letrashom
+            $("#letrashomInc" + i).removeClass("letrasActive");
+        }
+        $("#" + parm.id).addClass("tab-active");
+        $("#StatusSelect" + parm.id).addClass("tab-active-marks2");
+        $("#letras" + parm.id).addClass("letrasActive");
+
+        var bandera = 0;
+        if (parm.id == "homInc2") {
+            bandera = 1;
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 2;
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 3;
+        }
+        var listView = $("#gridTickets").data("kendoListView");
+        listView.dataSource.filter({ field: "Status", operator: "eq", value: bandera });
+        //$("#cueroHomInc").load("Incident/PendienteByIdUserView/0");
+    }
+
+    function UpdateBarStatus() {
+
+        if (typeof $("#gridTickets").data("kendoListView") === "undefined") {
+            clearTimeout(myVar);
+            return false;
+        }
+        else {
+
+        }
+
+        $.ajax({
+            url: '/Asset/UpdateBarStatus/1?var=' + Math.random(),
+            data: {
+                IdResponsable: $("#cbResponsable").val() == '' ? 0 : $("#cbResponsable").val(),
+                IdUsuarioAfectado: $("#cbUserioAfectad").val() == '' ? 0 : $("#cbUserioAfectad").val(),
+                PalabraClave: $("#PalabraClave").val(),
+                IdGrupo: $("#IdGrupo").length ? ($("#IdGrupo").val() == '' ? 0 : $("#IdGrupo").val()) : 0
+            },
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var active = 0, activeT = 0;
+                $.each(jsonx['Data'], function (index, value) {
+                    $("#boxP" + value['NAM_TYPE_FORM']).html(value['TicketsP']);
+                    $("#boxTP" + value['NAM_TYPE_FORM']).html("&nbsp;&nbsp;Total " + value['TotalP']);
+                    $("#boxC" + value['NAM_TYPE_FORM']).html(value['TicketsC']);
+                    $("#boxTC" + value['NAM_TYPE_FORM']).html("&nbsp;&nbsp;Total " + value['TotalC']);
+                });
+
+                //var listViewd = $("#gridTickets").data("kendoListView");
+                //listViewd.dataSource.page(listViewd.dataSource.page());
+            }
+
+        });
+
+        myVar = setTimeout("UpdateBarStatus();", 600000);
+
+    }
+
+</script>

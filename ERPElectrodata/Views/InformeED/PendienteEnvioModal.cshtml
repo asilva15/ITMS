@@ -1,0 +1,373 @@
+﻿@{
+    ViewBag.Title = "PendienteEnvioModal";
+    Layout = null;
+}
+
+<style>
+    #listEstadosPENM::-webkit-scrollbar {
+        width: 12px; /* width of the entire scrollbar */
+    }
+
+    #listEstadosPENM::-webkit-scrollbar-thumb {
+        background-color: #9B9B9B; /* color of the scroll thumb */
+        border-radius: 20px; /* roundness of the scroll thumb */
+        border: 3px solid white; /* creates padding around scroll thumb */
+    }
+</style>
+
+@using (Html.BeginForm("GuardarFormatoInforme", "InformeED", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEDitarInforme", name = "FrmEDitarInforme", target = "upload_targetPENM" }))
+{
+    <input id="IdInformePENModal" name="IdInforme" value="@ViewBag.IdDetaInforme" type="hidden" />
+    <input id="IdEstadoPENModal" name="IdEstado" value="@ViewBag.IdEstado" type="hidden" />
+    <input id="NumDocuSalePENModal" name="NumDocuSale" value="@ViewBag.NumDocuSale" type="hidden" />
+    <input id="IdPlantillaPENModal" name="IdPlantilla" type="hidden" /><div class="container row">
+        <div class="col-md-3" style="border-right: solid; border-right-width: 0.5px; border-right-color: #A2A2A2;">
+            <p>Línea de Tiempo de Estado</p>
+
+            <div class="x_content estadosPENM" id="estadosPENM">
+                <ul id="listEstadosPENM" class="todo-list-wrapper list-group list-group-flush" style="list-style: none; overflow-x:hidden; overflow-y: scroll; max-height:400px;"></ul>
+
+            </div>
+        </div>
+        <div class="col-md-9">
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Estado</label>
+                    <input id="txtEstadoInformePENM" name="txtEstadoInforme" class="form-control" type="text" style="width:100%" value="Pendiente de Elaboración" disabled>
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Responsable</label>
+                    <input id="txtResponsablePENM" name="txtResponsable" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Tipo Informe</label>
+                    <input id="txtTipoInformePENM" name="txtTipoInforme" class="form-control" type="text" style="width:100%" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Marca</label>
+                    <input id="txtMarcaPENM" name="txtMarca" class="form-control" type="text" style="width:100%" disabled />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label"><b>Ticket</b></label>
+                    <div>
+                        <span id="lblCodigoTicketPENM"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Fecha Máxima de Envío</label>
+                    <input id="dtFechaMaximaEnvioPENM" name="dtFechaMaximaEnvio" class="form-control" type="text" style="width:100%" disabled />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Correos</label>
+                    <input id="txtCorreoPENM" name="txtCorreo" class="form-control" type="text" style="width:100%" />
+
+                </div>
+                <div class="col-md-4">
+                    <label class="label">Dirección</label>
+                    <input id="txtDireccionPENM" name="txtDireccion" class="form-control" type="text" style="width:100%" />
+
+                </div>
+
+                <div class="col-md-4">
+                    <label class="label">Enlace Mesa de Partes Digital</label>
+                    <input id="txtEnlacePENM" name="txtEnlace" class="form-control" type="text" style="width:100%" />
+                </div>
+            </div>
+            <div class="form-group row">
+                <div class="col-md-4">
+                    <label class="label">Tipo Entrega (OP)</label>
+                    <input id="IdTipoEntregaPENModal" name="IdTipoEntrega" type="text" style="width:100%">
+                </div>
+            </div>
+            <br />
+            <h6><b>DESCARGAR ARCHIVOS:</b></h6>
+            <div class="form-group row">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-hover-shine btn-primary" style="float: right;"> Terminar Envío</button>
+                    <div class="mb-2 mr-2 dropright btn-group">
+                        <a class="btn-wide btn btn-primary" style="float: right; margin-right: 5px; color: #ffff;" onclick="DescargarPDFPENM(0)">Informe General</a>
+                        <button type="button" aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle-split dropdown-toggle btn btn-primary" onclick="DatosAdicionalesPENM()"></button>
+                        <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu">
+                            <div class="x_content seccionesAdicionalesPENM" id="seccionesAdicionalesPENM">
+                                <ul class="todo-list-wrapper list-group list-group-flush" style="list-style: none;"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <a class="btn btn-hover-shine btn-success" style="float: right; margin-right: 5px; color: #ffff;" onclick="enviarCorreo()"> Enviar Informe</a>
+                </div>
+            </div>
+        </div>
+        <button data-dismiss="modal" id="btnCerrarModalPENM" hidden>Cerrar</button>
+    </div>
+    <iframe id="upload_targetPENM" name="upload_targetPENM" src="" class="d-none"></iframe>
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+         var IDINPENM = @ViewBag.IdDetaInforme;
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "MaquinaEstados",
+            type: "Get",
+            data: { IDI: IDINPENM },
+            datatype: "json",
+            cache: false,
+
+            success: function (data) {
+                if (data) {
+                    tejerMaquinaEstadoPENM(data["Maquina"]);
+                }
+            },
+            error: function () {
+            }
+        });
+
+
+         $.ajax({
+             url: "/InformeED/ObtenerDatosPendienteEnvio/" + @ViewBag.IdDetaInforme,
+        type: "GET",
+            dataType: "json",
+                success: function (source) {
+                    $.each(source['Data'], function (index, value) {
+
+                        $("#txtEstadoInformePENM").val(source['Data'][index]['EstadoInforme']);
+                        $("#txtResponsablePENM").val(source['Data'][index]['ResponsableInforme']);
+                        $("#txtTipoInformePENM").val(source['Data'][index]['TipoInforme']);
+                        $("#dtFechaMaximaEnvioPENM").val(kendo.toString(new Date(source['Data'][index]['FechaMaximaEnvio']), "dd/MM/yyyy"));
+                        $("#txtMarcaPENM").val(source['Data'][index]['Marca']);
+                        $("#IdTicketPENM").val(source['Data'][index]['IdTicket']);
+                        $("#txtCorreoPENM").val(source['Data'][index]['Correos']);
+                        $("#txtDireccionPENM").val(source['Data'][index]['Direccion']);
+                        $("#txtEnlacePENM").val(source['Data'][index]['Enlace']);
+                        $("#EstadoPENModal").text(source['Data'][index]['EstadoInforme']);
+                        if ((source['Data'][index]['IdTicket']) != 0) {
+                            $("#lblCodigoTicketPENM").append('<a href=\"/DetailsTicket/Index/' + source['Data'][index]['IdTicket'] + '" target="_blank">' + source['Data'][index]['CodigoTicket'] + '</a>');
+                        } else {
+                            $("#lblCodigoTicketPENM").append("-");
+                        }
+
+                    });
+
+                }
+         });
+
+        $("#IdTipoEntregaPENModal").kendoMultiSelect({
+            dataTextField: "text",
+            dataValueField: "value",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: [
+                { text: "Mesa de Partes física", value: "1" },
+                { text: "Mesa de Partes digital", value: "2" },
+                { text: "Por correo electrónico", value: "3" }
+            ],
+        });
+
+
+        actualizarTipoEnvioPENM();
+    });
+    function DatosAdicionalesPENM() {
+        var docusale = @ViewBag.NumDocuSale;
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "ListFormatoAdicional",
+            type: "Get",
+            data: { numdocusale: docusale },
+            datatype: "json",
+            cache: false,
+
+            success: function (data) {
+                if (data) {
+                    ListaAdicionalesPENM(data["Adicionales"]);
+                }
+            },
+            error: function () {
+            }
+        });
+
+    }
+
+    function ListaAdicionalesPENM(Adicionales) {
+
+        $(".seccionesAdicionalesPENM ul").empty();
+
+        if (parseInt(Adicionales.length) > 0) {
+
+            $.each(Adicionales, function (index, value) {
+
+                if (Adicionales[index].Id == "" || Adicionales[index].Id == null || Adicionales[index].Id == undefined) {
+
+                    $(".seccionesAdicionalesPENM ul").append('<li><button type="button" tabindex="0" class="dropdown-item" onclick ="DescargarPDFPENM(' + Adicionales[index].Id +')">' + Adicionales[index].NombreFormato + '</button></li >');
+
+                }
+                else {
+                    $(".seccionesAdicionalesPENM ul").append('<li><button type="button" tabindex="0" class="dropdown-item" onclick ="DescargarPDFPENM(' + Adicionales[index].Id +')">' + Adicionales[index].NombreFormato + '</button></li >');
+
+                }
+
+            });
+
+        } else {
+            $(".seccionesAdicionalesPENM ul").append('<div class="smallField"> No cuenta con adicionales');
+        }
+
+
+    }
+    function actualizarTipoEnvioPENM() {
+        /*var IDIPENM = $("#IdInformePENModal").val();*/
+        var listaTipoEntrega = $("#IdTipoEntregaPENModal").data("kendoMultiSelect")
+        var lista = []
+
+        $.ajax({
+            url: "/InformeED/ObtenerTipoEntrega?iddocusale=" + @ViewBag.NumDocuSale,
+            type: 'GET',
+            success: function (data) {
+                for (var i = 0; i < data.Data.length; i++) {
+                    lista.push(data.Data[i].Id.toString());
+                }
+
+                console.log(lista);
+                listaTipoEntrega.value(lista);
+            }
+
+        });
+    }
+
+    function MensajeConfirmacionPENM(resp, descripcion) {
+        if (resp == "OK") {
+            toastr.success("", "El registro ha sido guardado.");
+            const boton = document.getElementById('btnCerrarModalPENM');
+            boton.click();
+            ListadoInformes(2)
+            ObtenerInformesxEstado()
+        }
+        else if (resp == "ERROR") {
+            toastr.error("", "Debe completar todos los datos antes de guardar.");
+        } else {
+            toastr.error("Por favor contacte al administrador.", "Mensaje");
+        }
+    }
+    function tejerMaquinaEstadoPENM(Maquina) {
+
+        console.log(Maquina);
+
+        if (parseInt(Maquina.length) > 0) {
+
+            $.each(Maquina, function (index, value) {
+
+                console.log(Maquina[index].Fecha);
+
+                if (Maquina[index].Hora == "" || Maquina[index].Hora == null || Maquina[index].Hora == undefined) {
+
+                    $(".estadosPENM ul").append('<li><div class= "vertical-timeline vertical-timeline--animate vertical-timeline--one-column" >'
+                        + '<div class="vertical-timeline-item vertical-timeline-element">'
+                        + '<div>'
+                        + '      <span class="vertical-timeline-element-icon bounce-in">'
+                        + '          <i class="badge badge-dot badge-dot-xl badge-danger"> </i>'
+                        + '      </span>'
+                        + '      <div class="vertical-timeline-element-content bounce-in">'
+                        /*+ '          <h4 class="timeline-title">Con Plantilla</h4>'*/
+                        + '<p style="font-size:10px;">' + Maquina[index].NombreEstado + '</p>'
+                        + '          <span class="vertical-timeline-element-date" style="font-size:10px;"></span>'
+                        + '      </div>'
+                        + '  </div>'
+                        + ' </div>'
+                        + '</div >'
+                        + '</li >'
+                    );
+
+                }
+                else {
+                    $(".estadosPENM ul").append('<li><div class= "vertical-timeline vertical-timeline--animate vertical-timeline--one-column" >'
+                        + '<div class= "vertical-timeline-item vertical-timeline-element" > '
+                        + '<div>'
+                        + '      <span class="vertical-timeline-element-icon bounce-in">'
+                        + '          <i class="badge badge-dot badge-dot-xl badge-success"> </i>'
+                        + '      </span>'
+                        + '      <div class="vertical-timeline-element-content bounce-in">'
+                        + '          <h4 class="timeline-title" style="font-size:12px;">' + Maquina[index].NombreEstado + '</h4>'
+                        + '          <p style="font-size:10px;">Hecho por: ' + Maquina[index].HechoPor + '</p>'
+                        + '          <span class="vertical-timeline-element-date" style="font-size:10px;">' + Maquina[index].Fecha + '<br />' + Maquina[index].Hora
+                        + '</span>'
+                        + '      </div>'
+                        + '  </div>'
+                        + '</div>'
+                        + '</div >'
+                        + '</li >'
+                    );
+
+                }
+
+            });
+
+        } else {
+            $(".estadosPENM ul").append('<div class="smallField"> No se encontraron registros');
+        }
+
+
+    }
+
+    function DescargarPDFPENM(opcion) {
+        var idInforme = @ViewBag.IdDetaInforme;
+        toastr.info("El archivo se esta descargando...");
+
+        $.ajax({
+            url: '/InformeED/DescargarInformesPDF',
+        type: 'POST',
+        data: {
+            IdInforme: idInforme,
+            Opcion: opcion
+        },
+            success: function (data) {
+                toastr.success("El archivo se esta descargando...");
+            if (data.pdfData) {
+                // Crear un enlace temporal
+                var link = document.createElement('a');
+                link.href = "data:application/pdf;base64," + data.pdfData;
+                link.download = 'Informe.pdf';
+
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                toastr.error("Error al descargar el informe.");
+            }
+        },
+        error: function () {
+            toastr.error("Error en la solicitud al servidor.");
+        }
+    });
+    }
+
+    function enviarCorreo() {
+
+        var idInforme = @ViewBag.IdDetaInforme;
+        $.ajax({
+            url: "/InformeED/EnvioInforme?correos=" + $("#txtCorreoPENM").val(),
+            type: 'POST',
+            data: {
+                IdInforme: idInforme
+            },
+            success: function (data) {
+                toastr.success("Enviado correctamente");
+            },
+            error: function () {
+                toastr.error("Error en el envio de correo.");
+            }
+
+        });
+    }
+
+</script>

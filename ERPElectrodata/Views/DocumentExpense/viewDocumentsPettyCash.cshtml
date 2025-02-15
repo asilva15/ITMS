@@ -1,0 +1,482 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_EXPENSE
+
+@{
+    Layout = null;
+}
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js" defer></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/responsive.bootstrap4.min.js" defer></script>
+
+<style>
+    .highlight-row {
+        background-color: #FF462D !important;
+        color: white;
+    }
+</style>
+
+<table id="tbProyectos" class="align-middle mb-0 table table-borderless table-striped table-hover" style="width:100%" data-page-length="6">
+    <thead>
+        <tr>
+            <th class="text-center" style="font-size:12px;">@ResourceLanguaje.Resource.Type</th>
+            <th class="text-center" style="font-size:12px;">@ResourceLanguaje.Resource.Date</th>
+            <th class="text-center" style="font-size:12px;">@ResourceLanguaje.Resource.Number</th>
+            <th class="text-center" style="font-size:12px;">@ResourceLanguaje.Resource.Supplier</th>
+            <th class="text-center" style="font-size:12px;">Archivo</th>
+            <th class="text-center" style="font-size:12px;">Base Imponible</th>
+            <th class="text-center" style="font-size:12px;">IGV</th>
+            <th class="text-center" style="font-size:12px;">Total(Base + IGV)</th>
+            <th class="text-center" style="font-size:12px;">Opción</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
+<div class="row mt-4">
+    <div class="col-sm-3" style="font-size:1.1em;font-weight:bold;text-align:right">
+        <div>Total Base: </div>
+        <div>Total IGV: </div>
+        <div>Total(Base + IGV): </div>
+    </div>
+    <div class="col-sm-3" style="font-size:1.1em;font-weight:bold">
+        <div id="montoTotal" style="text-align:right"></div>
+        <div id="montoIGVTotal" style="text-align:right"></div>
+        <div id="montoTotalIGV" style="text-align:right"></div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function () {
+
+
+        ListaProyectos();
+
+        $.ajax({
+            url: "/DocumentExpense/MontoTotal?id=@ViewBag.ID_REQU_EXPE",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                if (data['dTotal'] != "")
+                $("#montoTotal").append(data['dTotal']);
+            },
+            error: function (source) {
+            }
+        });
+
+        $.ajax({
+            url: "/DocumentExpense/TotalIGV?id=@ViewBag.ID_REQU_EXPE",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                if (data['dTotal'] != "")
+                $("#montoIGVTotal").append(data['dTotal']);
+            },
+            error: function (source) {
+            }
+        });
+
+         $.ajax({
+             url: "/DocumentExpense/MontoTotalIGV?id=@ViewBag.ID_REQU_EXPE",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                if (data['dTotal'] != "")
+                    $("#montoTotalIGV").append(data['dTotal']);
+            },
+            error: function (source) {
+            }
+        });
+    });
+    function ListaProyectos() {
+
+
+
+        $('#tbProyectos').dataTable().fnDestroy();
+
+
+        $('#tbProyectos').DataTable({
+            "order": [[0, "desc"]],
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: "/DocumentExpense/ListDocument?id=@ViewBag.ID_REQU_EXPE",
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var concat = "";
+
+                        concat = '<div style ="font-size:13px;">' + data.TYPE + '</div>';
+
+                        return concat
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var concat = "";
+
+                        concat = '<div style ="font-size:13px;">' + data.DATE + '</div>';
+
+                        return concat
+                    }
+                    /*data: "DATE",*/
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var concat = "";
+                        if (data.ID_TYPE_DOCU_EXPE != 4)
+                            concat = '<div style ="font-size:12px;">' + data.NUMBER + '</div>';
+                        else
+                            concat = "-";
+                        return concat
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var concat = "";
+                        if (data.ID_TYPE_DOCU_EXPE == 4)
+                            concat = '<div overflow:hidden;" title="' + data.MOBILITY + '" style="font-size:12px;">' + data.MOBILITY + '</div>';
+                        else if (data.ID_TYPE_DOCU_EXPE == 8) 
+                            concat = '<div overflow:hidden;" title="' + data.REINTEGRO + '" style="font-size:12px;">' + data.REINTEGRO + '</div>';
+                        else
+                            concat = '<div overflow:hidden;" title="' + data.SUPPLIER + '" style="font-size:12px;">' + data.SUPPLIER + '</div>';
+                        return concat
+                    }
+                },
+                {
+
+                    data: null,
+                    render: function (data, type, row) {
+                        var id_reque = @ViewBag.ID_REQU_EXPE;
+                        console.log('ENTRO' + id_reque);
+                        var concat = "";
+                            if (data.ID_ATTA != 0)
+                                concat = '<a style="font-size:12px;"  href="/DocumentExpense/VerDocumento/' + data.URL + '?idRequest=' + id_reque + '" target="_blank">' + data.NAM_ATTA + ' <img src="/Content/Images/pdf.png" style="width:10px; height:10px; border:none;"></a>';
+                            else
+                                concat = '-';
+                            return concat
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var concat = "";
+                        if (data.ID_TYPE_DOCU_EXPE != 4)
+                            concat =  '<div style ="font-size:13px;">' + data.COIN + ' ' + data.AMOUNT + '</div>';
+                        else
+                            concat = '<div style ="font-size:13px;">' + data.COIN + ' ' + data.DET_AMOUN + '</div>';
+                        return concat;
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var concat = "";
+
+                        if (data.ID_TYPE_DOCU_EXPE != 4) {
+
+                            if (data.PORCENTAJEIGV !== null || data.PORCENTAJEIGV !== "" || data.PORCENTAJEIGV !== undefined) {
+
+                                var porcentajeIGV = parseFloat(data.PORCENTAJEIGV.split('%')[0]) / 100;
+                                var amount = parseFloat(data.AMOUNT) * porcentajeIGV;
+
+                                concat = '<div style="font-size:13px;">' + data.COIN + ' ' + amount.toFixed(2) + '</div><div><span style="background-color: #f4ff00;">' + data.PORCENTAJEIGV + '</span></div>';
+
+                            } else {
+                                concat = '<div style="font-size:13px;">' + data.COIN + ' ' + '0.00</div><div><span style="background-color: #f4ff00;">(0%)</span></div>';
+                            }
+                        } else {
+                            concat = '<div style="font-size:13px;">' + data.COIN + ' ' + '0.00</div><div><span style="background-color: #f4ff00;">(0%)</span></div>';
+                        }
+
+                        return concat;
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        var concat = "";
+                        if (data.ID_TYPE_DOCU_EXPE != 4)
+                            concat = '<div style ="font-size:13px;">' + data.COIN + ' ' +data.IGV_CAL + '</div>';
+                        else
+                            concat = '<div style ="font-size:13px;">' + data.COIN + ' ' + data.DET_AMOUN + '</div>';
+                        return concat;
+                    }
+                    /*data: "IGV_CAL",*/
+                },
+
+                {
+                    data: null,
+
+                    render: function (data, type, row) {
+                        var contenido = "";
+                        contenido = '<div class="form-row">' +
+                            '<div class="col-md-3" style="text-align:center" aria-hidden="true"><button type="button" style="font-size:15px;cursor:pointer"id="btnEditar' + data.ID_DOCU_EXPE + '" title="Editar" class="border-0 btn-transition btn btn-outline-secondary" onclick="Editar(' + data.ID_DOCU_EXPE + ')" ><i class="fa fa-pencil-alt" style="color:blue;"></i></button></div>' +
+
+                            '<div class="col-md-3" style="text-align:center;" aria-hidden="true"><button type="button" style="font-size:15px;margin-left: 10px;cursor:pointer"id="btnEliminar' + data.ID_DOCU_EXPE + '" title="Eliminar" class="border-0 btn-transition btn btn-outline-secondary" onclick="Eliminar(' + data.ID_DOCU_EXPE + ')"><i class="fa fa-trash-alt" style="color:red;"></i></button></div>' +
+
+                            '<div class="col-md-3" style="text-align:center;" aria-hidden="true" id="divObservar' + data.ID_DOCU_EXPE + '" ><button type="button" style="font-size:15px;margin-left: 10px;cursor:pointer"id="btnObservar' + data.ID_DOCU_EXPE + '" title="Observar" class="border-0 btn-transition btn btn-outline-secondary" onclick="ObservarDetalleDocument(' + data.ID_DOCU_EXPE + ')" hidden><i class="fa fa-eye" style="color:red;"></i></button></div>' +
+
+                            '<div class="col-md-3" style="text-align:center;" aria-hidden="true"><button type="button" style="font-size:15px;margin-left: 10px;cursor:pointer"id="btnDetalleObservado' + data.ID_DOCU_EXPE + '" title="DetalleObservado" class="border-0 btn-transition btn btn-outline-secondary" onclick="DetalleObservado(' + data.ID_DOCU_EXPE + ')" hidden><i class="fa fa-eye" style="color:red;"></i></button></div>' +
+                            '</div> ';
+
+                        if (data.ID_TYPE_DOCU_EXPE == 6 || data.ID_STAT_REQU_EXPE == 7) {
+                            $("#btnEliminar" + data.ID_DOCU_EXPE).hide();
+                            $("#btnEditar" + data.ID_DOCU_EXPE).hide();
+                            $("#btnObservar" + data.ID_DOCU_EXPE).hide();
+                            $("#btnDetalleObservado" + data.ID_DOCU_EXPE).hide();
+                        }
+
+                        if (data.ID_STAT_REQU_EXPE == 6 && data.swObservar == true && data.swObservado == false) {
+                            $("#btnDetalleObservado" + data.ID_DOCU_EXPE).hide();
+                            $("#btnObservar" + data.ID_DOCU_EXPE).prop("hidden", false);
+                        } else if(data.swObservado==true) {
+                            console.log("aqui entro")
+                            $("#divObservar" + data.ID_DOCU_EXPE).hide();
+                            $("#btnDetalleObservado" + data.ID_DOCU_EXPE).prop("hidden", false);
+                        }
+
+                        return contenido;
+                    }
+                },
+
+
+            ],
+            "createdRow": function (row, data, dataIndex) {
+                // Check if swObservado is true
+                if (data.swObservado === true || data.swObservado === 1) {
+                    $(row).addClass('highlight-row'); // Add a custom class for styling
+                }
+            },
+            "columnDefs": [
+                {
+                    "targets": "_all",
+                    "className": "text-center"
+                }
+            ],
+            buttons: [
+
+            ],
+            "columnDefs": [
+                { "responsivePriority": 1, "targets": -1 }
+            ],
+            "lengthMenu": [[6, 10, 25, -1], [6, 10, 25, "All"]],
+
+            //"pageLength": 15,
+            "searching": false,
+            "pageLength": 10,
+           //"lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+            "language": {
+                "lengthMenu": "Mostrar _MENU_ Registros por página",
+                "info": "Mostrando página _PAGE_ de _PAGES_ de _TOTAL_ registros",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(filtrada de _MAX_ registros)",
+                "loadingRecords": "Cargando...",
+                "processing": "Procesando...",
+                "search": "Buscar:",
+                "zeroRecords": "No se encontraron registros coincidentes",
+                "paginate": {
+                    "next": "Siguiente",
+                    "previous": "Anterior"
+                },
+            },
+        });
+
+
+
+    }
+
+
+
+
+
+    ////////////new
+    function Editar(id) {
+
+        $("#lblTitulo").text("EDITAR DOCUMENTO");
+
+        $("#btnEditar" + id).attr("data-style", "expand-right");
+        $("#btnEditar" + id).attr("data-toggle", "modal");
+        $("#btnEditar" + id).attr("data-target", "#miModal");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").addClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/DocumentExpense/EditarDetalleDocument/' + id);
+
+    }
+
+
+
+    function Eliminar(id) {
+
+            $("#lblTitulo").text("Eliminar");
+
+            $("#btnEliminar" + id).attr("data-style", "expand-right");
+            $("#btnEliminar" + id).attr("data-toggle", "modal");
+            $("#btnEliminar" + id).attr("data-target", "#miModal");
+            //$("#btnEliminar" + id).hide();
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-lg");
+            $(".modal-dialog").addClass("modal-sm");
+
+            $('#modal-content').empty();
+            $('#modal-content').load('/DocumentExpense/EliminarDetalleDocument/' + id);
+    }
+
+    function ObservarDetalleDocument(id) {
+
+        $("#lblTitulo").text("Dejar Comentario");
+
+        $("#btnObservar" + id).attr("data-style", "expand-right");
+        $("#btnObservar" + id).attr("data-toggle", "modal");
+        $("#btnObservar" + id).attr("data-target", "#miModal");
+        //$("#btnEliminar" + id).hide();
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        /*$(".modal-dialog").addClass("modal-sm");*/
+        $('#modal-content').empty();
+        $('#modal-content').load('/DocumentExpense/ObservarDetalleDocument/' + id);
+    }
+
+    function DetalleObservado(id) {
+
+        $("#lblTitulo").text("Ver observaciones");
+
+        $("#btnDetalleObservado" + id).attr("data-style", "expand-right");
+        $("#btnDetalleObservado" + id).attr("data-toggle", "modal");
+        $("#btnDetalleObservado" + id).attr("data-target", "#miModal");
+        //$("#btnEliminar" + id).hide();
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        /*$(".modal-dialog").addClass("modal-sm");*/
+        $('#modal-content').empty();
+        $('#modal-content').load('/DocumentExpense/DetalleObservado/' + id);
+    }
+    ///////
+
+    function DeleteDocument(sw, id, idre, sup, typ, num, fec, tot) {
+        if(sw == 0){
+            $("#lblTitulo").text("@ResourceLanguaje.Resource.Notification");
+
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").removeClass("modal-sm");
+            $(".modal-dialog").addClass("modal-sm");
+
+            $('#modal-content').empty();
+            $("#modal-content").append("<div class='modal-body'>"+
+                                           "<div style='font-size:1em;'>" +
+                                             "<div style='width:10%;  text-transform:capitalize;'>" +
+                                                 "<div style='width:20%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Type:</div>" +
+                                                "<div style='width:80%; float:left;'>" + typ + "</div>" +
+                                                "<div style='width:20%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Number:</div>" +
+                                                "<div style='width:80%; float:left;'>" + num + "</div>" +
+                                                "<div style='width:20%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Date:</div>" +
+                                                "<div style='width:80%; float:left;'>" + fec + "</div>" +
+                                                "<div style='width:20%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Amount:</div>" +
+                                                "<div style='width:80%; float:left;'>" + tot + "</div>" +
+                                                "<div style='width:100%; float:left; margin-top:10px; color:#444444;  text-transform:none;'>¿Está seguro de eliminar el documento?</div>" +
+                                              "</div>" +
+                                           "</div>"+
+                                         "</div>");
+
+            $("#modal-content").append("<div class='modal-footer'>"+
+                                           "<div style='width:100%;'>" +
+                                              "<div style='width:95%; margin:0 auto; text-align:center;'>" +
+                                                 "<div style='width:100%; margin-top:10px;'>" +
+                                                      "<button id='btnYesDel' class='btn btn-primary' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>" +
+                                                      "&nbsp;&nbsp;<button id='btnNODel' class='btn btn-link' style='font-size:.9em;'>No</button>" +
+                                                  "</div>" +
+                                              "</div>" +
+                                           "</div>"+
+                                       "</div>");
+        }
+        else{
+            $("#lblTitulo").text("@ResourceLanguaje.Resource.Notification");
+
+            $(".modal-dialog").removeClass("modal-md");
+            $(".modal-dialog").removeClass("modal-md");
+            $(".modal-dialog").addClass("modal-md");
+
+            $('#modal-content').empty();
+
+            $("#modal-content").append("<div class='modal-body'>"+
+                                           "<div style='font-size:1em;'>" +
+                                             "<div style='width:100%; display:inline-block; text-transform:capitalize;'>" +
+                                                   "<div style='width:20%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Type:</div>" +
+                                                    "<div style='width:80%; float:left;'>" + typ + "</div>" +
+                                                    "<div style='width:20%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Date:</div>" +
+                                                    "<div style='width:80%; float:left;'>" + fec + "</div>" +
+                                                    "<div style='width:20%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Amount:</div>" +
+                                                    "<div style='width:80%; float:left;'>" + tot + "</div>" +
+                                                    "<div style='width:20%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Mobility:</div>" +
+                                                    "<div style='width:80%; float:left;'>" + sup + "</div>" +
+                                                    "<div style='width:100%; float:left; margin-top:10px; color:#444444;  text-transform:none;'>¿Está seguro de eliminar el documento?</div>" +
+                                              "</div>" +
+                                           "</div>"+
+                                         "</div>");
+
+            $("#modal-content").append("<div class='modal-footer'>"+
+                                           "<div style='width:100%;'>" +
+                                              "<div style='width:95%; margin:0 auto; text-align:right;'>" +
+                                                 "<div style='width:100%; margin-top:10px;'>" +
+                                                      "<button id='btnYesDel' class='btn btn-primary' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>" +
+                                                      "&nbsp;&nbsp;<button id='btnNODel' class='btn btn-link' style='font-size:.9em;'>No</button>" +
+                                                  "</div>" +
+                                              "</div>" +
+                                           "</div>"+
+                                       "</div>");
+                    }
+
+        var undo = $("#btnYesDel")
+            .bind("click", function () {
+
+                $.ajax({
+                    url: (sw == 0 ? "/DocumentExpense/Delete/" : "/DocumentExpense/DeleteMobility/") + id,
+                    data: "_var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (resp) {
+                        if(resp=='OK')
+                        {
+                            toastr.success("Se ha eliminado el documento", "");
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                        }
+                        //Cargado lista de documentos
+                        LoadDocuments(idre);
+                        if(resp == 'ChangeStatus'){
+                            toastr.warning("El documento no se pudo eliminar porque cambió de estado","");
+                        }
+                        else if (resp == 'error') {
+                            toastr.error("Ha ocurrido un error, contacte al administrador", "");
+                        }
+                    },
+                    error: function (source) {
+                        toastr.error("Ha ocurrido un error, contacte al administrador","");
+                    }
+                });
+            });
+
+        var undo = $("#btnNODel")
+            .bind("click", function () {
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+            });
+    }
+</script>

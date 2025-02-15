@@ -1,0 +1,43 @@
+﻿<div>
+    <div id="listaCargaExternoActivos">
+        @Html.Partial("_CargaTickets", (int)ViewBag.CantidadPintar)
+    </div>
+    <div id="listaExternoActivos">
+    </div>
+    <div class="mt-3">
+        <ul class="pagination" id="paginationExternoActivos"></ul>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        if (@ViewBag.CantidadTickets != 0) {
+            $.jqPaginator('#paginationExternoActivos', {
+                    totalPages: @ViewBag.CantidadTickets,
+                    visiblePages: 10,
+                    currentPage: 1,
+                    onPageChange: function (num, type) {
+                        if (type == "change") {
+                            cambioPaginaExternoActivos(num)
+                        }
+
+                    }
+            });
+
+        }
+
+    });
+    function cambioPaginaExternoActivos(pagina) {
+        if (@ViewBag.CantidadTickets != 0) {
+            document.getElementById("listaCargaExternoActivos").style.display = 'block'
+            document.getElementById("listaExternoActivos").style.display = 'none'
+            $.post("/Home/ActualizarActivosElectrodataPeru", { seccion: 1, pagina: pagina, esInterno: 0 }, function (response) {
+                $("#listaExternoActivos").html(response);
+                document.getElementById("listaCargaExternoActivos").style.display = 'none'
+                document.getElementById("listaExternoActivos").style.display = 'block'
+            });
+        }
+
+    }
+</script>

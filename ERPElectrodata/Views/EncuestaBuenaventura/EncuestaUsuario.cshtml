@@ -1,0 +1,90 @@
+﻿@{
+    ViewBag.Title = "Principal";
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<fieldset>
+    <div class="form-group">
+        <div id="contenedorRespuestas">
+            <!-- Aquí se mostrará el listado de preguntas y respuestas -->
+        </div>
+    </div>
+</fieldset>
+
+<script>
+    $(document).ready(function () {
+        listarPreguntasyrespuestas();
+    });
+
+    function listarPreguntasyrespuestas() {
+        var idPregunta = $('#hiddenIdPregunta').val();
+
+        $.ajax({
+            url: '/EncuestaBuenaventura/ObtenerListadoPreguntayRespuestas',
+            type: 'GET',
+            success: function (response) {
+                // Procesar la respuesta y construir el formulario
+                construirFormulario(response.data);
+            },
+            error: function (error) {
+                console.error('Error al obtener preguntas y respuestas:', error);
+            }
+        });
+    }
+
+    function construirFormulario(data) {
+        var contenedorRespuestas = $('#contenedorRespuestas');
+
+        // Iterar sobre las preguntas y respuestas
+        data.forEach(function (item) {
+            // Crear elementos HTML para mostrar la pregunta y respuestas
+            var preguntaElement = $('<div>').text(item.Pregunta);
+            var respuestasElement = $('<div>');
+
+            // Iterar sobre las respuestas
+            item.Respuestas.forEach(function (respuesta) {
+                var respuestaLabel = $('<label>').text(respuesta.Respuesta);
+
+                // Si la respuesta tiene FlagEspecificar en true, agregar un textbox
+                if (respuesta.FlagEspecificar) {
+                    var inputEspecificar = $('<input>').attr({
+                        type: 'checkbox',
+                        name: 'especificar_' + respuesta.IdRespuesta
+                    });
+                    var textboxEspecificar = $('<input>').attr({
+                        type: 'text',
+                        name: 'textoEspecificar_' + respuesta.IdRespuesta,
+                        placeholder: 'Especificar...'
+                    });
+
+                    // Agregar los elementos al contenedor de respuestas
+                    respuestasElement.append(inputEspecificar);
+                    respuestasElement.append(respuestaLabel);
+                    respuestasElement.append(textboxEspecificar);
+                } else {
+                    // Si no, solo agregar la respuesta
+                    respuestasElement.append(respuestaLabel);
+                }
+            });
+
+            // Agregar las preguntas y respuestas al contenedor principal
+            contenedorRespuestas.append(preguntaElement);
+            contenedorRespuestas.append(respuestasElement);
+        });
+    }
+</script>
+

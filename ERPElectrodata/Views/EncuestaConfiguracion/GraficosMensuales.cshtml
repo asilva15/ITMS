@@ -1,0 +1,1118 @@
+﻿@{
+    ViewBag.Title = "EncuestaConfiguracion";
+    Layout = null;
+}
+
+
+<link href="~/Bootstrap/css/bootstrap.css" rel="stylesheet" />
+<link href="~/Bootstrap/css/bootstrap-theme.min.css" rel="stylesheet" />
+<link href="~/Content/sweet-alert.css" rel="stylesheet" />
+<script src="~/Bootstrap/js/bootstrap.min.js"></script>
+<script src="~/Scripts/sweet-alert.js"></script>
+<script src="~/Scripts/bootstrap-tags.js"></script>
+<script src="~/Scripts/bootstrap-tags.min.js"></script>
+<script src="~/Scripts/Itms/Plugins/jquery.validate.min.js"></script>
+<style>
+    b {
+        color:#F83C50;
+    }
+</style>
+<h3>Informe de Encuestas</h3>
+
+<div class="divSpace3"></div>
+<div style="float:left;">
+    <div class="editor-label">
+        Cuenta <b>(*)</b>
+    </div>
+    <div class="editor-field">
+        <input type="text" name="IdAcco" id="IdAcco"/>
+    </div>
+</div>
+<div style="float: left; margin: 0px 10px 0px 10px;">Año : <b>(*)</b><br /><input type="text" id="Anio" name="Anio" /></div>
+<div style="float: left; margin: 0px 10px 0px 10px; ">Mes : <b>(*)</b><br />  <input type="text" id="Mes" name="Mes" /></div>
+<div style="float: left;"><button id="btnBuscar" class="k-button" style="margin: 15px;">Buscar</button></div>
+
+<div style="clear:both; width:100%; height:450px; margin-top:35px;" class="panel">
+    <!--RESUMEN DE ENCUESTAS-->
+    <div style="width: 49.5%; float:left;" class="panel panel-primary">
+        <div class="panel-heading">Resumen</div>
+        <div class="panel-body">
+            <div class="panel-body" style="height: 360px;">
+                <div id="encuestaResumen" style="height: 350px; width:98%;"></div>
+            </div>
+        </div>
+    </div>
+
+   <!--PREGUNTA 13-->
+    <div style="width: 49%; float:right; height:430px;" class="panel panel-primary">
+        <div class="panel-heading"><div class="title">¿Consideras que estábamos correctamente capacitados para resolver lo que necesitabas?</div></div>
+        <div class="panel-body">
+            <div class="panel-body" style="height: 350px;">
+                <div id="pregunta13Encuestas" style="width:100%;height:348px; float:left;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div style="clear:both; width:100%; height:450px; margin-top:35px;" class="panel">
+    <!--PREGUNTA 14-->
+    <div style="width: 49.5%; float:left;" class="panel panel-primary">
+        <div class="panel-heading">¿Consideras que el proceso fue rápido y sencillo?</div>
+        <div class="panel-body">
+            <div class="panel-body" style="height: 360px;">
+                <div id="pregunta14Encuestas" style="height: 350px; width:98%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!--PREGUNTA 15-->
+    <div style="width: 49%; float:right; height:430px;" class="panel panel-primary">
+        <div class="panel-heading"><div class="title">En general ¿Qué tan satisfecho está con la resolución de su incidente y/o requerimiento?</div></div>
+        <div class="panel-body">
+            <div class="panel-body" style="height: 350px;">
+                <div id="pregunta15Encuestas" style="width:100%;height:348px; float:left;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var myEncuestaResumen;
+    var myPregunta13Encuestas;
+    var myPregunta14Encuestas;
+    var myPregunta15Encuestas;
+    var myTicketStatus;
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+
+    $(document).ready(function () {
+        var today = new Date();
+
+        var Acco = $("#IdAcco").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TipoActivo/ListarCuentaTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        Acco.bind("change", function (e) {
+            IdAcco = Acco.dataItem().ID_ACCO;
+        });
+
+        var Anio = $("#Anio").kendoComboBox({
+            value: today.getFullYear()
+        }).data("kendoComboBox");
+
+        var Anio = $("#Anio").kendoComboBox({
+            autoBind: true,
+            dataTextField: "ID_ACCO_YEAR",
+            dataValueField: "ID_ACCO_YEAR",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "YEAR",
+                },
+                transport: {
+                read: "/AccountingYear/ListIndependiente?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var Mes = $("#Mes").kendoComboBox({
+            value: today.getMonth() + 1
+        }).data("kendoComboBox");
+
+        var Mes = $("#Mes").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_ACCO_MONT",
+            dataValueField: "ACCO_MONT",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "MONTH",
+                },
+                transport: {
+                    read: "/AccountingYear/ListIndependiente?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+
+        $("#btnBuscar").click(function () {
+            var IdAcco, Mes, Anio;
+            IdAcco = $("#IdAcco").val();
+            Mes = $("#Mes").val();
+            Anio = $("#Anio").val();
+            if (IdAcco == 0 || Mes == 0 || Anio == 0)
+            {
+                winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                + "<div style='padding:10px 0px 10px 0px;'>Complete los datos porfavor</div>" +
+                "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+               "<button id='continues' class='k-button'>Continuar</button>" +
+               "</div></div>", 400, 140);
+
+                    var undo = $("#continues")
+                   .bind("click", function () {
+                       closeWinModalPopUp();
+                   });
+
+                    $("#closebtnmodal").click(function () {
+                        closeWinModalPopUp();
+                    });
+            }
+            else
+            {
+                //encuestaResumenMensual(12);
+                encuestaResumen();
+                pregunta13Encuestas();
+                pregunta14Encuestas();
+                pregunta15Encuestas();
+            }
+        });
+
+    });
+
+    function encuestaResumen() {
+        var MES_TIME = $("#Mes").data("kendoComboBox");
+            var ANIO_TIME = $("#Anio").data("kendoComboBox");
+
+            $.ajax({
+                url: '/EncuestaConfiguracion/encuestaResumenMensual?&IdAcco=' + $("#IdAcco").val() + "&Mes=" + ($("#Mes").val()) + '&Anio=' + $("#Anio").val() + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+
+                var Serie = new Array();
+                var Respondidas = new Array();
+                var NoRespondidas = new Array();
+
+                var Nombre = new Array();
+                var Color = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var MES12 = new Array();
+
+                $.each(json['pie'], function (index, value) {
+                    Serie[index] = value['Serie'];
+                    Respondidas[index] = value['Respondidas'];
+                    NoRespondidas[index] = value['NoRespondidas'];
+
+                });
+                MES1[0] = Respondidas[0];
+                MES1[1] = NoRespondidas[0];
+                MES2[0] = Respondidas[1];
+                MES2[1] = NoRespondidas[1];
+                MES3[0] = Respondidas[2];
+                MES3[1] = NoRespondidas[2];
+                MES4[0] = Respondidas[3];
+                MES4[1] = NoRespondidas[3];
+                MES5[0] = Respondidas[4];
+                MES5[1] = NoRespondidas[4];
+                MES6[0] = Respondidas[5];
+                MES6[1] = NoRespondidas[5];
+                MES7[0] = Respondidas[6];
+                MES7[1] = NoRespondidas[6];
+                MES8[0] = Respondidas[7];
+                MES8[1] = NoRespondidas[7];
+                MES9[0] = Respondidas[8];
+                MES9[1] = NoRespondidas[8];
+                MES10[0] = Respondidas[9];
+                MES10[1] = NoRespondidas[9];
+                MES11[0] = Respondidas[10];
+                MES11[1] = NoRespondidas[10];
+                MES12[0] = Respondidas[11];
+                MES12[1] = NoRespondidas[11];
+
+                Nombre[0] = 'Respondidas';
+                Nombre[1] = 'No respondidas';
+
+                Color[0] = '#7CBB00';
+                Color[1] = '#B21E1E';
+
+                // inicio chart
+
+                var series = [];
+                var datosSeries = [];
+
+
+                for (var i = 0; i < 2; i++) {
+                    datosSeries = []
+                    //datosSeries.push(Total[i])
+
+                    //datosSeries.push(Resolved[i])
+                    datosSeries.push(MES1[i])
+
+                    datosSeries.push(MES2[i])
+
+                    datosSeries.push(MES3[i])
+
+                    datosSeries.push(MES4[i])
+
+                    datosSeries.push(MES5[i])
+
+                    datosSeries.push(MES6[i])
+
+                    datosSeries.push(MES7[i])
+
+                    datosSeries.push(MES8[i])
+
+                    datosSeries.push(MES9[i])
+
+                    datosSeries.push(MES10[i])
+
+                    datosSeries.push(MES11[i])
+
+                    datosSeries.push(MES12[i])
+
+                    // add browser data
+                    series.push({
+                        name: Nombre[i],
+                        color: Color[i],
+                        data: datosSeries
+                    });
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'encuestaResumen',
+                        zoomType: 'xy'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth: 1,
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+
+                    },
+                    yAxis: {
+                        minRange: 10,//json['agree'],
+                        min: 0,
+                        lineWidth: 1,
+                        title: {
+                            text: 'Encuestas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: '#516882',
+                            value: json['agree'],
+                            label: {
+                                text: json['agree']
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Encuestas',
+                        valueDecimals: 2
+                    },
+                    plotOptions: {
+                        line: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' },
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        }
+                    },
+                    series: series
+                });
+            }
+        });
+            myEncuestaResumen = setTimeout("encuestaResumen();", 300000);
+
+    }
+
+    function pregunta13Encuestas() {
+        var MES_TIME = $("#Mes").data("kendoComboBox");
+        var ANIO_TIME = $("#Anio").data("kendoComboBox");
+
+        $.ajax({
+            url: '/EncuestaConfiguracion/encuestaPreguntaMensual?&IdAcco=' + $("#IdAcco").val() + "&Mes=" + ($("#Mes").val()) + '&Anio=' + $("#Anio").val() + '&Pregunta=' + 13 + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+
+                var Serie = new Array();
+                var MuyMalo = new Array();
+                var Malo = new Array();
+                var Regular = new Array();
+                var Bueno = new Array();
+                var Excelente = new Array();
+
+                var Nombre = new Array();
+                var Color = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var MES12 = new Array();
+
+                $.each(json['pie'], function (index, value) {
+                    Serie[index] = value['Serie'];
+                    MuyMalo[index] = value['MuyMalo'];
+                    Malo[index] = value['Malo'];
+                    Regular[index] = value['Regular'];
+                    Bueno[index] = value['Bueno'];
+                    Excelente[index] = value['Excelente'];
+
+                });
+                MES1[0] = MuyMalo[0];
+                MES1[1] = Malo[0];
+                MES1[2] = Regular[0];
+                MES1[3] = Bueno[0];
+                MES1[4] = Excelente[0];
+                MES2[0] = MuyMalo[1];
+                MES2[1] = Malo[1];
+                MES2[2] = Regular[1];
+                MES2[3] = Bueno[1];
+                MES2[4] = Excelente[1];
+                MES3[0] = MuyMalo[2];
+                MES3[1] = Malo[2];
+                MES3[2] = Regular[2];
+                MES3[3] = Bueno[2];
+                MES3[4] = Excelente[2];
+                MES4[0] = MuyMalo[3];
+                MES4[1] = Malo[3];
+                MES4[2] = Regular[3];
+                MES4[3] = Bueno[3];
+                MES4[4] = Excelente[3];
+                MES5[0] = MuyMalo[4];
+                MES5[1] = Malo[4];
+                MES5[2] = Regular[4];
+                MES5[3] = Bueno[4];
+                MES5[4] = Excelente[4];
+                MES6[0] = MuyMalo[5];
+                MES6[1] = Malo[5];
+                MES6[2] = Regular[5];
+                MES6[3] = Bueno[5];
+                MES6[4] = Excelente[5];
+                MES7[0] = MuyMalo[6];
+                MES7[1] = Malo[6];
+                MES7[2] = Regular[6];
+                MES7[3] = Bueno[6];
+                MES7[4] = Excelente[6];
+                MES8[0] = MuyMalo[7];
+                MES8[1] = Malo[7];
+                MES8[2] = Regular[7];
+                MES8[3] = Bueno[7];
+                MES8[4] = Excelente[7];
+                MES9[0] = MuyMalo[8];
+                MES9[1] = Malo[8];
+                MES9[2] = Regular[8];
+                MES9[3] = Bueno[8];
+                MES9[4] = Excelente[8];
+                MES10[0] = MuyMalo[9];
+                MES10[1] = Malo[9];
+                MES10[2] = Regular[9];
+                MES10[3] = Bueno[9];
+                MES10[4] = Excelente[9];
+                MES11[0] = MuyMalo[10];
+                MES11[1] = Malo[10];
+                MES11[2] = Regular[10];
+                MES11[3] = Bueno[10];
+                MES11[4] = Excelente[10];
+                MES12[0] = MuyMalo[11];
+                MES12[1] = Malo[11];
+                MES12[2] = Regular[11];
+                MES12[3] = Bueno[11];
+                MES12[4] = Excelente[11];
+
+                Nombre[0] = 'Muy Malo';
+                Nombre[1] = 'Malo';
+                Nombre[2] = 'Regular';
+                Nombre[3] = 'Bueno';
+                Nombre[4] = 'Excelente';
+
+                Color[0] = '#CF2A56';
+                Color[1] = '#96C4AB';
+                Color[2] = '#FFF77D';
+                Color[3] = '#CDCF19';
+                Color[4] = '#212629';
+
+                // inicio chart
+
+                var series = [];
+                var datosSeries = [];
+
+
+                for (var i = 0; i < 5; i++) {
+                    datosSeries = []
+                    //datosSeries.push(Total[i])
+
+                    //datosSeries.push(Resolved[i])
+                    datosSeries.push(MES1[i])
+
+                    datosSeries.push(MES2[i])
+
+                    datosSeries.push(MES3[i])
+
+                    datosSeries.push(MES4[i])
+
+                    datosSeries.push(MES5[i])
+
+                    datosSeries.push(MES6[i])
+
+                    datosSeries.push(MES7[i])
+
+                    datosSeries.push(MES8[i])
+
+                    datosSeries.push(MES9[i])
+
+                    datosSeries.push(MES10[i])
+
+                    datosSeries.push(MES11[i])
+
+                    datosSeries.push(MES12[i])
+
+                    // add browser data
+                    series.push({
+                        name: Nombre[i],
+                        color: Color[i],
+                        data: datosSeries
+                    });
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'pregunta13Encuestas',
+                        zoomType: 'xy'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth: 1,
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+
+                    },
+                    yAxis: {
+                        minRange: 10,//json['agree'],
+                        min: 0,
+                        lineWidth: 1,
+                        title: {
+                            text: 'Encuestas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: '#516882',
+                            value: json['agree'],
+                            label: {
+                                text: json['agree']
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Encuestas',
+                        valueDecimals: 2
+                    },
+                    plotOptions: {
+                        line: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' },
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        }
+                    },
+                    series: series
+                });
+            }
+        });
+        myPregunta13Encuestas = setTimeout("pregunta13Encuestas();", 300000);
+
+    }
+
+    function pregunta14Encuestas() {
+        var MES_TIME = $("#Mes").data("kendoComboBox");
+        var ANIO_TIME = $("#Anio").data("kendoComboBox");
+
+        $.ajax({
+            url: '/EncuestaConfiguracion/encuestaPreguntaMensual?&IdAcco=' + $("#IdAcco").val() + "&Mes=" + ($("#Mes").val()) + '&Anio=' + $("#Anio").val() + '&Pregunta=' + 14 + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+
+                var Serie = new Array();
+                var MuyMalo = new Array();
+                var Malo = new Array();
+                var Regular = new Array();
+                var Bueno = new Array();
+                var Excelente = new Array();
+
+                var Nombre = new Array();
+                var Color = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var MES12 = new Array();
+
+                $.each(json['pie'], function (index, value) {
+                    Serie[index] = value['Serie'];
+                    MuyMalo[index] = value['MuyMalo'];
+                    Malo[index] = value['Malo'];
+                    Regular[index] = value['Regular'];
+                    Bueno[index] = value['Bueno'];
+                    Excelente[index] = value['Excelente'];
+
+                });
+                MES1[0] = MuyMalo[0];
+                MES1[1] = Malo[0];
+                MES1[2] = Regular[0];
+                MES1[3] = Bueno[0];
+                MES1[4] = Excelente[0];
+                MES2[0] = MuyMalo[1];
+                MES2[1] = Malo[1];
+                MES2[2] = Regular[1];
+                MES2[3] = Bueno[1];
+                MES2[4] = Excelente[1];
+                MES3[0] = MuyMalo[2];
+                MES3[1] = Malo[2];
+                MES3[2] = Regular[2];
+                MES3[3] = Bueno[2];
+                MES3[4] = Excelente[2];
+                MES4[0] = MuyMalo[3];
+                MES4[1] = Malo[3];
+                MES4[2] = Regular[3];
+                MES4[3] = Bueno[3];
+                MES4[4] = Excelente[3];
+                MES5[0] = MuyMalo[4];
+                MES5[1] = Malo[4];
+                MES5[2] = Regular[4];
+                MES5[3] = Bueno[4];
+                MES5[4] = Excelente[4];
+                MES6[0] = MuyMalo[5];
+                MES6[1] = Malo[5];
+                MES6[2] = Regular[5];
+                MES6[3] = Bueno[5];
+                MES6[4] = Excelente[5];
+                MES7[0] = MuyMalo[6];
+                MES7[1] = Malo[6];
+                MES7[2] = Regular[6];
+                MES7[3] = Bueno[6];
+                MES7[4] = Excelente[6];
+                MES8[0] = MuyMalo[7];
+                MES8[1] = Malo[7];
+                MES8[2] = Regular[7];
+                MES8[3] = Bueno[7];
+                MES8[4] = Excelente[7];
+                MES9[0] = MuyMalo[8];
+                MES9[1] = Malo[8];
+                MES9[2] = Regular[8];
+                MES9[3] = Bueno[8];
+                MES9[4] = Excelente[8];
+                MES10[0] = MuyMalo[9];
+                MES10[1] = Malo[9];
+                MES10[2] = Regular[9];
+                MES10[3] = Bueno[9];
+                MES10[4] = Excelente[9];
+                MES11[0] = MuyMalo[10];
+                MES11[1] = Malo[10];
+                MES11[2] = Regular[10];
+                MES11[3] = Bueno[10];
+                MES11[4] = Excelente[10];
+                MES12[0] = MuyMalo[11];
+                MES12[1] = Malo[11];
+                MES12[2] = Regular[11];
+                MES12[3] = Bueno[11];
+                MES12[4] = Excelente[11];
+
+                Nombre[0] = 'Muy Malo';
+                Nombre[1] = 'Malo';
+                Nombre[2] = 'Regular';
+                Nombre[3] = 'Bueno';
+                Nombre[4] = 'Excelente';
+
+                Color[0] = '#CF2A56';
+                Color[1] = '#96C4AB';
+                Color[2] = '#FFF77D';
+                Color[3] = '#CDCF19';
+                Color[4] = '#212629';
+
+                // inicio chart
+
+                var series = [];
+                var datosSeries = [];
+
+
+                for (var i = 0; i < 5; i++) {
+                    datosSeries = []
+                    //datosSeries.push(Total[i])
+
+                    //datosSeries.push(Resolved[i])
+                    datosSeries.push(MES1[i])
+
+                    datosSeries.push(MES2[i])
+
+                    datosSeries.push(MES3[i])
+
+                    datosSeries.push(MES4[i])
+
+                    datosSeries.push(MES5[i])
+
+                    datosSeries.push(MES6[i])
+
+                    datosSeries.push(MES7[i])
+
+                    datosSeries.push(MES8[i])
+
+                    datosSeries.push(MES9[i])
+
+                    datosSeries.push(MES10[i])
+
+                    datosSeries.push(MES11[i])
+
+                    datosSeries.push(MES12[i])
+
+                    // add browser data
+                    series.push({
+                        name: Nombre[i],
+                        color: Color[i],
+                        data: datosSeries
+                    });
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'pregunta14Encuestas',
+                        zoomType: 'xy'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth: 1,
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+
+                    },
+                    yAxis: {
+                        minRange: 10,//json['agree'],
+                        min: 0,
+                        lineWidth: 1,
+                        title: {
+                            text: 'Encuestas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: '#516882',
+                            value: json['agree'],
+                            label: {
+                                text: json['agree']
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Encuestas',
+                        valueDecimals: 2
+                    },
+                    plotOptions: {
+                        line: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' },
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        }
+                    },
+                    series: series
+                });
+            }
+        });
+        myPregunta14Encuestas = setTimeout("pregunta14Encuestas();", 300000);
+
+    }
+
+    function pregunta15Encuestas() {
+        var MES_TIME = $("#Mes").data("kendoComboBox");
+        var ANIO_TIME = $("#Anio").data("kendoComboBox");
+
+        $.ajax({
+            url: '/EncuestaConfiguracion/encuestaPreguntaMensual?&IdAcco=' + $("#IdAcco").val() + "&Mes=" + ($("#Mes").val()) + '&Anio=' + $("#Anio").val() + '&Pregunta=' + 15 + '&var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+
+                var Serie = new Array();
+                var MuyMalo = new Array();
+                var Malo = new Array();
+                var Regular = new Array();
+                var Bueno = new Array();
+                var Excelente = new Array();
+
+                var Nombre = new Array();
+                var Color = new Array();
+                var MES1 = new Array();
+                var MES2 = new Array();
+                var MES3 = new Array();
+                var MES4 = new Array();
+                var MES5 = new Array();
+                var MES6 = new Array();
+                var MES7 = new Array();
+                var MES8 = new Array();
+                var MES9 = new Array();
+                var MES10 = new Array();
+                var MES11 = new Array();
+                var MES12 = new Array();
+
+                $.each(json['pie'], function (index, value) {
+                    Serie[index] = value['Serie'];
+                    MuyMalo[index] = value['MuyMalo'];
+                    Malo[index] = value['Malo'];
+                    Regular[index] = value['Regular'];
+                    Bueno[index] = value['Bueno'];
+                    Excelente[index] = value['Excelente'];
+
+                });
+                MES1[0] = MuyMalo[0];
+                MES1[1] = Malo[0];
+                MES1[2] = Regular[0];
+                MES1[3] = Bueno[0];
+                MES1[4] = Excelente[0];
+                MES2[0] = MuyMalo[1];
+                MES2[1] = Malo[1];
+                MES2[2] = Regular[1];
+                MES2[3] = Bueno[1];
+                MES2[4] = Excelente[1];
+                MES3[0] = MuyMalo[2];
+                MES3[1] = Malo[2];
+                MES3[2] = Regular[2];
+                MES3[3] = Bueno[2];
+                MES3[4] = Excelente[2];
+                MES4[0] = MuyMalo[3];
+                MES4[1] = Malo[3];
+                MES4[2] = Regular[3];
+                MES4[3] = Bueno[3];
+                MES4[4] = Excelente[3];
+                MES5[0] = MuyMalo[4];
+                MES5[1] = Malo[4];
+                MES5[2] = Regular[4];
+                MES5[3] = Bueno[4];
+                MES5[4] = Excelente[4];
+                MES6[0] = MuyMalo[5];
+                MES6[1] = Malo[5];
+                MES6[2] = Regular[5];
+                MES6[3] = Bueno[5];
+                MES6[4] = Excelente[5];
+                MES7[0] = MuyMalo[6];
+                MES7[1] = Malo[6];
+                MES7[2] = Regular[6];
+                MES7[3] = Bueno[6];
+                MES7[4] = Excelente[6];
+                MES8[0] = MuyMalo[7];
+                MES8[1] = Malo[7];
+                MES8[2] = Regular[7];
+                MES8[3] = Bueno[7];
+                MES8[4] = Excelente[7];
+                MES9[0] = MuyMalo[8];
+                MES9[1] = Malo[8];
+                MES9[2] = Regular[8];
+                MES9[3] = Bueno[8];
+                MES9[4] = Excelente[8];
+                MES10[0] = MuyMalo[9];
+                MES10[1] = Malo[9];
+                MES10[2] = Regular[9];
+                MES10[3] = Bueno[9];
+                MES10[4] = Excelente[9];
+                MES11[0] = MuyMalo[10];
+                MES11[1] = Malo[10];
+                MES11[2] = Regular[10];
+                MES11[3] = Bueno[10];
+                MES11[4] = Excelente[10];
+                MES12[0] = MuyMalo[11];
+                MES12[1] = Malo[11];
+                MES12[2] = Regular[11];
+                MES12[3] = Bueno[11];
+                MES12[4] = Excelente[11];
+
+                Nombre[0] = 'Muy Malo';
+                Nombre[1] = 'Malo';
+                Nombre[2] = 'Regular';
+                Nombre[3] = 'Bueno';
+                Nombre[4] = 'Excelente';
+
+                Color[0] = '#CF2A56';
+                Color[1] = '#96C4AB';
+                Color[2] = '#FFF77D';
+                Color[3] = '#CDCF19';
+                Color[4] = '#212629';
+
+                // inicio chart
+
+                var series = [];
+                var datosSeries = [];
+
+
+                for (var i = 0; i < 5; i++) {
+                    datosSeries = []
+                    //datosSeries.push(Total[i])
+
+                    //datosSeries.push(Resolved[i])
+                    datosSeries.push(MES1[i])
+
+                    datosSeries.push(MES2[i])
+
+                    datosSeries.push(MES3[i])
+
+                    datosSeries.push(MES4[i])
+
+                    datosSeries.push(MES5[i])
+
+                    datosSeries.push(MES6[i])
+
+                    datosSeries.push(MES7[i])
+
+                    datosSeries.push(MES8[i])
+
+                    datosSeries.push(MES9[i])
+
+                    datosSeries.push(MES10[i])
+
+                    datosSeries.push(MES11[i])
+
+                    datosSeries.push(MES12[i])
+
+                    // add browser data
+                    series.push({
+                        name: Nombre[i],
+                        color: Color[i],
+                        data: datosSeries
+                    });
+                }
+
+                chart = new Highcharts.Chart({
+                    chart: {
+                        type: 'line',
+                        marginTop: 20,
+                        marginRight: 20,
+                        marginBottom: 80,
+                        renderTo: 'pregunta15Encuestas',
+                        zoomType: 'xy'
+                    },
+                    credits: { enabled: false },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        lineWidth: 1,
+                        categories: Serie,
+                        gridLineWidth: 1,
+                        title: {
+                            text: 'Months',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+
+                    },
+                    yAxis: {
+                        minRange: 10,//json['agree'],
+                        min: 0,
+                        lineWidth: 1,
+                        title: {
+                            text: 'Encuestas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        plotLines: [{
+                            value: 0,
+                            width: 1,
+                            color: '#808080',
+                        }, {
+                            width: 2,
+                            dashStyle: 'ShortDash',
+                            color: '#516882',
+                            value: json['agree'],
+                            label: {
+                                text: json['agree']
+                            }
+                        }]
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Encuestas',
+                        valueDecimals: 2
+                    },
+                    plotOptions: {
+                        line: {
+                            lineWidth: 3,
+                            marker: { symbol: 'circle' },
+                            tooltip: {
+                                headerFormat: headerFormat,
+                                pointFormat: pointFormat
+                            }
+                        }
+                    },
+                    series: series
+                });
+            }
+        });
+        myPregunta15Encuestas = setTimeout("pregunta15Encuestas();", 300000);
+
+    }
+
+    function uploadDone(msg) {
+        if (msg == "ERROR") {
+            winPopUpModal("Alerta", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+            + "<div style='padding:10px 0px 10px 0px;'>"+"Debe completar los campos porfavor"+"</div>"
+            + "La notificación ha sido enviada exitosamente a: <br>End User, Staff, Service Desk y Coordinador TI.<br>" +
+            "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>Continuar</button>" +
+           "</div></div>", 400, 180);
+
+            var undo = $("#continues")
+           .bind("click", function () {
+               closeWinModalPopUp();
+           });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+
+</script>

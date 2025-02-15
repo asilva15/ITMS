@@ -1,0 +1,317 @@
+﻿@{
+    ViewBag.Title = "Team";
+    Layout = null;
+}
+
+<input type="hidden" id="BandListteam" value="@ViewBag.banderateam" />
+
+<div style="width:60%; float:left; padding-left:0px; margin-left:0px;">
+    <div class="titleForm">
+        <div class="title" id="">Staff Assigned to the Project</div>
+    </div>
+
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            <div class=" inbodyformrbl" style="min-height:465px; display:inline-block; padding:10px;">
+
+                <div id="divprojmanag" style="border-bottom: 1px solid grey; width: 100%; display: table; padding: 0px 10px 0px 10px; ">
+                </div>
+
+                <div id="divtechnical" style="width: 100%;  padding: 10px 10px 5px 0px; ">
+                </div>
+
+                <div id="divtecteam" style="width: 100%; padding: 10px 10px 5px 0px; ">
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+@*-----------------------POPUP ADD NEW TECHNICAL LEADER------------------------------*@
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add Technical Leader</h4>
+            </div>
+            <div class="modal-body">
+                <div class="editor-label">
+                    Staff
+                </div>
+                <div class="editor-field" style="font-size:0.9em">
+                    @Html.TextBox("ArrayFile")
+                </div>
+                <br />
+                @*<input name="files" id="files" type="file" />*@
+            </div>
+            <div class="modal-footer">
+                <button onclick="AddNewLeaderTenichal()" type="button" class="k-button" data-dismiss="modal">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@*-----------------------POPUP ADD NEW TECHNICAL TEAM------------------------------*@
+
+<div class="modal fade" id="myModalTeam" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add Technical Team</h4>
+            </div>
+            <div class="modal-body">
+                <div class="editor-label">
+                    Staff
+                </div>
+                <div class="editor-field" style="font-size:0.9em">
+                    @Html.TextBox("ArrayTeam")
+                </div>
+                <br />
+                @*<input name="files" id="files" type="file" />*@
+            </div>
+            <div class="modal-footer">
+                <button onclick="AddNewTenichal()" type="button" class="k-button" data-dismiss="modal">Add</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        LoadTeam();       
+
+    })
+
+    //---------------------------------------TEAM-------------------------------------
+
+    function LoadTeam() {
+        $.ajax({
+            url: "/Project/ListTeam/@ViewBag.ID_PROJ_TEAM/@ViewBag.ID_PERS_ENTI_TEAM",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                datos = source;
+                showProjectManag();
+            },
+            error: function (source) {
+                alert("Error Carga Json");
+            }
+        });
+    }
+
+    function showProjectManag() {
+
+        $("#divprojmanag").empty();
+        $("#divtechnical").empty();
+        $("#divtecteam").empty();
+
+        $.each(datos['Data'], function (index, value) {
+
+            $("#divprojmanag").append(' <div style="width:100%;">' +
+                                                '<div style="display:table-cell; width:20px;"><img style="display:inline-block;" title="Project Management" src="/Content/Images/projmanag.png" /></div>' +
+                                                '<div style="display: table-cell; width: 400px; height: 25px"><div>Project Managment: ' + value['NAME'] + '</div></div>' +
+                                                '<div id="addnewleatec" style="display: table-cell; width:80px; height:25px; text-align:right; ">' +
+
+                                                '</div>' +
+                                       '</div>');
+            if (datos.banderapmo == 1) {
+                $("#addnewleatec").append('<div><img data-toggle="modal" data-target="#myModal" onclick="ListStaff(1)" style="display:inline-block; cursor:pointer;" title="Add Technical Leader" src="/Content/Images/addnewleadertec.png" /></div>');
+            }
+        });
+
+        $.each(datos['Equipo'], function (index, value) {
+
+            if (datos.Cant >= 1 && value['ID_ROL_TEAM'] == 1) {
+
+                $("#divtechnical").append('<div style="vertical-align:middle;">' +
+                                             '<div style="display: inline-block; width: 20px; height: 20px; float: left;"></div>' +
+                                             '<div style="display: inline-block; width: 20px; height: 20px; float: left;">' +
+                                                   '<img style="display:inline-block;" title="Technical Leader" src="/Content/Images/leadertec.png" />' +
+                                             '</div>' +
+                                             '<div style="display: inline-block; height:20px;float:left; ">Technical Leader: ' + value['NAM_TEAM'] + '</div>' +
+                                             '<div id="addnewpertec" style="display: inline-block; width:80px; height:20px; float:right;"></div>' +
+                                             '<div style="clear:both;"></div>' +
+                                          '</div>');
+
+                $("#divtechnical").css("border-bottom", "1px solid grey");
+
+                if (datos.banderaleaderteam == 1) {
+                    $("#addnewpertec").append('<div style="text-align:right;"><img data-toggle="modal" data-target="#myModalTeam" onclick="ListStaff(2)" style="cursor:pointer;" title="Add Technical Team" src="/Content/Images/addnewtecteam.png" /></div>');
+                }
+            }
+
+            if (datos.Cant >= 1 && value['ID_ROL_TEAM'] == 2) {
+
+                $("#divtecteam").append('<div style="vertical-align:middle;">' +
+                                                '<div style="display: inline-block; width: 40px; height: 20px; float: left;"></div>' +
+                                                '<div style="display: inline-block; width: 20px; height: 20px; float: left;">' +
+                                                      '<img style="display:inline-block;" title="Technical Team Staff" src="/Content/Images/tecteam.png" />' +
+                                                '</div>' +
+                                                '<div style="display: inline-block; height:20px;float:left; ">Technical Team Staff: ' + value['NAM_TEAM'] + '</div>' +
+                                                '<div id="personteam" style="display: inline-block; width:80px; height:20px; float:right;"></div>' +
+                                                '<div style="clear:both;"></div>' +
+                                             '</div>');
+
+                $("#divtecteam").css("border-bottom", "1px solid grey");
+
+            }
+
+        });
+    }
+
+    function ListStaff(id) {
+
+        $.get("/Project/Equipo", function (json) {
+
+            if (id == 1) {
+                var ArrayFile = $("#ArrayFile").kendoComboBox({
+                    index: 1,
+                    dataTextField: "FIR_NAME",
+                    dataValueField: "ID_PERS_ENTI",
+                    template: '<div style="clear:both;"><div style="float:left"><img height="40" width="40" src=\"/Content/Fotos/${data.ID_FOTO}.jpg\" alt=\"#:data.ID_ENTI#\" /></div>' +
+                                      '<div style="" ><div style="height:40px;">&nbsp;${data.FIR_NAME}<br /></div></div></div>',
+                    filter: "contains",
+                    autoBind: true,
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    dataSource: json['Data']
+                }).data("kendoComboBox");
+            }
+
+            if (id == 2) {
+                var ArrayFile = $("#ArrayTeam").kendoComboBox({
+                    index: 1,
+                    dataTextField: "FIR_NAME",
+                    dataValueField: "ID_PERS_ENTI",
+                    template: '<div style="clear:both;"><div style="float:left"><img height="40" width="40" src=\"/Content/Fotos/${data.ID_FOTO}.jpg\" alt=\"#:data.ID_ENTI#\" /></div>' +
+                                      '<div style="" ><div style="height:40px;">&nbsp;${data.FIR_NAME}<br /></div></div></div>',
+                    filter: "contains",
+                    autoBind: true,
+                    delay: 500,
+                    minLength: 0,
+                    suggest: true,
+                    dataSource: json['Data']
+                }).data("kendoComboBox");
+            }
+        })
+    }
+
+    function AddNewLeaderTenichal() {
+        var ArrayFile = $("#ArrayFile").data("kendoComboBox");
+        var idpersenti = ArrayFile.dataItem().ID_PERS_ENTI;
+
+        $.get("/Project/SaveTeam/@ViewBag.ID_PROJ_TEAM/" + idpersenti + "/1", function (data) {
+
+            if (data == 'OK') {
+
+                var msg = 'Technical Leader Assigned Correctly';
+
+                var title = '@ResourceLanguaje.Resource.InformationSaved ';
+                var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                                "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                                "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                                "<button id='btnContinues' class='k-button'>Continue</button>" +
+                                "</div></div>";
+
+                winPopUpModal(title, body, 300, 140);
+
+                $("#btnContinues").click(function () {
+
+                    $("#dlg").hide('200', "swing", function () {
+                        $("#bkg").fadeOut("300");
+
+                        LoadTeam();
+                    });
+
+                });
+            }
+            else {
+                var msg = 'This Project Already has an Assigned Technical Leader';
+
+                var title = '@ResourceLanguaje.Resource.InformationSaved ';
+                var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                                "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                                "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                                "<button id='btnContinues' class='k-button'>Continue</button>" +
+                                "</div></div>";
+
+                winPopUpModal(title, body, 300, 140);
+
+                $("#btnContinues").click(function () {
+
+                    $("#dlg").hide('200', "swing", function () {
+                        $("#bkg").fadeOut("300");
+
+                    });
+                });
+            }
+
+        });
+    }
+
+    function AddNewTenichal() {
+        var ArrayFile = $("#ArrayTeam").data("kendoComboBox");
+        var idpersenti = ArrayFile.dataItem().ID_PERS_ENTI;
+
+        $.get("/Project/SaveTeam/@ViewBag.ID_PROJ_TEAM/" + idpersenti + "/2?ID_PERS_PROJ=@ViewBag.ID_PERS_ENTI_TEAM", function (data) {
+
+            if (data == 'OK') {
+
+                var msg = 'Technical Team Staff Assigned Correctly';
+
+                var title = '@ResourceLanguaje.Resource.InformationSaved ';
+                var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                                "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                                "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                                "<button id='btnContinues' class='k-button'>Continue</button>" +
+                                "</div></div>";
+
+                winPopUpModal(title, body, 300, 140);
+
+
+
+                $("#btnContinues").click(function () {
+
+                    $("#dlg").hide('200', "swing", function () {
+                        $("#bkg").fadeOut("300");
+                        LoadTeam();
+                    });
+
+                });
+            }
+            else {
+                var msg = 'The Staff Already Assigned';
+
+                var title = '@ResourceLanguaje.Resource.InformationSaved ';
+                var body = "<div style='padding:0px 0px 20px 0px;'>" +
+                                "<div style='padding:10px 0px 10px 0px;'>" + msg + "</div>" +
+                                "<div style='float:right; padding:15px 10px 0px 6px; font-size:0.9em;'>" +
+                                "<button id='btnContinues' class='k-button'>Continue</button>" +
+                                "</div></div>";
+
+                winPopUpModal(title, body, 300, 140);
+
+                $("#btnContinues").click(function () {
+
+                    $("#dlg").hide('200', "swing", function () {
+                        $("#bkg").fadeOut("300");
+
+                    });
+                });
+            }
+
+        });
+    }
+    
+
+</script>

@@ -1,0 +1,517 @@
+﻿@{
+    Layout = null;
+}
+<div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+
+<style>
+    .k-datepicker {
+        width: 120px !important;
+        min-width: 140px !important;
+        min-width: 140px !important;
+    }
+
+    .k-datetimepicker {
+        min-width: 160px;
+    }
+
+    #SIN_DATE {
+        width: 120px;
+    }
+
+    .k-combobox {
+        min-width: 170px;
+    }
+
+    #COD_SUBTYPE_ACT {
+        height: 25px !important;
+        min-width: 80px;
+        max-width: 80px;
+        font-size: 14px !important;
+    }
+
+    #ID_TYPE_ACT {
+        min-width: 130px !important;
+    }
+
+    .contain-newAct {
+        min-width: 1150px;
+        max-width: 1200px;
+        float: left;
+    }
+
+    .backgroundcad {
+        max-width: 100%;
+        min-width: 100%;
+    }
+
+    .text-box {
+        width: 187px;
+        height: 26px;
+    }
+
+    .table {
+        width: 100%;
+    }
+
+    #PALABRA_CLAVE {
+        width: 187px;
+        height: 24px;
+    }
+
+    #detailAct {
+        width: 300px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
+<div style="width:100%">
+    <div class="titleForm">
+        <div class="title">Detalle de Actividades</div>
+    </div>
+    <div class="inBodyForm" style="height:auto; padding:10px 10px 10px 10px;" id="">
+        @using (Html.BeginForm("ExportarListActivity", "Activity", FormMethod.Post, new { id = "FrmDetailsActivity" }))
+        {
+            @Html.ValidationSummary(true)
+            <input type="hidden" name="ID_USR_ACT" id="ID_USR_ACT" value="@Session["UserId"]" />
+            <input type="hidden" name="VALIDATEUSER_ACT" id="VALIDATEUSER_ACT" value="@ViewBag.VALIDATEUSER" />
+
+            <div style="width:100%;">
+                <div id="FormFilterActivity" class="divHide" style="background-color: rgba(241,241,241,0.5)">
+                    <div class="bodyForm">
+
+                        <div class="inBodyForm">
+                            <div id="allPerformance" style="width:100%;">
+                                <div style="padding-left: 10px;">
+                                    <div style="width: 100%; height: 55px; margin: 10px 10px 7px 0px; padding: 0px 0px 0px 0px; font-size: 0.95em;" id="divFiltro">
+                                        <form id="ParamByPerson">
+                                            <div style="float: left; margin: 0px 10px 0px 10px; ">Cliente:<br />  <input type="text" id="ID_CLIE" name="ID_CLIE" /></div>
+                                            @*@if (Convert.ToInt32(ViewBag.VALIDATEUSER) == 1)
+                                            {*@
+                                                <div class="filterPerson" style="float:left;">Usuario :<br /><input type="text" id="ID_ENTI_FILTER" name="ID_ENTI_FILTER" /></div>
+                                            @*  }*@
+                                            <div style="float: left; margin: 0px 10px 0px 10px;">Desde :<br /><input type="text" id="SIN_DATE" name="SIN_DATE" /></div>
+                                            <div style="float: left; margin: 0px 10px 0px 10px; ">Hasta :<br />  <input type="text" id="TO_DATE" name="TO_DATE" /></div>
+                                            <div style="float: left;">Tipo/SubTipo/Descripcion :<br />  <input type="text" id="PALABRA_CLAVE" name="PALABRA_CLAVE" /></div>
+                                            <div style="float: left;"><button id="btnBuscar" class="k-button" style="margin: 15px;" onclick="fnBuscar(); return false;">Buscar</button></div>
+                                            <div style="float: left;"><button id="btnExportar" class="k-button" style="margin: 15px;" onclick="fnExportar(); return false;">Exportar</button></div>
+                                        </form>
+                                        <div style="clear:both;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table id="grid" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th id="showUsuario">Usuario</th>
+                            <th>Fecha Inicio</th>
+                            <th>Fecha Fin</th>
+                            <th>Hrs</th>
+                            @{
+                                if (@ViewBag.ID_ACCO == 4)
+                                {
+                                    <th>Tipo Actividad</th>
+                                }
+                            }
+                            @*<th>SubTipo</th>*@
+                            <th>Categoria</th>
+                            <th>Descripcion</th>
+                            <th>Comentarios</th>
+                            @*<th>Cuenta</th>*@
+                            <th style="border-left: 1px solid #e2e2e2; width: 120px; ">Opciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="TableNewActivity"></tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+<iframe id="FrmDetailsActivity" name="FrmDetailsActivity" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        var param_url = !!location.href.match(/&/);
+        if ('@ViewBag.VALIDATEUSER' == 'True' || parseInt(@Session["UserId"]) == 34) {
+            $('#showUsuario').show();
+        }
+        else {
+            $("#showUsuario").hide();
+        }
+        var id = $("#ID_USR_ACT").val();
+        if (param_url == false) {
+            function endChange() {
+                var endDate = k_enddatetimepicker.value(),
+                    startDate = k_startdatetimepicker.value();
+                console.log(endDate, startDate);
+
+                if (endDate) {
+                    endDate = new Date(endDate);
+                    endDate.setDate(endDate.getDate());
+                    k_startdatetimepicker.max(endDate);
+                } else if (startDate) {
+                    k_enddatetimepicker.min(new Date(startDate));
+                } else {
+                    endDate = new Date();
+                    k_startdatetimepicker.max(endDate);
+                    k_enddatetimepicker.min(endDate);
+                }
+            }
+            var today = new Date();
+            var k_enddatetimepicker = $("#TO_DATE").kendoDatePicker({
+                value: today,
+                change: endChange
+            }).data("kendoDateTimePicker");
+            function addDays(theDate, days) {
+                return new Date(theDate.getTime() + days * 24 * 60 * 60 * 1000);
+            }
+            var yesterday = addDays(new Date(), -1);
+            var k_startdatetimepicker = $("#SIN_DATE").kendoDatePicker({
+                value: yesterday
+            });
+        }
+        else {           
+            $.urlParam = function (name) {
+                var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+                if (results == null) {
+                    return null;
+                }
+                else {
+                    return results[1] || 0;
+                }
+            }            
+            var DateInDTP = $("#SIN_DATE").kendoDatePicker().data("kendoDatePicker");
+            var DateEndDTP = $("#TO_DATE").kendoDatePicker().data("kendoDatePicker");
+
+            var DateIni = new Date(unescape($.urlParam('SIN_DATE')));
+            var dateFin =  new Date(unescape($.urlParam('TO_DATE')));            
+            //$("#ID_ENTI_FILTER").val(unescape($.urlParam('PALABRA_CLAVE')));
+            DateInDTP.value(DateIni);
+            DateEndDTP.value(dateFin);
+        }
+        LoadActivityByPerson(id, param_url);
+        FnFilterFindActivity();
+        var ID_CLIE = $("#ID_CLIE").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+    });
+    function fnBuscar() {
+        var idUser = parseInt($('#ID_USR_ACT').val());
+        LoadActivityByPerson(idUser, false);
+    }
+    function fnExportar() {
+        $("#FrmDetailsActivity").submit();
+    }
+
+    function LoadActivityByPerson(id, param_url) {
+        function startChange() {
+            var startDate = k_startdatetimepicker.value(),
+                endDate = k_enddatetimepicker.value();
+
+            if (startDate) {
+                startDate = new Date(startDate);
+                startDate.setDate(startDate.getDate());
+                k_enddatetimepicker.min(startDate);
+            } else if (endDate) {
+                k_startdatetimepicker.max(new Date(endDate));
+            } else {
+                endDate = new Date();
+                k_startdatetimepicker.max(endDate);
+                k_enddatetimepicker.min(endDate);
+            }
+        }
+        function endChange() {
+            var endDate = k_enddatetimepicker.value(),
+                startDate = k_startdatetimepicker.value();
+            console.log(endDate, startDate);
+
+            if (endDate) {
+                endDate = new Date(endDate);
+                endDate.setDate(endDate.getDate());
+                k_startdatetimepicker.max(endDate);
+            } else if (startDate) {
+                k_enddatetimepicker.min(new Date(startDate));
+            } else {
+                endDate = new Date();
+                k_startdatetimepicker.max(endDate);
+                k_enddatetimepicker.min(endDate);
+            }
+        }
+        var today = new Date();
+        var k_startdatetimepicker = $("#DATE_INIC").kendoDateTimePicker({
+            value: today,
+            change: startChange
+        }).data("kendoDateTimePicker");
+        var k_enddatetimepicker = $("#DATE_END").kendoDateTimePicker({
+            value: today,
+            change: endChange
+        }).data("kendoDateTimePicker");
+        // mostrar Lista de Actividades
+
+        $.urlParam = function (name) {
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+            if (results == null) {
+                return null;
+            }
+            else {
+                return results[1] || 0;
+            }
+        }
+        var PARAM_SIN_DATE = decodeURIComponent($.urlParam('SIN_DATE'));
+        var PARAM_TO_DATE = decodeURIComponent($.urlParam('TO_DATE'));
+        var PARAM_PALABRA_CLAVE = decodeURIComponent($.urlParam('PALABRA_CLAVE'));
+
+        if (!param_url) {
+            var parametros = {
+                id: id,
+                ID_CLIE: $("#ID_CLIE").val(),
+                ID_ENTI_FILTER: $("#ID_ENTI_FILTER").val(),
+                SIN_DATE: $("#SIN_DATE").val(),
+                TO_DATE: $("#TO_DATE").val(),
+                PALABRA_CLAVE: $("#PALABRA_CLAVE").val(),
+                URL:0
+            };
+        }
+        else {
+            var parametros = {
+                id: id,
+                ID_CLIE: $("#ID_CLIE").val(),
+                ID_ENTI_FILTER: $("#ID_ENTI_FILTER").val(),
+                SIN_DATE: PARAM_SIN_DATE,
+                TO_DATE: PARAM_TO_DATE,
+                PALABRA_CLAVE: PARAM_PALABRA_CLAVE,
+                URL: 1
+            };
+        }
+        $.ajax({
+            url: "/Activity/ListActivity",
+            data: parametros,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                closeWinModalPopUpLoad();
+                var validate = '@ViewBag.VALIDATEUSER';
+                var admin = parseInt(@Session["UserId"]);
+                $("#TableNewActivity").empty();
+                $.each(data['Data'], function (index, value) {
+                    var tipoAct = '';
+                    if(@ViewBag.ID_ACCO == 4)
+                        tipoAct = '<td>' + (data['Data'][index]['DES_ACT']) + '</td>';
+                    if (admin == 34) {
+                        var time = secondsToTime((data['Data'][index]['TIEMPO_ACT']));
+                        $("#TableNewActivity").append('<tr>' +
+                                '<td>' + (data['Data'][index]['COM_NAME']) + '</td>' +
+                                '<td id="showUsuario">' + (data['Data'][index]['NAME_USER']) + '</td>' +
+                                '<td>' + (data['Data'][index]['DATE_INIC']) + '</td>' +
+                                '<td>' + (data['Data'][index]['DATE_END']) + '</td>' +
+                                '<td>' + time + '</td>' +
+                                tipoAct + 
+                                //'<td>' + (data['Data'][index]['DES_SUB_TYPE']) + '</td>' +
+                                '<td>' + (data['Data'][index]['CATEGORIA3']) + '-' + (data['Data'][index]['CATEGORIA4']) + '</td>' +
+                                '<td>' + (data['Data'][index]['NAM_SUB_TYPE']) + '</td>' +
+                                '<td>' + '<div id="detailAct">' + (data['Data'][index]['COMENTARIO']) + '</div>' + '</td>' +
+                                //'<td>' + (data['Data'][index]['NAM_ACCO']) + '</td>' +
+                                    '<td class="idOpciones" style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                            '<span  id="Search' + (data['Data'][index]['ID_ACTI_LOG']) + '" title="Search" class="glyphicon glyphicon-search" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="ShowActivity(' + (data['Data'][index]['ID_ACTI_LOG']) + ')"></span>' +
+                                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                            '<span  id="Edit' + (data['Data'][index]['ID_ACTI_LOG']) + '" title="Edit" class="glyphicon glyphicon-pencil" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="EditActivity(' + (data['Data'][index]['ID_ACTI_LOG']) + ')"></span>' +
+                                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                            '<span id="Remove' + (data['Data'][index]['ID_ACTI_LOG']) + '" title="Remove" class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="RemoveActivity(' + (data['Data'][index]['ID_ACTI_LOG']) + ')"></span>' +
+                                    '</td>' +
+                            '</tr>');
+                    }
+                    else if (validate == 'False') {
+                        var time2 = secondsToTime((data['Data'][index]['TIEMPO_ACT']));
+                        $("#TableNewActivity").append('<tr>' +
+                                '<td>' + (data['Data'][index]['COM_NAME']) + '</td>' +
+                                '<td>' + (data['Data'][index]['DATE_INIC']) + '</td>' +
+                                '<td>' + (data['Data'][index]['DATE_END']) + '</td>' +
+                                '<td>' + time2 + '</td>' +
+                                //'<td>' + (data['Data'][index]['DES_ACT']) + '</td>' +
+                                //'<td>' + (data['Data'][index]['DES_SUB_TYPE']) + '</td>' +
+                                '<td>' + (data['Data'][index]['CATEGORIA3']) + '-' + (data['Data'][index]['CATEGORIA4']) + '</td>' +
+                                '<td>' + (data['Data'][index]['NAM_SUB_TYPE']) + '</td>' +
+                                '<td >' + '<div id="detailAct">' + (data['Data'][index]['COMENTARIO']) + '</div>' + '</td>' +
+                                //'<td>' + (data['Data'][index]['NAM_ACCO']) + '</td>' +
+                                    '<td class="idOpciones" style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                            '<span  id="Search' + (data['Data'][index]['ID_ACTI_LOG']) + '" title="Search" class="glyphicon glyphicon-search" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="ShowActivity(' + (data['Data'][index]['ID_ACTI_LOG']) + ')"></span>' +
+                                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                            '<span  id="Edit' + (data['Data'][index]['ID_ACTI_LOG']) + '" title="Edit" class="glyphicon glyphicon-pencil" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="EditActivity(' + (data['Data'][index]['ID_ACTI_LOG']) + ')"></span>' +
+                                    '</td>' +
+                            '</tr>');
+                    }
+                    else if (validate == 'True') {
+                        var time3 = secondsToTime((data['Data'][index]['TIEMPO_ACT']));
+                        $("#TableNewActivity").append('<tr>' +
+                                '<td>' + (data['Data'][index]['COM_NAME']) + '</td>' +
+                                '<td id="showUsuario">' + (data['Data'][index]['NAME_USER']) + '</td>' +
+                                '<td>' + (data['Data'][index]['DATE_INIC']) + '</td>' +
+                                '<td>' + (data['Data'][index]['DATE_END']) + '</td>' +
+                                '<td>' + time3 + '</td>' +
+                                //'<td>' + (data['Data'][index]['DES_ACT']) + '</td>' +
+                                //'<td>' + (data['Data'][index]['DES_SUB_TYPE']) + '</td>' +
+                                '<td>' + (data['Data'][index]['CATEGORIA3']) + '-' + (data['Data'][index]['CATEGORIA4']) + '</td>' +
+                                '<td>' + (data['Data'][index]['NAM_SUB_TYPE']) + '</td>' +
+                                '<td >' + '<div id="detailAct">' + (data['Data'][index]['COMENTARIO']) + '</div>' + '</td>' +
+                                //'<td>' + (data['Data'][index]['NAM_ACCO']) + '</td>' +
+                                    '<td class="idOpciones" style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                            '<span  id="Search' + (data['Data'][index]['ID_ACTI_LOG']) + '" title="Search" class="glyphicon glyphicon-search" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="ShowActivity(' + (data['Data'][index]['ID_ACTI_LOG']) + ')"></span>' +
+                                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                            '<span  id="Edit' + (data['Data'][index]['ID_ACTI_LOG']) + '" title="Edit" class="glyphicon glyphicon-pencil" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="EditActivity(' + (data['Data'][index]['ID_ACTI_LOG']) + ')"></span>' +
+                                            '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                                            '<span id="Remove' + (data['Data'][index]['ID_ACTI_LOG']) + '" title="Remove" class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="RemoveActivity(' + (data['Data'][index]['ID_ACTI_LOG']) + ')"></span>' +
+                                    '</td>' +
+                            '</tr>');
+                    }
+                });
+            },
+            error: function (source) {
+                //alert("Error al cargar la Lista de Actividades por Usuario.");
+            }
+        });
+    }
+
+    function EditActivity(id) {
+        var htmlForm = '<div id="FormChangeActivity"></div>';
+        winFormPopUpModal("Editar Actividad", htmlForm, 750, 550);
+        $("#FormChangeActivity").load("/Activity/viewEditActivity?id=" + id + "&var=" + Math.random());
+    }
+    function ShowActivity(id) {
+        var htmlForm = '<div id="FormChangeActivity"></div>';
+        winFormPopUpModal("Mostrar Actividad", htmlForm, 750,550);
+        $("#FormChangeActivity").load("/Activity/viewDetailsActivity?id=" + id + "&var=" + Math.random());
+    }
+    function RemoveActivity(idActivity) {
+        var idUser = parseInt($('#ID_USR_ACT').val());
+        if (idActivity != "" || idActivity != null) {
+            winPopUpModal("Eliminar", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+           "<div style='padding:10px 0px 10px 0px;' style='font-size:.9em;'>Desea Eliminar la Actividad.</div>" +
+           "<div style='float:right; padding:20px 0px 0px 0px; '>" +
+           "<button id='btnYes' class='k-button' style='font-size:.9em;'>Si</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+           , 350, 130);
+            var undo = $("#btnYes")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                    winPopUpModalLoad('Eliminar', 'Espere unos segundos', 300, 130);
+                    $.ajax({
+                        url: "/Activity/RemoveActivity/",
+                        data: "id=" + idActivity + "&var=" + Math.random(),
+                        type: "POST",
+                        cache: false,
+                        dataType: "text",
+                        success: function (resp) {
+                            if (resp == "OK") {
+                                LoadActivityByPerson(idUser, false);
+                                closeWinModalPopUpLoad();
+                                x = 0;
+                            }
+                        },
+                        error: function (dato) {
+                            alert('ERROR');
+                            closeWinModalPopUpLoad();
+                        }
+                    });
+                });
+            var undo = $("#btnNO")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+        else {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Warning");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Error al eliminar Actividad </div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                "<button id='continues' class='k-button'>Continuar</button>" +
+                                        "</div>");
+            var undo = $("#continues")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        }
+    }
+    function FnFilterFindActivity() {
+        $("#FormFilterActivity").removeClass("divHide");
+        $(".idOpciones").hide();
+        var ID_ENTI_FILTER = $("#ID_ENTI_FILTER").kendoComboBox({
+            autoBind: false,
+            dataTextField: "PERSON",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    ID_ENTI: "ID_ENTI"
+                },
+                transport: {
+                    read: "/Activity/ListPersonActivity?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                if (e.sender.dataSource._data.length > 0) {
+                    $(".idOpciones").show();
+                }
+                else {
+                    $(".filterPerson").hide();
+                }
+            }
+        }).data("kendoComboBox");
+    }
+
+    function secondsToTime(seconds) {
+        var hours = Math.floor(seconds / 3600);
+        var minutes = Math.floor((seconds - (hours * 3600)) / 60);
+        //var seconds = seconds - (hours * 3600) - (minutes * 60);
+        var time = "";
+
+        if (hours != 0) {
+            time = hours + ":";
+        }
+        if (minutes != 0 || time !== "") {
+            minutes = (minutes < 10 && time !== "") ? "0" + minutes : String(minutes);
+            if (hours != 0)
+                time += minutes;
+            else {
+                if (minutes < 9)
+                    time += "0:" + "0" + minutes;
+                else
+                    time += "0:" + minutes;
+            }
+        }
+        //if (time === "") {
+        //    time = seconds + "s";
+        //}
+        //else {
+        //    time += (seconds < 10) ? "0" + seconds : String(seconds);
+        //}
+        return time;
+    }
+</script>

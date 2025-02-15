@@ -1,0 +1,220 @@
+﻿@{
+    Layout = null;
+}
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+</script>
+<style>
+    table.k-editor {
+        height: auto !important;
+    }
+</style>
+
+@using (Html.BeginForm("CerrandoOP", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAsignarPM", target = "upload_target" }))
+{
+    @Html.Hidden("Id")
+    <div class="from-group">
+        <div class="form-row">
+            <ul class="todo-list-wrapper list-group list-group-flush">
+                <div id="divTicketOP"></div>
+            </ul>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-row">
+            <div class="col-md-6">
+                @Html.CheckBox("chkSaldo", false)
+                Saldo por cobrar ($)
+            </div>
+            <div class="col-md-6">
+                <input id="txtSaldo" name="txtSaldo" class="form-control" value="@ViewBag.MontoxFacturar" />
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="editor-label">
+            Comentario
+        </label>
+        @Html.TextArea("ComentarioOP")
+    </div>
+    <div class="form-group">
+        <div class="form-row">
+            <div class="col-md-8">&nbsp;</div>
+            <div class="col-md-4">
+                <button id="submit" class="btn btn-primary btn-block">Cerrar OP</button>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" name="hdnChkSaldo" id="hdnChkSaldo" value="0" />
+}
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#txtSaldo").addClass("divHide");
+        $("Id").val(@ViewBag.ID_DOCU_SALE);
+
+        $('#chkAplicaSE').on('ifChanged', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoSoporteED(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoSoporteED(1);
+            }
+        });
+        $('#chkAplicaInforme').on('ifChanged', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoInformeED(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoInformeED(1);
+            }
+        });
+
+        $('#chkAplicaFabricante').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                //Checkeado
+                CambiarEstadoSoporteFabricante(0);
+            } else {
+                //No Checkeado
+                CambiarEstadoSoporteFabricante(1);
+            }
+        });
+
+        $.ajax({
+            url: "/OrderForm/ObtenerTicketsProyecto/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                mostrarTicketAsociado(source);
+            },
+            error: function (source) {
+                alert("Error Carga Json Cierre");
+            }
+        });
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            closeWinFormModalPopUp();
+        });
+
+        $("#ComentarioOP").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $('#chkSaldo').on('ifToggled', function (event) {
+            if ($(this).is(':checked')) {
+                $("#hdnChkSaldo").val(1);
+                $("#txtSaldo").removeClass("divHide");
+            } else {
+                $("#hdnChkSaldo").val(0);
+                $("#txtSaldo").addClass("divHide");
+            }
+        });
+    })
+
+
+    function mostrarTicketAsociado(dataCierre) {
+        $("#divTicketOP").empty();
+        $.each(dataCierre['Data'], function (index, value) {
+            $("#divTicketOP").append(
+                '<li class="list-group-item">'+
+                    '<div class= "todo-indicator bg-secondary" ></div >'+
+                    '<div class="widget-content p-0">'+
+                        '<div class="widget-content-wrapper">'+
+                            '<div class="widget-content-left mr-2"></div>'+
+                            '<div class="widget-content-left mr-3">'+
+                                '<div class="widget-content-left">'+
+                                    '<img width="42" class="rounded" src="/Content/Fotos/' + (dataCierre['Data'][index]['FotoEspecialista']) + '.jpg" alt="">'+
+                                '</div>'+
+                            '</div>'+
+                            '<div class="widget-content-left">'+
+                                '<div class="widget-heading">Especialista</div>'+
+                                '<div class="widget-subheading">' + (dataCierre['Data'][index]['Especialista']) + '</div>'+
+                            '</div>'+
+                            '<div class="mr-4"></div>'+
+                            '<div class="widget-content-left">'+
+                                '<div class="widget-heading">Código Ticket</div>'+
+                                '<div class="widget-subheading">' + (dataCierre['Data'][index]['Codigo']) + '</div>'+
+                            '</div>'+
+                            '<div class="mr-4"></div>'+
+                            '<div class="widget-content-left">'+
+                                '<div class="widget-heading">Estado</div>'+
+                                '<div class="widget-heading"><div style="color:' + (dataCierre['Data'][index]['ColorEstado']) + '">' + (dataCierre['Data'][index]['Estado']) + '</div></div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'+
+                '</li>'
+            );
+        });
+    }
+
+
+    function MensajeCerrarOP(msg, msnErr) {
+
+        if (msg == 'OK') {
+            //location.reload();
+
+            if (msnErr == 'OK') {
+
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+                toastr.success("", "La OP fue cerrada satisfactoriamente.");
+
+                if ($("#tabComentario").hasClass("active")) {
+                    Comentarios();
+                }
+                if ($("#tabAccion").hasClass("active")) {
+                    Acciones();
+                }
+                if ($("#tabSoporte").hasClass("active")) {
+                    Soporte();
+                }
+            }
+        } if (msg == 'ERROR') {
+            toastr.warning(msnErr, "¡Alerta!");
+
+        } else if (msg == 'Soporte') {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+
+            var mensaje = 'No se Actualizaron los Datos.</br>'
+
+            if (msnErr == 'SoporteED') { mensaje = mensaje + 'Debe registrar el Soporte - Electrodata.' + '</br>'; }
+            if (msnErr == 'Informe') { mensaje = mensaje + 'Debe registrar los Informes.' + '</br>'; }
+            if (msnErr == 'SoporteFabricante') { mensaje = mensaje + 'Debe registrar el Soporte - Fabricante.' + '</br>'; }
+
+            toastr.warning(mensaje, "Mensaje");
+
+        }
+    }
+</script>

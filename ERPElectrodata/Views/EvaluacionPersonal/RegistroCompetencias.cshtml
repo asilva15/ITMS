@@ -1,0 +1,239 @@
+﻿@{
+    ViewBag.Title = "RegistroCompetencias";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<style>
+    #SmallModalTitle {
+        font-size: 18px;
+    }
+</style>
+<div class="box">
+    <form>
+        <div class="box-body">
+            <div class="row">
+                <div class="col-sm-1">
+                    <br /><label for="cbPeriodo">Periodo</label>
+                </div>
+                <div class="col-sm-2">
+                    <select id="cbPeriodo" name="cbPeriodo" class="form-control select2" style="width:80%" ></select>
+                </div>
+                <div class="col-sm-1">
+                    <br /> <label for="cbCargo">Cargo</label><br />
+                </div>
+                <div class="col-sm-3">
+                    <select id="cbCargo" name="cbCargo" class="form-control select2" style="width:80%" ></select>
+                </div>
+                <div class="col-sm-1">
+                    <div class="form-group">
+                        <button type="button" class="btn btn-warning" onclick="ListarCompetencias()">Buscar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+    <div class="tab-content">
+        <div class="tab-pane active" id="tab_1">
+            <div class="box">
+                <!-- /.box-header -->
+                <div class="box-body">
+                    <table id="tablaCompetencias" class="table table-bordered table-striped" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Cargo</th>
+                                <th>Nombre Evaluacion</th>
+                                <th>Competencia</th>
+                                <th>Descripcion</th>
+                                <th>Indicador</th>
+                                <th>Peso</th>
+                                <th>Editar</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Cargo</th>
+                                <th>Nombre Evaluacion</th>
+                                <th>Competencia</th>
+                                <th>Descripcion</th>
+                                <th>Indicador</th>
+                                <th>Peso</th>
+                                <th>Editar</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.box-body -->
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Modal Editar Competencia-->
+@*<div class="modal fade" id="ModalCompetencia" tabindex="-1" role="dialog" aria-labelledby="ModalCompetenciaLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title col-md-10" id="ModalCompetenciaLabel">Editar Competencia</h3>
+                <button type="button" class="close col-md-2" data-dismiss="modal" aria-label="Close" style="width:10%">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="divEditarCompetencia" style="width:100%;">
+                    <div id="divEditarCompetencia"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>*@
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#cbPeriodo").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+        $("#cbPeriodo").on('change', function (e) {
+            $("#cbCargo").empty();
+            var idPeriodo = $("#cbPeriodo").find(':selected').val()
+
+            $("#cbCargo").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/EvaluacionPersonal/ListarDesempenoCargo/" + idPeriodo,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+
+                    },
+                },
+            });
+        });
+        //Asignación inicial
+        var $newOption = $("<option></option>").val("@ViewBag.IdPeriodo").text("@ViewBag.Periodo");
+        $("#cbPeriodo").append($newOption).trigger('change');
+
+        setTimeout(function () { MostrarCompetencias() }, 1000);
+    });
+
+    function ListarCompetencias() {
+        if ($("#cbPeriodo").val() == null || $("#cbPeriodo").val() == 0) {
+            toastr.warning('Seleccione el periodo');
+            //$('#SmallModalContent').modal('show');
+            //$("#SmallModalTitle").empty();
+            //$("#SmallModalTitle").text("Mensaje");
+            //$("#SmallModalBody").empty();
+            //$("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "Seleccione el Periodo." + "</div>");
+            //$("#SmallModalFooter").empty();
+            //$("#SmallModalFooter").append("<div style='float:right;'>" +
+            //                                  "<button id='continuee' class='k-button'>Continuar</button>" +
+            //                           "</div>");
+            //var undo = $("#continuee")
+            //.bind("click", function () {
+            //    $('#SmallModalContent').modal('hide');
+            //});
+        } else {
+            MostrarCompetencias()
+        }
+    }
+    function MostrarCompetencias() {
+        $('#tablaCompetencias').dataTable().fnDestroy();
+
+        $('#tablaCompetencias').DataTable({
+       
+            ajax: "/EvaluacionPersonal/EvaListarPeriodoCompetencia/" + $("#cbPeriodo").val() + '/' + $("#cbCargo").val(),
+            columns: [
+                { data: "Cargo" },
+                { data: "NombreEvaluacion" },
+                { data: "Competencia" },
+                { data: "Descripcion" },
+                { data: "Indicador" },
+                { data: "Peso" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return  '<div style=" text-align: center;"></div>' +
+                                '<span id="EditarCompetencia" title="Editar" class="fa fa-edit" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px;" data-toggle="modal" data-target="#miModal" onclick="EditarCompetencia(' + data.IdCompetencia + ')"></span>' +
+                                '</div>';
+                    }
+
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+    
+    function EditarCompetencia(id) {
+        $("#lblTitulo").text("Editar Competencia");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-md");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/EvaluacionPersonal/EditarCompetencias/" + id);
+
+        //$("#divEditarCompetencia").empty();
+        //$("#divEditarCompetencia").load("/EvaluacionPersonal/EditarCompetencias/" + id);
+    }
+</script>

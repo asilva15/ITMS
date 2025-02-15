@@ -1,0 +1,163 @@
+﻿@{
+    Layout = null;
+}
+<link href="~/Content/ArchitectureUI/main.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.common.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.rtl.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.default.min.css" rel="stylesheet" />
+<link href="~/Content19/kendo/2019.3.1023/kendo.default.mobile.min.css" rel="stylesheet" />
+<link href="~/Content19/all.css" rel="stylesheet" />
+
+<script src="~/Scripts19/kendo/2019.3.1023/jquery.min.js"></script>
+<script src="~/Scripts19/kendo/2019.3.1023/jszip.min.js"></script>
+<script src="~/Scripts19/kendo/2019.3.1023/kendo.all.min.js"></script>
+
+
+
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form id="Parametro">
+                        <div class="form-row">
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="IdArea">Área</label>
+                                    <select multiple="multiple" class="multiselect-dropdown form-control" id="IdArea" style="width:100%;"></select>
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="cbUsuario">Usuario</label>
+                                    <input id="cbUsuario" type="text">
+                                </div>
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="dtFechaInicio">Desde</label>
+                                <input id="dtFechaInicio" name="dtFechaInicio" value="@ViewBag.FechaActual"/>
+                            </div>
+                            <div class="col-sm-3">
+                                <label for="dtFechaFin">Hasta</label>
+                                <input id="dtFechaFin" name="dtFechaFin" value="@ViewBag.FechaActual"/>
+                            </div>
+                            <div class="col-sm-3">
+                                <div class="form-group">
+                                    <label for="cbTipoActividad">Tipo Actividad</label>
+                                    <select multiple="multiple" class="multiselect-dropdown form-control" id="cbTipoActividad" style="width:100%;"></select>
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                <div class="form-group">
+                                    <br />
+                                    <button id="btnBuscar" type="button" class="btn btn-warning btn-sm">Buscar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                @*<div class="col-md-12">
+                        <iframe id="RSReporteTipoActividades" style="height:480px; width:100%;border: 0px #eee solid;"></iframe>
+                    </div>*@
+                <iframe id="RSReporteTipoActividades" style="height:480px; width:100%;border: 0px #eee solid;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript" src="~/Content/ArchitectureUI/assets/scripts/main.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+
+<script type="text/javascript">
+    function GenerarReporte() {
+        if ($("#dtFechaInicio").val() == "" || $("#dtFechaFin").val() == "") {
+            uploadDone("Seleccione un rango de fechas y seleccione el área.");
+        } else {
+            if ($("#cbUsuario").val() == null || $("#cbUsuario").val() == "")
+                usuario = 0;
+            else
+                usuario = $("#cbUsuario").val();
+            window.frames["RSReporteTipoActividades"].src = "/Reporting/Actividad/ReporteTipoActividad.aspx?var=" + Math.random() +
+                "&IdArea=" + $("#IdArea").val() + "&cbUsuario=" + usuario
+                + "&dtFechaInicio=" + $("#dtFechaInicio").val() + "&dtFechaFin=" + $("#dtFechaFin").val() + "&cbTipoActividad=" + $("#cbTipoActividad").val();
+        }
+    }
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#dtFechaInicio").kendoDatePicker({
+            format: "MM/dd/yyyy"
+        });
+        $("#dtFechaFin").kendoDatePicker({
+            format: "MM/dd/yyyy"
+        });
+        $("#btnBuscar").click(function (event) {
+            GenerarReporte();
+            event.preventDefault();
+        });
+
+        $.ajax({
+            url: "/Activity/ListarAreaxOrganigramaMultiSelect",
+            type: 'post',
+            success: function (response) {
+                $.each(response, function (ind, elem) {
+                    console.log(elem.opcion);
+                    $("#IdArea").append(elem.opcion);
+                });
+                //$("#IdArea").multiselect("rebuild");
+                $("#IdArea").attr("disabled", false);
+            }
+        });
+
+        $.ajax({
+            url: "/Activity/ListarTipoActividad",
+            type: 'post',
+            success: function (response) {
+                $.each(response, function (ind, elem) {
+                    console.log(elem.opcion);
+                    $("#cbTipoActividad").append("<option value='" + elem.id + "'>" + elem.text + "</option>");
+                });
+                $("#cbTipoActividad").multiselect("rebuild");
+                $("#cbTipoActividad").attr("disabled", false);
+            }
+        });
+
+        $("#cbUsuario").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            placeholder: "Seleccione un usuario",
+            dataValueField: "id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Activity/ListPersonalActividadCbx"
+                }
+
+            }
+        });
+    });
+
+</script>
+<script type="text/javascript">
+
+    function uploadDone(msg) {
+        toastr.warning(msg, "Mensaje");
+    }
+</script>
+
+

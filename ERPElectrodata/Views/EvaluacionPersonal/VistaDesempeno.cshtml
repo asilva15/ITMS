@@ -1,0 +1,201 @@
+﻿@{
+    ViewBag.Title = "VistaDesempeno";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<div style="clear:both; width:100%; height:450px; margin-top:10px;" class="panel">
+    <div style="width: 100%; float:left;" class="panel panel-primary">
+        <div class="panel-heading">Desempeño</div>
+        <div class="panel-body" style="height:450px">
+            <div class="form-group row">
+                <div class="col-sm-3">
+
+                    <label for="cbPeriodo">Periodo</label><br />
+                    <input id="cbPeriodo" name="cbPeriodo" style="font-size:12px;" class="dropdownKendo" />
+                    @*<select id="cbPeriodo" class="form-control select2" style="width:80%" ></select>*@
+
+                </div>
+                <div class="col-sm-9">
+                    <br />
+                    <button id="btnGraficaDesempeno" type="button" class="btn btn-primary btn-sm" style="float:left;" onclick="MostrarDesempeno()">Buscar</button>
+                </div>
+            </div>
+            <div class="panel-body" style="height: 350px;">
+                <div id="RptDesempeno" style="height: 350px; width:98%;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+    var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                      //'<span style="color:{series.color}">Porcentaje</span>: {Porcentaje}<br/>';
+
+    $(document).ready(function () {
+        $("#cbPeriodo").kendoDropDownList({
+            dataTextField: "text",
+            dataValueField: "id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                var comboBox = $("#cbPeriodo").data("kendoDropDownList");
+                // Select the first item
+                comboBox.select(0);
+                // Trigger the change event to load the associated content
+                comboBox.trigger("change");
+            }
+        });
+
+        @*$("#cbPeriodo").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/EvaluacionPersonal/EvaListadoDesempeñoPeriodo",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+        //Asignación inicial
+        var $newOption = $("<option></option>").val("@ViewBag.IdPeriodo").text("@ViewBag.Periodo");
+        $("#cbPeriodo").append($newOption).trigger('change');
+
+        GenerarReporte(@ViewBag.IdPeriodo);*@
+    });
+    function MostrarDesempeno() {
+        
+        if ($("#cbPeriodo").val() == 0 || $("#cbPeriodo").val()==null) {
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje");
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "Seleccione un Periodo." + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                              "<button id='continuee' class='k-button'>Continuar</button>" +
+                                       "</div>");
+            var undo = $("#continuee")
+            .bind("click", function () {
+                $('#SmallModalContent').modal('hide');
+            });
+        } else {
+            GenerarReporte($("#cbPeriodo").val())
+        }
+    }
+    function GenerarReporte(IdPeriodo) {
+        $.ajax({
+            url: '/EvaluacionPersonal/ListarRptDesempeno/' + IdPeriodo + '?var=' + Math.random(),
+            dataType: 'json',
+            data:{},
+            cache: false,
+            async: true,
+            success: function (json) {
+                var Categoria = new Array();
+                var Cantidad = new Array();
+                var Porcentaje = new Array();
+
+                $.each(json['Data'],function (index,value){
+                    Categoria[index] = value['Serie'];
+                    Cantidad[index] = value['Cantidad'];
+                    Porcentaje[index] = value['Porcentaje'];
+                });
+
+                $('#RptDesempeno').highcharts({
+                    chart: {
+                        type: 'bar'
+                    },
+                    title: {
+                        text: null
+                    },
+                    subtitle: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: Categoria,
+                        gridLineWidth: 1,
+                        title: {
+                            align: 'high',
+                            text: 'Desempeño',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cantidad',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify'
+                        }
+                    },
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: '',
+                        valueDecimals:0,
+                        headerFormat:headerFormat,
+                        pointFormat:pointFormat
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal',
+                        },
+                        bar: {
+                            dataLabels: {
+                                enabled: false
+                            },
+                            showInLegend: true
+                        }
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    series: [{
+                        name:'Cantidad',
+                        color: '#B21E1E',
+                        data: Cantidad
+                    }]
+                });
+            }
+        });
+    }
+</script>

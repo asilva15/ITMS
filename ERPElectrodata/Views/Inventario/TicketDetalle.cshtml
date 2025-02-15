@@ -1,0 +1,604 @@
+﻿@model ERPElectrodata.Models.DETAILS_TICKET
+
+@{
+    Layout = null;
+}
+
+<style type="text/css">
+    .FondoGris01 {
+        background-color: #F7F7F7;
+        display: inline-block;
+        text-align: left;
+        vertical-align: middle;
+        padding: 2px 0 0 0;
+        width: 100%;
+    }
+</style>
+
+@*DETAILS DELIVERY *@
+
+<div style="float:left;width:64%;">
+    <div class="titleForm">
+        <div id="titleDetDelRec" class="title">Details</div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm">
+            <div id="Encabezado">
+            </div>
+            @using (Html.BeginForm("CreateDetailsDelivery", "DeliveryReception", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmDetailDelivery", target = "upload_target" }))
+            {
+                @Html.ValidationSummary(true)
+
+                @Html.HiddenFor(model => model.ID_TICK)
+
+                <div class="divFondoUno">
+                    <div class="divSpace3"></div>
+                    <div class="divCont3">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.Type
+                        </div>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.ID_TYPE_DETA_TICK)
+                            @Html.ValidationMessageFor(model => model.ID_TYPE_DETA_TICK)
+                        </div>
+                    </div>
+                    <div class="divSpace3"></div>
+
+                    <div id="idtypeactivity" class="divCont3 divHide">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.Status
+                        </div>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.ID_STAT)
+                            @Html.ValidationMessageFor(model => model.ID_STAT)
+                        </div>
+                    </div>
+                    <div class="divSpace3"></div>
+
+                    <div id="fechaScheduled" class="divCont3 divHide">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.DateScheduled
+                        </div>
+                        <div class="editor-field">
+                            @Html.EditorFor(model => model.FEC_SCHE)
+                            @Html.ValidationMessageFor(model => model.FEC_SCHE)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divFondoUno">
+                    <div style="width: 95.5%; float:left; padding: 0px 0px 0 15px;">
+                        <div class="editor-label">
+                            @ResourceLanguaje.Resource.Comment
+                        </div>
+                        <div class="editor-field">
+                            @Html.TextAreaFor(model => model.COM_DETA_TICK, new { rows = "20" })
+                            @Html.ValidationMessageFor(model => model.COM_DETA_TICK)
+                        </div>
+                    </div>
+                </div>
+                <div class="divFondoUno">
+                    <div style="width: 96%; float:left; padding: 0px 0px 0 15px; font-size:1.1em;">
+                        <input name="files" id="files" type="file" />
+                    </div>
+                </div>
+                <div class="divFondoUno">
+                    <div class="divSpace3"></div>
+                    <div style="display:inline-block; float:right; padding:0px 15px 0 5px; font-size:1.1em;">
+                        <div style=" float:left; padding:0px 15px 0px 0px; ">
+                            <button id="print" class="k-button">@ResourceLanguaje.Resource.BtnPrint</button>
+                        </div>
+                        <button id="submit" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+                    </div>
+                </div>
+                <div id="comment" class="divFondoUno">
+                    <div class="divSpace3"></div>
+                </div>
+                <iframe id="upload_target" name="upload_target" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+            }
+        </div>
+    </div>
+</div>
+<div style="float:right;width:35%;">
+    @*<div id="divAddAsset"></div>*@
+    <div class="titleForm">
+        <div class="title">@ResourceLanguaje.Resource.Activities</div>
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm" style="height:315px;">
+            <div id="gridActivities" style="border:none;height:260px;margin:5px;"></div>
+            <div id="pagerActivities" style="border-radius:4px;  margin:5px;"></div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="templateA">
+    <div class="FondoGris01">
+        <div class="casilla">
+            ${NAM_TYPE_DETA_TICK}
+        </div>
+        <div class="casilla">
+            ${CLIE}
+        </div>
+        <div class="casilla">
+            ${CREATE_DETA_INCI}
+        </div>
+    </div>
+    <div style="width:100%;height:4px;"></div>
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $.ajax({
+            url: "/DeliveryReception/ListByIdJson/" + "@ViewData["ID_TICK"]",
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showInfo();
+            },
+            error: function (source) {
+                data = source;
+                showInfo();
+            }
+        });
+    });
+
+    $("#print").click(function (event) {
+        event.preventDefault();
+        
+        if ('@ViewData["NAM_TYPE_FORM"]' == 'ENTREGA INT') {
+            window.open('/Reporting/Inventario/Entrega.aspx?id=' + "@ViewData["ID_TICK"]", '_blank');
+        }
+        if ('@ViewData["NAM_TYPE_FORM"]' == 'RECEPCION INT') {
+            window.open('/Reporting/Inventario/Recepcion.aspx?id=' + "@ViewData["ID_TICK"]", '_blank');
+        }
+        return false;
+    });
+
+    function showInfo() {
+
+        var strTitle = '';
+        if ('@ViewData["NAM_TYPE_FORM"]' == 'RECEPCION_INT') {
+            strTitle = 'Recepción # @ViewData["COD_TICK"]';
+        }
+        else {
+            strTitle = 'Entrega # @ViewData["COD_TICK"]';
+        }
+        $("#titleDetDelRec").empty();
+        $("#titleDetDelRec").append(strTitle);
+
+        $("#Encabezado").empty();
+        $.each(data['data'], function (index, value) {
+            $("#Encabezado").append(
+                '<div class = "divFondoUno">' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Usuario Afectado</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['CLIE']).toLowerCase() + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Estado</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_STAT']).toLowerCase() + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Prioridad</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_PRIO']).toLowerCase() + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Area</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_AREA']).toLowerCase() + '</div>' +
+                    '</div>' +
+                     '<div class="casilla">' +
+                        '<div class="smallTitle">Tiempo de Expiración</div>' +
+                        '<div class="smallField">' + (data['data'][index]['EXP_TIME']) + '</div>' +
+                     '</div>' +
+                '</div>' +
+                '<div class = "divFondoDos">' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Fuente de Solicitud</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_SOUR']).toLowerCase() + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Categoria</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['Cate']) + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">SubCategoria</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['SubCate']).toLowerCase() + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Clase</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['Class']).toLowerCase() + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">SubClase</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['SubClass']).toLowerCase() + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class ="divFondoUno">' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Lugar</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_SITE']) + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Locacion</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['NAM_LOCA']) + '</div>' +
+                    '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Fecha Creación</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['CREATE_TICK']) + '</div>' +
+                    '</div>' +
+                      '<div class="casilla">' +
+                        '<div class="smallField">Fecha Modificación</div>' +
+                        '<div class="smallTitle">' + (data['data'][index]['MODIFIED_TICK']) + '</div>' +
+                     '</div>' +
+                    '<div class = "casilla">' +
+                        '<div class = "smallField">Adjuntos</div>' +
+                        '<div class = "smallTitle">' + (data['data'][index]['ATTA_TOT']) + '</div>' +
+                    '</div>' +
+                '</div>' +
+                '<div class = "divFondoUno">' +
+                    '<div class="detailsSummary">' +
+                        '<div id="detSummary">' +
+                            '<div class="containerdt">' +
+                                '<div class="userData">' +
+                                  //  '<div class="asignedImage">' + '<a href="#"><img src="../../Content/Images/userAssig.png"/></a></div>' +
+                                     '<div class="asignedImage"><div ><img src="/Content/Fotos/' + (data['data'][index]['PHOTO']) + '.jpg"/></div></div>' +
+                                '</div>' +
+                                '<div class="messageData">' +
+                                    '<div class="messageArrow"></div>' +
+                                '<div class ="messageBoxDet">' +
+                                    '<div class ="msgBoxDetUser">' + 'Create By ' +
+                                    (data['data'][index]['USER']).toLowerCase() +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="msgBoxBody">' +
+                                    (data['data'][index]['SUM_TICK']) +
+                                '</div>' +
+                                '<div class ="dadjuntos">' +
+                                        (data['data'][index]['ADJUNTOS']) +
+                                '</div>' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>');
+
+            LlenarActivos(data['data'][index]['ID_TICK']);
+        });
+
+        if (parseInt('@ViewData["ID_STAT_END"]') == 6) {
+
+            var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").kendoComboBox({
+                autoBind: true,
+                index: 1,
+                dataTextField: "NAM_TYPE_DETA_TICK",
+                dataValueField: "ID_TYPE_DETA_TICK",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/TypeDetailsTicket/ListTypeDetailsTicketByID_MODUID_STAT_END/2"
+                    }
+                }
+            }).data("kendoComboBox");
+        }
+        else {
+            var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").kendoComboBox({
+                autoBind: true,
+                index: 1,
+                dataTextField: "NAM_TYPE_DETA_TICK",
+                dataValueField: "ID_TYPE_DETA_TICK",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/TypeDetailsTicket/ListTypeDetailsTicketByID_MODU/2"
+                    }
+                }
+            }).data("kendoComboBox");
+
+        }
+
+        var onSelect = function (e) {
+            var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").data("kendoComboBox");
+            if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 7) {
+                $.each(e.files, function (index, value) {
+                    if (value.extension.toLowerCase() != ".pdf") {
+                        e.preventDefault();
+
+                        winPopUpModal("Error...", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                           "<div style='padding:10px 0px 10px 0px;'>Please upload pdf Adobe Acrobat Document file</div>" +
+                               "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                               "<button id='continuee' class='k-button'>Continue</button>" +
+                               "</div></div>"
+                               , 400, 140);
+
+                        var undo = $("#continuee")
+                        .bind("click", function () {
+                            closeWinModalPopUp();
+                        });
+
+                    }
+                });
+            }
+        };
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.BtnAttach"
+            },
+            select: onSelect
+        });
+
+        var ID_STAT = $("#ID_STAT").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_STAT",
+            dataValueField: "ID_STAT",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/StatusTicket/StatusMODU"
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_TYPE_DETA_TICK.bind("change", function (e) {
+
+            if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 3) {
+                $("#idtypeactivity").removeClass('divHide');
+                $("#fechaScheduled").removeClass('divHide');
+
+                ID_STAT.value(5);
+            } else {
+                $("#idtypeactivity").addClass('divHide');
+                $("#fechaScheduled").addClass('divHide');
+            }
+        });
+
+        var FEC_SCHE = $("#FEC_SCHE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#COM_DETA_TICK").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        $("#submit").click(function () {
+            winPopUpModalLoad("Saving Your Asset", "Please Wait", 300, 130);
+        });
+    }
+
+    var FuenteDatos = new kendo.data.DataSource({
+        transport: {
+            read: {
+                url: "/DeliveryReception/ListDetailsTicketByID_TICK/" + "@ViewData["ID_TICK"]",
+                type: "GET",
+                dataType: "json",
+                data: {
+                    _: Math.random()
+                }
+            }
+        },
+        autoSync: true,
+        serverFiltering: true,
+        serverPaging: true,
+        pageSize: 15,
+        schema: {
+            data: "data",
+            total: "Count"
+        }
+    });
+
+    function LlenarActivos(id) {
+        $.ajax({
+            url: "/Inventario/ListAssetByID_TICK/" + id,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showListaAsset();
+            },
+            error: function (source) {
+                data = source;
+                showListaAsset();
+            }
+        });
+        ListComment(id);
+    }
+
+    function showListaAsset() {
+        $.each(data['data'], function (index, value) {
+            $("#Encabezado").append('<div style="width: 95.5%; float:left; padding: 0px 0px 0 15px;"><div class ="FondoGris01" onmouseover=\'this.style.background="#F3F3F3"\' onmouseout=\'this.style.background="#F7F7F7"\'>' +
+                '<div class = "casilla">' +
+                    '<div class = "smallField">Tipo de Activo</div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['NAM_TYPE_ASSE']) + '</div>' +
+                '</div>' +
+                '<div class = "casilla">' +
+                    '<div class = "smallField">Código de Activo</div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['CODE']) + '</div>' +
+                '</div>' +
+                '<div class = "casilla">' +
+                    '<div class = "smallField">Serie</div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['SER_NUMB']) + '</div>' +
+                '</div>' +
+                '<div class = "casilla">' +
+                    '<div class = "smallField">Nombre Activo</div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['NAM_EQUI']) + '</div>' +
+                '</div>' +
+                '<div class = "casilla">' +
+                    '<div class = "smallField">Marca</div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['NAM_MANU']) + '</div>' +
+                '</div>' +
+                '<div class = "casilla">' +
+                    '<div class = "smallField">Modelo</div>' +
+                    '<div class = "smallTitle">' + (data['data'][index]['NAM_COMM_MODE']) + '</div>' +
+                '</div></div><div style="height: 5px"></div></div>');
+        });
+    }
+
+    function ListComment(id) {
+        $.ajax({
+            url: "/DeliveryReception/ListDetailsTicketByID_TICK/" + id,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showCommentDetails();
+            },
+            error: function (source) {
+                data = source;
+                showCommentDetails();
+            }
+        });
+    }
+
+    function showCommentDetails() {
+        $.each(data['data'], function (index, value) {
+
+            $("#comment").append('<div class="detailsSummary">' +
+                       '<div id="detSummary">' +
+                           '<div class="containerdt">' +
+                               '<div class="userData">' +
+                                   '<div class="asignedImage"><div ><img src="/Content/Fotos/' + (data['data'][index]['PHOTO']) + '.jpg"/></div></div>' +
+                               '</div>' +
+                               '<div class="messageData">' +
+                                   '<div class="messageArrow"></div>' +
+                                       '<div class ="messageBoxDet">' +
+                                           '<div class ="msgBoxDetUser">' +
+                                               (data['data'][index]['PERS']).toLowerCase() +
+                                           '</div>' +
+                                           '<div class ="msgBoxDetCreate">' +
+                                               (data['data'][index]['CREATE_DETA_INCI']) +
+                                           '</div>' +
+                                       '</div>' +
+                                       '<div class ="messageBoxDet2">' +
+                                            '<div class ="msgBoxDetTDI' + (data['data'][index]['ID_TYPE_DETA_TICK']) + '">' +
+                                            (data['data'][index]['NAM_TYPE_DETA_TICK']).toLowerCase() +
+                                            '</div>' +
+                                            '<div class="msgBoxDetAs"> ' + ' ' +
+                                                ((data['data'][index]['ID_TYPE_DETA_TICK']) == 3 ? (": " + (data['data'][index]['NAM_STAT']).toLowerCase() + " " + (data['data'][index]['FEC_SCHE'])) : '') +
+                                            '</div>' +
+                                        '</div>' +
+                                   '<div class="msgBoxBody">' +
+                                       (data['data'][index]['COM_DETA_TICK']) +
+                                   '</div>' +
+                                   '<div class ="dadjuntos">' +
+                                       (data['data'][index]['ADJUNTOS']) +
+                               '</div>' +
+                               '</div>' +//message Data
+                           '</div>' +
+                       '</div>' +
+                   '</div>');
+        });
+    }
+
+</script>
+
+<script type="text/javascript">
+    function uploadDone(msg, code, id) {
+        if (msg == "OK") {
+            closeWinModalPopUpLoad();
+            var typeformat = 'Delivery';
+            if ('@ViewData["NAM_TYPE_FORM"]' == 'RECEPTION') { typeformat = 'Reception'; }
+            winPopUpModal("Information Saved / Notification Send", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+           + "<div style='padding:10px 0px 10px 0px;'>" + typeformat + " information was succesfully saved</div>" +
+           "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+           "<button id='continues' class='k-button'>Continue</button>" +
+           "</div></div>"
+             , 400, 139);
+
+            var undo = $("#continues")
+           .bind("click", function () {
+               closeWinModalPopUp();
+               location.reload(true);
+           });
+
+            $("#closebtnmodal").click(function () {
+                location.reload(true);
+            });
+        }
+        else {
+            closeWinModalPopUpLoad();
+            var titleAsset = '';
+            var messageAsset = '';
+            if (code == '0') {
+                titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.InformationMissingMsn';
+            }
+            else if (code == '1') {
+                titleAsset = '@ResourceLanguaje.Resource.BasedDrawback';
+                messageAsset = '@ResourceLanguaje.Resource.BasedDrawbackMsn';
+            }
+            else if(code == '3'){
+                titleAsset = '@ResourceLanguaje.Resource.InformationMissing';
+                messageAsset = '@ResourceLanguaje.Resource.AttachMsn';
+            }
+            else if (code == '4') {
+                titleAsset = '@ResourceLanguaje.Resource.Warning';
+                messageAsset = '@ResourceLanguaje.Resource.AssetMessage8';
+            }
+            else if (code == '5') {
+                titleAsset = '@ResourceLanguaje.Resource.Warning';
+                messageAsset = 'Check the Schedule Date';
+            }
+            else if (code == '6') {
+                titleAsset = '@ResourceLanguaje.Resource.Warning';
+                messageAsset = 'You must select a state';
+            }
+            else {
+                titleAsset = '@ResourceLanguaje.Resource.Warning';
+                messageAsset = '@ResourceLanguaje.Resource.AssetMessage2';
+
+                var elem = msg.split(',');
+                for (f = 0; f < elem.length - 1; f++) {
+                    $("#divDetailAsset_" + elem[f]).addClass('borderDetailsRojo');
+                }
+            }
+
+            winPopUpModal(titleAsset, "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + messageAsset + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 138);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                    closeWinModalPopUp();
+            });
+    }
+}
+</script>

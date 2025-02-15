@@ -1,0 +1,244 @@
+﻿@{
+    ViewBag.Title = "CalendarioTicketsProgramados";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar23/fullcalendar.min.css">
+<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar23/fullcalendar.print.css" media="print">
+@*<link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.css">
+    <link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.min.css">
+    <link rel="stylesheet" href="~/Content/themes/plugin/fullcalendar/fullcalendar.print.css" media="print">*@
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.11.2/moment.min.js"></script>*@
+<script src="~/Content/themes/plugin/fullcalendar/fullcalendar.min.js"></script>
+<style type="text/css">
+
+    .fc-view-container .fc-view {
+        overflow-y: scroll;
+    }
+
+</style>
+
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+<div class="main-card card">
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-4">
+                Usuario
+                <select id="cbPersonal" name="cbPersonal" class="form-control input-sm select2" type="text" style="width:100%"></select>
+            </div>
+            <div class="col-md-4">
+                <br />
+                <button type="button" class="btn btn-warning btn-block" style="float:right;" onclick="BuscarTicketsCalendario()"><i class="glyphicon glyphicon-calendar"></i> <span>Buscar</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="card-body">
+    <div class="form-row">
+        <div class="col-md-12">
+            @*<div id='calendar'></div>*@
+            <div id="calendar">
+            </div>
+        </div>
+    </div>
+</div>
+<strong style="padding-left:15px">*Calendario de Tickets Programados</strong>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#cbPersonal").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/AccountEntity/ListarPersonalEdata/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        setTimeout(function () {
+            VerTicketsCalendario();
+        }, 500);
+
+        //cambioIdioma('Buscar', $('#IdIdioma').val(), 'Buscar');
+        //cambioIdioma('Usuario', $('#IdIdioma').val(), 'Usuario');
+        //cambioIdioma('CalendariodeTicketsProgramados', $('#IdIdioma').val(), 'CalendariodeTicketsProgramados');
+    });
+
+    function BuscarTicketsCalendario() {
+        $('#calendar').fullCalendar('destroy');
+
+        VerTicketsCalendario();
+
+    }
+
+    function VerTicketsCalendario() {
+
+        $('#calendar').fullCalendar({
+            header: {
+                left: 'prev,next today',
+                center: 'title',
+                //right: 'month,agendaWeek,agendaDay'
+                right: 'month,basicWeek,basicDay'
+            },
+            buttonText: {
+                today: 'hoy',
+                month: 'mes',
+                week: 'semana',
+                day: 'día'
+            },
+            allDaySlot: false,
+            //Random default events
+            events: function (start, end, timezone, callback) {
+                $.ajax({
+                    url: '/Ticket/ListarCalendarioTicketsProgramados/' + $("#cbPersonal").val(),
+                    type: "POST",
+                    datatype: 'json',
+                    //data: {
+                    //    start: start.format(),
+                    //    end: end.format()
+                    //},
+                    success: function (data) {
+                        var events = [];
+
+                        $.each(data['data'], function (index, value) {
+
+                            events.push({
+                                id: (data['data'][index]['IdTicket']),
+                                title: (data['data'][index]['CodigoTicket']),
+                                start: (data['data'][index]['FechaProgramada']),
+                                backgroundColor: (data['data'][index]['ColorPrioridad']),
+                                borderColor: (data['data'][index]['ColorPrioridad']),
+                                url: "javascript:VerDetalleTicket(" + (data['data'][index]['IdTicket']) + ")",
+                            });
+
+                        });
+
+                        callback(events);
+                    },
+                    error: function (err) {
+
+                    }
+                });
+            },
+            editable: false,
+            droppable: true, // this allows things to be dropped onto the calendar !!!
+            eventLimit: true,
+        });
+
+    }
+
+    function VerDetalleTicket(id) {
+        window.open("http://" + location.host + "/DetailsTicket/Index/" + id)
+    }
+
+    function cambioIdioma(id, idIdioma, llave) {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdioma?llave=" + llave + "&IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    $.each(data['Data'], function (index) {
+                        var valores = (data['Data'][index]).split("|");
+                        var cantValores = document.getElementsByClassName(valores[1]);
+                        for (var i = 0; i < cantValores.length; i++) {
+                            cantValores[i].innerText = valores[0];
+                        }
+                    });
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+    //Date for the calendar events (dummy data)
+    //var date = new Date();
+    //var d = date.getDate(),
+    //    m = date.getMonth(),
+    //    y = date.getFullYear();
+
+    //$('#calendar').fullCalendar({
+    //    defaultDate: '2018-09-12',
+    //    editable: true,
+    //    eventLimit: true, // allow "more" link when too many events
+    //});
+
+    //$('#calendar').fullCalendar({
+    //    header: {
+    //        left: 'prev,next today',
+    //        center: 'title',
+    //        right: 'month,agendaWeek,agendaDay'
+    //    },
+    //    defaultDate: '2016-01-12',
+    //    editable: true,
+    //    eventLimit: true, // allow "more" link when too many events
+    //    events: [
+    //    {
+    //        title: 'All Day Event',
+    //        start: '2016-01-01'
+    //    },
+    //    {
+    //        title: 'Long Event',
+    //        start: '2016-01-07',
+    //        end: '2016-01-10'
+    //    },
+    //    {
+    //        id: 999,
+    //        title: 'Repeating Event',
+    //        start: '2016-01-09T16:00:00'
+    //    },
+    //    {
+    //        id: 999,
+    //        title: 'Repeating Event',
+    //        start: '2016-01-16T16:00:00'
+    //    },
+    //    {
+    //        title: 'Conference',
+    //        start: '2016-01-11',
+    //        end: '2016-01-13'
+    //    },
+    //    {
+    //        title: 'Meeting',
+    //        start: '2016-01-12T10:30:00',
+    //        end: '2016-01-12T12:30:00'
+    //    },
+    //    {
+    //        title: 'Lunch',
+    //        start: '2016-01-12T12:00:00'
+    //    },
+    //    {
+    //        title: 'Meeting',
+    //        start: '2016-01-12T14:30:00'
+    //    },
+    //    {
+    //        title: 'Happy Hour',
+    //        start: '2016-01-12T17:30:00'
+    //    },
+    //    {
+    //        title: 'Click for Google',
+    //        url: 'http://google.com/',
+    //        start: '2016-01-28'
+    //    }
+    //    ]
+    //});
+</script>

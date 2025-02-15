@@ -1,0 +1,147 @@
+﻿<div id="content">
+    <div class="row">
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-danger btn" id="homInc1" onclick="cambioEstadoGeneral('activoGeneral')">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Activos</div>
+                        <div class="widget-subheading">Total @ViewBag.TAActive</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span>@ViewBag.PActive</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-warning btn" id="homInc2" onclick="cambioEstadoGeneral('programadoGeneral')">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Programados</div>
+                        <div class="widget-subheading">Total @ViewBag.TAScheduled</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span>@ViewBag.PScheduled</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-success btn" id="homInc3" onclick="cambioEstadoGeneral('resueltoGeneral')">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Resueltos</div>
+                        <div class="widget-subheading">Total @ViewBag.TAResolved</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span>@ViewBag.PResolved</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-info btn" id="homInc4" onclick="cambioEstadoGeneral('cerradoGeneral')">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Cerrados</div>
+                        <div class="widget-subheading">Total @ViewBag.TAClosed</div>
+                    </div>
+                    <div class="widget-content-right">
+                        <div class="widget-numbers text-white"><span>@ViewBag.PClosed</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="TimeServer" name="TimeServer" value="@ViewBag.TimeServer" />
+    <div>
+        <div id="activoGeneral">
+            @Html.Action("_General_Activos", "Home", new { cantidad = @ViewBag.TAActive })
+        </div>
+        <div id="programadoGeneral" style="display:none">
+            @Html.Action("_General_Programados", "Home", new { cantidad = @ViewBag.TAScheduled })
+        </div>
+        <div id="resueltoGeneral" style="display:none">
+            @Html.Action("_General_Resueltos", "Home", new { cantidad = @ViewBag.PResolved })
+        </div>
+        <div id="cerradoGeneral" style="display:none">
+            @Html.Action("_General_Cerrados", "Home", new { cantidad = @ViewBag.PClosed })
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        var valor = document.getElementById('dias').value;
+
+        var diferencia = parseInt(valor);
+
+        if (diferencia > 170) {
+            var diasDieferencia = 180 - diferencia;
+            console.log('La contraseña vencio');
+            swal({
+                title: "Debe actualizar su contraseña",
+                text: "En " + diasDieferencia + " días se vencerá su contraseña. Por favor, actualizar.",
+                type: "info",
+                showCancelButton: true,
+                confirmButtonText: "Actualizar ahora",
+                cancelButtonText: "Actualizar después"
+            }).then(function (result) {
+                if (result.value) {
+                    // Acción al hacer clic en "Actualizar ahora"
+                    location = "http://" + location.host + "/Account/Manage";
+                }
+            });
+        }
+
+    });
+    function startCargarTickets() {
+        cargaInicialActivos()
+        cargaInicialProgramados()
+        cargaInicialResueltos()
+        cargaInicialCerrados()
+    }
+    function cargaInicialActivos() {
+        cargaInicialGeneralActivosTickets()
+    }
+    function cargaInicialProgramados() {
+        cambioPaginaProgramados(1)
+    }
+    function cargaInicialResueltos() {
+        cambioPaginaResueltos(1)
+    }
+    function cargaInicialCerrados() {
+        cambioPaginaCerrados(1)
+    }
+    function cambioEstadoGeneral(estado) {
+        var activo = document.getElementById("activoGeneral")
+        var programado = document.getElementById("programadoGeneral")
+        var resuelto = document.getElementById("resueltoGeneral")
+        var cerrado = document.getElementById("cerradoGeneral")
+        if (estado == 'activoGeneral') {
+            activo.style.display = "block"
+            programado.style.display = "none"
+            resuelto.style.display = "none"
+            cerrado.style.display = "none"
+        }
+        if (estado == 'programadoGeneral') {
+            programado.style.display = "block"
+            activo.style.display = "none"
+            resuelto.style.display = "none"
+            cerrado.style.display = "none"
+        }
+        if (estado == 'resueltoGeneral') {
+            resuelto.style.display = "block"
+            programado.style.display = "none"
+            activo.style.display = "none"
+            cerrado.style.display = "none"
+        }
+        if (estado == 'cerradoGeneral') {
+            cerrado.style.display = "block"
+            programado.style.display = "none"
+            resuelto.style.display = "none"
+            activo.style.display = "none"
+        }
+    }
+</script>

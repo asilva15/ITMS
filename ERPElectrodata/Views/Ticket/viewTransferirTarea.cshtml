@@ -1,0 +1,149 @@
+﻿@{
+    Layout = null;
+}
+
+<input id="IdTareaDetalle" value="@ViewBag.IdTareaDetalle" hidden/>
+<input id="IdQueu" value="@ViewBag.IdQueu" hidden/>
+<div class="main-card card">
+    <div class="card-header">
+        Usuario a Transferir
+    </div>
+    <div class="card-body">
+        <div class="form-row">
+            <div class="col-md-9">
+                <input id="usuarioTransferencia" />
+            </div>
+            <div class="col-md-3">
+                <button id="btnTransferirTarea" type="button" class="btn btn-primary"> <i class="fa fa-save"></i> Guardar</button>
+                <button id="btnCerrar" type="button" data-dismiss="modal" hidden></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#usuarioTransferencia").kendoComboBox({
+            autoBind: true,
+            dataValueField: "ID_PERS_ENTI",
+            dataTextField: "ASSI",
+            placeholder: "Seleccione un usuario",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                //schema: {
+                //    data: "Data",
+                //    total: "Count"
+                //},
+                transport: {
+                    read: "/Home/ListaUsuariosPorCola?ID_QUEU=" + $("#IdQueu").val() +"&var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#btnTransferirTarea").click(function () {
+            var url = "/Ticket/AsignarTarea/";
+            var idTareaDetalle = $("#IdTareaDetalle").val();
+            var usuario = $("#usuarioTransferencia").val();
+            var data = { id: idTareaDetalle, idticket: 0, descripcion: "", usuario:usuario };
+
+            swal({
+                title: `¿Deseas asignar esta actividad?`,
+                text: `Se asignará la actividad al usuario(a): ${$("#usuarioTransferencia").find(':selected').text()}`,
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Guardar",
+                cancelButtonText: "Cancel",
+                closeOnConfirm: false,
+                closeOnCancel: false
+            }, function (dismiss) {
+                if (dismiss) {
+                    $.ajax({
+                        url: url,
+                        data: data,
+                        type: "POST",
+                        cache: false,
+                        dataType: "text",
+                        success: function (resp) {
+                            if (resp == "OK") {
+                                $("#btnCerrar").click();
+                                idSetTimeout = setTimeout(function (element) {
+                                    
+                                    $.ajax({
+                                        contentType: 'application/json; charset=utf-8',
+                                        url: "/Ticket/ListarTareasPendientes",
+                                        type: "Get",
+                                        data: { idTicket: idTicket },
+                                        datatype: "json",
+                                        cache: false,
+
+                                        success: function (data) {
+
+                                            if (data) {
+                                                if ('@ViewBag.Movil' == '1') {
+                                                    $(".ticketHijoIndex ul > .divListTMovil").html('');
+                                                    tejerTareasPendientesMovil(data["tareaPendiente"]);
+                                                } else {
+                                                    $(".ticketHijoIndex ul").html('');
+                                                    tejerTareasPendientes(data["tareaPendiente"]);
+                                                }
+
+                                                swal.close();
+                                            }
+                                        },
+                                        error: function () {
+                                            //Crear_Failed()
+                                        }
+                                    });
+                                }, 2000, $(this));
+
+                                swal({
+                                    title: 'Guardando',
+                                    type: 'success',
+                                    text: 'Registro exitoso',
+                                    confirmButtonColor: "#DD6B55",
+                                    focusConfirm: false,
+                                    confirmButtonText:
+                                        'Continue',
+                                    confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                                });
+
+                            } else if (resp == "ERROR") {
+
+                                swal({
+                                    title: 'Warning',
+                                    type: 'info',
+                                    text: 'ERROR EN EL REGISTRO',
+                                    confirmButtonColor: "#DD6B55",
+                                    focusConfirm: false,
+                                    confirmButtonText:
+                                        'Continue',
+                                    confirmButtonAriaLabel: 'Thumbs up, great!'
+
+                                })
+
+
+                            }
+                            else {
+                                alert(Error);
+
+                            }
+                        }
+                    });
+
+                }
+                else {
+                    swal("Cancelado", "Ha cancelado la asignación", "error");
+                }
+
+            });
+
+            
+        })
+    });
+
+</script>

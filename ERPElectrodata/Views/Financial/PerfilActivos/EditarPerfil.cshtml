@@ -1,0 +1,190 @@
+﻿@{
+    ViewBag.Title = "NuevoPerfil";
+    Layout = null;
+}
+<style>
+    #cbCargo {
+        font-size:14px;
+    }
+</style>
+<div class="panel-body">
+    <div class="form-group-sm editor-field">
+        <div class="col-md-6">
+            <div style="font-size:14px;">Cargo </div> <!--IdAccoPara-->
+            @*<select id="cbCargo" class="form-control select2" type="text" style="width:100%" />*@
+            <span id="cbCargo"></span>
+            <input type="hidden" id="IdCargo" name="IdCargo"/>
+        </div>
+        @*<div class="col-md-3">
+            &nbsp;
+            <input id="btnAgregar" name="btnAgregar" class="btn btn-block btn-warning btn-sm" type="button" value="Agregar" onclick="validarAgregarFila();" /> 
+        </div>*@
+        <div class="col-md-3">
+            &nbsp;     
+            <input id="btnActualizar" name="btnActualizar" class="btn btn-block btn-primary btn-sm" type="button" value="Actualizar"/>
+        </div>
+    </div>
+    <div class="col-md-12">
+        &nbsp;
+    </div>
+    <div class="form-group-sm editor-field">
+        <table id="tablaNuevoPerfil" class="table table-bordered table-hover" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Tipo de Asignación</th>
+                    <th>Activo / Programa</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><select id="cbTipoAsignacion" class="form-control select2" type="text" style="width:100%" ></select></td>
+                    <td><select id="cbActivoPrograma" class="form-control select2" type="text" style="width:100%" ></select></td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>Tipo de Asignación</th>
+                    <th>Activo / Programa</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+    <div id="divMensaje"></div>
+</div>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url: "/PerfilActivos/ObtenerDatosPerfil/@ViewBag.Id",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(data['Data'], function (index) {
+                    //var $cargo = $("<option></option>").val((data['Data'][index]['IdCargo'])).text((data['Data'][index]['Cargo']));
+                    //$("#cbCargo").append($cargo).trigger('change');
+                    $("#cbCargo").text((data['Data'][index]['Cargo']));
+                    $("#IdCargo").val((data['Data'][index]['IdCargo']));
+                    var $tipoAsignacion = $("<option></option>").val((data['Data'][index]['IdAccoPara'])).text((data['Data'][index]['ValAccoPara']));
+                    $("#cbTipoAsignacion").append($tipoAsignacion).trigger('change');
+                    var $activoPrograma = $("<option></option>").val((data['Data'][index]['IdActivoPrograma'])).text((data['Data'][index]['ActivoPrograma']));
+                    $("#cbActivoPrograma").append($activoPrograma).trigger('change');
+                });
+            },
+            error: function (source) {
+                alert("Error Carga Json Comercial");
+            }
+        });
+        $("#cbTipoAsignacion").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Parameter/ListarPorParametro?idparametro=52",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbTipoAsignacion").on('change', function (e) {
+            $("#cbActivoPrograma").empty();
+            var idTipoAsignacion = $("#cbTipoAsignacion").find(':selected').val()
+            $("#cbActivoPrograma").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/TipoActivo/ListarTipoActivo?idTipoAsignacion=" + idTipoAsignacion,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+        });
+
+        $("#btnActualizar").click(function () {
+            $('#divMensaje').empty();
+            $('#divMensaje').show("show");
+            $("#divMensaje").append("<div class='alert alert-warning'>Confirme si desea actualizar este perfil<span style='float:right'>" +
+                '<span title="Confirmar" class="glyphicon glyphicon-ok" aria-hidden="true" id="actualizar" style="cursor:pointer;font-size:16px;color:#8EC327;"></span>&nbsp;&nbsp;' +
+                '<span title="Rechazar" class="glyphicon glyphicon-remove" aria-hidden="true" onclick="cerrarMensaje();" style="cursor:pointer;font-size:16px;color:#F83C50;"></span>' +
+                "</span></div>");
+            var eli = $("#actualizar").bind("click", function () {
+                $.ajax({
+                    url: "/PerfilActivos/ActualizarPerfilActivo/",
+                    data: "IdPerfilActivo=" + @ViewBag.Id +
+                          "&IdAccoPara=" + $("#cbTipoAsignacion").val() +
+                          "&IdActivoPrograma=" + $("#cbActivoPrograma").val() +
+                          "&var=" + Math.random(),
+                    type: "GET",
+                    cache: false,
+                    dataType: "text",
+                    success: function (resp) {
+                        $('#modalEditar').modal('hide');
+                        mensajeConfirmacion2(resp);
+                    }
+                });
+            });
+        });
+    });
+
+    function mensajeConfirmacion2(msg) {
+        if (msg == 'OK') {
+            $('#modalAsignarPM').modal('hide');
+            $('#SmallModalContent').modal('show');
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje")
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>El perfil ha sido actualizado.</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                      "<button id='continuar' class='btn btn-block btn-sm btn-primary'>Continuar</button>" +
+                                               "</div>");
+            var undo = $("#continuar")
+                .bind("click", function () {
+                    $('#SmallModalContent').modal('hide');
+                    ListarPerfilActivos();
+                });
+        }
+        else
+            if (msg == 'ERROR') {
+                $('#modalAsignarPM').modal('hide');
+                $('#SmallModalContent').modal('show');
+                $("#SmallModalTitle").empty();
+                $("#SmallModalTitle").text("Mensaje")
+                $("#SmallModalBody").empty();
+                $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Ha ocurrido un error al actualizar el perfil.</div>");
+                $("#SmallModalFooter").empty();
+                $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                          "<button id='continuar' class='btn btn-block btn-sm btn-primary'>Continuar</button>" +
+                                                   "</div>");
+                var undo = $("#continuar")
+                    .bind("click", function () {
+                        $('#SmallModalContent').modal('hide');
+                    });
+            }
+    }
+
+    function cerrarMensaje() {
+        $("#divMensaje").empty();
+    }
+</script>

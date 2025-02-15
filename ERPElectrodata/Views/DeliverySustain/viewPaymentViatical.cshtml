@@ -1,0 +1,177 @@
+﻿@model ERPElectrodata.Models.DELIVERY_SUSTAIN
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<div style="width:100%; display:inline-block;">
+    @using (Html.BeginForm("PaymentViatical", "DeliverySustain",
+        FormMethod.Post, new
+        {
+            enctype = "multipart/form-data",
+            id = "FormPaymentViatical",
+            name = "FormPaymentViatical",
+            target = "ut_PaymentViatical"
+        }))
+    {
+        <input type="hidden" id="HF_ID_REQU_EXPE" name="HF_ID_REQU_EXPE" value="@ViewBag.ID_REQU_EXPE" />          
+            if (@ViewBag.ID_STAT_REQUEST == 9 && @ViewBag.ID_TYPE_REQUEST == 2)
+                {
+<input type="hidden" id="HF_DOC_AMOU" name="HF_DOC_AMOU" value="@ViewBag.TotalReembolso" />
+                }
+                else
+                {
+<input type="hidden" id="HF_DOC_AMOU" name="HF_DOC_AMOU" value="@ViewBag.Total" />
+                }
+        
+        <input type="hidden" id="HF_COIN" name="HF_COIN" value="@ViewBag.Moneda" />
+        <div class="row">
+
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.NumberCheck
+                </div>
+                <div class="k-textbox" style="width:100%;">
+                    @Html.EditorFor(model => model.NUM_CHEC)
+                    @Html.ValidationMessageFor(model => model.NUM_CHEC)
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.Date
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.DOC_DATE)
+                    @Html.ValidationMessageFor(model => model.DOC_DATE)
+                </div>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.Currency
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.COIN)
+                    @Html.ValidationMessageFor(model => model.COIN)
+                </div>
+            </div>
+
+            <div class="col-sm-6" id="divAmount">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.Amount
+                </div>
+                <div style="margin-top:0px;">
+                    @Html.EditorFor(model => model.DOC_AMOU)
+                    @Html.ValidationMessageFor(model => model.DOC_AMOU)
+                </div>
+            </div>
+        </div>
+        if (@ViewBag.ID_TYPE_REQUEST == 2 && @ViewBag.ID_STAT_REQUEST != 9)
+        {
+            <div class="row">
+                <div class="col-sm-12">
+                    <div class="editor-label">
+                        Número de PRC
+                    </div>
+                    <div class="k-textbox" style="width:100%;">
+                        @Html.EditorFor(model => model.NumeroPRC)
+                        @Html.ValidationMessageFor(model => model.NumeroPRC)
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="row mt-2">
+            <div class="col-sm-12">
+                <input name="files" id="files" type="file" />
+            </div>
+        </div>
+
+        <div style="height:20px;"></div>
+
+        <div class="modal-footer">
+            <button id="submitPayment" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+            <button id="closeModal" data-dismiss="modal" hidden></button>
+        </div>
+    }
+
+    <iframe id="ut_PaymentViatical" name="ut_PaymentViatical" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var DOC_DATE = $("#DOC_DATE").kendoDatePicker().data("kendoDatePicker");
+
+        var LCoin = [{ text: "@ResourceLanguaje.Resource.PeruvianNuevoSol", value: "MN" }, { text: "@ResourceLanguaje.Resource.DollarAmerican", value: "ME" }];
+        var COIN = $("#COIN").kendoComboBox({
+            autoBind: true,
+            dataTextField: "text",
+            dataValueField: "value",
+            suggest: true,
+            dataSource: LCoin,
+            value: "@ViewBag.Moneda",
+            enable: false
+        }).data("kendoComboBox");
+
+        var valorInicial = (@ViewBag.ID_STAT_REQUEST == 9 && @ViewBag.ID_TYPE_REQUEST == 2) ? "@ViewBag.TotalReembolso" : "@ViewBag.Total";
+
+
+        $("#DOC_AMOU").kendoNumericTextBox({
+            min: 0,
+            value: parseFloat(valorInicial)
+
+        });
+
+        var DOC_AMOU = $("#DOC_AMOU").data("kendoNumericTextBox");
+        DOC_AMOU.enable(false);
+    });
+
+    $("#submitPayment").click(function () {
+
+        $('#myModalLoading').modal('show');
+
+      });
+
+    var onSelect = function (e) {
+        var ID_TYPE_DETA_TICK = $("#ID_TYPE_DETA_TICK").data("kendoComboBox");
+        //if (ID_TYPE_DETA_TICK.dataItem().ID_TYPE_DETA_TICK == 7) {
+        $.each(e.files, function (index, value) {
+            if (value.extension.toLowerCase() != ".pdf") {
+                e.preventDefault();
+
+                toastr.warning("Cargue el archivo de documento Adobe Acrobat en pdf", "Alerta");
+
+            }
+        });
+
+    };
+
+    $("#files").kendoUpload({
+        localization: {
+            select: "Adjuntar"
+        },
+        select: onSelect,
+        multiple: false,
+    });
+
+    function toastDeliverySustain(msg, msnErr) {
+        if (msg == 'OK') {
+            var btnCerrar = document.getElementById("closeModal");
+            btnCerrar.click()
+            /*$("[data-dismiss=modal]").trigger({ type: "click" });*/
+            toastr.success(msnErr, "@ResourceLanguaje.Resource.InformationSaved");
+           /* $('#miModal').modal('hide');*/
+            CargarGrilla(this)
+        }
+        else {
+            toastr.error(msnErr,"@ResourceLanguaje.Resource.InformationMissing");
+        }
+    }
+
+</script>

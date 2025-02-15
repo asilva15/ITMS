@@ -1,0 +1,292 @@
+﻿@{
+    ViewBag.Title = "ListaUsuarioRol";
+    Layout = "~/Views/Shared/_LayoutArch.cshtml";
+}
+
+<style>
+    .k-maskedtextbox {
+        width: 100%;
+    }
+</style>
+
+@*--------------------------------Plugin Toast--------------------------------*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+@*--------------------------------Plugin iCheck--------------------------------*@
+<link href="~/Content/themes/plugin//iCheck/flat/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+@*-----------------------Plugin DataTable + Bootstrap---------------------------------------------------------*@
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<button id="btnAbrirModal" type="button" data-toggle="modal" data-target="#miModal" aria-hidden="false" style="display:none"></button>
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-user-check icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Usuario - Rol
+                @*<div class="page-title-subheading">
+
+                    </div>*@
+            </div>
+        </div>
+    </div>
+</div>
+<div class="tab-content">
+    <div class="main-card mb-3 card">
+        <div class="card-body">
+            <div class="form-row">
+                <div class="col-md-3">
+                    <button type="button" class="btn btn-secondary" onclick="AsignarRol()" data-toggle="modal" data-target="#miModal" aria-hidden="false">
+                        <i class="fas fa-user fa-lg"></i>   Asignar Rol
+                    </button>
+                </div>
+            </div>
+            <hr style="visibility:hidden" />
+            <div class="form-row">
+                <div class="col-md-2" style="margin-left: 1.5%;">
+                    <div class="position-relative form-group">
+                        <label id="lblUsuario" for="nombreUsuario"><b>Usuario</b></label>
+                        <input id="nombreUsuario" type="text" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="position-relative form-group">
+                        <label id="lblRol" for="nombreRol"><b>Rol</b></label>
+                        <input id="nombreRol" type="text" />
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <hr style="visibility:hidden">
+                    <div class="col-md-10">
+                        <div class="position-relative form-group">
+                            <button type="button" class="btn btn-block btn-warning" onclick="Buscar()">Buscar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-6">
+                    <table id="roleTable" class="table table-hover table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width:40%">Usuario</th>
+                                <th style="width:60%">Rol</th>
+                                <th style="display:none">IdRol</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <table id="accionTable" class="table table-hover table-striped table-bordered">
+                        <thead>
+                            <tr>
+                                <th style="width:20%">Menú</th>
+                                <th style="width:80%">Acción</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="body-block-example-1 d-none">
+    <div class="loader bg-transparent no-shadow p-0">
+        <div class="ball-grid-pulse">
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+            <div class="bg-white"></div>
+        </div>
+    </div>
+</div>
+
+@*<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>*@
+<script>
+    var leng_esp = {
+        "sProcessing": "Procesando...",
+        "sLengthMenu": "Mostrar _MENU_ registros",
+        "sZeroRecords": "No se encontraron resultados",
+        "sEmptyTable": "Ningún dato disponible en esta tabla =(",
+        "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+        "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+        "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+        "sInfoPostFix": "",
+        "sSearch": "Buscar:",
+        "sUrl": "",
+        "sInfoThousands": ",",
+        "sLoadingRecords": "Cargando...",
+        "oPaginate": {
+            "sFirst": "Primero",
+            "sLast": "Último",
+            "sNext": "Siguiente",
+            "sPrevious": "Anterior"
+        },
+        "oAria": {
+            "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+            "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+        },
+        "buttons": {
+            "copy": "Copiar",
+            "colvis": "Visibilidad"
+        }
+    };
+
+    $(document).ready(function () {
+        //Carga de combobox
+        $("#nombreUsuario").kendoComboBox({
+            placeholder: "Seleccione un usuario",
+            dataTextField: "Usuario",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Role/ListaComboUsuarios?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#nombreRol").kendoComboBox({
+            placeholder: "Seleccione un rol",
+            dataTextField: "Rol",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Role/ListaComboRoles?var=" + Math.random()
+                }
+            }
+        });
+
+        //Limpieza de Tablas
+        $("#roleTable").dataTable().fnDestroy();
+        $("#accionTable").dataTable().fnDestroy();
+        //Carga de Tablas
+        Buscar();
+
+    });
+
+    function Buscar() {
+        var nusr = $("#nombreUsuario").val();
+        var nrol = $("#nombreRol").val();
+        if (nusr == '') nusr = 0;
+        if (nrol == '') nrol = 0;
+        $("#accionTable").dataTable().fnDestroy();
+        //$("#accionTable").DataTable().clear().draw();
+
+        $('#roleTable').off('click', 'tr');
+        $.ajax({
+            type: "GET",
+            url: "/Role/BuscarUsuarioRol?userid=" + nusr + "&rolid=" + nrol,
+            cache: false,
+            success: function (data) {
+                $('#roleTable').DataTable().destroy();
+                var rolt = $('#roleTable').DataTable({
+                    responsive: true,
+                    dom: 'rtp',
+                    select: true,
+                    //pagingType: "simple",
+                    data: data,
+                    columns: [
+                        {
+                            data: "Usuario",
+                        },
+                        {
+                            data: "Rol"
+                        },
+                        {
+                            data: "IdRol"
+                        }
+                    ],
+                    columnDefs: [
+                       {
+                           "targets": [2],
+                           "visible": false,
+                           "searchable": false
+                       }
+                    ],
+                    language: leng_esp
+                });
+                $('#roleTable').on('click', 'tr', function () {
+                    var data = rolt.row(this).data();
+                    AccionesRol(data.IdRol);
+                });
+                if (data.length == 0) {
+                     toastr.warning("No se encontraron resultados", "Advertencia");
+                } else {
+                    toastr.success("Mostrando Resultados", "Completado");
+                }
+            }
+        });
+    }
+
+    function AccionesRol(idRol) {
+        $("#accionTable").dataTable().fnDestroy();
+        $('#accionTable').DataTable({
+            responsive: true,
+            dom: 'rt',
+            select: true,
+            ajax: {
+                url: "/Role/ListaMenusAccionesRol?idRol=" + idRol,
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "Menu"
+                },
+                {
+                    data: "Acciones"
+                }
+            ]
+            ,
+            columnDefs: [
+                { "width": "20%", "targets": 0 }, { "width": "80%", "targets": 1 }
+            ],
+            language: leng_esp
+        });
+    }
+
+    function AsignarRol() {
+
+        $("#lblTitulo").text("Asignación de Rol");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").removeClass("modal-xs");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $("#modal-content").empty();
+        $("#modal-content").load('/Role/AsignarRol');
+    }
+
+</script>

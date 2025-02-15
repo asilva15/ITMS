@@ -1,0 +1,267 @@
+﻿@{
+    ViewBag.Title = "DetalleHorario";
+}
+@{
+    Layout = null;
+}
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<div class="card-header card-header-tab-animation">
+    <ul class="nav nav-justified">
+        <li class="nav-item"><a data-toggle="tab" id="tabEditar" class="active nav-link" onclick="DetalleEditarHorario()"><i class="fa fa-edit" style="font-size:24px"></i> Editar Horario</a></li>
+        <li class="nav-item"><a data-toggle="tab" id="tabEliminar" class="nav-link" onclick="EliminarHorario()">
+    <i class="fa fa-trash" style='font-size:24px'></i> Eliminar Horario
+</a></li>
+    </ul>
+</div>
+
+<div id="divDetalleEditarHorario">
+    <br />
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">
+            Datos del horario del Área Responsable
+        </div>
+        <div class="card-body">
+            <div id="divDatosActivo"></div>
+
+        </div>
+    </div>
+</div>
+<div id="divEliminarHorario">
+    <br />
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">
+            Elimine el horario asociado al Área Responsable
+        </div>
+        @using (Html.BeginForm("EliminarGrupoHorario", "HorarioGruposResolutores", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEliminarHorario", target = "upload_target" }))
+        {
+            @Html.ValidationSummary(true)
+
+
+            <input type="hidden" id="Id" name="Id" value="@ViewBag.IdHorario" />
+            <div class="row">
+                <div class="col-md-12" style="text-align:center">
+                    <div class="card-body">
+                        <form class="">
+                            <div class="form-row">
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <label id="lblEliminar" for="lblEliminar" class="">¿Está seguro que desea eliminar el horario asociado a <strong> @ViewBag.AreaResponsable</strong>?</label>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+
+                                <div class="col-md-12">
+                                    <div class="position-relative form-group">
+                                        <button type="submit" id="btnSiEliminar" class="btn-shadow btn btn-success btn-sm"> SI </button>
+                                        <button type="button" id="btnNoEliminar" class="btn-shadow btn btn-danger btn-sm" onclick="NoEliminar()"> NO </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        }
+        </div>
+</div>
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" style="display:none"></iframe>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var IdHorario = @ViewBag.IdHorario;
+        ObtenerDatosHorario(IdHorario);
+    });
+    DetalleEditarHorario();
+    function DetalleEditarHorario() {
+        $("#divDetalleEditarHorario").show()
+        $("#divEliminarHorario").hide()
+
+    }
+
+    function EliminarHorario() {
+        $("#divDetalleEditarHorario").hide()
+        $("#divEliminarHorario").show()
+
+    }
+
+    function ObtenerDatosHorario(id) {
+
+        $.ajax({
+            /**/
+            url: "/HorarioGruposResolutores/ObtenerDetalleHorarios/" + id,
+    /**/
+    type: "GET",
+    cache: false,
+    dataType: "json",
+    success: function (source) {
+        data = source;
+        mostrarDatosHorario();
+    },
+    error: function (source) {
+        alert("Error Carga Json Comercial");
+    }
+});
+}
+
+
+function mostrarDatosHorario() {
+
+$.each(data['Data'], function (index) {
+    $("#divDatosActivo").empty();
+    $("#divDatosActivo").append(
+        '<div class="form-row">' +
+        '<div class ="col-md-6">' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Código</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['IdGrupo']) + '</div>' +
+        '</div>' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Hora Inicio</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['Inicio']) +
+        '<button type="button" id="btnEditarInicio" name="btnEditarInicio" title="Editar Hora de Inicio" class="border-0 btn-transition btn btn-outline-success" onclick="editarHoraInicio(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-pencil-alt"></i></button>' +'</div>' +
+        '</div>' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Hora Fin</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['Fin']) +
+        '<button type="button" id="btnEditarFin" name="btnEditarFin" title="Editar Hora Fin" class="border-0 btn-transition btn btn-outline-success" onclick="editarHoraFin(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-pencil-alt"></i></button>' +'</div>' +
+        '</div>' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Días</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['Dias']) +
+        '<button type="button" id="btnEditarDias" name="btnEditarDias" title="Editar los Días" class="border-0 btn-transition btn btn-outline-success" onclick="editarDias(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-pencil-alt"></i></button>' +'</div>' +
+        '</div>' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Fecha de Creación</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['FechaCreacion']) + '</div>' +
+        '</div>' +
+        '</div>' +//fin bloque1
+        '<div class ="col-md-6">' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Área Responsable</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['GrupoResolutor']) + '</div>' +
+        '</div>' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Creado Por</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['Creadopor']) + '</div>' +
+        '</div>' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Feriados</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['Feriados']) + '<button type="button" id="btnEditarFeriado" name="btnEditarFeriado" title="Editar Feriados" class="border-0 btn-transition btn btn-outline-success" onclick="editarFeriados(' + (data['Data'][index]['Id']) + ')"><i class="fa fa-pencil-alt"></i></button>'
+        + '</div>' +
+        '</div>' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Fecha de Últ. Actualización</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['FechaUltActualizacion']) + '</div>' +
+        '</div>' +
+        '<div class = "row">' +
+        '<div class = "col-md-5"><b>Actualizado Últ. Vez Por</b></div>' +
+        '<div class = "col-md-7">' + (data['Data'][index]['ActualizadoUltVezPor']) + '</div>' +
+        '</div>' +
+        '</div>' +
+        '</div>'
+    );
+});
+    }
+
+    function editarHoraInicio(id) {
+        $("#lblTitulo").text("Editar Hora de Inicio");
+
+        $("#btnEditarInicio").attr("data-style", "expand-right");
+        $("#btnEditarInicio").attr("data-toggle", "modal");
+        $("#btnEditarInicio").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").removeClass("modal-lg");
+        //$(".modal-dialog").addClass("modal-lg");
+        //$("#miModal").modal("show");
+        $('#modal-content').empty();
+        $('#modal-content').load('/HorarioGruposResolutores/EditarHoraInicio/' + id);
+    }
+
+    function editarHoraFin(id) {
+        $("#lblTitulo").text("Editar Hora Fin");
+
+        $("#btnEditarFin").attr("data-style", "expand-right");
+        $("#btnEditarFin").attr("data-toggle", "modal");
+        $("#btnEditarFin").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/HorarioGruposResolutores/EditarHoraFin/' + id);
+    }
+
+    function editarDias(id) {
+        $("#lblTitulo").text("Editar los Días");
+
+        $("#btnEditarDias").attr("data-style", "expand-right");
+        $("#btnEditarDias").attr("data-toggle", "modal");
+        $("#btnEditarDias").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/HorarioGruposResolutores/EditarDias/' + id);
+    }
+
+    function editarFeriados(id) {
+        $("#lblTitulo").text("Editar Feriados");
+
+        $("#btnEditarFeriado").attr("data-style", "expand-right");
+        $("#btnEditarFeriado").attr("data-toggle", "modal");
+        $("#btnEditarFeriado").attr("data-target", "#miModal");
+        $(".modal-dialog").removeClass("modal-lg");
+        $('#modal-content').empty();
+        $('#modal-content').load('/HorarioGruposResolutores/EditarFeriados/' + id);
+                }
+
+    function uploadDoneDelete(msg, code) {
+        if (msg == "OK") {
+
+
+            var title = 'Horario Eliminado';
+
+            swal({
+                title: title,
+                type: 'success',
+                text: 'El horario se eliminó correctamente',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continuar',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            }, function () {
+                //var newurl = location.host + "/#/Home";
+                //location = "http://" + location.host + "/#/Home";
+                location.reload();
+            })
+
+        }
+
+        else {
+            swal({
+                title: 'Error',
+                type: 'info',
+                text: 'Error al eliminar',
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continuar',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+        }
+
+    }
+
+    function NoEliminar() {
+
+
+        toastr.warning("El Horario asignado al Área Responsable No se Eliminó", "Advertencia.");
+       // $('#tabEditar').trigger('click');
+        /*$("tabEditar").trigger({ type: "click" });*/
+        DetalleEditarHorario();
+        $('#tabEditar').addClass('active');
+        $('#tabEliminar').removeClass('active');
+
+                }
+
+</script>
+

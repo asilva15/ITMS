@@ -1,0 +1,148 @@
+﻿@{
+    Layout = null;
+}
+
+<div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+<div style="width:100%;min-width:5px;float:left;">
+    <div class="titleForm">
+        <div class="title">Lista de Objetivos y Funciones</div>
+    </div>
+    <div class="inBodyForm" style="height:700px; padding:10px 20px 10px 20px;" id="">
+        <div style="width:100%;background-color:white">
+            <div class="divFondoDos" style="padding-bottom:10px;">
+                <div class="editor-label" style="float:left; padding: 5px;">
+                    Cargo
+                </div>
+                <div class="editor-field" style="float:left;">
+                    <input id="IdCargo" name="IdCargo" />
+                </div>
+                <div class="editor-label" style="float:left; padding: 5px;">
+                    Palabra Clave
+                </div>
+                <div class="k-textbox" style="float:left;">
+                    <input id="PalabraClave">
+                </div>
+                <div class="editor-label" style="float:left; padding: 5px;">
+                </div>
+                <button id="btnBuscarObjetivo" type="button" class="btn btn-primary btn-sm" style="float:left;">Buscar</button>
+            </div>
+            <div style="overflow-y:auto; height:550px;">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th class="bg-primary" style="width:30%">Ojetivos</th>
+                            <th class="bg-primary" style="border-left: 1px solid #e2e2e2;width:40%">Descripción</th>
+                            <th class="bg-primary" style="border-left: 1px solid #e2e2e2;width:10%">Indicador</th>
+                            <th class="bg-primary" style="border-left: 1px solid #e2e2e2;width:10%">Cargo</th>
+                            <th class="bg-primary" style="border-left: 1px solid #e2e2e2;width:5%">Peso</th>
+                            <th class="bg-primary" style="border-left: 1px solid #e2e2e2; width:5%">Opciones</th>
+                        </tr>
+                    </thead>
+                </table>
+                <div id="listView" class="contentView">
+                </div>
+                <div id="pager" class="contentViewPager">
+                </div>
+            </div>
+            <div id="pager" class="contentViewPager">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="tmpObjetivos" type="text/x-kendo-template">
+    <div style="float:left;width:100%">
+        <div style="float:left; width:30%;" class="table table-hover">
+            ${Nombre}
+        </div>
+        <div style="float:left; width:40%;" class="table table-hover">
+            ${Descripcion}
+        </div>
+        <div style="float:left; width:10%;" class="table table-hover">
+            ${Indicador}
+        </div>
+        <div style="float:left; width:10%;" class="table table-hover">
+            ${CARGO}
+        </div>
+        <div style="float:left; width:5%;" class="table table-hover">
+            ${Peso}
+        </div>
+        <div style="float:left; width:5%;" class="table table-hover">
+            <span id="${Id}" class="glyphicon glyphicon-pencil" onclick="EditarObjetivo(this)" style="cursor: pointer;"></span>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#btnBuscarObjetivo").click(function () {
+            var dataSource = new kendo.data.DataSource({
+                transport: {
+                    read: {
+                        url: "/EvaluacionPersonal/ListarObjetivos",
+                        type: "GET",
+                        dataType: "json",
+                        data: {
+                            q: "#kendoui",
+                            ran: Math.random(),
+                            IdCargo: $("#IdCargo").val() == '' ? 0 : $("#IdCargo").val(),
+                            PalabraClave: $("#PalabraClave").val()
+                        }
+                    }
+                },
+                autoSync: true,
+                serverFiltering: true,
+                serverPaging: true,
+                pageSize: 15,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                }
+            });
+
+            $("#pager").kendoPager({
+                dataSource: dataSource,
+                pageSizes: [10, 15, 20],
+                refresh: true
+            });
+
+            $("#listView").kendoListView({
+                dataSource: dataSource,
+                template: kendo.template($("#tmpObjetivos").html())
+            });
+        });
+
+        $("#btnBuscarObjetivo").click();
+
+        $("#IdCargo").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/ListarCargo?var=" + Math.random()
+                }
+            }
+        });
+        var IdCargo = $("#IdCargo").data("kendoComboBox");
+
+    });
+
+    function EditarObjetivo(obj) {
+
+        var htmlForm = '<div id="FormEditarObjetivo"></div>';
+        winFormPopUpModal("Editar Objetivo", htmlForm, 730, 350);
+        $("#FormEditarObjetivo").load("/EvaluacionPersonal/Editar?id=" + obj.id + "&var=" + Math.random());
+    }
+
+</script>

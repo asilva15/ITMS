@@ -1,0 +1,1053 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+    Layout = null;
+}
+
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    table.k-editor {
+        height: auto !important;
+    }
+</style>
+
+
+@using (Html.BeginForm("GuardarInforme", "InformeED", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmRegistrar", name = "FrmRegistrar", target = "FrmRegistrar" }))
+{
+    <input type="hidden" id="IdDocuSale" name="IdDocuSale" value="@ViewBag.ID_DOCU_SALE" />
+
+    <style>
+        .modal-dialog {
+            position: absolute;
+            left: 10%;
+            top: 5%;
+            transform: translate(-50%, -50%);
+            margin: 0 10px;
+        }
+
+        .modal-content {
+            margin: 0;
+            width: 150%;
+            border-radius: 0;
+        }
+    </style>
+
+    <div class="row">
+        <div class="col-md-7">
+            <div class="mb-4 card">
+                <div class="card-body">
+                    <div class="col-lg-12">
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <span>Producto/Fabricante <b>(*)</b></span>
+                                    <input id="cbFabricanteInforme" name="cbFabricanteInforme" type="text" style="width: 100%" data-text-field="text" data-value-field="value">
+                                    @*<input id="cbFabricanteInforme" name="cbFabricanteInforme" type="text" style="width: 100%; font-size: 14px;" />*@
+                                </div>
+                                <div class="col-md-4">
+                                    <span>Tipo de Informe<b>(*)</b></span>
+                                    <input id="cbTipoInforme" name="cbTipoInforme" type="text" style="width: 100%; font-size: 14px;" />
+                                </div>
+                                <div class="col-md-4">
+                                    <span>Nro Informes Totales</span>
+                                    <input id="txtNroInformes" name="txtNroInformes" class="form-control" type="number" style="width: 100%; font-size: 14px;" min="0" value="1" readonly />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="row">
+                                <style>
+                                    .row.no-pad {
+                                        margin-right: 0;
+                                        margin-left: 0;
+                                    }
+
+                                        .row.no-pad > [class*='col-'] {
+                                            padding-right: 15px;
+                                            padding-left: 0;
+                                        }
+                                </style>
+
+
+                                <div class="col-md-3">
+                                    <span>Inicio de soporte <b>(*)</b></span>
+                                    <input id="FInicio" name="FInicio" type="date" placeholder="" class="form-control pull-right" value="" style="width: 100%; font-size: 14px;">
+                                    @*<input type="text" class="form-control pull-right" id="dtIniInforme" name="dtIniInforme" />*@
+                                </div>
+
+                                <div class="col-md-3">
+                                    <span>Fin de soporte <b>(*)</b></span>
+                                    <input id="FFin" name="FFin" type="date" placeholder="" class="form-control pull-right" value="" style="width: 100%; font-size: 14px;">
+                                    @*<input  id="dtFinInformeGeneral" name="dtFinInformeGeneral" />*@
+                                </div>
+                                <div class="col-md-6">
+                                    <span>Rango de Envío<b>(*)</b></span>
+                                    <div class="row no-pad ">
+                                        <div class="col-md-12" id="divcborangoenvio">
+
+                                            <input id="cborangoenvio" name="cborangoenvio" style="width: 100%; font-size: 14px;" onchange="mostrarDiv()">
+                                        </div>
+
+                                        <div id="divCantidadDias" style="display: none;">
+                                            @*<span style="font-size:12px">días<b>(*)</b></span>*@
+                                            <input id="txtnumerofrecuenciapersonalizada" name="txtnumerofrecuenciapersonalizada" class="form-control" type="number" style="width: 100%; font-size: 14px;" min="0" />
+                                            <span style="position: absolute; top: 50%; left: 70%; transform: translate(-50%, -50%); text-align: center;">día(s)</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="form-group">
+                            <div class="row">
+
+                                <style>
+                                    .row.no-pad {
+                                        margin-right: 0;
+                                        margin-left: 0;
+                                    }
+
+                                        .row.no-pad > [class*='col-'] {
+                                            padding-right: 15px;
+                                            padding-left: 0;
+                                        }
+                                </style>
+
+                                <div class="col-md-8">
+                                    <span>Plazo máximo de envío <b>(*)</b></span>
+                                    @*<span>Plazo de envío del informe<b>(*)</b></span>*@
+                                    <div class="row no-pad ">
+                                        <div class="col-md-6 m-0">
+
+                                            <input id="txtdiashabiles" name="txtdiashabiles" class="form-control" type="number" style="width: 100%; font-size: 14px;" min="0" />
+                                            <span style="position: absolute; top: 50%; left: 60%; transform: translate(-50%, -50%); text-align: center;">día(s)</span>
+
+                                        </div>
+                                        <div class="col-md-6 m-0">
+                                            <input id="cbdiashabiles" name="cbdiashabiles" style="width: 100%; font-size: 14px;">
+
+                                        </div>
+                                    </div>
+                                    <br />
+                                </div>
+                                <div class="col-md-4">
+                                    <br />
+                                    <input id="btnGenerarFechas" name="btnGenerarFechas" class="btn btn-block btn-primary btn-sm" type="button" value="Generar Fechas" onclick="GenerarFechas();" />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-md-12" id="divPregunta" style="display: none;">
+                                    El último informe tiene <span id="diasRestantes"></span> día(s), ¿Deseas que se cree ese informe?
+                                    <input type="hidden" id="diasRestantesHidden" name="diasRestantes" />
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <label>
+                                                <input type="radio" name="opcion" value="SI" id="SI">
+                                                <label for="SI">SI</label>
+
+                                            </label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label>
+                                                <input type="radio" name="opcion" value="NO" id="NO">
+                                                <label for="NO">NO</label>
+                                            </label>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="form-group">
+                                <div class="col-md-4">
+                                    <input id="btnGenerarFechas" name="btnGenerarFechas" class="btn btn-block btn-primary btn-sm" type="button" value="Generar Fechas" onclick="GenerarFechas();" />
+                                </div>
+                            </div>*@
+                    </div>
+                </div>
+            </div>
+        </div>
+        @*PARTE DEL CHECK BOX*@
+
+        <div class="col-md-5">
+
+            <div class="mb-4 card">
+                <div class="card-header">
+                    <label> Tipo de envío</label>
+                </div>
+
+                <div class="card-body">
+
+                    <div class="form-group">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label>
+                                    <input type="checkbox" id="idinformestxt"> Físico
+                                </label>
+
+                            </div>
+                            <div class="col-md-4">
+
+                                <label>
+                                    <input type="checkbox" id="idgestiontxt"> Mesa de Partes
+                                </label>
+                            </div>
+                            <div class="col-md-5">
+
+                                <label>
+                                    <input type="checkbox" id="idtablatxt"> Correo Electrónico
+                                </label>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group mb-2">
+
+                        <div class="row align-items-center">
+                            <label class="col-md-3 mb-0">Dirección:</label>
+                            <div class="col-md-9">
+                                <input id="txtinformesid" name="txtinformesid" class="form-control" type="text" disabled="disabled" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group mb-2">
+
+                        <div class="row align-items-center">
+                            <label class="col-md-3 mb-0">Enlace:</label>
+                            <div class="col-md-9">
+                                <input id="txtgestionid" name="txtgestionid" class="form-control" type="text" disabled="disabled" />
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="form-group mb-2">
+
+                        <div class="row align-items-center">
+                            <label class="col-md-3 mb-0">Correo:</label>
+                            <div class="col-md-9">
+                                <input id="txttablaid" name="txttablaid" class="form-control" type="text" disabled="disabled" />
+                            </div>
+                        </div>
+
+                    </div>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-row">
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">Listado de informes</div>
+                    <div class="card-body" style="overflow-y: scroll;max-height:300px">
+                        <div id="divListadoInformes">
+                            En esta sección se mostrará el listado de informes.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="imageregistra" class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">Imágen</div>
+                    <div class="card-body" style="overflow-y: scroll;max-height:300px">
+                        <a class="btn btn-gradient-primary" href="#" id="btn-paste">Pegar Imagen</a>
+                        <a class="btn btn-gradient-primary" href="#" id="btn-upload">Cargar Imagen</a>
+                        <br /><br />
+                        <div id="paste-here"></div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">Observaciones</div>
+                    <div class="card-body" style="overflow-y: scroll;max-height:300px">
+                        <textarea id="txtObservacionesInforme" name="txtObservacionesInforme" class="textarea" placeholder="Observaciones..."></textarea>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="row">
+            <div class="col-md-9">
+            </div>
+            <div class="col-md-3">
+                <input id="btnGuardarSoporteED" name="btnGuardarSoporteED" class="btn btn-block btn-primary btn-sm" type="submit" value="Guardar" />
+
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="imagenesData" name="imagenesData" />
+    <input type="hidden" id="titulosData" name="titulosData" />
+    <input type="hidden" id="comentariosData" name="comentariosData" />
+}
+
+
+<iframe id="FrmRegistrar" name="FrmRegistrar" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+<iframe id="FrmCrearSLA" name="FrmCrearSLA" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+<script>
+
+    $("#FrmRegistrar").submit(function (event) {
+        var selectedItems = $("#cbFabricanteInforme").data("kendoMultiSelect").value();
+        var input = $("<input>").attr("type", "hidden").attr("name", "SelectedFabricante").val(selectedItems);
+        $(this).append(input);
+    });
+
+    $('#FrmRegistrar input').keydown(function (event) {
+        if (event.keyCode === 13) {
+            event.preventDefault(); // Cancelar el comportamiento predeterminado del Enter
+        }
+    });
+
+    $(document).ready(function () {
+
+        $('#FInicio').val('@ViewBag.FechaIni');
+        $('#FFin').val('@ViewBag.FechaFi');
+
+        $('#idinformestxt').on('ifChanged', function (event) {
+            if ($(this).is(':checked')) {
+                // Checkbox marcado, habilitar el campo de texto
+                $('#txtinformesid').prop('disabled', false).focus();
+            } else {
+                // Checkbox desmarcado, deshabilitar el campo de texto
+                $('#txtinformesid').prop('disabled', true).val('');
+            }
+        });
+
+        $('#idgestiontxt').on('ifChanged', function (event) {
+            if ($(this).is(':checked')) {
+                // Checkbox marcado, habilitar el campo de texto
+                $('#txtgestionid').prop('disabled', false).focus();
+            } else {
+                // Checkbox desmarcado, deshabilitar el campo de texto
+                $('#txtgestionid').prop('disabled', true).val('');
+            }
+        });
+
+        $('#idtablatxt').on('ifChanged', function (event) {
+            if ($(this).is(':checked')) {
+                // Checkbox marcado, habilitar el campo de texto
+                $('#txttablaid').prop('disabled', false).focus();
+            } else {
+                // Checkbox desmarcado, deshabilitar el campo de texto
+                $('#txttablaid').prop('disabled', true).val('');
+            }
+        });
+
+
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+
+        $("#txtObservacionesInforme").kendoEditor({
+            tools: [],
+            encoded: false
+        });
+
+        $("#cbTipoInforme").kendoComboBox({
+            dataTextField: "TipoInforme",
+            index: 0,
+            dataValueField: "IdTipoInforme",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/ListarTipoInforme?var=" + Math.random()
+                }
+            }
+        });
+        var cbTipoInforme = $("#cbTipoInforme").data("kendoComboBox");
+
+        //$("#cbFabricanteInforme").kendoComboBox({
+        //    dataTextField: "text",
+        //    dataValueField: "id",
+        //    index: 1,
+        //    filter: "contains",
+        //    autoBind: true,
+        //    suggest: true,
+        //    dataSource: {
+        //        schema: {
+        //            data: "Data",
+        //            total: "Count"
+        //        },
+        //        transport: {
+        //            read: "/SoporteFabricante/ListarFabricante?var=" + Math.random()
+        //        }
+        //    }
+        //});
+
+        $("#cbFabricanteInforme").kendoMultiSelect({
+        dataTextField: "text",
+        dataValueField: "id",
+        filter: "contains",
+        autoBind: true,
+        suggest: true,
+        dataSource: {
+        transport: {
+                @*read: {
+                    url: "/SoporteFabricante/ListarFabricanteOP",
+                    data: { NumDocuSale: @ViewBag.ID_DOCU_SALE },
+                    dataType: "json"
+                }*@
+                read: {
+                    url: "/SoporteFabricante/ListarFabricantes",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                data: function (response) {
+                    return response; // Ajusta esto según la estructura de tus datos
+                }
+            }
+        },
+            dataBound: function () {
+                var multiSelect = $("#cbFabricanteInforme").data("kendoMultiSelect");
+
+                // Realiza una llamada AJAX para obtener los fabricantes a autoseleccionar
+                $.ajax({
+                    url: "/SoporteFabricante/ListarFabricanteOP",
+                    type: "GET",
+                    data: { NumDocuSale: @ViewBag.ID_DOCU_SALE },
+                    dataType: "json",
+                    success: function (response) {
+                        // Extrae los IDs de los fabricantes y autoselecciónalos
+                        var selectedIds = response.map(function (item) {
+                            return item.id;
+                        });
+
+                        // Establece los valores seleccionados en el MultiSelect
+                        multiSelect.value(selectedIds);
+                    },
+                    error: function () {
+                        console.error("Error al obtener los fabricantes para autoseleccionar.");
+                    }
+                });
+            }
+        });
+
+
+        var select = $("#cborangoenvio");
+        select.kendoComboBox({
+            dataSource: [
+                { text: "Diario", value: "D" },
+                { text: "Mensual", value: "M" },
+                { text: "Bimestral", value: "B" },
+                { text: "Trimestral", value: "T" },
+                { text: "Semestral", value: "S" },
+                { text: "Anual", value: "A" },
+                { text: "Personalizado", value: "P" }
+            ],
+            index: 1,
+            dataTextField: "text",
+            dataValueField: "value"
+        });
+
+
+        var select2 = $("#cbdiashabiles");
+
+        select2.kendoComboBox({
+            dataSource: [
+                { text: "Calendario", value: "C" },
+                { text: "Hábiles", value: "H" }
+            ],
+            index: 0,
+            dataTextField: "text",
+            dataValueField: "value"
+        });
+
+        $("#txtdiashabiles").val("5");
+
+        $("#FInicio, #FFin, #cborangoenvio").change(function () {
+            ObtenerRangosyDias($('input[name="opcion"]:checked').val());
+        });
+
+        $('input[name="opcion"]').on('ifChanged', function (event) {
+
+            var rpta = $(this).val();
+
+            ObtenerRangosyDias(rpta);
+
+        });
+
+        $("#txtnumerofrecuenciapersonalizada").on("keydown", function (event) {
+            if (event.keyCode === 13) {
+                ObtenerRangosyDias($('input[name="opcion"]:checked').val());
+            }
+        });
+
+        //creacion del registro de imagenes
+        const pasteLink = document.getElementById('btn-paste');
+        const uploadLink = document.getElementById('btn-upload');
+        const pasteHere = document.getElementById('paste-here');
+
+
+        let contadorImagenes = 1;
+        let titulos = [];
+        let comentariosImagenes = [];
+
+        const handlePaste = async (event) => {
+            event.preventDefault();
+
+            const pasteData = (event.clipboardData || window.clipboardData).getData('text');
+
+            if (pasteData) {
+                const activeCommentInput = document.activeElement;
+                if (activeCommentInput.tagName === 'INPUT' && activeCommentInput.type === 'text') {
+                    activeCommentInput.value += pasteData;
+                    return;
+                }
+            }
+
+            const files = event.clipboardData.files;
+            if (files.length > 0) {
+                for (const file of files) {
+                    if (file.type.startsWith('image/')) {
+                        const maxSizeInBytes = 1 * 1024 * 1024; // 1 MB
+                        if (file.size > maxSizeInBytes) {
+                            toastr.warning("La imagen debe pesar menos de 1mb", "Imagen");
+                            continue; // Skip processing this file
+                        }
+                        const url = URL.createObjectURL(file);
+                        createImageElement(url);
+                    }
+                }
+            }
+        };
+
+        const handlePasteBoton = async (event) => {
+            event.preventDefault();
+
+            const data = await navigator.clipboard.read();
+            const clipboardContent = data[0];
+            const type = clipboardContent.types[0];
+
+            if (type == 'text/plain') {
+                // Manejar el texto plano si es necesario
+            } else {
+                const blob = await clipboardContent.getType('image/png');
+                console.log(blob.size); // Agregamos esta línea para verificar el tamaño del blob
+
+                const maxSizeInBytes = 1 * 1024 * 1024; // 1 MB
+                if (blob.size > maxSizeInBytes) {
+                    toastr.warning("La imagen debe pesar menos de 1MB", "Imagen");
+                    return;
+                }
+
+                const url = window.URL.createObjectURL(blob);
+                createImageElement(url);
+            }
+        };
+
+        const handleDrop = async (event) => {
+            event.preventDefault();
+
+            const files = event.dataTransfer.files;
+            for (const file of files) {
+                if (file.type.startsWith('image/')) {
+                    console.log(file.size);
+                    const maxSizeInBytes = 1 * 1024 * 1024; // 1 MB
+                    if (file.size > maxSizeInBytes) {
+                        toastr.warning("La imagen debe pesar menos de 1MB", "Imagen");
+                        continue; // Continuar con el siguiente archivo si el tamaño es demasiado grande
+                    }
+                    const url = URL.createObjectURL(file);
+                    createImageElement(url);
+                }
+            }
+        };
+
+        const handleUpload = () => {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.style.display = 'none';
+            input.addEventListener('change', async (event) => {
+                const file = event.target.files[0];
+                console.log(file.size);
+                const maxSizeInBytes = 1 * 1024 * 1024; // 1 MB
+
+                if (file.size > maxSizeInBytes) {
+                    toastr.warning("La imagen debe pesar menos de 1MB", "Imagen");
+                    return;
+                }
+                const url = URL.createObjectURL(file);
+                createImageElement(url);
+            });
+            document.body.appendChild(input);
+            input.click();
+            document.body.removeChild(input);
+        };
+
+        const createImageElement = (url) => {
+
+            const imgContainer = document.createElement('div');
+            imgContainer.classList.add('img-container');
+
+            // Estilos para el contenedor de la imagen
+            imgContainer.style.marginBottom = '15px';
+            imgContainer.style.borderRadius = '8px';
+            imgContainer.style.overflow = 'hidden';
+            imgContainer.style.boxShadow = 'inset rgb(70 29 29 / 10%) 0px 0px 4px 6px';
+            imgContainer.style.backgroundColor = '#black';
+            imgContainer.style.padding = '10px';
+            imgContainer.style.display = 'flex';
+            imgContainer.style.flexDirection = 'column';
+            imgContainer.style.alignItems = 'center';
+            imgContainer.style.flexWrap = 'nowrap';
+
+            // Elemento de la imagen
+            const img = document.createElement('img');
+            img.src = url;
+            img.alt = 'Image';
+            img.style.width = '100%';
+            img.style.borderRadius = '8px';
+            img.style.boxShadow = '0 0 5px rgba(0, 0, 0, 0.1)';
+
+            // Contenedor para el campo de comentario, título y botón de eliminar
+            const controlsContainer = document.createElement('div');
+            controlsContainer.style.display = 'flex';
+            controlsContainer.style.width = '100%';
+            controlsContainer.style.justifyContent = 'space-between';
+            controlsContainer.style.alignItems = 'center';
+            controlsContainer.style.marginTop = '10px';
+
+            // Elemento para el campo de comentario
+            const comentarioImagen = document.createElement('input');
+            comentarioImagen.type = 'text';
+            comentarioImagen.placeholder = 'Comentario';
+            comentarioImagen.style.width = '100%';
+            comentarioImagen.style.padding = '5px';
+            comentarioImagen.style.border = '1px solid #ccc';
+            comentarioImagen.style.borderRadius = '5px';
+            comentarioImagen.style.boxSizing = 'border-box';
+
+            // Elemento para el título
+            const titulo = document.createElement('label');
+            titulo.textContent = 'Imagen' + contadorImagenes;
+            titulo.style.fontWeight = 'bold';
+            /*titulo.style.marginBottom = '5px';*/
+            titulo.style.width = '0%';
+
+            // Elemento para el botón de eliminar
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = '❌';
+            deleteBtn.style.backgroundColor = '#ffff';
+            deleteBtn.style.color = '#fff';
+            deleteBtn.style.border = 'none';
+            deleteBtn.style.borderRadius = '5px';
+            deleteBtn.style.cursor = 'pointer';
+            deleteBtn.style.width = '30px';
+            deleteBtn.style.transition = 'background-color 0.3s ease';
+
+            deleteBtn.addEventListener('click', () => {
+                const index = titulos.indexOf(titulo.textContent);
+                if (index !== -1) {
+                    titulos.splice(index, 1);
+                    comentariosImagenes.splice(index, 1); // Elimina el comentario asociado
+                }
+                imgContainer.remove();
+            });
+
+            titulos.push(titulo.textContent);
+
+            const btnGuardar = document.getElementById('btnGuardarSoporteED');
+
+            btnGuardar.addEventListener('click', function (event) {
+                event.preventDefault();
+
+                const imgContainers = pasteHere.querySelectorAll('div');
+                imgContainers.forEach((container, index) => {
+                    const comentarioInput = container.querySelector('input');
+                    const comentario = comentarioInput.value;
+                    comentariosImagenes.push(comentario);
+
+                });
+
+                console.log(comentariosImagenes);
+
+                var mensajes = [];
+                // Verificar si los campos están llenos antes de enviar el formulario
+                if ($('#idinformestxt').is(':checked') && $('#txtinformesid').val() === '') {
+                    // El checkbox está marcado pero el campo está vacío
+                    $('#txtinformesid').focus();
+                    mensajes.push("_Complete la dirección.");
+                }
+
+                if ($('#idgestiontxt').is(':checked') && $('#txtgestionid').val() === '') {
+                    // El checkbox está marcado pero el campo está vacío
+                    $('#txtgestionid').focus();
+                    mensajes.push("_Complete la mesa de partes.");
+                }
+
+                if ($('#idtablatxt').is(':checked') && $('#txttablaid').val() === '') {
+                    // El checkbox está marcado pero el campo está vacío
+                    $('#txttablaid').focus();
+                    mensajes.push("_Complete el correo.");
+                }
+
+                if (mensajes.length > 0) {
+                    toastr.warning(mensajes.join("\n"), "Mensaje"); // Mostrar mensajes en líneas separadas en la alerta
+                    return false; // Cancelar el envío del formulario
+                } else {
+                    $("#FrmRegistrar").submit();
+                }
+            });
+
+            controlsContainer.appendChild(comentarioImagen);
+            /*controlsContainer.appendChild(titulo);*/
+            controlsContainer.appendChild(deleteBtn);
+
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(controlsContainer);
+
+            pasteHere.appendChild(imgContainer);
+
+            contadorImagenes++;
+        };
+
+
+        pasteLink.addEventListener('click', handlePasteBoton);
+        uploadLink.addEventListener('click', handleUpload);
+
+        document.getElementById('imageregistra').addEventListener('paste', (event) => {
+
+            handlePaste(event);
+        });
+
+        document.getElementById('imageregistra').addEventListener('drop', (event) => {
+            handleDrop(event);
+        });
+
+        document.getElementById('imageregistra').addEventListener('dragover', (event) => {
+            event.preventDefault();
+        });
+
+        $('#FrmRegistrar').submit(function (event) {
+            event.preventDefault();
+
+            comentariosImagenes = [];
+            const images = Array.from(document.querySelectorAll('#paste-here img'));
+            const uniqueComments = new Set();
+            let allCommentsFilled = true;
+            let duplicateCommentFound = false;
+            let warningMessage = '';
+
+
+            let invalidCommentFound = false;
+
+
+            images.forEach((img, index) => {
+                if (invalidCommentFound) return;
+                const comentarioInput = document.querySelectorAll('.img-container input')[index];
+                const comentario = comentarioInput.value;
+                comentariosImagenes.push(comentario);
+
+            });
+
+            //if (!allCommentsFilled
+            //    /*|| duplicateCommentFound*/
+            //) {
+            //    toastr.warning(warningMessage, 'Advertencia');
+            //    return false;
+            //}
+
+            const promises = images.map(async img => {
+                const base64String = await getBase64FromImageUrl(img.src);
+                return base64String;
+            });
+
+            Promise.all(promises).then(base64Images => {
+                $('#imagenesData').val(JSON.stringify(base64Images));
+                $('#titulosData').val(JSON.stringify(titulos));
+                $('#comentariosData').val(JSON.stringify(comentariosImagenes));
+
+                this.submit();
+            });
+        });
+
+
+    });
+
+    function getBase64FromImageUrl(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.setAttribute('crossOrigin', 'anonymous');
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+                const dataURL = canvas.toDataURL('image/png');
+                const base64String = dataURL.split(',')[1]; // Obtener solo la parte base64
+                const imgDataWithPrefix = 'data:image/png;base64,' + base64String;
+                resolve(imgDataWithPrefix);
+            };
+            img.onerror = error => reject(error);
+            img.src = url;
+        });
+    }
+
+    function GenerarFechas() {
+        ObtenerRangosyDias($('input[name="opcion"]:checked').val());
+        var diasRestantes = document.getElementById("diasRestantes").textContent;
+        document.getElementById("diasRestantesHidden").value = diasRestantes;
+
+        var numerodeenviopersonalizado = $("#txtnumerofrecuenciapersonalizada").val() !== "" ? $("#txtnumerofrecuenciapersonalizada").val() : "0";
+
+        var mensaje = "";
+        if ($("#txtNroInformes").val() == "") {
+            mensaje = mensaje + "<br>- Ingrese el número de informes.";
+        }
+        if ($("#txtdiashabiles").val() == "") {
+            mensaje = mensaje + "<br>- Ingrese el numero de dis habiles.";
+        }
+        if ($('#cborangoenvio').val() === 'P' && $('#txtnumerofrecuenciapersonalizada').val() === '') {
+            mensaje += "<br>- Ingrese el tiempo.";
+        }
+
+        if ($("#txtTiempoInforme").val() == "") {
+            mensaje = mensaje + "<br>- Ingrese el tiempo.";
+        }
+
+
+        if ($("#dtFinInformeGeneral").val() == "") {
+            mensaje = mensaje + "<br>- Seleccione la fecha final.";
+        }
+
+
+        if ($("#cborangoenvio").val() == "P") {
+            var valorComboRango = $("#txtnumerofrecuenciapersonalizada").val();
+        }
+        else {
+            var valorComboRango = $("#cborangoenvio").val();
+        }
+
+        $.ajax({
+            url: "/SoporteED/GenerarFechasInforme?fI=" + $("#FInicio").val() + "&fF=" + $("#FFin").val() + "&rangoEnvio=" + valorComboRango + "&opcionInformeAdicional=" + $('input[name="opcion"]:checked').val() + "&plazoEnvio=" + $("#cbdiashabiles").val() + "&cantidadDias=" + $("#txtdiashabiles").val(),
+            data: {},
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                console.log(source)
+                $("#divListadoInformes").empty();
+                $("#txtNroInformes").val(source.data.length)
+                $.each(source['data'], function (index, value) {
+
+                    var rangoInicio = formatDate(value.RangoInicio); // Formatear fecha de inicio
+                    var rangoFin = formatDate(value.RangoFin); // Formatear fecha de fin
+                    var fechaMaximaEnvio = formatDate(value.FechaMaximaEnvio); // Formatear fecha máxima de envío
+
+                    var informeHtml = '<div class="form-group">' +
+                        '<div class="row align-items-center">' +
+                        '<label class="col-md-4 no-gutters">Informe ' + value.Numero + ':</label>' +
+                        '<div class="col-md-3" style="display: none">' +
+                        'Inicio Informe' +
+
+                        '<input type="date" class="form-control pull-right dtinicioenvio" id="dtinicioenvio' + value.Numero + '" name="dtinicioenvio' + value.Numero + '" value="' + rangoInicio + '" />' +
+                        '</div>' +
+
+                        '<div class="col-md-8">' +
+                        'Fin Informe' +
+
+                        '<input type="date" class="form-control pull-right dtfinenvio" id="dtfinenvio' + value.Numero + '" name="dtfinenvio' + value.Numero + '" value="' + rangoFin + '" />' + //rangoFin
+                        '</div>' +
+
+                        '<div class="col-md-3" style="display: none">' +
+                        'Máximo de envío' +
+
+                        '<input type="date" class="form-control pull-right" id="dtmaximoenvio' + value.Numero + '" name="dtmaximoenvio' + value.Numero + '" value="' + fechaMaximaEnvio + '" />' + // fechaMaximaEnvio
+                        '</div>' +
+
+                        '</div>' +
+                        '</div>';
+
+
+                    $("#divListadoInformes").append(informeHtml);
+                    $(document).ready(function () {
+                        $('#dtinicioenvio' + value.Numero).on('change', function () {
+                            var fechaSeleccionada = $(this).val();
+                            $('#dtfinenvio' + value.Numero).val(fechaSeleccionada);
+                            $('#dtmaximoenvio' + value.Numero).val(fechaSeleccionada);
+                            // Validar si dtfinenvio es menor que dtinicioenvio
+                            var dtInicio = new Date($('#dtinicioenvio' + value.Numero).val());
+                            var dtFin = new Date($('#dtfinenvio' + value.Numero).val());
+                            if (dtFin < dtInicio) {
+                                alert("La fecha de fin no puede ser menor que la fecha de inicio.");
+                            }
+                        });
+                    });
+                });
+            },
+            error: function (xhr, status, error) {
+                // Manejar el error
+            }
+        });
+
+    }
+
+    function formatDate(dateString) {
+        var parsedDate = kendo.parseDate(dateString, "dd/MM/yyyy");
+
+        if (parsedDate) {
+            var formattedDate = kendo.toString(parsedDate, "yyyy-MM-dd");
+            return formattedDate;
+        } else {
+            return null;
+        }
+    }
+
+    function MensajeConfirmacion(resp, descripcion) {
+        if (resp == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("", "El registro ha sido guardado.");
+            var tbProyectos = $('#tablaSoporteEdata').DataTable();
+            tbProyectos.ajax.reload();
+        }
+        else if (resp == "Envio") {
+            toastr.warning("Debe colocar almenos un tipo de envío", "Tipo de envío");
+
+        }
+        else if (resp == "SoporteED") {
+            toastr.warning(descripcion, "Soporte");
+
+        } else if (resp == "Informe") {
+            toastr.warning(descripcion, "Informe");
+        } else if (resp == "ERROR") { //Error Try catch
+            toastr.error("Por favor contacte al administrador.", "Mensaje");
+        } else if (resp == "MISMOS DATOS") {
+            toastr.error("Registro ya existe.", "Mensaje");
+        } else {
+            toastr.error("Por favor contacte al administrador.", "Mensaje");
+        }
+    }
+
+    function habilitarTextbox() {
+        // Obtener referencia al cuadro de texto
+        var textbox = $("#txttablaid");
+
+        // Verificar el estado actual del cuadro de texto
+        if (textbox.prop("disabled")) {
+            // Habilitar el cuadro de texto
+            textbox.prop("disabled", false);
+        } else {
+            // Deshabilitar el cuadro de texto
+            textbox.prop("disabled", true);
+        }
+    }
+
+    function toggleTextbox() {
+        var isChecked = document.getElementById('chektablaid').checked;
+        var textbox = document.getElementById('txttablaid');
+
+        if (isChecked) {
+            // Checkbox marcado, activar el cuadro de texto
+            textbox.disabled = false;
+        } else {
+            // Checkbox desmarcado, desactivar el cuadro de texto
+            textbox.disabled = true;
+        }
+    }
+
+    function ObtenerRangosyDias(valoropcion) {
+
+        if ($("#cborangoenvio").val() == "P") {
+            var valorCombo = $("#txtnumerofrecuenciapersonalizada").val();
+        }
+        else {
+            var valorCombo = $("#cborangoenvio").val();
+        }
+
+        $.ajax({
+            url: "/SoporteED/ObtenerRangosyDias?fI=" + $("#FInicio").val() + "&fF=" + $("#FFin").val() + "&rangoEnvio=" + valorCombo + "&opcionInformeAdicional=" + valoropcion,
+            type: 'GET',
+            data: {
+
+            },
+            success: function (response) {
+                // Llenar el valor del input con los datos recibidos
+                console.log(response)
+
+                $("#txtNroInformes").val(response.data.NumeroRangos);
+
+
+
+                if (response.data.DiasRestantes > 0) {
+
+                    $("#diasRestantes").text(response.data.DiasRestantes);
+
+                    document.getElementById("diasRestantesHidden").value = response.data.DiasRestantes;
+
+                   /* document.getElementById("opcion").value = ;*/
+
+                    $("#divPregunta").show();
+                   /* console.log(valoropcion);*/
+                    /*$('#' + valoropcion +'').iCheck('check');*/
+                    $('input[type="checkbox"], input[type="radio"]').removeClass('icheckbox_square icheckbox_square-blue icheckbox_square-red icheckbox_square-green iradio_square iradio_square-blue iradio_square-red iradio_square-green');
+                    //if ($('input[name="opcion"]:checked').val() == 'NO') {
+                    //    $('#NO').iCheck('check');
+                    //} else {
+                    //    $('#SI').iCheck('check');
+                    //}
+
+
+                } else {
+                    $("#divPregunta").hide();
+                    $("input[name='opcion']").prop('checked', false);
+                    /*$('input[name="opcion"]:checked').val("")*/
+                }
+            },
+            error: function () {
+                alert('Error al obtener los datos.');
+            }
+        });
+
+    }
+
+    function mostrarDiv() {
+        var seleccionado = document.getElementById("cborangoenvio").value;
+        var divCantidadDias = document.getElementById("divCantidadDias");
+        var divcborangoenvio = document.getElementById("divcborangoenvio");
+
+        if (seleccionado === "P") {
+            divcborangoenvio.classList.remove("col-md-12");
+            divcborangoenvio.classList.add("col-md-6");
+            divCantidadDias.style.display = "block";
+            divCantidadDias.classList.add("col-md-6");
+        } else {
+            divcborangoenvio.classList.remove("col-md-6");
+            divcborangoenvio.classList.add("col-md-12");
+            divCantidadDias.style.display = "none";
+            divCantidadDias.classList.remove("col-md-6");
+        }
+
+
+    }
+    function MensajeConfirmacionIndex() {
+
+        toastr.error("Debe registrar un Soporte Electrodata para crear informes.", "Mensaje");
+
+    }
+
+</script>

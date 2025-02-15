@@ -1,0 +1,241 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="~/Content/themes/AdminLTE.css" rel="stylesheet" />
+<link href="~/Content/themes/ionicons/css/ionicons.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+<style>
+    /*.panel > .panel-heading {
+        background-image: none;
+        background-color: red;
+        color: white;
+    }*/
+</style>
+
+<div class="panel panel-primary">
+    <div class="panel-heading" id="titulo"></div>
+    <div class="panel-body">
+        <div id="mensajes"></div> 
+        <table id="tablaTickets" class="table table-bordered table-striped" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Tipo Ticket</th>
+                    <th>Código</th>
+                    <th>Estado</th>
+                    <th>Prioridad</th>
+                    <th>Solicitante</th>
+                    <th>Asignado a</th>
+                    <th>Área</th>
+                    <th>Categoría</th>
+                    <th>Subcategoría</th>
+                    <th>Clase</th>
+                    <th>Subclase</th>
+                    <th>Comentario</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+                <tr>
+                    <th>Tipo Ticket</th>
+                    <th>Código</th>
+                    <th>Estado</th>
+                    <th>Prioridad</th>
+                    <th>Solicitante</th>
+                    <th>Asignado a</th>
+                    <th>Área</th>
+                    <th>Categoría</th>
+                    <th>Subcategoría</th>
+                    <th>Clase</th>
+                    <th>Subclase</th>
+                    <th>Comentario</th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var
+        fechaInicio,
+        fechaFin,
+        clieRep,
+        clieFin,
+        areaResponsable,
+        asignadoA,
+        categoria,
+        subCategoria,
+        clase,
+        subClase,
+        tipoTicket,
+        tipoReporte,
+        idReporte;
+    $(document).ready(function () {
+        $.urlParam = function (name) {
+            var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+            if (results == null) {
+                return null;
+            }
+            else {
+                return results[1] || 0;
+            }
+        }
+
+        fechaInicio = unescape($.urlParam('fechaInicio'));
+        fechaFin = unescape($.urlParam('fechaFin'));
+        clieRep = unescape($.urlParam('cliRep'));
+        clieFin = unescape($.urlParam('clieFin'));
+        areaResponsable = unescape($.urlParam('areaResponsable'));
+        asignadoA = unescape($.urlParam('asignadoA'));
+        categoria = unescape($.urlParam('categoria'));
+        subCategoria = unescape($.urlParam('subCategoria'));
+        clase = unescape($.urlParam('clase'));
+        subClase = unescape($.urlParam('subClase'));
+        tipoTicket = unescape($.urlParam('tipoTicket'));
+        tipoReporte = unescape($.urlParam('tipoReporte'));
+        idReporte = unescape($.urlParam('idReporte'));
+        ObtenerDatosReporte();
+        ListarDetalle();
+    });
+
+    function ObtenerDatosReporte() {
+
+        $.ajax({
+            url: "/Inform/ObtenerDatosReporte?tipoReporte=" + tipoReporte + "&idReporte=" + idReporte,
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                $("#titulo").html(resp);
+            }
+        });
+    }
+
+    function ListarDetalle() {
+        $('#tablaTickets').dataTable().fnDestroy();
+        $('#tablaTickets').DataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            //ajax: 'Inform/ListarDetalle',
+            ajax: {
+                //method: "POST",
+                url: 'Inform/Listardetalle?' +
+                    'fechaInicio=' + fechaInicio +
+                    '&fechaFin=' + fechaFin + 
+                    '&clieRep=' + clieRep + 
+                    '&clieFin=' + clieFin + 
+                    '&areaResponsable=' + areaResponsable + 
+                    '&asignadoA=' + asignadoA + 
+                    '&categoria=' + categoria + 
+                    '&subCategoria=' + subCategoria + 
+                    '&clase=' + clase + 
+                    '&subClase=' + subClase + 
+                    '&tipoTicket=' + tipoTicket + 
+                    '&tipoReporte=' + tipoReporte +
+                    '&idReporte=' + idReporte,
+                contenttype: "application/json; charset=utf-8",
+                //datatype: "json",
+                //data: { "arearesponsable": arearesponsable }
+            },
+            //data: {
+            //    fechaInicio: fechaInicio,
+            //    fechaFin: fechaFin,
+            //    clieRep: clieRep,
+            //    clieFin: clieFin,
+            //    areaResponsable: areaResponsable,
+            //    asignadoA: asignadoA,
+            //    categoria: categoria,
+            //    subCategoria: subCategoria,
+            //    clase: clase,
+            //    subClase: subClase,
+            //    tipoTicket: $tipoTicket,
+            //    tipoReporte: tipoReporte
+            //},
+            columns: [
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        return '<span id="btnOP" data-toggle="modal" data-target="#modalProductos" onclick="abrirModal(' + data.Id + ')"><b>' + data.OP + '</b></span>';
+                //    }
+                //},
+                //{ data: "Cliente" },
+                { data: "TipoTicket" },
+			    { data: "Codigo" },
+			    { data: "Estado" },
+			    { data: "Prioridad" },
+			    { data: "AsignadoA" },
+			    { data: "Solicitante" },
+			    { data: "Area" },
+			    { data: "Categoria" },
+			    { data: "Subcategoria" },
+			    { data: "Clase" },
+			    { data: "Subclase" },
+			    { data: "Comentario" },
+                //{ data: "Marcas" },
+                //{ data: "FechaCreacion" },
+                //{ data: "VendedorContacto" },
+                //{ data: "TipoMoneda" },
+                //{ data: "MontoTotal" },
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        var clase = "";
+                //        if (data.DiasParaVencer <= 30) {
+                //            clase = "rojo";
+                //        } else
+                //            if (data.DiasParaVencer > 30 && data.DiasParaVencer <= 90) {
+                //                clase = "amarillo";
+                //            } else {
+                //                clase = "verde";
+                //            }
+                //        return '<span class="' + clase + ' color">' + data.DiasParaVencer + '</span>';
+                //    }
+                //},
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        var opcion = "";
+                //        opcion = '<span  id="' + data.Id + '" title="Renovar" class="glyphicon glyphicon-ok" aria-hidden="true" style="color: #679700; cursor: pointer; font-size:15px;" data-toggle="modal" data-target="#modalRenovacion" onclick="abrirModalRenovacion(' + data.Id + ');"></span>' +
+                //                   '&nbsp; &nbsp; &nbsp; ' +
+                //                   '<span  id="' + data.Id + '" title="Eliminar" class="glyphicon glyphicon-remove" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:15px;" onclick="eliminarListaRenovacion(' + data.Id + ');"></span>';
+                //        return opcion;
+                //    }
+
+                //},
+                //{
+                //    data: null,
+                //    render: function (data, type, row) {
+                //        return data.PM + ' ' + data.EstadoOP
+                //    }
+                //}
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+</script>

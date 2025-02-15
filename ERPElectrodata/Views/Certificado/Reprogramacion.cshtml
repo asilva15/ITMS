@@ -1,0 +1,205 @@
+﻿@model ERPElectrodata.Models.Reprogramacion
+@{
+    /**/
+
+    ViewBag.Title = "Reprogramacion";
+    Layout = null;
+}
+
+@using (Html.BeginForm("ReprogramarCertificacion", "Certificado", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmReprogramacion", target = "target_reprogramacion" }))
+{
+    @Html.ValidationSummary(true)
+
+    <input type="hidden" id="Id" name="Id" value="@ViewBag.Id" />
+
+    <div class="tab-content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="main-card mb-3 card">
+                    <div class="card-body">
+                        <div class="card-title">Reprogramar certificado</div>
+                        <form class="">
+                            <div class="form-row">
+
+                                <div class="col-md-4">
+                                    <div class="position-relative form-group">
+                                        <label id="cbUsuario" for="cbUsuario" class="">Usuario</label>
+                                        <input id="txtUsuario" disabled />
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="position-relative form-group">
+                                        <label id="cbMarca" for="cbMarca" class="">Marca</label>
+                                        <input id="txtMarca" disabled />
+                                    </div>
+                                </div>
+                                @*<div class="col-md-4">
+                                        <div class="position-relative form-group">
+                                            <label id="cbNombre" for="cbNombre" class="">Fecha Programada Actual</label>
+                                            <input id="txtFechaProgramadaActual" name="txtFechaProgramadaActual" disabled />
+                                        </div>
+                                    </div>*@
+                                <div class="col-md-4">
+                                    <div class="position-relative form-group">
+                                        <label id="cbNombre" for="cbNombre" class="">Nombre</label>
+                                        <input id="txtNombre" name="txtNombre" disabled />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-8">
+                                    <div class="position-relative form-group">
+                                        <label id="lblMotivo" for="lblMotivo" class="">Motivo</label>
+                                        @Html.EditorFor(model => model.Motivo)
+                                        @Html.ValidationMessageFor(model => model.Motivo)
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="position-relative form-group">
+                                        <label id="lblFechaProgramada" for="lblFechaProgramada" class="">Fecha Programada </label>
+                                        <input id="txtFechaProgramada" name="txtFechaProgramada" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+
+                                <div class="col-md-8">
+                                    <br />
+                                </div>
+                                <div class="col-md-4">
+                                    <br />
+                                    <button id="btnReprogramar" type="submit" class="mt-1 btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+}
+
+<div class="tab-content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title">Mis Reprogramaciones</div>
+                    <form class="">
+
+                        <div class="form-row">
+                            <table style="width: 100%;" id="tbReprogramaciones" name="tbReprogramaciones" class="table table-hover table-striped table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha Programada</th>
+                                        <th>Motivo</th>
+                                        <th>Persona Reprogramación</th>
+                                    </tr>
+                                </thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<iframe id="target_reprogramacion" name="target_reprogramacion" src="" class="frameHidden" style="display:none"></iframe>
+
+<script type="text/javascript">
+
+
+    $(document).ready(function () {
+
+        $("#txtUsuario").kendoMaskedTextBox({
+            mask: ""
+        });
+        $("#txtMarca").kendoMaskedTextBox({
+            mask: ""
+        });
+        $("#txtNombre").kendoMaskedTextBox({
+            mask: ""
+        });
+        $("#txtFechaProgramadaActual").kendoMaskedTextBox({
+            mask: ""
+        });
+        $("#Motivo").kendoMaskedTextBox({
+            mask: ""
+        });
+
+        var FechaProgramada = $("#txtFechaProgramada").kendoDatePicker().data("kendoDateTimePicker");
+
+        ObtenerDatos(@ViewBag.Id);
+        ListarReprogramaciones(@ViewBag.Id);
+    });
+
+    function ObtenerDatos(id) {
+        $.ajax({
+            url: "/Certificado/ObtenerDatosCertificado/" + id,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (data) {
+                $.each(data['data'], function (index, value) {
+                    $("#txtUsuario").val(data['data'][index]['Persona']);
+                    $("#txtMarca").val((data['data'][index]['Marca']));
+                    $("#txtNombre").val((data['data'][index]['Certificado']));
+                    //$("#txtFechaProgramadaActual").val((data['data'][index]['FechaProgramada']));
+                });
+            },
+            error: function (source) {
+            }
+        });
+    }
+
+
+    function ListarReprogramaciones(id) {
+
+        $('#tbReprogramaciones').dataTable().fnDestroy();
+
+        var table = $('#tbReprogramaciones').DataTable({
+            responsive: true,
+            'order': [[0, 'asc']],
+            //'select': 'multi',
+            ajax: {
+                "url": "/Certificado/ListarReprogramaciones/" + id,
+
+            },
+            columns: [
+                { data: "FechaProgramada" },
+                { data: "Motivo" },
+                { data: "UsuarioReprograma" },
+            ],
+            "bPaginate": false,
+            "info": false,
+            "searching": false,
+        });
+
+    }
+
+
+    function MensajeReprogramacion(msg) {
+        if (msg == "OK") {
+            toastr.success("La fecha fue reprogramada.", "");
+            $("#Motivo").val("");
+            $("#txtFechaProgramada").val("");
+
+            var tabla = $('#tbReprogramaciones').DataTable();
+            tabla.ajax.reload();
+
+            var tabla = $('#tbCertificado').DataTable();
+            tabla.ajax.reload();
+
+        }
+        else if (msg == "VACIO") {
+            toastr.warning("Completar la información solicitada.", "Mensaje");
+        }
+        else {
+            toastr.error("Contacte al administrador", "Error");
+        }
+    }
+
+</script>

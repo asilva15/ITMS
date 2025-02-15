@@ -1,0 +1,690 @@
+﻿@{
+    ViewBag.Title = "Gestionar Tareas";
+    Layout = null;
+}
+
+<style>
+    .sortable-placeholder {
+        border: 1px dashed #ccc;
+        background: #f9f9f9;
+        min-height: 38px;
+        margin-bottom: 5px;
+    }
+
+    .idCategoriaPorTarea {
+        display: none;
+    }
+</style>
+
+<div>
+    <ul id="listaTareas" class="todo-list-wrapper list-group list-group-flush" style="overflow-x: hidden; overflow-y: scroll; max-height: 470px;">
+    </ul>
+
+    <div class="row">
+        <div class="col-md-12">
+            <button onclick="GuardarTareas();" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    var gruposResponsablesData = [];
+
+    $(document).ready(function () {
+
+        $("#listaTareas").sortable({
+            placeholder: "sortable-placeholder",
+            update: function (event, ui) {
+
+            }
+        });
+        $("#listaTareas").disableSelection();
+
+        $.ajax({
+            url: "/AccountQueue/ListByAcco?var=" + Math.random(),
+            type: "GET",
+            success: function (data) {
+                gruposResponsablesData = data.Data;
+            },
+            error: function () {
+            }
+        });
+
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "/Tarea/ListarTareasPorCategoria/@ViewBag.Id",
+            type: "GET",
+            datatype: "JSON",
+            cache: false,
+            success: function (data) {
+                if (data) ListarTareasCreadas(data["Data"]);
+            },
+            error: function () {
+            }
+        });
+
+
+    });
+
+    function ListarTareasCreadas(tarea) {
+        if (parseInt(tarea.length) > 0) {
+            $.each(tarea, function (index, value) {
+                let isChecked = value.Estado ? 'checked' : '';
+                let nomCateCompleta = value.NomCategoriaTarea;
+                let nomCate = nomCateCompleta.split(" - ");
+                nomCate.splice(0, 2);
+                let nomCateFinal = nomCate.join(" - ");
+
+                let newLi = `
+                <li class="list-group-item">
+                    <div class="todo-indicator bg-secondary"></div>
+                    <input name="IdTarea" type="hidden" value="${value.IdTarea}" />
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Título <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="TituloTarea" style="width:100%;" value="${value.TituloTarea}" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>
+                                Estado Pendiente
+                                <input type="text" class="k-textbox" name="DescPendiente" style="width:100%;" value="${value.DescPendiente}" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Descripción <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="DescripcionTarea" style="width:100%;" value="${value.DescripcionTarea}" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            Tipo Gestión
+                            <input type="text" class="k-textbox" name="TipoGestion" style="width:100%;" value="${value.TipoGestion}" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Grupo
+                            <input id="IdQueu_${index}" name="IdQueu" />
+                        </div>
+                        <div class="col-md-6">
+                            Tarea Precedente
+                            <input id="TareaPadre_${index}" name="TareaPadre" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Categoría 1
+                            <input id="IdCateN1_${index}" name="IdCateN1" value="${value.IdCateN1}" />
+                        </div>
+                        <div class="col-md-6">
+                            Categoría 2
+                            <input id="IdCateN2_${index}" name="IdCateN2" value="${value.IdCateN2}" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-2">
+                            Estado <br />
+                            <input type="checkbox" name="EstadoTarea" ${isChecked} />
+                        </div>
+                        <div class="col-md-10">
+                            <div class="form-group d-flex flex-column">
+                                <span>Categoría
+                                <div class="d-flex">
+                                    <textarea id="nuevaCategoria_${index}" class="form-control w-100 d-inline" disabled="disabled" style="height:38px; overflow:auto; min-height:38px">${nomCateFinal}</textarea>
+                                    <input value="${value.IdCate}" id="IdCate_${index}" name="IdCate" class="idCategoriaPorTarea" />
+                                    <button class="btn-shadow btn btn-primary mr-1" type="button" style="height:38px" data-toggle="modal" data-target="#modalCategorias" onclick="CategoriaPorTarea(${index});" id="AgregarCategoria_${index}">
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>`;
+                $("#listaTareas").append(newLi);
+
+                let comboTareaPadre = $("#TareaPadre_" + index).kendoComboBox({
+                    dataTextField: "TituloTarea",
+                    dataValueField: "IdTarea",
+                    filter: "contains",
+                    autoBind: true,
+                    delay: 500,
+                    minLength: 0,
+                    optionLabel: "",
+                    suggest: true,
+                    //template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                    //    '<span><strong>${data.TituloTarea}</strong></span>' +
+                    //    '<span>${data.DescripcionTarea}</span></div>',
+                    dataSource: {
+                        schema: {
+                            data: function (response) {
+                                // Filtrar la tarea actual
+                                return response.Data.filter(item => item.IdTarea !== value.IdTarea);
+                            },
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/Tarea/ListarTareasPorCategoria/@ViewBag.Id?var=" + Math.random()
+                        },
+                        sort: { field: "TituloTarea", dir: "asc" }
+                    }
+                }).data("kendoComboBox");
+
+                if (value.IdTareaPadre != null) {
+                    comboTareaPadre.value(value.IdTareaPadre);
+                }
+
+                let comboGrupo = $("#IdQueu_" + index).kendoComboBox({
+                    dataTextField: "QUEU",
+                    dataValueField: "ID_QUEU",
+                    filter: "contains",
+                    autoBind: true,
+                    suggest: true,
+                    template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                        '<span><strong>${data.QUEU}</strong></span>' +
+                        '<span>${data.DES_QUEU}</span></div>',
+                    dataSource: gruposResponsablesData,
+                    sort: { field: "QUEU", dir: "asc" }
+                }).data("kendoComboBox");
+
+                if (value.Id_Queu != null) {
+                    comboGrupo.value(value.Id_Queu);
+                }
+
+                $("#IdCateN1_" + index).kendoComboBox({
+                    dataTextField: "NAM_CATE",
+                    filter: "contains",
+                    autoBind: true,
+                    dataValueField: "ID_CATE",
+                    dataSource: {
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                        }
+                    },
+                    change: function (e) {
+                        $('#IdCate_' + index).val(null);
+                        $('#nuevaCategoria_' + index).val('');
+                        document.getElementById('AgregarCategoria_' + index).disabled = true;
+                    }
+                }).data("kendoComboBox");
+
+                $("#IdCateN2_" + index).kendoComboBox({
+                    autoBind: false,
+                    filter: "contains",
+                    cascadeFrom: "IdCateN1_" + index,
+                    dataTextField: "NAM_CATE2",
+                    dataValueField: "ID_CATE2",
+                    dataSource: {
+                        serverFiltering: true,
+                        schema: {
+                            data: "Data",
+                            total: "Count"
+                        },
+                        transport: {
+                            read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                        }
+                    },
+                    change: function (e) {
+                        $('#IdCate_' + index).val(null);
+                        $('#nuevaCategoria_' + index).val('');
+
+                        if ($("#IdCateN2_0").val() == '') {
+                            document.getElementById('AgregarCategoria_' + index).disabled = true;
+                        } else {
+                            document.getElementById('AgregarCategoria_' + index).disabled = false;
+                        }
+                    }
+                }).data("kendoComboBox");
+
+            });
+
+
+        } else {
+            let newLi = `
+                <li class="list-group-item" data-index="0">
+                    <div class="todo-indicator bg-secondary"></div>
+                    <input name="IdTarea" type="hidden" />
+                    <div class="form-row">
+                        <div class="col-10">
+                        </div>
+                        <div class="col-2">
+                            <button type="button" class="close" onclick="EliminarLiTarea(this);">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Título <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="TituloTarea" style="width:100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>
+                                Estado Pendiente
+                                <input type="text" class="k-textbox" name="DescPendiente" style="width:100%;" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Descripción <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="DescripcionTarea" style="width:100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            Tipo Gestión
+                            <input type="text" class="k-textbox" name="TipoGestion" style="width:100%;" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Grupo
+                            <input id="IdQueu_0" name="IdQueu" />
+                        </div>
+                        <div class="col-md-6">
+                            Tarea Precedente
+                            <input id="TareaPadre_0" name="TareaPadre" /></div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Categoría 1
+                            <input id="IdCateN1_0" name="IdCateN1" />
+                        </div>
+                        <div class="col-md-6">
+                            Categoría 2
+                            <input id="IdCateN2_0" name="IdCateN2" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-2">
+                            Estado <br />
+                            <input type="checkbox" name="EstadoTarea" checked />
+                        </div>
+                        <div class="col-md-10">
+                            <div class="form-group d-flex flex-column">
+                                <span>Categoría
+                                <div class="d-flex">
+                                    <textarea id="nuevaCategoria_0" class="form-control w-100 d-inline" disabled="disabled" style="height:38px; overflow:auto; min-height:38px"></textarea>
+                                    <input id="IdCate_0" name="IdCate" class="idCategoriaPorTarea" />
+                                    <button class="btn-shadow btn btn-primary mr-1" type="button" style="height:38px" data-toggle="modal" data-target="#modalCategorias" onclick="CategoriaPorTarea(0);" id="AgregarCategoria_0" disabled>
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>`;
+            $("#listaTareas").append(newLi);
+
+            $("#TareaPadre_0").kendoComboBox({
+                dataTextField: "TituloTarea",
+                dataValueField: "IdTarea",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                //template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                //    '<span><strong>${data.TituloTarea}</strong></span>' +
+                //    '<span>${data.DescripcionTarea}</span></div>',
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Tarea/ListarTareasPorCategoria/@ViewBag.Id?var=" + Math.random()
+                    },
+                    sort: { field: "TituloTarea", dir: "asc" }
+                }
+            }).data("kendoComboBox");
+
+            $("#IdQueu_0").kendoComboBox({
+                dataTextField: "QUEU",
+                dataValueField: "ID_QUEU",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                    '<span><strong>${data.QUEU}</strong></span>' +
+                    '<span>${data.DES_QUEU}</span></div>',
+                dataSource: gruposResponsablesData,
+                sort: { field: "QUEU", dir: "asc" }
+            }).data("kendoComboBox");
+
+            $("#IdCateN1_0").kendoComboBox({
+                dataTextField: "NAM_CATE",
+                filter: "contains",
+                autoBind: true,
+                dataValueField: "ID_CATE",
+                dataSource: {
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                },
+                change: function (e) {
+                    $('#IdCate_0').val(null);
+                    $('#nuevaCategoria_0').val('');
+                    document.getElementById('AgregarCategoria_0').disabled = true;
+                }
+            }).data("kendoComboBox");
+
+            $("#IdCateN2_0").kendoComboBox({
+                autoBind: false,
+                filter: "contains",
+                cascadeFrom: "IdCateN1_0",
+                dataTextField: "NAM_CATE2",
+                dataValueField: "ID_CATE2",
+                dataSource: {
+                    serverFiltering: true,
+                    schema: {
+                        data: "Data",
+                        total: "Count"
+                    },
+                    transport: {
+                        read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                    }
+                },
+                change: function (e) {
+                    $('#IdCate_0').val(null);
+                    $('#nuevaCategoria_0').val('');
+
+                    if ($("#IdCateN2_0").val() == '') {
+                        document.getElementById('AgregarCategoria_0').disabled = true;
+                    } else {
+                        document.getElementById('AgregarCategoria_0').disabled = false;
+                    }
+                }
+            }).data("kendoComboBox");
+
+        }
+    }
+
+    function AgregarLiTarea() {
+        let count = $("#listaTareas li").length;
+        let newLi = `
+                <li class="list-group-item" data-index="${count}">
+                    <div class="todo-indicator bg-secondary"></div>
+                    <input name="IdTarea" type="hidden" />
+                    <div class="form-row">
+                        <div class="col-10">
+                        </div>
+                        <div class="col-2">
+                            <button type="button" class="close" onclick="EliminarLiTarea(this);">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Título <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="TituloTarea" style="width:100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div>
+                                Estado Pendiente
+                                <input type="text" class="k-textbox" name="DescPendiente" style="width:100%;" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            <div>
+                                Descripción <span style="color:red">(*)</span>
+                                <input type="text" class="k-textbox" name="DescripcionTarea" style="width:100%;" />
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            Tipo Gestión
+                            <input type="text" class="k-textbox" name="TipoGestion" style="width:100%;" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Grupo
+                            <input id="IdQueu_${count}" name="IdQueu" />
+                        </div>
+                        <div class="col-md-6">
+                            Tarea Precedente
+                            <input id="TareaPadre_${count}" name="TareaPadre" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-6">
+                            Categoría 1
+                            <input id="IdCateN1_${count}" name="IdCateN1" />
+                        </div>
+                        <div class="col-md-6">
+                            Categoría 2
+                            <input id="IdCateN2_${count}" name="IdCateN2" />
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="col-md-2">
+                            Estado <br />
+                            <input type="checkbox" name="EstadoTarea" checked />
+                        </div>
+                        <div class="col-md-10">
+                            <div class="form-group d-flex flex-column">
+                                <span>Categoría
+                                <div class="d-flex">
+                                    <textarea id="nuevaCategoria_${count}" class="form-control w-100 d-inline" disabled="disabled" style="height:38px; overflow:auto; min-height:38px"></textarea>
+                                    <input id="IdCate_${count}" name="IdCate" class="idCategoriaPorTarea" />
+                                    <button class="btn-shadow btn btn-primary mr-1" type="button" style="height:38px" data-toggle="modal" data-target="#modalCategorias" onclick="CategoriaPorTarea(${count});" id="AgregarCategoria_${count}" disabled>
+                                        +
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>`;
+        $("#listaTareas").append(newLi);
+
+        $("#TareaPadre_" + count).kendoComboBox({
+            dataTextField: "TituloTarea",
+            dataValueField: "IdTarea",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            //template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+            //    '<span><strong>${data.TituloTarea}</strong></span>' +
+            //    '<span>${data.DescripcionTarea}</span></div>',
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Tarea/ListarTareasPorCategoria/@ViewBag.Id?var=" + Math.random()
+                },
+                sort: { field: "TituloTarea", dir: "asc" }
+            }
+        }).data("kendoComboBox");
+
+        $("#IdQueu_" + count).kendoComboBox({
+            dataTextField: "QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            template: '<div style="text-transform:capitalize;display:flex; flex-direction: column">' +
+                '<span><strong>${data.QUEU}</strong></span>' +
+                '<span>${data.DES_QUEU}</span></div>',
+            dataSource: gruposResponsablesData,
+            sort: { field: "QUEU", dir: "asc" }
+        }).data("kendoComboBox");
+
+        $("#IdCateN1_" + count).kendoComboBox({
+            dataTextField: "NAM_CATE",
+            filter: "contains",
+            autoBind: true,
+            dataValueField: "ID_CATE",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#IdCate_' + count).val(null);
+                $('#nuevaCategoria_' + count).val('');
+                document.getElementById('AgregarCategoria_' + count).disabled = true;
+            }
+        }).data("kendoComboBox");
+
+        $("#IdCateN2_" + count).kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            cascadeFrom: "IdCateN1_" + count,
+            dataTextField: "NAM_CATE2",
+            dataValueField: "ID_CATE2",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Administrator/ListCategory2?ID_ACCO=" + @Session["ID_ACCO"] + "&var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                $('#IdCate_' + count).val(null);
+                $('#nuevaCategoria_' + count).val('');
+
+                if ($("#IdCateN2_" + count).val() == '') {
+                    document.getElementById('AgregarCategoria_' + count).disabled = true;
+                } else {
+                    document.getElementById('AgregarCategoria_' + count).disabled = false;
+                }
+            }
+        }).data("kendoComboBox");
+
+    }
+
+    function EliminarLiTarea(element) {
+        $(element).closest('li').remove();
+    }
+
+    function CategoriaPorTarea(index) {
+        var ID_CATE_N2 = $("#IdCateN2_" + index).data("kendoComboBox");
+
+        $("#lblTituloCategoria").text("Seleccione una Categoria");
+
+        //$(".modal-dialog").removeClass("modal-sm");
+        //$(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-contentCategoria').empty();
+        $('#modal-contentCategoria').load('/Tarea/CategoriaPorTarea/' + ID_CATE_N2.value() + "?porTarea=1");
+
+        $("#guardarCategoriaModal").data('index', index);
+    }
+
+    function GuardarTareas() {
+        let tareas = [];
+        let valido = true;
+        $("#listaTareas li").each(function (index, li) {
+            let tarea = {
+                IdTarea: $(this).find("input[name='IdTarea']").val(),
+                TituloTarea: $(this).find("input[name='TituloTarea']").val().trim(),
+                DescPendiente: $(this).find("input[name='DescPendiente']").val().trim(),
+                DescripcionTarea: $(this).find("input[name='DescripcionTarea']").val().trim(),
+                TipoGestion: $(this).find("input[name='TipoGestion']").val().trim(),
+                Id_Queu: $(this).find("input[name='IdQueu']").val(),
+                Id_Cate: $(this).find("input[name='IdCate']").val(),
+                IdTareaPadre: $(this).find("input[name='TareaPadre']").val(),
+                Estado: $(this).find("input[name='EstadoTarea']").prop("checked")
+            };
+
+            console.log(tarea);
+
+            if (tarea.TituloTarea == "" || tarea.DescripcionTarea == "") {
+                toastr.warning(`Complete los datos obligatorios de la tarea ${index + 1}.`);
+                valido = false;
+                return false;
+
+            } else {
+                tareas.push(tarea);
+            }
+        });
+
+        if (valido) {
+
+            if (tareas.length > 0) {
+                swal({
+                    title: `¿Desea crear las tareas?`,
+                    text: `Se crearán las tareas ingresadas`,
+                    type: "warning",
+                    showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Guardar",
+                    cancelButtonText: "Cancel",
+                    closeOnConfirm: false,
+                    closeOnCancel: false
+                }, function (dismiss) {
+                    if (dismiss) {
+                        $.ajax({
+                            url: '/Tarea/CrearTareas/@ViewBag.Id',
+                            type: 'POST',
+                            contentType: 'application/json',
+                            data: JSON.stringify(tareas),
+                            success: function (result) {
+                                if (result.message == 'OK') {
+                                    toastr.success("Información guardada correctamente.");
+                                    swal.close();
+                                    ListarTareas();
+                                    $("[data-dismiss=modal]").trigger({ type: "click" });
+
+                                } else if (result.message == 'ERROR') {
+                                    swal({
+                                        title: 'Warning',
+                                        type: 'info',
+                                        text: 'ERROR EN LA CREACIÓN',
+                                        confirmButtonColor: "#DD6B55",
+                                        focusConfirm: false,
+                                        confirmButtonText: 'Continue',
+                                        confirmButtonAriaLabel: 'Thumbs up, great!'
+                                    })
+                                }
+                            },
+                            error: function (xhr, status, error) {
+                                console.error(xhr.responseText);
+                            }
+                        });
+                    }
+                });
+
+            } else {
+                toastr.warning("No hay tareas a crear.");
+            }
+        }
+    }
+
+</script>

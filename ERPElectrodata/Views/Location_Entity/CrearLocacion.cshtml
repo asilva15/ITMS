@@ -1,0 +1,162 @@
+﻿@model ERPElectrodata.Models.LOCATION
+@{
+    ViewBag.Title = "CrearLocacion";
+    Layout = null;
+}
+
+<div class="bodyForm">
+    <!--Declaración de Formulario-->
+    @using (Html.BeginForm("Crear", "Location_Entity", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmLocacion", target = "upload_target" }))
+    {
+        @Html.ValidationSummary(true)
+        <fieldset>
+            <div id="mensaje"></div>
+
+            <div class="form-group row">
+                <div class="col-md-6">
+                    <div class="editor-label">
+                        Cuenta <b style="color:red">*</b>
+                    </div>
+                    <div class="editor-field">
+                        <input id="ID_ACCO" type="text" name="ID_ACCO">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="editor-label">
+                        Sitio <b style="color:red">*</b>
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBoxFor(model => model.ID_SITE)
+                        @Html.ValidationMessageFor(model => model.ID_SITE)
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="editor-label">
+                        Nombre <b style="color:red">*</b>
+                    </div>
+                    <div class="k-textbox" style="min-width:100%">
+                        @Html.TextBoxFor(model => model.NAM_LOCA)
+                        @Html.ValidationMessageFor(model => model.NAM_LOCA)
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <br />
+
+                        </div>
+                        <div class="col-md-3">
+                            <br />
+
+                        </div>
+                        <div class="col-md-3">
+                            <button id="btnCancelar" class="ladda-button mb-2 btn btn-gradient-light btn-block widthMax" data-style="expand-right" data-dismiss="modal">
+                                <span class="ladda-label">Cancelar</span><span class="ladda-spinner"></span>
+                            </button>
+
+                        </div>
+                        <div class="col-md-3">
+                            <button id="submit" class="btn btn-warning btn-block">Guardar</button>
+
+                        </div>
+                    </div>
+                    </div>
+            </div>
+        </fieldset>
+    }
+</div>
+<iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var ID_ACCO = $("#ID_ACCO").kendoComboBox({
+            autoBind: true,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TipoActivo/ListarCuentaTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_SITE = $("#ID_SITE").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_ACCO",
+            dataTextField: "Site",
+            dataValueField: "IdSite",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+
+                },
+                transport: {
+                    read: "/Location_Entity/ListarSite?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+    });
+
+    //debugger
+    function uploadDone(msg, msnErr) {
+        if (msg == 'OK') {
+            toastr.success(msnErr);
+            $("#btnBuscar").click();
+            $("#btnCancelar").click();
+            ListarLocaciones();
+        }
+        else {
+            toastr.error(msnErr);
+        }
+        /*
+        if (msg == 'OK') {
+            $('#modalLocacion').modal("hide");
+            $('#SmallModalContent').modal("show");
+            $("#SmallModalTitle").empty();
+            $("#SmallModalTitle").text("Mensaje")
+            $("#SmallModalBody").empty();
+            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + msnErr + "</div>");
+            $("#SmallModalFooter").empty();
+            $("#SmallModalFooter").append("<div style='float:right;'><button id='continues' class='k-button'>Continuar</button></div>");
+            var undo = $("#continues")
+                .bind("click", function () {
+                    $('#SmallModalContent').modal('hide');
+                    $('#ModalContent').modal('hide');
+                    ListarLocaciones();
+                });
+
+            $("#closebtnmodal").click(function () {
+                $('#SmallModalContent').modal('hide');
+                ListarLocaciones();
+            });
+        }
+        else {
+            $('#mensaje').empty();
+            $('#mensaje').show("show");
+            $("#mensaje").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> " + msnErr + " </div>");
+            setTimeout(function () {
+                $("#mensaje").fadeOut(5500);
+            }, 1000);
+
+        }
+        */
+    }
+
+</script>

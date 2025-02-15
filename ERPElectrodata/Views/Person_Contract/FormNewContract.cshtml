@@ -1,0 +1,319 @@
+﻿@model ERPElectrodata.Models.PERSON_CONTRACT
+
+@{
+    Layout = null;
+}
+
+<div class="col-lg-12">
+    @using (Html.BeginForm("FormNewContract", "Person_Contract", FormMethod.Post, new { enctype = "multipart/form-data", id = "Form_FormNewContract", target = "upload_target" }))
+    {
+        @Html.AntiForgeryToken()
+        @Html.ValidationSummary(true)
+
+        <input type="hidden" name="ID_PERS_ENTI_FNC" value="@ViewBag.ID_PERS_ENTI" />
+        <input type="hidden" name="ACCION_HF" value="@ViewBag.ACCION" />
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.StartDateContractTalent
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.STAR_DATE)
+                    @Html.ValidationMessageFor(model => model.STAR_DATE)
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.EndDateContractTalent
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.END_DATE)
+                    @Html.ValidationMessageFor(model => model.END_DATE)
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.ConditionContractTalent
+                </div>
+                <div class="editor-field">
+                    @Html.EditorFor(model => model.ID_COND_CONT)
+                    @Html.ValidationMessageFor(model => model.ID_COND_CONT)
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.GrossSalaryTalent
+                </div>
+                <div style="margin-top:0px;">
+                    @Html.EditorFor(model => model.GROSS_SALARY)
+                    @Html.ValidationMessageFor(model => model.GROSS_SALARY)
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="editor-label">
+                    <a onclick="JobTitle()" data-toggle="modal" data-target="#miModal" title="@ResourceLanguaje.Resource.SelectJobTitle" style="cursor:pointer;">@ResourceLanguaje.Resource.JobTitleTalent</a>
+                </div>
+                <input type="hidden" name="ID_CHAR" value="0" id="ID_CHAR" />
+                <div class="k-textbox" style="width:100%;">
+                    <input type="text" id="NAM_CHAR" name="NAM_CHAR" readonly="readonly" style="text-transform:capitalize;" />
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.LocationTalent
+                </div>
+                <div class="editor-field">
+                    <input id="ID_LOCA" type="text" name="ID_LOCA">
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-lg-4">
+                <div style="width: 100%; padding-left:3px;" id="divFiles">
+                    <input name="filesNewCont" id="filesNewCont" type="file" />
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-12">
+            <div style="display:inline-block; float:right; padding:5px 10px 0 5px;">
+                <div style=" float:left; padding:0 10px 0 0; ">
+                    <button id="submitNC" class="btn btn-primary mb-3">@ResourceLanguaje.Resource.BtnSave</button>
+                </div>
+                <button id="reset" class="btn btn-link mb-3" onclick="cancelNewCont(); return false;">@ResourceLanguaje.Resource.BtnCancel</button>
+            </div>
+        </div>
+    }
+</div>
+<iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;display:none; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+
+    function cancelNewCont() {
+        $("#divLoad").css("display", "block");
+        $("#divDetailsContract").empty();
+        $("#divDetailsContract").load("/Person_Contract/ViewContract?id=@ViewBag.ID_PERS_CONT&id1=@ViewBag.ID_PERS_ENTI&var=" + Math.random());
+        $("#divPanelIzq").height(360);
+        $("#divPanelDer").height(360);
+        return false;
+    }
+
+    function JobTitle() {
+        $("#lblTitulo").text("@ResourceLanguaje.Resource.ChartPopupTitle");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-md");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/TalentChart/ViewChartWithoutStaff?id=@ViewBag.ID_CIA&var=" + Math.random());
+        @*var htmlForm = '<div id="FormJobTitle"></div>';
+        winFormPopUpModal("@ResourceLanguaje.Resource.ChartPopupTitle", htmlForm, 400, 400);
+        $("#FormJobTitle").load("/TalentChart/ViewChartWithoutStaff?id=@ViewBag.ID_CIA&var=" + Math.random());
+        return false;*@
+    }
+
+    $(document).ready(function () {
+        var STAR_DATE = $("#STAR_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+        var END_DATE = $("#END_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        var ID_USB = $("#ID_USB").kendoComboBox({
+            dataTextField: "NAM_AREA",
+            dataValueField: "ID_AREA",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Area/USB?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_AREA = $("#ID_AREA").kendoComboBox({
+            autoBind: false,
+            index: 0,
+            cascadeFrom: "ID_USB",
+            dataTextField: "NAM_AREA",
+            dataValueField: "ID_AREA",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Area/AreaByUSB?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_CARG_AREA = $("#ID_CARG_AREA").kendoComboBox({
+            autoBind: false,
+            index: 0,
+            cascadeFrom: "ID_AREA",
+            dataTextField: "NAM_CARG",
+            dataValueField: "ID_CARG_AREA",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Cargo/ListCargosByID_AREA?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#GROSS_SALARY").kendoNumericTextBox({
+            min: 0
+        });
+
+        @*$("#submitNC").click(function () {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.Saving @ResourceLanguaje.Resource.Contract', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });*@
+
+        var onSelectNewCont = function (e) {
+            $.each(e.files, function (index, value) {
+                if (value.extension.toLowerCase() != ".pdf") {
+                    e.preventDefault();
+
+                    winPopUpModal("@ResourceLanguaje.Resource.WrongFileExtension", "<div style='border-bottom:1px dotted #dadada;padding:0 3px 20px 3px;'>" +
+                    "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.AssetMessage8</div>" +
+                    "<div style='float:right; padding:30px 0 0 0; '>" +
+                    "<button id='continuee' class='k-button'>Continue</button>" +
+                    "</div></div>", 400, 140);
+
+                    var undo = $("#continuee")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                    });
+
+                }
+                else {
+                    $("#divFiles").css("width", "95%");
+                    $("#divFiles").css("padding-left", "12px");
+                    $("#divPanelIzq").height(430);
+                    $("#divPanelDer").height(430);
+                }
+            });
+        };
+
+        var onRemove = function (e) {
+            $("#divFiles").css("width", "100%");
+            $("#divFiles").css("padding-left", "3px");
+            $("#divPanelIzq").height(380);
+            $("#divPanelDer").height(380);
+        }
+
+        $("#filesNewCont").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach @ResourceLanguaje.Resource.Contract"
+            },
+            select: onSelectNewCont,
+            remove: onRemove,
+        });
+
+        var ID_COND_CONT = $("#ID_COND_CONT").kendoComboBox({
+            dataTextField: "NAM_COND",
+            dataValueField: "ID_COND_CONT",
+            filter: "contains",
+            autoBind: true,
+            index: 1,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Contract_Condition/List?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#ID_LOCA").kendoComboBox({
+            dataTextField: "NAME",
+            dataValueField: "ID_LOCA",
+            template: '<div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                        '<div>${ data.NAM_LOCA }</div>',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Location/ListChangeStatus?id=@ViewBag.ID_PERS_ENTI&var=" + Math.random()
+                }
+            }
+        });
+        var ID_LOCA = $("#ID_LOCA").data("kendoComboBox");
+
+        if ('@ViewBag.ACCION' == 'NewAdde') {
+            STAR_DATE.min("@ViewBag.STAR_DATE");
+            STAR_DATE.max("@ViewBag.END_DATE");
+            END_DATE.min("@ViewBag.STAR_DATE");
+
+            @*$("#ID_CHAR").val('@ViewBag.ID_CHAR');
+            $("#NAM_CHAR").val('@ViewBag.NAM_CHAR');
+
+            var ID_COND_CONT = $("#ID_COND_CONT").data("kendoComboBox");
+            ID_COND_CONT.value('@ViewBag.ID_COND_CONT');
+
+            var ID_LOCA = $("#ID_LOCA").data("kendoComboBox");
+            ID_LOCA.value('@ViewBag.ID_LOCA');
+
+            var GROSS_SALARY = $("#GROSS_SALARY").data("kendoNumericTextBox");
+            GROSS_SALARY.value(@ViewBag.GROSS_SALARY);*@
+        }
+        if ('@ViewBag.ACCION' == 'NewCont') {
+            STAR_DATE.min("@ViewBag.STAR_DATE");
+            END_DATE.min("@ViewBag.STAR_DATE");
+        }
+        $("#ID_CHAR").val('@ViewBag.ID_CHAR');
+        $("#NAM_CHAR").val('@ViewBag.NAM_CHAR');
+
+        var ID_COND_CONT = $("#ID_COND_CONT").data("kendoComboBox");
+        ID_COND_CONT.value('@ViewBag.ID_COND_CONT');
+
+        var ID_LOCA = $("#ID_LOCA").data("kendoComboBox");
+        ID_LOCA.value('@ViewBag.ID_LOCA');
+
+        var GROSS_SALARY = $("#GROSS_SALARY").data("kendoNumericTextBox");
+        GROSS_SALARY.value(@ViewBag.GROSS_SALARY);
+
+        $("#divLoad").css("display", "none");
+    });
+
+    function uploadDone(msg, code) {
+        if (msg == "OK") {            
+            location.reload(true);
+            //location.replace(location.href.replace("Edit", "Details"))
+
+        }
+        else {
+
+            toastr.warning(msg, "Mensaje");
+        }
+    }
+    
+</script>

@@ -1,0 +1,242 @@
+﻿@model ERPElectrodata.Models.ACCOUNTING_MONTH
+
+@{
+    Layout = null;
+}
+
+<div class="bodyMarcoForm" style="height:415px;">
+    @using (Html.BeginForm("AttachInvoiceUser", "Talent", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormAttachInvoice", name = "FormAttachInvoice", target = "upload_targetInvoice" }))
+    {
+        <input type="hidden" id="ID_PERS_ENTI" name="ID_PERS_ENTI" value="@ViewBag.ID_PERS_ENTI" />
+        <input type="hidden" id="HD_File" name="HD_File" value="0" />
+        <div class="divFondoUno">
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.TypeTalent
+                </div>
+                <div class="editor-field">
+                    <input type="text" name="ID_TYPE_PAYM" id="ID_TYPE_PAYM" class="dropdownKendo" />
+                </div>
+            </div>
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.StatusTalent
+                </div>
+                <div class="editor-field">
+                    @ResourceLanguaje.Resource.SignedTalent
+                </div>
+            </div>
+        </div>
+        <div class="divFondoDos">
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.Year
+                </div>
+                <div class="editor-field">
+                    @*@Html.EditorFor(model => model.ID_ACCO_YEAR)
+                    @Html.ValidationMessageFor(model => model.ID_ACCO_YEAR)*@
+                    <input type="text" name="ID_ACCO_YEAR" id="ID_ACCO_YEAR" class="dropdownKendo" />
+                </div>
+            </div>
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    @ResourceLanguaje.Resource.Month
+                </div>
+                <div class="editor-field">
+                    @*@Html.EditorFor(model => model.ID_ACCO_MONT)
+                    @Html.ValidationMessageFor(model => model.ID_ACCO_MONT)*@
+                    <input type="text" name="ID_ACCO_MONT" id="ID_ACCO_MONT" class="dropdownKendo" />
+                </div>
+            </div>
+        </div>
+        <div class="divFondoUno">
+            <div style="width: 96%; float:left; margin-left: 2%;" id="divFiles">
+                <input name="filesInvoice" id="filesInvoice" type="file" />
+            </div>
+        </div>
+        <div class="divFondoUno" style="margin-bottom:5px;">
+            <div style="float: right; min-width: 10px; width:3%; height: 1px;"></div>
+            <div style="display: inline-block; float: right; padding-top: 5px; ">
+                <button id="submitInvoice" class="k-button">@ResourceLanguaje.Resource.BtnSave</button>
+            </div>        
+        </div> 
+
+    }
+    <iframe id="upload_targetInvoice" name="upload_targetInvoice" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+</div>
+
+<script type="text/javascript">
+
+    var arc = null;
+    $("#submitInvoice").click(function (event) {
+        event.preventDefault();
+
+        //kendoComboBox
+        var ID_ACCO_YEAR = $("#ID_ACCO_YEAR").data("kendoDropDownList");
+        var ID_ACCO_MONT = $("#ID_ACCO_MONT").data("kendoDropDownList");
+
+        if($("#HD_File").val() == 0){
+            winPopUpModal("@ResourceLanguaje.Resource.InformationMissing", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>@ResourceLanguaje.Resource.PaymentBallotsMsn2</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee")
+            .bind("click", function () {
+                closeWinModalPopUp();
+            });
+        }
+        else{
+            var tipo = $("#ID_TYPE_PAYM").val();
+            var msn2 = "@ResourceLanguaje.Resource.PaymentBallotsMsn3";
+            if (tipo == 3) { var msn2 = "@ResourceLanguaje.Resource.PaymentBallotsMsn4"; }
+            else if (tipo == 4) { var msn2 = "@ResourceLanguaje.Resource.CertificateUtilities"; }
+
+            winPopUpModal("@ResourceLanguaje.Resource.Notification", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 10px 0px;'>" +
+           "<div style='padding:5px 12px 10px 10px; font-size:.95em; height:115px;'><span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Employee:</b> @ViewBag.Employee</span><br>" +
+           "<b>@ResourceLanguaje.Resource.Year:</b> " + ID_ACCO_YEAR.text() + "<br>" +
+           "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Month:</b> " + ID_ACCO_MONT.text().toLowerCase() + "</span><br>"+
+           "<span style='text-transform:capitalize;'><b>@ResourceLanguaje.Resource.Filename:</b> " + arc + "</span><br><br>" + msn2 + "</div>" +
+           "<div style='float:right; padding:20px 2px 0px 0px; '>" +
+           "<button id='btnYes' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>&nbsp;&nbsp;<button id='btnNO' class='k-button' style='font-size:.9em;'>No</button></div></div>"
+           , 350, 220);
+
+            var undo = $("#btnYes")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                    winPopUpModalLoad("@ResourceLanguaje.Resource.Saving", "@ResourceLanguaje.Resource.PleaseWait", 300, 130);
+
+                    $('#FormAttachInvoice').submit();
+                });
+
+            var undo = $("#btnNO")
+                .bind("click", function () {
+                    closeWinModalPopUp();
+                });
+
+        }
+    });
+
+    $(document).ready(function () {
+
+        var ID_TYPE_PAYM = $("#ID_TYPE_PAYM").kendoDropDownList({
+            dataTextField: "NAM_TYPE_PAYM",
+            dataValueField: "ID_TYPE_PAYM",
+            index:0,
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypePayment/List?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#ID_ACCO_YEAR").kendoDropDownList({
+            dataTextField: "ID_ACCO_YEAR",
+            dataValueField: "ID_ACCO_YEAR",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountingYear/List?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#ID_ACCO_MONT").kendoDropDownList({
+
+            dataTextField: "NAM_ACCO_MONT",
+            dataValueField: "ID_ACCO_MONTH",
+            cascadeFrom: 'ID_ACCO_YEAR',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountingMonth/List?var=" + Math.random()
+                }
+            }
+        });
+
+        var onSelectInvo = function (e) {
+            $.each(e.files, function (index, value) {
+                if (value.extension.toLowerCase() != ".pdf") {
+                    e.preventDefault();
+
+                    winPopUpModal("@ResourceLanguaje.Resource.WrongFileExtension", "<div style='border-bottom:1px dotted #dadada;padding:0 3px 20px 3px;'>" +
+                    "<div style='padding:10px 0 10px 0;'>@ResourceLanguaje.Resource.AssetMessage8</div>" +
+                    "<div style='float:right; padding:30px 0 0 0; '>" +
+                    "<button id='continuee' class='k-button'>Continue</button>" +
+                    "</div></div>", 400, 140);
+
+                    var undo = $("#continuee")
+                    .bind("click", function () {
+                        closeWinModalPopUp();
+                    });
+                    $("#HD_File").val(0);
+                    arc = null;
+                }
+                else{
+                    $("#HD_File").val(1);
+                    arc = value.name;
+                    $("#divFiles").css("width", "93.5%");
+                    $("#divFiles").css("margin-left", "3.8%");
+                }
+            });
+        };
+
+        $("#filesInvoice").kendoUpload({
+            localization: {
+                select: "Attach"
+            },
+            select: onSelectInvo,
+            remove : function(e){
+                $("#HD_File").val(0);
+                arc = null;
+                $("#divFiles").css("width", "96%");
+                $("#divFiles").css("margin-left", "2%");
+            }
+        });
+
+        var ID_ACCO_YEAR = $("#ID_ACCO_YEAR").data("kendoDropDownList");
+        ID_ACCO_YEAR.bind("dataBound", function (e) {
+            ID_ACCO_YEAR.value(ID_ACCO_YEAR.dataItem().YearNow);
+        });
+
+        var ID_ACCO_MONT = $("#ID_ACCO_MONT").data("kendoDropDownList");
+        ID_ACCO_MONT.bind("dataBound", function (e) {
+            ID_ACCO_MONT.value(ID_ACCO_MONT.dataItem().MonthNow);
+        });
+
+    });
+</script>

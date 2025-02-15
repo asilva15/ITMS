@@ -1,0 +1,536 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Evaluacion</title>
+</head>
+<body>
+    <div>
+        <div style="width:100%;">
+            <nav id="navDT">
+                <ul>
+                    <li><a href="javascript:void(0)" onclick="fnEvaluacion(this)"><div id="linkEvaluacion" class="activeNavDT"><i class="glyphicon glyphicon-comment"></i><font style="font-size:13px;margin-left:10px;">Evaluacion</font></div></a></li>
+                    <li><a href="javascript:void(0)" onclick="fnPlanMejora(this)"><div id="linkPlanMejora"><i class="glyphicon glyphicon-calendar"></i><font style="font-size:13px;margin-left:10px;">Plan de Mejora</font></div></a></li>
+                    <li><a href="javascript:void(0)" onclick="fnSustento(this)"><div id="linkSustento"><i class="glyphicon glyphicon-calendar"></i><font style="font-size:13px;margin-left:10px;">Archivos Sustento</font></div></a></li>
+                </ul>
+            </nav>
+            <div class="divSpace2"></div>
+            <div id="divEvaluacion" style="width:100%;">
+                @using (Html.BeginForm("GrabarEvaluacion", "EvaluacionPersonal", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEvaluacion", target = "upload_target" }))
+                {
+                    @Html.Hidden("IdEvaluacion")
+                    <div class="titleForm">
+                        <div class="title" id="divTitle">
+                            Evaluación
+                        </div>
+                    </div>
+                    <div class="bodyForm">
+                        <div class="inBodyForm">
+                            <div style="overflow-y:auto; height:100%;">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                Evaluar: @Html.Editor("IdEvaluado")
+                                                <br /><br /><br />
+                                                Objetivo
+                                            </th>
+                                            <th>Descripción</th>
+                                            <th>Peso</th>
+                                            <th style="border-left: 1px solid #e2e2e2; text-align:center">
+                                                <img id="imgEvaluado" style="width:75px; height:75px" src="/Content/Fotos/0.jpg" /><br />
+                                                Autoevaluación
+                                            </th>
+                                            <th style="border-left: 1px solid #e2e2e2; text-align:center">
+                                                <img id="imgEvaluador" style="width:75px; height:75px" src="/Content/Fotos/0.jpg" /><br />
+                                                Evaluador
+                                            </th>
+                                            <th style="border-left: 1px solid #e2e2e2; text-align:center">
+                                                <img id="imgRRHH" style="width:75px; height:75px" src="/Content/Fotos/11783.jpg" /><br />
+                                                RRHH
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="TablaCalificaciones"></tbody>
+                                </table>
+                            </div>
+                            <div id="divEvaFinal" class="divFondoDos" style="text-align:center"><h3>CALIFICACIÓN FINAL : <span id="spanNota"></span></h3></div>
+                            <div id="divbtn1" class="divFondoDos">
+                                <div style="height:5px;clear:both;"></div>
+                                <div style="float:right; padding:0px 15px 15px 5px;">
+                                    <div style="float:left; padding:0px 15px 0px 0px; ">
+                                        <div class="divSpace3"></div>
+                                        <div style="float:left; padding-top:10px">
+                                            <button id="btnGrabarEva" class="k-button">Grabar</button>
+                                        </div>
+                                        <div class="divSpace3"></div>
+                                        <div style="float:left; padding-top:10px">
+                                            <button id="btnFinalizarEva" class="k-button">Finalizar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="divbtn2" class="divFondoDos">
+                                <div style="height:5px;clear:both;"></div>
+                                <div style="float:right; padding:0px 15px 15px 5px;">
+                                    <div style="float:left; padding:0px 15px 0px 0px; ">
+                                        <div class="divSpace3"></div>
+                                        <div style="float:left; padding-top:10px">
+                                            <button id="btnConfirmar" class="k-button">Confirmar</button>
+                                        </div>
+                                        <div class="divSpace3"></div>
+                                        <div style="float:left; padding-top:10px">
+                                            <button id="btnRechazar" class="k-button">Rechazar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;display:none;"></iframe>
+                }
+            </div>
+            <div class="divSpace2"></div>
+            <div id="divPlanMejora" style="width:100%;">
+                <div id="divContenidoPlan"></div>
+            </div>
+            <div class="divSpace2"></div>
+            <div id="divSustento" style="width:100%;">
+                <div class="titleForm">
+                    <div class="title" id="divTitle">
+                        Plan de Mejora
+                    </div>
+                </div>
+                <div class="bodyForm">
+                    <div class="inBodyForm">
+                        <div id="ListaArchivos">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div style="clear:both; padding-bottom:10px;"></div>
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#divPlanMejora").css("display", "none");
+
+        CargarTablaEvaluaciones(@ViewBag.IdPersEnti);
+
+        $("#btnGrabarEva").click(function () {
+
+            var parametros = "";
+            var valores = $('#FrmEvaluacion').serialize().split('&');
+            $.each( valores, function( index, value ){
+                if(value.indexOf("txtAutoEva") != -1 || value.indexOf("txtJefeEva") != -1){
+                    var param = value.split('=');
+                    $.ajax({
+                        url: "/EvaluacionPersonal/GrabarEvaComentario?id=" + param[0] + "&texto=" + param[1],
+                        cache: false,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            
+                        }
+                    });
+                }
+                else{
+                    parametros = parametros + "&" + value;
+                }
+            });
+
+            event.preventDefault();
+            $.ajax({
+                url: "/EvaluacionPersonal/GrabarEvaluacion/0?var=" + Math.random() + parametros,
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    uploadDone("OK", 0)
+                },
+                error: function (source) {
+                    uploadDone("ERROR", 0)
+                }
+            });
+        });
+
+        $("#btnFinalizarEva").click(function () {
+
+            var parametros = "";
+            var valores = $('#FrmEvaluacion').serialize().split('&');
+            $.each( valores, function( index, value ){
+                if(value.indexOf("txtAutoEva") != -1 || value.indexOf("txtJefeEva") != -1){
+                    var param = value.split('=');
+                    $.ajax({
+                        url: "/EvaluacionPersonal/GrabarEvaComentario?id=" + param[0] + "&texto=" + param[1],
+                        cache: false,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            
+                        }
+                    });
+                }
+                else{
+                    parametros = parametros + "&" + value;
+                }
+            });
+
+            event.preventDefault();
+            $.ajax({
+                url: "/EvaluacionPersonal/GrabarEvaluacion/1?var=" + Math.random() + parametros,
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    uploadDone(data, 0)
+                },
+                error: function (source) {
+                    uploadDone("ERROR", 0)
+                }
+            });
+        });
+
+        $("#IdEvaluado").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "IdEvaluado",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/EvaluarPersonal?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                CargarTablaEvaluaciones($("#IdEvaluado").val())
+            }
+        });
+        var IdEvaluado = $("#IdEvaluado").data("kendoComboBox");
+        IdEvaluado.value(@ViewBag.IdPersEnti);
+
+        $("#btnConfirmar").click(function () {
+            var parametros = "";
+            var valores = $('#FrmEvaluacion').serialize().split('&');
+            $.each( valores, function( index, value ){
+                if(value.indexOf("txtAutoEva") != -1 || value.indexOf("txtJefeEva") != -1){
+                    var param = value.split('=');
+                    $.ajax({
+                        url: "/EvaluacionPersonal/GrabarEvaComentario?id=" + param[0] + "&texto=" + param[1],
+                        cache: false,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            
+                        }
+                    });
+                }
+                else{
+                    parametros = parametros + "&" + value;
+                }
+            });
+
+            event.preventDefault();
+            $.ajax({
+                url: "/EvaluacionPersonal/GrabarEvaluacion/2?var=" + Math.random() + parametros,
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    uploadDone("OK", 0)
+                },
+                error: function (source) {
+                    uploadDone("ERROR", 0)
+                }
+            });
+        });
+
+        $("#btnRechazar").click(function () {
+            var parametros = "";
+            var valores = $('#FrmEvaluacion').serialize().split('&');
+            $.each( valores, function( index, value ){
+                if(value.indexOf("txtAutoEva") != -1 || value.indexOf("txtJefeEva") != -1){
+                    var param = value.split('=');
+                    $.ajax({
+                        url: "/EvaluacionPersonal/GrabarEvaComentario?id=" + param[0] + "&texto=" + param[1],
+                        cache: false,
+                        type: "GET",
+                        dataType: "json",
+                        success: function (data) {
+                            
+                        }
+                    });
+                }
+                else{
+                    parametros = parametros + "&" + value;
+                }
+            });
+            event.preventDefault();
+            $.ajax({
+                url: "/EvaluacionPersonal/GrabarEvaluacion/3?var=" + Math.random() + parametros,
+                cache: false,
+                type: "GET",
+                dataType: "json",
+                success: function (data) {
+                    uploadDone("OK", 0)
+                },
+                error: function (source) {
+                    uploadDone("ERROR", 0)
+                }
+            });
+        });
+
+        
+        $("#divbtn1").css("display", "none");
+        $("#divbtn2").css("display", "none");
+    });
+
+    function fnEvaluacion() {
+        $("#linkEvaluacion").removeClass("activeNavDT");
+        $("#linkPlanMejora").removeClass("activeNavDT");
+        $("#linkSustento").removeClass("activeNavDT");
+        $("#linkEvaluacion").addClass("activeNavDT");
+
+        $("#divEvaluacion").css("display", "block");
+        $("#divPlanMejora").css("display", "none");
+        $("#divSustento").css("display", "none");
+    }
+
+    function fnPlanMejora() {
+
+        var IdUsuario = $("#IdEvaluado").val();
+
+        $("#linkEvaluacion").removeClass("activeNavDT");
+        $("#linkPlanMejora").removeClass("activeNavDT");
+        $("#linkSustento").removeClass("activeNavDT");
+        $("#linkPlanMejora").addClass("activeNavDT");
+
+        $("#divEvaluacion").css("display", "none");
+        $("#divPlanMejora").css("display", "block");
+        $("#divSustento").css("display", "none");
+
+        $("#divContenidoPlan").empty();
+        $("#divContenidoPlan").load("/EvaluacionPersonal/PlanMejora/" + IdUsuario + "?var=" + Math.random());
+        //CargarPlanMejora(IdUsuario);
+    }
+
+    function fnSustento(){
+        $("#linkEvaluacion").removeClass("activeNavDT");
+        $("#linkPlanMejora").removeClass("activeNavDT");
+        $("#linkSustento").removeClass("activeNavDT");
+        $("#linkSustento").addClass("activeNavDT");
+
+        $("#divEvaluacion").css("display", "none");
+        $("#divPlanMejora").css("display", "none");
+        $("#divSustento").css("display", "block");
+
+        CargarArchivos();
+    }
+
+    function CargarTablaEvaluaciones(idUsuario) {
+        $.ajax({
+            url: "/EvaluacionPersonal/ListarEvaluacion/" + idUsuario,
+            //data: parametros,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+
+                $("#TablaCalificaciones").empty();
+                $("#IdEvaluacion").val("");
+
+                $.each(data['Data'], function (index, value) {
+
+                    $("#TablaCalificaciones").append(
+                                                    '<tr id="IdEvaluacion' + (data['Data'][index]['Id']) + '">' +
+                                                        '<td style="width:30%">' + (data['Data'][index]['Nombre']) + '</td>' +
+                                                        '<td style="width:30%">' + (data['Data'][index]['Descripcion']) + '</td>' +
+                                                        '<td>' + (data['Data'][index]['Peso']) + '</td>' +
+                                                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                                            'Calificación : <input id="IdAutoEva' + (data['Data'][index]['Id']) + '" type="text" name="IdAutoEva' + (data['Data'][index]['Id']) + '" style="width:30px;" value="' + (data['Data'][index]['IdResultadoEvaluado']) + '" ' + (data['Data'][index]['Estado'] == 0 && data['Data'][index]['IdPersEnti'] == @ViewBag.IdPersEnti ? '' : 'disabled') + ' >' +
+                                                            '<textarea id="txtAutoEva' + (data['Data'][index]['Id']) + '" name="txtAutoEva' + (data['Data'][index]['Id']) + '" rows="3" cols="30" ' + (data['Data'][index]['Estado'] == 0 && data['Data'][index]['IdPersEnti'] == @ViewBag.IdPersEnti ? '' : 'disabled') + '>' + (data['Data'][index]['ObsResultadoEvaluado']) + '</textarea>' +
+                                                        '</td>' +
+                                                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                                            'Calificación : <input id="IdJefeEva' + (data['Data'][index]['Id']) + '" type="text" name="IdJefeEva' + (data['Data'][index]['Id']) + '" style="width:30px" value="' + (data['Data'][index]['IdResultadoJefe']) + '" ' + (data['Data'][index]['Estado'] == 1 && data['Data'][index]['IdPersEntiPadre'] == @ViewBag.IdPersEnti ? '' : 'disabled') + ' >' +
+                                                            '<textarea id="txtJefeEva' + (data['Data'][index]['Id']) + '" name="txtJefeEva' + (data['Data'][index]['Id']) + '"  rows="3" cols="30" ' + (data['Data'][index]['Estado'] == 1 && data['Data'][index]['IdPersEntiPadre'] == @ViewBag.IdPersEnti ? '' : 'disabled') + ' >' + (data['Data'][index]['ObsResultadoJefe']) + '</textarea>' +
+                                                        '</td>' +
+                                                        '<td style="text-align: center; border-left: 1px solid #e2e2e2; ">' +
+                                                            '-' +
+                                                        '</td>' +
+                                                    '</tr>'
+                        );
+                    $("#IdEvaluacion").val($("#IdEvaluacion").val() + ',' + data['Data'][index]['Id']);
+
+                    $('#imgEvaluado').attr("src", "/Content/Fotos/" + (data['Data'][index]['IdPersEnti']) + ".jpg");
+                    $('#imgEvaluador').attr("src", "/Content/Fotos/" + (data['Data'][index]['IdPersEntiPadre']) + ".jpg");
+
+                    if (data['Data'][index]['Estado'] == 2 && @Session["SUPERVISOR_RRHH"] == 1){
+                        $("#divbtn1").css("display", "none");
+                        $("#divbtn2").css("display", "block");
+                    }else
+                    {
+                        if ((data['Data'][index]['Estado'] == 0 && data['Data'][index]['IdPersEnti'] == @ViewBag.IdPersEnti) || (data['Data'][index]['Estado'] == 1 && data['Data'][index]['IdPersEntiPadre'] == @ViewBag.IdPersEnti))
+                        {
+                            $("#divbtn1").css("display", "block");
+                            $("#divbtn2").css("display", "none");
+                        }else{
+                            $("#divbtn1").css("display", "none");
+                            $("#divbtn2").css("display", "none");
+                        }
+                    }
+
+                    $("#IdAutoEva" + (data['Data'][index]['Id'])).kendoNumericTextBox({
+                        min: 1,
+                        max: 5,
+                        decimals: 0
+                    });
+                    $("#IdJefeEva" + (data['Data'][index]['Id'])).kendoNumericTextBox({
+                        min: 1,
+                        max: 5,
+                        decimals: 0
+                    });
+
+                    
+
+                });
+
+                EvaluacionFinal(idUsuario);
+
+            },
+            error: function (source) {
+                alert("Error Carga Json");
+            }
+        });
+    }
+
+    function EvaluacionFinal(idUsuario){
+        $.ajax({
+            url: "/EvaluacionPersonal/ObtenerCalificacionFinal/" + idUsuario,
+            cache: false,
+            type: "GET",
+            dataType: "text",
+            success: function (data) {
+                $("#spanNota").text(data);
+            },
+            error: function (source) {
+                alert("No tiene Evaluaciones Pendientes");
+            }
+        });
+    }
+
+    function CargarPlanMejora(idUsuario){
+        $.ajax({
+            url: "/EvaluacionPersonal/ObtenerPlanMejora/" + idUsuario,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                alert($("#txtAreaMejora").text());
+                alert($("#txt1").html());
+                $("#txtAreaMejora").text("");
+                $("#txt1").html("");
+                $("#txtComentario").html();
+
+                //$.each(data['Data'], function (index, value) {
+                //    $("#txtAreaMejora").html(data['Data']['AreaMejora']);
+                //    $("#txtComentario").html(data['Data']['Comentario']);
+                //});
+            },
+            error: function (source) {
+
+            }
+        });
+    }
+
+    function CargarArchivos(){
+
+        $.ajax({
+            url: "/EvaluacionPersonal/ObtenerArchivos/" + $("#IdEvaluado").val(),
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $("#ListaArchivos").empty();
+                $.each(data['Data'], function (index, value) {
+                    $("#ListaArchivos").append(
+                        '<div class="divFondoUno" style="padding: 5px 15px 5px 15px;">' +
+                            //'<div class="smallField" style="width:200px; float:left;">' + (data['Data'][index]['TIPO']) + '</div>' +
+                            '<div class="smallField" style="width:300px; float:left;">- <a href="/Adjuntos/Talent/EvaluacionPersonal/' + (data['Data'][index]['LINK']) + '" target="_BLANK">' + (data['Data'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                        '</div>'
+                    );
+                });
+            },
+            error: function (source) {
+                alert("Error Carga Json Archivos");
+            }
+        });
+    }
+
+    //*************************************************************
+
+    function uploadDone(msg, code) {
+
+        if (msg == "OK") {
+
+            //closeWinFormModalPopUp();
+
+            winPopUpModal("Mensaje del Sistema", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>Información Actualizada.</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continues' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continues").bind("click", function () {
+                closeWinModalPopUp();
+                CargarTablaEvaluaciones($("#IdEvaluado").val());
+            });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+                CargarTablaEvaluaciones($("#IdEvaluado").val());
+            });
+        }
+        else {
+            //closeWinFormModalPopUp();
+
+            var mensaje = 'No se Actualizaron los Datos.\n\n Contacte al Administrador.'
+
+            if (msg == "ERROR_PLAN"){mensaje="Debe registrar el Plan de Mejora antes de Finalizar la evaluación.";}
+            if (msg == "ERROR_OBS_JEFE"){mensaje="Debe registrar las observaciones por cada Objetivo";}
+
+            winPopUpModal("Advertencia", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+               "<div style='padding:10px 0px 10px 0px;'>" + mensaje + "</div>" +
+                   "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                   "<button id='continuee' class='k-button'>Continue</button>" +
+                   "</div></div>"
+                   , 400, 140);
+
+            var undo = $("#continuee").bind("click", function () {
+                closeWinModalPopUp();
+            });
+
+            $("#closebtnmodal").click(function () {
+                closeWinModalPopUp();
+            });
+        }
+    }
+
+</script>

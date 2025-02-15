@@ -1,0 +1,869 @@
+﻿@model ERPElectrodata.Models.CLIENT_ASSET
+
+@{
+    ViewBag.Title = "Details Asset";
+    Layout = null;
+}
+
+<div>
+<div class="mb-3 card">
+        <div class="card-header-tab card-header">Detalle del Activo</div>
+        <div class="card-body">
+            <div class="inBodyForm">
+                <div id="data"></div>
+                @* Inicio del Formulario*@
+                @using (Html.BeginForm("Create", "ClientAsset", FormMethod.Post, new { enctype = "multipart/form-data", target = "upload_target" }))
+                {
+                    @Html.HiddenFor(model => model.ID_ASSE);
+                    <div class="divFondoDos">
+                        <div class="divSpace2_a"></div>
+                        <div class="divCont2">
+                            <div class="editor-label">
+                                Opciones
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_TYPE_CLIE_ASSE)
+                                @Html.ValidationMessageFor(model => model.ID_TYPE_CLIE_ASSE)
+                            </div>
+                        </div>
+                        <div style="font-size:1em; float:right; margin:12px 20px 0px 0px;" id="divBuscarImage"></div>
+                    </div>
+
+                    <div id="divTypeTicket3" class="divFondoUno"></div>
+
+                    <div id="divTypeTicket2" class="divFondoUno">
+
+                        <div class="divSpace2_a"></div>
+                        <div class="divCont2">
+                            <div class="editor-label">
+                                Componente
+                            </div>
+                            <div class="editor-field">
+                                @Html.EditorFor(model => model.ID_PART_TYPE_ASSE)
+                                @Html.ValidationMessageFor(model => model.ID_PART_TYPE_ASSE)
+                            </div>
+                        </div>
+                        <div class="divSpace2_a"></div>
+                        <div class="divCont2">
+                            <div class="editor-label" id="valorMedida">
+                                Valor
+                            </div>
+                            <div class="k-textbox">
+                                @Html.EditorFor(model => model.VAL_PART_ASSE)
+                                @Html.ValidationMessageFor(model => model.VAL_PART_ASSE)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="divTypeTicket1" class="divFondoUno divHide">
+                        <div class="divFondoUno">
+                            <div class="divSpace2_a"></div>
+                            <div class="divCont2">
+                                <div class="editor-label">
+                                    Condición
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_COND)
+                                    @Html.ValidationMessageFor(model => model.ID_COND)
+                                </div>
+                            </div>
+                            <div class="divSpace2_a"></div>
+                            <div class="divCont2">
+                                <div class="editor-label">
+                                    Usuario
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_PERS_ENTI)
+                                    @Html.ValidationMessageFor(model => model.ID_PERS_ENTI)
+                                </div>
+                            </div>
+                        </div>
+                        <div class="divFondoDos">
+                            <div class="divSpace2_a"></div>
+                            <div class="divCont2">
+                                <div class="editor-label">
+                                    Locación
+                                </div>
+                                <div class="editor-field">
+                                    @Html.EditorFor(model => model.ID_LOCA)
+                                    @Html.ValidationMessageFor(model => model.ID_LOCA)
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="DownFile" class="divFondoUno" style="display:none;">
+                        <div class="divSpace2_a"></div>
+                        <div class="divCont2">
+                            <div class="editor-field">
+                                <a href="~/Download/Formato_baja_de_activos.xls" target="_blank" style="color:blue" title="@ResourceLanguaje.Resource.DownloadFormat">@ResourceLanguaje.Resource.DownloadFormat</a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="divFondoUno">
+                        <div class="divSpace2_a"></div>
+                        <div style="width:96%;float:left">
+                            <div class="editor-label">
+                                Comentario
+                            </div>
+                            <div class="editor-field">
+                                @Html.TextAreaFor(model => model.SUM_CLIE_ASSE, new { rows = "20" })
+                                @Html.ValidationMessageFor(model => model.SUM_CLIE_ASSE)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="width: 96%; float:left; padding: 0px 0px 0 15px; ">
+                        <input name="files" id="files" type="file" />
+                    </div>
+
+                    <div style="margin:0px 15px 0px 0px; height:25px; border:0px solid black;">
+                        <div style="float:right;padding:10px 0px 0px 0px; ">
+                            <button id="submit" class="k-button">Crear</button>
+                        </div>
+                    </div>
+
+                    <div style="clear:both; margin-bottom:10px;"></div>
+
+                    <div id="gridDetails" style="border:none"></div>
+                    <div style="width: 96%; float:left; padding: 0px 0px 0 15px; ">
+                        <div id="pagerDetails" style="margin-top:5px; border-radius:4px;"></div>
+                    </div>
+
+                    <div style="clear:both; margin-bottom:10px;"></div>
+
+                }
+            </div>
+        </div>
+    </div>
+    <div style="width:35%; float:right;">
+        <div class="titleForm"></div>
+    </div>
+</div>
+
+<div>
+    <div style="width:39%; float:right;">
+        <div class="titleForm">
+            <div class="title">Configuración</div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm">
+                <div id="treeview"></div>
+            </div>
+        </div>
+        <div style="height:10px;width:1px;"></div>
+        <div class="titleForm">
+            <div class="title">Actividades</div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:332px">
+                <div id="gridActivities" style="border:none;height:283px;margin:5px; overflow-y:auto"></div>
+                <div id="pagerActivities" style="border-radius:4px;  margin:5px;"></div>
+            </div>
+        </div>
+        <div class="titleForm">
+            <div class="title">Formatos - Tickets</div>
+        </div>
+        <div class="bodyForm">
+            <div class="inBodyForm" style="height:332px">
+                <div id="gridFormato" style="border:none;height:283px;margin:5px; overflow-y:auto"></div>
+                <div id="pagerFormato" style="border-radius:4px;  margin:5px;"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<iframe id="upload_target" name="upload_target" src="" style="width:0px; height:0px; display:none;"></iframe>
+
+<script id="treeview-template" type="text/kendo-ui-template">
+    #: item.NAM_PARA_CONF #
+    # if (item.HAS_VALUE == false) { #
+    <b>: #: item.VAL_CONF #</b>
+    # } #
+</script>
+
+<script type="text/x-kendo-tmpl" id="templateA">
+    <div class="FondoGris01">
+        <div class="casilla">
+            ${NAM_TYPE_ASSE_CLIE}<br>${NAM_PART_TYPE_ASSE}
+        </div>
+        <div class="casilla">
+            ${NAM_STAT_ASSE}<br>${NAM_COND}
+        </div>
+        <div class="casilla">
+            ${CLIE}<br>${NAME_AREA}
+        </div>
+        <div class="casilla">
+            Inicio: ${DAT_STAR}<br>Fin: ${DAT_END}
+        </div>
+    </div>
+    <div style="width:100%;height:4px;"></div>
+</script>
+
+<script type="text/x-kendo-tmpl" id="templateC">
+    <div class="detailsSummary">
+        <div id="detSummary">
+            <div class="containerdt">
+                <div class="userData">
+                    @*<div class="asignedImage"><a href=""><img src="/Content/Images/userAssig.png"/></a></div>*@
+                    <div class="asignedImage"><a href=""><img src="/Content/Fotos/${FOTO}" /></a></div>
+                </div>
+                <div class="messageData">
+                    <div class="messageArrow"></div>
+                    <div class="messageBoxDet">
+                        <div class="msgBoxDetUser">
+                            ${CREATE_BY}
+                        </div>
+                        <div class="msgBoxDetCreate">
+                            ${CREATE_DATE}
+                        </div>
+                    </div>
+                    <div class="messageBoxDet2">
+                        <div>
+                            ${NAM_TYPE_ASSE_CLIE} ${NAM_PART_TYPE_ASSE} | ${NAM_STAT_ASSE} - ${NAM_COND} |
+                            ${CLIE} | Inicio: ${DAT_STAR} - Fin: ${DAT_END}
+                        </div>
+                    </div>
+                    <div class="msgBoxBody">
+                        #= SUM_CLIE_ASSE #
+                    </div>
+                    <div class="dadjuntos">
+                        #= ATTA #
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script type="text/x-kendo-tmpl" id="templateF">
+    <div class="FondoGris01">
+        <div class="casilla" style="width:50px">
+            ${NAM_TYPE_FORM}
+        </div>
+        <div class="casilla">
+            <a href="\\DeliveryReception/Details/${ID_TICK}" target='_BLANK' id="${ID_TICK}">#= COD_TICK #</a>
+        </div>
+        <div class="casilla">
+            ${FIR_NAME} ${LAS_NAME}
+        </div>
+        <div class="casilla">
+            ${CREATE_TICK}
+        </div>
+        <div class="casilla">
+            #= ADJUNTOS #
+        </div>
+    </div>
+    <div style="width:100%;height:4px;"></div>
+</script>
+
+<script type="text/javascript">
+
+    function uploadDone(conf,msg){
+        closeWinModalPopUpLoad();
+        if(conf=='OK'){
+            var title = '@ResourceLanguaje.Resource.InformationSaved ';
+            if(msg=='0'){
+                var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"+
+                       "<div style='padding:10px 0px 10px 0px;'>Detail Asset information was succesfully saved</div>"+
+                       //"<div style='padding:10px 0px 10px 0px;'>Code: " + msg + "</div>"+
+                       "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                       "<button id='btnContinues' class='k-button'>Continue</button>" +
+                       "</div></div>";
+            }
+            else{
+                var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"+
+                       "<div style='padding:10px 0px 10px 0px;'>Detail Asset information was succesfully saved</div>"+
+                       "<div style='padding:10px 0px 10px 0px;'>Code Ticket: " + msg + "</div>"+
+                       "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                       "<button id='btnContinues' class='k-button'>Continue</button>" +
+                       "</div></div>";
+            }
+            winPopUpModal(title, body, 400, 180);
+
+            $("#closebtnmodal").click(function () {
+                location.reload(true);
+            });
+
+            $("#btnContinues").click(function () {
+                location.reload(true);
+            });
+        }
+        else{
+            var title = '@ResourceLanguaje.Resource.InformationMissing';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                "<div style='padding:10px 0px 10px 0px;'>"+msg+"</div>" +
+                "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                        "</div></div>";
+
+            winPopUpModal(title, body, 400, 150);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+
+    var data,data1;
+    $(document).ready(function () {
+
+        $("#submit").click(function () {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingDetailTicket', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            }
+        });
+        //divTypeTicket1
+        var ID_TYPE_CLIE_ASSE = $("#ID_TYPE_CLIE_ASSE").kendoComboBox({
+            autoBind: true,
+            index: 1,
+            dataTextField: "NAM_TYPE_ASSE_CLIE",
+            dataValueField: "ID_TYPE_ASSE_CLIEN",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeClientAsset/List"
+                }
+            }
+        }).data("kendoComboBox");
+        ID_TYPE_CLIE_ASSE.value(4);
+
+        var ID_COND = $("#ID_COND").kendoComboBox({
+            autoBind: true,
+            dataTextField: "TEXT",
+            dataValueField: "ID_COND",
+            template: '<div style="font-weight:bold;">${ data.NAM_STAT_ASSE }</div>' +
+                        '<div>${ data.NAM_COND }</div>',
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/OptionCondition/ListOptionConditionByIdCond/"+ "@ViewBag.ID_ASSE",
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/RequesterByAcco?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_LOCA = $("#ID_LOCA").kendoComboBox({
+            dataTextField: "NAM_LOCA",
+            dataValueField: "ID_LOCA",
+            template: '<div style="font-weight:bold;">${ data.NAM_SITE }</div>' +
+                        '<div>${ data.NAM_LOCA }</div>',
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Location/List?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_COND.bind("change", function (e) {
+            $.ajax({
+                url: "/AccountEntity/ResponsibleAssetByIdCond/" + "@ViewBag.ID_ASSE" + "/" + ID_COND.dataItem().ID_COND,
+                data: "var=" + Math.random(),
+                type: "GET",
+                dataType: "text",
+                success: function(resp){
+                    if(resp != '0'){
+                        ID_PERS_ENTI.value(resp);
+                        ID_PERS_ENTI.readonly();
+                    }
+                    else{
+                        ID_PERS_ENTI.value("");
+                        ID_PERS_ENTI.readonly(false);
+                    }
+                },
+                error: function(dato){
+                    alert('error');
+                }
+            });
+
+            div1 = document.getElementById('DownFile');
+            div2 = document.getElementById('divBuyMode');
+            if(/SURPLUS/.test(ID_COND.dataItem().TEXT) && /purchase/.test(div2.innerHTML))
+            {
+                div1.style.display ='';
+            }
+            else{
+                div1.style.display ='none';
+            }
+
+        });
+
+        var ID_PART_TYPE_ASSE = $("#ID_PART_TYPE_ASSE").kendoComboBox({
+            dataTextField: "NAM_PART_TYPE_ASSE",
+            dataValueField: "ID_PART_TYPE_ASSE",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/PartTypeAsset/List/"+"@ViewBag.ID_TYPE_ASSE"+"?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        ID_PART_TYPE_ASSE.bind("change", function (e) {
+            //valPartTypeAsset
+            $.ajax({
+                url: "/PartTypeAsset/ParameterConfigurationByID_PTA/" + "@ViewBag.ID_ASSE" + "/" + ID_PART_TYPE_ASSE.dataItem().ID_PART_TYPE_ASSE,
+                data: "var=" + Math.random(),
+                type: "GET",
+                dataType: "json",
+                success: function(source){
+                    data = source;
+                    showValPartTypeAsset();
+                },
+                error: function(source){
+                    alert("ERROR");
+                }
+            });
+        });
+
+        function showValPartTypeAsset(){
+            $("#VAL_PART_ASSE").val('');
+            $("#valorMedida").empty();
+            if(data['Data'][0]['UND_PARA_CONF'].length > 0){
+                $("#valorMedida").append('@ResourceLanguaje.Resource.Value (' + data['Data'][0]['UND_PARA_CONF']+ ')');
+            }
+            else{ $("#valorMedida").append('@ResourceLanguaje.Resource.Value');}
+
+            if(data['Data'][0]['ID_CONF'] != '0'){
+                $("#VAL_PART_ASSE").val(data['Data'][0]['VAL_CONF']);
+            }
+
+        }
+
+        ID_TYPE_CLIE_ASSE.bind("change", function (e) {
+            //console.log(e);
+            for (var i = 1; i <= 3; i++) {
+                $("#divTypeTicket" + i).addClass('divHide');
+            }
+            if (ID_TYPE_CLIE_ASSE.dataItem().ID_TYPE_ASSE_CLIEN == 3) {
+                $("#divTypeTicket1").removeClass('divHide');
+                ID_COND.value("");
+                ID_PERS_ENTI.value("");
+            }
+            if (ID_TYPE_CLIE_ASSE.dataItem().ID_TYPE_ASSE_CLIEN == 4) {
+                $("#divTypeTicket2").removeClass('divHide');
+                ID_PART_TYPE_ASSE.value("");
+            }
+            if (ID_TYPE_CLIE_ASSE.dataItem().ID_TYPE_ASSE_CLIEN == 5) {
+                $("#divTypeTicket3").removeClass('divHide');
+                ID_PART_TYPE_ASSE.value("");
+                $(function(){
+                    $.ajax({
+                        url: '/Asset/EditPartial/@ViewBag.ID_ASSE',
+                        cache: false,
+                        dataType: "html",
+                        success: function (data) {
+                            $('#divTypeTicket3').html(data);
+                        }
+                    });
+                });
+            }
+        });
+
+        $("#SUM_CLIE_ASSE").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        homogeneous = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Asset/TreeConfiguration/"+@ViewBag.ID_ASSE,
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_CONF",
+                    hasChildren: "HAS_VALUE"
+                }
+            }
+        });
+
+        $("#treeview").kendoTreeView({
+            template: kendo.template($("#treeview-template").html()),
+            dataSource: homogeneous,
+            dataTextField: "NAM_PARA_CONF"
+        });
+
+        var ID_ASSE = @ViewBag.ID_ASSE;
+
+        var dataSourceF = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Asset/AssetTicket",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        id: ID_ASSE
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerFormato").kendoPager({
+            dataSource: dataSourceF,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridFormato").kendoListView({
+            dataSource: dataSourceF,
+            template: kendo.template($("#templateF").html())
+        });
+
+        //Aqui
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/ClientAsset/DetailsAsset/" + "@ViewBag.ID_ASSE",
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        _: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerDetails").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridDetails").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#templateC").html())
+        });
+
+        $("#pagerActivities").kendoPager({
+            dataSource: dataSource,
+            buttonCount:3,
+            messages: {
+                display: "{0} - {1} of {2}",
+                empty: "",
+                page: "Page",
+                of: "of {0}",
+                itemsPerPage: "",
+                first: "Go to the first page",
+                previous: "Go to the previous page",
+                next: "Go to the next page",
+                last: "Go to the last page",
+                refresh: "Refresh"
+            },
+            refresh: true
+        });
+
+        $("#gridActivities").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#templateA").html())
+        });
+        //fin Aqui
+
+        $.ajax({
+            url: "/Asset/IndexByIdJson/" + "@ViewBag.ID_ASSE",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                showInfo();
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+
+        function showInfo() {
+
+            $.each(data['data'],function (index,value){
+                $("#data").append(
+                    '<div class ="divFondoDos">'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Código de Activo</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['COD_ASSE'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Tipo de Activo</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_TYPE_ASSE']).toLowerCase()+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Marca</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_MANU'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Modelo Comercial</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_COMM_MODE'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Modelo de Fábrica</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_MANU_MODE'])+'</div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class ="divFondoUno">'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Nombre de Equipo</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_EQUI'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Número de Serie</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['SER_NUMB'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Dirección MAC</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['MAC_ADRR'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Sistema Operativo</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['SO'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Fecha de Adquisición</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['ACQ_DATE'])+'</div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class ="divFondoDos">'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Asignado a</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['ASSI']).toLowerCase()+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Area</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_AREA']).substring(0, 30)+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Modo de Compra</div>'+
+                            '<div class = "smallTitle" id="divBuyMode">'+(data['data'][index]['NAM_BUY_MODE'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Código Solped</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['SOLPED'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Centro de Costo</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['CECO'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Costo</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['COST'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Lote</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['LOT'])+'</div>'+
+                        '</div>'+
+                    '</div>'+
+                    '<div class ="divFondoUno">'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Estado</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_STAT_ASSE']).toLowerCase()+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Condición</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_COND'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Lugar</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_SITE'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Locación</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_LOCA'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Fecha de Creación</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['CREATE'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Fecha de Actualización</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['UPDATE'])+'</div>'+
+                        '</div>'+
+                    '</div>'+
+
+                    (parseInt(@Session["ID_ACCO"]) == 4 ?
+                    '<div class ="divFondoDos">'+
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Memoria RAM</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_RAM'])+'</div>'+
+                         '</div>' +
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Procesador</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_PROC'])+'</div>'+
+                         '</div>' +
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Disco Duro</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['NAM_HD'])+'</div>'+
+                         '</div>' +
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Valor Activo</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['VALORACTIVO'])+'</div>'+
+                         '</div>' +
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Riesgo Intrínseco</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['RIESGOINTR'])+'</div>'+
+                         '</div>' +
+                    '</div>'
+                         : '') +
+
+                    (parseInt(@Session["ID_ACCO"]) == 19 ?
+                    '<div class ="divFondoDos">'+
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Fecha Inicio de Préstamo</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['FEC_INI_PRES'])+'</div>'+
+                         '</div>' +
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Fecha Fin de Préstamo</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['FEC_END_PRES'])+'</div>'+
+                         '</div>' +
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Garantía</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['GARANTIA'])+'</div>'+
+                         '</div>' +
+                         '<div class="casilla">' +
+                            '<div class="smallTitle">Contrato</div>' +
+                            '<div class = "smallTitle">'+(data['data'][index]['CONTRATO'])+'</div>'+
+                         '</div>' +
+                    '</div>'
+                         : '') +
+                    '<div class ="divFondoDos">'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Ip Local</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['IpLocal'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Ip Pública</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['IpPublica'])+'</div>'+
+                        '</div>'+
+                        '<div class = "casilla">'+
+                            '<div class = "smallField">Contrato</div>'+
+                            '<div class = "smallTitle">'+(data['data'][index]['Contrato'])+'</div>'+
+                        '</div>'+
+                    '</div>'+
+
+                    '<div class = "FondoBlanco2">'+
+                        '<div class="detailsSummary">'+
+                            '<div id="detSummary">'+
+                                '<div class="containerdt">'+
+                                    '<div class="userData">'+
+                                        '<div class="asignedImage">'+'<a href="#"><img style="width:70px; height:66px;" src="/Content/Fotos/'+(data['data'][index]['FOTO'])+'"/></a></div>'+
+                                    '</div>'+
+                                    '<div class="messageData">'+
+                                        '<div class="messageArrow"></div>'+
+                                    '<div class ="messageBoxDet">'+
+                                        '<div class ="msgBoxDetUser">'+'Creado por '+
+                                            (data['data'][index]['USER']).toLowerCase()+
+                                        '</div>'+
+                                    '</div>'+
+                                    '<div class="msgBoxBody">'+
+                                        (data['data'][index]['SUMM'])+
+                                    '</div>'+
+                                    '<div class ="dadjuntos">'+
+                                        (data['data'][index]['ADJUNTOS'])+
+                                    '</div>'+
+                                    '</div>'+
+                                '</div>'+
+                            '</div>'+
+                        '</div>'+
+                    '</div>'
+                    );
+
+                $("#divBuscarImage").html(
+                '<a style="color:#004170;" href="https://www.google.com.pe/search?hl=es-419&site=imghp&tbm=isch&source=hp&biw=1366&bih=414&q='
+                + (data['data'][index]['NAM_TYPE_ASSE']).replace(" ","+") + '+'
+                + (data['data'][index]['NAM_MANU']).replace(" ","+") + '+'
+                + (data['data'][index]['NAM_COMM_MODE']).replace(" ","+") + '&oq='
+                + (data['data'][index]['NAM_TYPE_ASSE']).replace(" ","+") + '+'
+                + (data['data'][index]['NAM_MANU']).replace(" ","+") + '+'
+                + (data['data'][index]['NAM_COMM_MODE']).replace(" ","+")
+                + '" target="_blank">Buscar imagen en la web</a>');
+
+            });
+        }
+
+    });
+</script>

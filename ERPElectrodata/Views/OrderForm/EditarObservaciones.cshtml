@@ -1,0 +1,250 @@
+﻿
+@{
+    ViewBag.Title = "EditarObservaciones";
+    Layout = null;
+}
+
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+@using (Html.BeginForm("EditarComentario", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "frmEditarComentario", target = "upload_target" }))
+{
+    <input type="hidden" id="IdComentario" name="IdComentario" value="@ViewBag.IdComentario" />
+    <input type="hidden" id="IdTipoComentario" name="IdTipoComentario" value="@ViewBag.IdTipoComentario" />
+    <input type="hidden" id="TipoComentario" name="TipoComentario" value="@ViewBag.TipoComentario" />
+    <input type="hidden" id="IdParametro" name="IdParametro" value="@ViewBag.IdParametro" />
+    <input type="hidden" id="Parametro" name="Parametro" value="@ViewBag.Parametro" />
+    <input type="hidden" id="IdDetalleParametro" name="IdDetalleParametro" value="@ViewBag.IdDetalleParametro" />
+    <input type="hidden" id="ParametroDetalle" name="ParametroDetalle" value="@ViewBag.ParametroDetalle" />
+    <input type="hidden" id="DiasRetraso" name="DiasRetraso" value="@ViewBag.DiasRetraso" />
+    <input type="hidden" id="AnioCierre" name="AnioCierre" value="@ViewBag.AnioCierre" />
+    <input type="hidden" id="MesCierre" name="MesCierre" value="@ViewBag.MesCierre" />
+    <input type="hidden" id="DiaCierre" name="DiaCierre" value="@ViewBag.DiaCierre" />
+
+    <div class="form-group">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-5">
+                    Tipo Comentario
+                    <select id="TipoComent" name="TipoComent" class="form-control input-sm select2" type="text" style="width:100%" required ></select>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group" id="divDetalle">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-4">
+                    Tipo
+                    <select id="idTipo" name="idTipo" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                </div>
+                <div class="col-md-4">
+                    Motivo *
+                    <select id="idDetalle" name="idDetalle" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                </div>
+                <div class="col-md-4">
+                    <div id="divFechaCierre">
+                        Fecha
+                        <input id="dtFechaCierre" name="dtFechaCierre" class="form-control" type="text" style="width:100%;" />
+                    </div>
+                    <div id="divDiasRetraso">
+                        Dias de Retraso
+                        <input id="txtDiasRetraso" name="txtDiasRetraso" class="form-control" type="text" style="width:100%;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-12">
+                    <textarea id="Comentario" name="Comentario" class="textarea">@ViewBag.Comentario</textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-9">
+                    &nbsp;
+                </div>
+                <div class="col-md-3">
+                    <input id="btnGuardarComentarios" name="btnGuardarComentarios" class="btn btn-block btn-primary btn-sm" type="submit" value="Guardar" />
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var fechaCierre = $("#dtFechaCierre").kendoDateTimePicker().data("kendoDateTimePicker");
+        var diasRetraso = $("#txtDiasRetraso").kendoNumericTextBox({
+            min: 0,
+            decimals: 0
+        });
+
+        $("#TipoComent").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/OptionDocuSaleActivity/ListarOpcionesActividad",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+
+                },
+            },
+        });
+
+        $("#TipoComent").change(function () {
+            
+            var idTipoComent = $("#TipoComent").find(':selected').val();
+            if (idTipoComent == 7) {
+                $("#divDetalle").show();
+                
+                if ($("#IdParametro").val() != 0) {
+
+                    var $cbTipo = $("<option></option>").val($("#idTipo").val()).text($("#Parametro").val());
+                    $("#idTipo").append($cbTipo).trigger('change');
+                } else {
+                    $("#idTipo").trigger('change');
+                }
+
+            } else {
+                $("#divDetalle").hide();
+            }
+            
+            $("#idTipo").empty();
+            $("#idDetalle").empty();
+
+        });
+
+        $("#idTipo").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ProyectosParametro/ObtenerParametro?var=" + Math.random(),
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page,
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+
+        $("#idTipo").change(function () {
+
+            $("#idDetalle").empty();
+            var idTipo = $("#idTipo").find(':selected').val();
+
+            $("#divFechaCierre").hide();
+            $("#divDiasRetraso").hide();
+
+            if (idTipo == 3) {
+                $("#divFechaCierre").show();
+                $("#divDiasRetraso").hide();
+            } else {
+                if ((idTipo == 1 || idTipo == 2)) {
+                    $("#divFechaCierre").hide();
+                    $("#divDiasRetraso").show();
+                }
+            }
+
+            $("#idDetalle").select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/ProyectosParametro/ObtenerParametroDetalle?IdParametro=" + idTipo + "&var=" + Math.random(),
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page,
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                }
+            });
+        });
+
+        $("#Comentario").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+        var $cbTipoComent = $("<option></option>").val($("#IdTipoComentario").val()).text($("#TipoComentario").val());
+        $("#TipoComent").append($cbTipoComent).trigger('change');
+
+    })
+
+    function MensajeObservacion(msg, msnErr) {
+        if (msg == 'OK') {
+            if ($("#tabComentario").hasClass("active")) {
+                Comentarios();
+            }
+            if ($("#tabAccion").hasClass("active")) {
+                Acciones();
+            }
+            if ($("#tabSoporte").hasClass("active")) {
+                Soporte();
+            }
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("", "Se actualizó el comentario.");
+        }
+        else {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.error("Contacte al Administrador.", "Mensaje");
+        }
+    }
+
+</script>

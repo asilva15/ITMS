@@ -1,0 +1,178 @@
+﻿@model ERPElectrodata.Models.ASSET
+
+@{
+//Layout = null;
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="form-row">
+    <div class="col-md-2">
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">
+                Reportes
+            </div>
+            <div class="card-body">
+                <div id="divOpciones">
+                    <center>
+                        <div>Activos</div>
+                        <button id="btnActUsuario" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Por Usuario</button>
+                        <button id="btnActTraza" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Trazabilidad</button>
+                        <button id="btnActTipo" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Por Tipo</button>
+
+                        @{
+                            if (Convert.ToInt32(Session["ID_ACCO"].ToString()) != 55)
+                            {
+                                <div class="mt-2">Licencias</div>
+                                <button id="btnActPrograma" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Por Programa</button>
+
+                            }
+
+                        }
+
+
+                        <div class="mt-2">Componentes</div>
+
+                        @{
+                            if (Convert.ToInt32(Session["ID_ACCO"].ToString()) != 55)
+                            {
+
+                                <button id="btnActComponente" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Por Componente</button>
+                            }
+
+                        }
+
+
+
+
+                        <button id="btnHistorico" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Reporte Histórico</button>
+                        @{
+                            try
+                            {
+                                if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 60 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 61 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 62 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 63 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 64 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 65 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 66 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 67 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 68 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 69 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 70 || Convert.ToInt32(Session["ID_ACCO"].ToString()) == 71 ||
+                                    Convert.ToInt32(Session["ID_ACCO"].ToString()) == 72
+                                    )
+                                {
+                                    <button id="btnMovil" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Celulares</button>
+                                }
+                            }
+                            catch { }
+                        }
+                        <button id="btnActArea" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Reporte por Área</button>
+                        <div class="mt-1">Mant. Preventivo</div>
+                        <button id="btnMantenimientoActivos" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Mant. de activos</button>
+                        <button id="btnHistorialMantenimientos" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Historial de Mant.</button>
+                        <div class="mt-1">Formatos</div>
+                        <button id="btnTransferenciaActivos" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Transferencia de <br /><span style="text-align:center;">Activos</span></button>
+                        @{
+                            try
+                            {
+                                if ((int)Session["SUPERVISOR_GESTOR_ACTIVOS"] == 1)
+                                {
+                                    if (Convert.ToInt32(Session["ID_ACCO"].ToString()) == 55)
+                                    {
+                                        <button id="btnActTrazaGral" type="button" class="btn btn-block btn-sm btn-primary btn-hover-shine">Trazabilidad General</button>
+
+                                    }
+                                }
+
+                            }
+                            catch { }
+                        }
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-10">
+        <div id="divCuerpo"></div>
+    </div>
+</div>
+@*@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}*@
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#divCuerpo").load("/Asset/viewAssetsByUserReport?var=" + Math.random());
+
+        $("#btnActUsuario").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewAssetsByUserReport?var=" + Math.random());
+        });
+
+        $("#btnActTraza").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewHistoryAssetReport?var=" + Math.random());
+        });
+
+        $("#btnActTipo").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/ReportAsset?var=" + Math.random());
+        });
+
+        $("#btnActPrograma").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewAssetByProgram?var=" + Math.random());
+        });
+
+        $("#btnActComponente").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewAssetByComponent?var=" + Math.random());
+        });
+
+        $("#btnHistorico").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewAssetByReportHistorical?var=" + Math.random());
+        });
+        $("#btnMovil").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewAssetByMovil?var=" + Math.random());
+        });       
+        $("#btnActArea").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewAssetByArea?var=" + Math.random());
+        });
+
+        $("#btnMantenimientoActivos").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/ActivoMantenimiento/vistaReporteActivoMant?var=" + Math.random());
+        });
+
+        $("#btnHistorialMantenimientos").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/ActivoMantenimiento/vistaReporteHistorialActivoMant?var=" + Math.random());
+        });
+
+        $("#btnTransferenciaActivos").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewRptTransferenciaActivos_CambioGuardia?var=" + Math.random());
+        });
+        
+        $("#btnActTrazaGral").click(function () {
+            $("#divCuerpo").empty();
+            $("#divCuerpo").load("/Asset/viewHistoryAssetReportGral?var=" + Math.random());
+        });
+
+    });
+
+</script>
+
+

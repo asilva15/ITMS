@@ -1,0 +1,269 @@
+﻿@{
+    ViewBag.Title = "List Hito";
+   Layout = null;
+}
+
+<input type="hidden" id="BandHito" value="@ViewBag.banderHito" />
+
+<div style="float:left; width:100%;">
+    <div class="titleForm">
+
+        <div class="title">
+            <div style="float:left"> Milestones for the Project</div>
+            <div style="float:right; padding-right:10px; width:100px; text-align:right;">
+                @*<div class="glyphicon glyphicon-refresh" style="display:inline-block; padding:0px; margin:0px;"></div>*@  
+                <div style="display:inline-block;">
+                    <img onclick="AddNewMilestone()" data-toggle="modal" data-target="#myModalMilestone" style="cursor:pointer;" title="Add New Milestone" src="/Content/Images/AddNew.png" />
+                </div>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+
+    </div>
+    <div class="bodyForm">
+        <div class="inBodyForm" style="padding:5px 10px 5px 10px;">
+            <div class=" inbodyformrbl" style="min-height:465px;">
+
+                <div id="container" style="height: 400px; min-width: 310px"></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="myModalMilestone" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="myModalLabel">Add New Milestone</h4>
+            </div>
+            <div class="modal-body">
+
+                <div id="idaddnewmile"></div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="k-button" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>    
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        LoadDataHitos();
+
+    })
+    
+    function LoadDataHitos()
+    {
+        $.ajax({
+            url: "/Project/DataListHito/@ViewBag.ID_PROJ_HITO",
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                ListHitoProject();
+            },
+            error: function (source) {
+                alert("Error Carga Json");
+            }
+        });
+
+    }
+
+
+    function AddDays(theDate, days)
+    {
+        return new Date(theDate.getTime() + days * 24 * 60 * 60 * 1000);
+    }  
+
+    function ListHitoProject() {
+
+        var infhito = [], stardate = [], gastos = [], deshito = [], dateinx = [], vectorhito = [], vectorgatos = [], vectormonto = [], horas=[];
+        //dataLength = data.length;
+
+        var d, dia, mes, anio, dutc,
+            i = 0, ind = 0, bandera = 0, valormonto = 0;
+
+        // set the allowed units for data grouping
+
+        groupingUnits = [['day', [1]], ['week', [1]], ['month', [1, 2, 3, 4, 6]]];
+
+        //-------------------Hitos --> Banderas----------------------------------
+
+        $.each(data['Data'], function (index, value) {
+
+            d = new Date((data['Data'][index]['STAR_DATE']));
+
+            dia = d.getDate();
+            mes = d.getMonth();
+            anio = d.getFullYear();
+
+            dutc = Date.UTC(anio, mes, dia);
+            stardate.push(dutc);
+
+            var info = ((data['Data'][index]['NAM_TYPE_HITO']).substring(0, 1)).toUpperCase();
+
+            infhito.push([info]);
+            deshito.push([data['Data'][index]['DES_HITO']]);
+        });
+
+        //-------------------Gastos-->OPs----------------------------------
+
+        $.each(data['Result'], function (index, value) {
+
+            d = new Date((data['Result'][index]['DAT_REGI']));
+
+            dia = d.getDate();
+            mes = d.getMonth();
+            anio = d.getFullYear();
+
+            dutc = Date.UTC(anio, mes, dia);
+
+            vectorgatos.push(dutc);
+            vectormonto.push((data['Result'][index]['AMOUNT']));
+
+        });
+
+        //-------------------Construyendo el eje X ----------------------------------
+        var NUM_DAYS = data.NUM_DAYS,
+            STAR_DATE = data.STAR_DATE;
+
+        for (i; i <= NUM_DAYS; i += 1) {
+            d = new Date(STAR_DATE);
+
+            dia = d.getDate();
+            mes = d.getMonth();
+            anio = d.getFullYear();
+
+            dutc = Date.UTC(anio, mes, dia);
+
+            for (ind; ind < vectorgatos.length; ind += 1) {
+                if (vectorgatos[ind] == dutc) {
+                    bandera = 1;
+                    valormonto = parseFloat(vectormonto[ind]);
+                }
+
+            }
+
+            if (bandera == 1) {
+                dateinx.push([dutc, valormonto]);
+            }
+            else {
+                dateinx.push([dutc, valormonto]);
+            }
+            
+            horas.push([dutc, Math.floor((Math.random() * 10) + 1)]);
+
+            var STAR_DATE = AddDays(new Date(STAR_DATE), 1);
+            ind = 0;
+            valormonto = 0;
+
+        }
+
+        //----------------------- create the chart--------------------------------------
+        $('#container').highcharts('StockChart', {
+
+            rangeSelector: {
+                selected: 1
+            },
+
+            title: {
+                text: 'Milestones and Ops'
+            },
+
+            yAxis: [{
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                title: {
+                    text: 'Milestones'
+                },
+                height: '60%',
+                lineWidth: 2
+            }, {
+                labels: {
+                    align: 'right',
+                    x: -3
+                },
+                title: {
+                    text: 'Request'
+                },
+                top: '65%',
+                height: '35%',
+                offset: 0,
+                lineWidth: 2
+            }],
+
+            series: [ {
+                type: 'column',
+                name: 'Amount',
+                data: dateinx,
+                yAxis: 1,
+                id:'dataseries',
+                dataGrouping: {
+                    units: groupingUnits
+                }
+            },
+
+            {
+                type: 'column',
+                name: 'Hours',
+                data: horas,
+                yAxis: 1,
+                id: 'dataseries',
+                dataGrouping: {
+                    units: groupingUnits
+                }
+            },
+
+        {
+            type: 'flags',
+            data: [                             
+            {
+                x: stardate[0],
+                title: infhito[0],
+                text: deshito[0],
+            },
+            {
+                x: stardate[1],
+                title: infhito[1],
+                text: deshito[1],
+            },
+            {
+                x: stardate[2],
+                title: infhito[2],
+                text: deshito[2],
+            }],
+            onSeries: 'dataseries',
+            shape: 'circlepin',
+            width: 16
+        }
+            ]
+        });
+
+    }                     
+
+       function AddNewMilestone()
+       {
+           $("#idaddnewmile").empty();
+           $("#idaddnewmile").load("/Project/CreateHito/@ViewBag.ID_PROJ_HITO?var=" + Math.random());         
+
+       }
+
+    function LoadGrafHitos() {
+
+        setTimeout(function () {
+            $("#container").empty();
+            LoadDataHitos();
+        }, 500);
+      
+    }
+
+   
+</script>

@@ -1,0 +1,653 @@
+﻿@{
+    Layout = null;
+    ViewBag.Title = "DetalleActividades";
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+
+
+@using (Html.BeginForm("AdjuntarArchivosActividades", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmDetalleActividades", name = "FrmDetalleActividades", target = "FrmDetalleActividades" }))
+{
+    <div class="row">
+        <div class="col-md-8">
+            <div class="mb-3 card">
+                <div class="card-header">Detalle de Actividad</div>
+                <div class="card-body">
+                    <input type="hidden" value="@ViewBag.IdDocuSale" name="IdDocuSale" id="IdDocuSale" />
+                    <input type="hidden" value="@ViewBag.IdCronograma" name="IdCronograma" id="IdCronograma" />
+                    <div id="mensaje"></div>
+                    <div class="row" style="padding-left:20px">
+                        <div class="col-md-3">
+                            Actividad
+                            <input id="txtActividad" name="txtActividad" value="@ViewBag.NombreActividad" class="form-control input-sm" type="text" disabled />
+                        </div>
+                        <div class="col-md-2" id="btnEditarActividad">
+                            <br />
+                            <button type="button" class="btn btn-primary" onclick="MostrarGuardarActividad()"><i class="fa fa-pen"></i>  Editar</button>
+                        </div>
+                        <div class="col-md-2" id="btnGuardarActividad">
+                            <br />
+                            <button type="button" class="btn btn-primary" onclick="ActualizarNombreActividad();"><i class="fa fa-save"></i>  Guardar</button>
+                        </div>
+                        <div class="col-md-3">
+                            Fecha
+                            <input id="txtFechaFin" name="txtFechaFin" class="form-control input-sm" value="@ViewBag.FechaFin" type="text" disabled />
+                        </div>
+                        <div class="col-md-3" id="btnReprogramarFecha">
+                            <br />
+                            <button type="button" class="btn btn-primary" onclick="MostrarReprogramarFecha();"><i class="fa fa-retweet"></i>  Reprogramar</button>
+                        </div>
+                    </div>
+                    <br /><br />
+                    <div class="row" style="padding-left:20px">
+                        <div class="col-md-3">
+                            Porcentaje de avance (%)
+                            <input id="txtPorcentaje" name="txtPorcentaje" value="@ViewBag.Porcentaje" class=" form-control input-sm" type="number" min="0" max="100" disabled />
+                        </div>
+                        <div class="col-md-6" id="btnGuardar">
+                            <br />
+                            <button id="submit" class="btn btn-primary"><i class="fa fa-save"></i>  Guardar</button>
+                        </div>
+                    </div>
+                    <br /><br />
+                    <div id="divAdjuntarArchivos">
+                        <div class="mb-3 card" style="width:100%;float:left;">
+                            <div class="card-header">Adjuntar Archivo</div>
+                            <div class="card-body">
+                                <div class="row" id="ArchivoInicio">
+                                    <div class="col-md-3">
+                                        Tipo de Documento
+                                        <select id="cbTipoDocumento1" name="cbTipoDocumento1" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                                    </div>
+                                    <div class="col-md-3" id="divFechaActa1">
+                                        Fecha Acta de Conformidad
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input type="text" class="form-control pull-right" id="dtFechaActa1" name="dtFechaActa1" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <br /><input name="archivo" id="archivo" type="file" />
+                                    </div>
+                                    <div class="col-md-2" style="padding-left:70px">
+                                        <br />
+                                        <span title="Agregar" class="glyphicon glyphicon-plus" aria-hidden="true" style="color: #4CAF50; cursor: pointer; font-size:13px;" id="agregar"></span>
+                                        &nbsp;
+                                        <span title="Eliminar" class="glyphicon glyphicon-minus" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size:13px;" id="eliminar"></span>
+                                    </div>
+                                </div>
+                                <div class="row" id="Archivo2">
+                                    <div class="col-md-3">
+                                        Tipo de Documento
+                                        <select id="cbTipoDocumento2" name="cbTipoDocumento2" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                                    </div>
+                                    <div class="col-md-3" id="divFechaActa2">
+                                        Fecha Acta de Conformidad
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input type="text" class="form-control pull-right" id="dtFechaActa2" name="dtFechaActa2" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <br /><input name="archivo" id="archivo" type="file" />
+                                    </div>
+                                </div>
+                                <div class="row" id="Archivo3">
+                                    <div class="col-md-3">
+                                        Tipo de Documento
+                                        <select id="cbTipoDocumento3" name="cbTipoDocumento3" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                                    </div>
+                                    <div class="col-md-3" id="divFechaActa3">
+                                        Fecha Acta de Conformidad
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input type="text" class="form-control pull-right" id="dtFechaActa3" name="dtFechaActa3" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <br /><input name="archivo" id="archivo" type="file" />
+                                    </div>
+                                </div>
+                                <div class="row" id="Archivo4">
+                                    <div class="col-md-3">
+                                        Tipo de Documento
+                                        <select id="cbTipoDocumento4" name="cbTipoDocumento4" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                                    </div>
+                                    <div class="col-md-3" id="divFechaActa4">
+                                        Fecha Acta de Conformidad
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input type="text" class="form-control pull-right" id="dtFechaActa4" name="dtFechaActa4" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <br /><input name="archivo" id="archivo" type="file" />
+                                    </div>
+                                </div>
+                                <div class="row" id="Archivo5">
+                                    <div class="col-md-3">
+                                        Tipo de Documento
+                                        <select id="cbTipoDocumento5" name="cbTipoDocumento5" class="form-control input-sm select2" type="text" style="width:100%" ></select>
+                                    </div>
+                                    <div class="col-md-3" id="divFechaActa5">
+                                        Fecha Acta de Conformidad
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input type="text" class="form-control pull-right" id="dtFechaActa5" name="dtFechaActa5" />
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <br /><input name="archivo" id="archivo" type="file" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                    <div id="divReprogramarFecha">
+                        <div class="mb-3 card">
+                            <div class="card-header">Reprogramar Fecha</div>
+                            <div class="card-body">
+                                <div id="divReprogramarCronograma"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+                <div class="mb-3 card">
+                    <div class="card-header">Archivos</div>
+                    <div class="card-body">
+                        <div style="padding-left:10px"><label>Archivos Adjuntados: <span id="spanCantidad"></span></label></div>
+                        <div id="ListaArchivos"></div>
+                    </div>
+                </div>
+                <div class="mb-3 card">
+                    <div class="card-header">Reprogramación</div>
+                    <div class="card-body">
+                        <div class="panel-group" id="accordion">
+                            @*<div id="ListarReprogramaciones"></div>*@
+                        </div>
+                    </div>
+                </div>
+        </div>
+
+    </div>
+}
+
+
+
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+<iframe id="FrmDetalleActividades" name="FrmDetalleActividades" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>
+
+<script type="text/javascript">
+    var numeroCombo = 1;
+
+    $(document).ready(function () {
+
+        $("#divFechaActa1").hide();
+        $('#dtFechaActa1').datepicker({ autoclose: true });
+
+        $("#divFechaActa2").hide();
+        $('#dtFechaActa2').datepicker({ autoclose: true });
+
+        $("#divFechaActa3").hide();
+        $('#dtFechaActa3').datepicker({ autoclose: true });
+
+        $("#divFechaActa4").hide();
+        $('#dtFechaActa4').datepicker({ autoclose: true });
+
+        $("#divFechaActa5").hide();
+        $('#dtFechaActa5').datepicker({ autoclose: true });
+
+        $('#divReprogramarCronograma').empty();
+
+        //Inicializando
+        $("#btnEditarActividad").hide();
+        $("#btnGuardar").hide();
+        $("#btnReprogramarFecha").hide();
+
+        $("#btnGuardarActividad").hide();
+        $("#divAdjuntarArchivos").hide();
+        $("#divReprogramarFecha").hide();
+        ocultarArchivos();
+
+        if ((@ViewBag.ESTADO == 1 || @ViewBag.ESTADO == 2 ) && @ViewBag.MostrarOpciones==1){
+            $("#btnEditarActividad").show();
+            $("#btnGuardar").show();
+            $("#btnReprogramarFecha").show();
+            $('#txtPorcentaje').attr('disabled', false);
+        }
+
+        if ((@ViewBag.ESTADO == 1 || @ViewBag.ESTADO == 2 ) && @ViewBag.MostrarOpciones==0 && $("#txtPorcentaje").val()<100){
+            $("#btnEditarActividad").show();
+        }
+
+        $("#agregar").click(function () {
+            if (numeroCombo != 5) {
+                numeroCombo = numeroCombo + 1;
+                $("#Archivo" + numeroCombo).show("show");
+            }
+        });
+        $("#eliminar").click(function () {
+            if (numeroCombo > 1) {
+                $("#Archivo" + numeroCombo).hide("show");
+                numeroCombo = numeroCombo - 1;
+            }
+        });
+
+        $("#cbTipoDocumento1").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeDocumentModule/ListarTipoDocumento/1",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbTipoDocumento1").on('change', function (e) {
+            var flag = $("#cbTipoDocumento1").val()
+            if (flag == 1) {
+                $('#dtFechaActa1').val("@ViewBag.FechaActual");
+                $("#divFechaActa1").show();
+            } else {
+                $('#dtFechaActa1').val("");
+                $("#divFechaActa1").hide();
+            }
+        });
+        $("#cbTipoDocumento2").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeDocumentModule/ListarTipoDocumento/1",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbTipoDocumento2").on('change', function (e) {
+            var flag = $("#cbTipoDocumento2").val()
+            if (flag == 1) {
+                $('#dtFechaActa2').val("@ViewBag.FechaActual");
+                $("#divFechaActa2").show();
+            } else {
+                $('#dtFechaActa2').val("");
+                $("#divFechaActa2").hide();
+            }
+        });
+        $("#cbTipoDocumento3").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeDocumentModule/ListarTipoDocumento/1",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbTipoDocumento3").on('change', function (e) {
+            var flag = $("#cbTipoDocumento3").val()
+            if (flag == 1) {
+                $("#divFechaActa3").show();
+                $('#dtFechaActa3').val("@ViewBag.FechaActual");
+            } else {
+                $("#divFechaActa3").hide();
+                $('#dtFechaActa3').val("");
+            }
+        });
+        $("#cbTipoDocumento4").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeDocumentModule/ListarTipoDocumento/1",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbTipoDocumento4").on('change', function (e) {
+            var flag = $("#cbTipoDocumento4").val()
+            if (flag == 1) {
+                $("#divFechaActa4").show();
+                $('#dtFechaActa4').val("@ViewBag.FechaActual");
+            } else {
+                $("#divFechaActa4").hide();
+                $('#dtFechaActa4').val("");
+            }
+        });
+        $("#cbTipoDocumento5").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeDocumentModule/ListarTipoDocumento/1",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbTipoDocumento5").on('change', function (e) {
+            var flag = $("#cbTipoDocumento5").val()
+            if (flag == 1) {
+                $("#divFechaActa5").show();
+                $('#dtFechaActa5').val("@ViewBag.FechaActual");
+            } else {
+                $("#divFechaActa5").hide();
+                $('#dtFechaActa5').val("");
+            }
+        });
+
+        //$("#archivo").kendoUpload({
+        //    localization: {
+        //        select: "Adjuntar"
+        //    },
+        //    //remove: function (e) {
+        //    //    e.data = {
+        //    //        KEY_ATTA: '1'
+        //    //    };
+        //    //},
+        //    //async: {
+        //    //    saveUrl: "/EvaluacionPersonal/AdjuntarArchivosEvaluado"
+        //    //}
+        //    select: onSelectInvo,
+        //    remove: function (e) {
+        //        arc = null;
+
+
+        //    }
+        //});
+
+
+        //Mostrando Archivos
+        $.ajax({
+            url: "/OrderForm/ObtenerArchivosActividades/" + @ViewBag.IdCronograma,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $("#ListaArchivos").empty();
+                var c = 0;
+                $.each(data['Data'], function (index, value) {
+                    $("#ListaArchivos").append(
+                       '<div class="divFondoUno">' +
+                           '<div class="smallField" style="width:100%; float:left;padding-left:2%">- <a href="' + (data['Data'][index]['LINK']) + '" target="_BLANK">' + (data['Data'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                       '</div>'
+                    );
+                    c = c + 1;
+                });
+                $("#spanCantidad").text(c);
+            },
+            error: function (source) {
+            }
+        });
+        //Mostrando Reprogramaciones
+        $.ajax({
+            url: "/OrderForm/ObtenerReprogramaciones/" + @ViewBag.IdCronograma,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $("#accordion").empty();
+                var cont = 1;
+                $.each(data['Data'], function (index, value) {
+                    if (cont == 1) {
+                        $("#accordion").append(
+                             '<div class="mb-3 card">' +
+                                  '<div class="card-header" style="height:47px">' +
+                                          '<button class="btn btn-link" type="button" data-toggle="collapse" data-parent="#accordion" data-target="#collapse' + cont + '">' +
+                                          'Reprogramación ' + cont +
+                                          '</button>' +
+                                  ' </div>' +
+                                  '<div id="collapse' + cont + '" class="panel-collapse collapse in">' +
+                                          '<div class="card-body">' +
+                                              '<div class="col-md-12">' +
+                                               '<strong>Fecha Inicial: </strong>' +
+                                               (data['Data'][index]['FechaInicial']) +
+                                              '</div>' +
+                                              '<div class="col-md-12">' +
+                                               '<strong>Fecha Reprogramada: </strong>' +
+                                               (data['Data'][index]['FechaReprogramada']) +
+                                              '</div>' +
+                                              '<div class="col-md-12">' +
+                                               '<strong>Motivo de Reprogramación: </strong>' +
+                                               (data['Data'][index]['Motivo']) +
+                                              '</div>' +
+                                              '<div id="divDocumento'+cont+'">'+
+                                                  '<div class="col-md-12">' +
+                                                   '<strong>Documento Adjunto:</strong>' +
+                                                  '</div>' +
+                                                  '<div class="col-md-12">' +
+                                                   (data['Data'][index]['Documento']) +
+                                                   '<div class="smallField" style="width:100%;"><a href="' + (data['Data'][index]['Link']) + '" target="_BLANK">' + (data['Data'][index]['Archivo']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                                                  '</div>' +
+                                              '</div>' +
+
+                                          '</div>' +
+                                  '</div>' +
+                             '</div>'
+                             );
+                    } else {
+                        $("#accordion").append(
+                             '<div class="mb-3 card">' +
+                                  '<div class="card-header" style="height:47px">' +
+                                          '<button class="btn btn-link" type="button" data-toggle="collapse" data-parent="#accordion" data-target="#collapse' + cont + '">' +
+                                          'Reprogramación ' + cont +
+                                          '</button>' +
+                                  ' </div>' +
+                                  '<div id="collapse' + cont + '" class="panel-collapse collapse">' +
+                                          '<div class="card-body">' +
+                                              '<div class="col-md-12">' +
+                                               '<strong>Fecha Inicial: </strong>' +
+                                               (data['Data'][index]['FechaInicial']) +
+                                              '</div>' +
+                                              '<div class="col-md-12">' +
+                                               '<strong>Fecha Reprogramada: </strong>' +
+                                               (data['Data'][index]['FechaReprogramada']) +
+                                              '</div>' +
+                                              '<div class="col-md-12">' +
+                                               '<strong>Motivo de Reprogramación: </strong>' +
+                                               (data['Data'][index]['Motivo']) +
+                                             '</div>' +
+                                             '<div id="divDocumento'+cont+'">'+
+                                                  '<div class="col-md-12">' +
+                                                   '<strong>Documento Adjunto:</strong>' +
+                                                  '</div>' +
+                                                  '<div class="col-md-12">' +
+                                                   (data['Data'][index]['Documento']) +
+                                                   '<div class="smallField" style="width:100%;"><a href="' + (data['Data'][index]['Link']) + '" target="_BLANK">' + (data['Data'][index]['Archivo']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                                                  '</div>' +
+                                              '</div>' +
+                                          '</div>' +
+                                  '</div>' +
+                             '</div>'
+                             );
+                    }
+                    //$("#ListarReprogramaciones").append(
+                    //'</div>'
+                    //);
+                    if ((data['Data'][index]['Archivo']) == "") {
+                        $("#divDocumento" + cont).hide();
+                    }
+                    cont = cont + 1;
+                });
+            },
+            error: function (source) {
+                toastr.error("Error al cargar las reprogramaciones");
+            }
+        });
+
+    });
+    function MostrarGuardarActividad() {
+        $("#txtActividad").attr("disabled", false);
+        $("#btnEditarActividad").hide();
+        $("#btnGuardarActividad").show();
+
+        var digitos = $("#txtActividad").val().length;
+        var rp = $("#txtActividad").val().substring(0, 3);
+
+        if (rp == "RP-") {
+            $("#txtActividad").val(($("#txtActividad").val()).substring(3, digitos));
+        }
+    }
+
+    function MostrarAdjuntarArchivos() {
+        $("#divAdjuntarArchivos").show();
+    }
+    function MostrarReprogramarFecha() {
+        $('#divReprogramarCronograma').empty();
+        $("#divReprogramarFecha").show();
+        $('#divReprogramarCronograma').load('/OrderForm/ReprogramarCronograma/@ViewBag.IdDocuSale/'+$("#IdCronograma").val());
+    }
+    function OcultarReprogramarFecha() {
+        $("#divReprogramarFecha").hide();
+    }
+
+    function ocultarArchivos() {
+        numeroCombo = 1;
+        $("#Archivo2").hide();
+        $("#Archivo3").hide();
+        $("#Archivo4").hide();
+        $("#Archivo5").hide();
+    }
+
+    function ActualizarNombreActividad() {
+        $.ajax({
+            url: "/OrderForm/ActualizarNombreActividad/",
+            data: "IdDocuSale=" + @ViewBag.IdDocuSale +
+                  "&IdCronograma=" + $("#IdCronograma").val() +
+                  "&Actividad=" + $("#txtActividad").val() +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    location.reload();
+                } else if (resp == "ERROR") {
+                    toastr.error("Error", "Ingrese el Nombre de la Actividad");
+                }
+            }
+        });
+    }
+
+    function Mensaje(msg, msnErr) {
+
+        if (msg == 'OK') {
+            location.reload();
+        }
+        else if (msg == 'Archivos') {
+            if (msnErr == "TipoDocumento") {
+                $('#mensaje').empty();
+                $('#mensaje').show("show");
+                $("#mensaje").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> Seleccione un Tipo de Documento </div>");
+                setTimeout(function () {
+                    $("#mensaje").fadeOut(3000);
+                }, 1400);
+            } else if (msnErr == "FechaActa") {
+                $('#mensaje').empty();
+                $('#mensaje').show("show");
+                $("#mensaje").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> Debe ingresar la fecha de acta de conformidad. </div>");
+                setTimeout(function () {
+                    $("#mensaje").fadeOut(3000);
+                }, 1400);
+            } else if (msnErr == "MostrarArchivos") {
+                $('#mensaje').empty();
+                $('#mensaje').show("show");
+                $("#mensaje").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> Debe adjuntar como mínimo un archivo.</div>");
+                setTimeout(function () {
+                    $("#mensaje").fadeOut(3000);
+                }, 1400);
+                MostrarAdjuntarArchivos();
+
+            } else {
+                $('#mensaje').empty();
+                $('#mensaje').show("show");
+                $("#mensaje").append("<div class='alert alert-danger'><strong>¡Alerta!</strong>" + msnErr + "</div>");
+                setTimeout(function () {
+                    $("#mensaje").fadeOut(3000);
+                }, 1400);
+
+            }
+        } else {
+            $('#mensaje').empty();
+            $('#mensaje').show("show");
+            $("#mensaje").append("<div class='alert alert-danger'><strong>¡Alerta!</strong> " + msnErr + " </div>");
+            setTimeout(function () {
+                $("#mensaje").fadeOut(3000);
+            }, 1400);
+        }
+    }
+
+</script>
+

@@ -1,0 +1,587 @@
+﻿@model ERPElectrodata.Models.ASSET
+
+@{
+    ViewBag.Title = "Find";
+    //Layout = null;
+}
+
+
+<style>
+
+    /*Ubicacion de los div Datatable*/
+    #dataTable_length, #dataTable_filter {
+        display: inline-block;
+        margin-right: 10px;
+        margin-bottom: 15px;
+    }
+
+    #dataTable_filter {
+        float: right;
+        margin-right: 10px;
+    }
+        
+    /*----------------------------*/
+
+       
+    /*Estilo bootstrap input*/
+
+    #dataTable_filter input {
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    #dataTable_filter input:focus {
+        border-color: #6c757d !important;
+        box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
+    }
+
+
+    #dataTable_filter input:focus {
+        outline: none !important;
+        border-color: #6c757d !important;
+        box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
+    }
+
+    #dataTable_filter input {
+        transition: background-color 0.3s ease-in-out;
+        transition: border-color 0.3s ease-in-out;
+    }
+
+    /*----------------------------*/
+
+
+    /*Estilo bootstrap Select*/
+
+
+    #dataTable_length select:focus {
+        outline: none !important;
+        border-color: #6c757d !important;
+        box-shadow: 0 0 0 0.2rem rgba(108, 117, 125, 0.25) !important;
+    }
+
+    /*---------------------------------*/
+
+
+    /*Estilos bootstrap Select*/
+
+    #dataTable_length select {
+        padding: .375rem .75rem;
+        font-size: 1rem;
+        line-height: 1.5;
+        color: #495057;
+        background-color: #fff;
+        background-clip: padding-box;
+        border: 1px solid #ced4da;
+        border-radius: .25rem;
+        transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
+    }
+
+    /*----------------------------*/
+
+    /*Paginacion*/
+
+    .dataTables_paginate {
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .paginate_button {
+        display: inline-block;
+        padding: 5px 10px;
+        margin: 0 2px;
+        cursor: pointer;
+        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        background-color: #fff;
+    }
+
+    .paginate_button.current {
+        background-color: #66819f;
+        color: #fff;
+    }
+
+    .paginate_button.disabled {
+        pointer-events: none;
+        color: #aaa;
+    }
+
+    .paginate_button a {
+        text-decoration: none !important;
+    }
+
+
+    .dataTables_paginate a {
+        text-decoration: none !important;
+    }
+
+    .dataTables_paginate a:hover {
+        text-decoration: none !important;
+    }
+
+
+    .ellipsis {
+        margin: 0 5px;
+    }
+
+    /*----------------------------*/
+
+    /*Transicion de paginas */
+    .dataTables_paginate {
+        overflow: hidden;
+    }
+
+    .dataTables_paginate a {
+        transition: background-color 0.3s, color 0.3s;
+    }
+
+    .dataTables_paginate a:hover {
+        background-color: #eee;
+        color: #333;
+    }
+
+    /*----------------------------*/
+
+    /* Estilos Boton Filtro */
+    #btnApplyFilters {
+        background-color: #66819f;
+        border-color: #66819f;
+    }
+
+    #btnApplyFilters:hover {
+        background-color: #49627e;
+        border-color: #49627e;
+    }
+
+    /*Estilos Icono Json*/
+
+    #lottie - container {
+        width: 64px; 
+        height: 64px; 
+    }
+    #limpiarFiltro {
+        width: 50px;
+        height:50px; 
+        cursor:pointer;
+    }
+
+
+
+    /*Estilos colores*/
+
+    #divTitle {
+        background-color: #66819f;
+        color: white;
+    }
+
+    .text-muted {
+        color: white !important;
+    }
+
+  
+
+
+
+
+
+
+</style>
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bodymovin/5.7.8/lottie.min.js"></script>
+
+
+<!-- ============================================================
+=LIBRERIAS PARA USO DE DATATABLES JS
+===============================================================-->
+<script src="https://cdn.datatables.net/1.11.0/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/responsive/2.2.9/js/dataTables.responsive.min.js"></script>
+
+
+<div id=""></div>
+
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="font-icon-wrapper font-icon-lg">
+                <i id="lottie-container"> </i>
+            </div>
+            <div>
+                <div class="titleModule"><b>Talento - Directorio de Telefóno</b></div>
+                <div class="page-title-subheading">
+                    Directorio de Telefono
+                </div>
+            </div>
+            <div class="derecha">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-header-tab card-header" id="divTitle">
+        <div class="card-header-title font-size-lg text-capitalize font-weight-normal">
+            <i class="header-icon lnr-laptop-phone mr-3 text-muted opacity-6" id="iconTitle"> </i>Directorio de Telefono
+        </div>
+
+
+        <div id="divFindAsset">
+            @using (Html.BeginForm("Export", "Asset", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAssetFind", target = "upload_target" }))
+            {
+                @Html.ValidationSummary(true)
+                <fieldset>
+
+                    <div class="row">
+
+
+
+
+                        <div class="col-sm-6 col-lg-2">
+                            <div style="width:220px">
+                                <input type="hidden" id="valTypeAsset" value="" />
+                                <div id="NewTypeAsset"></div>
+                                &nbsp;
+                                @Html.Hidden("ExpTypeAsset")
+                            </div>
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+                </fieldset>
+            }
+        </div>
+    </div>
+    <br />
+    <div id="filters" class="form-inline mb-3 ml-auto ml-lg-5">
+        <label class="mr-2" for="selectArea">Area:</label>
+        <select class="form-control mr-2" id="selectArea">
+        </select>
+
+        <label class="mr-2" for="miSelect">Locación:</label>
+        <select class="form-control mr-2" id="selectLocacion">
+        </select>
+
+        <button id="btnApplyFilters" class="btn btn-primary">Aplicar Filtros</button>
+
+
+        <a onclick="activarAnimacion()">
+            <div id="limpiarFiltro"></div>
+        </a>
+
+
+
+    </div>
+    <hr />
+    <div class="card-body">
+        <div id="example_wrapper" class="dataTables_wrapper dt-bootstrap4">
+            <div class="row">
+                <div class="col-sm-12">
+                    <table style="width: 100%;" id="dataTable" class="table table-hover table-striped table-bordered dataTable dtr-inline" role="grid" aria-describedby="example_info">
+                    </table>
+                </div>
+            </div><div class="row"><div class="col-sm-12 col-md-5"></div><div class="col-sm-12 col-md-7"></div></div>
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $("#ReporterGlobal").click(function () {
+            event.preventDefault();
+            var codigoActivo = $("#COD_ASSE").val();
+            var usuario = $("#Usuarios").val();
+            var contrato = $("#Contratos").val();
+            var tipoActivo = $("#ExpTypeAsset").val();
+            var marca = $("#ID_MANU").val();
+            var modeloComercial = $("#ID_COMM_MODE").val();
+            var modeloFabrica = $("#ID_MANU_MODE").val();
+            var lugar = $("#ID_SITE").val();
+            var locacion = $("#ID_LOCA").val();
+            var estado = $("#ID_STAT_ASSE").val();
+            var condicion = $("#ID_COND").val();
+            var numeroSerie = $("#SER_NUMB").val();
+            var direccionMAC = $("#MAC_ADRR").val();
+            var nombreEquipo = $("#NAM_EQUI").val();
+            var NumeroFactura = $("#NumeroFactura").val();
+            var GuiaRemision = $("#GuiaRemision").val();
+            window.open('/Reporting/Activo/ReporteGlobal.aspx?ca=' + codigoActivo + '&u=' + usuario + '&c=' + contrato + '&ta=' + tipoActivo + '&m=' +
+                marca + '&mc=' + modeloComercial + '&mf=' + modeloFabrica + '&l=' + lugar + '&lo=' + locacion + '&e=' + estado + '&cn=' + condicion +
+                '&s=' + numeroSerie + '&d=' + direccionMAC + '&n=' + nombreEquipo + '&nf=' + NumeroFactura + '&gr=' + GuiaRemision, '_blank');
+        });
+
+
+        // Funcion para el Boton filtrar
+        $("#btnApplyFilters").click(function () {
+            console.log("Botón presionado");
+            $("#dataTable").DataTable().clear().draw();
+            findAsset(); // Llama a la función findAsset al hacer clic en el botón
+        });
+
+
+        function findAsset() {
+
+            // Obtener valores de los selectores
+            var areaFilter = $("#selectArea").val();
+            var locacionFilter = $("#selectLocacion").val();
+
+            // Limpiar resultados anteriores
+            $("#pagerFind").empty();
+            $("#resultFind").empty();
+
+            // Destruir componentes DataTables anteriores si existen
+            if ($.fn.DataTable.isDataTable("#dataTable")) {
+                $("#dataTable").DataTable().destroy();
+            }
+
+            // Configurar DataTable - Estilos y Carga
+            var dataTable = $("#dataTable").DataTable({
+                "paging": true,
+                "columns": [
+                    { data: "Area", title: "Area" },
+                    { data: "UsuarioAsignado", title: "Usuario Asignado" },
+                    { data: "NombreActivo", title: "# Celular" },
+                    { data: "Marca", title: "Marca" },
+                    { data: "Condicion", title: "Condición" },
+                    { data: "Locacion", title: "Locacion" }
+
+
+                ],
+                "columnDefs": [
+                    {
+                        "targets": [4], // Índice de la columna de condición
+                        "width": "30px" // Ajusta el ancho
+                    }
+                ],
+                "createdRow": function (row, data, dataIndex) {
+
+                    // Condicion
+                    var condicionValue = data.Condicion;
+                    // Marca
+                    var marcaValue = data.Marca;
+
+                    // Colores Condicion
+                    var condicionColor = "";
+                    if (condicionValue === "OPERATIVO") {
+                        condicionColor = "#3ac47d";
+                    } else if (condicionValue === "PRESTAMO") {
+                        condicionColor = "#f2c11d";
+                    } else {
+                        condicionColor = "#000000"; // Negro
+                    }
+
+                    // Colores Marca
+                    var marcaColor = "";
+                    if (marcaValue === "ENTEL") {
+                        marcaColor = "#002EFF";
+                    } else if (marcaValue === "CLARO") {
+                        marcaColor = "#fe3835";
+                    } else if (marcaValue === "ZTE") {
+                        marcaColor = "#2ea2ff";
+                    } else if (marcaValue === "MOVISTAR") {
+                        marcaColor = "#164b92";
+                    } else {
+                        marcaColor = "#000000"; // Negro
+                    }
+
+                    // Cambio Color Condicion
+                    var condicionCell = $('td:eq(4)', row);
+                    condicionCell.html('<div style="background-color: ' + condicionColor + ';color:white;" class="badge badge-pill">' + condicionValue + '</div>');
+
+                    // Cambio Color Marca
+                    var marcaCell = $('td:eq(3)', row);
+                    marcaCell.html('<div style="background-color: ' + marcaColor + ';color:white;" class="badge badge-pill">' + marcaValue + '</div>');
+                },
+                "order": [[3, "asc"]],
+                "language": {
+                    "search": "Buscar:",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Último",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                    "lengthMenu": "Mostrar _MENU_ Registros",
+                    "info": "Mostrando _START_ a _END_ de _TOTAL_ Registros"
+                }
+
+            });
+
+
+            if ((areaFilter == null || areaFilter == "Seleccionar") && (locacionFilter == null || locacionFilter == "Seleccionar")) {
+                // Realizar la solicitud AJAX y agregar datos a DataTable sin considerar area y locacion
+                $.ajax({
+                    url: "/Talent/FindResulto",
+                    type: "GET",
+                    data: $('#FrmAssetFind').serialize() + "&valTypeAsset=" + $('#valTypeAsset').val(),
+                    dataType: "json",
+                    success: function (data) {
+                        // Agregar datos a DataTable
+                        dataTable.rows.add(data.Data).draw();
+                    },
+                    error: function (error) {
+                        // Manejar errores
+                        console.error("Error al obtener datos:", error);
+                    }
+                });
+            } else {
+                // Realizar la solicitud AJAX y agregar datos a DataTable considerando area y locacion
+                $.ajax({
+                    url: "/Talent/FindResulto",
+                    type: "GET",
+                    data: $('#FrmAssetFind').serialize() + "&valTypeAsset=" + $('#valTypeAsset').val() + "&Area=" + areaFilter + "&Locacion=" + locacionFilter,
+                    dataType: "json",
+                    success: function (data) {
+                        // Agregar datos a DataTable
+                        dataTable.rows.add(data.Data).draw();
+                    },
+                    error: function (error) {
+                        // Manejar errores
+                        console.error("Error al obtener datos:", error);
+                    }
+                });
+            }
+
+          
+
+
+
+            return false;
+        }
+
+
+
+        $.ajax({
+            url: "/Talent/FindResulto",
+            type: "GET",
+            data: $('#FrmAssetFind').serialize() + "&valTypeAsset=" + $('#valTypeAsset').val(),
+            dataType: "json",
+            success: function (data) {
+                // Obtener áreas y locaciones únicas de la DataTable
+                var uniqueAreas = [...new Set(data.Data.map(item => item.Area))];
+                var uniqueLocaciones = [...new Set(data.Data.map(item => item.Locacion))];
+
+                // Llenar el select de "Area" con las áreas únicas
+                fillSelect('selectArea', uniqueAreas);
+
+                // Llenar el select de "Locación" con las locaciones únicas
+                fillSelect('selectLocacion', uniqueLocaciones);
+
+               
+            },
+            error: function (error) {
+                // Manejar errores
+                console.error("Error al obtener datos:", error);
+            }
+        });
+
+        // Función para llenar un select
+        function fillSelect(selectId, optionsArray) {
+            var select = $('#' + selectId);
+            select.empty(); // Limpiar el select antes de agregar nuevas opciones
+            select.append($('<option>').text('Seleccionar').val('')); // Agregar la opción "Seleccionar"
+
+            // Iterar sobre las opciones y agregarlas al select
+            $.each(optionsArray, function (index, option) {
+                select.append($('<option>').text(option).val(option));
+            });
+        }
+
+
+        findAsset();
+
+        //animacion
+
+
+        var lottieContainer = document.getElementById('lottie-container');
+
+        // Cargar el archivo JSON de animación
+        fetch('/Content/Json/contact.json')
+            .then(response => response.json())
+            .then(data => {
+                // Configura la animación
+                var animation = bodymovin.loadAnimation({
+                    container: lottieContainer,
+                    renderer: 'svg',
+                    loop: true,
+                    autoplay: true,
+                    animationData: data,
+                });
+            })
+            .catch(error => console.error('Error al cargar el archivo JSON:', error));
+
+
+         //boton limpiar filtros 
+
+        var limpiarFiltroAnimation = bodymovin.loadAnimation({
+            container: document.getElementById('limpiarFiltro'),
+            renderer: 'svg',
+            loop: false,
+            autoplay: false,
+            path: '/Content/Json/reload.json',
+        });
+
+        // Desactivar la animación inicialmente
+        limpiarFiltroAnimation.pause();
+
+
+        function activarAnimacion() {
+            limpiarFiltroAnimation.goToAndPlay(0);
+            limpiarFiltroAnimation.pause();
+
+            limpiarFiltroAnimation.addEventListener('complete', function () {
+
+
+                $('#selectArea').append($('<option>').text('Seleccionar').val(''));
+                $('#selectLocacion').append($('<option>').text('Seleccionar').val(''));
+
+                // Ajax reutilizado para llenado del select
+                $.ajax({
+                    url: "/Talent/FindResulto",
+                    type: "GET",
+                    data: $('#FrmAssetFind').serialize() + "&valTypeAsset=" + $('#valTypeAsset').val(),
+                    dataType: "json",
+                    success: function (data) {
+                        var uniqueAreas = [...new Set(data.Data.map(item => item.Area))];
+                        var uniqueLocaciones = [...new Set(data.Data.map(item => item.Locacion))];
+                        fillSelect('selectArea', uniqueAreas);
+                        fillSelect('selectLocacion', uniqueLocaciones);
+
+                        // Limpiar y volver a cargar los datos en DataTable
+                        $("#dataTable").DataTable().clear().draw();
+                        findAsset();
+                    },
+                    error: function (error) {
+                        console.error("Error al obtener datos:", error);
+                    }
+                });
+            });
+
+            // Reproducir la animación
+            limpiarFiltroAnimation.play();
+        }
+        window.activarAnimacion = activarAnimacion;
+
+
+    });
+
+</script>
+
+
+

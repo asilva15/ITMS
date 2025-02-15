@@ -1,0 +1,111 @@
+﻿@{
+    Layout = null;
+}
+
+<div id="treeviewProcedure" style="padding: 3px 0 0 7px;"></div>
+
+<script id="treeviewProcedure-template" type="text/kendo-ui-template">
+    # if (item.DESC_PARA == 'ISO 0') { #
+        <span style="font-size: .9em;"> #= item.NAME_PARA # </span>
+    # } else if (item.DESC_PARA == 'ISO') { #
+        <span style="font-size: .9em;"> #= item.NAME_PARA # </span>
+    # } else if (item.ATTACH === false) { #
+        <span style="font-size: .9em; text-transform:capitalize;"> #= item.NAME_PARA # </span>
+    # } else if (item.ATTACH == true && item.DELETE == true && item.DOWNLOAD == true) { #
+    <a href="#: item.NAM_FILE #" target="_blank" style="text-decoration:none;" name="#: item.ID_PARA #" onclick="RegistrarLog(this.name);">
+        <img src="/Content/Images/#: item.EXT_ATTA #" style="width:14px; height:14px; border:none;" /><span style="text-transform:capitalize; font-size: .9em; font-weight:700;"> #= item.NAME_PARA # </span><a id='D|#: item.ID_PARA #' class='fa fa-window-close' href="javascript:void(0);" title='Remove' style='color:rgb(232, 219, 191);'></a>
+        <br /><span style="font-size: .8em; color:gray; padding-left:20px; text-transform:capitalize; margin-left:20px;">#= item.DESC_PARA # - #= item.USER_NAME #</span>
+    </a>
+
+    # } else if (item.ATTACH == true && item.DELETE == true) { #
+    <img src="/Content/Images/#: item.EXT_ATTA #" style="width:14px; height:14px; border:none;" />
+    <span style="text-transform:capitalize; font-size: .9em;"> #= item.NAME_PARA # </span>
+    <a id='D|#: item.ID_PARA #' class='fa fa-window-close' href="javascript:void(0);" title='Remove' style='color:rgb(232, 219, 191);'></a>
+    <br />
+    <span style="font-size: .8em; color:gray; padding-left:20px; text-transform:capitalize; margin-left:20px;">#= item.DESC_PARA # - #= item.USER_NAME #</span>
+
+    # } else if (item.ATTACH == true && item.DOWNLOAD == true) { #
+    <a href="#: item.NAM_FILE #" target="_blank" style="text-decoration:none;" name="#: item.ID_PARA #" onclick="RegistrarLog(this.name);">
+        <img src="/Content/Images/#: item.EXT_ATTA #" style="width:14px; height:14px; border:none;" /><span style="text-transform:capitalize; font-size: .9em; font-weight:700;"> #= item.NAME_PARA # </span>
+        <br /><span style="font-size: .8em; color:gray; padding-left:20px; text-transform:capitalize; margin-left:20px;">#= item.DESC_PARA # - #= item.USER_NAME #</span>
+    </a>
+
+    # } else if (item.ATTACH == true) { #
+    <img src="/Content/Images/#: item.EXT_ATTA #" style="width:14px; height:14px; border:none;" />
+    <span style="text-transform:capitalize; font-size: .9em;"> #= item.NAME_PARA # </span>
+    <br />
+    <span style="font-size: .8em; color:gray; padding-left:20px; text-transform:capitalize; margin-left:20px;">#= item.DESC_PARA # - #= item.USER_NAME #</span>
+    # } #
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#treeviewProcedure").empty();
+        homogeneous = new kendo.data.HierarchicalDataSource({
+            transport: {
+                read: {
+                    url: "/Knowledge/TreeKnowledge/@ViewBag.ID_AREA",
+                    dataType: "json"
+                }
+            },
+            schema: {
+                model: {
+                    id: "ID_PARA",
+                    hasChildren: "HAS_VALUE",
+                    NAME_PARA: "NAME_PARA",
+                }
+            }
+        });
+
+        $("#treeviewProcedure").kendoTreeView({
+            template: kendo.template($("#treeviewProcedure-template").html()),
+            dataSource: homogeneous,
+            dataTextField: "NAME_PARA",
+            select: onSelectTVProc,
+        });
+    });
+
+    function onSelectTVProc(e) {
+        var dataItem = this.dataItem(e.node);
+        var rest = dataItem.id.split('*');
+        $("#ID_KNOW_CATE_ATTA").val(rest[1]);
+        //alert($("#ID_KNOW_CATE_ATTA").val(rest[1]));
+
+        if (dataItem.id.substring(0, 3) == 'ISO') {
+            var title = dataItem.NAME_PARA;
+            if (title.length > 51) { title = title.substring(0, 52) + '...' }
+            $("#divTitleAttach").html('@ResourceLanguaje.Resource.ISOAttachFolder : ' + title);
+            $("#divCategory").css("display", "none");
+            $("#divAnio").css("display", "none");
+            var res = dataItem.id.split('*');
+            $("#ID_KNOW_CATE_ATTA").val(res[1]);
+
+            //alert($("#ID_KNOW_CATE_ATTA").val(res[1]));
+        }
+        else {
+            $("#divTitleAttach").html('@ResourceLanguaje.Resource.Attach');
+            $("#divCategory").css("display", "inline-block");
+            $("#divAnio").css("display", "inline-block");
+            $("#ID_KNOW_CATE_ATTA").val(0);
+        }
+    }
+
+    function RegistrarLog(id) {
+        $.ajax({
+            url: "/Knowledge/RegistrarLogAcceso",
+            data: "var=" + Math.random() + "&id=" + id,
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                
+            },
+            error: function (source) {
+                
+            }
+        });
+    }
+
+</script>

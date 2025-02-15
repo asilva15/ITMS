@@ -1,0 +1,871 @@
+﻿@model ERPElectrodata.Models.DELIVERY_SUSTAIN
+
+@{
+    //Layout = "~/Views/Shared/_LayoutClient.cshtml";
+    //Layout = null;
+    ViewBag.Title = ResourceLanguaje.Resource.Accountability;
+}
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<style>
+    .menuBandeja {
+        width: 24px;
+        height: 24px;
+        background: transparent url('/Content/Images/Menu.png') no-repeat;
+        cursor: pointer;
+    }
+
+        .menuBandeja:hover {
+            background: transparent url('/Content/Images/MenuAct.png') no-repeat;
+        }
+
+    .divTitleDocuments {
+        /*width: 100%;*/
+        /*height:22px;*/
+        color: white;
+        background-color: #2D5C88;
+        /*position: relative;
+        border-top: 1px solid #e2e2e2;
+        border-left: 1px solid #e2e2e2;
+        border-right: 1px solid #e2e2e2;*/
+    }
+
+    .divButtomPrint {
+        width: 16px;
+        height: 16px;
+        background: transparent url('/Content/Images/Printer.png') no-repeat;
+        cursor: pointer;
+        float: right;
+        margin-left: 4px;
+    }
+
+    .divButtomReject {
+        width: 16px;
+        height: 16px;
+        background: transparent url('/Content/Images/RejectRequest.png') no-repeat;
+        cursor: pointer;
+        float: right;
+        margin-left: 4px;
+    }
+
+    .divButtomVal {
+        width: 16px;
+        height: 16px;
+        background: transparent url('/Content/Images/Validar.png') no-repeat;
+        cursor: pointer;
+        float: right;
+        margin-left: 4px;
+        /*position:absolute;
+    right:28px;
+    top: 5px;*/
+    }
+
+        .divButtomVal:hover {
+            background: transparent url('/Content/Images/ValidarAct.png') no-repeat;
+        }
+
+    .divButtomReceive {
+        width: 16px;
+        height: 16px;
+        background: transparent url('/Content/Images/receive.png') no-repeat;
+        cursor: pointer;
+        float: right;
+        margin-left: 2px;
+        /*position:absolute;
+    right:5px;
+    top: 5px;*/
+    }
+
+        .divButtomReceive:hover {
+            background: transparent url('/Content/Images/receiveAct.png') no-repeat;
+        }
+
+    .divButtomAdd {
+        width: 16px;
+        height: 16px;
+        background: transparent url('/Content/Images/AddNew.png') no-repeat;
+        cursor: pointer;
+        float: right;
+        margin-left: 4px;
+    }
+
+        .divButtomAdd:hover {
+            background: transparent url('/Content/Images/AddNewAct.png') no-repeat;
+        }
+</style>
+<div id="divContent">
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="font-icon-wrapper font-icon-lg">
+                    <i class="fa fa-comment-dollar icon-gradient bg-sunny-morning"> </i>
+                </div>
+                <div>
+                    <div class="titleModule"><b>Contabilidad</b></div>
+                    <div class="page-title-subheading">
+                        Lista de Rendiciones
+                    </div>
+                </div>
+                <div class="derecha">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="mb-3 card">
+    <div class="p-4 card-body">
+        <div class="p-1 slick-slider-sm mx-auto">
+            @*Estado de la solicitud*@
+            <div class="col-lg-12" id="divViatico">
+
+            </div>
+            <hr />
+            @*Foto y detalle usuario*@
+            <div class="row">
+                <div class="col-lg-4">
+                    <div style="height:60px;background-color:rgba(192,192,192,0.1)" id="divUsuario"></div>
+                    <div class="col-sm-12" id="divDetalle"> </div>
+                </div>
+                <div class="col-lg-8">
+                    @*<div class="col-sm-1"></div>*@
+                    <div class="col p-0 mt-2" id="divRendicion" style="border-right:1px  solid #EAE5E5;border-left:1px solid #EAE5E5;border-bottom:1px solid #EAE5E5;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="tpt_ListActivity">
+    <div class="col-lg-12">
+        <div class="row">
+            <div class="col-sm-3">
+                <div style="color: \\#808080;">@ResourceLanguaje.Resource.Status</div>
+                # if(ID_STAT_REQU_EXPE == 3) {#
+                <div style="color:black;">
+                    <a style="text-decoration:none; cursor:pointer;" title="${REASON_REJECT}">${NAM_STAT_REQU_EXPE}</a>
+                </div>
+                # } else { #
+                <div style="color:black;">${NAM_STAT_REQU_EXPE}</div>
+                # } #
+            </div>
+            <div class="col-sm-3">
+                <div style="color: \\#808080;">Usuario</div>
+                <div style="color: black;">${User}</div>
+            </div>
+            <div class="col-sm-3">
+                <div style="color: \\#808080;">Fecha de Inicio</div>
+                <div style="color: black;">${DAT_STAR} ${DAT_HH}</div>
+            </div>
+        </div>
+    </div>
+</script>
+
+<script id="tpt-tootip" type="text/x-kendo-template">
+    <div style="width:100%; text-align:justify;">#=target.data('title')#</div>
+</script>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        $.ajax({
+            url: "/DeliverySustain/ListarDetalleViatico?id=@ViewBag.id&resp=@ViewBag.resp",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                $.each(data['data'], function (index, value) {
+                    $("#divViatico").append(
+                        '<div style="width: 50px; height: 55px; border: 1px solid #f5f5f5;background-color: ' + (data['data'][index]['COLOR']) + '; color: white; font-size: 2.2em; text-align: center; padding-top: 3px;float:left;">'
+                        + (data['data'][index]['NAM_ABBR']) +
+                        '</div>' +
+                         '<div class="ml-5 pl-4" style="font-size:.9em;">' +
+                            (data['data'][index]['NAM_TYPE_DELI_SUST']) + '<br />' +
+                        'Código ' + (data['data'][index]['COD_REQU_EXPE'])+' <br />' +
+                            (data['data'][index]['NAM_STAT_REQU_EXPE']) +
+                        '<div>'
+                    );
+                    $("#divUsuario").append(
+                    '<div style="width: 8px; height: 60px; background-color: #ffbb00; float: left;"></div>'+
+                    '<div style="width: auto; height: 60px; width:60px; float:left;">'+
+                    '<img src="/Content/Fotos/' + (data['data'][index]['ID_PERS_ENTI_REQU']) + '.jpg" width="60" height="60" />'+
+                    '</div>'+
+                    '<div class="ml-5 pl-4" style="font-size:.9em;">'+
+                        '@ResourceLanguaje.Resource.FromUser: ' + (data['data'][index]['Solicitante']) + ' <br />'+
+                        '@ResourceLanguaje.Resource.Date: ' + (data['data'][index]['DAT_DEPA'])+' <br />'+
+                        '@ResourceLanguaje.Resource.ToUser: ' + (data['data'][index]['Aprueba']) +
+                        '</div>');
+
+                    var id_request = @ViewBag.id;
+                    console.log(data['data'][index]['NAM_STAT_REQU_EXPE'])
+                    $("#divDetalle").append(
+                        '<div class="row" style="color: #808080">' +
+                            '<div class="col-sm-5">'+
+                                '@ResourceLanguaje.Resource.Code Ticket:'+
+                            '</div>'+
+                            '<div class="col-sm-7">'+
+                            '<a href="/DetailsTicket/Index/' + (data['data'][index]['ID_TICK'])+'" target = "_blank" style = "text-decoration:none; color:#017ad1;">' + (data['data'][index]['COD_TICK'])+'</a>'+
+                            '</div>'+
+                            '<div class="col-sm-5">'+
+                                '@ResourceLanguaje.Resource.OrderForm: '+
+                            '</div>'+
+                            '<div class="col-sm-7" >'+
+                            '<a href="/DetailsTicket/Index/' + (data['data'][index]['ID_TICK']) +'"  target="_blank" style="text-decoration:none; color:#017ad1;">' + (data['data'][index]['NAM_TYPE_DOCU_SALE']) + ' ' + (data['data'][index]['NUM_DOCU_SALE'])+'</a>'+
+                            '</div>'+
+                            '<div class="col-sm-5">'+
+                                '@ResourceLanguaje.Resource.Amount: '+
+                            '</div>'+
+                            '<div class="col-sm-7" id="Monto" >'+
+                        (data['data'][index]['CURRENCY']) + ' ' + (data['data'][index]['AMOUNT']) + ' ' + (data['data'][index]['NAM_CURR']) +
+
+
+                        ('@ViewBag.PerfilEditarMonto' == 'True'
+                            ? '<button type="button" style="font-size:15px;margin-left: 10px;cursor:pointer" id="btnEditarMonto" title="MostrarEdicionMonto" class="border-0 btn-transition btn btn-outline-secondary" onclick="MostrarEdicionMonto()"><i class="fa fa-pen"></i></button>' : ''
+
+                        )
+
+                        +
+                        '</div>'
+                        +
+                        '<div class="col-sm-7" id="MontoActualizar" hidden>' + (data['data'][index]['CURRENCY']) + ' ' + '<input type="text" id="MontoEditar" value = "' + (data['data'][index]['AMOUNT']) + '" style="width:50%"><button type="button" style="font-size:15px;margin-left: 10px;cursor:pointer" id="btnActualizarMonto" title="EditarMonto" class="border-0 btn-transition btn btn-outline-secondary" onclick="EditarMonto(' + @ViewBag.id + ',' + @ViewBag.Estado +')" ><i class="fa fa-save"></i></button>' +
+                        '</div>'
+
+                        +
+
+                        '<div style="display:none;" id="divDetVia" class="col-sm-12"></div>' +
+                        (data['data'][index]['NAM_ATTA'] == null ? '' :
+                        '<div class="col-sm-5">Comprobante de Pago: </div>' +
+                            '<div class="col-sm-7">' + '<a style="font-size:12px;"  href="/DeliverySustain/VerDocumento/' + (data['data'][index]['URL']) + '?id_request=' + id_request + '" target="_blank">' + (data['data'][index]['NAM_ATTA']) + ' <img src="/Content/Images/pdf.png" style="width:10px; height:10px; border:none;"></a>' + '</div>')
+
+                        +
+                        (data['data'][index]['NAM_ATTA_DEVOLUCION'] == null ? '' :
+                            '<div class="col-sm-5">Devolución al usuario:</div>' +
+                            '<div class="col-sm-7">' + '<a style="font-size:12px;"  href="/DeliverySustain/VerDocumento/' + (data['data'][index]['URL_DEVOLUCION']) + '?id_request=' + id_request + '" target="_blank">' + (data['data'][index]['NAM_ATTA_DEVOLUCION']) + ' <img src="/Content/Images/pdf.png" style="width:10px; height:10px; border:none;"></a>' + '</div>' +
+                            '<div class="col-sm-5">Monto Reembolsado:</div> <div class= "col-sm-7" >' + (data['data'][index]['CURRENCY']) + ' ' + @ViewBag.MontoADevolver + ' ' + (data['data'][index]['NAM_CURR'])+ '</div>'
+                        )
+                        +
+
+                        '<div class="col-sm-12 mt-3"><div id="gridDetailsVia" style="width:100%;"></div></div>' +
+
+                            '<div class="col-sm-12">@ResourceLanguaje.Resource.Justification:</div>' +
+                            '<div class="col-sm-12" style="margin-bottom: 3px; padding:3px 5px 3px 5px; border: 1px solid #c3c3c3; overflow-y: auto; height: 74px; text-align:justify;">' + (data['data'][index]['JUSTIFICATION'])+'</div>' +
+                            '<div class="col-sm-12" style="background-color:#2b5797;color:white;">Actividades</div>' +
+                            '<div class="col-sm-12" id="divListActivity" style="font-size:.9em;background-color:rgba(43,87,151,0.1);"></div>' +
+                        '</div>');
+
+
+                    $("#divRendicion").empty();
+                    var from = String(data['data'][index]['Solicitante']).replace(/\s+/g, '.');
+
+                    var id_deli_sust = null;
+
+                    if (data['data'][index]['ID_TYPE_DELI_SUST'] == 3 || data['data'][index]['ID_TYPE_DELI_SUST'] == 1) {
+                        id_deli_sust = id_request;
+                    } else {
+                        id_deli_sust = (data['data'][index]['ID_DELI_SUST'])
+                    }
+
+                    $("#divRendicion").append(
+
+                        '<div class="divTitleDocuments p-1 pl-1">Documentos' +
+                            '<div id="divButtonPri" class="divButtomPrint" title="@ResourceLanguaje.Resource.BtnPrint" onclick="PrintDeliSust(' + id_deli_sust + ')"></div>' +
+                            '<div id="divButtonRej" class="divButtomReject" title="@ResourceLanguaje.Resource.RejectAccountability" onclick="RejectAccountability(' + @ViewBag.id + ')" data-toggle="modal" data-target="#miModal"></div>' +
+                            '<div id="divButtonVal" class="divButtomVal" title="@ResourceLanguaje.Resource.ValidateAccountability" onclick="Accountability(' + @ViewBag.id + ',\'' + (data['data'][index]['NAM_TYPE_DELI_SUST']) + '\',\'' + (data['data'][index]['COD_REQU_EXPE']) + '\',\'' + (data['data'][index]['NAM_CURR']) + '\',' + (data['data'][index]['AMOUNT']) + ',\'' + (data['data'][index]['MONEY']) + '\')" data-toggle="modal" data-target="#miModal"></div>' +
+                        (data['data'][index]['NAM_STAT_REQU_EXPE'] == 'Nueva Solicitud' ? '' : '<div id="divButtonRec" class="divButtomReceive" title="@ResourceLanguaje.Resource.ReceptionRequest" onclick="ReceptionRequest(' + @ViewBag.id + ',\'' + (data['data'][index]['NAM_TYPE_DELI_SUST']) + '\',\'' + (data['data'][index]['COD_REQU_EXPE']) + '\',\'' + (data['data'][index]['NAM_CURR']) + '\',' + (data['data'][index]['AMOUNT']) + ',\'' + (data['data'][index]['MONEY']) + '\')" data-toggle="modal" data-target="#miModal"></div>')+
+                        '<div id="divButtonNew" class="divButtomAdd" title="@ResourceLanguaje.Resource.NewDocument" onclick="NewDocument(' + @ViewBag.id + ',\'' + (data['data'][index]['MONEY']) + '\'' + ',\'' +from+'\')" data-toggle="modal" data-target="#miModal"></div>' +
+                        '</div>' +
+                        '<div id="divDocuments" class=""></div>' +
+                        '<div class="row">' +
+                            '<div class="col-lg-4">' + '</div>' +
+                            '<div class="col-lg-4">' +
+                            '<button id="DownDocumentsAll" type ="button" class="btn btn-warning btn-block" onclick="DownDocumentsAll()">Descargar Archivos</button >' +
+                            '</div>' +
+                            '<div class="col-lg-4">' + '</div>' +
+                        '</div>'
+                        );
+
+                    if ((data['data'][index]['ID_TYPE_DELI_SUST'])==2){
+                        LoadDetailViatical(@ViewBag.id);
+                        $("#divDetVia").append(
+                            '<div class="row">' +
+                                '<div class="col-sm-5">@ResourceLanguaje.Resource.NumberDays: </div>' +
+                                '<div class="col-sm-7">' + (data['data'][index]['NUM_DAYS']) + '</div>' +
+                                '<div class="col-sm-5">@ResourceLanguaje.Resource.DepartureDate: </div>' +
+                                '<div class="col-sm-7">' + (data['data'][index]['DAT_DEPA']) + '</div>' +
+                                '<div class="col-sm-5">@ResourceLanguaje.Resource.Destination: </div>' +
+                                '<div class="col-sm-7">' + (data['data'][index]['DESTINATION']) + '</div>' +
+                                '<div class="col-sm-5">Número PRC: </div>' +
+                                '<div class="col-sm-7">' + (data['data'][index]['NUMEROPRC']) + '</div>' +
+                            '</div>');
+                        $("#divDetVia").css("display","block");
+                    }
+                    //Cargando Lista de actividades
+                    LoadActivity(@ViewBag.id);
+                    //Cargando Documentos asociados
+                    LoadDocuments(@ViewBag.id);
+                });
+
+                $.each(data['data2'], function (index, value) {
+                //Ocultando Boton
+                    console.log((data['data2'][index]['SwxRendir']))
+                    if ((data['data2'][index]['SwxRendir'])) {
+                        $("#divButtonNew").css("display", "block");
+                        $("#divButtonRec").css("display", "block");
+                        $("#btnEditarMonto").removeAttr("hidden");
+                    }
+                    else {
+                        $("#divButtonNew").css("display", "block");
+                        $("#divButtonRec").css("display", "none");
+                        $("#divButtonRej").css("display", "none");
+
+                    }
+
+                    if ((data['data2'][index]['SwRendir'])) {
+                        $("#divButtonVal").css("display", "block");
+                        $("#divButtonRej").css("display", "block");
+
+                    }
+                    else {
+                        $("#divButtonVal").css("display", "none");
+                        $("#divButtonRej").css("display", "none");
+                    }
+
+                });
+            },
+            error: function (source) {
+            //alert("Error Carga Json");
+            }
+            });
+    });
+
+    function LoadDetailViatical(id){
+
+        var dsGrid = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/RequestViatical/ListDetailViatical?id=" + id + "&var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 10,
+            schema: {
+                data: "Data",
+                total: "Count",
+                model: {
+                    fields: {
+                        NAM_TYPE_VIAT: { type: "string" },
+                        AMOUNT: { type: "number" },
+                    }
+                }
+            },
+            aggregate: [{ field: "NAM_TYPE_VIAT", aggregate: "count" },
+                        { field: "AMOUNT", aggregate: "sum" }]
+        });
+
+        $("#gridDetailsVia").kendoGrid({
+            dataSource: dsGrid,
+            resizable: false,
+            columns: [
+                {
+                    field: "NAM_TYPE_VIAT", title: "@ResourceLanguaje.Resource.Type",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: left; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px;"
+                    },
+                    footerTemplate: "<div style='text-align:right; width:100%; font-weight:normal;'>Total:</div>"
+                },
+                {
+                    field: "AMOUNT", title: "@ResourceLanguaje.Resource.Amount", format: "{0:N2}", width: 80,
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px;"
+                    },
+                    footerTemplate: "<div style='text-align:right; width:100%; font-weight:normal;'>#= kendo.format('{0:N2}',sum) #</div>"
+                }
+            ],
+        });
+    }
+
+    function LoadActivity(id) {
+        var dsLV = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/RequestExpenseActivity/ListActivity?id=" + id + "&var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 10,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#divListActivity").kendoListView({
+            dataSource: dsLV,
+            template: kendo.template($("#tpt_ListActivity").html()),
+        });
+
+        $("#divListActivity").kendoTooltip({
+            filter: "a",
+            content: kendo.template($("#tpt-tootip").html()),
+            width: 250,
+            position: "top",
+            animation: {
+                open: {
+                    effects: "fade:in"
+                }
+            }
+        }).data("kendoTooltip");
+
+        $("#divListActivity").find("a").click(false);
+    }
+
+    function LoadDocuments(id) {
+        $("#divDocuments").empty();
+        $("#divDocuments").load("/DocumentExpense/viewDocumentsPettyCash?id=" + id + "&var=" + Math.random());
+    }
+
+    function DownDocumentsAll(id) {
+        location.href = "/DocumentExpense/DescargarArchivoAll/" + @ViewBag.id;
+
+    }
+
+    function PrintDeliSust(id) {
+        window.open('/Reporting/WF_ReportAccountability.aspx?id=' + id, '_blank');
+    }
+
+    function RejectAccountability(id) {
+        $("#lblTitulo").text("@ResourceLanguaje.Resource.RejectAccountability");
+
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").removeClass("modal-md");
+        $(".modal-dialog").addClass("modal-md");
+
+        $('#modal-content').empty();
+        $("#modal-content").append("<form method='post' id='divFormRejectAccountability' name='divFormRejectAccountability' target = 'ut_reject'>" +
+                                      "<div class='modal-body'>"+
+                                       "<div style='font-size:1em;'>" +
+                                         "<div style='width:100%; display:inline-block; text-transform:capitalize;'>" +
+                                                "<div>" +
+                                                    "<div style='width:100%; margin:0 auto;'>" +
+                                                        "<div style='width:100%; display:inline-block; text-align:justify;'>" +
+                                                            "<span class='col-sm-12' style='width:100%;'>@ResourceLanguaje.Resource.ReasonRejectAccountability</span>" +
+                                                            "<div class='col-sm-12'>" +
+                                                                "<div class='k-textbox' style='width:100%;'>" +
+                                                                    "<input type='text' name='REASON_REJECT' id='REASON_REJECT' />" +
+                                                                    "</div>" +
+                                                            "</div>" +
+                                                        "</div>" +
+                                                    "</div>" +
+                                                "</div>" +
+                                          "</div>" +
+                                       "</div>"+
+                                     "</div>");
+
+        $("#modal-content").append("<div class='modal-footer'>"+
+                                       "<div style='width:100%;'>" +
+                                          "<div style='width:95%; margin:0 auto; text-align:right;'>" +
+                                             "<div style='width:100%; margin-top:10px;'>" +
+                                                  "<input type='submit' id='btnYesRej' class='k-button' style='font-size:.9em;' value='@ResourceLanguaje.Resource.Yes'/>"+
+                                                  "&nbsp;&nbsp;<button id='btnNORej' class='k-button' style='font-size:.9em;'>No</button>" +
+                                              "</div>" +
+                                          "</div>" +
+                                       "</div>"+
+                                   "</div>"+
+                                 "</form>" +
+                             "<iframe id='ut_reject' name='ut_reject' src='' style='width:0px;height:0px;border-width:0px;display:none;'></iframe>"
+                                   );
+
+        var undo = $("#btnYesRej")
+            .bind("click", function () {
+                $.ajax({
+                    url: "/RequestExpense/RejectReception/" + id,
+                    data: $("#divFormRejectAccountability").serialize()+"&var=" + Math.random(),
+                    type: "POST",
+                    success: function (resp) {
+                        if(resp=='OK'){
+                            toastr.success("@ResourceLanguaje.Resource.RejectReceptionMsn", "@ResourceLanguaje.Resource.InformationSaved");
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            CargarGrilla();
+                        }else if(resp=='ERROR1'){
+                            toastr.warning("@ResourceLanguaje.Resource.ReasonReject","@ResourceLanguaje.Resource.InformationSaved");
+                        }else if(resp=='ERROR2'){
+                            toastr.warning("Cambiar estado","@ResourceLanguaje.Resource.InformationSaved");
+                        } else if(resp=='ERROR3'){
+                            toastr.warning("La solicitud no existe","@ResourceLanguaje.Resource.InformationSaved");
+                        }
+                        else {
+                            toastr.error("Error en la transacción","@ResourceLanguaje.Resource.InformationSaved");
+                        }
+                    }
+                });
+                @*winPopUpModalLoad("@ResourceLanguaje.Resource.Saving", "@ResourceLanguaje.Resource.PleaseWait", 300, 130);*@
+            });
+
+        var undo = $("#btnNORej")
+            .bind("click", function (event) {
+                event.preventDefault();
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+            });
+    }
+
+    function Accountability(id,tip,cod,txtmon,amo,curr){
+        moneda = txtmon;
+        ttSolicitado = amo;
+        ttRendido = 0;
+        devol = 0;
+        reint = 0;
+        if(curr=='MN'){curr='S/.'}
+        else{curr='US$'}
+
+        $.ajax({
+            url: "/DocumentExpense/MontoRecepcion?id=" + id,
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                if (data != null) {
+                    devol = 0;
+                    $.each(data['data'], function (index, value) {
+
+                        ttRendido = ttRendido + (data['data'][index]['AMOUNT']);
+                    });
+                    if (ttSolicitado > ttRendido) { devol = ttSolicitado - ttRendido; }
+                    if (ttSolicitado < ttRendido) { reint = ttRendido - ttSolicitado; }
+                }
+                $("#lblTitulo").text("@ResourceLanguaje.Resource.ReceptionRequest");
+
+                $(".modal-dialog").removeClass("modal-md");
+                $(".modal-dialog").removeClass("modal-md");
+                $(".modal-dialog").addClass("modal-md");
+
+                $('#modal-content').empty();
+                $("#modal-content").append("<div class='modal-body'>"+
+                                       "<div style='font-size:1em;'>" +
+                                         "<div style='width:100%; display:inline-block; text-transform:capitalize;'>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Type:</div>" +
+                                            "<div style='width:72%; float:left;'>" + tip + "<span style='font-size: .95em; color: #808080;'> (@ResourceLanguaje.Resource.Code: " + cod + ")</span></div>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>Total:</div>" +
+                                            "<div style='width:72%; float:left;'>" + curr + " " + ttSolicitado.toFixed(2) + " " + moneda + "</div>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Accountability:</div>" +
+                                            "<div style='width:72%; float:left;'>" + curr + " " + ttRendido.toFixed(2) + " " + moneda + "</div>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>Devolución: </div>" +
+                                            "<div style='width:72%; float:left;'>" + curr + " " + devol.toFixed(2) + " " + moneda + "</div>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>Devolución al trabajador:</div>" +
+                                            "<div style='width:72%; float:left;'>" + curr + " " + reint.toFixed(2) + " " + moneda + "</div>" +
+                                            "<div style='width:100%; float:left; margin-top:10px; color:#444444;  text-transform:none;'>¿Estás seguro de validar la rendición de "+ tip + "?</div>" +
+                                          "</div>" +
+                                       "</div>"+
+                                     "</div>");
+
+                $("#modal-content").append("<div class='modal-footer'>"+
+                                       "<div style='width:100%;'>" +
+                                          "<div style='width:95%; margin:0 auto; text-align:right;'>" +
+                                             "<div style='width:100%;'>" +
+                                               "<button id='btnYesVal' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>" +
+                                               "&nbsp;&nbsp;<button id='btnNOVal' class='k-button' style='font-size:.9em;'>No</button>" +
+                                            "</div>" +
+                                         "</div>" +
+                                      "</div>"+
+                                  "</div>");
+
+        var undo = $("#btnYesVal")
+            .bind("click", function () {
+                $.ajax({
+                    url: "/RequestExpense/ValidateRequest/" + id,
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (resp) {
+                        if (resp == 'OK') {
+                            toastr.success("@ResourceLanguaje.Resource.PettyCashRendered", "@ResourceLanguaje.Resource.InformationSaved");
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                            setTimeout(function () {
+                                location.reload();
+                            }, 1000);
+
+                        } else if (resp == 'Error Transaction') {
+                            toastr.warning("Error al guardar los datos.", "@ResourceLanguaje.Resource.Warning");
+
+                        } else if (resp == 'Observacion Pendiente') {
+                            console.log(resp);
+                            toastr.warning("Documentos pendientes por subsanar.", "ALERTA");
+                        }
+
+                        else
+                            toastr.warning("Cambiar estado","");
+                    },
+                    error: function (resp) {
+                        toastr.warning("Ha ocurrido un error.","");
+                    }
+                });
+            });
+
+        var undo = $("#btnNOVal")
+            .bind("click", function () {
+                $("[data-dismiss=modal]").trigger({ type: "click" });
+            });
+            }
+        });
+
+    }
+
+    function ReceptionRequest(id, tip, cod, txtmon, amo, curr) {
+        moneda = txtmon;
+        ttSolicitado = amo;
+        var ttRendido = 0;
+        var devol = amo;
+        var reint = 0;
+        if(curr=='MN'){curr='S/.'}
+        else { curr = 'US$' }
+
+        $.ajax({
+            url: "/DocumentExpense/MontoRecepcion?id="+id,
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                if (data != null) {
+                    devol = 0;
+                    $.each(data['data'], function (index, value) {
+
+                            ttRendido = ttRendido + (data['data'][index]['AMOUNT']);
+                    });
+                    if (ttSolicitado > ttRendido) { devol = ttSolicitado - ttRendido; }
+                    if (ttSolicitado < ttRendido) { reint = ttRendido - ttSolicitado; }
+                }
+
+
+                    $("#lblTitulo").text("Solicitud de recepción");
+
+                    $(".modal-dialog").removeClass("modal-md");
+                    $(".modal-dialog").removeClass("modal-sm");
+                    $(".modal-dialog").removeClass("modal-lg");
+                    $(".modal-dialog").removeClass("modal-md");
+                    $(".modal-dialog").addClass("modal-md");
+
+                    $('#modal-content').empty();
+                    $('#modal-content').append("<div class='modal-body'>"+
+                                                   "<div style='font-size:1em;'>" +
+                                                        "<div style='width:100%; display:inline-block; text-transform:capitalize;'>" +
+                                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Type:</div>" +
+                                                            "<div style='width:72%; float:left;'>" + tip + "<span style='font-size: .95em; color: #808080;'> (@ResourceLanguaje.Resource.Code: " + cod + ")</span></div>" +
+                                                            "<div style='width:28%; float:left; color:#444444;'>Total:</div>" +
+
+                                                            "<div style='width:72%; float:left;'  id='MontoModal'>" + curr + " " + ttSolicitado.toFixed(2) + " " + moneda +
+
+                        ('@ViewBag.PerfilEditarMonto' == 'True' ?
+                            "<button type='button' style='font-size:15px;margin-left: 10px;cursor:pointer' id='btnEditarMontoModal' title='EditarMonto' class='border-0 btn-transition btn btn-outline-secondary' onclick='MostrarEdicionMontoModal()' ><i class='fa fa-pen'></i></button>" : ""
+
+                        ) + "</div><div style='width: 72 %; float: left;' id='MontoActualizarModal' hidden>" + curr + " " +
+                                                            "<input type='text' id='MontoEditarModal'  value = '" + ttSolicitado.toFixed(2) + "' style='width:50%'>"+
+                                                            "<button type='button' style='font-size:15px;margin-left: 10px;cursor:pointer' id='btnActualizarMonto' title='EditarMonto' class='border-0 btn-transition btn btn-outline-secondary' onclick='EditarMontoModal(" + id+","+ttRendido +")' ><i class='fa fa-save'></i></button></div>"+
+                                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Accountability:</div>" +
+                                                            "<div style='width:72%; float:left;'>" + curr + " " + ttRendido.toFixed(2) + " " + moneda + "</div>" +
+                                                            "<div style='width:28%; float:left; color:#444444;'>Devolución:</div>" +
+                                                            "<div style='width:72%; float:left;'>" + curr + " " + devol.toFixed(2) + " " + moneda + "</div>" +
+                                                            "<div style='width:28%; float:left; color:#444444;'>Devolución al trabajador:</div>" +
+                                                            "<div style='width:72%; float:left;'>" + curr + " " + reint.toFixed(2) + " " + moneda + "</div>" +
+                                                            "<div style='width:100%; float:left; margin-top:10px; color:#444444;  text-transform:none;'>@ResourceLanguaje.Resource.ReceptionRequestMsn</div>" +
+                                                        "</div>" +
+                                                   "</div>"+
+                                                "</div>");
+
+                    $("#modal-content").append("<div class='modal-footer'>"+
+                                                   "<div style='width:100%;'>" +
+                                                      "<div style='width:95%; margin:0 auto; text-align:right;'>" +
+                                                         "<div style='width:100%; margin-top:10px;'>" +
+                                                              "<button id='btnYesRec' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>" +
+                                                              "&nbsp;&nbsp;<button id='btnNORec' class='k-button' style='font-size:.9em;'>No</button>" +
+                                                            "</div>" +
+                                                     "</div>" +
+                                                  "</div>"+
+                                              "</div>");
+                    var undo = $("#btnYesRec")
+                        .bind("click", function () {
+
+                            $.ajax({
+                                url: "/RequestExpense/ReceptionRequest/" + id,
+                                data: "var=" + Math.random(),
+                                type: "GET",
+                                dataType: "text",
+                                success: function (resp) {
+                                    if (resp == 'OK') {
+                                        toastr.success("@ResourceLanguaje.Resource.ReceptionRequestMsnOK", "@ResourceLanguaje.Resource.InformationSaved");
+                                        $("[data-dismiss=modal]").trigger({ type: "click" });
+                                        setTimeout(function () {
+                                            location.reload();
+                                        }, 1000);
+                                    }
+                                    else if(resp == 'Error Editar'){
+
+                                        toastr.warning("Puede editar el monto de la solicitud. Presionando el lapiz que esta al lado del monto solicitado.", "ALERTA");
+                                    } else {
+                                        toastr.warning("No se puede realizar la solicitud de recepción de documentos.", "");
+                                    }
+                                },
+                                error: function (resp) {
+                                    toastr.error("Ha ocurrido un error, contacte al administrador","");
+                                }
+                            });
+                        });
+
+                    var undo = $("#btnNORec")
+                        .bind("click", function () {
+                            $("[data-dismiss=modal]").trigger({ type: "click" });
+                        });
+                        }
+                    });
+    }
+
+    function NewDocument(id, curr, soli) {
+        $("#lblTitulo").text("Nuevo Documento");
+
+        $(".modal-dialog").removeClass("modal-lg");//modal-lg
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/DocumentExpense/viewNewPettyCash?var=" + Math.random() + "&id2=" + soli+ "&id=" + id + "&id1=" + curr );
+    }
+
+    function MostrarEdicionMonto() {
+        $('#Monto').hide();
+        $('#MontoActualizar').removeAttr('hidden');
+    }
+
+    function MostrarEdicionMontoModal() {
+        $('#MontoModal').hide();
+        $('#MontoActualizarModal').removeAttr('hidden');
+    }
+
+    function EditarMonto(id,idestado) {
+
+        var montoActualizar = $('#MontoEditar').val();
+
+        $.ajax({
+            url: "/RequestExpense/EditarMonto/" + id,
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "text",
+            data: {
+                IdEstado: idestado,
+                MontoActualizar: montoActualizar
+            },
+            success: function (resp) {
+                if (resp == 'OK') {
+                    toastr.success("Monto actualizado correctamente.", "Guardado");
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+
+                }
+                else if (resp == 'ERROR') {
+                    toastr.warning("El monto debe ser el mismo al rendido. Genere una nueva solicitud si el monto es distinto.", "ALERTA");
+                }
+            }
+
+        });
+    }
+
+    function EditarMontoModal(id,ttre) {
+
+        var montoActualizar = $('#MontoEditarModal').val();
+
+        $.ajax({
+            url: "/RequestExpense/EditarMontoModal/" + id,
+            data: "var=" + Math.random(),
+            type: "GET",
+            dataType: "text",
+            data: {
+                MontoActualizar: montoActualizar,
+                MontoRendido: ttre
+            },
+            success: function (resp) {
+                if (resp == 'OK') {
+                    toastr.success("Monto actualizado correctamente.", "Guardado");
+                    setTimeout(function () {
+                        location.reload();
+                    }, 1000);
+
+                }
+                else if (resp == 'ERROR') {
+                    toastr.warning("El monto debe ser el mismo al rendido. Genere una nueva solicitud si el monto es distinto.", "ALERTA");
+                }
+            }
+
+        });
+    }
+
+
+
+    function uploadDoneMsn(msg, msnErr) {
+        if (msg == 'OK PettyCash') {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("@ResourceLanguaje.Resource.PettyCashMsn00", "@ResourceLanguaje.Resource.InformationSaved");
+            LoadDocuments(@ViewBag.id);
+        }
+        else if (msg == 'OK Reject') {
+            toastr.success(msnErr,"@ResourceLanguaje.Resource.InformationSaved");
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            LoadDocuments(@ViewBag.id);
+        }
+        else if (msg == 'OK Payment') {
+            toastr.success(msnErr,"@ResourceLanguaje.Resource.InformationSaved");
+
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            LoadDocuments(@ViewBag.id);
+        }
+        else if (msg == 'OK Delete') {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.error("Eliminado correctamente", "Documento de Gastos");
+            LoadDocuments(@ViewBag.id);
+        }
+        else if (msg == 'Update PettyCash') {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.warning("Actualizado correctamente", "Documento de Gastos");
+            LoadDocuments(@ViewBag.id);
+
+        }
+        else {
+                toastr.error(msnErr,"@ResourceLanguaje.Resource.InformationMissing");
+        }
+    }
+
+
+</script>
+

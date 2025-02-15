@@ -1,0 +1,193 @@
+﻿@model ERPElectrodata.Models.EncuestaConfiguracion
+@{
+    ViewBag.Title = "EncuestaConfiguracion";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional 
+        });
+    });
+</script>
+<style type="text/css">
+    a.tooltip span {
+        cursor: default;
+        display: none;
+        padding: 5px;
+        margin: -25px 0px 0px 120px;
+        width: 230px;
+        position: relative;
+        z-index: 9;
+    }
+
+    a.tooltip:hover span {
+        display: block;
+        position: absolute;
+        background: #000;
+        border: 1px solid #cccccc;
+        color: #ddd;
+        font-size: 14px;
+        font-weight: normal;
+        opacity: 0.9;
+    }
+
+    .bg-primary {
+        background-color: rgb(81, 104, 130);
+        font-size: 13px;
+    }
+
+    .detalle {
+        font-size: 13px;
+        color: #7F7F7F;
+    }
+
+    .contenido {
+        background: #DCDCDE;
+    }
+
+    #BtnEditar {
+        color: #2D5C88;
+        background: #ffffff;
+        border: 0;
+    }
+
+    #Enviar {
+        color: #2D5C88;
+        background: #ffffff;
+        border: 0;
+    }
+
+
+    #caja {
+        /*border:1px solid black;*/
+        height: 25px;
+        padding-top: -5px;
+    }
+
+    #pagerdivPrograma {
+        margin-top: 0;
+        padding-top: 0;
+    }
+
+    #exportar {
+        /*clear:both;*/
+        float: right;
+        height: 28px;
+        width: 70px;
+    }
+
+    #Buscar {
+        margin-right: 20px;
+    }
+
+    b {
+        color: #F83C50;
+    }
+
+    .bg-primary {
+        
+    }
+</style>
+<div class="afterMain" id="divContainerCrearCuenta">
+    <div style="float: left; width:100%">
+        <div class="titleForm">
+            <div class="title">
+                Reporte de Encuestas
+            </div>
+        </div>
+
+        <div class="bodyForm" id="divNuevaLicencia">
+            <div class="inbodyform">
+
+                <!--Declaración de Formulario-->
+                    @Html.ValidationSummary(true)
+                    <fieldset>
+                        <legend>Sub Tipo Componente</legend>
+
+                        <div class="divFondoUno">
+                            @*<form id="Parametros">*@
+                                @if (Convert.ToInt32(Session["ID_ACCO"]) == 4)
+                                {
+                                    <div class="divSpace3"></div>
+                                    <div style="float:left;">
+                                        <div class="editor-label">
+                                            Cuenta <b>(*)</b>
+                                        </div>
+                                        <div class="editor-field">
+                                            @Html.TextBoxFor(model => model.IdAcco)
+                                            @Html.ValidationMessageFor(model => model.IdAcco)
+                                        </div>
+                                    </div>
+                                }
+                                <div style="float: left; margin: 0px 10px 0px 10px;">Desde :<br /><input type="text" id="FechaInicio" name="FechaInicio" /></div>
+                                <div style="float: left; margin: 0px 10px 0px 10px; ">Hasta :<br />  <input type="text" id="FechaFin" name="FechaFin" /></div>
+                                <div style="float: left;"><button id="btnBuscar" class="k-button" style="margin: 15px;">Buscar</button></div>
+                                <div id="rs-priority-wrapper" style="display: none;" class="inBodyForm">
+                                    <iframe id="rptEncuestas" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+                                </div>                        
+                        @*</form>*@
+                        </div>
+                    </fieldset>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () { 
+
+        $("#btnBuscar").click(function () { //&FechaInicio=11/20/2017 2:12 PM&FechaFin=11/20/2017 2:12 PM&IdAcco=19
+            $("#rs-priority-wrapper").show();
+            //alert("&FechaInicio=" + $("#FechaInicio").val() + "&FechaFin=" + $("#FechaFin").val() + "&IdAcco=" + $("#IdAcco").val());
+            window.frames["rptEncuestas"].src = "/Reporting/EncuestaConfiguracion/ReporteEncuesta.aspx?var=" + Math.random()
+                + "&FechaInicio=" + $("#FechaInicio").val() + "&FechaFin=" + $("#FechaFin").val() + "&IdAcco=" + $("#IdAcco").val();
+        });
+
+        var today = new Date();
+        var FechaInicio = $("#FechaInicio").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+        var FechaFin = $("#FechaFin").kendoDateTimePicker({
+            value: today
+        }).data("kendoDateTimePicker");
+
+        var IdCuenta;
+
+        var Acco = $("#IdAcco").kendoComboBox({
+            autoBind: false,
+            dataTextField: "NAM_ACCO",
+            dataValueField: "ID_ACCO",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TipoActivo/ListarCuentaTipoActivo?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        Acco.bind("change", function (e) {
+            IdAcco = Acco.dataItem().ID_ACCO;
+        });
+
+    });
+
+    
+
+</script>

@@ -1,0 +1,529 @@
+﻿@{
+    ViewBag.Title = "MantenimientoCategoriasGF";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<body>
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-settings"></i>
+                </div>
+                <div>
+                    Configuración de Automatización - Categorias
+                    <div class="page-title-subheading">Agregar, editar o eliminar las asignación de la categoria.</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        <div class="mb-3 card">
+            <div class="card-header-tab card-header">Búsqueda de Categoria</div>
+            <div class="card-body">
+                <div id="divFindAsset">
+                    @using (Html.BeginForm("ExportarCategoria", "Administrator", FormMethod.Post, new { id = "FormCategoria", name = "FormCategoria", target = "ut_category" }))
+                    {
+                        <fieldset>
+                            <div class="row">
+                                <div class="col-sm-6 col-lg-2">
+                                    <div class="editor-label">
+                                        Categoria 1
+                                    </div>
+                                    @Html.Editor("ID_CATE_N1")
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <div class="editor-label">
+                                        Categoria 2
+                                    </div>
+                                    @Html.Editor("ID_CATE_N2")
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <div class="editor-label">
+                                        Categoria 3
+                                    </div>
+                                    @Html.Editor("ID_CATE_N3")
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <div class="editor-label">
+                                        Categoria 4
+                                    </div>
+                                    @Html.Editor("ID_CATE_N4")
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <div class="editor-label">
+                                        Área Responsable
+                                    </div>
+                                    @Html.Editor("ID_QUEU")
+                                </div>
+                                <div class="col-sm-6 col-lg-2">
+                                    <div class="editor-label">
+                                        Personal Asignado
+                                    </div>
+                                    @Html.Editor("ID_PERS_ENTI")
+                                </div>
+                                <div class="col-sm-6 col-lg-2 mt-3">
+                                    <button id="btnBuscar" type="button" class="btn btn-primary btn-block" onclick="buscarCategoriasxfiltro(); return false;">
+                                        <i class="fa fa-search"></i> Buscar
+                                    </button>
+                                </div>
+                                <div class="col-sm-6 col-lg-2 mt-3">
+                                    <button id="btnAgregarConfiguracion" class="btn btn-success btn-block" data-toggle="modal" data-target="#miModal" onclick="AgregarConfiguracion(); return false;">
+                                        <i class="fa fa-plus"></i> Agregar configuración
+                                    </button>
+                                </div>
+
+                            </div>
+
+                        </fieldset>
+                    }
+
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="bodyForm">
+        <div class="inBodyForm" style="height:100%; background-color:white">
+            <div style="width:100%">
+                <table id="tbTipoServicio" class="table table-hover table-striped table-bordered" style="width:100%">
+                    <thead class="bg-primary" style="color:white">
+                        <tr>
+                            <th>Categoria 1</th>
+                            <th>Categoria 2</th>
+                            <th>Categoria 3</th>
+                            <th>Categoria 4</th>
+                            <th>Area Responsable</th>
+                            <th>Personal a Cargo</th>
+                            <th>TipoTicket</th>
+                            <th>Detalle Cabecera</th>
+                            <th>Opciones</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+            <div style="float:left; width:100%"><hr /></div>
+            <div id="gridCategory" class="contentView"></div>
+            <div id="pagerCategory" class="contentViewPager" style="width:99%"></div>
+        </div>
+    </div>
+
+    <footer>
+        <iframe id="upload_target" name="upload_target" src="" style="display:none;"></iframe>
+    </footer>
+</body>
+<script>
+
+    $(document).ready(function () {
+        buscarCategorias();
+        var ID_QUEU = $("#ID_QUEU").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            dataTextField: "QUEU",
+            dataValueField: "ID_QUEU",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListByAcco?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_QUEU.dataItem()) {
+                    $('#ID_QUEU').attr('value', ID_QUEU.dataItem().ID_QUEU);
+                }
+                else {
+                    $('#ID_QUEU').attr('value', 0);
+                }
+                $("#ID_PERS_ENTI").data("kendoComboBox").value("");
+            }
+        }).data("kendoComboBox");
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_QUEU",
+            filter: "contains",
+            dataTextField: "ASSI",
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+
+        var ID_CATE_N1 = $("#ID_CATE_N1").kendoComboBox({
+            autoBind: false,
+            filter: "contains",
+            dataTextField: "NAM_CATE",
+            dataValueField: "ID_CATE",
+            dataSource: {
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategoryGF?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N1.dataItem()) {
+                    $('#ID_CAT_N1').attr('value', ID_CATE_N1.dataItem().ID_CATE);
+                }
+                else {
+                    $('#ID_CAT_N1').attr('value', 0);
+                }
+                $("#ID_CATE_N2").data("kendoComboBox").value("");
+                $("#ID_CATE_N3").data("kendoComboBox").value("");
+                $("#ID_CATE_N4").data("kendoComboBox").value("");
+                $('#ID_CAT_N4').attr('value', 0);
+                $('#ID_CAT_N3').attr('value', 0);
+                $('#ID_CAT_N2').attr('value', 0);
+
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N2 = $("#ID_CATE_N2").kendoComboBox({
+            autoBind: false,
+            cascadeFrom: "ID_CATE_N1",
+            filter: "contains",
+            dataTextField: "NAM_CATE2",
+            dataValueField: "ID_CATE2",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory2?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N2.dataItem()) {
+                    $('#ID_CAT_N2').attr('value', ID_CATE_N2.dataItem().ID_CATE2);
+                }
+                else {
+                    $('#ID_CAT_N2').attr('value', 0);
+                }
+                $("#ID_CATE_N3").data("kendoComboBox").value("");
+                $("#ID_CATE_N4").data("kendoComboBox").value("");
+                $('#ID_CAT_N4').attr('value', 0);
+                $('#ID_CAT_N3').attr('value', 0);
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N3 = $("#ID_CATE_N3").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_CATE_N2",
+            filter: "contains",
+            dataTextField: "NAM_CATE3",
+            dataValueField: "ID_CATE3",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory3?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N3.dataItem()) {
+                    $('#ID_CAT_N3').attr('value', ID_CATE_N3.dataItem().ID_CATE3);
+                }
+                else {
+                    $('#ID_CAT_N3').attr('value', 0);
+                }
+                $("#ID_CATE_N4").data("kendoComboBox").value("");
+                $('#ID_CAT_N4').attr('value', 0);
+            }
+        }).data("kendoComboBox");
+
+        var ID_CATE_N4 = $("#ID_CATE_N4").kendoComboBox({
+            autoBind: true,
+            cascadeFrom: "ID_CATE_N3",
+            filter: "contains",
+            dataTextField: "NAM_CATE4",
+            dataValueField: "ID_CATE4",
+            dataSource: {
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/CategoryTicket/ListCategory4?var=" + Math.random()
+                }
+            },
+            change: function (e) {
+                if (ID_CATE_N4.dataItem()) {
+                    $('#ID_CAT_N4').attr('value', ID_CATE_N4.dataItem().ID_CATE4);
+                }
+                else {
+                    $('#ID_CAT_N4').attr('value', 0);
+                }
+            }
+        }).data("kendoComboBox");
+
+    });
+
+    function AgregarConfiguracion() {
+        console.log("Entro a la funcion");
+        $("#lblTitulo").text("Agregar Configuración");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/CategoryTicket/AgregarConfiguracionCategoriaGF");
+    }
+
+    function EditCategory(id) {
+
+        console.log("Entro a la funcion - EDITAR");
+        $("#lblTitulo").text("Editar Configuración");
+
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+
+        $('#modal-content').empty();
+        $('#modal-content').load("/CategoryTicket/EditarConfiguracionCategoriaGF?id=" + id);
+    }
+
+    function buscarCategoriasxfiltro() {
+
+        event.preventDefault();
+        var leng_esp = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Sin resutados. ",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+
+        $('#tbTipoServicio').DataTable().destroy();
+        $('#tbTipoServicio').empty();
+
+        $('#tbTipoServicio').DataTable({
+            responsive: true,
+            dom: 'frtip',
+            select: true,
+            ajax: {
+                url: "/CategoryTicket/BuscarCategoriaxFiltro/?var=" + Math.random() + "&" + $('#FormCategoria').serialize(),
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "categoria1", title: "Categoria 1"
+                },
+                {
+                    data: "categoria2", title: "Categoria 2"
+                },
+                {
+                    data: "categoria3", title: "Categoria 3"
+                },
+                {
+                    data: "categoria4", title: "Categoria 4"
+                },
+                {
+                    data: "area", title: "Area Responsable"
+                },
+                {
+                    data: "personal", title: "Personal a Cargo"
+                },
+                {
+                    data: "tipoTicket", title: "Tipo Ticket"
+                },
+                {
+                    data: "detalleCabecera", title: "Detalle cabecera"
+                },
+                {
+                    data: null,
+                    title: "Opciones",
+                    render: function (data, type, row) {
+                        let categoryId = 0;
+
+                        return '<div><center>' +
+                            '<span class="fa fa-pencil-alt btnAbrirModal" style="cursor: pointer;" data-toggle="modal" data-target="#miModal" onclick="EditCategory(' + data.IdConfiguracionCategoria + ')"></span> ' +
+                            '<span class="fa fa-window-close btnAbrirModal" onclick="deleteCategory(' + data.IdConfiguracionCategoria + ')" style="cursor: pointer;"></span>' +
+                            '</center></div>';
+                    }
+
+                }
+            ],
+
+            language: leng_esp
+        });
+
+
+    }
+
+    function buscarCategorias() {
+        var leng_esp = {
+            "sProcessing": "Procesando...",
+            "sLengthMenu": "Mostrar _MENU_ registros",
+            "sZeroRecords": "No se encontraron resultados",
+            "sEmptyTable": "Sin resultados",
+            "sInfo": "Mostrando del _START_ al _END_ de _TOTAL_ registros",
+            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
+            "sInfoPostFix": "",
+            "sSearch": "Buscar:",
+            "sUrl": "",
+            "sInfoThousands": ",",
+            "sLoadingRecords": "Cargando...",
+            "oPaginate": {
+                "sFirst": "Primero",
+                "sLast": "Último",
+                "sNext": "Siguiente",
+                "sPrevious": "Anterior"
+            },
+            "oAria": {
+                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+            },
+            "buttons": {
+                "copy": "Copiar",
+                "colvis": "Visibilidad"
+            }
+        };
+
+        $('#tbTipoServicio').DataTable().destroy();
+        $('#tbTipoServicio').empty();
+
+        $('#tbTipoServicio').DataTable({
+            responsive: true,
+            dom: 'frtip',
+            select: true,
+            ajax: {
+                url: "/CategoryTicket/BuscarCategoria/?var=" + Math.random() + "&" + $('#FormCategoria').serialize(),
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "categoria1", title: "Categoria 1"
+                },
+                {
+                    data: "categoria2", title: "Categoria 2"
+                },
+                {
+                    data: "categoria3", title: "Categoria 3"
+                },
+                {
+                    data: "categoria4", title: "Categoria 4"
+                },
+                {
+                    data: "area", title: "Area Responsable"
+                },
+                {
+                    data: "personal", title: "Personal a Cargo"
+                },
+                {
+                    data: "tipoTicket", title: "Tipo Ticket"
+                },
+                {
+                    data: "detalleCabecera", title: "Detalle cabecera"
+                },
+                {
+                    data: null,
+                    title: "Opciones",
+                    render: function (data, type, row) {
+                        let categoryId = 0;
+
+                        return '<div><center>' +
+                            '<span class="fa fa-pencil-alt btnAbrirModal" style="cursor: pointer;" data-toggle="modal" data-target="#miModal" onclick="EditCategory(' + data.IdConfiguracionCategoria + ')"></span> ' +
+                            '<span class="fa fa-window-close btnAbrirModal" onclick="deleteCategory(' + data.IdConfiguracionCategoria + ')" style="cursor: pointer;"></span>' +
+                            '</center></div>';
+                    }
+
+                }
+            ],
+
+            language: leng_esp
+        });
+
+    }
+
+    $("#BtnBuscarCategoria").click(function (event) {
+        event.preventDefault();
+        buscarCategoriasxfiltro();
+    });
+
+    function deleteCategory(idConfiguracion) {
+        debugger;
+        swal({
+            title: 'Si elimina una configuración Padre se eliminarán sus dependencia. ¿Esta seguro de eliminar la configuración?',
+            type: 'info',
+            focusConfirm: false,
+            confirmButtonText: 'Continuar',
+            confirmButtonAriaLabel: 'Thumbs up, great!',
+            showCancelButton: true,
+            cancelButtonText: 'Cancelar',
+            cancelButtonColor: '#d33',
+            preConfirm: function () {
+                console.log('Second button clicked');
+            }
+        }, function () {
+            $.ajax({
+                url: "/CategoryTicket/EliminarConfiguracion",
+                data: { IdConfiguracion: idConfiguracion },
+                type: 'POST',
+                success: function (response) {
+                    swal({
+                        title: 'Configuracion Eliminada',
+                        type: 'success',
+                        confirmButtonText: 'Continuar',
+                    });
+
+                    setTimeout(function () {
+                        buscarCategorias();
+                    }, 1000);
+                },
+                error: function (error) {
+                    console.log(error);
+                }
+            });
+        })
+    }
+
+</script>

@@ -1,0 +1,146 @@
+﻿@{
+    ViewBag.Title = "DetalleOC";
+    Layout = null;
+}
+
+@{
+    ViewBag.Title = "DetalleOC";
+    Layout = null;
+}
+
+<style>
+    .table-empresa {
+        border-collapse: collapse;
+        width: 100%;
+    }
+
+        .table-empresa th,
+        .table-empresa td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .table-empresa th {
+            background-color: #2c395b;
+            color: white;
+        }
+
+        .table-empresa tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .table-empresa tbody tr:hover {
+            background-color: #ddd;
+        }
+        
+
+</style>
+
+<div id="registroInfodetalle"></div>
+<div class="container" style="height: 580px;">
+    <div class="form-group row">
+        <div class="card">
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1">
+                        <div class="table-wrapper" style="max-height: 550px; overflow-y: scroll; overflow-x: auto;">
+                            <div class="table-responsive" style="width: fit-content;">
+                                <table id="tbDetalleOCITMS" class="table table-bordered table-striped table-empresa">
+                                    <thead style="font-size: 12px;">
+                                        <tr>
+                                            <th>Num. Doc.</th>
+                                            <th>IT</th>
+                                            <th>Sub IT</th>
+                                            <th>Alm</th>
+                                            <th>Cod. Art.</th>
+                                            <th>Artículo</th>
+                                            <th>P.U. Costo</th>
+                                            <th>P.U. Vta.</th>
+                                            <th>Cantidad</th>
+                                            <th>Prec. Costo</th>
+                                            <th>Prec. Vta.</th>
+                                            <th>% DSC. 1</th>
+                                            <th>Pre. Vta c/Desc</th>
+                                            <th>% Imp. 1</th>
+                                            <th>Pre. Vta. Total</th>
+                                            <th>Ademon</th>
+                                            <th>Ademoncan</th>
+                                            <th>Adecan</th>
+                                            <th>AdecanMon</th>
+                                            <th>SalArt</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="font-size: 12px;"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        var Tipo = "@ViewBag.Tipo";
+        var NumDoc = "@ViewBag.NumDoc";
+
+        ListadoDetalleOC(Tipo, NumDoc);
+    });
+
+    function ListadoDetalleOC(TipoOC, NumDocOC) {
+        $.ajax({
+            url: '/OrderForm/ListarDetalleOC/',
+            type: 'GET',
+            data: {
+                TipoOC: TipoOC,
+                NumDocOC: NumDocOC
+            },
+            dataType: 'json',
+            success: function (response) {
+                if (response && response.Data) {
+                    var data = response.Data;
+                    var totalRegistros = data.length;
+                    $('#registroInfodetalle').html('<div>&nbsp&nbsp&nbspMostrando <b>' + totalRegistros + '</b> registros</div>');
+                    var tbody = $('#tbDetalleOCITMS tbody');
+                    tbody.empty();
+
+                    $.each(data, function (index, item) {
+
+                        var row = '<tr>' +
+                            '<td>' + item.NUMDOC + '</td>' +
+                            '<td>' + item.NUMITE + '</td>' +
+                            '<td>' + item.NUMITE1 + '</td>' +
+                            '<td>' + item.CODSUBALM + '</td>' +
+                            '<td>' + item.CODART + '</td>' +
+                            '<td>' + item.DESART + '</td>' +
+                            '<td>' + item.PUCOSTO + '</td>' +
+                            '<td>' + item.PUVENTA + '</td>' +
+                            '<td>' + item.CANTIDAD + '</td>' +
+                            '<td>' + item.PRECOS + '</td>' +
+                            '<td>' + item.PREVENTA + '</td>' +
+                            '<td>' + item.DSC001 + '</td>' +
+                            '<td>' + item.PVCDSC + '</td>' +
+                            '<td>' + item.IMP001 + '</td>' +
+                            '<td>' + item.PVTOTAL + '</td>' +
+                            '<td>' + item.ADEMON + '</td>' +
+                            '<td>' + item.ADEMONCAN + '</td>' +
+                            '<td>' + item.ADECAN + '</td>' +
+                            '<td>' + item.ADECANMON + '</td>' +
+                            '<td>' + item.SALART + '</td>' +
+                            '</tr>';
+                        tbody.append(row);
+
+                    });
+
+                } else {
+                    console.log('No se encontraron datos.');
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Error en la solicitud AJAX:', error);
+            }
+        });
+    }
+</script>

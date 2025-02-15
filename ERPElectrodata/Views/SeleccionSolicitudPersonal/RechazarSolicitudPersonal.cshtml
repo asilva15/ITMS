@@ -1,0 +1,157 @@
+﻿@model ERPElectrodata.Models.SolicitudRechazado
+
+@{
+    /**/
+
+    ViewBag.Title = "RechazarSolicitudPersonal";
+    Layout = null;
+}
+
+@*<script type="text/javascript" src="~/Content/ArchitectureUI/assets/scripts/main.js"></script>*@
+
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+
+<!--Declaración de Formulario-->
+@using (Html.BeginForm("RechazarSolicitudPersonal", "SeleccionSolicitudPersonal", FormMethod.Post, new { enctype = "multipart/form-data", id = "FormRechazar", target = "upload_target" }))
+{
+    <input type="hidden" id="IdSolicitudesRechazo" name="IdSolicitudesRechazo" value="@ViewBag.Id" />
+    <div class="box">
+        <!-- /.box-header -->
+        <div class="box-body">
+            <div class="form-group">
+                <table id="tablaSolicitudes" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Solicitante</th>
+                            <th>Vacante</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-lg-9">
+                        <br />
+                    </div>
+                    <div class="col-lg-3" id="btnGuardarCambio">
+                        <button id="submit" class="btn btn-sm btn-danger"> RECHAZAR</button>
+                        @*<button class="scrollup"><i class="glyphicon glyphicon-floppy-disk"></i>  scroll</button>*@
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        &nbsp;&nbsp; *Seleccione un motivo de rechazo
+        <!-- /.box-body -->
+    </div>
+}
+
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+
+<!--Cuadro necesario para enviar archivos Adjuntos sin realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" class="hidden" style="display:none"></iframe>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $('#tablaSolicitudes').dataTable().fnDestroy();
+        $('#tablaSolicitudes').DataTable().clear().destroy();
+        $('#tablaSolicitudes').DataTable({
+            //"order": [[4, "asc"]],
+            //dom: 'Bfrtip',
+            //"destroy": true,
+            ajax: {
+                "url": '/SeleccionSolicitudPersonal/ListarSolicitudesRechazar/',
+                "data": function (d) {
+                    d.IdSolicitudes = $("#IdSolicitudesRechazo").val();
+                }
+            },
+            columns: [
+                { data: "Solicitante" },
+                { data: "Cargo" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+
+                        $("#cbMotivo" + data.Id).select2({
+                            id: function (e) { return e.id; },
+                            placeholder: 'Seleccione...',
+                            minimumInputLength: 0,
+                            multiple: false,
+                            allowClear: true,
+                            ajax: {
+                                url: "/SeleccionSolicitudPersonal/ListarMotivoRechazo/",
+                                dataType: 'json',
+                                quietMillis: 100,
+                                data: function (params) {
+                                    return {
+                                        q: params.term,
+                                        page: params.page
+                                    };
+                                },
+                                processResults: function (data, page) {
+                                    return { results: data };
+
+                                },
+                            },
+                        });
+                        return "<select id='cbMotivo" + data.Id + "' name='cbMotivo" + data.Id + "' class='form - control input - sm select2' type='text' style='width: 100 %' required ></select>";
+                    }
+                },
+            ],
+            "bPaginate": false,
+            "info": false,
+            "searching": false,
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+
+    });
+
+
+    function MostrarMensajeRechazado(msg, descripcion) {
+
+        setTimeout(function () {
+            $(".modal-backdrop").remove();
+            $("#miModal").removeClass("show")
+        }, 180);
+
+        if (msg == "OK") {
+            toastr.success(descripcion, "");
+
+            setTimeout(function () {
+                location.reload();
+            }, 700);
+            
+        }
+        else if (msg == "VACIO") {
+            toastr.warning("Por favor, seleccione una solicitud como mínimo", "Mensaje");
+        }
+        else {
+            toastr.danger("Contacte al administrador.", "Error");
+        }
+    }
+
+
+</script>
+

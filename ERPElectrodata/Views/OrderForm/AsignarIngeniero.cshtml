@@ -1,0 +1,146 @@
+﻿@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("AsignarEspecialista", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAsignarEspec", target = "upload_target" }))
+{
+    @Html.Hidden("Id")
+    <div class="divFondoDos" style="padding:0px 0px 0px 15px;">
+        <div class="divCont2">
+            <div class="editor-label">
+                Area Responsable
+            </div>
+            <div class="editor-field">
+                @Html.TextBox("AreaResp")
+            </div>
+        </div>
+        <div class="divSpace2"></div>
+        <div class="divCont2">
+            <div class="editor-label">
+                Asignar a
+            </div>
+            <div class="editor-field">
+                @Html.Editor("Asignado")
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos" style="padding:0px 0px 0px 15px;">
+        <div class="editor-label">
+            No Aplica
+        </div>
+        <div class="editor-field">
+            @Html.CheckBox("Aplica", false)
+        </div>
+    </div>
+    <div class="divFondoDos">
+        <div class="divSpace2"></div>
+        <div style="width:95.5%;float:left;">
+            <div class="editor-label">
+                Comentarios
+            </div>
+            <div class="editor-field">
+                @Html.TextArea("ObsAsignarInge")
+            </div>
+        </div>
+    </div>
+    <div class="divFondoUno">
+        <div style="height:5px;clear:both;"></div>
+        <div style="float:right; padding:0px 15px 15px 5px;">
+            <div style="float:left; padding:0px 15px 0px 0px; ">
+                <div class="divSpace3"></div>
+                <div style="float:left; padding-top:10px">
+                    <button id="submit" class="k-button">Crear</button>
+                </div>
+                <div class="divSpace3"></div>
+                <div style="float:left; padding-top:10px">
+                    <button id="reset" class="k-button">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden"></iframe>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            closeWinFormModalPopUp();
+        });
+
+        $("Id").val(@ViewBag.ID_DOCU_SALE);
+
+        var AreaResp = $("#AreaResp").kendoComboBox({
+            dataTextField: "QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%; height:35px; position:relative; ">' +
+                        '<span><strong>${data.QUEU}</strong></span><br />' +
+                        '<span style="position:absolute; top:15px;">${data.DES_QUEU}</span></div>',
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountQueue/ListarOperaciones?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var Asignado = $("#Asignado").kendoComboBox({
+            autoBind: false,
+            index: 0,
+            cascadeFrom: "AreaResp",
+            dataTextField: "ASSI",
+            dataValueField: "ID_PERS_ENTI",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/AssigneByQueue?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        AreaResp.bind("change", function (e) {
+            Asignado.value(AreaResp.dataItem().ID_PERS_ENTI_ASSI_DEFA);
+        });
+
+        $("#ObsAsignarInge").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+    });
+</script>

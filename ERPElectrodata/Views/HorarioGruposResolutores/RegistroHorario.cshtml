@@ -1,0 +1,183 @@
+﻿@model ERPElectrodata.Models.GrupoHorario
+
+@{
+    ViewBag.Title = "RegistroHorario";
+}
+
+@{
+    Layout = null;
+}
+
+@*<div class="card-header card-header-tab-animation">
+        <ul class="nav nav-justified">
+            <li class="nav-item"><a data-toggle="tab" id="tabTicket" class="active nav-link" onclick="DetalleTicket(this)"><i class="fa fa-tasks"></i> Ticket</a></li>
+            <li class="nav-item"><a data-toggle="tab" id="tabOp" class="nav-link" onclick="DetalleOp(this)"><i class="fa fa-file"></i> OP</a></li>
+            <li class="nav-item"><a data-toggle="tab" id="tabViaticos" class="nav-link" onclick="DetalleViaticos(this)"><i class="fa fa-calendar"></i> Viáticos</a></li>
+            <li class="nav-item"><a data-toggle="tab" id="tabCambios" class="nav-link" onclick="DetalleCambios(this)"><i class="fa fa-cogs"></i> Gestión de Cambios</a></li>
+        </ul>
+    </div>*@
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<div id="divRegistroHorario">
+    <br />
+    <div class="mb-3 card">
+        <div class="card-header-tab card-header">
+            Registrar Horario
+        </div>
+        <div class="card-body">
+            <div class="tab-content">
+                <div class="tab-pane active">
+                    @using (Html.BeginForm("CrearSolicitud", "HorarioGruposResolutores", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmSolicitudVacaciones", target = "upload_target" }))
+                    {
+                        @Html.ValidationSummary(true)
+                        <fieldset>
+                            <div class="form-row">
+                                <div class="col-md-6" id="divAResponsable">
+                                    <div class="position-relative form-group">
+                                        <label id="lblAResponsable" for="cbAResponsable" class="">Área Responsable <span style="color:red">*</span></label>
+                                        <input type="text" name="cbResolutor" id="cbResolutor" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblMotivoVacante" for="IdMotivoVacante" class="">Hora de Inicio <span style="color:red">*</span> </label>
+                                        @Html.EditorFor(model => model.HoraInicio)
+                                        @Html.ValidationMessageFor(model => model.HoraInicio)
+                                    </div>
+                                </div>
+                                <div class="col-md-3" id="divCantidadVacante">
+                                    <div class="position-relative form-group">
+                                        <label id="lblCantidad" for="CantidadVacante" class="">Hora Fin <span style="color:red">*</span></label>
+                                        @Html.EditorFor(model => model.HoraFin)
+                                        @Html.ValidationMessageFor(model => model.HoraFin)
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-6" id="divDias">
+                                    <div class="position-relative form-group">
+                                        <label id="lblCantidad" for="CantidadVacante" class="">Días <span style="color:red">*</span></label><br />
+                                        @Html.CheckBox("Lunes", false)
+                                        @Html.ValidationMessageFor(model => model.Lunes)<label>Lunes</label>
+                                        @Html.CheckBox("Martes", false)
+                                        @Html.ValidationMessageFor(model => model.Martes) <label>Martes</label>
+                                        @Html.CheckBox("Miercoles", false)
+                                        @Html.ValidationMessageFor(model => model.Miercoles)<label>Miercoles</label>
+                                        @Html.CheckBox("Jueves", false)
+                                        @Html.ValidationMessageFor(model => model.Jueves) <label>Jueves</label><br />
+                                        @Html.CheckBox("Viernes", false)
+                                        @Html.ValidationMessageFor(model => model.Viernes) <label>Viernes</label>
+                                        @Html.CheckBox("Sabado", false)
+                                        @Html.ValidationMessageFor(model => model.Sabado) <label>Sabado</label>
+                                        @Html.CheckBox("Domingo", false)
+                                        @Html.ValidationMessageFor(model => model.Domingo) <label>Domingo</label>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="position-relative form-group">
+                                        <label id="lblMotivoVacante" for="IdMotivoVacante" class="">Feriados <span style="color:red">*</span> </label><br />
+                                        @*@Html.RadioButtonFor(model => model.Feriado, (String)"Si")*@
+                                        @Html.RadioButton("IsActive", true, false) <label>Si</label>
+                                        @*@Html.RadioButtonFor(model => model.Feriado, (String)"No", new { @checked = "checked" })*@
+                                        @Html.RadioButton("IsActive", false, true) <label>No</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="col-md-3">
+                                    <br />
+                                </div>
+                                <div class="col-md-3">
+                                    <br />
+                                </div>
+                                <div class="col-md-3">
+                                    <br />
+                                </div>
+                                <div class="col-md-3">
+                                    <button id="submit" class="btn btn-info btn-lg btn-block"><i class="fa fa-save"></i> Guardar</button>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <iframe id="upload_target" name="upload_target" src="" style="display:none;"></iframe>
+                    }                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var cbResolutor = $("#cbResolutor").kendoComboBox({
+            placeholder: "",
+            dataTextField: "NAME_QUEU",
+            dataValueField: "ID_QUEU",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/HorarioGruposResolutores/ListarResolutoresComboBox?var=" + Math.random()
+                }
+            }
+        });
+
+        var HoraIni = $("#HoraInicio").kendoTimePicker({
+            format: "hh:mm tt",
+            change: function () {
+                HoraInicio = this.value();
+            }
+        });
+
+        var HoraFin = $("#HoraFin").kendoTimePicker({
+            format: "hh:mm tt",
+            change: function () {
+                FechaFin = this.value();
+            }
+        });
+    });
+
+    function uploadDone(msg, code) {
+
+        if (msg == "OK") {
+            /*var title = 'Información Guardada';*/
+
+            toastr.success("Información Guardada.", "Horario Guardado");
+
+            $(".modal-backdrop").remove();
+            $("#miModal").removeClass("show");//'#modal-content
+            MostrarFormRegistro();
+            listarHorariosGResolutores();
+      
+
+        }
+        //En caso exista disconformidad se muestra mensaje
+        else {
+            var title = 'Advertencia';
+
+
+            swal({
+                title: title,
+                type: 'info',
+                text: code,
+                focusConfirm: false,
+                confirmButtonText:
+                    'Continuar',
+                confirmButtonAriaLabel: 'Thumbs up, great!'
+
+            })
+        }
+    }
+</script>
+
+
+
+

@@ -1,0 +1,72 @@
+﻿@{
+    ViewBag.Title = "TransferenciaActivos";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+
+<div class="mb-3 card">
+    <div class="card-header-tab card-header">
+        Formato de Transferencia de Activos - Cambio de Guardia
+    </div>
+    <div class="card-body">
+        <div id="mensaje"></div>
+        <div class="form-row">
+            <div class="col-md-3">
+                <div class="editor-label">
+                    Locación
+                </div>
+                <div class="editor-field">
+                    <select id="cbLocacion" class="form-control input-sm select2" type="text" style="width:100%"></select>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <br />
+                <button type="button" class="btn btn-primary btn-block" id="btnBuscar"><i class="fa fa-search"></i> Buscar</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div>
+    <iframe id="rptTransferenciaActivos" style="height:570px; width:100%;border: 0px #eee solid;"></iframe>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#cbLocacion").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                transport: function (params, callback) {
+                    $.ajax({
+                        url: "/Location/ListarLocacion/",
+                        dataType: 'json',
+                        data: {
+                            q: params.term,
+                            page: params.page
+                        },
+                        success: function (data) {
+                            callback(data);
+                        }
+                    });
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#btnBuscar").click(function () {
+            if ($('#cbLocacion').val() == null) {
+                toastr.warning("Debe seleccionar una locación.", "Mensaje");
+            } else {
+                $("#rs-priority-wrapper").show();
+                window.frames["rptTransferenciaActivos"].src = "/Reporting/Activo/RptTransferenciaActivos_CambioGuardia.aspx?var=" + Math.random()
+                    + "&IdLoca=" + $("#cbLocacion").val();
+            }
+        });
+    });
+</script>

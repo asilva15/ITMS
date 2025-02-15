@@ -1,0 +1,594 @@
+﻿@{
+    Layout = null;
+}
+
+<div id="FormFilterActivity" style="background-color: rgba(241,241,241,0.5)">
+    <div class="bodyForm">
+
+        <div class="inBodyForm">
+            <div id="allPerformance" style="width:100%;">
+                <div style="padding-left: 10px;">
+                    <div style="width: 100%; height: 55px; margin: 10px 10px 7px 0px; padding: 0px 0px 0px 0px; font-size: 0.95em;" id="divFiltro">
+                        <form id="ParamByPerson">
+                            @*<div style="float: left; margin: 0px 10px 0px 10px; ">Area:<br />  <input type="text" id="ID_AREA" name="ID_AREA" /></div>*@
+                            <div style="float: left; margin: 0px 10px 0px 10px;">Desde :<br /><input type="text" id="SIN_DATE" name="SIN_DATE" /></div>
+                            <div style="float: left; margin: 0px 10px 0px 10px; ">Hasta :<br />  <input type="text" id="TO_DATE" name="TO_DATE" /></div>
+                            <div style="float: left;"><button id="btnBuscar" class="k-button" style="margin: 15px;" onclick="fnBuscar(); return false;">Buscar</button></div>
+                        </form>
+                        <div style="clear:both;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="afterMain">
+    <div>
+        <div style="width: 100%; float:left;">
+            <div class="titleForm"><div class="title">Reporte Consolidado</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 650px;">
+                    <div id="ListOPALL" style="width: 100%; height: 650px; float: left;" ></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="clear: both; height: 10px;"></div>
+    @*<div>
+        <div style="width: 50%; float:left;">
+            <div class="titleForm"><div class="title">Infraestructura</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 450px;">
+                    <div id="ListInf" style="width:98%;height: 450px;"></div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 49%; height: 300px;float:right;">
+            <div class="titleForm"><div class="title">Arquitectura de TI</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 450px;">
+                    <div id="ListArq" style="width: 95%; height: 450px; float: left;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="clear: both; height: 10px;"></div>
+    <div>
+        <div style="width: 50%; float:left;">
+            <div class="titleForm"><div class="title">Virtualización y Seguridad</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 450px;">
+                    <div id="ListVyS" style="width:98%;height: 450px;"></div>
+                </div>
+            </div>
+        </div>
+        <div style="width: 49%; height: 300px;float:right;">
+            <div class="titleForm"><div class="title">Networking</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" style="height: 450px;">
+                    <div id="ListNwk" style="width: 95%; height: 450px; float: left;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div style="clear: both; height: 10px;"></div>*@
+</div>
+
+
+<script type="text/javascript">
+    function fnBuscar() { 
+        var parametros = {
+            inic: $("#SIN_DATE").val(),
+            fin: $("#TO_DATE").val(),
+            area: 0
+        };
+        $.ajax({
+            url: "/Activity/ListOpImplementationAll",
+            data: parametros,
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (json) {
+                var headerFormat = '<span style="font-size: 12px;font-weight:bold;">{point.key}</span><br/>';
+                var pointFormat = '<span style="color:{series.color}">{series.name}</span>: {point.y}<br/>';
+                //TODOS
+                var OPAll = new Array();
+                var hoursAll = new Array();                
+                $.each(json['ListOPAll'], function (index, value) {
+                    OPAll[index] = value['OP_ALL'];
+                    hoursAll[index] = value['TOTAL'] / 3600;                   
+                });
+                $('#ListOPALL').highcharts({
+                    chart: {
+                        type: 'column',
+                        marginTop: 20,
+                        zoomType: 'xy'
+                    },
+                    title: {
+                        text: null
+                    },
+                    xAxis: {
+                        categories: OPAll,
+                        title: {
+                            text: 'OP',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        gridLineWidth: 0,
+                        lineWidth: 0,
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        }
+                    },
+                    yAxis: {
+                        min: 0,
+                        title: {
+                            text: 'Cant. de Horas',
+                            align: 'high',
+                            style: {
+                                color: '#666',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        labels: {
+                            overflow: 'justify',
+                            style: {
+                                textTransform: 'capitalize'
+                            }
+                        },
+                        lineWidth: 1,
+                        gridLineWidth: 1
+                    },
+                    credits: {
+                        enabled: false
+                    },
+                    legend: {
+                        enabled: false
+                    },                   
+                    tooltip: {
+                        crosshairs: true,
+                        shared: true,
+                        valueSuffix: ' Hrs',
+                        valueDecimals: 1,
+                        headerFormat: headerFormat,
+                        pointFormat: pointFormat
+                    },
+                    plotOptions: {
+                        series: {
+                            stacking: 'normal',
+                        }
+                    },
+                    series: [{
+                        name: 'Total',
+                        data: hoursAll,
+                        cursor: 'pointer',
+                        point: {
+                            events: {
+                                click: function () {
+                                    var inic = $("#SIN_DATE").val();
+                                    var fin = $("#TO_DATE").val();
+                                    var op = this.category;
+                                    var url = "http://" + location.host + "/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + op;
+                                    window.open(url, '_blank');
+                                }
+                            }
+                        }
+                    }]
+                });
+        //        //Infraestructura
+        //        var OpInfraestructura = new Array();
+        //        var hoursInf = new Array();
+        //        $.each(json['ListInf'], function (index, value) {
+        //            OpInfraestructura[index] = value['OP_ALL'];
+        //            hoursInf[index] = value['TOTAL'] / 3600;
+        //        });
+        //        $('#ListInf').highcharts({
+        //            chart: {
+        //                type: 'column',
+        //                marginTop: 20,
+        //                zoomType: 'xy'
+        //            },
+        //            colors: ["#376092"],
+        //            title: {
+        //                text: null
+        //            },
+        //            xAxis: {
+        //                categories: OpInfraestructura,
+        //                title: {
+        //                    text: 'Horas',
+        //                    align: 'high',
+        //                    style: {
+        //                        color: '#666',
+        //                        fontWeight: 'bold'
+        //                    }
+        //                },
+        //                gridLineWidth: 0,
+        //                lineWidth: 0,
+        //                labels: {
+        //                    overflow: 'justify',
+        //                    style: {
+        //                        textTransform: 'capitalize'
+        //                    }
+        //                }
+        //            },
+        //            yAxis: {
+        //                min: 0,
+        //                title: {
+        //                    text: 'Cant. de Horas',
+        //                    align: 'high',
+        //                    style: {
+        //                        color: '#666',
+        //                        fontWeight: 'bold'
+        //                    }
+        //                },
+        //                labels: {
+        //                    overflow: 'justify',
+        //                    style: {
+        //                        textTransform: 'capitalize'
+        //                    },
+        //                },
+        //                lineWidth: 1,
+        //                gridLineWidth: 1
+        //            },
+        //            credits: {
+        //                enabled: false
+        //            },                     
+        //            tooltip: {
+        //                crosshairs: true,
+        //                shared: true,
+        //                valueSuffix: ' Hrs',
+        //                valueDecimals: 1,
+        //                headerFormat: headerFormat,
+        //                pointFormat: pointFormat
+        //            },
+        //            plotOptions: {
+        //                bar: {
+        //                    dataLabels: {
+        //                        enabled: false
+        //                    },
+        //                    shadow: false
+        //                }
+        //            },
+        //            legend: {
+        //                enabled: false
+        //            },
+        //            series: [{
+        //                name: 'Total',
+        //                data: hoursInf,
+        //                cursor: 'pointer',
+        //                point: {
+        //                    events: {
+        //                        click: function () {
+        //                            var inic = $("#SIN_DATE").val();
+        //                            var fin = $("#TO_DATE").val();
+        //                            var op = this.category;
+        //                            var url = "http://" + location.host + "/#/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + op;
+        //                            window.open(url, '_blank');
+        //                        }
+        //                    }
+        //                }
+        //            }]
+        //        });
+        //        //Arquitectura
+        //        var OPArq = new Array();
+        //        var hoursArq = new Array();
+        //        $.each(json['ListArq'], function (index, value) {
+        //            OPArq[index] = value['OP_ALL'];
+        //            hoursArq[index] = value['TOTAL'] / 3600;
+        //        });
+        //        $('#ListArq').highcharts({
+        //            chart: {
+        //                type: 'column',
+        //                marginTop: 20,
+        //                zoomType: 'xy'
+        //            },
+        //            colors: ["#95B3D7"],
+        //            title: {
+        //                text: null
+        //            },
+        //            subtitle: {
+        //                text: null
+        //            },
+        //            xAxis: {
+        //                categories: OPArq,
+        //                title: {
+        //                    text: 'OP',
+        //                    align: 'high',
+        //                    style: {
+        //                        color: '#666',
+        //                        fontWeight: 'bold'
+        //                    }
+        //                },
+        //                gridLineWidth: 0,
+        //                lineWidth: 0,
+        //                labels: {
+        //                    overflow: 'justify',
+        //                    style: {
+        //                        textTransform: 'capitalize'
+        //                    }
+        //                }
+        //            },
+        //            yAxis: {
+        //                min: 0,
+        //                title: {
+        //                    text: 'Cant. de Horas',
+        //                    align: 'high',
+        //                    style: {
+        //                        color: '#666',
+        //                        fontWeight: 'bold'
+        //                    }
+        //                },
+        //                labels: {
+        //                    overflow: 'justify',
+        //                    style: {
+        //                        textTransform: 'capitalize'
+        //                    }
+        //                },
+        //                lineWidth: 1,
+        //                gridLineWidth: 1
+        //            },
+        //            tooltip: {
+        //                crosshairs: true,
+        //                shared: true,
+        //                valueSuffix: ' Hrs',
+        //                valueDecimals: 1,
+        //                headerFormat: headerFormat,
+        //                pointFormat: pointFormat
+        //            },
+        //            plotOptions: {
+        //                bar: {
+        //                    dataLabels: {
+        //                        enabled: false
+        //                    },
+        //                    shadow: false
+        //                }
+        //            },
+        //            legend: {
+        //                enabled: false
+        //            },
+        //            credits: {
+        //                enabled: false
+        //            },
+        //            series: [{
+        //                name: 'Total',
+        //                data: hoursArq,
+        //                cursor: 'pointer',
+        //                point: {
+        //                    events: {
+        //                        click: function () {
+
+        //                            var inic = $("#SIN_DATE").val();
+        //                            var fin = $("#TO_DATE").val();
+        //                            var usr = this.category;
+        //                            var url = "http://" + location.host + "/#/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+        //                            window.open(url, '_blank');
+        //                        }
+        //                    }
+        //                }
+        //            }]
+        //        });
+        //        ////Virtualizacion y Servers
+        //        var OPVyS = new Array();
+        //        var hoursVyS = new Array();
+        //        $.each(json['ListVyS'], function (index, value) {
+        //            OPVyS[index] = value['OP_ALL'];
+        //            hoursVyS[index] = value['TOTAL'] / 3600;
+        //        });
+        //        $('#ListVyS').highcharts({
+        //            chart: {
+        //                type: 'column',
+        //                marginTop: 20,
+        //                zoomType: 'xy'
+        //            },
+        //            colors: ["#95B3D7"],
+        //            title: {
+        //                text: null
+        //            },
+        //            subtitle: {
+        //                text: null
+        //            },
+        //            xAxis: {
+        //                categories: OPVyS,
+        //                title: {
+        //                    text: 'OP',
+        //                    align: 'high',
+        //                    style: {
+        //                        color: '#666',
+        //                        fontWeight: 'bold'
+        //                    }
+        //                },
+        //                gridLineWidth: 0,
+        //                lineWidth: 0,
+        //                labels: {
+        //                    overflow: 'justify',
+        //                    style: {
+        //                        textTransform: 'capitalize'
+        //                    }
+        //                }
+        //            },
+        //            yAxis: {
+        //                min: 0,
+        //                title: {
+        //                    text: 'Cant. de Horas',
+        //                    align: 'high',
+        //                    style: {
+        //                        color: '#666',
+        //                        fontWeight: 'bold'
+        //                    }
+        //                },
+        //                labels: {
+        //                    overflow: 'justify',
+        //                    style: {
+        //                        textTransform: 'capitalize'
+        //                    }
+        //                },
+        //                lineWidth: 1,
+        //                gridLineWidth: 1
+        //            },
+        //            tooltip: {
+        //                crosshairs: true,
+        //                shared: true,
+        //                valueSuffix: ' Hrs',
+        //                valueDecimals: 1,
+        //                headerFormat: headerFormat,
+        //                pointFormat: pointFormat
+        //            },
+        //            plotOptions: {
+        //                bar: {
+        //                    dataLabels: {
+        //                        enabled: false
+        //                    },
+        //                    shadow: false
+        //                }
+        //            },
+        //            legend: {
+        //                enabled: false
+        //            },
+        //            credits: {
+        //                enabled: false
+        //            },
+        //            series: [{
+        //                name: 'Total',
+        //                data: hoursVyS,
+        //                cursor: 'pointer',
+        //                point: {
+        //                    events: {
+        //                        click: function () {
+
+        //                            var inic = $("#SIN_DATE").val();
+        //                            var fin = $("#TO_DATE").val();
+        //                            var usr = this.category;
+        //                            var url = "http://" + location.host + "/#/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+        //                            window.open(url, '_blank');
+        //                        }
+        //                    }
+        //                }
+        //            }]
+        //        });
+        //        ////Networking
+        //        var OPNwk = new Array();
+        //        var hoursNwk = new Array();
+        //        $.each(json['ListNwk'], function (index, value) {
+        //            OPNwk[index] = value['OP_ALL'];
+        //            hoursNwk[index] = value['TOTAL'] / 3600;
+        //        });
+        //        $('#ListNwk').highcharts({
+        //            chart: {
+        //                type: 'column',
+        //                marginTop: 20,
+        //                zoomType: 'xy'
+        //            },
+        //            colors: ["#95B3D7"],
+        //            title: {
+        //                text: null
+        //            },
+        //            subtitle: {
+        //                text: null
+        //            },
+        //            xAxis: {
+        //                categories: OPNwk,
+        //                title: {
+        //                    text: 'OP',
+        //                    align: 'high',
+        //                    style: {
+        //                        color: '#666',
+        //                        fontWeight: 'bold'
+        //                    }
+        //                },
+        //                gridLineWidth: 0,
+        //                lineWidth: 0,
+        //                labels: {
+        //                    overflow: 'justify',
+        //                    style: {
+        //                        textTransform: 'capitalize'
+        //                    }
+        //                }
+        //            },
+        //            yAxis: {
+        //                min: 0,
+        //                title: {
+        //                    text: 'Cant. de Horas',
+        //                    align: 'high',
+        //                    style: {
+        //                        color: '#666',
+        //                        fontWeight: 'bold'
+        //                    }
+        //                },
+        //                labels: {
+        //                    overflow: 'justify',
+        //                    style: {
+        //                        textTransform: 'capitalize'
+        //                    }
+        //                },
+        //                lineWidth: 1,
+        //                gridLineWidth: 1
+        //            },
+        //            tooltip: {
+        //                crosshairs: true,
+        //                shared: true,
+        //                valueSuffix: ' Hrs',
+        //                valueDecimals: 1,
+        //                headerFormat: headerFormat,
+        //                pointFormat: pointFormat
+        //            },
+        //            plotOptions: {
+        //                bar: {
+        //                    dataLabels: {
+        //                        enabled: false
+        //                    },
+        //                    shadow: false
+        //                }
+        //            },
+        //            legend: {
+        //                enabled: false
+        //            },
+        //            credits: {
+        //                enabled: false
+        //            },
+        //            series: [{
+        //                name: 'Total',
+        //                data: hoursNwk,
+        //                cursor: 'pointer',
+        //                point: {
+        //                    events: {
+        //                        click: function () {
+
+        //                            var inic = $("#SIN_DATE").val();
+        //                            var fin = $("#TO_DATE").val();
+        //                            var usr = this.category;
+        //                            var url = "http://" + location.host + "/#/DetailsActivity?SIN_DATE=" + inic + "&TO_DATE=" + fin + "&PALABRA_CLAVE=" + usr;
+        //                            window.open(url, '_blank');
+        //                        }
+        //                    }
+        //                }
+        //            }]
+        //        });
+            }
+        });
+    }
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        function addDays(theDate, days) {
+            return new Date(theDate.getTime() + days * 24 * 60 * 60 * 1000);
+        }
+        var yesterday = addDays(new Date(), -1);
+
+        var k_enddatetimepicker = $("#TO_DATE").kendoDatePicker({
+            value: new Date()
+        }).data("kendoDatePicker");
+
+        var k_startdatetimepicker = $("#SIN_DATE").kendoDatePicker({
+            value: yesterday
+        }).data("kendoDatePicker");
+    });    
+    fnBuscar();
+</script>
+

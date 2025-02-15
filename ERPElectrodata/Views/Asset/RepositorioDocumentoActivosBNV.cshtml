@@ -1,0 +1,262 @@
+﻿@{
+    ViewBag.Title = "RepositorioDocumentoActivosBNV";
+}
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/jquery.dataTables.min.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+
+<div class="app-page-title">
+    <div class="page-title-wrapper">
+        <div class="page-title-heading">
+            <div class="page-title-icon">
+                <i class="fa fa-regular fa-file icon-gradient bg-sunny-morning"> </i>
+            </div>
+            <div>
+                Activos - Documento
+                <div class="page-title-subheading">
+                    Repositorio de Documentos de Activos
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    <div class="card-header">
+        Buscar Documentos
+    </div>
+
+    <div class="card-body">
+        @using (Html.BeginForm("ExportarDocumentosAdjuntosBNV", "Asset", FormMethod.Post, new { enctype = "multipart/form-data", id = "formExportar", name = "formExportar", target = "upload_target" }))
+        {
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        Grupo
+                        <input id="IdGrupo" value="@ViewBag.IdGrupo" name="IdGrupo" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        Unidad Minera
+                        @Html.Editor("UMinera")
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        Usuario Asignado
+                        @Html.Editor("ID_PERS_ENTI")
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="form-group">
+                        Número de Serie
+                        <input class="k-textbox" style="width:100%" id="SER_NUMB" name="SER_NUMB" />
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group">
+                        Tipo Formato
+                        @Html.Editor("ID_TYPE_FORM")
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button id="Buscar" type="button" onclick="ListarDocumentos()" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Buscar</button>
+                </div>
+                <div class="col-md-2">
+                    <br />
+                    <button id="Submit" type="button" onclick="ExportarDocumentos()" class="btn btn-light btn-block"><i class="fa fa-file-excel"></i> Exportar</button>
+                </div>
+            </div>
+            <iframe id="upload_target" name="upload_target" src="" style="display:none;"></iframe>
+        }
+    </div>
+</div>
+<div class="main-card mb-3 card">
+    <div class="card-header">
+        Listado de documentos cargados
+    </div>
+
+    <div class="card-body">
+        <table class="align-middle mb-0 table table-borderless table-striped table-hover display responsive no-wrap" style="width: 100%; text-align: center;" id="tbDocumentos">
+            <thead>
+                <tr>
+                    <th class="text-center">Tipo Formato</th>
+                    <th class="text-center">Activo</th>
+                    <th class="text-center">Ticket</th>
+                    <th class="text-center">Usuario Asignado</th>
+                    <th class="text-center">Fecha Creación</th>
+                    <th class="text-center">Documento</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        var IdGrupo = $("#IdGrupo").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarGruposBNV/1?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var UMinera = $("#UMinera").kendoComboBox({
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Asset/ListarAllUMineraBNV?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_PERS_ENTI = $("#ID_PERS_ENTI").kendoComboBox({
+            dataTextField: "CLIE",
+            dataValueField: "ID_PERS_ENTI",
+            filter: "contains",
+            autoBind: false,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/CargarListaAfectadosBnv"
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_TYPE_FORM = $("#ID_TYPE_FORM").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            dataSource: [{
+                Nombre: "ASIGNACIÓN",
+                Id: "1"
+            }, {
+                Nombre: "RECEPCIÓN",
+                Id: "2"
+            }],
+            filter: "contains",
+        }).data("kendoComboBox");
+
+        ListarDocumentos();
+    });
+
+    function ListarDocumentos() {
+        var idGrupo = $("#IdGrupo").data("kendoComboBox").value();
+
+        if (!idGrupo) {
+            toastr.warning('Seleccione un grupo.');
+            return;
+        }
+
+        var idUMinera = $("#UMinera").val();
+        var idPersEnti = $("#ID_PERS_ENTI").data("kendoComboBox").value();
+        var numSerie = $("#SER_NUMB").val();
+        var idTipoFormato = $("#ID_TYPE_FORM").data("kendoComboBox").value();
+
+        toastr.warning('Límite: 900 registros.<br/>Para mejorar su búsqueda agregar parámetros adicionales.');
+
+        $('#tbDocumentos').dataTable().fnDestroy();
+        $('#tbDocumentos').dataTable({
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: {
+                url: "/Asset/ListarDocumentosAdjuntosBNV",
+                "data": function (d) {
+                    d.IdGrupo = idGrupo;
+                    d.IdUMinera = idUMinera;
+                    d.IdPersEnti = idPersEnti;
+                    d.NumSerie = numSerie;
+                    d.IdTipoFormato = idTipoFormato;
+                },
+                type: "GET",
+                dataSrc: "Data"
+            },
+            columns: [
+                {
+                    data: "TipoFormato"
+                },
+                {
+                    data: "NumeroSerie"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href="/DeliveryReception/Details/' + data.IdTicket + '" style="text-decoration:none;" title="' + data.CodigoTicket + '" target="_blank">' +
+                            '<span style="text-transform:capitalize;">' + data.CodigoTicket + '</span>' +
+                            '</a>'
+                    }
+                },
+                {
+                    data: "UsuarioAsignado"
+                },
+                {
+                    data: "FechaCreacion"
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        if (data.Archivos !== "") {
+                            var archivos = data.Archivos.split('|');
+
+                            /*return '<ul>' + archivos.map(archivo => `<li><a href="/Adjuntos/${data.TipoFormato}/60/${archivo}" target="_blank">${archivo}</a></li>`).join('') + '</ul>';*/
+                            return '<ul style="list-style-type:none;">' + archivos.map(archivo => `<li>${generarLink(archivo, data.TipoFormato)}</li>`).join('') + '</ul>';
+                        } else {
+                            return "Sin archivos adjuntos";
+                        }
+                    }
+                },
+            ]
+        });
+    }
+
+    function generarLink(archivo, tipoFormato) {
+        var p = archivo.split('/');
+        var nombre = p[0];
+        var extension = p[1];
+
+        var url = `/Adjuntos/${tipoFormato}/60/${nombre}_${extension}`
+        return '<img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;" />&nbsp;<a href="' + url + '" target="_blank">' + nombre + '</a>';
+    }
+
+    function ExportarDocumentos() {
+        var idGrupo = $("#IdGrupo").data("kendoComboBox").value();
+
+        if (!idGrupo) {
+            toastr.warning('Seleccione un grupo.');
+        } else {
+            $("#formExportar").submit();
+        }
+    }
+
+</script>

@@ -1,0 +1,239 @@
+﻿@model ERPElectrodata.Models.DOCUMENT_SALE
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>OPFromSIDIGE</title>
+</head>
+<body>
+    <div>
+@using (Html.BeginForm("OPFromSIDIGE", "Sales", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmOPFromSIDIGE", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+    
+    @Html.HiddenFor(model => model.ID_COMP)
+    @Html.HiddenFor(model => model.ID_TYPE_DOCU_SALE)
+    @Html.HiddenFor(model => model.NUM_DOCU_SALE)
+    @Html.HiddenFor(model => model.OS)
+    <div class="divFondoUno">
+        <div class="divSpace2"></div>
+        <div class="divCont2">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.FinalCustomer
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(model => model.ID_COMP_END)
+            </div>
+        </div>
+
+        <div class="divSpace2"></div>
+        <div class="divCont2">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.ExpirationTime
+            </div>
+            <div class="editor-field">
+                @Html.EditorFor(model => model.EXP_DATE)
+            </div>
+        </div>
+    </div>
+    
+    <div class="divFondoDos">
+            
+    <div class="divSpace2"></div>
+    <div style="width:95.5%;float:left;">
+        <div class="editor-label">
+            @ResourceLanguaje.Resource.Summary
+        </div>
+        <div class="editor-field">
+            @Html.TextAreaFor(model => model.SUM_DOCU_SALE)
+            @Html.ValidationMessageFor(model => model.SUM_DOCU_SALE)
+        </div>
+    </div>
+
+    </div>
+
+    <div class="divFondoUno">
+        <div class="divSpace2"></div>
+        <div class="divCont2" style="width:95.5%;">
+            <input name="files" id="files" type="file" />
+        </div>
+    </div>
+
+    <div class="divFondoUno">
+        <div style="height:5px;clear:both;"></div>
+
+        <div style="display:inline-block; float:right; padding:0px 15px 15px 5px;">
+            <div style=" float:left; padding:0px 15px 0px 0px; ">
+                <button id="submit" class="k-button">Create</button>
+            </div>
+            <button id="reset" class="k-button">@ResourceLanguaje.Resource.BtnCancel</button>
+        </div>
+    </div>
+}
+
+    <iframe id="upload_target" name="upload_target" src="" class="frameHidden"></iframe>
+
+    </div>
+</body>
+</html>
+
+<script type="text/javascript">
+
+    function uploadDone(msg, code) {
+
+        $("#dlgF").hide('200', "swing", function () {
+            $("#bkgF").fadeOut("300");
+        });
+
+        closeWinModalPopUpLoad();
+
+        if (msg == "OK") {
+
+            var title = '@ResourceLanguaje.Resource.InformationSaved / @ResourceLanguaje.Resource.NotificationSend';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                   + "<div style='padding:10px 0px 10px 0px;'>The information was succesfully saved</div>"
+                   + "<div style='padding:10px 0px 10px 0px;'>Code: " + code + "</div>"
+                   + "The notification was succesfully sent to: <br>Service Desk and IT Coordinator.<br>" +
+                   "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                   "<button id='btnContinues' class='k-button'>Continue</button>" +
+                   "</div></div>";
+
+            winPopUpModal(title, body, 400, 230);
+
+            $("#closebtnmodal").click(function () {
+                //location.reload(true);
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+                //RELOAD OP
+                Sales();
+            });
+
+            $("#btnContinues").click(function () {
+                //location.reload(true);
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+
+                Sales();
+            });
+
+        }
+        else {
+            var title = '@ResourceLanguaje.Resource.InformationMissing';
+            var body = "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>" +
+                "<div style='padding:10px 0px 10px 0px;'>" + code + "</div>" +
+                "<div style='float:right; padding:30px 6px 0px 6px; font-size:0.9em;'>" +
+                "<button id='btnContinuee' class='k-button'>Continue</button>" +
+                        "</div></div>";
+
+            winPopUpModal(title, body, 400, 150);
+
+            $("#btnContinuee").click(function () {
+                $("#dlg").hide('200', "swing", function () {
+                    $("#bkg").fadeOut("300");
+                });
+            });
+        }
+    }
+
+    $(document).ready(function () {
+
+        $("#reset").click(function (event) {
+
+            event.preventDefault();
+
+            $("#dlgF").hide('200', "swing", function () {
+                $("#bkgF").fadeOut("300");
+            });
+        });
+
+        $("#submit").click(function (event) {
+            winPopUpModalLoad('@ResourceLanguaje.Resource.Saving', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+        });
+        @*$("#submit").click(function (event) {
+            event.preventDefault();
+
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingYourTicket', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+
+            $.ajax({
+                url: "/Sales/OPFromSIDIGE/1?" + $('#FrmOPFromSIDIGE').serialize(),
+                type: "POST"
+            }).done(function (htmlX) {
+                console.log(htmlX);
+                if (htmlX == "OK") {
+                    $("#dlgF").hide('200', "swing", function () {
+                        $("#bkgF").fadeOut("300");
+                    });
+                    closeWinModalPopUpLoad();
+                }
+                else {
+                    alert(htmlX);
+                    closeWinModalPopUpLoad();
+                }
+                
+            }).fail(function (html) {
+                console.log(html);
+                closeWinModalPopUpLoad();
+                alert("ERROR");
+            });
+        });*@
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "@ResourceLanguaje.Resource.Attach"
+            }
+        });
+
+        var ID_COMP_END = $("#ID_COMP_END").kendoComboBox({
+            autoBind: false,
+            dataTextField: "COM_NAME",
+            dataValueField: "ID_ENTI",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                //serverFiltering: true,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/AccountEntity/ListCompanyByAccount?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var EXP_DATE = $("#EXP_DATE").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        $("#SUM_DOCU_SALE").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+    });
+</script>

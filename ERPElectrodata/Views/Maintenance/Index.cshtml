@@ -1,0 +1,79 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<nav>
+    <ul>
+        <li><a href="#" onclick="NewTicket(this)">@ResourceLanguaje.Resource.User</a></li>
+        @*<li onclick="FindTicket(this)"><a href="#">@ResourceLanguaje.Resource.FindTicket</a></li>
+        <li onclick="TicketReport(this)"><a href="#">@ResourceLanguaje.Resource.TicketReport</a></li>*@
+    </ul>
+</nav>
+
+<div id="gridUsers" class="contentView">
+
+</div>
+
+<div id="pagerUsers" class="contentViewPager">
+
+</div>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <div style="width:100%;border-bottom:1px solid; padding:5px 0px 5px 0px;display:inline-block;">
+        <div style="color:\\#515151; font-size:18px;">${LAS_NAME} ${FIR_NAME}</div>
+        Mobile Phone: ${CEL_ENTI}<br />
+        E-Mail:${EMA_ENTI}<br />
+        <div style="clear:both">
+            <div style="float:left">Genere:${SEX_ENTI}<br /></div>
+            <div style="float:right;"><a id="${ID_ENTI}" href="\#" onclick="AdminClass(this)">Admin</a></div>
+        </div>
+    </div>
+</script>
+
+<script type="text/javascript">
+    function AdminClass(link)
+    {
+        var id = link.id
+        //console.log(link.id);
+        $("#gridUsers").empty();
+        $("#pagerUsers").remove();
+        $("#gridUsers").load("/ClassEntity/Admin/" + id);
+    }
+    $(document).ready(function () {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/ClassEntity/ListPerson?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        $("#pagerUsers").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridUsers").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html())
+        });
+    });
+
+</script>

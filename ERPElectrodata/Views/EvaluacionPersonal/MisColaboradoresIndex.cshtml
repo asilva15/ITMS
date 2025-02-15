@@ -1,0 +1,170 @@
+﻿@{
+    Layout = null;
+}
+
+
+<style>
+</style>
+
+<div class="container-fluid">
+    @*@using (Html.BeginForm("GrabarEvaluacionPersonal", "EvaluacionPersonal", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEvaluacionDesempeno1", name = "FrmEvaluacionDesempeno1", target = "FrmEvaluacionDesempeno1" }))
+        {*@
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+    <div class="form-group row">
+        <div style="float:left;padding-top:1.5%">
+            Periodo: <input id="IdPeriodo" style="font-size:12px;" class="dropdownKendo"/>
+        </div><label>&nbsp;&nbsp;</label>
+        <div style="float:left;padding-top:1.5%">
+            Selecciones a un colaborador: <input id="IdEvaluado" style="font-size:12px;" class="dropdownKendo"/>
+        </div>
+
+    </div>
+
+    <div class="x_panel" style="padding-bottom:10px;">
+
+        <div class="x_content">
+            <!-- Smart Wizard -->
+            <div id="wizard" class="form_wizard wizard_horizontal">
+                <ul class="wizard_steps">
+                    <li>
+                        <a href="#step-1">
+                            <span class="step_no"><i class="glyphicon glyphicon-user"></i></span>
+                            <span class="step_descr" title="SGD - Objetivos">
+                                1. Objetivos<br />
+                                <small> </small>
+                            </span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#step-2">
+                            <span class="step_no"><i class="glyphicon glyphicon-file"></i></span>
+                            <span class="step_descr" title="SGD - Plan de Mejora">
+                                2. Feedback<br />
+                                <small> </small>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                <div id="step-1">
+                    <div class="form-horizontal form-label-left">
+                        <div class="divSpace2"></div>
+                        <div id="divEvColabObjetivos" style="width:100%;">
+                            <div id="divColabObjetivos"></div>
+                        </div>
+                    </div>
+                </div>
+                <div id="step-2">
+                    <div class="form-horizontal form-label-left">
+                        <div class="divSpace2"></div>
+                        <div id="divEvaFeedBack" style="width:100%;">
+                            <div id="divFeedBack"></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    @*}*@
+</div>
+@*<iframe id="FrmEvaluacionDesempeno1" name="FrmEvaluacionDesempeno1" src="" style="width:0px; height:0px; visibility:hidden;"></iframe>*@
+<script>
+    $(document).ready(function () {
+        $("#IdPeriodo").kendoDropDownList({
+            dataTextField: "Periodo",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/EvaluacionPersonal/ListaPeriodosColaboradores?var=" + Math.random()
+                }
+            },
+            dataBound: function (e) {
+                var comboBox = $("#IdPeriodo").data("kendoDropDownList");
+                // Select the first item
+                comboBox.select(0);
+                // Trigger the change event to load the associated content
+                comboBox.trigger("change");
+            },
+            change: function (e) {
+                var selectedPeriodId = this.value();
+                var evaluadoCombo = $("#IdEvaluado").data("kendoDropDownList");
+                evaluadoCombo.enable(true); // Habilitar el comboBox IdEvaluado
+                evaluadoCombo.dataSource.read({ IdPeriodo: selectedPeriodId }); // Recargar el dataSource con el IdPeriodo seleccionado
+                evaluadoCombo.value(""); 
+                $("#divColabObjetivos").empty();
+                $("#divFeedBack").empty();
+            }
+        });
+
+        $("#IdEvaluado").kendoDropDownList({
+            dataTextField: "Evaluado",
+            dataValueField: "IdPersEnti",
+            optionLabel: {
+                Evaluado: "Seleccionar",
+                IdPersEnti: null
+            },
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: function (options) {
+                        var IdPeriodo = $("#IdPeriodo").data("kendoDropDownList").value();
+                        if (IdPeriodo) {
+                            options.data.IdPeriodo = IdPeriodo; 
+                            return $.ajax({
+                                url: "/EvaluacionPersonal/ListadoSubordinados",
+                                data: { IdPeriodo: IdPeriodo },
+                                success: function (result) {
+                                    options.success(result);
+                                },
+                                error: function (result) {
+                                    options.error(result);
+                                }
+                            });
+                        }
+                    }
+                }
+            },
+            enable: false, 
+            change: function (e) {
+                var comboBox = $("#IdEvaluado").data("kendoDropDownList");
+                var selectedValue = comboBox.value();
+                var IdPeriodo = $("#IdPeriodo").data("kendoDropDownList").value();
+
+                $('.buttonFinish').hide();
+
+                $("#divColabObjetivos").empty();
+                $("#divColabObjetivos").load("/EvaluacionPersonal/MisColaboradoresObjetivos/" + selectedValue + "?IdPeriodo=" + IdPeriodo + "&var=" + Math.random());
+
+                $("#divFeedBack").empty();
+                $("#divFeedBack").load("/EvaluacionPersonal/MisColaboradoresFeedBack/" + selectedValue + "?IdPeriodo=" + IdPeriodo + "&var=" + Math.random());
+
+                $('#wizard').smartWizard();
+                $('.buttonNext').addClass('btn btn-success');
+                $('.buttonPrevious').addClass('btn btn-success');
+
+            }
+        });
+    });
+
+</script>

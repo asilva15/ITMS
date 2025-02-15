@@ -1,0 +1,102 @@
+﻿@{
+    Layout = null;
+}
+<h1>@ResourceLanguaje.Resource.Sales</h1>
+<div style="width:100%;" id="divCarrusel"></div>
+<div style="margin-top:15px; width:100%;" id="divDetailsSales"></div>
+
+<script src="~/Scripts/jquery.carousel.js"></script>
+<script type="text/javascript">
+    var idSel = '';
+    var idSeljt = '';
+
+    $(document).ready(function () {
+        //$('body').removeClass('no-js');
+        $.ajax({
+            url: "/Sales/LIST_ORGANIZATION_BY_ID_PERS_ENTI/",
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                loadMenu();
+            },
+            error: function (source) {
+                //alert("Error Carga Json");
+            }
+        });
+    });
+
+    function loadMenu() {
+        var ini = 0;
+        var sql = '<div id="my-carousel-2" class="carousel module" style="height:100px;"><ul>';
+        $.each(data['Data'], function (index, value) {
+            sql = sql +
+            '<li style="cursor:pointer;" onclick="selectMenu(' + (data['Data'][index]['ID_PERS_ENTI']) + ')" onmouseout="onmouseoutMenu(this)" onmouseover="onmouseoverMenu(this)" id="li' + (data['Data'][index]['ID_PERS_ENTI']) + '">' +
+                '<div id="div' + (data['Data'][index]['ID_PERS_ENTI']) + '" style="width:100%; height:100%; position:relative;" >' +
+                    '<img src="/Content/Fotos/' + (data['Data'][index]['ID_PHOTO']) + '" class="ClassFotoSave" style="float:left;"/>' +
+                    '<div style="float:left; margin:8px 0 0 8px; text-transform:capitalize; width:120px;">' + (data['Data'][index]['PERSON']) + '</div>' +
+                    '<div id="jt' + (data['Data'][index]['ID_PERS_ENTI']) + '" style="float:left; margin-left:8px; font-size: 0.85em; color:gray;">' + (data['Data'][index]['NAM_CHAR']) + '</div>' +
+                    '<div style="float:right; margin-right:8px; font-size: 1em; width:100px; text-align:right;"></div>' +
+                    '<div class="divAjax-Loading" id="divLoading' + (data['Data'][index]['ID_PERS_ENTI']) + '" style="display:none; top:-10px; right:0px; position:absolute;"></div>' +
+                '</div>' +
+            '</li>';
+            if (index == 0) {
+                idSel = 'li' + (data['Data'][index]['ID_PERS_ENTI']);
+                idSeljt = 'jt' + (data['Data'][index]['ID_PERS_ENTI']);
+
+                loadSelect((data['Data'][index]['ID_PERS_ENTI']));
+            }
+        });
+        sql = sql + '</ul></div>'
+        $("#divCarrusel").append(sql);
+
+        $('#my-carousel-2').carousel({
+            itemsPerPage: 5,
+            itemsPerTransition: 5,
+            speed: 500
+        });
+
+        $("#" + idSel).css("border", "1px solid #dd9500");
+        $("#" + idSel).css("background-color", "#dd9500");
+        $("#" + idSel).css("color", "#ffffff");
+        $("#" + idSeljt).css("color", "#ffffff");
+    }
+
+    function onmouseoutMenu(e) {
+        if (idSel != e.id) {
+            $("#" + e.id).css("background-color", "#ffffff");
+        }
+    }
+    function onmouseoverMenu(e) {
+        if (idSel != e.id) {
+            $("#" + e.id).css("background-color", "#f2f2f2");
+        }
+    }
+    function selectMenu(id) {
+
+        $("#divLoading" + id).css("display", "block");
+
+        if (idSel != '') {
+            $("#" + idSel).css("border", "1px solid #ddd");
+            $("#" + idSel).css("background-color", "#ffffff");
+            $("#" + idSel).css("color", "#dd9500");
+            $("#" + idSeljt).css("color", "gray");
+        }
+        idSel = 'li' + id;
+        idSeljt = 'jt' + id;
+        $("#" + idSel).css("border", "1px solid #dd9500");
+        $("#" + idSel).css("background-color", "#dd9500");
+        $("#" + idSel).css("color", "#ffffff");
+        $("#" + idSeljt).css("color", "#ffffff");
+
+        loadSelect(id);
+    }
+    function loadSelect(id) {
+        $("#divDetailsSales").empty();
+        $("#divDetailsSales").load("/Sales/viewDetailsSales?id=" + id + "&var=" + Math.random(), function () {
+            $("#divLoading" + id).css("display", "none");
+        });
+    }
+</script>

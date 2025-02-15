@@ -1,0 +1,133 @@
+﻿@model  ERPElectrodata.Models.SolicitudPersonal
+
+@{
+    Layout = null;
+}
+
+<style>
+</style>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+@*<script type="text/javascript" src="js/jquery.js"></script>*@
+
+@*<div class="box">*@
+
+
+@using (Html.BeginForm("EditarProyecto", "SeleccionSolicitudPersonal", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEditarSolicitud", target = "upload_target" }))
+{
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+
+
+    <input type="hidden" id="Id" name="Id" value="@ViewBag.Id" />
+    <input type="hidden" id="Id" name="Id" value="@ViewBag.IdCliente" />
+    <div class="row">
+        <div class="col-md-12" style="text-align:center">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <form class="">
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="position-relative form-group">
+                                    <label id="lblEditarSolicitud" for="EditarSolicitud" class="">Ingrese el código del Proyecto</label>
+
+                                </div>
+                            </div>
+
+
+
+                        </div>
+                        <div class="form-row">
+
+                            <div class="col-md-4">
+                                <div class="position-relative form-group">
+                                    <label id="lblRemuneracion" for="Proyecto" class="">Proyecto (OP) <span style="color:red">*</span></label>
+
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                @Html.EditorFor(model => model.IdProyecto)
+                                @Html.ValidationMessageFor(model => model.IdProyecto)
+
+                            </div>
+                        </div>
+                        <div class="form-row">
+
+
+                            <div class="col-md-12" style="text-align:center;">
+                                <div class="position-relative form-group">
+                                    <button type="submit" id="btnEditarSolicitud" class="btn-shadow btn btn-success btn-sm">Editar Proyecto</button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+}
+
+
+
+
+<iframe id="upload_target" name="upload_target" src="" class="frameHidden" style="display:none"></iframe>
+<script>
+    $(document).ready(function () {
+
+        //var FechaInicioTrabajo = $("#FechaInicioTrabajo").kendoDateTimePicker().data("kendoDateTimePicker");
+        //var FechaFinTrabajo = $("#FechaFinTrabajo").kendoDateTimePicker().data("kendoDateTimePicker");
+
+        var cbCliente = $("#IdProyecto").kendoComboBox({
+            placeholder: "",
+            dataTextField: "PROYECTO",
+            dataValueField: "ID_DOCU_SALE",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            value: "@ViewBag.IdProyecto",
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: ("/SeleccionSolicitudPersonal/ListarProyectoComboBox/" + @ViewBag.IdCliente)
+                }
+            }
+        });
+       @*var cbCliente = $("#IdProyecto").kendoComboBox({
+            format: "S/ #.#",
+            decimals: 0,
+            min: 0,
+            value: "@ViewBag.IdProyecto"
+        });*@
+
+    });
+    function uploadDone(msg) {
+        if (msg == "OK") {
+
+            toastr.success("Se actualizó con exito.", "Proyecto Actualizado");
+
+            $(".modal-backdrop").remove();
+            $("#miModal").removeClass("show");//'#modal-content
+
+            ObtenerDatosSolicitud();
+        }
+
+        else {
+            toastr.success("Error.", "Error Actualizada");
+
+            $(".modal-backdrop").remove();
+            $("#miModal").removeClass("show")
+        }
+
+    }
+</script>

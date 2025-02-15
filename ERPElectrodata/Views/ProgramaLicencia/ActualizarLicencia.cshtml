@@ -1,0 +1,150 @@
+﻿@{
+    ViewBag.Title = "";
+    Layout = null;
+}
+@*@using (Html.BeginForm("Actualizar", "ProgramaLicencia", FormMethod.Post, new { enctype = "multipart/form-data", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)*@
+<input type="hidden" name="Id" id="Id" value="@ViewBag.Id" />
+<input type="hidden" name="IdLicVencida" id="IdLicVencida" value="@ViewBag.IdLicVencida" />
+<fieldset>
+    <legend>Marca Asociada</legend>
+    <div class="divFondoUno">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Programa
+            </div>
+            <div class="editor-field">
+                <input id="IdPrograma" type="text" name="IdPrograma" value="@ViewBag.IdPrograma" disabled="disabled">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Serie
+            </div>
+            <div class="k-textbox">
+                <input id="Serie" type="text" name="Serie" value="@ViewBag.Serie" disabled="disabled">
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Tipo de Licencia
+            </div>
+            <div class="editor-field">
+                <input id="IdTipoLicencia" type="text" name="IdTipoLicencia" value="@ViewBag.IdTipoLicencia" disabled="disabled">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+               Código de Licencia
+            </div>
+            <div class="k-textbox">
+                <input id="Codigo" type="text" name="Codigo" value="@ViewBag.Codigo" disabled="disabled">
+            </div>
+        </div>
+    </div>
+    <div class="divFondoDos">
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Versión
+            </div>
+            <div class="k-textbox">
+                <input id="Version" type="text" name="Version" value="@ViewBag.Version" disabled="disabled">
+            </div>
+        </div>
+        <div class="divSpace3"></div>
+        <div class="divCont3">
+            <div class="editor-label">
+                Código de Activación
+            </div>
+            <div class="k-textbox">
+                <input id="CodigoActivacion" type="text" name="CodigoActivacion" value="@ViewBag.CodigoActivacion"  disabled="disabled">
+            </div>
+        </div>
+    </div>
+    <div style="display:inline-block; float:right; padding: 20px 20px 15px 5px;">
+        <div style="float: left; padding: 0 15px 0 0;">
+            <button id="actualizarLicencia" class="k-button">Actualizar</button>
+        </div>
+        <button id="cancelMarca" class="k-button">Cancelar</button>
+    </div>
+</fieldset>
+@*}*@
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#IdPrograma").kendoComboBox({
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Programa/ListarProgramas?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#IdTipoLicencia").kendoComboBox({
+            dataTextField: "VAL_ACCO_PARA",
+            dataValueField: "ID_ACCO_PARA",
+            filter: "contains",
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Parameter/ListarTipoLicencia?var=" + Math.random()
+                }
+            }
+        });
+
+        $("#cancelMarca").click(function (event) {
+            event.preventDefault();
+            closeWinFormModalPopUp();
+        });
+
+        $("#actualizarLicencia").click(function (event) {
+            $.ajax({
+                url: "/ProgramaLicencia/Actualizar/"+@ViewBag.Id,
+                type: "GET",
+                cache: false,
+                success: function (source) {
+                    winPopUpModal("Licencia actualizada", "<div style='border-bottom:1px dotted #dadada;padding:0px 0px 20px 0px;'>"
+                      + "<div style='padding:10px 0px 10px 0px;'>La Licencia ha sido actualizada.</div>"
+                      + "<div style='float:right; padding:30px 0px 0px 0px; '>" +
+                      "<button id='continues' class='k-button'>Continuar</button>" +
+                      "</div></div>", 400, 160);
+                    var undo = $("#continues")
+                   .bind("click", function () {
+                       closeWinModalPopUp();
+                       location.reload(true);
+                   });
+                },
+                error: function (source) {
+                    alert("Error al actualizar la licencia");
+                }
+            });
+        });
+
+    });
+
+</script>

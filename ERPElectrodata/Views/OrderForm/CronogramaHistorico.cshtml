@@ -1,0 +1,177 @@
+﻿@{
+    ViewBag.Title = "CronogramaHistorico";
+    Layout = null;
+}
+
+@{
+    ViewBag.Title = "Gantt";
+    Layout = null;
+}
+
+<head>
+
+    <!-- Meta data -->
+    @*<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous" />*@
+    <link href="~/Content/themes/plugin/gantt/jsgantt.css" rel="stylesheet" type="text/css" />
+    <script src="~/Content/themes/plugin/gantt/jsgantt.js" type="text/javascript"></script>
+</head>
+<!-- Content -->
+<body data-spy="scroll" data-target="#my-navbar-nav">
+    <!-- Content -->
+    <!-- Home -->
+    <!-- Demo -->
+    <div class="panel panel-primary" style="width:100%;float:left;">
+        <div class="panel-heading">Diagrama de Gantt - Cronograma Actual</div>
+        <div class="panel-body">
+            <div class="container-fluid section" id="demo">
+                <div id="embedded-Gantt">
+                    <script type="text/javascript">
+
+                        $.ajax({
+                            url: "/OrderForm/ObtenerDetalleCronograma/@ViewBag.ID_DOCU_SALE",
+                            type: "GET",
+                            cache: false,
+                            dataType: "json",
+                            success: function (source) {
+                                data = source;
+                                //mostrarDetalle();
+
+                                var g = new JSGantt.GanttChart(document.getElementById('embedded-Gantt'), 'week');
+
+                                var c = 1;
+                                if (g.getDivId() != null) {
+                                    g.setCaptionType('Complete');  // Set to Show Caption (None,Caption,Resource,Duration,Complete)
+                                    g.setQuarterColWidth(36);
+                                    g.setDateTaskDisplayFormat('day dd month yyyy'); // Shown in tool tip box
+                                    g.setDayMajorDateDisplayFormat('mon yyyy - Week ww') // Set format to display dates in the "Major" header of the "Day" view
+                                    g.setWeekMinorDateDisplayFormat('dd mon') // Set format to display dates in the "Minor" header of the "Week" view
+                                    g.setShowTaskInfoLink(1); // Show link in tool tip (0/1)
+                                    g.setShowEndWeekDate(0); // Show/Hide the date for the last day of the week in header for daily view (1/0)
+                                    g.setUseSingleCell(10000); // Set the threshold at which we will only use one cell per table row (0 disables).  Helps with rendering performance for large charts.
+                                    g.setFormatArr('Day', 'Week', 'Month', 'Quarter');
+                                    //gantt.AddTaskItem(new JSGantt.TaskItem(1, 'Define Chart API', '', '', 'ggroupblack', '', 0, 'Brian', 0, 1, 0, 1, '', '', 'Some Notes text', g));
+                                    //gantt.AddTaskItem(new JSGantt.TaskItem(1, 'Chart Object', '2018-01-01', '2018-01-01', 'gmilestone', '', 1, 'Shlomy', 100, 0, 1, 1, '', '', '', g));
+
+                                    $.each(data['Data'], function (index, value) {
+
+                                        g.AddTaskItem(new JSGantt.TaskItem(
+                                            c, data['Data'][index]['NombreActividad'],
+                                            data['Data'][index]['FechaInicio'],
+                                            data['Data'][index]['FechaFin'],
+                                            data['Data'][index]['Estilo'], 'javascript:MostrarDetalleActividades(' + data['Data'][index]['Id'] + ',"' + data['Data'][index]['NombreActividad'] + '","' + data['Data'][index]['Recurso'] + '","' + data['Data'][index]['TipoActividad'] + '","' + data['Data'][index]['FechaInicio'] + '","' + data['Data'][index]['FechaFin'] + '",' + data['Data'][index]['Completo'] + ')',
+                                            data['Data'][index]['Mile'], data['Data'][index]['Recurso'],
+                                            data['Data'][index]['Completo'], data['Data'][index]['Grupo'],
+                                            data['Data'][index]['Padre'], data['Data'][index]['Abierto'],
+                                            data['Data'][index]['Depende'], data['Data'][index]['Subtitulo'],
+                                            data['Data'][index]['Notas'], data['Data'][index]['Gantt'])
+                                            );
+
+                                        c = c + 1;
+                                    });
+                                    g.Draw();
+                                }
+                            },
+                            error: function (source) {
+                                alert("Error Carga Json Programa");
+                            }
+                        });
+
+                        var g = new JSGantt.GanttChart(document.getElementById('embedded-Gantt'), 'week');
+
+
+
+                    </script>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="DiagramasGantt"></div>
+
+    <script type="text/javascript">
+
+
+        $.ajax({
+            url: "/OrderForm/ObtenerNroCronogramas/@ViewBag.ID_DOCU_SALE/1",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+
+                $.each(data['Data'], function (index, value) {
+                        $("#DiagramasGantt").append(
+                        '<div class="panel panel-default" style="width:100%;float:left;">' +
+                        '<div class="panel-heading">Diagrama de Gantt - Cronograma ' + data['Data'][index]['NroCronograma'] + '</div>' +
+                        '<div class="panel-body">' +
+                        '<div class="container-fluid section" id="demo' + data['Data'][index]['NroCronograma'] + '">' +
+                        '<div id="embedded-Gantt' + data['Data'][index]['NroCronograma'] + '">' +
+                        '</div></div></div></div>'
+                        );
+                        ObtenerDetalleCronograma(data['Data'][index]['NroCronograma']);
+
+                    });
+                
+            },
+            error: function (source) {
+                alert("Error Carga Json Programa");
+            }
+        });
+
+
+        function ObtenerDetalleCronograma(NroCronograma) {
+            
+                $.ajax({
+                    url: "/OrderForm/ObtenerDetalleCronogramaIniciales/"+@ViewBag.ID_DOCU_SALE+"/"+NroCronograma,
+                    type: "GET",
+                    cache: false,
+                    dataType: "json",
+                    success: function (source) {
+                        data = source;
+                        var g = new JSGantt.GanttChart(document.getElementById('embedded-Gantt' + NroCronograma), 'week');
+
+                        var c = 1;
+                        if (g.getDivId() != null) {
+                            g.setCaptionType('Complete');  // Set to Show Caption (None,Caption,Resource,Duration,Complete)
+                            g.setQuarterColWidth(36);
+                            g.setDateTaskDisplayFormat('day dd month yyyy'); // Shown in tool tip box
+                            g.setDayMajorDateDisplayFormat('mon yyyy - Week ww') // Set format to display dates in the "Major" header of the "Day" view
+                            g.setWeekMinorDateDisplayFormat('dd mon') // Set format to display dates in the "Minor" header of the "Week" view
+                            g.setShowTaskInfoLink(1); // Show link in tool tip (0/1)
+                            g.setShowEndWeekDate(0); // Show/Hide the date for the last day of the week in header for daily view (1/0)
+                            g.setUseSingleCell(10000); // Set the threshold at which we will only use one cell per table row (0 disables).  Helps with rendering performance for large charts.
+                            g.setFormatArr('Day', 'Week', 'Month', 'Quarter');
+                            //gantt.AddTaskItem(new JSGantt.TaskItem(1, 'Define Chart API', '', '', 'ggroupblack', '', 0, 'Brian', 0, 1, 0, 1, '', '', 'Some Notes text', g));
+                            //gantt.AddTaskItem(new JSGantt.TaskItem(1, 'Chart Object', '2018-01-01', '2018-01-01', 'gmilestone', '', 1, 'Shlomy', 100, 0, 1, 1, '', '', '', g));
+
+                            $.each(data['Data'], function (index, value) {
+
+                                g.AddTaskItem(new JSGantt.TaskItem(
+                                    c, data['Data'][index]['NombreActividad'],
+                                    data['Data'][index]['FechaInicio'],
+                                    data['Data'][index]['FechaFin'],
+                                    data['Data'][index]['Estilo'], 'javascript:MostrarDetalleActividades(' + data['Data'][index]['Id'] + ',"' + data['Data'][index]['NombreActividad'] + '","' + data['Data'][index]['Recurso'] + '","' + data['Data'][index]['TipoActividad'] + '","' + data['Data'][index]['FechaInicio'] + '","' + data['Data'][index]['FechaFin'] + '",' + data['Data'][index]['Completo'] + ')',
+                                    data['Data'][index]['Mile'], data['Data'][index]['Recurso'],
+                                    data['Data'][index]['Completo'], data['Data'][index]['Grupo'],
+                                    data['Data'][index]['Padre'], data['Data'][index]['Abierto'],
+                                    data['Data'][index]['Depende'], data['Data'][index]['Subtitulo'],
+                                    data['Data'][index]['Notas'], data['Data'][index]['Gantt'])
+                                    );
+
+                                c = c + 1;
+                            });
+                            g.Draw();
+                        }
+                    },
+                    error: function (source) {
+                        alert("Error Carga Json Programa");
+                    }
+                });
+            }
+
+
+
+        </script>
+</body>

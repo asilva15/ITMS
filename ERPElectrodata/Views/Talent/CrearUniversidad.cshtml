@@ -1,0 +1,81 @@
+﻿@model ERPElectrodata.Models.Universidad
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("CrearUniversidad", "Talent", FormMethod.Post, new { enctype = "multipart/form-data", name = "FrmUniversidad", id = "FrmUniversidad", target = "utUniversidad" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Nombre <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.Nombre)
+                    @Html.ValidationMessageFor(model => model.Nombre)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6">
+                <button id="cancelNewUniversidad" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6">
+                <button id="submitNewUniversidad" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="utUniversidad" name="utUniversidad" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#submitNewUniversidad").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewUniversidad").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+    });
+
+    function uploadDoneUniversidad(msg, code) {
+
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se registró correctamente.", "Información Guardada");
+
+            if (@ViewBag.Cantidad === 0) {
+                $("#IdUniversidad").data("kendoComboBox").dataSource.read();
+                var IdUniversidad = $("#IdUniversidad").data("kendoComboBox");
+                IdUniversidad.value(code);
+
+            } else {
+                for (var i = 0; i < @ViewBag.Cantidad; i++) {
+                    $("#IdUniversidad_" + i).data("kendoComboBox").dataSource.read();
+                }
+                var IdUniversidad = $("#IdUniversidad_@ViewBag.Index").data("kendoComboBox");
+                IdUniversidad.value(code);
+            }
+        }
+        else {
+            var messageUniversidad = '';
+            if (code == '1') {
+                messageUniversidad = 'Complete los datos obligatorios.';
+            }
+            else if (code == '2') {
+                messageUniversidad = 'Ha ocurrido un error. Contacte al administrador.';
+            }
+            else {
+                messageUniversidad = 'La universidad ya existe.';
+            }
+
+            toastr.warning(messageUniversidad, "Mensaje");
+        }
+    }
+</script>

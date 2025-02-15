@@ -1,0 +1,193 @@
+﻿@model ERPElectrodata.Models.TablaLookerStudio
+@{
+    Layout = null;
+}
+<style>
+    .select2-container--bootstrap .select2-selection--single {
+        height: calc(2.25rem + 2px);
+    }
+</style>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card card">
+            @using (Html.BeginForm("EditarLookerStudio", "ServiceNow", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEditarLookerStudio", target = "upload_target" }))
+            {
+                <input type="hidden" id="id_TablaLookerStudio" name="id_TablaLookerStudio" value="@Model.id_TablaLookerStudio" />
+
+                <input type="hidden" id="TotalHoras_estimadoNumero" name="TotalHoras_estimado" />
+                <input type="hidden" id="TotalHoras_realNumero" name="TotalHoras_real" />
+                @*<input type="hidden" id="TipoAtencionTexto" name="TipoAtencion" value="@Model.TipoAtencion" />
+                <input type="hidden" id="AtribuidoATexto" name="AtribuidoA" value="@Model.AtribuidoA" />*@
+                @*<input type="hidden" id="CategoriaTexto" name="Categoria" value="@Model.Categoria" />*@
+                <input type="hidden" id="SubCategoriaTexto" name="SubCategoria" value="@Model.SubCategoria" />
+                <div class="card-body">
+                    <div class="col-md-12">
+                        <div class="form-row">
+                            <div class="col-md-12">
+                                <div class="form-row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Breve Descripción</label>
+                                            <input class="form-control" type="text" id="BreveDescripcion" name="BreveDescripcion" value="@Model.BreveDescripcion" />
+                                        </div>
+                                    </div>
+                                    @*<div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>Tipo</label>
+                                            <input class="form-control" type="text" id="Tipo" name="Tipo" value="@Model.Tipo" readonly />
+                                        </div>
+                                    </div>*@
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Tipo de Atencion</label>
+                                            <input class="form-control" type="text" id="TipoAtencion" name="TipoAtencion" value="@Model.TipoAtencion" />
+                                            @*<select id="TipoAtencion" class="form-control">
+                                                <option value="">&nbsp;</option>
+                                            </select>*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Total Horas Estimado</label>
+                                            <input class="form-control" type="text" id="TotalHoras_estimado"   placeholder="00:00" oninput="handleInput(event)" onchange="validarHora(event)" autocomplete="off" />
+                                        </div>
+
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Total Horas Real</label>
+                                            <input class="form-control" type="text" id="TotalHoras_real"  placeholder="00:00" oninput="handleInput(event)" onchange="validarHora(event)"/>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Comentario</label>
+                                            <input class="form-control" type="text" id="Comentario" name="Comentario" value="@Model.Comentario" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="d-block text-right card-footer">
+                    <button class="btn-shadow btn btn-primary" id="submit" type="submit">Guardar</button>
+                </div>
+            }
+
+        </div>
+    </div>
+    <button id="closeModal" data-dismiss="modal" hidden></button>
+</div>
+
+<script>
+    var listaCategoriaEditar = []
+    var listaSubcategoria = []
+    $(document).ready(function () {
+        $('#BreveDescripcion').on('change', function (e) {
+            document.getElementById("Tipo").value = obtenerPrimeraPalabra(e.target.value)
+        });
+        document.getElementById("TotalHoras_real").value = convertirNumeroAHoras("@Model.TotalHoras_real")
+        document.getElementById("TotalHoras_estimado").value = convertirNumeroAHoras("@Model.TotalHoras_estimado")
+         @*document.getElementById("TotalHoras_real").value = @Model.TotalHoras_real
+        document.getElementById("TotalHoras_estimado").value = @Model.TotalHoras_estimado*@
+    })
+
+    function obtenerPrimeraPalabra(frase) {
+        // Buscar el índice del primer guion (-)
+        const indiceGuion = frase.indexOf('-');
+        // Si no se encuentra el guion, devolver la frase completa como la primera palabra
+        if (indiceGuion === -1) {
+            return "";
+        }
+
+        // Extraer la primera palabra basada en la posición del guion
+        const primeraPalabra = frase.substring(0, indiceGuion);
+
+        return primeraPalabra.trim(); // Devolver la primera palabra eliminando espacios adicionales
+    }
+    function convertirHorasANumero(e) {
+        // Dividir la cadena en horas y minutos
+        const partes = e.split(':');
+
+        // Convertir las partes a números
+        const horas = parseInt(partes[0], 10) || 0; // Si no se puede convertir, asumir 0 horas
+        const minutos = parseInt(partes[1], 10) || 0; // Si no se puede convertir, asumir 0 minutos
+
+        // Calcular el total de horas (sumar las horas y convertir los minutos a horas)
+        const totalHoras = horas + minutos / 60;
+        console.log(totalHoras)
+        return totalHoras;
+    }
+    function convertirNumeroAHoras(numero) {
+        // Obtén la parte entera y decimal del número
+        var horas = Math.floor(numero);
+        var minutos = Math.round((numero % 1) * 60);
+        // Formatea las horas y minutos como cadena
+        var horasStr = horas < 10 ? '0' + horas : horas;
+        var minutosStr = minutos < 10 ? '0' + minutos : minutos;
+
+        // Retorna la cadena en formato "HH:mm"
+        return horasStr + ':' + minutosStr;
+    }
+    function handleInput(event) {
+        // Obtener el valor actual del campo de entrada
+        let inputValue = event.target.value;
+
+        // Verificar si ya hay un ":" presente en el valor
+        const tieneDosPuntos = inputValue.includes(':');
+        const cantidadDosPuntos = (inputValue.match(/:/g) || []).length;
+        // Filtrar los caracteres no numéricos y ':' si aún no hay un ":"
+        if (cantidadDosPuntos <= 1) {
+
+            inputValue = inputValue.replace(/[^0-9:]/g, '');
+        } else {
+            // Si ya hay un ":", eliminar cualquier otro ":" que se intente agregar
+            if (event.data == ":") {
+                inputValue = inputValue.slice(0, -1)
+                inputValue = inputValue.replace(/[^0-9:]/g, '');
+            }
+
+        }
+        // Actualizar el valor del campo de entrada
+        event.target.value = inputValue;
+    }
+    function validarHora(e) {
+        const horaTexto = (e.target.value).toString()
+        let [horas, minutos] = ["0", "0"]
+        if (horaTexto.indexOf(":") !== -1) {
+            [horas, minutos] = horaTexto.split(":")
+            if (horas == "") {
+                horas = "0"
+            }
+            if (minutos == "") {
+                minutos = "0"
+            }
+        }
+        else {
+            horas = (e.target.value).toString()
+        }
+        horas = horas.padStart(2, '00')
+        minutos = minutos.padStart(2, '00')
+        if (minutos >= 60) {
+            alert("Solo se permite hasta el minuto 59")
+            e.target.value = `${horas}:59`
+        } else {
+            e.target.value = `${horas}:${minutos}`
+        }
+        convertirHorasANumero(e.target.value)
+        calcularFechaVencimiento()
+    }
+
+    $("#FrmEditarLookerStudio").submit(function () {
+        document.getElementById("TotalHoras_estimadoNumero").value = Math.round(convertirHorasANumero(document.getElementById("TotalHoras_estimado").value) * 100) / 100
+        document.getElementById("TotalHoras_realNumero").value = Math.round(convertirHorasANumero(document.getElementById("TotalHoras_real").value) * 100) / 100
+        return true
+    })
+</script>

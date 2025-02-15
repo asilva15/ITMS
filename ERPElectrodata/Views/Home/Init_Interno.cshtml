@@ -1,0 +1,398 @@
+﻿@{
+    ViewBag.Title = @ResourceLanguaje.Resource.IncidentRequest;
+    @Layout = null;
+}
+
+<style type="text/css">
+    a.tooltip span {
+        cursor: default;
+        display: none;
+        padding: 5px;
+        margin: -25px 0px 0px 120px;
+        width: 230px;
+        position: relative;
+        z-index: 9;
+    }
+
+    a.tooltip:hover span {
+        display: block;
+        position: absolute;
+        background: #000;
+        border: 1px solid #cccccc;
+        color: #ddd;
+        font-size: 14px;
+        font-weight: normal;
+        opacity: 0.9;
+    }
+</style>
+<link href="~/Content/themes/plugin/iCheck/square/blue.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/iCheck/icheck.js"></script>
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script>
+    $(document).ready(function () {
+        $('input').iCheck({
+            checkboxClass: 'icheckbox_square-blue',
+            radioClass: 'iradio_square-blue',
+            increaseArea: '20%' // optional
+        });
+    });
+</script>
+<div id="divContent">
+    <div class="row">
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-danger btn" id="homInc1" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Activos</div>
+                        <div class="widget-subheading">Total @ViewBag.TAActive</div>
+                    </div>
+                    <div class="widget-content-right d-flex justify-content-center align-items-center">
+                        <div id="loadActiveI" class="spinner-border text-secondary" role="status" style="width:20px; height:20px">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="widget-numbers text-white"><span>@ViewBag.PActive</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-warning btn" id="homInc2" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Programados</div>
+                        <div class="widget-subheading">Total @ViewBag.TAScheduled</div>
+                    </div>
+                    <div class="widget-content-right d-flex justify-content-center align-items-center">
+                        
+                        <div id="loadProgramadoI" class="spinner-border text-secondary" role="status" style="width:20px; height:20px">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="widget-numbers text-white"><span>@ViewBag.PScheduled</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-success btn" id="homInc3" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Resueltos</div>
+                        <div class="widget-subheading">Total @ViewBag.TAResolved</div>
+                    </div>
+                    <div class="widget-content-right d-flex justify-content-center align-items-center">
+                        <div id="loadResueltoI" class="spinner-border text-secondary" role="status" style="width:20px; height:20px">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="widget-numbers text-white"><span>@ViewBag.PResolved</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 col-xl-3">
+            <div class="card mb-3 widget-content bg-info btn" id="homInc4" onclick="Click(this)">
+                <div class="widget-content-wrapper text-white">
+                    <div class="widget-content-left">
+                        <div class="widget-heading">Cerrados</div>
+                        <div class="widget-subheading">Total @ViewBag.TAClosed</div>
+                    </div>
+                    <div class="widget-content-right d-flex justify-content-center align-items-center">
+                        <div id="loadCerradoI" class="spinner-border text-secondary" role="status" style="width:20px; height:20px">
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                        <div class="widget-numbers text-white"><span>@ViewBag.PClosed</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="TimeServer" name="TimeServer" value="@ViewBag.TimeServer" />
+    <div id="gridTickets" class="contentView">
+    </div>
+    <div id="pagerTickets" class="contentViewPager">
+    </div>
+    <div id="listViewInterno"></div>
+</div>
+
+<script type="text/x-kendo-tmpl" id="templateInterno">
+    <a href="\/\#${URL}${ID_INCI}" class="text-decoration-none" target="_blank" title="${SUM_INCI_PLAIN}">
+        <div class="card-body py-3 btn-shadow btn-outline-focus">
+            <div class="row no-gutters align-items-center">
+                <div class="col-4">
+                    <div class="small">
+                        ${NAM_TYPE_TICK} ${COD_INCI}
+                    </div>
+                    <div class="small">Asignado a: ${ASSI}</div>
+                    # if (VIS_COMP) { #
+                    <div class="small"><b>${REQU} (${CIA})</b></div>
+                    # } else { #
+                    <div class="small"><b>${REQU}</b></div>
+                    # } #
+                    <div class="small">Creado: ${CREATEBY} ${CREATE_INCI}</div>
+                    <div class="small">Actualizado: ${MODIFIED_INCI}</div>
+                </div>
+                <div class="col-6">
+                    <div class="small" title="${SUM_INCI_PLAIN}">${Titulo}</div>
+                    <div class="small">${NAM_CATE} > ${NAM_SUBC} > ${NAM_CLAS} > ${NAM_SUBCLAS}</div>
+                </div>
+                <div class="d-none d-md-block col-2">
+                    <div class="row no-gutters align-items-center">
+
+                        <div class="media col-12 align-items-center">
+                            <img style="width: 40px; height: auto;" src="/Content/Fotos/${ID_FOTO_ASSI}.jpg" alt=" " class="d-block ui-w-30 rounded-circle">
+                            <div class="media-body flex-truncate ml-2">
+
+                                # if(NAM_PRIO.indexOf("P1") > -1) {#
+                                <div class="badge badge-danger">${NAM_PRIO} ${HOU_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("P2") > -1) {#
+                                <div class="badge badge-warning">${NAM_PRIO} ${HOU_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("P3") > -1) {#
+                                <div class="badge badge-success">${NAM_PRIO} ${HOU_PRIO}</div>
+                                # } #
+                                # if(NAM_PRIO.indexOf("P4") > -1) {#
+                                <div class="badge badge-info">${NAM_PRIO} ${HOU_PRIO}</div>
+                                # } #
+
+                                # if(EXP_TIME.indexOf("Stopped") > -1 ) {#
+                                # if(ID_STAT_END != 4 && ID_STAT_END != 6) { #
+                                <div class="line-height-1 text-truncate">${DATE_SCHE} | ${HOUR_SCHE}</div>
+                                # } #
+                                # } else { #
+                                <div class="line-height-1 text-truncate">${EXP_TIME}</div>
+                                # } #
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </a>
+</script>
+
+<script type="text/javascript">
+    var con = 0;
+    var timer;
+    var eIActivos, eIProgramados, eIResueltos, eICerrados
+    $(document).ready(function () {
+        var id = 0,
+            subCuenta = 'INTERNO',
+            idEstado = 0;
+        //ListarTicketPorEstado(id,subCuenta,idEstado);
+        if (eIActivos == undefined && eIProgramados == undefined && eIResueltos == undefined && eICerrados == undefined) {
+            CargarTodosTicketsPorEstadoI(id, subCuenta, idEstado)
+        }
+        else {
+            if (eIActivos != undefined) {
+                document.getElementById("loadActiveI").style.display = "none"
+                NewListarTicketPorEstadoI(eIActivos)
+
+            }
+            if (eIProgramados != undefined) {
+                document.getElementById("loadProgramadoI").style.display = "none"
+            }
+            if (eIResueltos != undefined) {
+                document.getElementById("loadResueltoI").style.display = "none"
+            }
+            if (eICerrados != undefined) {
+                document.getElementById("loadCerradoI").style.display = "none"
+            }
+        }
+        
+    });
+
+    async function CargarTodosTicketsPorEstadoI(id, subCuenta, idEstado) {
+        await listarTicketsEi(id, subCuenta, 0).then(resolve => {
+            eIActivos = resolve
+            NewListarTicketPorEstadoI(eIActivos)
+            document.getElementById("loadActiveI").style.display = "none"
+        })
+        await Promise.all([
+            listarTicketsEi(id, subCuenta, 5).then(result => {
+                document.getElementById("loadProgramadoI").style.display = "none"
+                eIProgramados = result
+            }),
+            listarTicketsEi(id, subCuenta, 4).then(result => {
+                document.getElementById("loadResueltoI").style.display = "none"
+                eIResueltos = result
+            }),
+            listarTicketsEi(id, subCuenta, 6).then(result => {
+                document.getElementById("loadCerradoI").style.display = "none"
+                eICerrados = result
+            })
+        ])
+    }
+
+    function listarTicketsEi(id, subCuenta, idEstado) {
+        return new Promise(resolve => {
+            $.ajax({
+                url: "/Ticket/ListarTicketPorEstado?" +
+                    "id=" + id +
+                    "&subCuenta=" + subCuenta +
+                    "&ID_STAT=" + idEstado,
+                type: "GET",
+                cache: false,
+                async: true,
+                success: function (jsonx) {
+                    resolve(jsonx)
+                }
+
+            });
+        })
+    }
+
+
+    function ListarTicketPorEstado(id, subCuenta, idEstado) {
+        $("#listViewInterno").empty();
+        $("#listViewInterno").kendoListView({
+            dataSource: {
+                transport: {
+                    read: {
+                        url: "/Ticket/ListarTicketPorEstado?" +
+                            "id=" + id +
+                            "&subCuenta=" + subCuenta +
+                            "&ID_STAT=" + idEstado,
+                        type: "GET",
+                        dataType: "json"
+                    }
+                },
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                pageSize: 10
+            },
+            template: kendo.template($("#templateInterno").html()),
+            pageable: true
+        });
+    }
+
+    function NewListarTicketPorEstadoI(data) {
+        if (data != undefined) {
+            $("#listViewInterno").empty();
+            $("#listViewInterno").kendoListView({
+                dataSource: {
+                    data: data.Data,
+                    pageSize: 10
+                },
+                template: kendo.template($("#template2").html()),
+                pageable: true
+            });
+        }
+    }
+
+    //function Click(parm) {
+    //    var bandera = 0;
+    //    if (parm.id == "homInc2") {
+    //        bandera = 5;
+    //    }
+    //    else if (parm.id == "homInc3") {
+    //        bandera = 4;
+    //    }
+    //    else if (parm.id == "homInc4") {
+    //        bandera = 6;
+    //        toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda ir a <b><a href="/#/FindTicket" style="text-decoration:none;color:black;">Buscar Tickets</a></b>');
+    //    } else if (parm.id == "homInc5") {
+    //        bandera = 0;
+    //    } else if (parm.id == "homInc6") {
+    //        bandera = 5;
+    //    } else if (parm.id == "homInc7") {
+    //        bandera = 4;
+    //    } else if (parm.id == "homInc8") {
+    //        bandera = 6;
+    //        toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda ir a <b><a href="/#/FindTicket" style="text-decoration:none;color:black;">Buscar Tickets</a></b>')
+    //    }
+    //    ListarTicketPorEstado(0, '', bandera);
+    //}
+
+    function Click(parm) {
+        var bandera = 0;
+        if (parm.id == "homInc1") {
+            bandera = 0;
+            NewListarTicketPorEstadoI(eIActivos)
+        }
+        if (parm.id == "homInc2") {
+            bandera = 5;
+            NewListarTicketPorEstadoI(eIProgramados)
+        }
+        else if (parm.id == "homInc3") {
+            bandera = 4;
+            NewListarTicketPorEstadoI(eIResueltos)
+        }
+        else if (parm.id == "homInc4") {
+            bandera = 6;
+            if (eICerrados != undefined) {
+                toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda ir a <b><a href="/FindTicket" style="text-decoration:none;color:black;">Buscar Tickets</a></b>');
+                NewListarTicketPorEstadoI(eICerrados)
+            }
+            
+        } else if (parm.id == "homInc5") {
+            bandera = 0;
+            NewListarTicketPorEstadoI(eIActivos)
+        } else if (parm.id == "homInc6") {
+            bandera = 5;
+            NewListarTicketPorEstadoI(eIProgramados)
+        } else if (parm.id == "homInc7") {
+            bandera = 4;
+            NewListarTicketPorEstadoI(eIResueltos)
+        } else if (parm.id == "homInc8") {
+            bandera = 6;
+            if (eICerrados != undefined) {
+                toastr.warning('Límite: 1000 registros.<br/>Para mejorar su búsqueda ir a <b><a href="/FindTicket" style="text-decoration:none;color:black;">Buscar Tickets</a></b>')
+                NewListarTicketPorEstadoI(eICerrados)
+            }
+            
+        }
+        //ListarTicketPorEstado(0, '', bandera);
+    }
+
+    function UpdateBarStatus() {
+        if (typeof $("#gridTickets").data("kendoListView") === "undefined") {
+
+            clearTimeout(myVar);
+            return false;
+        }
+        else {
+
+        }
+        $.ajax({
+            url: '/Ticket/UpdateBarStatus/0?var=' + Math.random(),
+            dataType: 'json',
+            cache: false,
+            async: true,
+            success: function (jsonx) {
+
+                var active = 0, activeT = 0;
+                $.each(jsonx['Data'], function (index, value) {
+
+                    if (value['ID_STAT'] == 1) {
+                        active = active + value['Tickets'];
+                        activeT = activeT + value['Total'];
+                    }
+                    else if (value['ID_STAT'] == 3) {
+                        active = active + value['Tickets'];
+                        activeT = activeT + value['Total'];
+                    }
+                    else {
+                        $("#box" + value['NAM_STAT']).html(value['Tickets']);
+                        $("#boxT" + value['NAM_STAT']).html("@ResourceLanguaje.Resource.TotalAccount " + value['Total']);
+                    }
+
+                });
+
+                $("#boxActive").html(active);
+                $("#boxTActive").html("@ResourceLanguaje.Resource.TotalAccount " + activeT);
+
+                var listViewd = $("#gridTickets").data("kendoListView");
+                listViewd.dataSource.page(listViewd.dataSource.page());
+
+            }
+
+        });
+
+    }
+
+</script>

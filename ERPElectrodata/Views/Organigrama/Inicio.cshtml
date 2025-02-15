@@ -1,0 +1,191 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Organigrama Electrodata</title>
+        
+    @Scripts.Render("~/bundles/jquery")
+    <link href="~/Content/themes/plugin/primitives/css/jquery-ui.min.css" rel="stylesheet" />
+    <script src="~/Content/themes/plugin/primitives/js/jquery.js"></script>
+    <script src="~/Content/themes/plugin/primitives/js/jquery-ui.min.js"></script>
+    <!-- # include file="src/src.primitives.html"-->
+    <script src="~/Content/themes/plugin/primitives/js/primitives.min.js?5100"></script>
+    <script src="~/Content/themes/plugin/primitives/js/primitives.jquery.min.js?5100"></script>
+    <link href="~/Content/themes/plugin/primitives/css/primitives.latest.css?5100" media="screen" rel="stylesheet" type="text/css" />
+    @*<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />*@
+    <style>
+        [data-buttonname="delete"] {
+            color: red;
+        }
+
+        #nameSearch {
+            border-color: #c5c5c5;
+            border-width: 1px;
+            border-style: solid;
+            border-radius: 0.25rem;
+            color: #2e2e2e;
+            line-height: 1.65em;
+            text-indent: .571em;
+            padding: .17857143em 0;
+            width: 13.4em;
+            font-weight: bold;
+        }
+
+        #btnSearchName {
+            border-radius: 0.25rem;
+            padding: 0.375rem 0.75rem;
+            color: #212529;
+            background-color: #e4e7eb;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        #btnSearchName:hover {
+            color: #212529;
+            background-color: #ced3db;
+        }
+    </style>
+    <script type='text/javascript'>
+        //<![CDATA[
+        $(window).load(function () {
+
+            $.ajax({
+                url: '/Organigrama/OrganigramaEmpresaGerenciaArea/153',
+                dataType: 'json',
+                cache: false,
+                async: true,
+                success: function (jsonx) {
+
+                    var options = new primitives.orgdiagram.Config();
+                    //botones
+                    var buttons = [];
+                    buttons.push(new primitives.orgdiagram.ButtonConfig("Ver", "ui-icon-person", "Ver Detalle Organigrama"));
+
+                    var items = jsonx;
+
+                    options.items = items;
+                    options.cursorItem = 0;
+                    options.buttons = buttons;
+                    //options.hasButtons = primitives.common.Enabled.True;
+                    options.templates = [getDepartmentTitleTemplate()];
+                    options.onItemRender = onTemplateRender;
+                    options.hasSelectorCheckbox = primitives.common.Enabled.True;
+                    options.normalLevelShift = 20;
+                    options.dotLevelShift = 20;
+                    options.lineLevelShift = 10;
+                    options.normalItemsInterval = 10;
+                    options.dotItemsInterval = 10;
+                    options.lineItemsInterval = 4;
+                    options.onButtonClick = function (e, data) {
+                        window.open("/Organigrama/DetalleOrganigrama/" + data.context.id);
+                    };
+
+                    jQuery("#basicdiagram").orgDiagram(options);
+
+                    //jQuery(window).tooltip();
+                }
+            });
+
+            $("#btnSearchName").click(function () {
+                var searchText = $("#nameSearch").val();
+
+                if (searchText.trim() !== "") {
+                    var encodedSearchText = encodeURIComponent(searchText);
+                    window.open("/Organigrama/BuscarOrganigrama/?name=" + encodedSearchText);
+                }
+            });
+
+            $("#nameSearch").keydown(function (e) {
+                var searchText = $("#nameSearch").val();
+
+                if (e.key == 'Enter' && searchText.trim() !== "") {
+                    var encodedSearchText = encodeURIComponent(searchText);
+                    window.open("/Organigrama/BuscarOrganigrama/?name=" + encodedSearchText);
+                }
+            });
+        });//]]>
+
+
+        function onTemplateRender(event, data) {
+            switch (data.renderingMode) {
+                case primitives.common.RenderingMode.Create:
+                    /* Initialize widgets here */
+                    break;
+                case primitives.common.RenderingMode.Update:
+                    /* Update widgets here */
+                    break;
+            }
+
+            var itemConfig = data.context;
+
+            if (data.templateName == "DepartmentTitleTemplate") {
+                data.element.find("[name=titleBackground]").css({ "background": itemConfig.itemTitleColor });
+
+                var fields = ["title"];
+                for (var index = 0; index < fields.length; index++) {
+                    var field = fields[index];
+
+                    var element = data.element.find("[name=" + field + "]");
+                    if (element.text() != itemConfig[field]) {
+                        element.text(itemConfig[field]);
+                    }
+                }
+            }
+        }
+
+        function getDepartmentTitleTemplate() {
+            var result = new primitives.orgdiagram.TemplateConfig();
+            result.name = "DepartmentTitleTemplate";
+            result.isActive = true;
+
+            /*var buttons = [];
+            buttons.push(new primitives.orgdiagram.ButtonConfig("delete", "ui-icon-close", "Delete"));
+            buttons.push(new primitives.orgdiagram.ButtonConfig("properties", "ui-icon-gear", "Info"));
+            buttons.push(new primitives.orgdiagram.ButtonConfig("add", "ui-icon-person", "Add"));
+            buttons.push(new primitives.orgdiagram.ButtonConfig("notice", "ui-icon-notice", "Notice"));
+            result.buttons = buttons;*/
+
+            result.itemSize = new primitives.common.Size(200, 30);
+            result.minimizedItemSize = new primitives.common.Size(3, 3);
+            result.highlightPadding = new primitives.common.Thickness(2, 2, 2, 2);
+
+
+            var itemTemplate = jQuery(
+                '<div class="bp-item bp-corner-all bt-item-frame">'
+                + '<div name="titleBackground" class="bp-item bp-corner-all bp-title-frame" style="top: 2px; left: 2px; width: 196px; height: 25px;">'
+                + '<div name="title" class="bp-item bp-title" style="top: 3px; left: 6px; width: 188px; height: 23px; text-align:center;">'
+                + '</div>'
+                + '</div>'
+                + '</div>'
+            ).css({
+                width: result.itemSize.width + "px",
+                height: result.itemSize.height + "px"
+            }).addClass("bp-item");
+            result.itemTemplate = itemTemplate.wrap('<div>').parent().html();
+
+            return result;
+        }
+    </script>
+</head>
+<body style="background-color:#0C2A3E">
+    <div style="width:100%">
+        <div style="width:33%; float:left">
+            <img src="http://itms.electrodata.com.pe/images/logoED.png" width="250" />
+        </div>
+        <div style="float: left; text-align: center;">
+            <span style="font-size:xx-large; font-family:Arial;color:white;">ESTRUCTURA ORGANIZACIONAL</span>
+            <div style="margin-top: 10px;">
+                <input type="text" id="nameSearch" placeholder="Nombre del colaborador" />
+                <button type="button" class="k-button" id="btnSearchName">Buscar</button>
+            </div>
+        </div>
+        <div style="clear: both;"></div>
+    </div>
+    <div id="basicdiagram" style="width: 100%; height: 600px; border-style: dotted; border-width: 1px;background-color:white; float:left" />
+</body>
+</html>

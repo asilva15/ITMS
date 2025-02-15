@@ -1,0 +1,149 @@
+﻿@{
+    ViewBag.Title = "EditarContacto";
+    Layout = null;
+}
+
+
+@using (Html.BeginForm("EditarPersona", "Contacto", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmEditarContacto", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+    <input id="IdCompania" name="IdCompania" type="hidden" value="0" />
+    <input id="IdPersEnti" name="IdPersEnti" type="hidden" value="0" />
+    <input id="IdEnti" name="IdEnti" type="hidden" value="0" />
+    <div style="width:100%">
+        <div class="form-row">
+            <div class="col-md-4">
+                <div>Compañía <b>(*)</b></div>
+                <input id="txtCompania" name="txtCompania" class="form-control input-sm" type="text" disabled="disabled" />
+            </div>
+            <div class="col-md-4">
+                Nombres <b>(*)</b>
+                <input id="txtFirName" name="txtFirName" class="form-control input-sm" type="text" />
+            </div>
+            <div class="col-md-4">
+                Apellidos <b>(*)</b>
+                <input id="txtLasName" name="txtLasName" class="form-control input-sm" type="text" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4">
+                <div>Sexo <b>(*)</b></div>
+                <select class="form-control select2" style="width: 100%;" id="cbSexo" name="cbSexo">
+                    <option value="M">Masculino</option>
+                    <option value="F">Femenino</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                Celular
+                <input id="txtCelPers" name="txtCelPers" class="form-control input-sm" type="text" />
+            </div>
+            <div class="col-md-4">
+                RPM
+                <input id="txtRpmPers" name="txtRpmPers" class="form-control input-sm" type="text" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-4">
+                Extensión
+                <input id="txtExtPers" name="txtExtPers" class="form-control input-sm" type="text" />
+            </div>
+            <div class="col-md-4">
+                Correo Personal <b>(*)</b>
+                <input id="txtEmaPers" name="txtEmaPers" class="form-control input-sm" type="email" />
+            </div>
+            <div class="col-md-4">
+                Cargo
+                <input id="txtCarPers" name="txtCarPers" class="form-control input-sm" type="text" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-12">
+                Observaciones
+                <input id="txtObservacion" name="txtObservacion" class="form-control input-sm" type="text" />
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-md-8">
+                &nbsp;
+            </div>
+            <div class="col-md-2">
+                &nbsp;
+                <input id="btnLimpiar" name="btnLimpiar" class="btn btn-block btn-light btn-sm" type="button" value="Limpiar" onclick="LimpiarDatos();" />
+            </div>
+            <div class="col-md-2">
+                &nbsp;
+                <button id="btnEditarPersona" name="btnEditarPersona" class="btn btn-block btn-primary btn-sm" type="submit"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </div>
+}
+<iframe id="upload_target" name="upload_target" src="" style="width:0px;height:0px;border-width:0px;" class="display:none"></iframe>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        ObtenerDatosContacto();
+    });
+
+    function ObtenerDatosContacto() {
+
+        $.ajax({
+            url: "/Contacto/ObtenerDatosContacto/" + @ViewBag.IdEnti,
+            data: "var=" + Math.random(),
+            cache: false,
+            type: "GET",
+            dataType: "json",
+            success: function (data) {
+                $.each(data['Data'], function (index, value) {
+                    $("#IdCompania").val((data['Data'][index]['IdCompania']));
+                    $("#IdEnti").val((data['Data'][index]['IdEnti']));
+                    $("#IdPersEnti").val((data['Data'][index]['IdPersEnti']));
+                    $("#txtCompania").val((data['Data'][index]['Compania']));
+                    $("#txtFirName").val((data['Data'][index]['Nombre']));
+                    $("#txtLasName").val((data['Data'][index]['Apellidos']));
+                    $("#txtCelPers").val((data['Data'][index]['Celular']));
+                    $("#txtRpmPers").val((data['Data'][index]['RPM']));
+                    $("#txtExtPers").val((data['Data'][index]['Extension']));
+                    $("#txtEmaPers").val((data['Data'][index]['Correo']));
+                    $("#txtCarPers").val((data['Data'][index]['Cargo']));
+                    $("#txtObservacion").val((data['Data'][index]['Observaciones']));
+
+                    if (data['Data'][index]['Sexo'] != " ") {
+                        $("#cbSexo").val(data['Data'][index]['Sexo']);
+                    }
+                });
+            },
+            error: function (source) {
+                toastr.warning("Error al cargar los datos del contacto");
+            }
+        });
+    }
+   
+
+    function MensajeEditarContacto(resp) {
+        
+        if (resp == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("El contacto fue editado.", "¡Bien hecho!");
+            CargarCelularCorreo();
+        }
+        else if (resp == "Vacio") {
+            toastr.warning("Verifique los campos obligatorios.", "¡Alerta!");
+        } else if (resp == "Existe") {
+            toastr.warning("El contacto ya existe.", "¡Alerta!");
+        } else {
+            toastr.error("Contacte al administrador.", "¡Error!");
+        }
+    }
+    function LimpiarDatos() {
+        $("#txtFirName").val("");
+        $("#txtLasName").val("");
+        $("#txtCelPers").val("");
+        $("#txtRpmPers").val("");
+        $("#txtExtPers").val("");
+        $("#txtEmaPers").val("");
+        $("#txtCarPers").val("");
+        $("#cbSexo").val("M");
+        $("#txtObservacion").val("");
+    }
+</script>

@@ -1,0 +1,271 @@
+﻿@{
+    ViewBag.Title = "NuevoPerfil";
+    Layout = null;
+}
+<style>
+    .botonRemover {
+        color: #F83C50; 
+        cursor: pointer; 
+        font-size:20px;
+    }
+</style>
+<div class="panel-body">
+    <div class="form-group">
+        <div class="form-row">
+            <div class="col-md-6">
+                <div>Cargo <b>(*)</b></div> <!--IdAccoPara -->
+                <select id="cbCargo" class="form-control select2" type="text" style="width:100%" ></select>
+            </div>
+            <div class="col-md-3">
+                &nbsp;
+                <input id="btnAgregar" name="btnAgregar" class="btn btn-block btn-warning btn-sm" type="button" value="Agregar" onclick="validarAgregarFila();" />
+            </div>
+            <div class="col-md-3">
+                &nbsp;
+                <input id="btnGuardar" name="btnGuardar" class="btn btn-block btn-primary btn-sm" type="button" value="Guardar" onclick="mostrarMensajeAlerta();" />
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-12">
+        &nbsp;
+        <button id="btnCancelar" style="display:none" data-style="expand-right" data-dismiss="modal"></button>
+    </div>
+    <div class="form-group-sm editor-field">
+        <table id="tablaNuevoPerfil" class="table table-bordered table-hover" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Tipo de Asignación</th>
+                    <th>Activo / Programa</th>
+                    <th>Opciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @*<tr>
+                    <td><select id="cbTipoAsignacion" class="form-control select2" type="text" style="width:100%" /></td>
+                    <td><select id="cbActivoPrograma" class="form-control select2" type="text" style="width:100%" /></td>
+                    <td><center><span title="Nuevo Perfil" class="glyphicon glyphicon-remove botonRemover" aria-hidden="true"></span></center></td>
+                </tr>*@
+            </tbody>
+            @*<tfoot>
+                <tr>
+                    <th>Tipo de Asignación</th>
+                    <th>Activo / Programa</th>
+                    <th>Opciones</th>
+                </tr>
+            </tfoot>*@
+        </table>
+    </div>
+    <div id="divMensaje"></div>
+</div>
+<script>
+    var cont = 0;
+    var n = 0;
+    var ultimoValor = 0;
+    var idFila = 0;
+    $(document).ready(function () {
+        var selected = [];
+        AgregarFila();
+        cargarComboCargo();
+    });
+
+    function cargarComboCargo() {
+        $("#cbCargo").select2({
+            id: function (e) { return e.id; },
+            placeholder: 'Seleccione...',
+            minimumResultsForSearch: 1,
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/PerfilActivos/ListChart",
+                dataType: 'json',
+                //type: "POST",
+                //params: {
+                //    contentType: 'application/json; charset=utf-8'
+                //},
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            }
+        });
+    }
+
+    function AgregarFila() {
+        cont++; n++;
+        var fila =
+            '<tr class="selected" id="fila' + cont + '">' +
+                '<td><select id="cbTipoAsignacion' + cont + '" class="form-control select2" type="text" style="width:100%" ></select></td>' +
+                '<td><select id="cbActivoPrograma' + cont + '" class="form-control select2" type="text" style="width:100%" ></select></td>' +
+                '<td>' +
+                    '<center><span id="valor'+cont+'" title="Nuevo Perfil" class="btn btn-outline-dark" aria-hidden="true" value="'+cont+'" onclick=remover(' + cont + ');><i class="fas fa-times"></i></span></center>' +
+                '</td>' +
+            '</tr>';
+        $("#tablaNuevoPerfil").append(fila);
+        $("#cbTipoAsignacion" + cont).select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Parameter/ListarPorParametro?idparametro=52",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbActivoPrograma" + cont).attr('disabled',true);
+        $("#cbTipoAsignacion" + cont).on('change', function (e) {
+            $("#cbActivoPrograma" + cont).empty();
+            var idTipoAsignacion = $("#cbTipoAsignacion" + cont).find(':selected').val()
+            if (idTipoAsignacion != undefined) {
+                $("#cbActivoPrograma" + cont).removeAttr('disabled');
+                $("#cbActivoPrograma" + cont).select2({
+                id: function (e) { return e.id; },
+                placeholder: 'Seleccione...',
+                minimumInputLength: 0,
+                multiple: false,
+                allowClear: true,
+                ajax: {
+                    url: "/TipoActivo/ListarTipoActivo?idTipoAsignacion=" + idTipoAsignacion,
+                    dataType: 'json',
+                    quietMillis: 100,
+                    data: function (params) {
+                        return {
+                            q: params.term,
+                            page: params.page
+                        };
+                    },
+                    processResults: function (data, page) {
+                        return { results: data };
+                    },
+                },
+            });
+            } else {
+                $("#cbActivoPrograma" + cont).attr('disabled');
+            }
+            
+        });
+    }
+    function remover(id_fila) {
+        $("#fila" + id_fila).remove();
+        ultimoValor = $("#valor" + cont).text();
+        n--;
+    }
+    function validarAgregarFila() {
+        if (n == 0 ) {
+            AgregarFila();
+        }
+        else {
+            //Traemos el numero de fila
+            var fila = parseInt($('#tablaNuevoPerfil').find('td').length) / 3;
+            //$("#tablaNuevoPerfil tr:eq( " + fila + " )").css("background", "red");
+            //alert($("#tablaNuevoPerfil td:eq( " + uv1 + " )").html());
+            //alert($("#cbTipoAsignacion" + uv).val());
+            idFila = parseInt($("#tablaNuevoPerfil tr:eq( " + fila + " )").attr("id").substr(4, 1));
+            //alert($("#tablaNuevoPerfil tr:eq( " + uv + " )").attr("id").substr(4,1))
+            //alert($("#tablaNuevoPerfil tr:eq( " + uv + " )").attr("id"));
+            if ($("#cbTipoAsignacion" + idFila).val() == null || $("#cbActivoPrograma" + idFila).val() == null) {
+                $('#divMensaje').empty();
+                $('#divMensaje').show("show");
+                $("#divMensaje").append("<div class='alert alert-danger'><strong>¡Cuidado!</strong> Complete los campos porfavor </div>");
+                setTimeout(function () {
+                    $("#divMensaje").fadeOut(3000);
+                }, 1000);
+            }
+            else
+            {
+                AgregarFila();
+            }
+        }
+    }
+
+    function mostrarMensajeAlerta() {
+        var resultado = "OK";
+        for (var i = 1; i <= cont; i++) {
+            if (( ($("#cbTipoAsignacion" + i + ":visible").length > 0) == true && $("#cbTipoAsignacion" + i).val() == null) || ( ($("#cbActivoPrograma" + i + ":visible").length > 0) && $("#cbActivoPrograma" + i).val() == null )) {
+                resultado = "ERROR";
+            }
+        }
+        if (!($("#cbCargo").val() == null)) {
+            if (resultado == "OK") {
+                $('#divMensaje').empty();
+                $('#divMensaje').show("show");
+                $("#divMensaje").append("<div class='alert alert-warning'><div class='form-row'>Confirme si desea registrar el nuevo perfil<span class='ml-auto'>" +
+                    '<span title="Confirmar" class="btn btn-outline-success" aria-hidden="true" onclick="GuardarNuevoPerfil();"><i class="fas fa-check"></i></span>' +
+                    '<span title="Rechazar" class="btn btn-outline-danger" aria-hidden="true" onclick="cerrarMensaje();"><i class="fas fa-times"></i></span>' +
+                    "</span></div></div>");
+                $('#btnAgregar').hide('show');
+            }
+            else {
+                $('#divMensaje').empty();
+                $('#divMensaje').show("show");
+                $("#divMensaje").append("<div class='alert alert-danger'><strong>¡Cuidado! </strong> Complete los campos porfavor </div>");
+                setTimeout(function () {
+                    $("#divMensaje").fadeOut(3000);
+                }, 1000);
+            }
+        }
+        else {
+            $('#divMensaje').empty();
+            $('#divMensaje').show("show");
+            $("#divMensaje").append("<div class='alert alert-danger'><strong>¡Cuidado! </strong>Ingrese el cargo porfavor</div>");
+            setTimeout(function () {
+                $("#divMensaje").fadeOut(3000);
+            }, 1000);
+        }
+    }
+    function GuardarNuevoPerfil() {
+        var cbTipoActPro = "";
+        for (var i = 1; i <= cont; i++) {
+            cbTipoActPro = cbTipoActPro + ($("#cbTipoAsignacion" + i).val() + '|' + $("#cbActivoPrograma" + i).val() + ',');
+        }
+        $.ajax({
+            url: "/PerfilActivos/GuardarPerfil/",
+            data: "cbCargo=" + $("#cbCargo").val() +
+                  "&cbTipActPro=" + cbTipoActPro +
+                  "&var=" + Math.random(),
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (resp) {
+                if (resp == "OK") {
+                    MensajeConfirmacion('Mensaje', 'Se ha registrado un nuevo perfil');
+                } 
+            }
+        });
+    }
+
+    
+
+    function MensajeConfirmacion(msg, msnErr) {
+
+        if (msg == 'OK') {
+            toastr.success("Completado", "Información Actualizada");
+        }
+        else if (msg == 'Mensaje') {
+            toastr.success(msg, msnErr);
+            $("#btnCancelar").trigger({ type: "click" });
+            ListarPerfilActivos();
+        }
+    }
+    function cerrarMensaje() {
+        $("#divMensaje").empty();
+        $('#btnAgregar').show('show');
+    }
+</script>

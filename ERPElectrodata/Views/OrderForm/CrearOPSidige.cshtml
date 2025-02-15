@@ -1,0 +1,340 @@
+﻿@{
+//Layout = null;
+}
+
+<!DOCTYPE html>
+<style>
+    #tam {
+        width: 80% !important;
+    }
+</style>
+
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>FindOPSidige</title>
+</head>
+<body>
+    <div class="card mb-2">
+        <div class="card-header-tab card-header">OP - SIDIGE</div>
+        <div class="card-body">
+            <div id="divFindTicket">
+                @using (Html.BeginForm("FindOPSidige", "OrderForm", FormMethod.Post, new { id = "FrmFindOPSidige" }))
+                {
+                    @Html.Hidden("hdnTipoDocumento")
+                    <div class="form-row">
+                        <div class="col-md-3">
+                            <div class="editor-label">
+                                Compañía
+                            </div>
+                            <div>
+                                @Html.Editor("ID_ENTI")
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="label">
+                                Tipo OP
+                            </div>
+                            <div>
+                                @Html.Editor("ID_TYPE_DOCU_SALE")
+                            </div>
+                        </div>
+
+                        <div class="col-md-2">
+                            <div class="label">
+                                Número/Código OP
+                            </div>
+                            <div class="k-textbox" style="width:100%">
+                                @Html.Editor("NUM_DOCU_SALE")
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <br />
+                            <button id="find" class="btn btn-primary btn-block"><i class="fa fa-search"></i> Buscar</button>
+                        </div>
+                    </div>
+
+                }
+            </div>
+        </div>
+        <br />
+    </div>
+    <div class="card mb-2">
+            <div style="clear:both;"></div>
+            <div id="gridOP" class="contentView"></div>
+            <div style="clear:both;"></div>
+            <div id="pagerOP" class="contentViewPager"></div>
+    </div>
+
+    <div id="divAdjuntar" class="divFondoUno" style="display:none">
+        <div class="divCont3">
+            <button id="btnArchivosInicio" class="k-button" onclick="Archivos();">Adjuntar</button>
+        </div>
+    </div>
+
+    @*<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Adjuntar Archivos Iniciales OP</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="editor-label">
+                        Tipo de Documento
+                    </div>
+                    <div class="editor-field">
+                        @Html.TextBox("IdTipoDocumento")
+                    </div>
+                    <input name="files" id="files" type="file" />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="k-button" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>*@
+
+</body>
+</html>
+
+
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="card-header-sm pr-0 pl-0" style="background-color:lightgray;font-weight:bold">
+        <div class="col-md-12">
+            <div class="row">
+                <div class="col-md-2">
+                    ${COD_TYPE_DOCU_SALE}
+                    ${NUM_DOCU_SALE}
+                </div>
+                <div class="col-md-2" title="Affected End User">
+                    ${CODDOC_OS} ${NUMDOC_OS}
+                </div>
+                <div class="col-md-4" title="Fecha Creacion @ResourceLanguaje.Resource.DateFormat">
+                    Creado: ${DAT_DOCU_SALE}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body" style="font-size:12.5px">
+        <div class="row">
+            <div class="col-md-9" style="float:left">
+                <div class="row">
+                    <div class="col-md-5">
+                        <b>${CIA}</b><br />
+                        ${CIA_RUC}<br />
+                        ${CIA_ADDR}
+                    </div>
+                    <div class="col-md-4">
+                        <b>${NAM_CLIE_CONT}</b><br />
+                        ${CLI_JOB_TITL}<br />
+                        ${CLI_TELE}<br />
+                        ${CLI_PHON_EXTE}<br />
+                        ${CLIE_EMAI}
+                    </div>
+                </div>
+            </div>
+            <div style="float:right;" class="col-md-2">
+                <button id="${ID_ENTI},${NUMDOC_OS},${ID_TYPE_DOCU_SALE},${NUM_DOCU_SALE}" onclick="transferITMS(this)" class="k-button CrearOP_ITMS" >Crear en ITMS</button>
+            </div>
+        </div>
+    </div>
+    <hr class="m-0" />
+    <div class="card-body pt-2 pb-2" style="font-size:12.5px">
+        <div class="row">
+            <div class="col-md-4">Vendedor: ${VENDOR}</div>
+            <div class="col-md-3">Código Vendedor: ${ID_VEND}</div>
+        </div>
+    </div>
+    @*<div class="card-footer-sm" style="background-color:lightgray;font-size:12.5px">
+        <div class="row">
+            <div class="col-md-4">Vendedor: ${VENDOR}</div>
+            <div class="col-md-3">Código Vendedor: ${ID_VEND}</div>
+        </div>
+    </div>*@
+</script>
+
+<script>
+
+    function BuscarOPSIDIGE() {
+
+        toastr.warning("Espere por favor.", "Buscando");
+
+        $("#pagerOP").empty();
+        $("#gridOP").empty();
+
+        if ($("#gridOP").data("kendoListView")) {
+            $("#pagerOP").data("kendoPager").destroy();
+            $("#gridOP").data("kendoListView").destroy();
+        }
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/OrderForm/ResultFindOPSidige?" + $('#FrmFindOPSidige').serialize(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+
+        $("#pagerOP").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridOP").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html())
+        });
+
+
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+            autoBind: true,
+            index: 0,
+            dataTextField: "COM_NAME",
+            filter: "contains",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                                      '<div style="">${data.COM_NAME}</div>' +
+                                      '<div style="">(${data.NAM_TYPE_DI} : ${data.NUM_TYPE_DI})</div>' +
+                                  '</div>',
+            dataValueField: "ID_ENTI",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ClassEntity/CIAOP?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_TYPE_DOCU_SALE = $("#ID_TYPE_DOCU_SALE").kendoComboBox({
+            autoBind: true,
+            index: 0,
+            dataTextField: "COD_TYPE_DOCU_SALE",
+            filter: "contains",
+            dataValueField: "ID_TYPE_DOCU_SALE",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeDocumentSale/ListAll?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#find").click(function (event) {
+
+            event.preventDefault();
+
+            BuscarOPSIDIGE()
+        });
+
+
+    });
+
+    function transferITMS(obj) {
+
+        //event.preventDefault();
+        var res = obj.id.split(",");
+        $(".CrearOP_ITMS").attr("data-style", "expand-right");
+        $(".CrearOP_ITMS").attr("data-toggle", "modal");
+        $(".CrearOP_ITMS").attr("data-target", "#miModal");
+
+        $("#lblTitulo").text("Creación de la OP en SIDIGE");
+        $(".modal-dialog").removeClass("modal-sm");
+        $(".modal-dialog").removeClass("modal-lg");
+        $(".modal-dialog").addClass("modal-lg");
+
+        $("#modal-content").empty();
+        $("#modal-content").load("/OrderForm/OPFromSIDIGE?_=" + Math.random() + "&ID_ENTI=" + res[0] + "&OS=" + res[1].trim() + "&ID_TYPE_DOCU_SALE=" + res[2] + "&NUM_DOCU_SALE=" + res[3]);
+    }
+    function Archivos() {
+                $("#lblTitulo").text("Adjuntar Archivos Iniciales OP");
+                $(".modal-dialog").removeClass("modal-sm");
+                $(".modal-dialog").removeClass("modal-lg");
+                $("#modal-content").empty();
+                $("#modal-content").html(
+                    '<div class="col-md-12">'+
+                           'Tipo de Documento'+
+                        '</div>'+
+                        '<div class="col-md-6">'+
+                            '@Html.TextBox("IdTipoDocumento")'+
+                        '</div><br>'+
+                    '<input name="files" id="files" type="file" />'
+        );
+
+        var IdTipoDocumento = $("#IdTipoDocumento").kendoComboBox({
+            dataTextField: "NAM_TYPE_DOCU_ATTA",
+            dataValueField: "ID_TYPE_DOCU_ATTA",
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Total"
+                },
+                transport: {
+                    read: "/TypeDocumentModule/ListByModule/2?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#files").kendoUpload({
+            localization: {
+                select: "Adjuntar"
+            },
+            upload: function (e) {
+                e.data = {
+                    IdTipoDocumento: IdTipoDocumento.dataItem().ID_TYPE_DOCU_ATTA,
+                    IdDocuSale: $("#hdnTipoDocumento").val()
+                };
+            },
+            remove: function (e) {
+                e.data = {
+
+                };
+            },
+            async: {
+                saveUrl: "/OrderForm/AdjuntarArchivosIniciales",
+                removeUrl: ""
+            }
+        });
+
+    }
+</script>

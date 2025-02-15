@@ -1,0 +1,243 @@
+﻿@{
+    Layout = null;
+}
+
+    <div class="card mb-2">
+        <div class="card-header-tab card-header"> Documentos Adjuntos</div>
+        <div class="card-body">
+            <div id="divAdjuntos"></div>
+        </div>
+    </div>
+    <div class="card mb-2">
+        <div class="card-header-tab card-header"> Documentos del Proyecto</div>
+        <div class="card-body">
+            <div class="card mb-1" style="width:100%;">
+                <div class="card-header-tab card-header"> Documentos Iniciales</div>
+                <div class="card-body">
+                    <div id="divDocsIniciales"></div>
+                </div>
+            </div>
+            <br />
+            <div class="card mb-1" style="width:100%;">
+                <div class="card-header-tab card-header"> Documentos Iniciales</div>
+                <div class="card-body">
+                    <div id="divDocsAdjuntos"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script type="text/javascript">
+
+    function CargarArchivos() {
+        $.ajax({
+            url: "/DocumentoVenta/ObtenerArchivos/@ViewBag.IdDocumentoVenta",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                mostrarArchivos();
+            },
+            error: function (source) {
+                alert("Error Carga Archivos");
+            }
+        });
+    }
+
+    function mostrarArchivos() {
+        $("#divAdjuntos").empty();
+        $.each(data['Data'], function (index, value) {
+            var str = '';
+            if (data['Data'][index]['TIPO'] == '.pdf' || data['Data'][index]['TIPO'] == '.txt' || data['Data'][index]['TIPO'] == '.jpg' || data['Data'][index]['TIPO'] == '.png') {
+                str = '<div class="col-md-3">- <a href="/DocumentoVenta/VerDoc/' + (data['Data'][index]['LINK']) + '" target="_BLANK">' + (data['Data'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>';
+            }
+            else {
+                str = '<div class="col-md-3">- <a href="/DocumentoVenta/DescargarArchivo/' + (data['Data'][index]['LINK']) + '" target="_BLANK">' + (data['Data'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>';
+            }
+            $("#divAdjuntos").append(
+                '<div class="form-row" >' +
+                    '<div class="col-md-2">' + (data['Data'][index]['TIPO']) + '</div>' +
+                    '<div class="col-md-2">' + (data['Data'][index]['NUMDOC']) + '</div>' +
+                    //'<div class="smallField" style="width:30%; float:left;">- <a href="/Adjuntos/DocumentControl/RegistrosOP/' + (data['Data'][index]['LINK']) + '" target="_BLANK">' + (data['Data'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                    str +
+                    '<div class="col-md-2">' + (data['Data'][index]['CREATE_ATTA']) + '</div>' +
+                    '<div class="col-md-2">' + (data['Data'][index]['NOMBRE']) + '</div>' +
+                    '<div id="div' + (data['Data'][index]['ID']) + '" class="col-md-1">' +
+                        '<span id="E' + (data['Data'][index]['ID']) + '" title="Editar" class="fa fa-pen" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="VerEditarDocumento(' + (data['Data'][index]['ID']) + ',' + (data['Data'][index]['IdTipoDocumento']) + ')"></span>' +
+                        '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                        '<span id="R' + (data['Data'][index]['ID']) + '" title="Eliminar" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="EliminarDocumento(' + (data['Data'][index]['ID']) + ')"></span>' +
+                    '</div>' +
+                '</div>' +
+                '<div id="divEdita' + (data['Data'][index]['ID']) + '" class="form-group row" style="display:none">' +
+                    '<div class="col-md-5">' +
+                        '<div id="TD' + (data['Data'][index]['ID']) + '">Tipo de Documento: <input id="cbTD' + (data['Data'][index]['ID']) + '" type="text" /></div>' +
+                    '</div>' +
+                    '<div class="col-md-5">' +
+                        '<div id="ND' + (data['Data'][index]['ID']) + '">Número de Documento: <input id="txtND' + (data['Data'][index]['ID']) + '" class="k-textbox" id="txtND' + (data['Data'][index]['ID']) + '" type="text" style="width:100%" value="' + (data['Data'][index]['NUMDOC']) + '" /></div>' +
+                    '</div>' +
+                '<div class="col-md-2">' +
+                        '<br/>'+
+                        '<span id="E' + (data['Data'][index]['ID']) + '" title="Editar" class="fa fa-save" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size:13px; " onclick="EditarDocumento(' + (data['Data'][index]['ID']) + ')"></span>' +
+                        '<span>&nbsp;&nbsp;&nbsp;</span>' +
+                        '<span id="R' + (data['Data'][index]['ID']) + '" title="Eliminar" class="fa fa-times" aria-hidden="true" style="color: #BA141A; cursor: pointer; font-size: 13px;" onclick="CancelarDocumento(' + (data['Data'][index]['ID']) + ')"></span>' +
+                    '</div>' +
+                '</div>'
+            );
+        });
+    }
+
+    function VerEditarDocumento(idDocumento, idTipoDoc) {
+        $("#div" + idDocumento).removeAttr("style");
+        $("#divEdita" + idDocumento).removeAttr("style");
+
+        $("#div" + idDocumento).attr("style", "display:none");
+        $("#divEdita" + idDocumento).attr("style", "display:true");
+
+        var cbDocumento = $("#cbTD" + idDocumento).kendoComboBox({
+            dataTextField: "NAM_TYPE_DOCU_ATTA",
+            dataValueField: "ID_TYPE_DOCU_ATTA",
+            filter: "contains",
+            index: 1,
+            autoBind: true,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Total"
+                },
+                transport: {
+                    read: "/TypeDocumentModule/ListByModule/3?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        cbDocumento.value(idTipoDoc);
+    }
+
+    function CancelarDocumento(idDocumento) {
+        $("#div" + idDocumento).attr("style","display:true");
+        $("#divEdita" + idDocumento).attr("style", "display:none");
+    }
+
+    function EditarDocumento(idDocumento) {
+
+        var idTipoDoc = $("#cbTD" + idDocumento).val();
+        var numdoc = $("#txtND" + idDocumento).val();
+
+        $.ajax({
+            url: "/DocumentoVenta/EditarDocumentoAdjunto/" + idDocumento + "?td=" + idTipoDoc +  "&nd=" + numdoc,
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (source) {
+                if (source != "OK") { toastr.error("Contacte al Administrador", "");}
+                else {
+                    toastr.success("Se editó el documento.", "");
+                    CargarArchivos();
+                }
+            },
+            error: function (source) {
+                toastr.error("Contacte al Administrador", "");
+            }
+        });
+    }
+
+    function EliminarDocumento(idDocumento) {
+        $.ajax({
+            url: "/DocumentoVenta/EliminarDocumentoAdjunto/" + idDocumento,
+            type: "GET",
+            cache: false,
+            dataType: "text",
+            success: function (source) {
+                if (source != "OK") { toastr.error("Contacte al Administrador",""); }
+                else {
+                    toastr.success("Se eliminó el documento.", "");
+                    CargarArchivos();
+                }
+            },
+            error: function (source) {
+                toastr.error("Contacte al Administrador", "");
+            }
+        });
+    }
+
+    function cargarDocsInicialesOP() {
+        $.ajax({
+            url: "/OrderForm/ObtenerArchivosComercial/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            dataType: "json",
+            success: function (source) {
+                data1 = source;
+                mostrarArchivosOP();
+            },
+            error: function (source) {
+                alert("Error Carga Json Archivos Comercial");
+            }
+        });
+    }
+
+    function mostrarArchivosOP() {
+        var c = 0;
+        $.each(data1['Data2'], function (index, value) {
+            $("#divDocsIniciales").append(
+                '<div class="form-row">' +
+                    '<div class="col-md-5">- <a href="' + (data1['Data2'][index]['LINK']) + '" target="_BLANK">' + (data1['Data2'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                    '<div class="col-md-2">' + (data1['Data2'][index]['CREATE_ATTA']) + '</div>' +
+                    '<div class="col-md-3">' + (data1['Data2'][index]['NOMBRE']) + '</div>' +
+                    '<div class="col-md-2">' + (data1['Data2'][index]['FECHAACTA']) + '</div>' +
+                '</div>'
+            );
+            c = c + 1;
+        });
+        if (c == 0) {
+            $("#divDocsIniciales").append(
+                '<div  class="col-md-12" style="padding-left:14px">No se adjuntaron documentos.</div>'
+            );
+        }
+    }
+
+    function cargarDocsAdjuntosOP() {
+        $.ajax({
+            url: "/OrderForm/ObtenerArchivosProyecto/@ViewBag.ID_DOCU_SALE",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                data = source;
+                mostrarArchivosProyecto();
+            },
+            error: function (source) {
+                alert("Error Carga Json Archivos Proyectos");
+            }
+        });
+    }
+
+    function mostrarArchivosProyecto() {
+        $("#divDocsAdjuntos").empty();
+        var c = 0;
+        $.each(data['Data'], function (index, value) {
+            $("#divDocsAdjuntos").append(
+                '<div class="form-row">' +
+                    '<div class="col-md-5">- <a href="' + (data['Data'][index]['LINK']) + '" target="_BLANK">' + (data['Data'][index]['ARCHIVO']) + ' <img src="/Content/Images/pdf.png" style="width:14px; height:14px; border:none;"></a></div>' +
+                    '<div class="col-md-2">' + (data['Data'][index]['CREATE_ATTA']) + '</div>' +
+                    '<div class="col-md-3">' + (data['Data'][index]['NOMBRE']) + '</div>' +
+                    '<div class="col-md-2">' + (data['Data'][index]['FECHAACTA']) + '</div>' +
+                '</div>'
+            );
+            c = c + 1;
+        });
+        if (c == 0) {
+            $("#divDocsAdjuntos").append(
+                '<div  class="col-md-12" style="padding-left:14px">No se adjuntaron documentos.</div>'
+            );
+        }
+    }
+
+    CargarArchivos();
+    cargarDocsInicialesOP();
+    cargarDocsAdjuntosOP();
+
+</script>

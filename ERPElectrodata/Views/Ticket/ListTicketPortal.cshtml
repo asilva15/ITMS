@@ -1,0 +1,419 @@
+﻿@model ERPElectrodata.Models.TICKET
+@{
+    ViewBag.Title = "ListTicketPortal";
+    Layout = null;
+
+}
+
+<style type="text/css">
+    a.tooltip span {
+        cursor: default;
+        display: none;
+        padding: 5px;
+        margin: -25px 0px 0px 120px;
+        width: 230px;
+        position: relative;
+        z-index: 9;
+    }
+
+    a.tooltip:hover span {
+        display: block;
+        position: absolute;
+        background: #000;
+        border: 1px solid #cccccc;
+        color: #ddd;
+        font-size: 14px;
+        font-weight: normal;
+        opacity: 0.9;
+    }
+</style>
+
+<input type="hidden" id="IdIdioma" name="IdIdioma" value="@Session["IdIdioma"]" />
+
+<div id="divContent">
+    <table width="100%">
+        <tr>
+            <td width="50%">
+                <h1 class="titleModule"><span class="TicketsdelPortal"></span></h1>
+            </td>
+            @*<td align="right" width="50%">
+                    @if (Convert.ToInt32(Session["ID_ACCO"]) == 1 || Convert.ToInt32(Session["OPERACIONES"]) == 1)
+                    {
+                        <div class="modal-body" style="width:200px">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped active" role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100" style="width: @ViewBag.Porcentaje%">
+                                    Actividad_Semanal
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </td>*@
+        </tr>
+    </table>
+    @*<div id="ticketsByStatus">
+            <div class="ticketByStatusP4_1">
+                <div id="homInc1" class="ticketByStatusP4" onclick="Click(this)">
+                    <div class="tabStatus1" style="position:relative;">
+                        <div id="boxActive" class="boxQty">@ViewBag.PActive</div>
+                        <div id="letrashomInc1" class="letras letrasActive">
+                            <div>Activos<br /><div id="boxTActive">Total @ViewBag.TAActive</div></div>
+                            <div style="clear:both;"></div>
+                        </div>
+                        <div id="StatusSelecthomInc1" class="tab-active-marks2"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ticketByStatusP4_1">
+                <div id="homInc2" class="ticketByStatusP4" onclick="Click(this)">
+                    <div class="tabStatus2" style="position:relative;">
+                        <div id="boxSCHEDULED" class="boxQty">@ViewBag.PScheduled</div>
+                        <div id="letrashomInc2" class="letras">
+                            <div>Programado<br /><div id="boxTSCHEDULED">Total @ViewBag.TAScheduled</div></div>
+                            <div style="clear:both;"></div>
+                        </div>
+                        <div id="StatusSelecthomInc2"></div>
+                        <div class="divAjax-Loading" id="loadinghomInc2" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ticketByStatusP4_1">
+                <div id="homInc3" class="ticketByStatusP4" onclick="Click(this)">
+                    <div class="tabStatus3" style="position:relative;">
+                        <div id="boxRESOLVED" class="boxQty">@ViewBag.PResolved</div>
+                        <div id="letrashomInc3" class="letras">
+                            <div>Resuelto<br /><div id="boxTRESOLVED">Total @ViewBag.TAResolved</div></div>
+                            <div style="clear:both;"></div>
+                        </div>
+                        <div id="StatusSelecthomInc3"></div>
+                        <div class="divAjax-Loading" id="loadinghomInc3" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="ticketByStatusP4_1">
+                <div id="homInc4" class="ticketByStatusP4" onclick="Click(this)">
+                    <div class="tabStatus4" style="position:relative;">
+                        <div id="boxCLOSED" class="boxQty">@ViewBag.PClosed</div>
+                        <div id="letrashomInc4" class="letras">
+                            <div>Cerrado<br /><div id="boxTCLOSED">Total @ViewBag.TAClosed</div></div>
+                            <div style="clear:both;"></div>
+                        </div>
+                        <div id="StatusSelecthomInc4"></div>
+                        <div class="divAjax-Loading" id="loadinghomInc4" style="top:0px; right:0px; position:absolute; display:none;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>*@
+    <input type="hidden" id="TimeServer" name="TimeServer" value="@ViewBag.TimeServer" />
+
+
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr style="background-color:#333333;">
+                    @*<th style="color:white">#</th>*@
+                    <th style="color:white"><span class="Código"></span> </th>
+                    <th style="color:white"><span class="Título"></span> </th>
+                    <th style="color:white"><span class="Asignado"></span> </th>
+                    <th style="color:white"><span class="Estado"></span> </th>
+                    <th style="color:white"><span class="FechaCreación"></span></th>
+                    <th style="color:white"><span class="Creadopor"></span></th>
+                    <th style="color:white"><span class="Asignar"></span></th>
+                    @*<th>Acción</th>*@
+                </tr>
+            </thead>
+            <tbody id="gridTickets">
+
+                @*<tr>
+                    <td>
+                        ${ID_TICK}
+                    </td>
+                    @*<td>
+                        @Html.DisplayFor(modelItem => item.Codigo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Titulo)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Asignado)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Estado)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.FechaCreacion)
+                    </td>
+                    <td>
+                        <a href="/Solicitud/Detalles?id=@Html.DisplayFor(modelItem => item.Codigo)"><i class="fa fa-eye text-navy"></i></a>
+                    </td>*@
+                @*</tr>*@
+
+
+
+            </tbody>
+        </table>
+        <div class="modal fade" id="EditCommentModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Cerrar</span></button>
+                        <h4 class="modal-title" id="myModalLabel"><span class="AsignarTicketPortal"></span></h4>
+                    </div>
+                    <div id="divFrmLoadSummary">
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    @*<div id="gridTickets" class="contentView">
+        </div>*@
+
+    <div id="pagerTickets" class="contentViewPager">
+
+    </div>
+
+
+
+
+</div>
+
+
+
+<script type="text/x-kendo-tmpl" id="template">
+    @*<div class="incidentHomeList">
+        <div class="incidentHomeListBlock1 hasLayout">
+            <div class="incidentHomeListHeader" style="position:relative;">*@
+    @*<div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>*@
+    @*<th>#</th>*@
+    @*<th>Código </th>*@
+    @*<th>Título </th>
+        <th>Asignado </th>
+        <th>Estado </th>
+        <th>Fecha Creación</th>
+        <th>Acción</th>*@
+    @*</tr>
+        </thead>*@
+    @*<tbody>*@
+
+
+    @*<a href="\\#${URL}${ID_TICK}" target='_BLANK'>*@
+    <tr id="Resumen" title="${SUM_TICK_PLAIN}">
+
+        @*<td>
+
+                ${RowNumber}
+
+            </td>*@
+
+        <td>
+            ${ID_TICK}
+        </td>
+        <td>
+            ${ID_TITLE}
+        </td>
+        <td>
+            ${ASIG}
+        </td>
+        <td>
+            ${STAT}
+        </td>
+        <td>
+            ${FCREAT}
+        </td>
+        <td>
+            ${CREABY}
+        </td>
+        <td>
+            <a href="javascript:void(0)" data-toggle="modal" data-target="\\#EditCommentModal" onclick="EditComment(${ID_TICK})">Asignar:</a>
+            @*<a href="\\#${URL}${ID_TICK}" target="_blank">Asignarme:</a>*@
+        </td>
+        @*<td>
+                @Html.DisplayFor(modelItem => item.Titulo)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Asignado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Estado)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.FechaCreacion)
+            </td>
+            <td>
+                <a href="/Solicitud/Detalles?id=@Html.DisplayFor(modelItem => item.Codigo)"><i class="fa fa-eye text-navy"></i></a>
+            </td>*@
+    </tr>
+    @*</a>*@
+
+
+    @*</tbody>*@
+    @*</table>
+        </div>*@
+
+    @*<div class="${ICO_PRIO}">
+            ${NAM_STAT} <div style="float:right"> ${NAM_PRIO} ${HOU_PRIO}</div>
+        </div>
+        # if(EXP_TIME.indexOf("Stopped") > -1 ) {#
+        # if(ID_STAT_END != 4 && ID_STAT_END != 6) { #
+        <div style="position: absolute; display: inline-block; top: 25px; right: 0px; width: 100px; height: 60px;padding: 3px 10px 3px 10px; " title="Date Scheduled">
+            <div style="float: left; font-family: Sans-Serif; font-size: 1.3em; width: 100%; padding-top: 2px; text-align: center; color: \\#FFBB00; min-height: 40px; -webkit-border-top-left-radius: 4px; -webkit-border-top-right-radius: 4px; -moz-border-radius-topleft: 4px; -moz-border-radius-topright: 4px; border-top-left-radius: 4px; border-top-right-radius: 4px; ">
+                <div style="font-size:.85em;">${DATE_SCHE} | ${HOUR_SCHE}</div>
+            </div>
+        </div>
+        # } #
+        # } else { #
+        <div id="divContentTimeRemaining${ID_INCI}" style="position: absolute; display: block; top: 25px; right: 0px; width: 100px; height: 60px; padding: 3px 10px 3px 10px;" title="Expiration Time">
+            <div id="divTimeRemaining${ID_INCI}" style="float: left; font-size: 1.3em; width: 100%; padding-top: 1px; text-align: center; min-height: 40px;font-weight:500">${EXP_TIME}</div>
+        </div>
+        # } #*@
+    @*</div>
+        </div>*@
+    @*<div class="incidentHomeSumary">
+            <a href="\\#${URL}${ID_INCI}" target='_BLANK' id="Resumen" title="${SUM_INCI_PLAIN}">#= SUM_INCI #</a>
+        </div>*@
+    @*<div class="contraya">
+            <div class="raya"></div>
+        </div>*@
+    @*<div class="incidentHomeRes">
+            <div class="ticket">
+                <div style="float:left;">
+                    ${NAM_TYPE_TICK} \\#
+                </div>
+                <div style="float:left;">
+                    #= COD_INCI.substr(0, (COD_INCI.length-6)) #
+                </div>
+                <div style="color:\\#022A41;float:left;font-weight:600;">
+                    #= COD_INCI.substr((COD_INCI.length-6), 6) #
+                </div>
+            </div>
+            <div class="cateTicket">
+                ${NAM_CATE} > ${NAM_SUBC} > ${NAM_CLAS} > ${NAM_SUBCLAS}
+                # if(NUM_OP != '') { #
+                <a href="\\#/DocumentSaleActivity/Index/${ID_DOCU_SALE}" target="_blank" title="View OP">
+                    ${COD_TYPE_DOCU_SALE} ${NUM_OP}
+                </a>
+                # } else { #
+                > Via ${NAM_SOUR}
+                # } #
+            </div>
+            <div class="createBy">Creado por: ${CREATEBY}</div>
+            <div class="assignedTo"></div>
+        </div>*@
+    @*</div>*@
+    @*<div style="width:100%; height:100%; position:relative; float:left;" id="divSON${ID_TICK}">
+
+        </div>*@
+
+    @*<div id="btn${ID_TICK}">
+
+        </div>*@
+    <div style="clear:both">
+    </div>
+
+</script>
+
+<script type="text/javascript">
+
+    
+
+    $(document).ready(function () {
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Ticket/ListByPortal/0?var" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+        cambioIdiomaTexto();
+
+        $("#pagerTickets").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });
+
+        $("#gridTickets").kendoListView({
+            dataSource: dataSource,
+            template: kendo.template($("#template").html()),
+        });
+
+        //$("#Resumen").tooltip();
+        //$("#Resumen").tooltip({
+
+        //    title: "<h4><img src='images/smiley.png' alt='Smiley'> Hello, <b>I'm</b> <i>Smiley!</i></h4>",
+        //    html: true
+
+        //});
+
+        //UpdateBarStatus();
+    });
+
+    function cambioIdiomaTexto() {
+        idIdioma = $("#IdIdioma").val();
+        if (idIdioma != 0) {
+            $.ajax({
+                url: "/Account/cambioIdiomaTexto?IdIdioma=" + idIdioma,
+                type: "GET",
+                cache: false,
+                dataType: "json",
+                success: function (source) {
+                    data = source;
+                    var valTextos = new Array()
+                    $.each(data['Data'], function (index) {
+                        valTextos.push((data['Data'][index]));
+                    });
+                    for (var i = 0; i < valTextos.length; i++) {
+                        var valores = valTextos[i].split("|");
+                        var valorLlave = valores[1];
+                        var valorTexto = valores[0];
+                        var clases = document.getElementsByClassName(valorLlave);
+                        for (var j = 0; j < clases.length; j++) {
+                            clases[j].innerText = valorTexto;
+                        }
+                    }
+                },
+                error: function (source) {
+                }
+            });
+        }
+    }
+
+    function EditComment(id) {
+
+        $("#divFrmLoadSummary").empty();
+
+        //if (parseInt(@Session["ID_ACCO"]) == 17) {
+        $("#divFrmLoadSummary").load("/Ticket/AsignarTicketPortal/" + id + "?_=" + Math.random());
+        //}
+        //else {
+        //    $("#divFrmLoadSummary").load("/Ticket/EditSummary/" + id + "?_=" + Math.random());
+        //}
+
+    }
+
+
+
+</script>

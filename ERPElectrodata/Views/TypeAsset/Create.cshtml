@@ -1,0 +1,125 @@
+﻿@model ERPElectrodata.Models.TYPE_ASSET
+
+@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("Create", "TypeAsset", FormMethod.Post, new { enctype = "multipart/form-data", name = "FrmTypeAsset", id = "FrmTypeAsset", target = "utTAsset" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <input type="hidden"  id="idGrupoAct" name="idGrupoAct" value="@ViewBag.IdGrupo" />
+        <div class="form-group row">
+            <div class="col-sm-6 col-lg-6">
+                <div class="editor-label">
+                    Nombre <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.NAM_TYPE_ASSE)
+                    @Html.ValidationMessageFor(model => model.NAM_TYPE_ASSE)
+                </div>
+            </div>
+            <div class="col-sm-4 ml-4" hidden>
+                <div class="editor-label">
+                    Color
+                </div>
+                <div class="mt-1">
+                    <input type="color" name="COLOR" id="COLOR" />
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Descripción <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.DESC_TYPE_ASSE)
+                    @Html.ValidationMessageFor(model => model.DESC_TYPE_ASSE)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-lg-4">
+                <br />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="cancelNewTypeAsset" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="submitNewTypeAsset" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="utTAsset" name="utTAsset" src="" style="display:none"></iframe>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitNewTypeAsset").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewTypeAsset").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#DESC_TYPE_ASSE").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+    function uploadDoneTypeAsset(msg, code) {
+
+        if (msg == "OK") {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+            toastr.success("Se registró correctamente el tipo de activo.", "Información Guardada");
+
+            if ("@ViewBag.Mantenimiento" == "1") {
+                $("#cbTipoActivo").data("kendoComboBox").dataSource.read();
+                ListarTabla();
+            } else {
+                $("#ID_TYPE_ASSE").data("kendoComboBox").dataSource.read();
+                var ID_TYPE_ASSE = $("#ID_TYPE_ASSE").data("kendoComboBox");
+                ID_TYPE_ASSE.value(code);
+            }            
+        }
+        else {
+            var messageAsset = '';
+            if (code == '0') {
+                messageAsset = 'Complete los datos obligatorios.';
+            }
+            else if (code == '1') {
+                messageAsset = 'Contacte al administrador.';
+            }
+
+            toastr.warning(msg, "Mensaje");
+        }
+    }
+</script>

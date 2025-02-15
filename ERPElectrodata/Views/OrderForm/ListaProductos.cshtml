@@ -1,0 +1,113 @@
+﻿@*@model ERPElectrodata.Models.PMO*@
+@{
+    Layout = null;
+}
+@*<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+    <link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+    <link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+
+    <script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>*@
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+<div class="card" style="width:100%;">
+    <div class="card-header-tab card-header">@ViewBag.TipoOP @ViewBag.OP</div>
+    <div class="card-body">
+        <div class="scroll-area-lg">
+            <div class="scrollbar-container">
+                <div class="p-2">
+                    @using (Html.BeginForm("RegistroProductoEmail", "OrderForm", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmProductoRenovacion", target = "upload_target" }))
+                    {
+                        <input type="hidden" id="IdDocuSale" name="IdDocuSale" value="@ViewBag.IdDocuSale" />
+                        <ul class="todo-list-wrapper list-group list-group-flush" id="divListaProducto"></ul>
+                        <br/>
+                        <div id="opGobierno"></div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Cuadro necesario para enviar archivos Adjuntos si realizar reload de toda la página.-->
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+<script type="text/javascript">
+    $(document).ready(function () {
+        ListaProductos();
+        $("#btnGuardar").click(function () {
+            debugger
+            event.preventDefault();
+
+            swal({
+                title: "¿Está seguro(a) que desea enviar los productos seleccionados?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#DD6B55",
+                cancelButtonText: "No",
+                confirmButtonText: "Sí",
+                closeOnConfirm: false
+            }, function (dismiss) {
+                if (dismiss) {
+                    $("#FrmProductoRenovacion").submit();
+                    swal.close();
+                } 
+            });
+        });
+    });
+
+    function ListaProductos() {
+        $.ajax({
+            url: "/OrderForm/ListarProductosOP",
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                $("#divListaProducto").empty();
+                var cont = 0;
+                data = source;
+                if (data['data'].length > 0) {
+                    $("#opGobierno").append('<label>¿Es una OP de Gobierno? <input type="checkbox" style="width: 17px; height: 17px;" id="chkGobierno" name="chkGobierno"/></label>'+
+                        '<br/> <button id="btnGuardar" name="btnGuardar" class="btn btn-primary btn-lg col-sm-2" type="submit"> <i class="fa fa-save" style="color:white;"></i> Guardar</button>');
+                }
+                $.each(data['data'], function (index) {
+                    $("#divListaProducto").append(
+                        '<li class="list-group-item">' +
+                        '<div class="todo-indicator bg-warning"></div>' +
+                        '<div class="widget-content p-0">' +
+                        '<div class="widget-content-wrapper">' +
+                        '<div class="widget-content-left mr-2">' +
+                        '<div class="custom-checkbox custom-control">' +
+                        '<input type="checkbox" id="chkProducto' + cont + '" name="chkProducto' + cont + '" class="custom-control-input"><label class="custom-control-label" for="chkProducto' + cont + '">&nbsp;</label>' +
+                        '</div>' +
+                        '</div>' +
+                        '<div class="widget-content-left" style="width:100%;">' +
+                        '<div class="widget-heading">' +
+                        'Código: ' + (data['data'][index]['CODART']) + ' | Marca: ' + (data['data'][index]['Marca']) +
+                        '</div>' +
+                        '<div class="widget-subheading"><textarea id="producto' + cont + '" name="producto' + cont + '" style="border:0;width:100%;" readonly>' + (data['data'][index]['DESART']) + '</textarea></div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</div>' +
+                        '</li>'
+                    );
+
+                    cont++;
+                });
+            },
+            error: function (source) {
+                toastr.error("Error Carga Json Comercial", "Mensaje");
+            }
+        });
+    }
+
+    function mensajeProducto(msj, desc) {
+        if (msj == "OK") {
+            toastr.success(desc);
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        } else {
+            toastr.error("Ha ocurrido un error, contacte al administrador");
+        }
+    }
+</script>

@@ -1,0 +1,349 @@
+﻿@{
+    ViewBag.Title = "RptTicketPrioridad";
+    Layout = null;
+}
+
+<link href="~/Content/themes/plugin/select2/select2.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/select2/select2.full.js"></script>
+<link href="~/Content/themes/plugin/datepicker/datepicker3.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/datepicker/bootstrap-datepicker.js"></script>
+<link href="~/Content/UtilElectrodata.css" rel="stylesheet" />
+
+<link href="~/Content/themes/plugin/DataTables/datatables.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/Buttons-1.4.2/css/buttons.bootstrap.css" rel="stylesheet" />
+<link href="~/Content/themes/plugin/DataTables/DataTables-1.10.16/css/dataTables.bootstrap4.css" rel="stylesheet" />
+<link href="~/Content/ITMS/styles.css" rel="stylesheet" />
+
+<script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+<script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+<script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+<link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+<script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+<div class="row">
+    <div class="col-md-12">
+        <div class="main-card p-3 card">
+            <div class="form-row">
+                <div class="col-md-3">
+                    Prioridad
+                    <select id='cbPrioridad' name='cbPrioridad' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+                </div>
+                <div class="col-md-3">
+                    Tipo de Ticket
+                    <select id='cbTipoTicket' name='cbTipoTicket' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+                </div>
+                <div class="col-md-3">
+                    Estado
+                    <select id='cbEstado' name='cbEstado' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+                </div>
+                <div class="col-md-3">
+                    Personal Asignado
+                    <select id='cbAsignado' name='cbAsignado' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-md-3">
+                    <div class="form-group">
+                        Fecha Inicio <span style="color:red">(*)</span>
+                        <div class="input-group">
+                            <div class="input-group-prepend datepicker-trigger">
+                                <div class="input-group-text">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control" id="dtFechaInicio" name="dtFechaInicio" value="@ViewBag.FechaInicio" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        Fecha Fin <span style="color:red">(*)</span>
+                        <div class="input-group">
+                            <div class="input-group-prepend datepicker-trigger">
+                                <div class="input-group-text">
+                                    <i class="fa fa-calendar"></i>
+                                </div>
+                                <input type="text" class="form-control" id="dtFechaFin" name="dtFechaFin" value="@ViewBag.FechaActual" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    Cuenta
+                    <select id='cbCuenta' name='cbCuenta' class='form-control input-sm select2' type='text' style="width:100%" ></select>
+                </div>
+                <div class="col-md-1">
+                    <div class="form-group">
+                        <br />
+                        <button type="button" class="btn btn-warning btn-sm" onclick="ValidarParametros()"> Buscar </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<form>
+    <div class="box-body">
+        <div class="row" style="padding-left:2%">
+            <div class="col-sm-2">
+            </div>
+            <div class="col-sm-2">
+            </div>
+            <div class="col-sm-2">
+            </div>
+            <div class="col-sm-2">
+            </div>
+        </div>
+        <br />
+        <div class="row" style="padding-left:2%">
+        </div>
+    </div>
+
+</form>
+<br />
+<div class="tab-content">
+    <div class="tab-pane active" id="tab_TicketsConsolidado">
+        <div class="box">
+            <!-- /.box-header -->
+            <div class="box-body">
+                <table id="tablaTicketsConsolidado" class="table table-bordered table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Código</th>
+                            <th>Prioridad</th>
+                            <th>Personal Asignado</th>
+                            <th>Estado</th>
+                            <th>Categoría</th>
+                            <th>Usuario Creador</th>
+                            <th>Fecha Creación</th>
+                            <th>Fecha de Cierre</th>
+                            <th>Cuenta</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                    <tfoot>
+                        <tr>
+                            <th>Código</th>
+                            <th>Prioridad</th>
+                            <th>Personal Asignado</th>
+                            <th>Estado</th>
+                            <th>Categoría</th>
+                            <th>Usuario Creador</th>
+                            <th>Fecha Creación</th>
+                            <th>Fecha de Cierre</th>
+                            <th>Cuenta</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            <!-- /.box-body -->
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $('#dtFechaInicio').datepicker({
+            autoclose: true
+        });
+        $('#dtFechaFin').datepicker({
+            autoclose: true
+        });
+
+        $("#cbCuenta").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            maximumSelectionLength: 5,
+            multiple: true,
+            allowClear: true,
+            ajax: {
+                url: "/Account/ListarCuentasxUsuario",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#cbTipoTicket").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/TypeTicket/ListarTipoTicket/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        $("#cbPrioridad").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/Priority/ListarPrioridadTicket/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        //Asignación inicial
+        var $newOption = $("<option></option>").val("@ViewBag.IdPrioridad").text("@ViewBag.Prioridad");
+        $("#cbPrioridad").append($newOption).trigger('change');
+
+        $("#cbEstado").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/StatusTicket/ListarEstadoTicket/",
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+        $("#cbAsignado").select2({
+            placeholder: 'Seleccione...',
+            minimumInputLength: 0,
+            multiple: false,
+            allowClear: true,
+            ajax: {
+                url: "/ChangeRequest/ListarCambioResponsable/" + @ViewBag.IdCuenta,
+                dataType: 'json',
+                quietMillis: 100,
+                data: function (params) {
+                    return {
+                        q: params.term,
+                        page: params.page
+                    };
+                },
+                processResults: function (data, page) {
+                    return { results: data };
+                },
+            },
+        });
+
+        ListarTicketsConsolidado();
+    });
+
+    function ValidarParametros() {
+        if ($("#dtFechaInicio").val() == null || $("#dtFechaInicio").val() == 0 || $("#dtFechaFin").val() == null || $("#dtFechaFin").val() == 0) {
+            toastr.warning("Seleccione un rango de fechas.");
+            //$('#SmallModalContent').modal('show');
+            //$("#SmallModalTitle").empty();
+            //$("#SmallModalTitle").text("Mensaje");
+            //$("#SmallModalBody").empty();
+            //$("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + "Seleccione un rango de fechas." + "</div>");
+            //$("#SmallModalFooter").empty();
+            //$("#SmallModalFooter").append("<div style='float:right;'>" +
+            //                                  "<button id='continuee' class='k-button'>Continuar</button>" +
+            //                           "</div>");
+            //var undo = $("#continuee")
+            //.bind("click", function () {
+            //    $('#SmallModalContent').modal('hide');
+            //});
+        } else {
+            ListarTicketsConsolidado()
+        }
+    }
+    function ListarTicketsConsolidado(){
+        $('#tablaTicketsConsolidado').dataTable().fnDestroy();
+
+        $('#tablaTicketsConsolidado').DataTable({
+            "order": [[2, "asc"]],
+            dom: 'Bfrtip',
+            responsive:true,
+            ajax: {
+                "url":"ListarTicketsConsolidado/"+$("#cbTipoTicket").val()+'/'+$("#cbPrioridad").val()
+                    +'/'+$("#cbCuenta").val(),
+                "data": function ( d ) {
+                    d.IdEstado = $("#cbEstado").val(),
+                    d.IdAsignado = $("#cbAsignado").val(),
+                    d.FechaInicio = $("#dtFechaInicio").val(),
+                    d.FechaFin=$("#dtFechaFin").val()
+                }
+            },
+            columns: [
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<a href=\"/DetailsTicket/Index/' + data.IdTicket + '\" target="_blank">' + data.CodigoTicket + '</a>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<span class="label" style="background-color:' + data.ColorPrioridad + ';color:white;">' + data.Prioridad + '</span>';
+                    }
+                },
+                { data: "UsuarioAsignado" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<span class="label" style="background-color:' + data.ColorEstado + ';color:white;">' + data.Estado + '</span>';
+                    }
+                },
+                {
+                   data: null,
+                   render: function (data, type, row) {
+                       return '<span>' + data.Categoria3 +'-'+data.Categoria4+ '</span>';
+                   }
+                },
+                { data: "UsuarioCreador" },
+                { data: "FechaCreacion" },
+                { data: "FechaCierre" },
+                { data: "Cuenta" },
+
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+        });
+    }
+
+</script>
+

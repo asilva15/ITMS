@@ -1,0 +1,61 @@
+﻿@{
+    Layout = null;
+}
+
+@using (Html.BeginForm("TicketReport", "InformGFCDH", FormMethod.Post, new { id = "FormReportMemorandum" }))
+{
+
+    <div style="width:100%;">
+        <div style="float:left; width:100%; margin:5px 0 0 10px;">
+            <div class="editor-label">
+                @ResourceLanguaje.Resource.Year
+            </div>
+            <div class="editor-field">
+                @Html.TextBox("CB_YEAR")
+            </div>
+        </div>
+        <div style="display:inline-block; float:right; padding:20px 10px 0px 0px;">
+            <div style=" float:left; padding:0px 5px 0px 0px; ">
+                <a id="linkReportChangeSalary" class="k-button" href="/Reporting/WF_ReportMemorandum.aspx" target="_blank"> @ResourceLanguaje.Resource.BtnCreate</a>
+            </div>
+            <button id="reset" class="k-button">@ResourceLanguaje.Resource.BtnCancel</button>
+        </div>
+    </div>
+
+}
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        $.get("/AccountingYear/ListIndependiente", function (json) {
+
+            var CB_YEAR = $("#CB_YEAR").kendoComboBox({
+                index: 0,
+                dataTextField: "ID_ACCO_YEAR",
+                dataValueField: "ID_ACCO_YEAR",
+                filter: "contains",
+                autoBind: true,
+                delay: 500,
+                minLength: 0,
+                suggest: true,
+                dataSource: json['YEAR']
+            }).data("kendoComboBox");
+
+            var CB_YEAR = $("#CB_YEAR").data("kendoComboBox");
+            CB_YEAR.bind("change", function (e) {
+                document.getElementById('linkReportChangeSalary').href = "/Reporting/WF_ReportMemorandum.aspx?" + $("#FormReportMemorandum").serialize();
+            });
+        });
+
+        $("#reset").click(function (event) {
+            event.preventDefault();
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+        });
+
+    });
+
+
+</script>

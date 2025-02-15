@@ -1,0 +1,846 @@
+﻿@model ERPElectrodata.Models.DELIVERY_SUSTAIN
+
+@{
+//Layout = null;
+}
+
+<div style="width:100%; margin-top:15px;">
+    <div class="divGridMenuAction" style="display:none;" id="divMenuAction">
+        <div style="margin:4px 0 0 4px; width:80%;">
+            <button id="btnNewDeli" class="k-button">@ResourceLanguaje.Resource.NewDelivery</button>
+        </div>        
+    </div>
+    <div id="divGridClosure"></div>
+</div>
+
+<script type="text/x-kendo-template" id="tpt_detailsGrid">
+    <div class="divTabStrip">
+        <ul>
+            <li class="k-state-active">
+                @ResourceLanguaje.Resource.Substantiated
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.Unsubstantiated
+            </li>
+            <li>
+                @ResourceLanguaje.Resource.Activities
+            </li>
+        </ul>
+        <div>
+            <div class="Substantiated"></div>
+        </div>
+        <div>
+            <div class='Unsubstantiated'></div>
+        </div>
+        <div>
+            <div class='cssActivities'></div>
+        </div>
+    </div>
+</script>
+
+<script id="divButtonAcc" type="text/x-kendo-tmpl">
+    <div style="width:100%; display:inline-block;">
+        <div style="float:left; width:74%; margin-top:5px;">
+            <div class="progressGrid"></div>
+        </div>
+        <div style="float:left; width:26%; min-width:34px; display:inline-block;">
+            
+            <div class="divButtomPrint2" style="margin:10px 0px 0 0;"
+                 onclick="PrintMobility(#: ID_DELI_SUST#)" title='@ResourceLanguaje.Resource.Mobility'></div>
+            <div class="divButtomPrint2" style="margin:10px 10px 0 10px;"
+                 onclick="PrintReport(#: ID_DELI_SUST#)" title='@ResourceLanguaje.Resource.Report'></div>
+
+            # if(UNSUBSTA == 0) {#
+                # if(ID_STAT_DELI_SUST == 1) { #
+                    <div class="divBtnRejectDisabled" style="margin:10px 0 0 10px;" title='@ResourceLanguaje.Resource.RequestReceipt'></div>
+                    <div class="divBtnReceive" style="margin:10px 0 0 0;"
+                        onclick="Eventclick(1,#: ID_DELI_SUST#,'#: DOC_NUMB#',#: DOC_AMOU#,#: PREVIUS#,#: SUBSTANT#,#: AMO_AVAI#,'#: COIN#')" title='@ResourceLanguaje.Resource.RequestReceipt'></div>                    
+                # } else if(ID_STAT_DELI_SUST == 2 && VIS_APPR == true) { #
+                    <div class="divBtnReject" style="margin:10px 0 0 10px;"
+                        onclick="Eventclick(3,#: ID_DELI_SUST#,'#: DOC_NUMB#',#: DOC_AMOU#,#: PREVIUS#,#: SUBSTANT#,#: AMO_AVAI#,'#: COIN#')" title='@ResourceLanguaje.Resource.RejectReception'></div>
+                    <div class="divBtnValida" style="margin:10px 0 0 0;"
+                        onclick="Eventclick(2,#: ID_DELI_SUST#,'#: DOC_NUMB#',#: DOC_AMOU#,#: PREVIUS#,#: SUBSTANT#,#: AMO_AVAI#,'#: COIN#')" title='@ResourceLanguaje.Resource.ApproveReception'></div>
+                # } #
+            # } else { #
+                <div class="divBtnReceiveDisabled" style="margin:10px 0 0 0;" title='@ResourceLanguaje.Resource.RequestReceipt'></div>
+            # } #
+
+             
+        </div>       
+    </div>
+</script>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        if(@ViewBag.VisibleNew == 1){
+            $("#divMenuAction").css("display","block");
+        }
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/DeliverySustain/ListPettyCash?var=" + Math.random(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        q: "#kendoui",
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            serverPaging: true,
+            pageSize: 10,
+            schema: {
+                data: "Data",
+                total: "Count",
+                model: {
+                    fields: {
+                        DOC_NUMB: { type: "string" },
+                        NAM_STAT: { type: "string" },
+                        DOC_DATE: { type: "date" },
+                        DOC_AMOU: { type: "number" },
+                        SUBSTANT: { type: "number" },
+                        UNSUBSTA: { type: "number" },
+                        AMO_AVAI: { type: "number" },
+                        PREVIUS: { type: "number" },
+                    }
+                }
+            },
+            aggregate: [{ field: "DOC_NUMB", aggregate: "count" },
+                        { field: "DOC_AMOU", aggregate: "sum" },
+                        { field: "SUBSTANT", aggregate: "sum" },
+                        { field: "UNSUBSTA", aggregate: "sum" },
+                        { field: "AMO_AVAI", aggregate: "sum" },
+                        { field: "PREVIUS", aggregate: "sum" }]
+        });
+
+        var element = $("#divGridClosure").kendoGrid({
+            dataSource: dataSource,
+            sortable: true,
+            pageable: {
+                refresh: true,
+                pageSizes: true,
+                buttonCount: 5
+            },
+            detailTemplate: kendo.template($("#tpt_detailsGrid").html()),
+            detailInit: detailInit,
+            dataBound: function () {
+                this.expandRow(this.tbody.find("tr.k-master-row").first());
+            },
+            columns: [
+                {
+                    field: "DOC_NUMB",
+                    title: "@ResourceLanguaje.Resource.Code",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DOC_DATE",
+                    title: "@ResourceLanguaje.Resource.Date",
+                    format: "@ResourceLanguaje.Resource.Idioma" == "ESP" ? "{0:dd/MM/yyyy}" : "{0:M/d/yyyy}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "COIN",
+                    title: "&nbsp;",
+                    width: "35px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DOC_AMOU",
+                    title: "@ResourceLanguaje.Resource.Assigned",
+                    format: "{0:N}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    footerTemplate: "<div style='font-size: 12px; text-align:right; width:100%; font-weight:normal;'>#= kendo.format('{0:N2}',sum) #</div>"
+                },
+                {
+                    field: "PREVIUS",
+                    title: "@ResourceLanguaje.Resource.Previus",
+                    format: "{0:N}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    footerTemplate: "<div style='font-size: 12px; text-align:right; width:100%; font-weight:normal;'>#= kendo.format('{0:N2}',sum) #</div>"
+                },
+                {
+                    field: "SUBSTANT",
+                    title: "@ResourceLanguaje.Resource.Substantiated",
+                    format: "{0:N}",
+                    width: "100px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    footerTemplate: "<div style='font-size: 12px; text-align:right; width:100%; font-weight:normal;'>#= kendo.format('{0:N2}',sum) #</div>"
+                },
+                {
+                    field: "UNSUBSTA",
+                    title: "Unsubstantiated",
+                    format: "{0:N}",
+                    width: "100px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    footerTemplate: "<div style='font-size: 12px; text-align:right; width:100%; font-weight:normal;'>#= kendo.format('{0:N2}',sum) #</div>"
+                },
+                {
+                    field: "AMO_AVAI",
+                    title: "@ResourceLanguaje.Resource.Available",
+                    format: "{0:N}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    footerTemplate: "<div style='font-size: 12px; text-align:right; width:100%; font-weight:normal;'>#= kendo.format('{0:N2}',sum) #</div>"
+                },
+                {
+                    field: "NAM_STAT",
+                    title: "@ResourceLanguaje.Resource.Status",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+
+                {
+                    field: "NAME_TYPE",
+                    title: "Type",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+
+                {
+                    field: "SUBSTANT",
+                    title: "Percentage of Accountability",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    template: kendo.template($("#divButtonAcc").html()),
+                }
+            ],
+            dataBound: function (e) {
+                var grid = this;
+                var a;
+                var b;
+                $(".progressGrid").each(function () {
+                    var row = $(this).closest("tr");
+                    var model = grid.dataItem(row);
+                    var tt = 0;
+                    tt = parseFloat(model.SUBSTANT) / parseFloat(model.DOC_AMOU + model.PREVIUS) * 100;
+
+                    $(this).kendoProgressBar({
+                        value: 0,
+                        type: "percent",
+                        animation: {
+                            duration: 500
+                        },
+                        change: function (e) {
+                            if (model.ID_STAT_DELI_SUST == 1) {
+                                this.progressWrapper.css({
+                                    "background-color": "#ffbb00",
+                                    "border-color": "#ffbb00"
+                                });
+                            }
+                            else if (model.ID_STAT_DELI_SUST == 2) {
+                                this.progressWrapper.css({
+                                    "background-color": "#7cbb00",
+                                    "border-color": "#7cbb00"
+                                });
+                            }
+                        }
+                    });
+
+                    //$(this).data("kendoProgressBar").bind("MiEvento", function(e,ui){
+                    //    e.sender.value(tt);
+                    //});
+                    //$(this).data("kendoProgressBar").trigger("MiEvento");
+
+                    $(this).data("kendoProgressBar").value(0.01);
+                    $(this).data("kendoProgressBar").value(tt);
+                });
+            }
+        });
+
+    });
+
+    function detailInit(e) {
+        var detailRow = e.detailRow;
+
+        detailRow.find(".divTabStrip").kendoTabStrip({
+            animation: {
+                open: { effects: "fadeIn" }
+            }
+        });
+
+        detailRow.find(".Substantiated").kendoGrid({
+            dataSource: {
+                type: "GET",
+                dataType: "json",
+                transport: {
+                    read: "/DocumentExpense/ListDocumentExpenseByID_DELI_SUST?var" + Math.random(),
+                },
+                serverFiltering: true,
+                filter: { field: "ID_DELI_SUST", operator: "eq", value: e.data.ID_DELI_SUST },
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    model: {
+                        fields: {
+                            COD_REQU_EXPE: { type: "string" },
+                            DOC_NUMB: { type: "string" },
+                            DOC_DATE: { type: "date" },
+                            AMOUNT: { type: "number" },
+                            ID_DELI_SUST: { type: "number" },
+                        }
+                    },
+                },
+                aggregate: [{ field: "AMOUNT", aggregate: "sum" }]
+            },
+            scrollable: false,
+            sortable: true,
+            //pageable: true,
+            selectable: true,
+            columns: [
+                {
+                    field: "COD_REQU_EXPE", title: "@ResourceLanguaje.Resource.Request", width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                },
+                {
+                    field: "USER", title: "@ResourceLanguaje.Resource.Requester", width: "150px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: left; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                },
+                {
+                    field: "NAM_DOCU", title: "@ResourceLanguaje.Resource.Type", width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DOC_NUMB", title: "@ResourceLanguaje.Resource.Number", width: "100px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DOC_DATE", title: "@ResourceLanguaje.Resource.Date", width: "80px",
+                    format: "@ResourceLanguaje.Resource.Idioma" == "ESP" ? "{0:dd/MM/yyyy}" : "{0:M/d/yyyy}",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "SUPPLIER", title: "@ResourceLanguaje.Resource.Supplier",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: left; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "COIN",
+                    title: "&nbsp;",
+                    width: "30px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "AMOUNT",
+                    title: "@ResourceLanguaje.Resource.Amount",
+                    format: "{0:N}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    footerTemplate: "<div style='font-size: 12px; text-align:right; width:100%; font-weight:normal;'>" +
+                        "#= kendo.format('{0:N2}', sum) #</div>",
+                },
+            ]
+        });
+
+        //Solicitudes por Rendir
+        detailRow.find(".Unsubstantiated").kendoGrid({
+            dataSource: {
+                type: "GET",
+                dataType: "json",
+                transport: {
+                    read: "/RequestExpense/ListUnsubstantiatedByID_DELI_SUST?var" + Math.random(),
+                },
+                serverFiltering: true,
+                filter: { field: "ID_DELI_SUST", operator: "eq", value: e.data.ID_DELI_SUST },
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    model: {
+                        fields: {
+                            COD_REQU_EXPE: { type: "string" },
+                            DAT_REGI: { type: "date" },
+                            DAT_PAYM: { type: "date" },
+                            AMOUNT: { type: "number" },
+                            ID_REQU_EXPE: { type: "number" },
+                        }
+                    },
+                },
+                aggregate: [{ field: "AMOUNT", aggregate: "sum" }]
+            },
+            scrollable: false,
+            sortable: true,
+            selectable: true,
+            columns: [
+                {
+                    field: "COD_REQU_EXPE", title: "@ResourceLanguaje.Resource.Request", width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                },
+                {
+                    field: "USER", title: "@ResourceLanguaje.Resource.Requester", width: "150px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: left; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                },
+                {
+                    field: "DAT_REGI", title: "@ResourceLanguaje.Resource.Date", width: "80px",
+                    format: "@ResourceLanguaje.Resource.Idioma" == "ESP" ? "{0:dd/MM/yyyy}" : "{0:M/d/yyyy}",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "DAT_PAYM", title: "@ResourceLanguaje.Resource.Payment", width: "80px",
+                    format: "@ResourceLanguaje.Resource.Idioma" == "ESP" ? "{0:dd/MM/yyyy}" : "{0:M/d/yyyy}",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "JUSTIFICATION", title: "@ResourceLanguaje.Resource.Justification",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: left; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                },
+                {
+                    field: "COIN",
+                    title: "&nbsp;",
+                    width: "30px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                },
+                {
+                    field: "AMOUNT",
+                    title: "@ResourceLanguaje.Resource.Amount",
+                    format: "{0:N}",
+                    width: "80px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: right; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                    footerTemplate: "<div style='font-size: 12px; text-align:right; width:100%; font-weight:normal;'>" +
+                        "#= kendo.format('{0:N2}', sum) #</div>",
+                },
+            ]
+        });
+
+        //actividades
+        detailRow.find(".cssActivities").kendoGrid({
+            dataSource: {
+                type: "GET",
+                dataType: "json",
+                transport: {
+                    read: "/DeliverySustain/ListActivitiesByID_DELI_SUST?var" + Math.random(),
+                },
+                serverFiltering: true,
+                filter: { field: "ID_DELI_SUST", operator: "eq", value: e.data.ID_DELI_SUST },
+                schema: {
+                    data: "Data",
+                    total: "Count",
+                    model: {
+                        fields: {
+                            NAM_STAT_DELI_SUST: { type: "string" },
+                            DAT_REGI: { type: "date" },
+                            DAT_END: { type: "date" },
+                            USER: { type: "string" }
+                        }
+                    },
+                }
+            },
+            scrollable: false,
+            //sortable: true,
+            selectable: true,
+            columns: [
+                {
+                    field: "USER", title: "@ResourceLanguaje.Resource.User", //width: "200px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: left; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                },
+                {
+                    field: "NAM_STAT_DELI_SUST", title: "@ResourceLanguaje.Resource.Status", width: "150px",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: left; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    },
+                },
+                {
+                    field: "DAT_REGI", title: "@ResourceLanguaje.Resource.Date", width: "120px",
+                    format: "@ResourceLanguaje.Resource.Idioma" == "ESP" ? "{0:dd/MM/yyyy HH:mm}" : "{0:M/d/yyyy HH:mm}",
+                    attributes: {
+                        "class": "table-cell",
+                        style: "text-align: center; font-size: 12px"
+                    },
+                    headerAttributes: {
+                        "class": "table-header-cell",
+                        style: "text-align: center; font-size: 12px; font-weight:bold;"
+                    }
+                }
+            ]
+        });
+    }
+
+    function PrintReport(id){
+        window.open('/Reporting/WF_ReportAccountability.aspx?id=' + id, '_blank');
+    }
+
+    function PrintMobility(id){
+        window.open('/Reporting/WF_ReportMobility.aspx?id=' + id, '_blank');
+    }
+
+    function Eventclick(event,id,cod,ass,pre,sub,ava,mon) {
+        var altu = 220;
+        var s_mon = '@ResourceLanguaje.Resource.PeruvianNuevoSol';
+        if(mon=='US$'){ s_mon = '@ResourceLanguaje.Resource.DollarAmerican'; }
+
+        var tit = '@ResourceLanguaje.Resource.ReceptionRequest';
+        var msn = '@ResourceLanguaje.Resource.ReceptionRequestMsn';
+        var res = '@ResourceLanguaje.Resource.ReceptionRequestMsnOK';
+        if(event == 2){
+            tit = '@ResourceLanguaje.Resource.ApproveReception';
+            msn = '@ResourceLanguaje.Resource.ApproveReceptionMsn';
+            res = '@ResourceLanguaje.Resource.ReceptionApproveMsnOK';
+        }
+        else if(event == 3){
+            tit = '@ResourceLanguaje.Resource.RejectReception';
+            msn = '@ResourceLanguaje.Resource.RejectReceptionMsn1';
+            res = '@ResourceLanguaje.Resource.ReceptionRequestMsnOK';
+        }
+        
+        $('#ModalContent').modal('show');
+        $("#ModalContentAll").empty();
+        $("#ModalContentAll").append("<div class='modal-header'>"+
+                                          "<button type='button' class='close' data-dismiss='modal'><span aria-hidden='true'>&times;</span><span class='sr-only'>Close</span></button>"+
+                                           "<h2 class='modal-title' style='font-weight:bold;'>"+tit+"</h2>"+
+                                      "</div>");
+
+        $("#ModalContentAll").append("<div class='modal-body'>"+
+                                       "<div style='font-size:1em;'>" +
+                                         "<div style='width:100%; display:inline-block; text-transform:capitalize;'>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Code:</div>" +
+                                            "<div style='width:72%; float:left;'>" + cod + "</div>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Assigned:</div>" +
+                                            "<div style='width:72%; float:left;'>" + mon + " " + kendo.format('{0:N2}',ass) + " " + s_mon + "</div>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Previus:</div>" +
+                                            "<div style='width:72%; float:left;'>" + mon + " " + kendo.format('{0:N2}',pre) + " " + s_mon + "</div>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Substantiated:</div>" +
+                                            "<div style='width:72%; float:left;'>" + mon + " " + kendo.format('{0:N2}',sub) + " " + s_mon + "</div>" +
+                                            "<div style='width:28%; float:left; color:#444444;'>@ResourceLanguaje.Resource.Available:</div>" +
+                                            "<div style='width:72%; float:left;'>" + mon + " " + kendo.format('{0:N2}',ava) + " " + s_mon + "</div>" +                                            
+                                            "<div style='width:100%; float:left; margin-top:10px; color:#444444;  text-transform:none;'>" + msn + "</div>" +
+                                          "</div>" +
+                                       "</div>"+
+                                     "</div>");
+        
+        $("#ModalContentAll").append("<div class='modal-footer'>"+
+                                       "<div style='width:100%;'>" +
+                                          "<div style='width:95%; margin:0 auto; text-align:right;'>" +
+                                             "<div style='width:100%;'>" +
+                                                  "<button id='btnYesRecep' class='k-button' style='font-size:.9em;'>@ResourceLanguaje.Resource.Yes</button>" +
+                                                  "&nbsp;&nbsp;<button id='btnNORecep' class='k-button' style='font-size:.9em;'>No</button>" +
+                                              "</div>" +
+                                          "</div>" +
+                                       "</div>"+
+                                   "</div>");
+
+        var undo = $("#btnYesRecep")
+            .bind("click", function () {
+               
+                $('#myModalLoading').modal('show');
+
+                $.ajax({
+                    url: (event == 1 ? "/DeliverySustain/ReceptionRequest/"  + id :
+                         (event == 2 ? "/DeliverySustain/ReceptionApprove/"  + id:
+                                       "/DeliverySustain/ReceptionReject/" + id)),
+                    data: "var=" + Math.random(),
+                    type: "GET",
+                    dataType: "text",
+                    success: function (resp) {
+                        $('#myModalLoading').modal('hide');
+
+                        if(resp=='OK'){                           
+
+                            $('#SmallModalContent').modal('show');
+                            $("#SmallModalTitle").empty();
+                            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.InformationSaved");
+                            $("#SmallModalBody").empty();
+                            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>" + res + "</div>");
+                            $("#SmallModalFooter").empty();
+                            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                       "</div>");
+                            var undo = $("#continues")
+                            .bind("click", function () {
+                                $('#ModalContent').modal('hide');
+                                $('#SmallModalContent').modal('hide');                               
+                            });
+                            $('#divGridClosure').data('kendoGrid').dataSource.read();
+                            $('#divGridClosure').data('kendoGrid').refresh();
+                        }
+                        else if(resp='NOREGISTER')
+                        {
+                            $('#SmallModalContent').modal('show');
+                            $("#SmallModalTitle").empty();
+                            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.Warning");
+                            $("#SmallModalBody").empty();
+                            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Does not Exist a New Registered Petty Cash</div>");
+                            $("#SmallModalFooter").empty();
+                            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                       "</div>");
+                            var undo = $("#continues")
+                           .bind("click", function () {                              
+                               $('#SmallModalContent').modal('hide');
+                           });
+                        }
+
+                        else if(resp='NOPETTYCASH')
+                        {
+                            $('#SmallModalContent').modal('show');
+                            $("#SmallModalTitle").empty();
+                            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.Warning");
+                            $("#SmallModalBody").empty();
+                            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>You do not Have a New Petty Cash Registered</div>");
+                            $("#SmallModalFooter").empty();
+                            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                       "</div>");
+
+                            var undo = $("#continues")
+                               .bind("click", function () {                                 
+                                   $('#SmallModalContent').modal('hide');
+                               });
+                        }
+                        else
+                        {
+                            $('#SmallModalContent').modal('show');
+                            $("#SmallModalTitle").empty();
+                            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.Warning");
+                            $("#SmallModalBody").empty();
+                            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'>Could not Approve Reception</div>");
+                            $("#SmallModalFooter").empty();
+                            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                       "</div>");
+
+                            var undo = $("#continues")
+                               .bind("click", function () {                                 
+                                   $('#SmallModalContent').modal('hide');
+                               });
+                        }
+                    },
+                    error: function (resp) {
+                        $('#myModalLoading').modal('hide'); 
+                        
+                    {
+                            $('#SmallModalContent').modal('show');
+                            $("#SmallModalTitle").empty();
+                            $("#SmallModalTitle").text("@ResourceLanguaje.Resource.Warning");
+                            $("#SmallModalBody").empty();
+                            $("#SmallModalBody").append("<div style='padding:10px 0 10px 0;'> You Can not Delete. Contact the System Administrator</div>");
+                            $("#SmallModalFooter").empty();
+                            $("#SmallModalFooter").append("<div style='float:right;'>" +
+                                                              "<button id='continues' class='k-button'>@ResourceLanguaje.Resource.Continue</button>" +
+                                                       "</div>");
+                            var undo = $("#continues")
+                               .bind("click", function () {                                  
+                                   $('#SmallModalContent').modal('hide');
+                               });
+                        }
+                    },
+                });
+            });
+
+        var undo = $("#btnNORecep")
+            .bind("click", function () {
+                $('#ModalContent').modal('hide');
+            });
+    }
+
+    $("#btnNewDeli").click(function (event) {
+        event.preventDefault();
+        $('#ModalContent').modal('show');
+        $("#ModalContentAll").empty();
+        $("#ModalContentAll").append('<div class="modal-header" id="ModalContentHeader">'+
+                          '<button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>'+
+                          '<h2 class="modal-title" style="font-weight:bold;">@ResourceLanguaje.Resource.NewDelivery</h2>'+
+                      '</div>');
+        $("#ModalContentAll").append( "<div id='divFormNewDeli'></div>");
+        $("#divFormNewDeli").load("/DeliverySustain/viewNewDelivery?_=" + Math.random());
+    });
+
+</script>

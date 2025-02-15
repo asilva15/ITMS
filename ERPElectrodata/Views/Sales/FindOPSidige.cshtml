@@ -1,0 +1,309 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>FindOPSidige</title>
+</head>
+<body>
+    <div class="afterMain">
+        <div style="float:left;width:40%;">
+            <div class="titleForm"><div class="title">OP Sidige</div></div>
+            <div class="bodyForm">
+                <div class="inBodyForm" id="divFindTicket">
+                    @using (Html.BeginForm("FindOPSidige", "Sales", FormMethod.Post, new { id = "FrmFindOPSidige" }))
+    {
+    <fieldset>
+        <legend>TICKET</legend>
+
+        <div class="divFondoUno">
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    CIA
+                </div>
+                <div class="field-label">
+                    @Html.Editor("ID_ENTI")
+                    @*@Html.Hidden("ID_ENTI_H")*@
+                </div>
+            </div>
+        </div>
+
+        <div class="divFondoDos">
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    Type OP
+                </div>
+                <div class="field-label">
+                    @Html.Editor("ID_TYPE_DOCU_SALE")
+                    @*@Html.Hidden("ID_TYPE_DOCU_SALE_H")*@
+                </div>
+            </div>
+
+            <div class="divSpace2"></div>
+            <div class="divCont2">
+                <div class="editor-label">
+                    Number OP
+                </div>
+                <div class="k-textbox">
+                    @Html.Editor("NUM_DOCU_SALE")
+                    @*@Html.Hidden("NUM_DOCU_SALE_H")*@
+                </div>
+            </div>
+        </div>
+
+
+        <div style=" float:right; padding:10px 10px 10px 5px;">
+            <button id="find" class="k-button">@ResourceLanguaje.Resource.BtnFind</button>
+        </div>
+    </fieldset>
+}
+                </div>
+            </div>
+                    
+                </div>
+
+                <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+
+                <div style="float:left;width:29%;">
+
+                </div>
+
+                <div style="width:1%;min-width:5px;height:1px;float:left;"></div>
+
+                <div style="float:left;width:29%;">
+
+                </div>
+            </div>
+
+    <div style="clear:both;"></div>
+
+    <div id="gridOP" class="contentView"></div>
+
+    <div style="clear:both;"></div>
+
+    <div id="pagerOP" class="contentViewPager"></div>
+
+</body>
+
+</html>
+
+<script type="text/x-kendo-tmpl" id="template">
+    <div class="incidentHomeList">
+        <div class="incidentHomeListBlock1 hasLayout">
+            <div class="incidentHomeListHeader">
+                <div class="FondoNegro">
+                    <div id="${COD_TYPE_DOCU_SALE}">
+                    </div>
+                    <div class="status">
+                        ${EVENTO}
+                    </div>
+                    <div class="incidentHomeRequesterIcon" title="Affected End User">
+                        ${CODDOC_OS} ${NUMDOC_OS}
+                    </div>
+                    <div class="incidentHomeCreate" title="Creation date @ResourceLanguaje.Resource.DateFormat">
+                        Create: ${DAT_DOCU_SALE}
+                    </div>
+                    @*<div class="incidentHomeModified" title="Modification date @ResourceLanguaje.Resource.DateFormat">
+                Modified: ${COD_TYPE_DOCU_SALE}
+            </div>
+            <div class="incidentHomeExpTime" title="Expiration Time">
+                Expiration Time: ${COD_TYPE_DOCU_SALE}
+            </div>*@
+                </div>
+                <div class="ID_PRIO_1" id="${ID_ENTI},${NUMDOC_OS},${ID_TYPE_DOCU_SALE},${NUM_DOCU_SALE}" onclick="transferITMS(this)">
+                    ${COD_TYPE_DOCU_SALE}
+                </div>
+            </div>
+        </div>
+        <div class="incidentHomeSumary">
+            @*<a href="${COD_TYPE_DOCU_SALE}${COD_TYPE_DOCU_SALE}" target='_BLANK'>#= COD_TYPE_DOCU_SALE #</a>*@
+            <div style="float:left; width:42%; padding-left:10px;">
+                <b>${CIA}</b><br />
+                ${CIA_RUC}<br />
+                ${CIA_ADDR}
+            </div>
+            <div style="float: left; width: 32%;">
+                <b>${NAM_CLIE_CONT}</b><br />
+                ${CLI_JOB_TITL}<br />
+                ${CLI_TELE}<br />
+                ${CLI_PHON_EXTE}<br />
+                ${CLIE_EMAI}
+            </div>
+        </div>
+        <div class="contraya">
+            <div class="raya"></div>
+        </div>
+        <div class="incidentHomeRes">
+            <div class="ticket">
+                ${COD_TYPE_DOCU_SALE}
+                ${NUM_DOCU_SALE}
+            </div>
+            <div class="cateTicket">${VENDOR}</div>
+            <div class="viaTicket">${ID_VEND}</div>
+    @*<div class="createBy">Create By: ${COD_TYPE_DOCU_SALE}</div>
+    <div class="assignedTo">Assigned To: ${COD_TYPE_DOCU_SALE}</div>*@
+        </div>
+    </div>
+
+    <div id="btn${COD_TYPE_DOCU_SALE}">
+    </div>
+
+    <div style="clear:both">
+    </div>
+</script>
+
+<script>    
+    function Graficos() {
+
+        winPopUpModalLoad('@ResourceLanguaje.Resource.Searching', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+
+        $("#pagerOP").empty();
+        $("#gridOP").empty();
+
+        if ($("#gridOP").data("kendoListView")) {
+            $("#pagerOP").data("kendoPager").destroy();
+            $("#gridOP").data("kendoListView").destroy();
+        }
+
+        var dataSource = new kendo.data.DataSource({
+            transport: {
+                read: {
+                    url: "/Sales/ResultFindOPSidige?" + $('#FrmFindOPSidige').serialize(),
+                    type: "GET",
+                    dataType: "json",
+                    data: {
+                        ran: Math.random()
+                    }
+                }
+            },
+            autoSync: true,
+            serverFiltering: true,
+            filter: { field: "Status", operator: "eq", value: 0 },
+            serverPaging: true,
+            pageSize: 15,
+            schema: {
+                data: "Data",
+                total: "Count"
+            }
+        });
+
+
+        $("#pagerOP").kendoPager({
+            dataSource: dataSource,
+            pageSizes: [15, 30, 65],
+            refresh: true
+        });      
+
+        $("#gridOP").kendoListView({
+            dataSource: dataSource,
+            dataBound: onDataBound,
+            template: kendo.template($("#template").html())
+        });
+
+        function onDataBound() {
+            closeWinModalPopUpLoad();
+        }
+
+    }
+</script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        var ID_ENTI = $("#ID_ENTI").kendoComboBox({
+            autoBind: true,
+            index: 0,
+            dataTextField: "COM_NAME",
+            filter: "contains",
+            template: '<div style="text-transform:capitalize; display: inline-block; width:100%;">' +
+                                      '<div style="">${data.COM_NAME}</div>' +
+                                      '<div style="">(${data.NAM_TYPE_DI} : ${data.NUM_TYPE_DI})</div>' +
+                                  '</div>',
+            dataValueField: "ID_ENTI",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/ClassEntity/CIAOP?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        var ID_TYPE_DOCU_SALE = $("#ID_TYPE_DOCU_SALE").kendoComboBox({
+            autoBind: true,
+            index: 0,
+            dataTextField: "COD_TYPE_DOCU_SALE",
+            filter: "contains",
+            dataValueField: "ID_TYPE_DOCU_SALE",
+            dataSource: {
+                //type: "odata",
+                serverFiltering: false,
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/TypeDocumentSale/ListAll?var=" + Math.random()
+                }
+            }
+        }).data("kendoComboBox");
+
+        $("#find").click(function (event) {
+
+            event.preventDefault();
+
+            //document.getElementById("NUM_DOCU_SALE_H").value = document.getElementById("NUM_DOCU_SALE").value;
+            //document.getElementById("ID_ENTI_H").value = ID_ENTI.dataItem().ID_ENTI;
+            //document.getElementById("ID_TYPE_DOCU_SALE_H").value = ID_TYPE_DOCU_SALE.dataItem().ID_TYPE_DOCU_SALE;
+            //console.log(document.getElementById("ID_ENTI_H").value);
+            //console.log(document.getElementById("ID_TYPE_DOCU_SALE_H").value);
+            //console.log(document.getElementById("NUM_DOCU_SALE_H").value);
+
+            Graficos()
+        });
+
+    });
+
+
+
+    function transferITMS(obj) {
+        //console.log(obj.id);
+        var res = obj.id.split(",");
+        //console.log(res[0]);
+        //console.log(res[1]);
+
+        var htmlForm = '<div id="FormTranferOP"></div>';
+        winFormPopUpModal("Sure You Want To Attract Attention", htmlForm, 490, 400);
+        $("#FormTranferOP").load("/Sales/OPFromSIDIGE?_=" + Math.random() +"&ID_ENTI=" + res[0]+ "&OS=" + res[1].trim() + "&ID_TYPE_DOCU_SALE=" + res[2] + "&NUM_DOCU_SALE=" + res[3]);
+
+        $("#btnContinues").click(function () {
+            //location.reload(true);
+            $("#dlg").hide('200', "swing", function () {
+                $("#bkg").fadeOut("300");
+            });
+
+            winPopUpModalLoad('@ResourceLanguaje.Resource.SavingYourTicket', '@ResourceLanguaje.Resource.PleaseWait', 300, 130);
+
+            $.ajax({
+                url: "/Sales/CreateOPFromSIDIGE",
+                data: {codOP:"OPVC-1401"}
+                
+            }).done(function (html) {
+                //$(this).addClass("done");
+                console.log(html);
+                closeWinModalPopUpLoad();
+            });
+
+        });
+    }
+    //Graficos();
+</script>

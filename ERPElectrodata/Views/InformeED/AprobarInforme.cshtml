@@ -1,0 +1,419 @@
+﻿@{
+    ViewBag.Title = "AprobarInforme";
+    Layout = null;
+}
+
+
+<style>
+
+    #observacionesApI,
+    #comentariosApI {
+        display: none;
+    }
+
+    .form-container {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+        .form-container label,
+        .form-container input,
+        .form-container select,
+        .form-container textarea {
+            margin-bottom: 10px;
+        }
+
+        .form-container .submit-btn {
+            float: right;
+        }
+
+        .form-container .button-container {
+            text-align: right;
+        }
+
+            .form-container .button-container .btn {
+                margin-left: 10px;
+            }
+
+        .form-container .small-input {
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+
+        .form-container textarea {
+            font-size: 12px;
+            padding: 5px 10px;
+        }
+
+    .comentarios-container {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 10px;
+        max-height: 130px; /* Ajusta la altura máxima según tus necesidades */
+        overflow-y: auto;
+    }
+
+
+    .comentario {
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+        .comentario .info {
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #888;
+        }
+
+        .comentario .burbuja {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            margin-bottom: 5px;
+        }
+
+            .comentario .burbuja .tipo-correccion {
+                font-weight: bold;
+            }
+
+            .comentario .burbuja .codigo-ticket {
+                color: #888;
+            }
+
+    .botones-container {
+        text-align: right;
+        margin-top: 10px;
+    }
+
+        .botones-container .btn {
+            margin-left: 10px;
+        }
+
+    #nuevos-comentarios .comentario {
+        margin-bottom: 10px;
+    }
+
+
+</style>
+@using (Html.BeginForm("AprobarInforme", "InformeED", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmAprobarInformeApI", name = "FrmAprobarInformeApI", target = "upload_targetApI" }))
+{
+    <input id="IdInformeApI" name="IdInforme" value="@ViewBag.IdInformeED" type="hidden" /><div class="container row" style="height: 580px; ">
+        <div class="container col-md-8" style="border-right: solid; border-right-width: 0.5px; border-right-color: #A2A2A2; ">
+            <div style="position: absolute;top: 50%;left: 50%;transform: translate(-50%, -50%);">
+                <div id="cargando" class="text-center" style="display: none;">
+                    <img src="../../Images/spinner.gif" alt="Cargando...">
+                </div>
+                <iframe id="idiframeaprobacion" width="720" height="600" style="overflow-y: scroll; overflow-x: hidden;"></iframe>
+
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+
+                <div class="mb-2 mr-2 dropright btn-group">
+                    <a class="btn-wide btn btn-primary" onclick="InformeGeneralAPI(0)">Informe General</a>
+                    <a aria-haspopup="true" aria-expanded="false" data-toggle="dropdown" class="dropdown-toggle-split dropdown-toggle btn btn-primary" onclick="DatosAdicionales()"></a>
+                    <div tabindex="-1" role="menu" aria-hidden="true" class="dropdown-menu" >
+                        <div class="x_content seccionesAdicionales" id="seccionesAdicionales">
+                            <ul class="todo-list-wrapper list-group list-group-flush" style="list-style: none;"></ul>
+                        </div>
+                    </div>
+                </div>
+                <br /><br />
+
+                <div class="form-check form-check-inline">
+                    <!-- Agregamos la clase form-check-inline para hacerlos inline -->
+                    <input class="form-check-input" type="radio" name="estado" value="aprobar" id="radio-aprobarApI" checked>
+                    <label class="form-check-label" for="radio-aprobarApI">Aprobar</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <!-- Agregamos la clase form-check-inline para hacerlos inline -->
+                    <input class="form-check-input" type="radio" name="estado" value="no-aprobar" id="radio-no-aprobarApI">
+                    <label class="form-check-label" for="radio-no-aprobarApI">No Aprobar</label>
+                </div>
+            </div>
+
+            <div id="observacionesApI">
+                <div class="form-container">
+                    <div class="form-row">
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="tipo-correccion">Tipo de corrección:</label>
+                                <input id="tipo-correccionApI" name="tipo-correccion" type="text" class="form-control" style="width:100%">
+
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group">
+                                <label for="codigo-ticket">Código de ticket:</label>
+                                <input type="text" class="form-control small-input" name="codigosTickets" id="codigo-ticketApI">
+                            </div>
+                        </div>
+                        <input name="codigos" id="codigosApI" type="hidden" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comentario">Comentario:</label>
+                        <textarea class="form-control small-input" id="comentarioApI" name="comentario" rows="4"></textarea>
+                    </div>
+
+                    <div class="button-container">
+                        <button class="btn btn-primary btn-sm" id="agregar-btn" type="submit">Agregar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="comentariosApI" class="comentarios-container">
+
+                <div id="listaComentariosApI">
+                </div>
+                <!-- Nuevos comentarios -->
+                @*<div id="nuevos-comentarios"></div>*@
+            </div>
+
+            <div class="botones-container">
+                @*<button class="btn btn-primary" id="guardar-btnApI" onclick="VistaPreviaApI()">Vista Previa</button>*@
+                <a class="btn btn-primary btn-sm" id="guardar-btn" onclick="GuardarComentariosApI()" style="color:#fff;">Guardar</a>
+                <button class="btn btn-secondary btn-sm" data-dismiss="modal" id="cerrar-btnApI">Cerrar</button>
+            </div>
+        </div>
+
+
+    </div>
+    <iframe id="upload_targetApI" name="upload_targetApI" src="" class="d-none"></iframe>
+}
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        var $radioNoAprobar = $("#radio-no-aprobarApI");
+        var $radioAprobar = $("#radio-aprobarApI");
+        var $observacionesDiv = $("#observacionesApI");
+        var $comentariosDiv = $("#comentariosApI");
+        var $guardarBtn = $("#guardar-btnApI");
+        var $cerrarBtn = $("#cerrar-btnApI");
+        var codigosTickets = $("#codigo-ticketApI").kendoMultiSelect({
+            dataTextField: "Ticket",
+            dataValueField: "ID_TICKET",
+            filter: "contains",
+            autoBind: true,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/CargarListaTicketsInforme?IDI=" + @ViewBag.IdInformeED
+                }
+            },
+            change: function (e) {
+                var value = this.value();
+                $('#codigosApI').val(value);
+            }
+        });
+        $observacionesDiv.hide();
+        $comentariosDiv.hide();
+        $radioNoAprobar.change(function () {
+            if ($radioNoAprobar.is(":checked")) {
+                $observacionesDiv.show();
+                $comentariosDiv.show();
+            } else {
+                $observacionesDiv.hide();
+                $comentariosDiv.hide();
+            }
+        });
+
+        $radioAprobar.change(function () {
+            if ($radioAprobar.is(":checked")) {
+                $observacionesDiv.hide();
+                $comentariosDiv.hide();
+            }
+        });
+
+        var TipoCorreccion = $("#tipo-correccionApI").kendoComboBox({
+            autoBind: true,
+            index: 1,
+            dataTextField: "Nombre",
+            dataValueField: "Id",
+            filter: "contains",
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/InformeED/CargarListaTipoCorreciones"
+                }
+            }
+
+        }).data("kendoComboBox");
+
+
+
+
+        cargarListaTicketInformeApI();
+        cargarListaComentariosApI();
+    });
+    function DatosAdicionales() {
+        var docusale = @ViewBag.OP;
+        $.ajax({
+            contentType: 'application/json; charset=utf-8',
+            url: "/InformeED/ListFormatoAdicional",
+            type: "Get",
+            data: { numdocusale: docusale },
+            datatype: "json",
+            cache: false,
+
+            success: function (data) {
+                if (data) {
+                    ListaAdicionales(data["Adicionales"]);
+                }
+            },
+            error: function () {
+            }
+        });
+
+    }
+
+    function ListaAdicionales(Adicionales) {
+
+        $(".seccionesAdicionales ul").empty();
+
+        if (parseInt(Adicionales.length) > 0) {
+
+            $.each(Adicionales, function (index, value) {
+
+                if (Adicionales[index].Id == "" || Adicionales[index].Id == null || Adicionales[index].Id == undefined) {
+
+                    $(".seccionesAdicionales ul").append('<li><button type="button" tabindex="0" class="dropdown-item" onclick ="InformeGeneralAPI(' + Adicionales[index].Id +')">' + Adicionales[index].NombreFormato + '</button></li >');
+
+                }
+                else {
+                    $(".seccionesAdicionales ul").append('<li><button type="button" tabindex="0" class="dropdown-item" onclick ="InformeGeneralAPI(' + Adicionales[index].Id +')">' + Adicionales[index].NombreFormato + '</button></li >');
+
+                }
+
+            });
+
+        } else {
+            $(".seccionesAdicionales ul").append('<div class="smallField"> No cuenta con adicionales');
+        }
+
+
+    }
+
+    function cargarListaTicketInformeApI() {
+        /*var IDI = $("#IdInformeApI").val()*/
+
+        $.ajax({
+            url: "/InformeED/CargarListaTicketsInforme?IDI=" + @ViewBag.IdInformeED,
+            type: "GET",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                console.log(source.Data)
+            },
+        });
+    }
+
+    function cargarListaComentariosApI() {
+        $.get("/InformeED/CargarListaComentariosInforme", { idi: @ViewBag.IdInformeED }, function (response) {
+            $("#listaComentariosApI").html(response);
+        });
+    }
+
+    function GuardarComentariosApI() {
+        var IDI = @ViewBag.IdInformeED;
+        var estadoSeleccionado = $("input[name='estado']:checked").val();
+
+        console.log(IDI)
+        $.ajax({
+            url: "/InformeED/GuardarAprobarInforme?IDI=" + IDI + "&estado=" + estadoSeleccionado,
+            type: "POST",
+            cache: false,
+            dataType: "json",
+            success: function (source) {
+                console.log(source)
+                toastr.success("", "El registro ha sido guardado.");
+                var cerrarbtn = document.getElementById("cerrar-btnApI")
+                cerrarbtn.click();
+                ListadoInformes(3)
+                ObtenerInformesxEstado()
+            },
+        });
+    }
+    function limpiarDatos() {
+        var textareaElement = document.getElementById('comentarioApI');
+        textareaElement.value = "";
+        var codigosTicket = $("#codigo-ticketApI").data("kendoMultiSelect")
+        codigosTicket.value([]);
+        var correciones = $("#tipo-correccionApI").data("kendoComboBox")
+        correciones.value("")
+    }
+    function MensajeConfirmacionApI(resp, descripcion) {
+        console.log(resp)
+        if (resp == "OK") {
+            toastr.success("", "El registro ha sido guardado.");
+            limpiarDatos()
+            cargarListaComentariosApI()
+        }
+        else if (resp == "OK-CERRAR") {
+            toastr.success("", "El registro ha sido guardado.");
+            var cerrarbtn = document.getElementById("cerrar-btnApI")
+            cerrarbtn.click();
+            ListadoInformes(3)
+            ObtenerInformesxEstado()
+        } else {
+            toastr.error("Por favor contacte al administrador.", "Mensaje");
+        }
+    }
+    var ajaxRequest = null;
+
+    function InformeGeneralAPI(opcion) {
+
+        if (ajaxRequest && ajaxRequest.readyState !== 4) {
+            ajaxRequest.abort();
+            ajaxRequest = null;
+        }
+
+        $('#cargando').show();
+
+        var iframe = document.getElementById('idiframeaprobacion');
+        iframe.style.display = 'none';
+
+        var idInforme = @ViewBag.IdInformeED;
+
+        ajaxRequest = $.ajax({
+            url: '/InformeED/InformesVistaPrevia',
+            type: 'POST',
+            data: {
+                IdInforme: idInforme,
+                Opcion: opcion
+            }, 
+            success: function (data) {
+                if (data !== null && data !== "") {
+                    $('#cargando').hide();
+
+                    iframe.src = 'data:application/pdf;base64,' + data;
+                    iframe.style.display = 'block';
+                } else {
+                    $('#cargando').hide();
+                    alert('Error al generar el informe.');
+                }
+            },
+            error: function () {
+                $('#cargando').hide();
+                alert('Error en la solicitud al servidor.');
+            }
+        });
+    }
+</script>

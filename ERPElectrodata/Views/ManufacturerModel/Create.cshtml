@@ -1,0 +1,149 @@
+﻿@model ERPElectrodata.Models.MANUFACTURER_MODEL
+
+@{
+    Layout = null;
+}
+
+@* CREATE MANUFACTURER MODEL *@
+
+@using (Html.BeginForm("Create", "ManufacturerModel", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmManufacturerModel", target = "upload_target" }))
+{
+    @Html.ValidationSummary(true)
+
+    <fieldset>
+        <input type="hidden" id="ID_MANU_HF" value="0" name="ID_MANU_HF" />
+        <div class="form-group row">
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    Marca <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    <input type="text" name="ID_MANUFACTURER" id="ID_MANUFACTURER" />
+                </div>
+            </div>
+            <div class="col-sm-6">
+                <div class="editor-label">
+                    Modelo de Fábrica <b style="color:red">(*)</b>
+                </div>
+                <div class="k-textbox" style="width:100%">
+                    @Html.TextBoxFor(model => model.NAM_MANU_MODE)
+                    @Html.ValidationMessageFor(model => model.NAM_MANU_MODE)
+                </div>
+            </div>
+        </div>
+        <div class="form-group row">
+            <div class="col-sm-12">
+                <div class="editor-label">
+                    Descripción <b style="color:red">(*)</b>
+                </div>
+                <div class="editor-field">
+                    @Html.TextAreaFor(model => model.DESC_MANU_MODE)
+                    @Html.ValidationMessageFor(model => model.DESC_MANU_MODE)
+                </div>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col-sm-6 col-lg-4">
+                <br />
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="cancelNewManufacturerModel" type="button" class="btn btn-light btn-block">Cancelar</button>
+            </div>
+            <div class="col-sm-6 col-lg-4">
+                <button id="submitNewManufacturerModel" class="btn btn-primary btn-block"><i class="fa fa-save"></i> Guardar</button>
+            </div>
+        </div>
+    </fieldset>
+}
+<iframe id="upload_target" name="upload_target" src="" style="display:none"></iframe>
+<script type="text/javascript">
+    $(document).ready(function () {
+
+        $("#submitNewManufacturerModel").click(function () {
+            toastr.info('Guardando...', 'Espere Por Favor');
+        });
+
+        $("#cancelNewManufacturerModel").click(function (event) {
+            $("[data-dismiss=modal]").trigger({ type: "click" });
+        });
+
+        $("#ID_MANUFACTURER").kendoComboBox({
+            dataTextField: "NAM_MANU",
+            dataValueField: "ID_MANU",
+            filter: "contains",
+            autoBind: false,
+            delay: 500,
+            minLength: 0,
+            suggest: true,
+            dataSource: {
+                schema: {
+                    data: "Data",
+                    total: "Count"
+                },
+                transport: {
+                    read: "/Manufacturer/List?var=" + Math.random()
+                }
+            }
+        });
+        var ID_MANUFACTURER = $("#ID_MANUFACTURER").data("kendoComboBox");
+        if ("@ViewBag.ID_MANUFACTURER" != '0') {            
+            ID_MANUFACTURER.value("@ViewBag.ID_MANUFACTURER");
+            $("#ID_MANU_HF").val("@ViewBag.ID_MANUFACTURER");
+        }
+        ID_MANUFACTURER.enable(false);
+
+        $("#DESC_MANU_MODE").kendoEditor({
+            tools: [
+                "bold",
+                "italic",
+                "underline",
+                "strikethrough",
+                "foreColor",
+                "backColor",
+                "justifyLeft",
+                "justifyCenter",
+                "justifyRight",
+                "justifyFull",
+                "insertUnorderedList",
+                "insertOrderedList",
+                "indent",
+                "outdent",
+                "createLink",
+                "unlink",
+                "subscript",
+                "superscript"
+            ], encoded: false
+        });
+
+    });
+
+</script>
+
+<script type="text/javascript">
+
+     function uploadDoneManufacturerModel(msg, code,nombre) {
+
+         if (msg == "OK") {
+             $("[data-dismiss=modal]").trigger({ type: "click" });
+             toastr.success("Se registró correctamente el modelo de fábrica.", "Información Guardada");
+
+             $("#ID_MANU_MODE").data("kendoComboBox").dataSource.read();
+             var ID_MANU_MODE = $("#ID_MANU_MODE").data("kendoComboBox");
+             ID_MANU_MODE.value(code);
+         }
+         else {
+             var messageAsset = '';
+             if (code == '0') {
+                 messageAsset = 'Complete los datos obligatorios.';
+             }
+             else if (code == '1') {
+                 messageAsset = 'Contacte al administrador.';
+             }
+             else {
+                 messageAsset = 'El modelo de fábrica ya existe.';
+             }
+
+             toastr.warning(messageAsset, "Mensaje");
+         }
+     }
+</script>

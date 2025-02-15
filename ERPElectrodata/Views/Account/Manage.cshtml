@@ -1,0 +1,172 @@
+﻿@model ERPElectrodata.Models.LocalPasswordModel
+@{
+    //
+    if (Convert.ToInt32(Session["ID_ACCO"]) == 55 && Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_OT"]) == 1 && Convert.ToInt32(Session["GESTOR_ACTIVOS_HUDBAY_IT"]) == 0)
+    {
+        Layout = "~/Views/Shared/_LayoutHBOT.cshtml";
+    }
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <script src="~/Content/themes/plugin/toastr/toastr.min.js"></script>
+    <link href="~/Content/themes/plugin/toastr/toastr.min.css" rel="stylesheet" />
+
+    <script src="~/Content/themes/plugin/DataTables/datatables.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/buttons.bootstrap.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/Buttons-1.4.2/js/dataTables.buttons.js"></script>
+    <script src="~/Content/themes/plugin/DataTables/DataTables-1.10.16/js/dataTables.bootstrap4.js"></script>
+</head>
+<body>
+    <div class="app-page-title">
+        <div class="page-title-wrapper">
+            <div class="page-title-heading">
+                <div class="page-title-icon">
+                    <i class="pe-7s-key"></i>
+                </div>
+                <div>
+                    Cambio de Contraseña
+                    <div class="page-title-subheading">Puede actualizar su contraseña</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title text-center" id="">Cambio de clave</div>
+                    @using (Html.BeginForm("Manage", "Account", FormMethod.Post, new { enctype = "multipart/form-data", id = "FrmRecuperarContrasena", target = "upload_target" }))
+                    {
+                        @Html.AntiForgeryToken()
+                        @Html.ValidationSummary(true)
+                        <div class="form-row">
+                            <div class="col-md-8 offset-md-1">
+                                <div class="position-relative form-group">
+                                    <label id="">Contraseña Actual<span style="color: red">*</span></label><br />
+                                    <input id="OldPassowrd" type="password" name="OldPassword" class="form-control" />
+                                </div>
+                                <div class="position-relative form-group">
+                                    <label id="">Contraseña Nueva<span style="color: red">*</span></label>
+                                    <div class="input-group">
+                                        <input id="NewPassword" type="password" name="NewPassword" class="form-control" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" id="NP1btnShow" type="button" value="show"><span class="fa fa-eye icon"></span></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="position-relative form-group">
+                                    <label id="">Confirmar Contraseña<span style="color: red">*</span></label>
+                                    <div class="input-group">
+                                        <input id="ConfirmPassword" type="password" name="ConfirmPassword" class="form-control" />
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary" id="NP2btnShow" type="button" value="show"> <span class="fa fa-eye icon"></span></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br />
+                                <div style="text-align: center;">
+                                    <button id="submit" class="btn btn-primary">Guardar Cambios</button>
+                                </div>
+                            </div>
+                        </div>
+                        <iframe id="upload_target" name="upload_target" src="" class="d-none"></iframe>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="main-card mb-3 card">
+                <div class="card-body">
+                    <div class="card-title" id="">Observaciones</div>
+                    <div class="form-row">
+                        <div class="col-md-12">
+                            <div class="vertical-time-simple vertical-without-time vertical-timeline vertical-timeline--one-column">
+                                <div class="vertical-timeline-item dot-danger vertical-timeline-element">
+                                    <div>
+                                        <span class="vertical-timeline-element-icon bounce-in"></span>
+                                        <div class="vertical-timeline-element-content bounce-in">
+                                            <h4 class="timeline-title">La nueva contraseña debe tener una longitud mínima de <strong>12 caracteres.</strong></h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="vertical-timeline-item dot-danger vertical-timeline-element">
+                                    <div>
+                                        <span class="vertical-timeline-element-icon bounce-in"></span>
+                                        <div class="vertical-timeline-element-content bounce-in">
+                                            <h4 class="timeline-title">Se debe incluir <strong>mínimo un caracter especial (!,#,$,%) y un número.</strong></h4>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="vertical-timeline-item dot-danger vertical-timeline-element">
+                                    <div>
+                                        <span class="vertical-timeline-element-icon bounce-in"></span>
+                                        <div class="vertical-timeline-element-content bounce-in">
+                                            <h4 class="timeline-title">La nueva contraseña no debe ser la misma que la contraseña anterior. <strong>No se debe usar una contraseña anterior.</strong></h4>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+
+
+<script>
+    $(document).ready(function () {
+
+        $("#NP1btnShow").click(function () {
+            var tipo = $("#NewPassword").attr("type");
+            if (tipo == "password") {
+                $("#NewPassword").attr("type", "text");
+                $("#NP1btnShow").html(`<span class='fa fa-eye-slash icon'></span>`);
+            } else {
+                $("#NewPassword").attr("type", "password");
+                $("#NP1btnShow").html(`<span class='fa fa-eye icon'></span>`);
+            }
+        });
+
+        $("#NP2btnShow").click(function () {
+            var tipo = $("#ConfirmPassword").attr("type");
+            if (tipo == "password") {
+                $("#ConfirmPassword").attr("type", "text");
+                $("#NP2btnShow").html(`<span class='fa fa-eye-slash icon'></span>`);
+            } else {
+                $("#ConfirmPassword").attr("type", "password");
+                $("#NP2btnShow").html(`<span class='fa fa-eye icon'></span>`);
+            }
+        });
+    });
+
+    function uploadDoneNuevo(msg, msgerror, nro) {
+        
+        if (msg === "OK") {
+            swal({
+                title: "Cambios guardados",
+                text: msgerror,
+                type: "success",
+            },
+                function (isConfirm) {
+                    location = "http://" + location.host + "/Account/Login";
+                }
+            );
+
+        } else {
+            swal({
+                title: "Error",
+                text: msgerror,
+                type: "error",
+            });
+        }
+    }
+
+</script>
+

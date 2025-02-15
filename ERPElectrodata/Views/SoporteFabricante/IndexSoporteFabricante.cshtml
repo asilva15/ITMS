@@ -1,0 +1,113 @@
+﻿@{
+    ViewBag.Title = "IndexSoporteFabricante";
+    Layout = null;
+}
+
+<div id="mensajeMarca"></div>
+<div class="form-group">
+    <div class="col-md-12">
+        <div class="mb-3 card">
+            <div class="card-header">Listado de soporte fabricante</div>
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="tab-pane active" id="tab_1">
+                        <table id="tablaSoporteFabricante" class="table table-bordered table-striped" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Fabricante</th>
+                                    <th>Productos</th>
+                                    <th>Mant. Preventivos Totales</th>
+                                    <th>Fecha Inicio Soporte</th>
+                                    <th>Fecha Fin Soporte</th>
+                                    <th>Observaciones</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                            <tfoot>
+                                <tr>
+                                    <th>Fabricante</th>
+                                    <th>Productos</th>
+                                    <th>Mant. Preventivos Totales</th>
+                                    <th>Fecha Inicio Soporte</th>
+                                    <th>Fecha Fin Soporte</th>
+                                    <th>Observaciones</th>
+                                    <th>Opciones</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="EditarSoporteFabricante"></div>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        ListaSoporteFabricante();
+    });
+
+    function ListaSoporteFabricante() {
+        $('#tablaSoporteFabricante').dataTable().fnDestroy();
+
+        $('#tablaSoporteFabricante').DataTable({
+            "order": [[4, "asc"]],
+            responsive: true,
+            dom: 'Bfrtip',
+            ajax: "/SoporteFabricante/ListarSoporteFabricante/" + @ViewBag.IdDocuSale,
+            columns: [
+                { data: "Fabricante" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style=" text-align: center;"></div>' +
+                        '<span >'+(data.Productos).replace(/<[^>]*>?/g, '');+'</span>' +
+                        '</div>';
+                    }
+                },
+                { data: "MantPrev" },
+                { data: "InicioSoporte" },
+                { data: "FinSoporte" },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<span >'+(data.Observaciones).replace(/<[^>]*>?/g, '')+'</span>';
+                    }
+                },
+                {
+                    data: null,
+                    render: function (data, type, row) {
+                        return '<div style=" text-align: center;">' +
+                        '<span id="btnEditarSoporteFab" title="Editar" class="fa fa-pen" aria-hidden="true" style="color: #2D5C88; cursor: pointer; font-size: 13px;" onclick="EditarSoporteFAB(' + data.IdSoporteFAB + ')" ></span>' +
+                        '</div>';
+                    }
+                },
+            ],
+            buttons: [
+                {
+                    extend: 'collection',
+                    text: 'Export',
+                    buttons: [
+                        'excel',
+                        'csv',
+                        'pdf'
+                    ]
+                }
+            ]
+
+        });
+
+    }
+
+    function EditarSoporteFAB(id){
+        $("#EditarSoporteFabricante").empty();
+        $("#EditarSoporteFabricante").load('/SoporteFabricante/EditarSoporteFabricante/'+id);
+    }
+
+</script>
+
